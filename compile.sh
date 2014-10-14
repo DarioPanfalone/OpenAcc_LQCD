@@ -1,3 +1,4 @@
+
 rm *.o
 rm prog
 pgcc -acc=noautopar -Mlarge_arrays -Minfo=accel -O3 -v -ta=tesla:cc35,cuda5.5,time,keep,ptxinfo -c OpenAcc/fermion_matrix.c  #-Mcuda=maxregcount:128
