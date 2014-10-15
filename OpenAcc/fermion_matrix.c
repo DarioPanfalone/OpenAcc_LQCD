@@ -1,4 +1,5 @@
 #include "./struct_c_def.c"
+#include "./fermionic_utilities.c"
 #include "openacc.h"
 
 static inline vec3 mat_vec_mul( const __restrict su3_soa * const matrix,

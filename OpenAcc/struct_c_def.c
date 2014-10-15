@@ -32,7 +32,11 @@
 #define sizeh 32768 // che sarebbe 16^4/2
 #define no_links (4 * vol4)
 
+#define mass2 0.1
+
+// used in the dynamical allocation of structures
 #define ALIGN 128
+
 
 static inline int snum_acc(int x, int y, int z, int t) {
   int ris;
