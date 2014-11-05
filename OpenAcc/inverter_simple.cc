@@ -1,6 +1,6 @@
-#ifndef INVERTER_CC_ 
-#define INVERTER_CC_ 
-
+#ifndef INVERTER_OPENACC_ 
+#define INVERTER_OPENCC_ 
+#define DEBUG_INVERTER_OPENACC
 #include <time.h> 
 #include <fstream>
 #include "../FermionMatrix/fermionmatrix.cc"
@@ -22,8 +22,8 @@ using namespace std;
 // Doe e Deo sono definite in '../FermionMatrix/fermionmatrix.cc'
 // Doe 
 
-void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL ){
-  #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER))
+void invert_openacc(Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL ){
+  #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_OPENACC))
   cerr <<  "DEBUG: inside invert ..."<< endl;
   cerr.flush();
   #endif
@@ -32,6 +32,7 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
   static Fermion vloc_h;
   static Fermion vloc_s;
   static Fermion vloc_p;  
+
  
   /****************************************************************
   I puntatori di seguito sono stati definiti per pura pigrizia, 
@@ -41,7 +42,6 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
   Fermion* loc_h= &vloc_h;
   Fermion* loc_s= &vloc_s;
   Fermion* loc_p= &vloc_p;  
-
 
   int cg;
   long int i;
@@ -53,9 +53,33 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
   out->gauss();      // trial solution for out
   else (*out) = Fermion(*trialSolution);
 
-  // s=(M^dagM)out
-  Doe(loc_h,out);
-  Deo(loc_s, loc_h);
+  vec3COM_soa soaCOM_out;
+  vec3COM_soa soaCOM_loc_r;
+  vec3COM_soa soaCOM_loc_h;
+  vec3COM_soa soaCOM_loc_s;
+  vec3COM_soa soaCOM_loc_p;
+  su3COM_soa conf_soaCOM[8];
+
+  out->ferm_aos_to_soaCOM(&soaCOM_out);
+  for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
+
+  //  s=(M^dagM)out
+  apply_Doe_openacc( conf_soaCOM , &soaCOM_out   , &soaCOM_loc_h );
+  apply_Deo_openacc( conf_soaCOM , &soaCOM_loc_h , &soaCOM_loc_s );
+
+  loc_s->ferm_soaCOM_to_aos(&soaCOM_loc_s);
+  loc_h->ferm_soaCOM_to_aos(&soaCOM_loc_h);
+  out->ferm_soaCOM_to_aos(&soaCOM_out);
+
+
+  /*
+  out->saveToFile("out_openacc.fer");
+  loc_h->saveToFile("loc_h_openacc.fer");
+  loc_s->saveToFile("loc_s_openacc.fer");
+  */
+
+
+
 
   for(i=0; i<sizeh; i++)
      {
@@ -86,9 +110,17 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
      cg++;
     
      // s=(M^dag M)p    alpha=(p,s)
-     Doe(loc_h, loc_p);
-     Deo(loc_s, loc_h);
+     //     Doe(loc_h, loc_p);
+     //     Deo(loc_s, loc_h);
 
+     loc_p->ferm_aos_to_soaCOM(&soaCOM_loc_p);
+     apply_Doe_openacc( conf_soaCOM , &soaCOM_loc_p   , &soaCOM_loc_h );
+     apply_Deo_openacc( conf_soaCOM , &soaCOM_loc_h   , &soaCOM_loc_s );
+     loc_p->ferm_soaCOM_to_aos(&soaCOM_loc_p);
+     loc_h->ferm_soaCOM_to_aos(&soaCOM_loc_h);
+     loc_s->ferm_soaCOM_to_aos(&soaCOM_loc_s);
+
+     
      for(i=0; i<sizeh; i++)
         {
         vr_1=(loc_p->fermion[i]);
@@ -132,14 +164,25 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
         vr_3=vr_1+gammag*vr_2;
         (loc_p->fermion[i])=vr_3;
         }
+     cerr << "Inversion iter: " << cg << "  residuo " << sqrt(lambda) << " (target=" << res << ")  " << endl;
 
      } while( (sqrt(lambda)>res) && cg<max_cg);
   
-  #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER))
+  #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_OPENACC))
   cout << "\tterminated invert terminated in "<<cg<<" iterations [";
+
+
   // test
-  Doe(loc_h, out);
-  Deo(loc_s, loc_h);
+  //  Doe(loc_h, out);
+  //  Deo(loc_s, loc_h);
+
+  out->ferm_aos_to_soaCOM(&soaCOM_out);
+  apply_Doe_openacc( conf_soaCOM , &soaCOM_out   , &soaCOM_loc_h );
+  apply_Deo_openacc( conf_soaCOM , &soaCOM_loc_h   , &soaCOM_loc_s );
+  loc_s->ferm_soaCOM_to_aos(&soaCOM_loc_s);
+  loc_h->ferm_soaCOM_to_aos(&soaCOM_loc_h);
+  out->ferm_soaCOM_to_aos(&soaCOM_out);
+
 
 
   for(i=0; i<sizeh; i++)

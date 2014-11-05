@@ -122,7 +122,7 @@ Conf::Conf(int initMode)
       {
       Su3 aux;               // aux is a small perturbation
       aux.rand_matrix();
-      aux*=0.00;
+      aux*=0.01;
       u_save[i].one();
       u_save[i]+=aux;
       u_save[i].sunitarize();

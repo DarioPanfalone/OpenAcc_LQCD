@@ -21,27 +21,27 @@ typedef struct{
 class Fermion {
 public:
 
- Vec3 fermion[sizeh];
+  Vec3 fermion[sizeh];
 
- Fermion(void);
- Fermion(const Fermion&); //copy constructor
+  Fermion(void);
+  Fermion(const Fermion&); //copy constructor
+  
+  void gauss(void);
+  void gauss(int);
+  void z2noise(void);
+  void allOnes(void);
+  void allOnesI(void);
+  void all123(void);
+  double l2norm2(void);
+  void allabc(REAL,REAL,REAL);
+  void allOnesExcept(int);
+  
+  void ferm_aos_to_soaCOM(vec3COM_soa *out) const;
+  void ferm_soaCOM_to_aos(vec3COM_soa const* const in);
 
- void gauss(void);
- void gauss(int);
- void z2noise(void);
- void allOnes(void);
- void allOnesI(void);
- void all123(void);
- double l2norm2(void);
- void allabc(REAL,REAL,REAL);
- void allOnesExcept(int);
-
- void ferm_aos_to_soaCOM(vec3COM_soa *out) const;
- void ferm_soaCOM_to_aos(vec3COM_soa const* const in);
-
- void saveToFile(const char*);
- void loadFromFile(const char*);
-
+  void saveToFile(const char*);
+  void loadFromFile(const char*);
+  
 };
 
 // base constructor

@@ -57,6 +57,10 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
   Doe(loc_h,out);
   Deo(loc_s, loc_h);
 
+  out->saveToFile("out_cpu.fer");
+  loc_h->saveToFile("loc_h_cpu.fer");
+  loc_s->saveToFile("loc_s_cpu.fer");
+
   for(i=0; i<sizeh; i++)
      {
      vr_1=(out->fermion[i]);
@@ -82,7 +86,6 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
   // loop over cg iterations
   cg=0;
   do {
-    
      cg++;
     
      // s=(M^dag M)p    alpha=(p,s)
@@ -132,10 +135,11 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
         vr_3=vr_1+gammag*vr_2;
         (loc_p->fermion[i])=vr_3;
         }
+    cerr << "Inversion iter: " << cg << "  residuo " << sqrt(lambda) << " (target=" << res << ")  " << endl;    
 
      } while( (sqrt(lambda)>res) && cg<max_cg);
   
-  #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER))
+  //  #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER))
   cout << "\tterminated invert terminated in "<<cg<<" iterations [";
   // test
   Doe(loc_h, out);
@@ -152,7 +156,7 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
      }
   global_sum(d_vector1, sizeh);
   cout << " res/stop_res="<< sqrt(d_vector1[0])/res << " ,  stop_res="<< res << " ]"<<endl;
-  #endif
+  //  #endif
 
   if(cg==max_cg)
     {
