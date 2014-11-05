@@ -49,9 +49,10 @@ void invert_openacc(Fermion *out, Fermion *in, REAL res, Fermion *trialSolution 
   Vec3 vr_1, vr_2, vr_3, vr_4, vr_5;
 
   // initializations
-  if (trialSolution == NULL) 
-  out->gauss();      // trial solution for out
-  else (*out) = Fermion(*trialSolution);
+  if (trialSolution == NULL) {
+    out->gauss();      // trial solution for out
+    cout << "Generated trial solution while inside inverter!! " << endl;
+  } else  {(*out) = Fermion(*trialSolution);}
 
   vec3COM_soa soaCOM_out;
   vec3COM_soa soaCOM_loc_r;
