@@ -3,6 +3,8 @@
 #include <complex.h>
 #endif
 
+#include <math.h>
+#include <stdio.h>
 
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
 #define DIM_BLOCK_Y 8 // This should divide ny
