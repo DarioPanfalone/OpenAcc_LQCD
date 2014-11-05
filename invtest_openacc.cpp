@@ -32,13 +32,22 @@ int main(){
    tempFermion3->gauss();
    cout << "Initialized Random Fermion Vectors.\n";
 
+   //CASO SIMPLE
    //   invert(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
-   invert_openacc(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
+   //invert_openacc(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
 
-   //      invert(tempFermion2,tempFermion1,inv_single_double_prec,NULL);
-   //      invert_openacc(tempFermion2,tempFermion1,inv_single_double_prec,NULL);
+   //CASO FULL
+   vec3COM_soa soa1COM;
+   vec3COM_soa soa2COM;
+   vec3COM_soa soa3COM;
+   su3COM_soa conf_soaCOM[8];
 
-   
+   tempFermion1->ferm_aos_to_soaCOM(&soa1COM);
+   tempFermion3->ferm_aos_to_soaCOM(&soa3COM);
+   for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
+   invert_openacc_full(conf_soaCOM,&soa2COM,&soa1COM,inv_single_double_prec,&soa3COM);
+   tempFermion2->ferm_aos_to_soaCOM(&soa2COM);
+
    tempFermion2->saveToFile("invertedCPU.fer");
 
    /*

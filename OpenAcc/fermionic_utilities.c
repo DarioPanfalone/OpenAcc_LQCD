@@ -27,6 +27,17 @@ static inline void scal_prod_loc_2double( const __restrict vec3_soa * const in_v
   res_ri[0] = creal(sum);
   res_ri[1] = cimag(sum);
 }
+static inline double scal_prod_loc_1double( const __restrict vec3_soa * const in_vect1,
+                                          const __restrict vec3_soa * const in_vect2,
+                                          const int idx_vect
+                                          ) {
+
+  d_complex sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
+  sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
+  sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
+
+  return creal(sum);
+}
 
 
 
@@ -53,6 +64,23 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
   res = resR+resI*1.0I;
   return res;
 }
+
+double real_scal_prod_global(  const __restrict vec3_soa * const in_vect1,
+			       const __restrict vec3_soa * const in_vect2
+			       ){
+  int t;
+  double res_R_p;
+  double resR = 0.0;
+
+#pragma acc kernels present(in_vect1) present(in_vect2)
+#pragma acc loop reduction(+:resR)
+  for(t=0; t<sizeh; t++) {
+    res_R_p=scal_prod_loc_1double(in_vect1,in_vect2,t);
+    resR+=res_R_p;
+  }
+  return resR;
+}
+
 
 void  scal_prod_openacc(vec3COM_soa *in1,vec3COM_soa *in2, double *pre, double *pim){
   vec3_soa * ferm1_acc;
