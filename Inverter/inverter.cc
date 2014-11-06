@@ -22,7 +22,7 @@ using namespace std;
 // Doe e Deo sono definite in '../FermionMatrix/fermionmatrix.cc'
 // Doe 
 
-void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL ){
+void invert (Fermion *out, const Fermion *in, REAL res, const Fermion *trialSolution = NULL ){
   #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER))
   cerr <<  "DEBUG: inside invert ..."<< endl;
   cerr.flush();

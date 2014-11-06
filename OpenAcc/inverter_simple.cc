@@ -1,5 +1,7 @@
-#ifndef INVERTER_OPENACC_ 
-#define INVERTER_OPENCC_ 
+
+
+#ifndef INVERTER_OPENACC_
+#define INVERTER_OPENACC_
 #define DEBUG_INVERTER_OPENACC
 #include <time.h> 
 #include <fstream>
@@ -22,7 +24,7 @@ using namespace std;
 // Doe e Deo sono definite in '../FermionMatrix/fermionmatrix.cc'
 // Doe 
 
-void invert_openacc(Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL ){
+void invert_openacc(Fermion *out, const Fermion *in, REAL res, const Fermion *trialSolution = NULL ){
   #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_OPENACC))
   cerr <<  "DEBUG: inside invert ..."<< endl;
   cerr.flush();

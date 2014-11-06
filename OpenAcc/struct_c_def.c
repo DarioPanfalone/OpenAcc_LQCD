@@ -1,3 +1,8 @@
+
+#ifndef STRUCT_C_DEF_
+#define STRUCT_C_DEF_
+
+
 #ifndef COMPLEX_C_
 #define COMPLEX_C_
 #include <complex.h>
@@ -164,3 +169,6 @@ void convert_vec3COM_soa_to_vec3_soa(vec3COM_soa *in, vec3_soa *out){
   }
 }
 
+
+
+#endif

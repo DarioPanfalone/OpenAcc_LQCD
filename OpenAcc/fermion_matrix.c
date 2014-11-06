@@ -1,3 +1,7 @@
+
+#ifndef FERMION_MATRIX_C
+#define FERMION_MATRIX_C
+
 //#include "./struct_c_def.c"
 //#include "openacc.h"
 //#include "./fermionic_utilities.c"
@@ -301,7 +305,7 @@ void acc_Doe(const __restrict su3_soa * const u, __restrict vec3_soa * const out
 
 
 
-void  apply_Deo_openacc(su3COM_soa *conf,vec3COM_soa *in,vec3COM_soa *out){
+void  apply_Deo_openacc(const su3COM_soa *conf,const vec3COM_soa *in,vec3COM_soa *out){
   su3_soa  * conf_acc;
   vec3_soa * ferm1_acc;
   vec3_soa * ferm2_acc;
@@ -322,7 +326,7 @@ void  apply_Deo_openacc(su3COM_soa *conf,vec3COM_soa *in,vec3COM_soa *out){
   free(ferm2_acc);
 }
 
-void  apply_Doe_openacc(su3COM_soa *conf,vec3COM_soa *in,vec3COM_soa *out){
+void  apply_Doe_openacc(const su3COM_soa *conf,const vec3COM_soa *in,vec3COM_soa *out){
   su3_soa  * conf_acc;
   vec3_soa * ferm1_acc;
   vec3_soa * ferm2_acc;
@@ -342,3 +346,6 @@ void  apply_Doe_openacc(su3COM_soa *conf,vec3COM_soa *in,vec3COM_soa *out){
   free(ferm1_acc);
   free(ferm2_acc);
 }
+
+#endif
+

@@ -12,6 +12,8 @@
  */
 
 
+#ifndef FERMIONIC_UTILITIES_C_
+#define FERMIONIC_UTILITIES_C_
 
 
 static inline void scal_prod_loc_2double( const __restrict vec3_soa * const in_vect1,
@@ -110,7 +112,7 @@ double l2norm2_global( const __restrict vec3_soa * const in_vect1
 }
 
 
-void  scal_prod_openacc(vec3COM_soa *in1,vec3COM_soa *in2, double *pre, double *pim){
+void  scal_prod_openacc(const vec3COM_soa *in1,const vec3COM_soa *in2, double *pre, double *pim){
   vec3_soa * ferm1_acc;
   vec3_soa * ferm2_acc;
   posix_memalign((void **)&ferm1_acc, ALIGN, sizeof(vec3_soa));
@@ -194,4 +196,10 @@ void assign_in_to_out(  const __restrict vec3_soa * const in_vect1,
     out->c1[ih]=(in_vect1->c1[ih]);
     out->c2[ih]=(in_vect1->c2[ih]);
   }
+
 }
+
+
+#endif
+
+

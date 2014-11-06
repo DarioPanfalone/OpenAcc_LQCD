@@ -1,3 +1,7 @@
+
+#ifndef INVERTER_FULL_C_
+#define INVERTER_FULL_C_
+
 #include "./struct_c_def.c"
 #include "./fermionic_utilities.c"
 #include "./fermion_matrix.c"
@@ -88,7 +92,7 @@ void ker_invert_openacc(  const __restrict su3_soa * const u,
 
 
 
-void invert_openacc_full( su3COM_soa  *conf,vec3COM_soa *out,vec3COM_soa *in,double res,vec3COM_soa *trialSol){
+void invert_openacc_full(const  su3COM_soa  *conf,vec3COM_soa *out,const vec3COM_soa *in,double res,const vec3COM_soa *trialSol){
 
   printf("Residuo target = %f \n", res);
 
@@ -136,3 +140,6 @@ void invert_openacc_full( su3COM_soa  *conf,vec3COM_soa *out,vec3COM_soa *in,dou
   free(kloc_h);
   free(kloc_p);
 }
+
+#endif
+

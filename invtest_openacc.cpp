@@ -17,9 +17,6 @@
 
 using namespace std;
 
-#define INV_CPU_ONLY
-//#define INV_SIMPLE_OPENACC
-//#define INV_FULL_OPENACC
 
 
 int main(){
@@ -29,28 +26,27 @@ int main(){
    init(0);
    cout << "Initialized Random Gauge Matrix.\n";
 
-   Fermion* tempFermion1 = new Fermion();//initialized to 0
-   Fermion* tempFermion2 = new Fermion();//initialized to 0
-   Fermion* tempFermion3 = new Fermion();//initialized to 0
+   //   Fermion() initializes to 0
+ 
+   Fermion* tempFermion1 = new Fermion(); // Fermion to invert
+   Fermion* tempFermion2_cpu = new Fermion(); // Result fermion for cpu
+   Fermion* tempFermion2_openacc_simple = new Fermion();// result fermions for openacc_simple
+   Fermion* tempFermion2_openacc_full = new Fermion();// result fermion for openacc_full
+   Fermion* tempFermion3 = new Fermion();// Trial solution
 
    tempFermion1->gauss();
    tempFermion3->gauss();
    cout << "Initialized Random Fermion Vectors.\n";
 
    // CASO CPU ONLY
-#ifdef INV_CPU_ONLY
    cout << "CPU ONLY INVERSION" << endl;
-    invert(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
-#endif
+   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
 
    //CASO SIMPLE OPENACC
-#ifdef INV_SIMPLE_OPENACC
    cout << "SIMPLE OPENACC INVERSION" << endl;
-   invert_openacc(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
-#endif
+   invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
 
    //CASO FULL OPENACC
-#ifdef INV_FULL_OPENACC
    cout << "FULL OPENACC INVERSION" << endl;
    vec3COM_soa soa1COM;
    vec3COM_soa soa2COM;
@@ -61,10 +57,11 @@ int main(){
    for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
    cout << inv_single_double_prec << endl;
    invert_openacc_full(conf_soaCOM,&soa2COM,&soa1COM,inv_single_double_prec,&soa3COM);
-   tempFermion2->ferm_soaCOM_to_aos(&soa2COM);
-#endif
+   tempFermion2_openacc_full->ferm_soaCOM_to_aos(&soa2COM);
 
-   tempFermion2->saveToFile("invertedCPU.fer");
+   tempFermion2_cpu->saveToFile("invertedCPU.fer");
+   tempFermion2_openacc_simple->saveToFile("invertedOPENACC_SIMPLE.fer");
+   tempFermion2_openacc_full->saveToFile("invertedOPENACC_FULL.fer");
  
 
    /*
@@ -101,7 +98,9 @@ int main(){
    */
 
    delete tempFermion1;
-   delete tempFermion2; 
+   delete tempFermion2_cpu; 
+   delete tempFermion2_openacc_simple; 
+   delete tempFermion2_openacc_full; 
    delete tempFermion3; 
    end();//deallocates all
 
