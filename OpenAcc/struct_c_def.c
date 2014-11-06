@@ -34,8 +34,8 @@
 #define sizeh 32768 // che sarebbe 16^4/2
 #define no_links (4 * vol4)
 
-#define mass2 0.1
-int max_cg=100000;             // maximum number of iteration in CG inverter                                                                           
+#define mass2 0.25
+int max_cg=1;//100000;             // maximum number of iteration in CG inverter                                                                           
 
 // used in the dynamical allocation of structures
 #define ALIGN 128

@@ -33,9 +33,9 @@ const int ferm_temp_bc=1;
 const int start=2;  //=0 ordered start, =1 random start, =2 start from saved conf
 
 // RHMC parameters
-const int max_cg=100000;             // maximum number of iteration in CG inverter
+const int max_cg=1;//100000;             // maximum number of iteration in CG inverter
 
- const REAL inv_single_double_prec=1.0e-8;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
+const REAL inv_single_double_prec=1.0;//1.0e-08;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 // const REAL inv_single_double_prec=10.0;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 
   //Rational approximations for Metropolis
