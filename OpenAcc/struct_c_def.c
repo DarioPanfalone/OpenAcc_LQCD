@@ -10,6 +10,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
 #define DIM_BLOCK_Y 8 // This should divide ny
@@ -39,7 +40,7 @@
 #define sizeh 32768 // che sarebbe 16^4/2
 #define no_links (4 * vol4)
 
-#define mass2 0.25
+#define mass2 0.0004
 int max_cg=100000;             // maximum number of iteration in CG inverter                                                                           
 
 // used in the dynamical allocation of structures
