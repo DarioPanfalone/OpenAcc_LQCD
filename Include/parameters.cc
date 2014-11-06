@@ -18,7 +18,7 @@ const int nt=16;
 // run parameters
 const int no_flavours=2; // number of quark species
 const REAL beta=5.55;
-const REAL mass=0.25;//0.01335; //0.04303;
+const REAL mass=0.5;//0.01335; //0.04303;
 
 
 
@@ -33,7 +33,7 @@ const int ferm_temp_bc=1;
 const int start=2;  //=0 ordered start, =1 random start, =2 start from saved conf
 
 // RHMC parameters
-const int max_cg=1;//100000;             // maximum number of iteration in CG inverter
+const int max_cg=100000;             // maximum number of iteration in CG inverter
 
 const REAL inv_single_double_prec=1.0;//1.0e-08;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 // const REAL inv_single_double_prec=10.0;  // if stopping residue <inv_single_double_prec inverter use double prec, else single

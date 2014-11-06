@@ -59,6 +59,7 @@ int main(){
    invert_openacc_full(conf_soaCOM,&soa2COM,&soa1COM,inv_single_double_prec,&soa3COM);
    tempFermion2_openacc_full->ferm_soaCOM_to_aos(&soa2COM);
 
+
    tempFermion2_cpu->saveToFile("invertedCPU.fer");
    tempFermion2_openacc_simple->saveToFile("invertedOPENACC_SIMPLE.fer");
    tempFermion2_openacc_full->saveToFile("invertedOPENACC_FULL.fer");
