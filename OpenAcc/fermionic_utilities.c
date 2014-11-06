@@ -31,12 +31,25 @@ static inline double scal_prod_loc_1double( const __restrict vec3_soa * const in
                                           const __restrict vec3_soa * const in_vect2,
                                           const int idx_vect
                                           ) {
-
+  // questa routine potrebbe essere migliorata perche per adesso
+  // nel calcolare la parte reale del prodotto scalare si calcola anche
+  // la parte immaginaria che poi viene buttata via.
+  // forse si puo riscrivere il tutto in modo piu esplicito facendogli fare
+  // solo i conti che contribuiscono al calcolo della parte reale.
   d_complex sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
   sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
   sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
 
   return creal(sum);
+}
+
+static inline double l2norm2_loc( const __restrict vec3_soa * const in_vect1,
+				  const int idx_vect
+				  ) {
+  double sum = creal(in_vect1->c0[idx_vect])*creal(in_vect1->c0[idx_vect])+cimag(in_vect1->c0[idx_vect])*cimag(in_vect1->c0[idx_vect]);
+  sum += creal(in_vect1->c1[idx_vect])*creal(in_vect1->c1[idx_vect])+cimag(in_vect1->c1[idx_vect])*cimag(in_vect1->c1[idx_vect]);
+  sum += creal(in_vect1->c2[idx_vect])*creal(in_vect1->c2[idx_vect])+cimag(in_vect1->c2[idx_vect])*cimag(in_vect1->c2[idx_vect]);
+  return sum;
 }
 
 
@@ -76,6 +89,21 @@ double real_scal_prod_global(  const __restrict vec3_soa * const in_vect1,
 #pragma acc loop reduction(+:resR)
   for(t=0; t<sizeh; t++) {
     res_R_p=scal_prod_loc_1double(in_vect1,in_vect2,t);
+    resR+=res_R_p;
+  }
+  return resR;
+}
+
+double l2norm2_global( const __restrict vec3_soa * const in_vect1
+		       ){
+  int t;
+  double res_R_p;
+  double resR = 0.0;
+
+#pragma acc kernels present(in_vect1)
+#pragma acc loop reduction(+:resR)
+  for(t=0; t<sizeh; t++) {
+    res_R_p=l2norm2_loc(in_vect1,t);
     resR+=res_R_p;
   }
   return resR;

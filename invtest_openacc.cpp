@@ -17,6 +17,11 @@
 
 using namespace std;
 
+#define INV_CPU_ONLY
+//#define INV_SIMPLE_OPENACC
+//#define INV_FULL_OPENACC
+
+
 int main(){
 
 
@@ -32,23 +37,35 @@ int main(){
    tempFermion3->gauss();
    cout << "Initialized Random Fermion Vectors.\n";
 
-   //CASO SIMPLE
-   //   invert(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
-   //invert_openacc(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
+   // CASO CPU ONLY
+#ifdef INV_CPU_ONLY
+   cout << "CPU ONLY INVERSION" << endl;
+    invert(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
+#endif
 
-   //CASO FULL
+   //CASO SIMPLE OPENACC
+#ifdef INV_SIMPLE_OPENACC
+   cout << "SIMPLE OPENACC INVERSION" << endl;
+   invert_openacc(tempFermion2,tempFermion1,inv_single_double_prec,tempFermion3);
+#endif
+
+   //CASO FULL OPENACC
+#ifdef INV_FULL_OPENACC
+   cout << "FULL OPENACC INVERSION" << endl;
    vec3COM_soa soa1COM;
    vec3COM_soa soa2COM;
    vec3COM_soa soa3COM;
    su3COM_soa conf_soaCOM[8];
-
    tempFermion1->ferm_aos_to_soaCOM(&soa1COM);
    tempFermion3->ferm_aos_to_soaCOM(&soa3COM);
    for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
+   cout << inv_single_double_prec << endl;
    invert_openacc_full(conf_soaCOM,&soa2COM,&soa1COM,inv_single_double_prec,&soa3COM);
-   tempFermion2->ferm_aos_to_soaCOM(&soa2COM);
+   tempFermion2->ferm_soaCOM_to_aos(&soa2COM);
+#endif
 
    tempFermion2->saveToFile("invertedCPU.fer");
+ 
 
    /*
    vec3COM_soa soa1COM;

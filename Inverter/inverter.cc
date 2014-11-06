@@ -54,7 +54,7 @@ void invert (Fermion *out, Fermion *in, REAL res, Fermion *trialSolution = NULL 
   else (*out) = Fermion(*trialSolution);
 
   // s=(M^dagM)out
-  Doe(loc_h,out);
+  Doe(loc_h, out);
   Deo(loc_s, loc_h);
 
   out->saveToFile("out_cpu.fer");
