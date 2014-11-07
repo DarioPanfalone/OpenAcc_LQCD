@@ -9,33 +9,33 @@
 
 // lattice dimensions
 const int nx=16;
-const int ny=16;
-const int nz=16;
-const int nt=16;
+const int ny=8;
+const int nz=4;
+const int nt=2;
 
 
 
 // run parameters
 const int no_flavours=2; // number of quark species
 const REAL beta=5.55;
-const REAL mass=0.25;//0.01335; //0.04303;
+const REAL mass=0.2;//0.01335; //0.04303;
 
 
 
 // random seed (if 0 time machine is used)
-const int rand_seed=1;
+const int rand_seed=18149;
 
 // fermion temporal bounday condition   =0 --> antiperiodic, else periodic
 const int ferm_temp_bc=1;               
 
 
 // start parameter
-const int start=2;  //=0 ordered start, =1 random start, =2 start from saved conf
+const int start=0;  //=0 ordered start, =1 random start, =2 start from saved conf
 
 // RHMC parameters
-const int max_cg=1;//100000;             // maximum number of iteration in CG inverter
+const int max_cg=100000;             // maximum number of iteration in CG inverter
 
-const REAL inv_single_double_prec=1.0;//1.0e-08;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
+const REAL inv_single_double_prec=1.0e-05;//1.0e-08;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 // const REAL inv_single_double_prec=10.0;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 
   //Rational approximations for Metropolis

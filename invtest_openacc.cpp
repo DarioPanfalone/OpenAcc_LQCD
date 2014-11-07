@@ -34,17 +34,19 @@ int main(){
    Fermion* tempFermion2_openacc_full = new Fermion();// result fermion for openacc_full
    Fermion* tempFermion3 = new Fermion();// Trial solution
 
-   tempFermion1->gauss();
-   tempFermion3->gauss();
+   //   tempFermion1->gauss();
+   //   tempFermion3->gauss();
+   tempFermion1->z2noise();
+   tempFermion3->z2noise();
    cout << "Initialized Random Fermion Vectors.\n";
 
    // CASO CPU ONLY
-   cout << "CPU ONLY INVERSION" << endl;
-   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
+   //   cout << "CPU ONLY INVERSION" << endl;
+   //   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
 
    //CASO SIMPLE OPENACC
-   cout << "SIMPLE OPENACC INVERSION" << endl;
-   invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
+   //   cout << "SIMPLE OPENACC INVERSION" << endl;
+   //   invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
 
    //CASO FULL OPENACC
    cout << "FULL OPENACC INVERSION" << endl;
@@ -59,9 +61,15 @@ int main(){
    invert_openacc_full(conf_soaCOM,&soa2COM,&soa1COM,inv_single_double_prec,&soa3COM);
    tempFermion2_openacc_full->ferm_soaCOM_to_aos(&soa2COM);
 
+   double diff_CPU_SIMPLE = difference(tempFermion2_cpu,tempFermion2_openacc_simple);
+   double diff_CPU_FULL   = difference(tempFermion2_cpu,tempFermion2_openacc_full);
+
+   cout << "Differenze: \n  |CPU - SIMPLE| = " << diff_CPU_SIMPLE << "\n  |CPU - FULL| = " << diff_CPU_FULL << endl;
+
    tempFermion2_cpu->saveToFile("invertedCPU.fer");
    tempFermion2_openacc_simple->saveToFile("invertedOPENACC_SIMPLE.fer");
    tempFermion2_openacc_full->saveToFile("invertedOPENACC_FULL.fer");
+
  
 
    /*

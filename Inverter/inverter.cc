@@ -28,6 +28,9 @@ void invert (Fermion *out, const Fermion *in, REAL res, const Fermion *trialSolu
   cerr.flush();
   #endif
 
+  clock_t time_start, time_finish;
+  time_start=clock();
+
   static Fermion vloc_r;
   static Fermion vloc_h;
   static Fermion vloc_s;
@@ -57,9 +60,6 @@ void invert (Fermion *out, const Fermion *in, REAL res, const Fermion *trialSolu
   Doe(loc_h, out);
   Deo(loc_s, loc_h);
 
-  out->saveToFile("out_cpu.fer");
-  loc_h->saveToFile("loc_h_cpu.fer");
-  loc_s->saveToFile("loc_s_cpu.fer");
 
   for(i=0; i<sizeh; i++)
      {
@@ -166,6 +166,8 @@ void invert (Fermion *out, const Fermion *in, REAL res, const Fermion *trialSolu
     err_file.close();
     }
 
+  time_finish=clock();
+  cout << "CPU INVERSION times:        Tot time: " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec     AvgTime/cg_iter: " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC/cg << endl << endl ;
 
 
 
