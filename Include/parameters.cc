@@ -8,10 +8,10 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-const int nx=16;
-const int ny=8;
-const int nz=4;
-const int nt=2;
+const int nx=32;
+const int ny=32;
+const int nz=32;
+const int nt=32;
 
 
 

@@ -15,10 +15,10 @@
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
 #define DIM_BLOCK_Y 8 // This should divide ny
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
-#define nx 16
-#define ny 8
-#define nz 4
-#define nt 2
+#define nx 32
+#define ny 32
+#define nz 32
+#define nt 32
 #define vol1 nx
 #define vol2 (ny * vol1)
 #define vol3 (nz * vol2)

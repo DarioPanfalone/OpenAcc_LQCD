@@ -24,6 +24,7 @@ int main(){
 
 //All SU(3) links set to identity
    init(0);
+   //   gauge_conf->saveToFile("TestConf_32.cnf");
    cout << "Initialized Random Gauge Matrix.\n";
 
    //   Fermion() initializes to 0
@@ -39,15 +40,16 @@ int main(){
    tempFermion1->z2noise();
    tempFermion3->z2noise();
    cout << "Initialized Random Fermion Vectors.\n";
+   //   tempFermion1->saveToFile("fer_32.fer");
 
    // CASO CPU ONLY
-   //   cout << "CPU ONLY INVERSION" << endl;
-   //   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
-
+   cout << "CPU ONLY INVERSION" << endl;
+   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
+   
    //CASO SIMPLE OPENACC
-   //   cout << "SIMPLE OPENACC INVERSION" << endl;
-   //   invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
-
+   cout << "SIMPLE OPENACC INVERSION" << endl;
+   invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
+   
    //CASO FULL OPENACC
    cout << "FULL OPENACC INVERSION" << endl;
    vec3COM_soa soa1COM;
