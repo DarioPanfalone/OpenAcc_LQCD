@@ -1,7 +1,6 @@
 
-
-#ifndef INVERTER_OPENACC_
-#define INVERTER_OPENACC_
+#ifndef INVERTER_SIMPLE_OPENACC_
+#define INVERTER_SIMPLE_OPENACC_
 #define DEBUG_INVERTER_OPENACC
 #include <time.h> 
 #include <fstream>
