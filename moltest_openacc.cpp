@@ -4,7 +4,6 @@
 #include "./Include/global_const.cc"
 #include "./Include/global_macro.cc"
 #include "./Include/global_var.cc"
-#include "./Include/struct_def.cc"
 
 //#define DEBUG_MODE  //useful in some cases
 #include "./Init/init.cc"
