@@ -2,23 +2,12 @@
 #define PARAMETERS_CC_
 
 #include "./global_macro.cc"
-
-#define DIM_BLOCK_X 8 // This should divide (nx/2)
-#define DIM_BLOCK_Y 8 // This should divide ny
-#define DIM_BLOCK_Z 8  // This should divide nz*nt
-
-// lattice dimensions
-const int nx=16;
-const int ny=8;
-const int nz=4;
-const int nt=2;
-
+#include "./common_defines.h"
 
 
 // run parameters
 const int no_flavours=2; // number of quark species
 const REAL beta=5.55;
-const REAL mass=0.2;//0.01335; //0.04303;
 
 
 

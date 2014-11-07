@@ -40,13 +40,13 @@ int main(){
    tempFermion3->z2noise();
    cout << "Initialized Random Fermion Vectors.\n";
 
-   // CASO CPU ONLY
-   //   cout << "CPU ONLY INVERSION" << endl;
-   //   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
+   //CASO CPU ONLY
+   // cout << "CPU ONLY INVERSION" << endl;
+   // invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
 
    //CASO SIMPLE OPENACC
-   //   cout << "SIMPLE OPENACC INVERSION" << endl;
-   //   invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
+   // cout << "SIMPLE OPENACC INVERSION" << endl;
+   // invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
 
    //CASO FULL OPENACC
    cout << "FULL OPENACC INVERSION" << endl;
