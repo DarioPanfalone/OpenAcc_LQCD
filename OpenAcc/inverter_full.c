@@ -88,9 +88,12 @@ void invert_openacc_full(const  su3COM_soa  *conf,vec3COM_soa *out,const vec3COM
   vec3_soa * ferm_out_acc;
   vec3_soa * ferm_try_acc;
   posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+  printf("ALLOCATED SOA CONF\n");
+
   posix_memalign((void **)&ferm_in_acc , ALIGN, sizeof(vec3_soa));
   posix_memalign((void **)&ferm_out_acc, ALIGN, sizeof(vec3_soa));
   posix_memalign((void **)&ferm_try_acc, ALIGN, sizeof(vec3_soa));
+  printf("ALLOCATED SOA VECS\n");
 
   // AUXILIARY FERMION FIELDS FOR THE INVERTER
   vec3_soa * kloc_r;
@@ -101,12 +104,16 @@ void invert_openacc_full(const  su3COM_soa  *conf,vec3COM_soa *out,const vec3COM
   posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa));
   posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa));
   posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa));
+  printf("ALLOCATED OTHER SOA VECS\n");
 
 
   int dir;
   for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
+  printf("CONVERTED COM CONF TO SOA CONF\n");
   convert_vec3COM_soa_to_vec3_soa(in,ferm_in_acc);
   convert_vec3COM_soa_to_vec3_soa(trialSol,ferm_try_acc);
+  printf("CONVERTED COM VECS TO SOA VECS\n");
+
   
 
   struct timeval t0, t1;

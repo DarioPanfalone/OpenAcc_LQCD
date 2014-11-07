@@ -60,9 +60,6 @@ void invert (Fermion *out, const Fermion *in, REAL res, const Fermion *trialSolu
   Doe(loc_h, out);
   Deo(loc_s, loc_h);
 
-  out->saveToFile("out_cpu.fer");
-  loc_h->saveToFile("loc_h_cpu.fer");
-  loc_s->saveToFile("loc_s_cpu.fer");
 
   for(i=0; i<sizeh; i++)
      {

@@ -41,7 +41,9 @@ public:
 
   void saveToFile(const char*);
   void loadFromFile(const char*);
-  
+
+  double difference(Fermion a,Fermion b); 
+ 
 };
 
 // base constructor
@@ -196,5 +198,23 @@ void Fermion::ferm_soaCOM_to_aos(vec3COM_soa const* const in){
       fermion[i].comp[2] = complex<double>(in->c2[i].Re,in->c2[i].Im);
     }     
 }
+
+
+double difference(Fermion *a,Fermion *b){
+  complex<double> cd0,cd1,cd2;
+  double d0,d1,d2;
+  for( int i =0 ; i < sizeh ; i++){
+    cd0 = (a->fermion[i].comp[0])-(b->fermion[i].comp[0]);
+    cd1 = (a->fermion[i].comp[1])-(b->fermion[i].comp[1]);
+    cd2 = (a->fermion[i].comp[2])-(b->fermion[i].comp[2]);
+    d0=cd0.real()*cd0.real()+cd0.imag()*cd0.imag();
+    d1=cd1.real()*cd1.real()+cd1.imag()*cd1.imag();
+    d2=cd2.real()*cd2.real()+cd2.imag()*cd2.imag();
+    d_vector1[i]=d0+d1+d2;
+  }
+  global_sum(d_vector1, sizeh);
+  return sqrt(d_vector1[0]);
+}
+
  
 #endif

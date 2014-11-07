@@ -16,31 +16,26 @@
 #define DIM_BLOCK_Y 8 // This should divide ny
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 #define nx 16
-#define ny 16
-#define nz 16
-#define nt 16
+#define ny 8
+#define nz 4
+#define nt 2
 #define vol1 nx
 #define vol2 (ny * vol1)
 #define vol3 (nz * vol2)
 #define vol4 (nt * vol3)
-//#define nxh (nx >> 1) // nx/2
-//#define nyh (ny >> 1)
-//#define nzh (nz >> 1)
-//#define nth (nt >> 1)
-
-#define nxh 8
-#define nyh 8
-#define nzh 8
-#define nth 8
+#define nxh (nx >> 1) // nx/2
+#define nyh (ny >> 1)
+#define nzh (nz >> 1)
+#define nth (nt >> 1)
 
 #define size vol4
 #define size2 (2*size)
 #define size3 (3*size)
-//#define sizeh (size / 2)
-#define sizeh 32768 // che sarebbe 16^4/2
+#define sizeh (size / 2)
+//#define sizeh 524288   // che sarebbe 32^4/2
 #define no_links (4 * vol4)
 
-#define mass2 0.0004
+#define mass2 0.04
 int max_cg=100000;             // maximum number of iteration in CG inverter                                                                           
 
 // used in the dynamical allocation of structures

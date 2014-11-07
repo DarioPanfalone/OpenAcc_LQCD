@@ -26,6 +26,7 @@ Conf *gauge_conf;
 // vectors for global sum (also used in inverters)
 double *d_vector1;
 
+
 //used in the CUDA version, to pack the configuration on the device
 float *gauge_field_packed;
 int *shift_table;
