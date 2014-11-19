@@ -11,14 +11,14 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 16
-#define ny 8
-#define nz 4
-#define nt 2
+#define nx 32
+#define ny 32
+#define nz 32
+#define nt 32
 
 #define sizehh nx*ny*nz*nt/2 
 
-#define mass 0.2 
+#define mass 0.02
 
 typedef struct COM_t{
   double Re;

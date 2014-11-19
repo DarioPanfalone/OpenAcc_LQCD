@@ -22,7 +22,7 @@ int main(){
 
 
 //All SU(3) links set to identity
-   init(0);
+   init(1);
    //   gauge_conf->saveToFile("TestConf_32.cnf");
    cout << "Initialized Random Gauge Matrix.\n";
 
@@ -42,12 +42,12 @@ int main(){
    //   tempFermion1->saveToFile("fer_32.fer");
 
    // CASO CPU ONLY
-   cout << "CPU ONLY INVERSION" << endl;
-   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
+   //   cout << "CPU ONLY INVERSION" << endl;
+   //   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
    
    //CASO SIMPLE OPENACC
-   cout << "SIMPLE OPENACC INVERSION" << endl;
-   invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
+   //   cout << "SIMPLE OPENACC INVERSION" << endl;
+   //   invert_openacc(tempFermion2_openacc_simple,tempFermion1,inv_single_double_prec,tempFermion3);
    
    //CASO FULL OPENACC
    cout << "FULL OPENACC INVERSION" << endl;

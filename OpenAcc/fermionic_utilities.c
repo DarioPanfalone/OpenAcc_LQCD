@@ -38,11 +38,16 @@ static inline double scal_prod_loc_1double( const __restrict vec3_soa * const in
   // la parte immaginaria che poi viene buttata via.
   // forse si puo riscrivere il tutto in modo piu esplicito facendogli fare
   // solo i conti che contribuiscono al calcolo della parte reale.
+  /*
   d_complex sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
   sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
   sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
+  */
 
-  return creal(sum);
+  double sum  = creal(in_vect1->c0[idx_vect]) * creal(in_vect2->c0[idx_vect]) + cimag(in_vect1->c0[idx_vect]) * cimag(in_vect2->c0[idx_vect]);
+         sum += creal(in_vect1->c1[idx_vect]) * creal(in_vect2->c1[idx_vect]) + cimag(in_vect1->c1[idx_vect]) * cimag(in_vect2->c1[idx_vect]);
+         sum += creal(in_vect1->c2[idx_vect]) * creal(in_vect2->c2[idx_vect]) + cimag(in_vect1->c2[idx_vect]) * cimag(in_vect2->c2[idx_vect]);
+  return sum;
 }
 
 static inline double l2norm2_loc( const __restrict vec3_soa * const in_vect1,
@@ -160,6 +165,48 @@ void combine_in1xm2_minus_in2_minus_in3(  const __restrict vec3_soa * const in_v
     out->c0[ih]=(in_vect1->c0[ih]*mass2)-in_vect2->c0[ih]-in_vect3->c0[ih];
     out->c1[ih]=(in_vect1->c1[ih]*mass2)-in_vect2->c1[ih]-in_vect3->c1[ih];
     out->c2[ih]=(in_vect1->c2[ih]*mass2)-in_vect2->c2[ih]-in_vect3->c2[ih];
+  }
+}
+
+void combine_before_loop(  const __restrict vec3_soa * const vect_in,
+			   const __restrict vec3_soa * const vect_out,
+			   __restrict vec3_soa * const vect_r,
+			   __restrict vec3_soa * const vect_s,
+			   __restrict vec3_soa * const vect_p){
+#pragma acc kernels present(vect_in) present(vect_out) present(vect_r) present(vect_s) present(vect_p)
+#pragma acc loop independent 
+  for(int ih=0; ih<sizeh; ih++) {
+    //s=m^2*out-s
+    vect_s->c0[ih] = (vect_out->c0[ih]*mass2)-vect_s->c0[ih];
+    vect_s->c1[ih] = (vect_out->c1[ih]*mass2)-vect_s->c1[ih];
+    vect_s->c2[ih] = (vect_out->c2[ih]*mass2)-vect_s->c2[ih];
+    //r=in-s
+    vect_r->c0[ih] =  vect_in->c0[ih]-vect_s->c0[ih];
+    vect_r->c1[ih] =  vect_in->c1[ih]-vect_s->c1[ih];
+    vect_r->c2[ih] =  vect_in->c2[ih]-vect_s->c2[ih];
+    //p=r
+    vect_p->c0[ih] =  vect_r->c0[ih];
+    vect_p->c1[ih] =  vect_r->c1[ih];
+    vect_p->c2[ih] =  vect_r->c2[ih];
+  }
+}
+
+void combine_inside_loop( __restrict vec3_soa * const vect_out,
+			  __restrict vec3_soa * const vect_r,
+			  const __restrict vec3_soa * const vect_s,
+			  const __restrict vec3_soa * const vect_p,
+			  const double omega){
+#pragma acc kernels present(vect_out) present(vect_r) present(vect_s) present(vect_p)
+#pragma acc loop independent 
+  for(int ih=0; ih<sizeh; ih++) {
+    //out+=omega*p
+    vect_out->c0[ih] += (vect_p->c0[ih]*omega);
+    vect_out->c1[ih] += (vect_p->c1[ih]*omega);
+    vect_out->c2[ih] += (vect_p->c2[ih]*omega);
+    //r-=omega*s
+    vect_r->c0[ih]   -= (vect_s->c0[ih]*omega);
+    vect_r->c1[ih]   -= (vect_s->c1[ih]*omega);
+    vect_r->c2[ih]   -= (vect_s->c2[ih]*omega);
   }
 }
 

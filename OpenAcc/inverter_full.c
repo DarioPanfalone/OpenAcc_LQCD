@@ -9,6 +9,7 @@
 
 #define DEBUG_INVERTER_FULL_OPENACC
 
+#define OTTIMIZZALO
 
 
 int ker_invert_openacc(  const __restrict su3_soa * const u,
@@ -30,10 +31,17 @@ int ker_invert_openacc(  const __restrict su3_soa * const u,
   assign_in_to_out(trialSolution,out);
   acc_Doe(u,loc_h,out);
   acc_Deo(u,loc_s,loc_h);
+
+#ifdef OTTIMIZZALO
   combine_in1xm2_minus_in2(out,loc_s,loc_s);
   combine_in1_minus_in2(in,loc_s,loc_r);
   assign_in_to_out(loc_r,loc_p);
+#else
+  combine_before_loop(in,out,loc_r,loc_s,loc_p);
+#endif
+
   delta=l2norm2_global(loc_r);
+
   // loop over cg iterations
   cg=0;
   do {
@@ -41,20 +49,27 @@ int ker_invert_openacc(  const __restrict su3_soa * const u,
     // s=(M^dag M)p    alpha=(p,s)
     acc_Doe(u,loc_h,loc_p);
     acc_Deo(u,loc_s,loc_h);
+
     combine_in1xm2_minus_in2(loc_p,loc_s,loc_s);
     alpha = real_scal_prod_global(loc_p,loc_s);
+
     omega=delta/alpha;     
     // out+=omega*p  r-=omega*s
     // lambda=(r,r);
+#ifdef OTTIMIZZALO
     combine_in1xfactor_plus_in2(loc_p,omega,out,out);
     combine_in1xfactor_plus_in2(loc_s,-omega,loc_r,loc_r);
+#else
+    combine_inside_loop(out,loc_r,loc_s,loc_p,omega);
+#endif
+
     lambda = l2norm2_global(loc_r);
     gammag=lambda/delta;
     delta=lambda;
     // p=r+gammag*p
     combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
-    printf("Iteration: %d    --> residue = %e   (target = %e) \n", cg, sqrt(lambda), res);
+    //    printf("Iteration: %d    --> residue = %e   (target = %e) \n", cg, sqrt(lambda), res);
 #endif
   } while( (sqrt(lambda)>res) && cg<max_cg);
 
