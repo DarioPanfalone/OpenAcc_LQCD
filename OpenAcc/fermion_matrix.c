@@ -2,9 +2,9 @@
 #ifndef FERMION_MATRIX_C
 #define FERMION_MATRIX_C
 
-//#include "./struct_c_def.c"
-//#include "openacc.h"
-//#include "./fermionic_utilities.c"
+#include "./struct_c_def.c"
+#include "openacc.h"
+#include "./fermionic_utilities.c"
 
 static inline vec3 mat_vec_mul( const __restrict su3_soa * const matrix,
                                 const int idx_mat,
