@@ -11,8 +11,10 @@
 #include "./FermionMatrix/fermionmatrix.cc"
 #include "./Extern/extern_c_func.cc"
 
+#include "./Findminmax/findminmax.cc"
 #include "./Inverter/inverter.cc"
 #include "./OpenAcc/inverter_simple.cc"
+
 
 using namespace std;
 
@@ -42,8 +44,8 @@ int main(){
    //   tempFermion1->saveToFile("fer_32.fer");
 
    // CASO CPU ONLY
-   //   cout << "CPU ONLY INVERSION" << endl;
-   //   invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
+   //      cout << "CPU ONLY INVERSION" << endl;
+   //      invert(tempFermion2_cpu,tempFermion1,inv_single_double_prec,tempFermion3);
    
    //CASO SIMPLE OPENACC
    //   cout << "SIMPLE OPENACC INVERSION" << endl;
@@ -71,7 +73,22 @@ int main(){
    tempFermion2_openacc_simple->saveToFile("invertedOPENACC_SIMPLE.fer");
    tempFermion2_openacc_full->saveToFile("invertedOPENACC_FULL.fer");
 
- 
+
+
+
+   double min, max, epsilon;
+   double *minmax;
+   minmax = new REAL [2];
+   //TEST CALCOLO AUTOVALORE MASSIMO ED AUTOVALORE MINIMO
+   //   findminmax(min, max);                                                                                                    
+   cout << "CPU:      min = " << min << "    max = " << max << endl;
+
+   findminmax_con_openacc(minmax);
+   min = minmax[0];
+   max = minmax[1];
+   cout << "OPENACC:  min = " << min << "    max = " << max << endl;
+
+
 
    /*
    vec3COM_soa soa1COM;

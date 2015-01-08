@@ -20,6 +20,8 @@
 
 #define mass 0.02
 
+#define therm_updates 0
+
 typedef struct COM_t{
   double Re;
   double Im;

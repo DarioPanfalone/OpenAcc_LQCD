@@ -26,7 +26,6 @@
 #define size2 (2*size)
 #define size3 (3*size)
 #define sizeh (size / 2)
-//#define sizeh 524288   // che sarebbe 32^4/2
 #define no_links (4 * vol4)
 
 #define mass2 mass*mass

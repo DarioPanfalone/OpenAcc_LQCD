@@ -33,6 +33,11 @@ int init(int startMode = 1)
      // allocate gauge configuration
      gauge_conf=new Conf(startMode);
 
+     // allocate auxiliary global fermion 
+     loc_r=new Fermion;
+     loc_h=new Fermion;
+     loc_s=new Fermion;
+     loc_p=new Fermion;
 
      // auxiliary vectors for global sums
      d_vector1=new double[size];

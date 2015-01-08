@@ -155,6 +155,31 @@ void combine_in1xfactor_plus_in2(  const __restrict vec3_soa * const in_vect1,
 }
 
 
+void multiply_fermion_x_doublefactor(  __restrict vec3_soa * const in1,
+                                       const double factor
+				       ){
+
+#pragma acc kernels present(in1)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    in1->c0[ih] = factor * (in1->c0[ih]);
+    in1->c1[ih] = factor * (in1->c1[ih]);
+    in1->c2[ih] = factor * (in1->c2[ih]);
+  }
+}
+
+void combine_add_factor_x_in2_to_in1( __restrict vec3_soa * const in1,const __restrict vec3_soa * const in2, double factor){
+#pragma acc kernels present(in1) present(in2)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    in1->c0[ih] += (factor) *  (in2->c0[ih]);
+    in1->c1[ih] += (factor) *  (in2->c1[ih]);
+    in1->c2[ih] += (factor) *  (in2->c2[ih]);
+  }
+}
+
+
+
 void combine_in1xm2_minus_in2_minus_in3(  const __restrict vec3_soa * const in_vect1,
                                           const __restrict vec3_soa * const in_vect2,
                                           const __restrict vec3_soa * const in_vect3,
@@ -209,7 +234,19 @@ void combine_inside_loop( __restrict vec3_soa * const vect_out,
     vect_r->c2[ih]   -= (vect_s->c2[ih]*omega);
   }
 }
+void combine_in1xm2_minus_in2(const __restrict vec3_soa * const in_vect1,
+                              __restrict vec3_soa * const in_vect2){
+#pragma acc kernels present(in_vect1) present(in_vect2)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    in_vect2->c0[ih]=(in_vect1->c0[ih]*mass2)-in_vect2->c0[ih];
+    in_vect2->c1[ih]=(in_vect1->c1[ih]*mass2)-in_vect2->c1[ih];
+    in_vect2->c2[ih]=(in_vect1->c2[ih]*mass2)-in_vect2->c2[ih];
+  }
+}
 
+/*
+//OLD VERSION WITH 3 ARGUMENTS
 void combine_in1xm2_minus_in2(  const __restrict vec3_soa * const in_vect1,
                                 const __restrict vec3_soa * const in_vect2,
                                 __restrict vec3_soa * const out){
@@ -221,6 +258,7 @@ void combine_in1xm2_minus_in2(  const __restrict vec3_soa * const in_vect1,
     out->c2[ih]=(in_vect1->c2[ih]*mass2)-in_vect2->c2[ih];
   }
 }
+*/
 
 void combine_in1_minus_in2(  const __restrict vec3_soa * const in_vect1,
                              const __restrict vec3_soa * const in_vect2,

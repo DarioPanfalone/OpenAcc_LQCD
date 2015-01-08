@@ -5,11 +5,15 @@
 #include "./struct_c_def.c"
 #include "./fermionic_utilities.c"
 #include "./fermion_matrix.c"
+#include "./find_min_max.c"
 #include "openacc.h"
 
 #define DEBUG_INVERTER_FULL_OPENACC
 
-#define OTTIMIZZALO
+#define OTTIMIZZALO  // --> quando e' definito ottimizzalo fa la cosa che pareva essere piu efficiente, vale a dire
+                     //     di lasciare le routine di algebra lineare separate in tanti kernel, piuttosto che farne
+                     //     uno unico. (In realta' le cose sembravano equivalenti, quindi ho lasciato quella
+                     //     piu leggibile delle due, cioe' quella con piu kernel)
 
 
 int ker_invert_openacc(  const __restrict su3_soa * const u,
@@ -33,7 +37,8 @@ int ker_invert_openacc(  const __restrict su3_soa * const u,
   acc_Deo(u,loc_s,loc_h);
 
 #ifdef OTTIMIZZALO
-  combine_in1xm2_minus_in2(out,loc_s,loc_s);
+  //  combine_in1xm2_minus_in2(out,loc_s,loc_s); // --> old version (3 args)
+  combine_in1xm2_minus_in2(out,loc_s);
   combine_in1_minus_in2(in,loc_s,loc_r);
   assign_in_to_out(loc_r,loc_p);
 #else
@@ -50,7 +55,8 @@ int ker_invert_openacc(  const __restrict su3_soa * const u,
     acc_Doe(u,loc_h,loc_p);
     acc_Deo(u,loc_s,loc_h);
 
-    combine_in1xm2_minus_in2(loc_p,loc_s,loc_s);
+    //    combine_in1xm2_minus_in2(loc_p,loc_s,loc_s); // --> old version (3 args)
+    combine_in1xm2_minus_in2(loc_p,loc_s); 
     alpha = real_scal_prod_global(loc_p,loc_s);
 
     omega=delta/alpha;     

@@ -14,8 +14,15 @@ int use_stored=1;  // when =0 stored eigenvalues are used
 // staggered phases , allocated and set in Geometry/geometry.cc :: init_geo()
 int *eta;
 
-// next neighbours, allocated and set in Geometry/geometry.cc :: init_geo()
+// auxiliary global fermions to be used in inverters
+class Fermion;
+Fermion *loc_r;
+Fermion *loc_h;
+Fermion *loc_s;
+Fermion *loc_p;
 
+
+// next neighbours, allocated and set in Geometry/geometry.cc :: init_geo()
 long int **nnp;    
 long int **nnm;   
 

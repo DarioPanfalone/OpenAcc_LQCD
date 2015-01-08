@@ -13,3 +13,7 @@ extern "C" {
   //  void invert_openacc_full(su3COM_soa  *conf,vec3COM_soa *out,vec3COM_soa *in,double res,vec3COM_soa *trialSol = NULL);
   void invert_openacc_full(const su3COM_soa  *conf,vec3COM_soa *out,const vec3COM_soa *in,double res,const vec3COM_soa *trialSol);
 }
+
+extern "C" {
+  void find_min_max_openacc(const  su3COM_soa  *conf, const vec3COM_soa *gaussian1,  const vec3COM_soa *gaussian2,double *minmax);
+}
