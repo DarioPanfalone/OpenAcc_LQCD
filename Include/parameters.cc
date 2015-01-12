@@ -15,16 +15,16 @@ const REAL beta=5.55;
 const int rand_seed=18149;
 
 // fermion temporal bounday condition   =0 --> antiperiodic, else periodic
-const int ferm_temp_bc=1;               
+const int ferm_temp_bc=0;
 
 // start parameter
-const int start=0;  //=0 ordered start, =1 random start, =2 start from saved conf
+const int start=1;  //=0 ordered start, =1 random start, =2 start from saved conf
 
 
 // RHMC parameters
 const int gmp_remez_precision=100; // The precision that gmp uses
 
-const REAL inv_single_double_prec=1.0e-05;//1.0e-08;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
+const REAL inv_single_double_prec=1.0e-02;//1.0e-05;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 // const REAL inv_single_double_prec=10.0;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 
 //Rational approximations for Metropolis
@@ -35,7 +35,7 @@ const REAL residue_metro=1.0e-8;    // stopping residual for CG
 //Rational approximations for MD        
 const int approx_md=9;
 const REAL lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
-const REAL residue_md=1.0e-3;    // stopping residual for CG        
+const REAL residue_md=1.0e-1;    // stopping residual for CG        
 
 
 

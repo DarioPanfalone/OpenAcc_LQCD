@@ -344,12 +344,15 @@ void Su3::rand_matrix(void)
   complex<REAL> prod;
   REAL norm;
   Su3 ris;
+  double pre,pim;
 
   for(i=0; i<2; i++)
      {
      for(j=0; j<3; j++)
         {
-        ris.comp[i][j]=complex<REAL>(1.0-2.0*casuale(), 1.0-2.0*casuale());
+	  pre = 1.0-2.0*casuale();
+	  pim = 1.0-2.0*casuale();
+	  ris.comp[i][j]=complex<REAL>(pre,pim);
         }
      }
  

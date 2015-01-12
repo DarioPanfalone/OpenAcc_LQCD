@@ -13,12 +13,12 @@
 // lattice dimensions
 #define nx 16
 #define ny 16
-#define nz 8
-#define nt 4
+#define nz 16
+#define nt 16
 
 #define sizehh nx*ny*nz*nt/2 
 
-#define mass 0.02
+#define mass 0.1
 
 #define therm_updates 0
 #define max_cg 10000
