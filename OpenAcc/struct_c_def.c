@@ -30,7 +30,6 @@
 
 #define mass2 mass*mass
 
-int max_cg=100000;             // maximum number of iteration in CG inverter                                                                           
 
 // used in the dynamical allocation of structures
 #define ALIGN 128
@@ -63,6 +62,24 @@ typedef struct su3_soa_t {
   vec3_soa r1;
   vec3_soa r2;
 } su3_soa;
+
+//SHIFT FERMIONS
+typedef struct ACC_ShiftFermion_t{
+  vec3_soa shift[max_approx_order];
+} ACC_ShiftFermion;
+
+//MULTI FERMIONS
+typedef struct ACC_MultiFermion_t{
+  vec3_soa multi[no_ps];
+} ACC_MultiFermion;
+
+//SHIFT MULTI FERMIONS
+typedef struct ACC_ShiftMultiFermion_t{
+  vec3_soa shiftmulti[max_approx_order][no_ps];
+} ACC_ShiftMultiFermion;
+
+
+
 
 // funzioni di conversione:    su3_soa   ==>   su3COM_soa 
 void convert_su3_soa_to_su3COM_soa(su3_soa *in, su3COM_soa *out){
@@ -133,5 +150,94 @@ void convert_vec3COM_soa_to_vec3_soa(vec3COM_soa *in, vec3_soa *out){
 }
 
 
+// funzioni di conversione:    ACC_ShiftFermion  ==>  COM_ShiftFermion          
+void convert_ACC_ShiftFermion_to_COM_ShiftFermion(ACC_ShiftFermion *in, COM_ShiftFermion *out){
+  int i,ia;
+  for(ia =0 ; ia < max_approx_order ; ia++){
+    for( i =0 ; i < sizeh ; i++){
+      out->shift[ia].c0[i].Re = creal(in->shift[ia].c0[i]);
+      out->shift[ia].c1[i].Re = creal(in->shift[ia].c1[i]);
+      out->shift[ia].c2[i].Re = creal(in->shift[ia].c2[i]);
+
+      out->shift[ia].c0[i].Im = cimag(in->shift[ia].c0[i]);
+      out->shift[ia].c1[i].Im = cimag(in->shift[ia].c1[i]);
+      out->shift[ia].c2[i].Im = cimag(in->shift[ia].c2[i]);
+    }
+  }
+}
+
+// funzioni di conversione:    COM_ShiftFermion  ==>  ACC_ShiftFermion          
+void convert_COM_ShiftFermion_to_ACC_ShiftFermion(COM_ShiftFermion *in, ACC_ShiftFermion *out){
+  int i,ia;
+  for(ia =0 ; ia < max_approx_order ; ia++){
+    for( i =0 ; i < sizeh ; i++){
+      out->shift[ia].c0[i] = (in->shift[ia].c0[i].Re) + (in->shift[ia].c0[i].Im) * 1.0I;
+      out->shift[ia].c1[i] = (in->shift[ia].c1[i].Re) + (in->shift[ia].c1[i].Im) * 1.0I;
+      out->shift[ia].c2[i] = (in->shift[ia].c2[i].Re) + (in->shift[ia].c2[i].Im) * 1.0I;
+    }
+  }
+}
+
+// funzioni di conversione:    ACC_MultiFermion  ==>  COM_MultiFermion          
+void convert_ACC_MultiFermion_to_COM_MultiFermion(ACC_MultiFermion *in, COM_MultiFermion *out){
+  int i,ips;
+  for(ips =0 ; ips < no_ps ; ips++){
+    for( i =0 ; i < sizeh ; i++){
+      out->multi[ips].c0[i].Re = creal(in->multi[ips].c0[i]);
+      out->multi[ips].c1[i].Re = creal(in->multi[ips].c1[i]);
+      out->multi[ips].c2[i].Re = creal(in->multi[ips].c2[i]);
+
+      out->multi[ips].c0[i].Im = cimag(in->multi[ips].c0[i]);
+      out->multi[ips].c1[i].Im = cimag(in->multi[ips].c1[i]);
+      out->multi[ips].c2[i].Im = cimag(in->multi[ips].c2[i]);
+    }
+  }
+}
+
+// funzioni di conversione:    COM_MultiFermion  ==>  ACC_MultiFermion          
+void convert_COM_MultiFermion_to_ACC_MultiFermion(COM_MultiFermion *in, ACC_MultiFermion *out){
+  int i,ips;
+  for(ips =0 ; ips < no_ps ; ips++){
+    for( i =0 ; i < sizeh ; i++){
+      out->multi[ips].c0[i] = (in->multi[ips].c0[i].Re) + (in->multi[ips].c0[i].Im) * 1.0I;
+      out->multi[ips].c1[i] = (in->multi[ips].c1[i].Re) + (in->multi[ips].c1[i].Im) * 1.0I;
+      out->multi[ips].c2[i] = (in->multi[ips].c2[i].Re) + (in->multi[ips].c2[i].Im) * 1.0I;
+    }
+  }
+}
+
+
+
+// funzioni di conversione:    ACC_ShiftMultiFermion  ==>  COM_ShiftMultiFermion
+void convert_ACC_ShiftMultiFermion_to_COM_ShiftMultiFermion(ACC_ShiftMultiFermion *in, COM_ShiftMultiFermion *out){
+  int i,ips,ia;
+  for(ips =0 ; ips < no_ps ; ips++){
+    for(ia =0 ; ia < max_approx_order ; ia++){
+      for( i =0 ; i < sizeh ; i++){
+        out->shiftmulti[ia][ips].c0[i].Re = creal(in->shiftmulti[ia][ips].c0[i]);
+        out->shiftmulti[ia][ips].c1[i].Re = creal(in->shiftmulti[ia][ips].c1[i]);
+        out->shiftmulti[ia][ips].c2[i].Re = creal(in->shiftmulti[ia][ips].c2[i]);
+
+        out->shiftmulti[ia][ips].c0[i].Im = cimag(in->shiftmulti[ia][ips].c0[i]);
+        out->shiftmulti[ia][ips].c1[i].Im = cimag(in->shiftmulti[ia][ips].c1[i]);
+        out->shiftmulti[ia][ips].c2[i].Im = cimag(in->shiftmulti[ia][ips].c2[i]);
+      }
+    }
+  }
+}
+
+// funzioni di conversione:    COM_ShiftMultiFermion  ==>  ACC_ShiftMultiFermion
+void convert_COM_ShiftMultiFermion_to_ACC_ShiftMultiFermion(COM_ShiftMultiFermion *in, ACC_ShiftMultiFermion *out){
+  int i,ips,ia;
+  for(ia =0 ; ia < max_approx_order ; ia++){
+    for(ips =0 ; ips < no_ps ; ips++){
+      for( i =0 ; i < sizeh ; i++){
+        out->shiftmulti[ia][ips].c0[i] = (in->shiftmulti[ia][ips].c0[i].Re) + (in->shiftmulti[ia][ips].c0[i].Im) * 1.0I;
+        out->shiftmulti[ia][ips].c1[i] = (in->shiftmulti[ia][ips].c1[i].Re) + (in->shiftmulti[ia][ips].c1[i].Im) * 1.0I;
+        out->shiftmulti[ia][ips].c2[i] = (in->shiftmulti[ia][ips].c2[i].Re) + (in->shiftmulti[ia][ips].c2[i].Im) * 1.0I;
+      }
+    }
+  }
+}
 
 #endif

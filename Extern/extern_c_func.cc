@@ -17,3 +17,11 @@ extern "C" {
 extern "C" {
   void find_min_max_openacc(const  su3COM_soa  *conf, const vec3COM_soa *gaussian1,  const vec3COM_soa *gaussian2,double *minmax);
 }
+
+extern "C" {
+  //  void multips_invert_openacc_full(const su3COM_soa  *conf,COM_ShiftMultiFermion *out, const COM_MultiFermion *in, REAL res, COM_RationalApprox approx);
+  void multips_invert_openacc_full(const su3COM_soa  *conf,COM_ShiftMultiFermion *out, COM_MultiFermion *in, REAL res, COM_RationalApprox *approx);
+}
+extern "C" {
+  void first_inv_approx_calc_openacc(const su3COM_soa  *conf,COM_MultiFermion *out, const COM_MultiFermion *in, double res,const COM_RationalApprox *approx);
+}

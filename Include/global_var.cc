@@ -14,12 +14,30 @@ int use_stored=1;  // when =0 stored eigenvalues are used
 // staggered phases , allocated and set in Geometry/geometry.cc :: init_geo()
 int *eta;
 
+
+// normalized coefficients for rational approximations
+class RationalApprox;
+RationalApprox *first_inv_approx_norm_coeff;
+RationalApprox *md_inv_approx_norm_coeff;
+RationalApprox *last_inv_approx_norm_coeff;
+RationalApprox *meas_inv_coeff;
+
 // auxiliary global fermions to be used in inverters
 class Fermion;
 Fermion *loc_r;
 Fermion *loc_h;
 Fermion *loc_s;
 Fermion *loc_p;
+
+class MultiFermion;
+MultiFermion *fermion_phi;
+MultiFermion *fermion_chi;
+
+// to be used in shifted inverter and fermion force calculation
+class ShiftFermion;
+ShiftFermion *p_shiftferm;
+class ShiftMultiFermion;
+ShiftMultiFermion *fermion_shiftmulti;
 
 
 // next neighbours, allocated and set in Geometry/geometry.cc :: init_geo()

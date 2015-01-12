@@ -38,6 +38,10 @@ int init(int startMode = 1)
      loc_h=new Fermion;
      loc_s=new Fermion;
      loc_p=new Fermion;
+     fermion_phi=new MultiFermion;
+     fermion_chi=new MultiFermion;
+     p_shiftferm=new ShiftFermion;
+     fermion_shiftmulti=new ShiftMultiFermion;
 
      // auxiliary vectors for global sums
      d_vector1=new double[size];

@@ -285,6 +285,80 @@ void assign_in_to_out(  const __restrict vec3_soa * const in_vect1,
 }
 
 
+void set_shiftmulti_to_zero( const int iorder, const int ips, __restrict ACC_ShiftMultiFermion * const out){
+
+#pragma acc kernels present(out)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    out->shiftmulti[iorder][ips].c0[ih] = 0.0 + 0.0*I;
+    out->shiftmulti[iorder][ips].c1[ih] = 0.0 + 0.0*I;
+    out->shiftmulti[iorder][ips].c2[ih] = 0.0 + 0.0*I;
+  }
+
+}
+
+void extract_pseudo_and_assign_to_fermion( const  __restrict ACC_MultiFermion * const in, const int ips,  __restrict vec3_soa * const out){
+#pragma acc kernels present(in) present(out)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    out->c0[ih]=in->multi[ips].c0[ih];
+    out->c1[ih]=in->multi[ips].c1[ih];
+    out->c2[ih]=in->multi[ips].c2[ih];
+  }
+}
+
+void extract_pseudo_and_assign_to_shiftfermion(const __restrict ACC_MultiFermion * const in, int ips, __restrict ACC_ShiftFermion * const out, int ia){
+#pragma acc kernels present(in) present(out)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    out->shift[ia].c0[ih]=in->multi[ips].c0[ih];
+    out->shift[ia].c1[ih]=in->multi[ips].c1[ih];
+    out->shift[ia].c2[ih]=in->multi[ips].c2[ih];
+  }
+}
+
+
+void combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(__restrict ACC_ShiftMultiFermion * const out,const  __restrict ACC_ShiftFermion * const in,int ips, int ia, double factor){
+#pragma acc kernels present(in) present(out)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    out->shiftmulti[ia][ips].c0[ih] -= (factor)*(in->shift[ia].c0[ih]);
+    out->shiftmulti[ia][ips].c1[ih] -= (factor)*(in->shift[ia].c1[ih]);
+    out->shiftmulti[ia][ips].c2[ih] -= (factor)*(in->shift[ia].c2[ih]);
+  }
+}
+
+void combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm( __restrict ACC_ShiftFermion * const in1, int ia, double fact1, const __restrict vec3_soa * const in2, double fact2){
+#pragma acc kernels present(in1) present(in2)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    in1->shift[ia].c0[ih] = (fact1) * (in1->shift[ia].c0[ih]) + (fact2) * (in2->c0[ih]);
+    in1->shift[ia].c1[ih] = (fact1) * (in1->shift[ia].c1[ih]) + (fact2) * (in2->c1[ih]);
+    in1->shift[ia].c2[ih] = (fact1) * (in1->shift[ia].c2[ih]) + (fact2) * (in2->c2[ih]);
+  }
+}
+
+void extract_from_shiftmulti_and_assign_to_fermion( const  __restrict ACC_ShiftMultiFermion * const in, const int ia, const int ips,  __restrict vec3_soa * const out){
+#pragma acc kernels present(in) present(out)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    out->c0[ih]=in->shiftmulti[ia][ips].c0[ih];
+    out->c1[ih]=in->shiftmulti[ia][ips].c1[ih];
+    out->c2[ih]=in->shiftmulti[ia][ips].c2[ih];
+  }
+}
+
+void combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1( __restrict vec3_soa * const in1,double fact, const __restrict vec3_soa * const in2, const __restrict ACC_MultiFermion * const in3,int ips){
+#pragma acc kernels present(in1) present(in2) present(in3)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    in1->c0[ih] = (in1->c0[ih]) * fact - (in2->c0[ih]) - (in3->multi[ips].c0[ih]);
+    in1->c1[ih] = (in1->c1[ih]) * fact - (in2->c1[ih]) - (in3->multi[ips].c1[ih]);
+    in1->c2[ih] = (in1->c2[ih]) * fact - (in2->c2[ih]) - (in3->multi[ips].c2[ih]);
+  }
+}
+
+
 #endif
 
 
