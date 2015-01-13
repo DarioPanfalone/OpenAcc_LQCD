@@ -12,7 +12,7 @@ const REAL beta=5.55;
 
 
 // random seed (if 0 time machine is used)
-const int rand_seed=18149;
+const int rand_seed=48102;
 
 // fermion temporal bounday condition   =0 --> antiperiodic, else periodic
 const int ferm_temp_bc=0;

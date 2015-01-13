@@ -168,7 +168,10 @@ void acc_Deo(const __restrict su3_soa * const u, __restrict vec3_soa * const out
 
           matdir = 6;
           eta = 1 - ( 2*((x+y+z) & 0x1) );
+
+#ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(t/(nt-1)));
+#endif
 	  // mat_vec_mul( &(u_work[snum_acc(x,y,z,t) + size3]), &(in[snum_acc(x,y,z,tp)]), &aux_tmp );
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,z,tp) ) );
 
@@ -191,7 +194,9 @@ void acc_Deo(const __restrict su3_soa * const u, __restrict vec3_soa * const out
 
           matdir = 7;
           eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(tm/(nt-1)));
+#endif
 	  // conjmat_vec_mul( &(u_work[sizeh + snum_acc(x,y,z,tm) + size3]), &(in[ snum_acc(x,y,z,tm) ]), &aux_tmp );
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,z,tm), eta, in, snum_acc(x,y,z,tm) ) );
 
@@ -267,7 +272,9 @@ void acc_Doe(const __restrict su3_soa * const u, __restrict vec3_soa * const out
 
           matdir = 7;
           eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(t/(nt-1)));
+#endif
 	  // mat_vec_mul( &(u_work[snum_acc(x,y,z,t) + sizeh + size3]), &(in[ snum_acc(x,y,z,tp) ]), &aux_tmp );
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,z,tp)) );
 
@@ -290,7 +297,9 @@ void acc_Doe(const __restrict su3_soa * const u, __restrict vec3_soa * const out
 
           matdir = 6;
           eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(tm/(nt-1)));
+#endif
 	  // conjmat_vec_mul( &(u_work[snum_acc(x,y,z,tm) + size3]), &(in[ snum_acc(x,y,z,tm) ]), &aux_tmp );   
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,z,tm), eta, in, snum_acc(x,y,z,tm)) );
 

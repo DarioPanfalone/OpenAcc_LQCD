@@ -19,6 +19,7 @@
 
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
+
 void ker_invert_openacc_shiftmulti(   const __restrict su3_soa * const u,
 				     __restrict ACC_ShiftMultiFermion * const out,
 				     const __restrict ACC_MultiFermion * const in,

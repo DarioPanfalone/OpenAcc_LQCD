@@ -42,10 +42,10 @@ int main(){
    Fermion* tempFermion2_openacc_full = new Fermion();// result fermion for openacc_full
    Fermion* tempFermion3 = new Fermion();// Trial solution
 
-   //   tempFermion1->gauss();
-   //   tempFermion3->gauss();
-   tempFermion1->z2noise();
-   tempFermion3->z2noise();
+   tempFermion1->gauss();
+   tempFermion3->gauss();
+      //tempFermion1->z2noise();
+      //tempFermion3->z2noise();
    cout << "Initialized Random Fermion Vectors.\n";
    //   tempFermion1->saveToFile("fer_32.fer");
 
@@ -89,6 +89,8 @@ int main(){
 
 
 
+
+   /*
    //////////////////////////////////////////////////////////////////////////////////////////////////
    /////////////////////// CONFRONTO FUNZIONI FIND MIN E FIND MAX  //////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +105,7 @@ int main(){
    min = minmax[0];
    max = minmax[1];
    cout << "OPENACC:  min = " << min << "    max = " << max << endl;
-
+   */
 
 
 
@@ -188,9 +190,19 @@ int main(){
    cerr << "shi  " << fermion_shiftmulti->fermion[0][0][i] << endl ;
 
    cout << "--- INVERTITORE CPU --- --- --- RISULTATI DI MULTIPS" << endl << endl;
-   cout <<   (fermion_chi->fermion[ips][ish].comp[0]).real() << "     " <<    (fermion_chi->fermion[ips][ish].comp[0]).imag() << endl;
-   cout <<   (fermion_chi->fermion[ips][ish].comp[1]).real() << "     " <<    (fermion_chi->fermion[ips][ish].comp[1]).imag() << endl;
-   cout <<   (fermion_chi->fermion[ips][ish].comp[2]).real() << "     " <<    (fermion_chi->fermion[ips][ish].comp[2]).imag() << endl;
+
+   ofstream oferm;
+   string ofermname="inverted_openacc.fer";
+   oferm.open(ofermname.c_str());
+   oferm.precision(18);
+   for(int ips=0;ips<2;ips++){
+     for(int ish=0;ish<sizeh;ish++){
+       oferm <<   (fermion_app->fermion[ips][ish].comp[0]).real() << "     " <<    (fermion_app->fermion[ips][ish].comp[0]).imag() << endl;
+       oferm <<   (fermion_app->fermion[ips][ish].comp[1]).real() << "     " <<    (fermion_app->fermion[ips][ish].comp[1]).imag() << endl;
+       oferm <<   (fermion_app->fermion[ips][ish].comp[2]).real() << "     " <<    (fermion_app->fermion[ips][ish].comp[2]).imag() << endl;
+     }
+   }
+   oferm.close();
 
    double diff_CPU_FULL   = difference_multi(fermion_chi,fermion_app);
    cout << "--- multinv differences: openacc - cpu      --------" << endl << endl;

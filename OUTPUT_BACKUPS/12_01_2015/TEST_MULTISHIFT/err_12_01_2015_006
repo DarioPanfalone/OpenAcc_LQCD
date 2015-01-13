@@ -1,0 +1,207 @@
+ Random number inside init and before gauge conf generation :    0.73969957553421857
+	+++++++++++RationalApprox++++++++++++++++
+	++ approx_order=19
+	++ min_epsilon=4e-07
+	++ RA_a0=2.0309425275246222
+	++ 0	RA_a[0]=-2.0565859195511442e-08	RA_b[0]=4.2379134906741012e-07
+	++ 1	RA_a[1]=-7.8533773003543939e-08	RA_b[1]=2.4400388840414027e-06
+	++ 2	RA_a[2]=-2.3024848604537387e-07	RA_b[2]=7.8157952843490541e-06
+	++ 3	RA_a[3]=-6.4310073781219526e-07	RA_b[3]=2.1176600842358813e-05
+	++ 4	RA_a[4]=-1.7747586689074919e-06	RA_b[4]=5.4017886557038191e-05
+	++ 5	RA_a[5]=-4.8798490713210514e-06	RA_b[5]=0.00013459606013265800
+	++ 6	RA_a[6]=-1.3400397145841174e-05	RA_b[6]=0.00033224205041019200
+	++ 7	RA_a[7]=-3.6781700657875218e-05	RA_b[7]=0.00081702641748663700
+	++ 8	RA_a[8]=-0.00010094960242609600	RA_b[8]=0.0020061710549651680
+	++ 9	RA_a[9]=-0.00027710913054728300	RA_b[9]=0.004923541330453852
+	++ 10	RA_a[10]=-0.00076111011939219400	RA_b[10]=0.012083713556330085
+	++ 11	RA_a[11]=-0.0020935682005989970	RA_b[11]=0.029674492215720152
+	++ 12	RA_a[12]=-0.0057798483491560240	RA_b[12]=0.072995778668340838
+	++ 13	RA_a[13]=-0.016101136740779893	RA_b[13]=0.18032282812283307
+	++ 14	RA_a[14]=-0.045859926417737551	RA_b[14]=0.45016039713160296
+	++ 15	RA_a[15]=-0.13801224146745663	RA_b[15]=1.1537808123039637
+	++ 16	RA_a[16]=-0.47737114078125593	RA_b[16]=3.1657474190478387
+	++ 17	RA_a[17]=-2.3992119104476779	RA_b[17]=10.526653751086283
+	++ 18	RA_a[18]=-42.76601369952501	RA_b[18]=71.453711805020506
+	+++++++++++++++++++++++++++++++++++++++++
+
+phi  (-0.33143056840448266,-0.47334552136014558) (-0.54223796740754358,-0.98051954262712115) (0.20810572802802181,-0.78943080807708537)
+
+shi  (-2.7595502793524425,-23.66982002827263) (11.69565293056603,27.610510380223374) (5.4368668639802875,-10.831240295747113)
+
+
+Accelerator Kernel Timing data
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  real_scal_prod_global  NVIDIA  devicenum=0
+    time(us): 4,202
+    95: data region reached 657 times
+    95: compute region reached 657 times
+        97: kernel launched 657 times
+            grid: [256]  block: [128]
+             device time(us): total=2,316 max=65 min= avg=3
+            elapsed time(us): total=13,683 max=83 min=17 avg=20
+        97: reduction kernel launched 657 times
+            grid: [1]  block: [256]
+             device time(us): total=1,886 max=21 min= avg=2
+            elapsed time(us): total=15,533 max=81 min=17 avg=23
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  l2norm2_global  NVIDIA  devicenum=0
+    time(us): 13,219
+    110: data region reached 1583 times
+    110: compute region reached 1583 times
+        112: kernel launched 1583 times
+            grid: [256]  block: [128]
+             device time(us): total=5,177 max=63 min= avg=3
+            elapsed time(us): total=32,499 max=82 min=18 avg=20
+        112: reduction kernel launched 1583 times
+            grid: [1]  block: [256]
+             device time(us): total=8,042 max=105 min= avg=5
+            elapsed time(us): total=32,678 max=120 min=16 avg=20
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  acc_Deo  NVIDIA  devicenum=0
+    time(us): 17,367
+    119: data region reached 1577 times
+    119: compute region reached 1577 times
+        127: kernel launched 1577 times
+            grid: [2x2x16]  block: [8x8x8]
+             device time(us): total=17,367 max=66 min=8 avg=11
+            elapsed time(us): total=38,061 max=82 min=22 avg=24
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  find_min_max_openacc  NVIDIA  devicenum=0
+    time(us): 51
+    135: data region reached 2 times
+        135: data copyin transfers: 6
+             device time(us): total=51 max=12 min=7 avg=8
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  combine_in1xfactor_plus_in2  NVIDIA  devicenum=0
+    time(us): 7,564
+    148: data region reached 657 times
+    148: compute region reached 657 times
+        150: kernel launched 657 times
+            grid: [256]  block: [128]
+             device time(us): total=7,564 max=99 min=6 avg=11
+            elapsed time(us): total=15,988 max=111 min=22 avg=24
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  multiply_fermion_x_doublefactor  NVIDIA  devicenum=0
+    time(us): 9,566
+    162: data region reached 882 times
+    162: compute region reached 882 times
+        164: kernel launched 882 times
+            grid: [256]  block: [128]
+             device time(us): total=9,566 max=70 min=9 avg=10
+            elapsed time(us): total=21,580 max=85 min=22 avg=24
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  combine_add_factor_x_in2_to_in1  NVIDIA  devicenum=0
+    time(us): 11,251
+    172: data region reached 976 times
+    172: compute region reached 976 times
+        174: kernel launched 976 times
+            grid: [256]  block: [128]
+             device time(us): total=11,251 max=69 min=9 avg=11
+            elapsed time(us): total=23,412 max=81 min=22 avg=23
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  ker_openacc_recombine_shiftmulti_to_multi  NVIDIA  devicenum=0
+    time(us): 39
+    200: compute region reached 1 time
+        204: kernel launched 1 time
+            grid: [256x2]  block: [128]
+             device time(us): total=15 max=15 min=15 avg=15
+            elapsed time(us): total=28 max=28 min=28 avg=28
+    200: data region reached 2 times
+        351: data copyout transfers: 1
+             device time(us): total=24 max=24 min=24 avg=24
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  acc_Doe  NVIDIA  devicenum=0
+    time(us): 18,525
+    214: data region reached 1577 times
+    214: compute region reached 1577 times
+        222: kernel launched 1577 times
+            grid: [2x2x16]  block: [8x8x8]
+             device time(us): total=18,525 max=70 min=5 avg=11
+            elapsed time(us): total=38,709 max=82 min=22 avg=24
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  combine_in1xm2_minus_in2  NVIDIA  devicenum=0
+    time(us): 13,710
+    239: data region reached 1220 times
+    239: compute region reached 1220 times
+        241: kernel launched 1220 times
+            grid: [256]  block: [128]
+             device time(us): total=13,710 max=66 min= avg=11
+            elapsed time(us): total=29,834 max=291 min=22 avg=24
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  assign_in_to_out  NVIDIA  devicenum=0
+    time(us): 10,317
+    277: data region reached 884 times
+    277: compute region reached 884 times
+        279: kernel launched 884 times
+            grid: [256]  block: [128]
+             device time(us): total=10,317 max=69 min=9 avg=11
+            elapsed time(us): total=21,190 max=81 min=22 avg=23
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  set_shiftmulti_to_zero  NVIDIA  devicenum=0
+    time(us): 352
+    290: data region reached 38 times
+    290: compute region reached 38 times
+        292: kernel launched 38 times
+            grid: [256]  block: [128]
+             device time(us): total=352 max=13 min= avg=9
+            elapsed time(us): total=1,184 max=321 min=22 avg=31
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  extract_pseudo_and_assign_to_fermion  NVIDIA  devicenum=0
+    time(us): 20
+    301: data region reached 2 times
+    301: compute region reached 2 times
+        303: kernel launched 2 times
+            grid: [256]  block: [128]
+             device time(us): total=20 max=11 min=9 avg=10
+            elapsed time(us): total=53 max=27 min=26 avg=26
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  extract_pseudo_and_assign_to_shiftfermion  NVIDIA  devicenum=0
+    time(us): 444
+    311: data region reached 38 times
+    311: compute region reached 38 times
+        313: kernel launched 38 times
+            grid: [256]  block: [128]
+             device time(us): total=444 max=14 min=10 avg=11
+            elapsed time(us): total=1,040 max=33 min=25 avg=27
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti  NVIDIA  devicenum=0
+    time(us): 102,507
+    322: data region reached 7771 times
+    322: compute region reached 7771 times
+        324: kernel launched 7771 times
+            grid: [256]  block: [128]
+             device time(us): total=102,507 max=96 min=7 avg=13
+            elapsed time(us): total=209,391 max=111 min=24 avg=26
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm  NVIDIA  devicenum=0
+    time(us): 103,956
+    332: data region reached 7771 times
+    332: compute region reached 7771 times
+        334: kernel launched 7771 times
+            grid: [256]  block: [128]
+             device time(us): total=103,956 max=72 min=7 avg=13
+            elapsed time(us): total=211,131 max=90 min=24 avg=27
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  first_inv_approx_calc_openacc  NVIDIA  devicenum=0
+    time(us): 22
+    338: data region reached 1 time
+        338: data copyin transfers: 3
+             device time(us): total=22 max=8 min=7 avg=7
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  extract_from_shiftmulti_and_assign_to_fermion  NVIDIA  devicenum=0
+    time(us): 398
+    342: data region reached 38 times
+    342: compute region reached 38 times
+        344: kernel launched 38 times
+            grid: [256]  block: [128]
+             device time(us): total=398 max=13 min=9 avg=10
+            elapsed time(us): total=1,008 max=33 min=25 avg=26
+/gpfs/ddn/users/fnegro/MOLINVTEST_REPO/OpenAcc/./fermionic_utilities.c
+  combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1  NVIDIA  devicenum=0
+    time(us): 409
+    352: data region reached 38 times
+    352: compute region reached 38 times
+        354: kernel launched 38 times
+            grid: [256]  block: [128]
+             device time(us): total=409 max=13 min=9 avg=10
+            elapsed time(us): total=983 max=28 min=25 avg=25

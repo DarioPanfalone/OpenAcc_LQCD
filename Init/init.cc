@@ -30,8 +30,11 @@ int init(int startMode = 1)
      // defined in Geometry/geometry.cc
      init_geo();
 
+
+     cerr << " Random number inside init and before gauge conf generation :    " << casuale() << endl;
      // allocate gauge configuration
      gauge_conf=new Conf(startMode);
+     cerr << " Random number inside init and after gauge conf generation :    " << casuale() << endl;
 
      // allocate auxiliary global fermion 
      loc_r=new Fermion;
