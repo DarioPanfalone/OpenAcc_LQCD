@@ -25,3 +25,7 @@ extern "C" {
 extern "C" {
   void first_inv_approx_calc_openacc(const su3COM_soa  *conf,COM_MultiFermion *out, const COM_MultiFermion *in, double res,const COM_RationalApprox *approx);
 }
+
+extern "C" {
+  void  calc_plaquette_openacc(const su3COM_soa *conf);
+}

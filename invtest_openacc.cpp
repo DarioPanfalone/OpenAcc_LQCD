@@ -18,6 +18,7 @@
 #include "./Inverter/inverter.cc"
 #include "./OpenAcc/inverter_simple.cc"
 
+#include "./Meas/gaugemeas.cc"
 
 using namespace std;
 
@@ -30,7 +31,7 @@ int main(){
   rationalapprox_calc();
 
 //All SU(3) links set to identity
-   init(1);
+   init(0);
    //   gauge_conf->saveToFile("TestConf_32.cnf");
    cout << "Initialized Random Gauge Matrix.\n";
 
@@ -118,6 +119,12 @@ int main(){
 
    su3COM_soa conf_soaCOM[8];
    for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
+
+   calc_plaquette_openacc(conf_soaCOM);
+   double ps,pt;
+   gauge_conf->calc_plaq(ps,pt);
+   cout << "PlaquetteCPU  " << (ps+pt)*0.5 << endl;
+
    vec3COM_soa soa1COM;
    vec3COM_soa soa2COM;
    tempFermion1->ferm_aos_to_soaCOM(&soa1COM);
@@ -161,6 +168,7 @@ int main(){
    fermion_phi->ferm_Multi_to_MultiCOM(&COMMON_multi);
 
    first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_multi_out,&COMMON_multi,residue_metro,COM_approx);
+
    fermion_shiftmulti->ferm_ShiftMultiCOM_to_ShiftMulti(&COMMON_shiftmulti);
    fermion_app->ferm_MultiCOM_to_Multi(&COMMON_multi_out);
    for(int icomp=0;icomp<3;icomp++)
@@ -170,7 +178,7 @@ int main(){
 
 
 
-   multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx);
+   //   multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx);
    int iter, pseudofermion,i;
    Vec3 vr_1;
 
@@ -191,6 +199,7 @@ int main(){
 
    cout << "--- INVERTITORE CPU --- --- --- RISULTATI DI MULTIPS" << endl << endl;
 
+   /*
    ofstream oferm;
    string ofermname="inverted_openacc.fer";
    oferm.open(ofermname.c_str());
@@ -203,6 +212,7 @@ int main(){
      }
    }
    oferm.close();
+   */
 
    double diff_CPU_FULL   = difference_multi(fermion_chi,fermion_app);
    cout << "--- multinv differences: openacc - cpu      --------" << endl << endl;

@@ -5,6 +5,7 @@
 #define INCLUDE_ACC_X_FERM_MATRIX
 #include "./struct_c_def.c"
 #include "./fermionic_utilities.c"
+#include "./su3_utilities.c"
 #include "openacc.h"
 #endif
 
@@ -16,6 +17,8 @@
 
 #include "./inverter_full.c"
 #include "./find_min_max.c"
+
+
 
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
@@ -44,13 +47,13 @@ void ker_invert_openacc_shiftmulti(   const __restrict su3_soa * const u,
   posix_memalign((void **)&zeta_iii, ALIGN,  max_approx_order*sizeof(double));
   posix_memalign((void **)&omegas,   ALIGN,  max_approx_order*sizeof(double));
   posix_memalign((void **)&gammas,   ALIGN,  max_approx_order*sizeof(double));
-  printf("Allocated auxiliary variables \n");
+  //  printf("Allocated auxiliary variables \n");
 
   int pseudofermion,iter;
   double alpha, delta, lambda, omega, omega_save, gammag, fact;
 
-  printf("Inside the kernel \n");
-  printf("Ordine della approssimazione:   %i \n",approx[0].COM_approx_order);
+  //  printf("Inside the kernel \n");
+  //  printf("Ordine della approssimazione:   %i \n",approx[0].COM_approx_order);
 
   alpha=0.0;
 
@@ -66,7 +69,7 @@ void ker_invert_openacc_shiftmulti(   const __restrict su3_soa * const u,
     extract_pseudo_and_assign_to_fermion(in,pseudofermion,loc_r);
     assign_in_to_out(loc_r,loc_p);
     delta=l2norm2_global(loc_r);
-    printf("delta    %.18lf\n",delta);
+    //    printf("delta    %.18lf\n",delta);
     omega=1.0;
 
     for(iter=0; iter<(approx[0].COM_approx_order); iter++){
@@ -86,16 +89,16 @@ void ker_invert_openacc_shiftmulti(   const __restrict su3_soa * const u,
       acc_Deo(u,loc_s,loc_h);
       combine_in1xm2_minus_in2(loc_p,loc_s);
 
-      printf("component_loc_s[0]    %.18e\n",creal(loc_s->c0[0]));
-      printf("component_loc_p[0]    %.18e\n",creal(loc_p->c0[0]));
+      //      printf("component_loc_s[0]    %.18e\n",creal(loc_s->c0[0]));
+      //      printf("component_loc_p[0]    %.18e\n",creal(loc_p->c0[0]));
 
       alpha = real_scal_prod_global(loc_p,loc_s);
-      printf("alpha    %.18lf\n",alpha);
-      printf("mass2    %.18lf\n",mass2);
+      //      printf("alpha    %.18lf\n",alpha);
+      //      printf("mass2    %.18lf\n",mass2);
 
       omega_save=omega;   // omega_save=omega_(j-1)                                                                                                        
       omega=-delta/alpha;  // omega = (r_j,r_j)/(p_j, Ap_j)               
-      printf("omega    %.18lf\n",omega);
+      //      printf("omega    %.18lf\n",omega);
 
       // out-=omegas*ps
       for(iter=0; iter<(approx[0].COM_approx_order); iter++){
@@ -131,18 +134,18 @@ void ker_invert_openacc_shiftmulti(   const __restrict su3_soa * const u,
 	}
       }
       delta=lambda;
-      printf("Pseudoferm: %i   Iteration: %i    --> residue = %e   (target = %e) \n", pseudofermion, cg, sqrt(lambda), residuo);
+      //      printf("Pseudoferm: %i   Iteration: %i    --> residue = %e   (target = %e) \n", pseudofermion, cg, sqrt(lambda), residuo);
 
-      printf("Inside multishift  ( step = %i )\n");
-      printf("lambda   %.18lf\n",lambda );
-      printf("omega    %.18lf\n",omega );
-      printf("gammag   %.18lf\n",gammag );
+      //      printf("Inside multishift  ( step = %i )\n");
+      //      printf("lambda   %.18lf\n",lambda );
+      //      printf("omega    %.18lf\n",omega );
+      //      printf("gammag   %.18lf\n",gammag );
 
-      for(iter=0; iter<(approx[0].COM_approx_order); iter++){
-	printf("zeta_i[%i] =  %.18lf\n",iter,zeta_i[iter]);
-	printf("gammas[%i] =  %.18lf\n",iter,gammas[iter]);
-	printf("omegas[%i] =  %.18lf\n",iter,omegas[iter]);
-      }
+      //      for(iter=0; iter<(approx[0].COM_approx_order); iter++){
+	//	printf("zeta_i[%i] =  %.18lf\n",iter,zeta_i[iter]);
+	//	printf("gammas[%i] =  %.18lf\n",iter,gammas[iter]);
+	//	printf("omegas[%i] =  %.18lf\n",iter,omegas[iter]);
+      //      }
 
 
     } while(sqrt(lambda)>residuo && cg<max_cg); // end of cg iterations 

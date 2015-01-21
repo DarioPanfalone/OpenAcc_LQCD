@@ -51,6 +51,12 @@ typedef struct vec3_soa_t {
   d_complex c2[sizeh];
 } vec3_soa;
 
+typedef struct dcomplex_soa_t {
+  d_complex c[sizeh];
+} dcomplex_soa;
+
+
+
 typedef struct vec3_t {
   d_complex c0;
   d_complex c1;

@@ -48,6 +48,7 @@ int init(int startMode = 1)
 
      // auxiliary vectors for global sums
      d_vector1=new double[size];
+     d_vector2=new double[size];
 
 #ifdef USEGPU
      gauge_field_packed=new float[12*no_links*2];            // 2 since 1double~2float
@@ -83,6 +84,7 @@ void end(void)
 
   // clear auxiliary vectors
   delete [] d_vector1;
+  delete [] d_vector2;
 
 
    // clear gauge configuration

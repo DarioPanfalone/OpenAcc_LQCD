@@ -50,6 +50,7 @@ Conf *gauge_conf;
 
 // vectors for global sum (also used in inverters)
 double *d_vector1;
+double *d_vector2;
 
 
 //used in the CUDA version, to pack the configuration on the device

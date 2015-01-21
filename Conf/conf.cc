@@ -15,13 +15,21 @@ class Conf {
   // base constructor private!
   Conf(void);
 public:
+
+  Su3 u_save[no_links];
+  Su3 u_work[no_links];
+
   Conf(int initMode);
+
+  void  calc_plaq(REAL &pls, REAL &plt) const;
+  //  void  calc_all_plaq(REAL &pxyr,REAL &pxyi,REAL &pxzr,REAL &pxzi,REAL &pxtr,REAL &pxti,REAL &pyzr,REAL &pyzi,REAL &pytr,REAL &pyti,REAL &pztr,REAL &pzti);
+  void  calc_poly(REAL &re, REAL &im) const;
+  Su3 get_staple(int index, int mu);
+  void  cooling();
 
   void allIdentities();
   void allIdentitiesExcept(int ii,int sub);
 
-  Su3 u_save[no_links];
-  Su3 u_work[no_links];
 
   void unitarize_with_eta(void);
   void saveToFile(const char*);
@@ -227,5 +235,35 @@ void Conf::saveToFile(const char *filename){
 
 }
 
+//Calcola la staple associata al link che parte dal sito index in direzione mu               
+Su3 Conf::get_staple(int index, int mu)
+{
+  Su3 aux,staple;
+  int nu, pos;
+  long int index_mu, index_nu, helper;
+
+  pos = index;
+  index_mu=mu*size;
+  aux.zero();
+  staple.zero();
+  for(nu=0; nu<4; nu++)
+    {
+      if(nu!=mu)
+        {
+          index_nu=nu*size;
+          aux = (gauge_conf->u_work[index_nu + nnp[pos][mu]]);  // 1        \
+          aux*=~(gauge_conf->u_work[index_mu + nnp[pos][nu]]);  // 2        \
+          aux*=~(gauge_conf->u_work[index_nu + pos]);           // 3        \
+          staple += aux;
+
+          helper=nnm[pos][nu];
+          aux =~(gauge_conf->u_work[index_nu + nnp[helper][mu]]); // 1      \
+          aux*=~(gauge_conf->u_work[index_mu + helper]);          // 2      \
+          aux*= (gauge_conf->u_work[index_nu + helper]);          // 3      \             
+          staple += aux;
+        }
+    }
+  return staple;
+}
 
 #endif

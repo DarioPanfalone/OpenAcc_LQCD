@@ -41,6 +41,8 @@ public:
  complex<REAL> det(void) const;
  void sunitarize(void);
  void sub_su2unitarize(int index,int sito);
+  void sub_su2unitarize_persmearing(int index,int sito);
+
  REAL l2norm(void) const;
  REAL l2norm2(void) const;
  void ta(void);
@@ -826,6 +828,54 @@ void Su3::sub_su2unitarize(int index,int sito)
   }
 
 
+}
+
+
+// proietta la matrice sul sottogruppo su2 identificato da index 
+void Su3::sub_su2unitarize_persmearing(int index,int sito)
+{
+  Su3 aux=*this;
+  REAL norm = 0.0;
+  REAL norma=0.0;
+  int ind1,ind2;
+  for(int i=0;i<3;i++){
+    for(int j=0;j<3;j++){
+      if(i==index) aux.comp[i][j] = 0.0;
+      if(j==index){
+        aux.comp[i][j] = 0.0;
+        if(i==index) aux.comp[i][j] = 1.0;
+      }
+    }
+  }
+  ind1=1;
+  ind2=2;
+  if(index==1){
+    ind1=0;
+    ind2=2;
+  }
+  if(index==2){
+    ind1=0;
+    ind2=1;
+  }
+  REAL c0,c1,c2,c3;
+  c0=(real(aux.comp[ind1][ind1]+aux.comp[ind2][ind2]));
+  c1=(imag(aux.comp[ind1][ind2]+aux.comp[ind2][ind1]));
+  c2=(real(aux.comp[ind1][ind2]-aux.comp[ind2][ind1]));
+  c3=(imag(aux.comp[ind1][ind1]-aux.comp[ind2][ind2]));
+  norma=sqrt(c0*c0+c1*c1+c2*c2+c3*c3);
+  c0/=norma;
+  c1/=norma;
+  c2/=norma;
+  c3/=norma;
+  aux.comp[ind1][ind1]=  complex<REAL>(c0,c3);
+  aux.comp[ind1][ind2]=  complex<REAL>(c2,c1);
+  aux.comp[ind2][ind1]= -conj(aux.comp[ind1][ind2]);
+  aux.comp[ind2][ind2]=  conj(aux.comp[ind1][ind1]);
+  for(int i=0;i<3;i++){
+    for(int j=0;j<3;j++){
+      comp[i][j]=aux.comp[i][j];
+    }
+  }
 }
 
 
