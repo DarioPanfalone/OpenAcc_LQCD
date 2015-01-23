@@ -205,17 +205,17 @@ void findminmax_con_openacc(REAL *minmax){
       loc_p->ferm_aos_to_soaCOM(&soa1COM);
       loc_s->ferm_aos_to_soaCOM(&soa2COM);
 
-      /*
+
       find_min_max_openacc(conf_soaCOM,&soa1COM,&soa2COM,minmax);
       min_stored=minmax[0];
       max_stored=minmax[1];
-      */
 
+      /*
       minmax[0]=0.01;
       minmax[1]=7.2;
       min_stored=0.01;
       max_stored=7.2;
-
+      */
 
     }
 

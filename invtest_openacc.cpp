@@ -31,7 +31,7 @@ int main(){
   rationalapprox_calc();
 
 //All SU(3) links set to identity
-   init(0);
+   init(1);
    //   gauge_conf->saveToFile("TestConf_32.cnf");
    cout << "Initialized Random Gauge Matrix.\n";
 
@@ -120,10 +120,20 @@ int main(){
    su3COM_soa conf_soaCOM[8];
    for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
 
+
+   clock_t time_start, time_finish;
+
    calc_plaquette_openacc(conf_soaCOM);
+
    double ps,pt;
+
+   time_start=clock();
    gauge_conf->calc_plaq(ps,pt);
+   time_finish=clock();
+   cout << "time for Plaquette measurements = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
+
    cout << "PlaquetteCPU  " << (ps+pt)*0.5 << endl;
+
 
    vec3COM_soa soa1COM;
    vec3COM_soa soa2COM;
@@ -178,7 +188,7 @@ int main(){
 
 
 
-   //   multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx);
+      multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx);
    int iter, pseudofermion,i;
    Vec3 vr_1;
 

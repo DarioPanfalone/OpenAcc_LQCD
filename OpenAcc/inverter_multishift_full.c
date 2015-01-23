@@ -3,10 +3,12 @@
 
 #ifndef INCLUDE_ACC_X_FERM_MATRIX
 #define INCLUDE_ACC_X_FERM_MATRIX
+#include "openacc.h"
 #include "./struct_c_def.c"
 #include "./fermionic_utilities.c"
 #include "./su3_utilities.c"
-#include "openacc.h"
+//#include "./gpu_selection.c"
+
 #endif
 
 
