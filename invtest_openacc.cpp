@@ -31,7 +31,7 @@ int main(){
   rationalapprox_calc();
 
 //All SU(3) links set to identity
-   init(1);
+   init(0);
    //   gauge_conf->saveToFile("TestConf_32.cnf");
    cout << "Initialized Random Gauge Matrix.\n";
 
@@ -112,27 +112,40 @@ int main(){
 
 
    //////////////////////////////////////////////////////////////////////////////////////////////////
-   /////////////////////// CONFRONTO INVERTITORE MULTISHIFT    //////////////////////////////////////
+   /////////////////////// CONFRONTO CALCOLO PLAQ E ALTRE ROUTINE DI GAUGE    ///////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////////////
-   create_phi();
-   cout << "Created phi\n";
+   clock_t time_start, time_finish;
+
 
    su3COM_soa conf_soaCOM[8];
    for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
 
-
-   clock_t time_start, time_finish;
-
    calc_plaquette_openacc(conf_soaCOM);
+   calc_staples_openacc(conf_soaCOM);
 
    double ps,pt;
 
    time_start=clock();
    gauge_conf->calc_plaq(ps,pt);
    time_finish=clock();
-   cout << "time for Plaquette measurements = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
+   cout << "Time for Plaquette measurements on the CPU= " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 
-   cout << "PlaquetteCPU  " << (ps+pt)*0.5 << endl;
+   cout << "Plaquette CPU    =  " << (ps+pt)*0.5 << endl;
+
+
+
+
+
+   //////////////////////////////////////////////////////////////////////////////////////////////////
+   /////////////////////// CONFRONTO INVERTITORE MULTISHIFT    //////////////////////////////////////
+   //////////////////////////////////////////////////////////////////////////////////////////////////
+   create_phi();
+
+   cout << "Created phi\n";
+
+   //   uncomment the following if the conf has not yet been declared
+   //   su3COM_soa conf_soaCOM[8];
+   //   for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
 
 
    vec3COM_soa soa1COM;
@@ -187,8 +200,9 @@ int main(){
    cout << "Conversions done!" << endl;
 
 
-
-      multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx);
+   // uncomment this to perform the full comparison between the openacc anf the cpu version of the multishift.
+   // might take a while if the volume is large and if the mass is small
+   //      multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx);
    int iter, pseudofermion,i;
    Vec3 vr_1;
 

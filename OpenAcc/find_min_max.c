@@ -29,7 +29,7 @@ double ker_find_max_eigenvalue_openacc(  const __restrict su3_soa * const u,
 
   norm=sqrt(l2norm2_global(loc_p));
   loop_count=0;
-  printf("norm  out  %.18lf\n",norm);
+  //  printf("norm  out  %.18lf\n",norm);
   // loop start
   do{
       // normalize  p
@@ -42,6 +42,7 @@ double ker_find_max_eigenvalue_openacc(  const __restrict su3_soa * const u,
       acc_Doe(u,loc_h,loc_p);
       acc_Deo(u,loc_p,loc_h);
 
+      /*
       if(loop_count==0){
 	char *nomei = "input_fmax_cuda_cpu";
 	FILE *cerri = fopen(nomei, "a");
@@ -56,6 +57,7 @@ double ker_find_max_eigenvalue_openacc(  const __restrict su3_soa * const u,
 	}
 	fclose(cerri);
       }
+      */
 
 
       // p=(M^dag M)r
@@ -64,7 +66,7 @@ double ker_find_max_eigenvalue_openacc(  const __restrict su3_soa * const u,
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
       loop_count++;
-      printf("norm  in  %.18lf\n",norm);
+      //      printf("norm  in  %.18lf\n",norm);
     } while(old_norm>1.0e-5);    // loop end
   double max=norm;
   return max;
