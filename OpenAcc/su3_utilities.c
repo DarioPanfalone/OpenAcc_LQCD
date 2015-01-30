@@ -2,6 +2,12 @@
 #ifndef SU3_UTILITIES_C_
 #define SU3_UTILITIES_C_
 
+// TABLES FOR THE NEAREST NEIGHBOURS
+// nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"
+//                            starting from the site "site_half" (from 0 to sizeh) of parity "par"
+// nnm[site_half][dir][par] = nearest neighbour in the negative direction "dir"
+//                            starting from the site "site_half" (from 0 to sizeh) of parity "par"
+// temporarily defined and computed here (should be moved elsewhere!)
 int nnp_openacc[sizeh][4][2];
 int nnm_openacc[sizeh][4][2];
 void compute_nnp_and_nnm_openacc(){
@@ -51,7 +57,8 @@ void compute_nnp_and_nnm_openacc(){
 }
 
 
-
+// ROUTINE TO CHOOSE THE ACTIVE GPU
+//   should be moved elsewhere!
 void select_working_gpu_homemade(int dev_index){
   acc_device_t my_device_type;
   my_device_type = acc_device_nvidia;
@@ -63,6 +70,7 @@ void select_working_gpu_homemade(int dev_index){
   printf("Selected GPU number: %d \n",dev_index);
 }
 
+// mat3 = mat1 * mat2 
 static inline void    mat1_times_mat2_into_mat3_absent_stag_phases( const __restrict su3_soa * const mat1,
 								  const int idx_mat1,
 								  const __restrict su3_soa * const mat2,
@@ -100,6 +108,7 @@ static inline void    mat1_times_mat2_into_mat3_absent_stag_phases( const __rest
   mat3->r1.c2[idx_mat3] = mat1_10 * mat2_02 + mat1_11 * mat2_12 + mat1_12 * mat2_22 ;
 }
 
+// mat1 = mat1 * hermitian_conjucate(mat2)
 static inline void    mat1_times_conj_mat2_into_mat1_absent_stag_phases( __restrict su3_soa * const mat1,
 								       const int idx_mat1,
 								       const __restrict su3_soa * const mat2,
@@ -138,6 +147,7 @@ static inline void    mat1_times_conj_mat2_into_mat1_absent_stag_phases( __restr
 }
 
 // Routine for the computation of the 3 matrices which contributes to the right part of the staple
+// mat4 = mat1 * hermitian_conjucate(mat2)* hermitian_conjucate(mat3)
 static inline void    mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases( const __restrict su3_soa * const matnu1,
 											  const int idx_mat_nu1,
 											  const __restrict su3_soa * const matmu2,
@@ -216,6 +226,7 @@ static inline void    mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_sta
 }
 
 // Routine for the computation of the 3 matrices which contributes to the left part of the staple
+// mat4 = hermitian_conjucate(mat1)* hermitian_conjucate(mat2) * mat3
 static inline void    conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases( const __restrict su3_soa * const matnu1,
 											  const int idx_mat_nu1,
 											  const __restrict su3_soa * const matmu2,
@@ -299,7 +310,7 @@ static inline void    conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag
 }
 
 
-
+// mat1 = mat1 * integer factor
 static inline void   mat1_times_int_factor( __restrict su3_soa * const mat1,
 					   const int idx_mat1,
 					   int factor){
@@ -343,6 +354,7 @@ static inline void set_traces_to_value( dcomplex_soa * const tr_local_plaqs,
 
 }
 
+// multiply the whole configuration for the staggered phases field
 void mult_conf_times_stag_phases( __restrict su3_soa * const u){
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u)
@@ -398,7 +410,9 @@ void mult_conf_times_stag_phases( __restrict su3_soa * const u){
 
 }
 
-
+// routine for the computation of the average of the plaquettes computed on the plane mu-nu
+// 1) all the plaquettes on the plane mu-nu are computed and saved locally
+// 2) finally the reduction of the traces is performed
 double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa * const u,
 							    __restrict su3_soa * const loc_plaq,
 							    dcomplex_soa * const tr_local_plaqs,
