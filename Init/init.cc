@@ -9,6 +9,7 @@
 #include "../Su3/su3.cc"
 #include "../Fermions/fermions.cc"
 #include "../Conf/conf.cc"
+#include "../Staples/staples.cc"
 #include "../Rand/random.cc"
 #include "../Geometry/geometry.cc"
 #include "../Include/global_var.cc"
@@ -35,6 +36,9 @@ int init(int startMode = 1)
      // allocate gauge configuration
      gauge_conf=new Conf(startMode);
      cerr << " Random number inside init and after gauge conf generation :    " << casuale() << endl;
+
+     // allocate staples
+     gauge_staples=new Staples();
 
      // allocate auxiliary global fermion 
      loc_r=new Fermion;
@@ -86,9 +90,25 @@ void end(void)
   delete [] d_vector1;
   delete [] d_vector2;
 
+  // clear auxiliary global fermions
+  delete loc_r;
+  delete loc_h;
+  delete loc_s;
+  delete loc_p;
+
+  // clear fermions
+  delete fermion_phi;
+  delete fermion_chi;
+
+  // clear shifted fermions
+  delete p_shiftferm;
+  delete fermion_shiftmulti;
+
 
    // clear gauge configuration
   delete gauge_conf;
+  // clear staples
+  delete gauge_staples;
 
   // clear geometry variables
   end_geo();

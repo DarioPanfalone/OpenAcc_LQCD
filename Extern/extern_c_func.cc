@@ -30,5 +30,7 @@ extern "C" {
   void  calc_plaquette_openacc(const su3COM_soa *conf);
 }
 extern "C" {
-  void  calc_staples_openacc(const su3COM_soa *conf);
+  //  void  calc_staples_openacc(const su3COM_soa *conf);
+  void  calc_staples_openacc(const su3COM_soa *conf,su3COM_soa *COM_staples);
 }
+

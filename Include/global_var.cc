@@ -48,6 +48,11 @@ long int **nnm;
 class Conf;
 Conf *gauge_conf;
 
+// staples
+class Staples;
+Staples *gauge_staples;
+
+
 // vectors for global sum (also used in inverters)
 double *d_vector1;
 double *d_vector2;

@@ -1,4 +1,3 @@
-
 #ifndef SU3_UTILITIES_C_
 #define SU3_UTILITIES_C_
 
@@ -662,7 +661,7 @@ void  calc_plaquette_openacc(const su3COM_soa *conf){
 
 //QUESTA ROUTINE NON FUNZIONA ANCORA CORRETTAMENTE ==> non da i risultati corretti
 // TUTTAVIA COMPILANDO CON O SENZA I PRGMA OPENACC I RISULTATI SONO UGUALI 
-void  calc_staples_openacc(const su3COM_soa *conf){
+void  calc_staples_openacc(const su3COM_soa *conf,su3COM_soa *COM_staples){
   su3_soa  * conf_acc, * local_staples;
   posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));      // --> 4*size
   posix_memalign((void **)&local_staples, ALIGN, 8*sizeof(su3_soa)); // --> 4*size
@@ -696,7 +695,8 @@ void  calc_staples_openacc(const su3COM_soa *conf){
   }
   gettimeofday ( &t3, NULL );
 
-  printf("Staple = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c0[0]) , cimag(conf_acc[0].r0.c0[0]));
+  printf("Staple00 = ( %.18lf , %.18lf )\n", creal(local_staples[0].r0.c0[0]) , cimag(local_staples[0].r0.c0[0]));
+  printf("Staple33 = ( %.18lf , %.18lf )\n", creal(local_staples[0].r2.c2[0]) , cimag(local_staples[0].r2.c2[0]));
 
   double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
   double dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
@@ -709,8 +709,12 @@ void  calc_staples_openacc(const su3COM_soa *conf){
   printf("                                                PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
 
 
+
+  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&local_staples[dir],&COM_staples[dir]);
+
   free(conf_acc);
   free(local_staples);
+
   }
 
 

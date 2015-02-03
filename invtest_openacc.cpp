@@ -24,7 +24,7 @@ using namespace std;
 
 
 
-int main(){
+int main(int argc,char **argv){
 
   cout.precision(18);
   cerr.precision(18);
@@ -118,10 +118,10 @@ int main(){
 
 
    su3COM_soa conf_soaCOM[8];
+   su3COM_soa stap_soaCOM[8];
    for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
 
    calc_plaquette_openacc(conf_soaCOM);
-   calc_staples_openacc(conf_soaCOM);
 
    double ps,pt;
 
@@ -132,6 +132,53 @@ int main(){
 
    cout << "Plaquette CPU    =  " << (ps+pt)*0.5 << endl;
 
+
+
+   time_start=clock();
+   calc_staples(0);
+   time_finish=clock();
+   cout << "Time for Staples measurements on the CPU= " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
+
+
+   calc_staples_openacc(conf_soaCOM,stap_soaCOM);
+   for(int index=0;index<8;index++)   gauge_conf->conf_soaCOM_to_aos(&stap_soaCOM[index],index); //metto dentro alla conf le staples prodotte  dal codice openacc
+
+
+   //CALCOLO LA DIFFERENZA IN NORMA2 TRA LE STAPLE CPU E QUELLE OPENACC
+   int pos_h;
+   Su3 aux_h;
+   int mu_h;
+   int x_h,y_h,z_h,t_h;
+
+   //   for(int id_h=0; id_h<size; id_h++)
+   int partial_sum=size;
+   double normetta;
+   for(int id_h=0; id_h<partial_sum; id_h++)
+     {
+       coord(id_h,x_h,y_h,z_h,t_h);
+       d_vector1[id_h]=0.0;
+       for(mu_h=0; mu_h<4; mu_h++)
+	 {
+	   pos_h=id_h+mu_h*size;
+	   aux_h=(gauge_staples->staples[pos_h]);
+	   if(mu_h==1)  aux_h*=pow(-1.0,x_h);
+	   if(mu_h==2)  aux_h*=pow(-1.0,x_h+y_h);
+	   if(mu_h==3){
+	     aux_h*=pow(-1.0,x_h+y_h+z_h);
+	     if(t_h==31) aux_h *= -1;
+	   }
+
+	   aux_h+=(gauge_conf->u_work[pos_h]);
+	   normetta=(double)aux_h.l2norm2();
+	   d_vector1[id_h]+=normetta;
+	 }
+     }
+
+
+   //   global_sum(d_vector1,size);
+   global_sum(d_vector1,partial_sum);
+   double   diff1_h=sqrt(d_vector1[0])*sqrt(0.25/9.0/((double)(partial_sum)));  // 4 directions, 8 components
+   cout << "Delta Staple / d.o.f. = " << diff1_h<<"\n";
 
 
 
