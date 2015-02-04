@@ -43,16 +43,53 @@ int main(int argc,char **argv){
    Fermion* tempFermion2_openacc_full = new Fermion();// result fermion for openacc_full
    Fermion* tempFermion3 = new Fermion();// Trial solution
 
+   //   tempFermion1->Growing();
+   //   tempFermion3->Growing();
    tempFermion1->gauss();
    tempFermion3->gauss();
       //tempFermion1->z2noise();
       //tempFermion3->z2noise();
    cout << "Initialized Random Fermion Vectors.\n";
-   //   tempFermion1->saveToFile("fer_32.fer");
+   tempFermion1->saveToFile("fergrowing.fer");
 
 
 
 
+   //////////////////////////////////////////////////////////////////////////////////////////////////
+   /////////////////////// CONFRONTO APPLICAZIONE MATRICE    ////////////////////////////////////////
+   //////////////////////////////////////////////////////////////////////////////////////////////////
+   /*
+   vec3COM_soa soa1COM_app;
+   vec3COM_soa soa2COM_app;
+   su3COM_soa conf_soaCOM[8];
+
+   tempFermion1->ferm_aos_to_soaCOM(&soa1COM_app);
+   for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
+
+   apply_Doe_openacc(conf_soaCOM,&soa1COM_app,&soa2COM_app);
+   //   apply_Deo_openacc(conf_soaCOM,&soa1COM,&soa2COM);
+
+   tempFermion3->ferm_soaCOM_to_aos(&soa2COM_app);
+
+   tempFermion3->saveToFile("pippo3.fer");
+   //   gauge_conf->saveToFile("TestConf_biconv.cnf");
+
+
+
+   cout << "Saving fermion in StartFermion.fer\n";
+   tempFermion1->saveToFile("StartFermion.fer");
+ 
+   //   Fermion* tempFermion2 = new Fermion();
+
+   cout << "Multiplying by Doe.\n";
+   Doe(tempFermion3,tempFermion1);
+   //   cout << "Multiplying by Deo.\n";
+   //   Deo(tempFermion1,tempFermion2);
+ 
+   cout << "Saving fermion in EndFermionCPU.fer\n";
+   tempFermion3->saveToFile("EndFermionCPU.fer");
+
+   */
    //////////////////////////////////////////////////////////////////////////////////////////////////
    /////////////////////// CONFRONTO INVERTITORE SINGOLO     ////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -181,8 +218,6 @@ int main(int argc,char **argv){
    cout << "Delta Staple / d.o.f. = " << diff1_h<<"\n";
 
 
-
-
    //////////////////////////////////////////////////////////////////////////////////////////////////
    /////////////////////// CONFRONTO INVERTITORE MULTISHIFT    //////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,12 +256,8 @@ int main(int argc,char **argv){
    COM_MultiFermion    COMMON_multi_out;
    COM_ShiftMultiFermion   COMMON_shiftmulti;
 
-
    MultiFermion *fermion_app;
    fermion_app = new MultiFermion;
-
-
-
 
    cout << "Chosen directions\n";
 

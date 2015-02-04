@@ -34,6 +34,7 @@
 // used in the dynamical allocation of structures
 #define ALIGN 128
 
+#define ONE_BY_THREE 0.333333333333333333
 
 static inline int snum_acc(int x, int y, int z, int t) {
   int ris;
@@ -83,6 +84,15 @@ typedef struct ACC_MultiFermion_t{
 typedef struct ACC_ShiftMultiFermion_t{
   vec3_soa shiftmulti[max_approx_order][no_ps];
 } ACC_ShiftMultiFermion;
+
+
+typedef struct tamat_soa_t {
+  d_complex c01[sizeh];
+  d_complex c02[sizeh];
+  d_complex c12[sizeh];
+  double rc00[sizeh];
+  double rc11[sizeh];
+} tamat_soa;
 
 
 

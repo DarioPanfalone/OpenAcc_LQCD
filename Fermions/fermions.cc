@@ -30,6 +30,7 @@ public:
   void gauss(int);
   void z2noise(void);
   void allOnes(void);
+  void Growing(void);
   void allOnesI(void);
   void all123(void);
   double l2norm2(void);
@@ -81,6 +82,14 @@ void Fermion::gauss(int d)
     fermion[i].gauss(d);
     }
  }
+
+void Fermion::Growing(void)
+{
+  for(long int i=0; i<sizeh; i++)
+    {
+      fermion[i].grow_vec3(i*6.0);
+    }
+}
 
 
 // Initialize with z2 noise

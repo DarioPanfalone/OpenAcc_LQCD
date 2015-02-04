@@ -46,7 +46,9 @@ public:
  REAL l2norm2(void);
 
  void gauss(void);
- void gauss(int);
+  void gauss(int);
+  void grow_vec3(double site);
+
  void z2noise(void);
  void ones(void);
  void onesI(void);
@@ -331,6 +333,33 @@ void Vec3::gauss(void)
   comp[0]=complex_gauss();
   comp[1]=complex_gauss();
   comp[2]=complex_gauss();
+  }
+
+// Complex gaussian vector
+void Vec3::grow_vec3(double site)
+  {
+    int v2_sit = (int) site/6.0;
+    int sit = (int) site;
+    int sit1=sit+1;
+    int sit2=sit+2;
+    int sit3=sit+3;
+    int sit4=sit+4;
+    int sit5=sit+5;
+
+    sit = sit%1000;
+    sit1 = sit1%1000;
+    sit2 = sit2%1000;
+    sit3 = sit3%1000;
+    sit4 = sit4%1000;
+    sit5 = sit5%1000;
+
+    comp[0]=complex<REAL>(sit,sit1);
+    comp[1]=complex<REAL>(sit2,sit3);
+    comp[2]=complex<REAL>(sit4,sit5);
+
+    comp[0]=complex<REAL>(v2_sit,0.0);
+    comp[1]=complex<REAL>(v2_sit,0.0);
+    comp[2]=complex<REAL>(v2_sit,0.0);
   }
 
 void Vec3::gauss(int d)
