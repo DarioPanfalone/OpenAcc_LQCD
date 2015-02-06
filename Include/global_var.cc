@@ -14,6 +14,10 @@ int use_stored=1;  // when =0 stored eigenvalues are used
 // staggered phases , allocated and set in Geometry/geometry.cc :: init_geo()
 int *eta;
 
+// momenta derivative times complex_I
+class Ipdot;
+Ipdot *gauge_ipdot;
+
 
 // normalized coefficients for rational approximations
 class RationalApprox;

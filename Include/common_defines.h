@@ -38,6 +38,14 @@ typedef struct vec3COM_soa_t {
   COM c2[sizehh];
 } vec3COM_soa;
 
+typedef struct tamatCOM_soa_t {
+  COM c01[sizehh];
+  COM c02[sizehh];
+  COM c12[sizehh];
+  double rc00[sizehh];
+  double rc11[sizehh];
+} tamatCOM_soa;
+
 typedef struct vec3COM_t {
   COM c0;
   COM c1;

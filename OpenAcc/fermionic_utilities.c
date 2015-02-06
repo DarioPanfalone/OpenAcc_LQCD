@@ -348,6 +348,16 @@ void extract_from_shiftmulti_and_assign_to_fermion( const  __restrict ACC_ShiftM
   }
 }
 
+void extract_from_shiftmulti_multiply_for_factor_and_assign_to_fermion( const  __restrict ACC_ShiftMultiFermion * const in, const int ia, const int ips, double factor,  __restrict vec3_soa * const out){
+#pragma acc kernels present(in) present(out)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    out->c0[ih]=(in->shiftmulti[ia][ips].c0[ih])*factor;
+    out->c1[ih]=(in->shiftmulti[ia][ips].c1[ih])*factor;
+    out->c2[ih]=(in->shiftmulti[ia][ips].c2[ih])*factor;
+  }
+}
+
 void combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1( __restrict vec3_soa * const in1,double fact, const __restrict vec3_soa * const in2, const __restrict ACC_MultiFermion * const in3,int ips){
 #pragma acc kernels present(in1) present(in2) present(in3)
 #pragma acc loop independent

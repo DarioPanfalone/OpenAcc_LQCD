@@ -2,6 +2,7 @@
 #define INIT_CC_
 
 #include <iostream>
+
 #include "../Include/global_var.cc"
 #include "../Include/parameters.cc"
 #include "../Geometry/geometry.cc"
@@ -9,11 +10,22 @@
 #include "../Su3/su3.cc"
 #include "../Fermions/fermions.cc"
 #include "../Conf/conf.cc"
+#include "../FermionMatrix/fermionmatrix.cc"  
+#include "../Extern/extern_c_func.cc" 
+#include "../Findminmax/findminmax.cc"
+#include "../SimplifiedRationalApprox/rationalapprox.cc"      
+#include "../SimplifiedRationalApprox/rationalapprox_calc.cc" 
 #include "../Staples/staples.cc"
 #include "../Rand/random.cc"
 #include "../Geometry/geometry.cc"
 #include "../Include/global_var.cc"
 #include "../Exception/exception.cc"
+#include "../Ipdot/ipdot.cc"
+#include "../FermionForce/fermionforce.cc"
+
+     
+#include "../Inverter/inverter.cc"    
+#include "../OpenAcc/inverter_simple.cc"  
 
 using namespace std;
 
@@ -39,6 +51,8 @@ int init(int startMode = 1)
 
      // allocate staples
      gauge_staples=new Staples();
+     // allocate ipdot
+     gauge_ipdot=new Ipdot();
 
      // allocate auxiliary global fermion 
      loc_r=new Fermion;
@@ -104,6 +118,8 @@ void end(void)
   delete p_shiftferm;
   delete fermion_shiftmulti;
 
+  // clear ipdot 
+  delete gauge_ipdot;
 
    // clear gauge configuration
   delete gauge_conf;
