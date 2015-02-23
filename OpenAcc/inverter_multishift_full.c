@@ -223,7 +223,8 @@ void ker_openacc_recombine_shiftmulti_to_multi( const __restrict ACC_ShiftMultiF
     }
   }
 }
-/*
+
+
 static inline vec1_directprod_conj_vec2_into_tamat(const  __restrict vec3_soa  * const fer_l,
 						   int idl,
 						   const  __restrict vec3_soa  * const fer_r,
@@ -263,7 +264,7 @@ void direct_product_of_fermions_into_tamat( const  __restrict vec3_soa  * const 
 
   //LOOP SUI SITI PARI
   int xh, y, z, t;
-#pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc kernels present(loc_s) present(loc_h) present(ipdot) present(approx)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -276,7 +277,7 @@ void direct_product_of_fermions_into_tamat( const  __restrict vec3_soa  * const 
           int parity;
 	  int dir_mu;
 	  int mu;
-	  x = 2*hx + ((y+z+t) & 0x1);
+	  x = 2*xh + ((y+z+t) & 0x1);
           idxh = snum_acc(x,y,z,t);  // r
 	  //  parity = (x+y+z+t) % 2;
 	  parity = 0; // la fisso cosi' perche' sto prendendo il sito pari
@@ -292,7 +293,7 @@ void direct_product_of_fermions_into_tamat( const  __restrict vec3_soa  * const 
   }  // t
 
   //LOOP SUI SITI DISPARI
-#pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc kernels present(loc_s) present(loc_h) present(ipdot) present(approx)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -305,7 +306,7 @@ void direct_product_of_fermions_into_tamat( const  __restrict vec3_soa  * const 
           int parity;
 	  int dir_mu;
 	  int mu;
-	  x = 2*hx + ((y+z+t+1) & 0x1);
+	  x = 2*xh + ((y+z+t+1) & 0x1);
           idxh = snum_acc(x,y,z,t);  // r
 	  //  parity = (x+y+z+t) % 2;
 	  parity = 1; // la fisso cosi' perche' sto prendendo il sito dispari
@@ -347,7 +348,7 @@ void ker_openacc_compute_fermion_force( const __restrict su3_soa * const u,
     }
   }
 }
-*/
+
 
 void multips_invert_openacc_full(const su3COM_soa  *conf,COM_ShiftMultiFermion *out, COM_MultiFermion *in, double res, COM_RationalApprox *approx){
   
@@ -563,11 +564,11 @@ void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM
   {
   gettimeofday ( &t1, NULL );
 
-  ///////////  ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_in_acc,res,approx,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+  ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_in_acc,res,approx,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
 
    // I think that for the force reconstruction this is not necessary
   //  ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_in_acc,ferm_out_acc,approx); 
-  ////////////////  ker_openacc_compute_fermion_force(conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,ipdot_acc,approx);
+   ker_openacc_compute_fermion_force(conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,ipdot_acc,approx);
 
   gettimeofday ( &t2, NULL );
 
