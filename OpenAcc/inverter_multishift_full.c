@@ -223,6 +223,7 @@ void ker_openacc_recombine_shiftmulti_to_multi( const __restrict ACC_ShiftMultiF
     }
   }
 }
+/*
 static inline vec1_directprod_conj_vec2_into_tamat(const  __restrict vec3_soa  * const fer_l,
 						   int idl,
 						   const  __restrict vec3_soa  * const fer_r,
@@ -346,6 +347,7 @@ void ker_openacc_compute_fermion_force( const __restrict su3_soa * const u,
     }
   }
 }
+*/
 
 void multips_invert_openacc_full(const su3COM_soa  *conf,COM_ShiftMultiFermion *out, COM_MultiFermion *in, double res, COM_RationalApprox *approx){
   
@@ -561,11 +563,11 @@ void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM
   {
   gettimeofday ( &t1, NULL );
 
-  ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_in_acc,res,approx,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+  ///////////  ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_in_acc,res,approx,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
 
    // I think that for the force reconstruction this is not necessary
   //  ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_in_acc,ferm_out_acc,approx); 
-  ker_openacc_compute_fermion_force(conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,ipdot_acc,approx);
+  ////////////////  ker_openacc_compute_fermion_force(conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,ipdot_acc,approx);
 
   gettimeofday ( &t2, NULL );
 
