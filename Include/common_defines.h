@@ -20,6 +20,7 @@
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
 
 #define mass 0.32
+#define beta 5.55
 
 #define therm_updates 0
 #define max_cg 100000

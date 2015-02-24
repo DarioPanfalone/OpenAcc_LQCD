@@ -34,3 +34,12 @@ extern "C" {
   void  calc_staples_openacc(const su3COM_soa *conf,su3COM_soa *COM_staples);
 }
 
+extern "C" {
+  void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM_MultiFermion *in, double res, const COM_RationalApprox *approx);
+}
+
+extern "C" {
+  void  calc_ipdot_gauge_openacc(const su3COM_soa *conf);
+}
+
+

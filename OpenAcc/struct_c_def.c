@@ -28,12 +28,11 @@
 #define no_links (4 * vol4)
 
 #define mass2 mass*mass
-
-
 // used in the dynamical allocation of structures
 #define ALIGN 128
 
-#define ONE_BY_THREE 0.333333333333333333
+#define ONE_BY_THREE 0.33333333333333333333333
+#define beta_by_three beta*ONE_BY_THREE
 
 static inline int snum_acc(int x, int y, int z, int t) {
   int ris;

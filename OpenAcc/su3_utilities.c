@@ -856,7 +856,7 @@ static inline void tamat1_plus_tamat2_times_factor_into_tamat1(__restrict tamat_
 void mom_sum_mult( __restrict tamat_soa * const mom,
 		   const __restrict tamat_soa * const ipdot,
 		   const double factor){
-  // !!!!!!!!!!!!!!!  factor  must be equal to   -beta/3.0*timestep !!!!!!!!!!!!!!!!!!!!11
+  // !!!!!!!!!!!!!!!  factor  must be equal to   -beta/3.0*timestep !!!!!!!!!!!!!!!!!!!!
   int x, y, z, t;
 #pragma acc kernels present(mom) present(ipdot)
 #pragma acc loop independent gang(nt)
@@ -1035,7 +1035,7 @@ void  calc_ipdot_gauge_openacc(const su3COM_soa *conf){
 
   int looping_directions[4][3] = {{1,2,3},{0,2,3},{0,1,3},{0,1,2}};
 
-#pragma acc data copy(conf_acc[0:8]) create(local_staples[0:8]) create(ipdot[0:8])
+#pragma acc data copyin(conf_acc[0:8]) create(local_staples[0:8]) copyout(ipdot[0:8])
   {
     gettimeofday ( &t1, NULL );
 
@@ -1054,8 +1054,14 @@ void  calc_ipdot_gauge_openacc(const su3COM_soa *conf){
   }
   gettimeofday ( &t3, NULL );
 
-  printf("Staple00 = ( %.18lf , %.18lf )\n", creal(local_staples[0].r0.c0[0]) , cimag(local_staples[0].r0.c0[0]));
-  printf("Staple33 = ( %.18lf , %.18lf )\n", creal(local_staples[0].r2.c2[0]) , cimag(local_staples[0].r2.c2[0]));
+  printf("Ipdot 00 = ( %.18lf )\n", ipdot[0].rc00[0]);
+  printf("Ipdot 11 = ( %.18lf )\n", ipdot[0].rc11[0]);
+  printf("Ipdot 01 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c01[0]) , cimag(ipdot[0].c01[0]));
+  printf("Ipdot 02 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c02[0]) , cimag(ipdot[0].c02[0]));
+  printf("Ipdot 12 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c12[0]) , cimag(ipdot[0].c12[0]));
+
+
+
 
   double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
   double dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);

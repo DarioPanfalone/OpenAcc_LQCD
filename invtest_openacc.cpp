@@ -179,8 +179,8 @@ int main(int argc,char **argv){
    cout << "Time for Staples measurements on the CPU= " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 
 
-   calc_staples_openacc(conf_soaCOM,stap_soaCOM);
-   for(int index=0;index<8;index++)   gauge_conf->conf_soaCOM_to_aos(&stap_soaCOM[index],index); //metto dentro alla conf le staples prodotte  dal codice openacc
+   //   calc_staples_openacc(conf_soaCOM,stap_soaCOM);
+   //   for(int index=0;index<8;index++)   gauge_conf->conf_soaCOM_to_aos(&stap_soaCOM[index],index); //metto dentro alla conf le staples prodotte  dal codice openacc
 
 
    //CALCOLO LA DIFFERENZA IN NORMA2 TRA LE STAPLE CPU E QUELLE OPENACC
@@ -218,6 +218,29 @@ int main(int argc,char **argv){
    global_sum(d_vector1,partial_sum);
    double   diff1_h=sqrt(d_vector1[0])*sqrt(0.25/9.0/((double)(partial_sum)));  // 4 directions, 8 components
    cout << "Delta Staple / d.o.f. = " << diff1_h<<"\n";
+
+
+
+
+   //////////////////////////////////////////////////////////////////////////////////////////////////
+   /////////////////////// CONFRONTO FORZA DI GAUGE            //////////////////////////////////////
+   //////////////////////////////////////////////////////////////////////////////////////////////////
+   //   create_momenta();
+   calc_ipdot_gauge();
+   cout << ">>>>>> Ipdot[0] <<<<<<" << endl;
+   cout << gauge_ipdot->ipdot[0] << endl;
+   cout << ">>>>>> Staple[0] <<<<<<" << endl;
+   cout << gauge_staples->staples[0] << endl;
+   cout << ">>>>>> Conf[0] <<<<<<" << endl;
+   cout << gauge_conf->u_work[0] << endl;
+   calc_ipdot_gauge_openacc(conf_soaCOM);
+
+
+
+
+
+
+
 
 
    //////////////////////////////////////////////////////////////////////////////////////////////////

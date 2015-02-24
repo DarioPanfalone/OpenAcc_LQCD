@@ -7,7 +7,8 @@
 
 // run parameters
 const int no_flavours=2; // number of quark species
-const REAL beta=5.55;
+//const REAL beta=5.55;
+//const REAL beta=3.00; // in this way beta_by_three = 1.0
 
 
 
