@@ -95,6 +95,34 @@ typedef struct tamat_soa_t {
 
 
 
+// funzioni di conversione:    tamat_soa   ==>   tamatCOM_soa 
+void convert_tamat_soa_to_tamatCOM_soa(tamat_soa *in, tamatCOM_soa *out){
+  int i;
+  for(i =0 ; i < sizeh ; i++){
+    out->c01[i].Re = creal(in->c01[i]);
+    out->c02[i].Re = creal(in->c02[i]);
+    out->c12[i].Re = creal(in->c12[i]);
+
+    out->c01[i].Im = cimag(in->c01[i]);
+    out->c02[i].Im = cimag(in->c02[i]);
+    out->c12[i].Im = cimag(in->c12[i]);
+
+    out->rc00[i] = in->rc00[i];
+    out->rc11[i] = in->rc11[i];
+  }
+}
+
+// funzioni di conversione:    tamatCOM_soa   ==>   tamat_soa 
+void convert_tamatCOM_soa_to_tamat_soa(tamatCOM_soa *in, tamat_soa *out){
+  int i;
+  for( i =0 ; i < sizeh ; i++){
+    out->c01[i] = in->c01[i].Re + in->c01[i].Im * 1.0I;
+    out->c02[i] = in->c02[i].Re + in->c02[i].Im * 1.0I;
+    out->c12[i] = in->c12[i].Re + in->c12[i].Im * 1.0I;
+    out->rc00[i] = in->rc00[i];
+    out->rc11[i] = in->rc11[i];
+  }
+}
 // funzioni di conversione:    su3_soa   ==>   su3COM_soa 
 void convert_su3_soa_to_su3COM_soa(su3_soa *in, su3COM_soa *out){
   int i;

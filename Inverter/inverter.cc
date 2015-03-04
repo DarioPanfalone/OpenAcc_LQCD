@@ -272,7 +272,6 @@ void multips_shifted_invert (ShiftMultiFermion *out, MultiFermion *in, REAL res,
           }
 	global_sum(d_vector1,sizeh);
 	alpha=d_vector1[0];
-
 	omega_save=omega;   // omega_save=omega_(j-1)                                     
 	omega=-delta/alpha;  // omega = (r_j,r_j)/(p_j, Ap_j)   
 
@@ -339,7 +338,7 @@ void multips_shifted_invert (ShiftMultiFermion *out, MultiFermion *in, REAL res,
 	      }
           }
 	delta=lambda;
-	cout << pseudofermion << "    " << cg <<  "    " <<  sqrt(lambda) << "    " << res << endl;
+	//	cout << pseudofermion << "    " << cg <<  "    " <<  sqrt(lambda) << "    " << res << endl;
 
       } while(sqrt(lambda)>res && cg<max_cg); // end of cg iterations                   
 

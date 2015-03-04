@@ -241,10 +241,16 @@ void RationalApprox::md_inv_approx_coeff(void)
  int i;
  REAL min, max, epsilon;
 
+ REAL *minmax;
+ minmax = new REAL [2];
  // normalized coefficients
  *this=*md_inv_approx_norm_coeff;
 
- findminmax(min, max);
+ // findminmax(min, max);
+ findminmax_con_openacc(minmax);
+ min = minmax[0];
+ max = minmax[1];
+
 
  min*=0.95;
  max*=1.05;
@@ -284,11 +290,16 @@ void RationalApprox::last_inv_approx_coeff(void)
  #endif
  int i;
  REAL min, max, epsilon;
+ REAL *minmax;
+ minmax = new REAL [2];
 
  // normalized coefficients
  *this=*last_inv_approx_norm_coeff;
 
- findminmax(min, max);
+ // findminmax(min, max);
+ findminmax_con_openacc(minmax);
+ min = minmax[0];
+ max = minmax[1];
 
  min*=0.95;
  max*=1.05;

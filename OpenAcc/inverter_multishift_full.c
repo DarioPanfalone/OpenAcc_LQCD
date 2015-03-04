@@ -225,38 +225,125 @@ void ker_openacc_recombine_shiftmulti_to_multi( const __restrict ACC_ShiftMultiF
 }
 
 
-static inline vec1_directprod_conj_vec2_into_tamat(const  __restrict vec3_soa  * const fer_l,
-						   int idl,
-						   const  __restrict vec3_soa  * const fer_r,
-						   int idr,
-						   __restrict tamat_soa * const ipdot,
-						   int idipdot,
-						   double factor){
+static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * const aux_u,
+							int idxh,
+							const  __restrict vec3_soa  * const fer_l,
+							int idl,
+							const  __restrict vec3_soa  * const fer_r,
+							int idr,
+							double factor){
   // forse si possono risparmiare un po di conti andando a prendere le sole parti reale e immaginarie 
   //  e scrivendo i prodotti in modo molto piu' sbrodolato
   // in particolare per gli elementi lungo la diagonale
-  d_complex r0=conj(fer_r->c0[idr]);
-  d_complex r1=conj(fer_r->c1[idr]);
-  d_complex r2=conj(fer_r->c2[idr]);
+  d_complex r0 = factor * conj(fer_r->c0[idr]);
+  d_complex r1 = factor * conj(fer_r->c1[idr]);
+  d_complex r2 = factor * conj(fer_r->c2[idr]);
+  d_complex l0 = fer_l->c0[idl];
+  d_complex l1 = fer_l->c1[idl];
+  d_complex l2 = fer_l->c2[idl];
 
-  ipdot->c01[idipdot]  = (fer_l->c0[idl]*r1) - conj(fer_l->c1[idl]*r0);
-  ipdot->c02[idipdot]  = (fer_l->c0[idl]*r2) - conj(fer_l->c2[idl]*r0);
-  ipdot->c12[idipdot]  = (fer_l->c1[idl]*r2) - conj(fer_l->c2[idl]*r1);
-  double a00=cimag(fer_l->c0[idl])*creal(fer_r->c0[idl])-creal(fer_l->c0[idl])*cimag(fer_r->c0[idl]);
-  double a11=cimag(fer_l->c1[idl])*creal(fer_r->c1[idl])-creal(fer_l->c1[idl])*cimag(fer_r->c1[idl]);
-  double a22=cimag(fer_l->c2[idl])*creal(fer_r->c2[idl])-creal(fer_l->c2[idl])*cimag(fer_r->c2[idl]);
-  ipdot->rc00[idipdot] = a00-ONE_BY_THREE*(a00+a11+a22);
-  ipdot->rc11[idipdot] = a11-ONE_BY_THREE*(a00+a11+a22);
+  aux_u->r0.c0[idxh] += l0*r0;
+  aux_u->r0.c1[idxh] += l0*r1;
+  aux_u->r0.c2[idxh] += l0*r2;
+  aux_u->r1.c0[idxh] += l1*r0;
+  aux_u->r1.c1[idxh] += l1*r1;
+  aux_u->r1.c2[idxh] += l1*r2;
+  aux_u->r2.c0[idxh] += l2*r0;
+  aux_u->r2.c1[idxh] += l2*r1;
+  aux_u->r2.c2[idxh] += l2*r2;
 
 }
 
-void direct_product_of_fermions_into_tamat( const  __restrict vec3_soa  * const loc_s,
-					    const  __restrict vec3_soa  * const loc_h,
-					    __restrict tamat_soa * const ipdot,
-					    const COM_RationalApprox * const approx,
-					    int iter
-					    ){
 
+static inline  mat1_times_auxmat_into_tamat( const  __restrict su3_soa * const mat1,
+						 const  int idx,
+						 const  int eta,
+						 const  __restrict su3_soa * const auxmat,
+						 const  int idx_aux,
+						  __restrict tamat_soa * const ipdot,
+						 const  int idipdot){
+  d_complex mat1_00 = mat1->r0.c0[idx];
+  d_complex mat1_01 = mat1->r0.c1[idx];
+  d_complex mat1_02 = mat1->r0.c2[idx];
+  d_complex mat1_10 = mat1->r1.c0[idx];
+  d_complex mat1_11 = mat1->r1.c1[idx];
+  d_complex mat1_12 = mat1->r1.c2[idx];
+  //Compute 3rd matrix row from the first two
+  d_complex mat1_20 = conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
+  d_complex mat1_21 = conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
+  d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
+  //Multiply 3rd row by eta
+  mat1_20 = (mat1_20)*eta;
+  mat1_21 = (mat1_21)*eta;
+  mat1_22 = (mat1_22)*eta;
+  d_complex auxmat_00 = auxmat->r0.c0[idx_aux];
+  d_complex auxmat_01 = auxmat->r0.c1[idx_aux];
+  d_complex auxmat_02 = auxmat->r0.c2[idx_aux];
+  d_complex auxmat_10 = auxmat->r1.c0[idx_aux];
+  d_complex auxmat_11 = auxmat->r1.c1[idx_aux];
+  d_complex auxmat_12 = auxmat->r1.c2[idx_aux];
+  d_complex auxmat_20 = auxmat->r2.c0[idx_aux];
+  d_complex auxmat_21 = auxmat->r2.c1[idx_aux];
+  d_complex auxmat_22 = auxmat->r2.c2[idx_aux];
+
+  // product;
+  ///////////////////////////////////////////////////
+  ///// possibilita' numero 1 ///////////////////////
+  ///////////////////////////////////////////////////
+  // piu' variabili e piu' scritture, meno conti
+  d_complex a00 = mat1_00 * auxmat_00 + mat1_01 * auxmat_10 + mat1_02 * auxmat_20;
+  d_complex a01 = mat1_00 * auxmat_01 + mat1_01 * auxmat_11 + mat1_02 * auxmat_21;
+  d_complex a02 = mat1_00 * auxmat_02 + mat1_01 * auxmat_12 + mat1_02 * auxmat_22;
+  //  d_complex a10 = mat1_10 * auxmat_00 + mat1_11 * auxmat_10 + mat1_12 * mat1_20;
+  //  d_complex a11 = mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * mat1_21;
+  //  d_complex a12 = mat1_10 * auxmat_02 + mat1_11 * auxmat_12 + mat1_12 * mat1_22;
+  mat1_00 = mat1_10 * auxmat_00 + mat1_11 * auxmat_10 + mat1_12 * auxmat_20;
+  mat1_01 = mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * auxmat_21;
+  mat1_02 = mat1_10 * auxmat_02 + mat1_11 * auxmat_12 + mat1_12 * auxmat_22;
+  //  d_complex a20 = mat1_20 * auxmat_00 + mat1_21 * auxmat_10 + mat1_22 * mat1_20;
+  //  d_complex a21 = mat1_20 * auxmat_01 + mat1_21 * auxmat_11 + mat1_22 * mat1_21;
+  //  d_complex a22 = mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * mat1_22;
+  mat1_10 = mat1_20 * auxmat_00 + mat1_21 * auxmat_10 + mat1_22 * auxmat_20;
+  mat1_11 = mat1_20 * auxmat_01 + mat1_21 * auxmat_11 + mat1_22 * auxmat_21; 
+  mat1_12 = mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * auxmat_22;
+  ipdot->c01[idipdot]  += 0.5*((a01) - conj(mat1_00));
+  ipdot->c02[idipdot]  += 0.5*((a02) - conj(mat1_10));
+  ipdot->c12[idipdot]  += 0.5*((mat1_02) - conj(mat1_11));
+  ipdot->rc00[idipdot] += cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
+  ipdot->rc11[idipdot] += cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
+  ///////////////////////////////////////////////////
+  ///// fine possibilita' numero 1 //////////////////
+  ///////////////////////////////////////////////////
+
+  /*
+//////// ATTENZIONE CHE E' SBAGLIATA PERCHE NEI PRODOTTI IL TERZO AUXMAT E' IN REALTA MESSO A MAT1
+  ///////////////////////////////////////////////////
+  ///// possibilita' numero 2 ///////////////////////
+  ///////////////////////////////////////////////////
+  // meno variabili e meno scritture, piu' conti
+  ipdot->c01[idipdot] +=(mat1_00 * auxmat_01 + mat1_01 * auxmat_11 + mat1_02 * mat1_21)-conj(mat1_10 * auxmat_00 + mat1_11 * auxmat_10 + mat1_12 * mat1_20);
+  ipdot->c02[idipdot] +=(mat1_00 * auxmat_02 + mat1_01 * auxmat_12 + mat1_02 * mat1_22)-conj(mat1_20 * auxmat_00 + mat1_21 * auxmat_10 + mat1_22 * mat1_20);
+  ipdot->c12[idipdot] +=(mat1_10 * auxmat_02 + mat1_11 * auxmat_12 + mat1_12 * mat1_22)-conj(mat1_20 * auxmat_01 + mat1_21 * auxmat_11 + mat1_22 * mat1_21);
+  ipdot->rc00[idipdot]+=cimag(mat1_00 * auxmat_00 + mat1_01 * auxmat_10 + mat1_02 * mat1_20)-ONE_BY_THREE*(cimag(mat1_00 * auxmat_00 + mat1_01 * auxmat_10 + mat1_02 * mat1_20)+cimag(mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * mat1_21)+cimag(mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * mat1_22));
+  ipdot->rc11[idipdot] += cimag(mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * mat1_21)-ONE_BY_THREE*(cimag(mat1_00 * auxmat_00 + mat1_01 * auxmat_10 + mat1_02 * mat1_20)+cimag(mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * mat1_21)+cimag(mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * mat1_22));
+  ///////////////////////////////////////////////////
+  ///// fine possibilita' numero 2 //////////////////
+  ///////////////////////////////////////////////////
+  */
+
+
+
+
+
+}
+
+
+void direct_product_of_fermions_into_auxmat(const  __restrict vec3_soa  * const loc_s,
+					    const  __restrict vec3_soa  * const loc_h,
+					    __restrict su3_soa * const aux_u,
+					    const COM_RationalApprox * const approx,
+					    int iter){
+  
   //   ////////////////////////////////////////////////////////////////////////   //
   //    Riflettere se conviene tenere i loop sui siti pari e su quelli dispari    //
   //    separati come sono adesso o se invece conviene fare un unico kernel!!!    //
@@ -264,7 +351,7 @@ void direct_product_of_fermions_into_tamat( const  __restrict vec3_soa  * const 
 
   //LOOP SUI SITI PARI
   int xh, y, z, t;
-#pragma acc kernels present(loc_s) present(loc_h) present(ipdot) present(approx)
+#pragma acc kernels present(loc_s) present(loc_h)  present(approx) present(aux_u)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -281,19 +368,20 @@ void direct_product_of_fermions_into_tamat( const  __restrict vec3_soa  * const 
           idxh = snum_acc(x,y,z,t);  // r
 	  //  parity = (x+y+z+t) % 2;
 	  parity = 0; // la fisso cosi' perche' sto prendendo il sito pari
-#pragma acc loop independent
+
 	  for(mu=0;mu<4;mu++){
 	    idxpmu = nnp_openacc[idxh][mu][parity];// r+mu        
 	    dir_mu = 2*mu +  parity;
-	    vec1_directprod_conj_vec2_into_tamat(loc_h,idxpmu,loc_s,idxh,&ipdot[dir_mu],idxh,approx[0].COM_RA_a[iter]);
+	    vec1_directprod_conj_vec2_into_mat1(&aux_u[dir_mu],idxh,loc_h,idxpmu,loc_s,idxh,approx[0].COM_RA_a[iter]);
 	  }//mu
+
         }  // x     
       }  // y       
     }  // z         
   }  // t
 
   //LOOP SUI SITI DISPARI
-#pragma acc kernels present(loc_s) present(loc_h) present(ipdot) present(approx)
+#pragma acc kernels present(loc_s) present(loc_h)  present(approx) present(aux_u)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -314,17 +402,226 @@ void direct_product_of_fermions_into_tamat( const  __restrict vec3_soa  * const 
 	  for(mu=0;mu<4;mu++){
 	    idxpmu = nnp_openacc[idxh][mu][parity];// r+mu        
 	    dir_mu = 2*mu +  parity;
-	    vec1_directprod_conj_vec2_into_tamat(loc_s,idxpmu,loc_h,idxh,&ipdot[dir_mu],idxh,approx[0].COM_RA_a[iter]);
+	    vec1_directprod_conj_vec2_into_mat1(&aux_u[dir_mu],idxh,loc_s,idxpmu,loc_h,idxh,-approx[0].COM_RA_a[iter]);
 	  }//mu
         }  // x     
       }  // y       
     }  // z         
   }  // t
-
 }// closes routine     
+
+static inline void assign_zero_to_tamat_soa_component(__restrict tamat_soa * const matrix_comp,
+						      int idx){
+  matrix_comp->c01[idx]=0.0+I*0.0;
+  matrix_comp->c02[idx]=0.0+I*0.0;
+  matrix_comp->c12[idx]=0.0+I*0.0;
+  matrix_comp->rc00[idx]=0.0;
+  matrix_comp->rc11[idx]=0.0;
+}
+
+void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix){
+  int hx, y, z, t;
+  int mu;
+#pragma acc kernels present(matrix)
+#pragma acc loop independent gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent vector(DIM_BLOCK_X)
+	for(hx=0; hx < nxh; hx++) {
+	  int x,idxh;
+	  x = 2*hx + ((y+z+t) & 0x1);
+	  idxh = snum_acc(x,y,z,t);
+	  for(mu=0; mu<8; mu++) {
+	    assign_zero_to_su3_soa_component(&matrix[mu],idxh);
+	  }
+	}  // x
+      }  // y
+    }  // z
+  }  // t
+}
+
+
+/*
+// Questa routine fa tutto quello che dovrebbero fare 
+//    - multiply_conf_times_force_and_take_ta_even
+//    - multiply_conf_times_force_and_take_ta_odd
+// pero' NON COMPILA perche' l'istruzione "mat1_times_auxmat_into_tamat"
+// e' ripetuta troppe volte (8). Invece quando la ripeto solo (6) volte compila... mah!!
+
+// multiply the whole configuration for the staggered phases field
+void multiply_conf_times_force_and_take_ta(const __restrict su3_soa * const u,
+					   const __restrict su3_soa * const auxmat,
+					   __restrict tamat_soa * const ipdot){
+  int hx,y,z,t,idxh;
+#pragma acc kernels present(u) present(auxmat) present(ipdot)
+#pragma acc loop independent gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent vector(DIM_BLOCK_X)
+        for(hx=0; hx < nxh; hx++) {
+          int x,eta;
+
+          //even sites
+          x = 2*hx + ((y+z+t) & 0x1);
+          idxh = snum_acc(x,y,z,t);
+
+          // dir  0  =  x even   --> eta = 1 , no multiplication needed
+	  eta = 1;
+	  mat1_times_auxmat_into_tamat(&u[0],idxh,eta,&auxmat[0],idxh,&ipdot[0],idxh);
+
+          // dir  2  =  y even
+          eta = 1 - ( 2*(x & 0x1) );
+	  mat1_times_auxmat_into_tamat(&u[2],idxh,eta,&auxmat[2],idxh,&ipdot[2],idxh);
+
+          // dir  4  =  z even
+          eta = 1 - ( 2*((x+y) & 0x1) );
+	  mat1_times_auxmat_into_tamat(&u[4],idxh,eta,&auxmat[4],idxh,&ipdot[4],idxh);
+
+          // dir  6  =  t even
+          eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+          eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+	  mat1_times_auxmat_into_tamat(&u[6],idxh,eta,&auxmat[6],idxh,&ipdot[6],idxh);
+
+
+          //odd sites
+          x = 2*hx + ((y+z+t+1) & 0x1);
+          idxh = snum_acc(x,y,z,t);
+          // dir  1  =  x odd    --> eta = 1 , no multiplication needed
+	  eta = 1;
+	  mat1_times_auxmat_into_tamat(&u[1],idxh,eta,&auxmat[1],idxh,&ipdot[1],idxh);
+
+          // dir  3  =  y odd
+          eta = 1 - ( 2*(x & 0x1) );
+	  mat1_times_auxmat_into_tamat(&u[3],idxh,eta,&auxmat[3],idxh,&ipdot[3],idxh);
+
+          // dir  5  =  z odd
+	  eta = 1 - ( 2*((x+y) & 0x1) );
+	  mat1_times_auxmat_into_tamat(&u[5],idxh,eta,&auxmat[5],idxh,&ipdot[5],idxh);
+
+          // dir  7  =  t odd
+          eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+          eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+	  mat1_times_auxmat_into_tamat(&u[7],idxh,eta,&auxmat[7],idxh,&ipdot[7],idxh);
+
+
+        }
+      }
+    }
+  }
+
+}
+
+
+*/
+
+
+void multiply_conf_times_force_and_take_ta_even(  const __restrict su3_soa * const u,
+						  const __restrict su3_soa * const auxmat,
+						  __restrict tamat_soa * const ipdot){
+  int hx,y,z,t,idxh;
+#pragma acc kernels present(u) present(auxmat) present(ipdot)
+#pragma acc loop independent gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent vector(DIM_BLOCK_X)
+        for(hx=0; hx < nxh; hx++) {
+          int x,eta;
+
+          //even sites
+          x = 2*hx + ((y+z+t) & 0x1);
+          idxh = snum_acc(x,y,z,t);
+
+          // dir  0  =  x even   --> eta = 1 , no multiplication needed
+	  eta = 1;
+	  mat1_times_auxmat_into_tamat(&u[0],idxh,eta,&auxmat[0],idxh,&ipdot[0],idxh);
+
+          // dir  2  =  y even
+          eta = 1 - ( 2*(x & 0x1) );
+	  mat1_times_auxmat_into_tamat(&u[2],idxh,eta,&auxmat[2],idxh,&ipdot[2],idxh);
+
+          // dir  4  =  z even
+          eta = 1 - ( 2*((x+y) & 0x1) );
+	  mat1_times_auxmat_into_tamat(&u[4],idxh,eta,&auxmat[4],idxh,&ipdot[4],idxh);
+
+          // dir  6  =  t even
+          eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+          eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+	  mat1_times_auxmat_into_tamat(&u[6],idxh,eta,&auxmat[6],idxh,&ipdot[6],idxh);
+
+        }
+      }
+    }
+  }
+
+}
+
+
+
+void multiply_conf_times_force_and_take_ta_odd(  const __restrict su3_soa * const u,
+					         const __restrict su3_soa * const auxmat,
+					         __restrict tamat_soa * const ipdot){
+  int hx,y,z,t,idxh;
+#pragma acc kernels present(u) present(auxmat) present(ipdot)
+#pragma acc loop independent gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent vector(DIM_BLOCK_X)
+        for(hx=0; hx < nxh; hx++) {
+          int x,eta;
+
+          //odd sites
+          x = 2*hx + ((y+z+t+1) & 0x1);
+          idxh = snum_acc(x,y,z,t);
+          // dir  1  =  x odd    --> eta = 1 , no multiplication needed
+	  eta = 1;
+	  mat1_times_auxmat_into_tamat(&u[1],idxh,eta,&auxmat[1],idxh,&ipdot[1],idxh);
+
+          // dir  3  =  y odd
+          eta = 1 - ( 2*(x & 0x1) );
+	  mat1_times_auxmat_into_tamat(&u[3],idxh,eta,&auxmat[3],idxh,&ipdot[3],idxh);
+
+          // dir  5  =  z odd
+	  eta = 1 - ( 2*((x+y) & 0x1) );
+	  mat1_times_auxmat_into_tamat(&u[5],idxh,eta,&auxmat[5],idxh,&ipdot[5],idxh);
+
+          // dir  7  =  t odd
+          eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+          eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+	  mat1_times_auxmat_into_tamat(&u[7],idxh,eta,&auxmat[7],idxh,&ipdot[7],idxh);
+
+
+        }
+      }
+    }
+  }
+
+}
+
+
 
 
 void ker_openacc_compute_fermion_force( const __restrict su3_soa * const u,
+					__restrict su3_soa * const aux_u,
 					const __restrict ACC_ShiftMultiFermion * const in_shiftmulti,
 					__restrict vec3_soa  * const loc_s,
 					__restrict vec3_soa  * const loc_h,
@@ -334,20 +631,19 @@ void ker_openacc_compute_fermion_force( const __restrict su3_soa * const u,
   int ips;
   int ih;
   int iter=0;
-  //#pragma acc kernels present(in_shiftmulti) present(loc_s) present(loc_h)  present(ipdot)  present(approx)
-  //#pragma acc loop independent
-  for(ips=0; ips < no_ps; ips++){
+  //set_tamat_soa_to_zero(ipdot);
+  set_su3_soa_to_zero(aux_u);
 
+  for(ips=0; ips < no_ps; ips++){
     for(iter=0; iter<(approx[0].COM_approx_order); iter++){
       extract_from_shiftmulti_and_assign_to_fermion(in_shiftmulti,iter,ips,loc_s);
       acc_Doe(u,loc_h,loc_s);
-      direct_product_of_fermions_into_tamat(loc_s,loc_h,ipdot,approx,iter);
-
-
-      
+      direct_product_of_fermions_into_auxmat(loc_s,loc_h,aux_u,approx,iter);
     }
   }
-}
+  //  multiply_conf_times_force_and_take_ta(u,aux_u,ipdot);
+
+ }
 
 
 void multips_invert_openacc_full(const su3COM_soa  *conf,COM_ShiftMultiFermion *out, COM_MultiFermion *in, double res, COM_RationalApprox *approx){
@@ -521,16 +817,21 @@ void first_inv_approx_calc_openacc(const su3COM_soa  *conf, COM_MultiFermion *ou
 
 
 void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM_MultiFermion *in, double res, const COM_RationalApprox *approx){
-  
+  printf("######################################## \n");
+  printf("#### Inside fermion force openacc ###### \n");
+  printf("######################################## \n");
   printf("Residuo target = %f \n", res);
+
 
   tamat_soa * ipdot_acc;
   su3_soa  * conf_acc;
+  su3_soa  * aux_conf_acc;
   ACC_MultiFermion * ferm_in_acc;
   ACC_MultiFermion * ferm_out_acc;
   ACC_ShiftMultiFermion * ferm_shiftmulti_acc;
 
   posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
   posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa));
   posix_memalign((void **)&ferm_in_acc  , ALIGN, sizeof(ACC_MultiFermion));
   posix_memalign((void **)&ferm_out_acc , ALIGN, sizeof(ACC_MultiFermion));
@@ -549,6 +850,10 @@ void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM
   posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa));
   posix_memalign((void **)&k_p_shiftferm, ALIGN, sizeof(ACC_ShiftFermion));
   printf("Allocated auxiliary fermions \n");
+  int index = 19;
+
+  struct timeval t0, t1,t2,t3;
+  gettimeofday ( &t0, NULL );
 
 
   int dir;
@@ -557,31 +862,42 @@ void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM
   printf("Converted conf and multi fermion \n");
 
 
-  struct timeval t0, t1,t2,t3;
-  gettimeofday ( &t0, NULL );
 
-#pragma acc data copyin(conf_acc[0:8]) copyin(ferm_in_acc[0:1]) copyin(approx[0:1])  copyout(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8])
+
+#pragma acc data copyin(conf_acc[0:8]) copyout(aux_conf_acc[0:8]) copyin(ferm_in_acc[0:1]) copyin(approx[0:1])  copyout(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8])
   {
   gettimeofday ( &t1, NULL );
 
-  ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_in_acc,res,approx,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+    ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_in_acc,res,approx,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
 
    // I think that for the force reconstruction this is not necessary
   //  ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_in_acc,ferm_out_acc,approx); 
-   ker_openacc_compute_fermion_force(conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,ipdot_acc,approx);
+   ker_openacc_compute_fermion_force(conf_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,ipdot_acc,approx);
 
+   //   multiply_conf_times_force_and_take_ta(conf_acc,aux_conf_acc,ipdot_acc);
+   multiply_conf_times_force_and_take_ta_even(conf_acc,aux_conf_acc,ipdot_acc);
+   multiply_conf_times_force_and_take_ta_odd(conf_acc,aux_conf_acc,ipdot_acc);
   gettimeofday ( &t2, NULL );
 
   }
 
 
-  int ips = 1;
-  int ish = 108986;
 
-  printf("%e    %e \n",creal(ferm_out_acc->multi[ips].c0[ish]),cimag(ferm_out_acc->multi[ips].c0[ish]));
-  printf("%e    %e \n",creal(ferm_out_acc->multi[ips].c1[ish]),cimag(ferm_out_acc->multi[ips].c1[ish]));
-  printf("%e    %e \n",creal(ferm_out_acc->multi[ips].c2[ish]),cimag(ferm_out_acc->multi[ips].c2[ish]));
-  convert_ACC_MultiFermion_to_COM_MultiFermion(ferm_out_acc,out);
+  printf("Ferm - Ipdot  OPENACC \n");
+  printf("Ipdot 00 = ( %.18lf )\n", ipdot_acc[0].rc00[index]);
+  printf("Ipdot 11 = ( %.18lf )\n", ipdot_acc[0].rc11[index]);
+  printf("Ipdot 01 = ( %.18lf , %.18lf )\n", creal(ipdot_acc[0].c01[index]) , cimag(ipdot_acc[0].c01[index]));
+  printf("Ipdot 02 = ( %.18lf , %.18lf )\n", creal(ipdot_acc[0].c02[index]) , cimag(ipdot_acc[0].c02[index]));
+  printf("Ipdot 12 = ( %.18lf , %.18lf )\n", creal(ipdot_acc[0].c12[index]) , cimag(ipdot_acc[0].c12[index]));
+
+
+  for(dir=0;dir<8;dir++)  convert_tamat_soa_to_tamatCOM_soa(&ipdot_acc[dir],&out[dir]);
+
+  printf("Ipdot 00 = ( %.18lf )\n", out[0].rc00[index]);     
+  printf("Ipdot 11 = ( %.18lf )\n", out[0].rc11[index]);     
+  printf("Ipdot 01 = ( %.18lf , %.18lf )\n", out[0].c01[index].Re , out[0].c01[index].Im);     
+  printf("Ipdot 02 = ( %.18lf , %.18lf )\n", out[0].c02[index].Re , out[0].c02[index].Im);     
+  printf("Ipdot 12 = ( %.18lf , %.18lf )\n", out[0].c12[index].Re , out[0].c12[index].Im);     
 
 
   gettimeofday ( &t3, NULL );
@@ -590,7 +906,7 @@ void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM
   double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
   double dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
 
-  printf("FULL FIRST INV APPROX CALC                      Tot time          : %f sec  \n",dt_tot);
+  printf("FULL FERMION FORCE COMPUTATION                  Tot time          : %f sec  \n",dt_tot);
   printf("                                                PreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
   printf("                                                PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
   printf("                                                PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
@@ -599,10 +915,14 @@ void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM
   
   printf("Reconverted fermions \n");
 
+
   free(conf_acc);
+  free(aux_conf_acc);
+  free(ipdot_acc);
   free(ferm_in_acc);
   free(ferm_out_acc);
   free(ferm_shiftmulti_acc);
+
 
   free(kloc_r);
   free(kloc_s);
@@ -610,6 +930,10 @@ void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM
   free(kloc_p);
 
   printf("Freed memory \n");
+
+  printf("########################################### \n");
+  printf("#### Completed fermion force openacc ###### \n");
+  printf("########################################### \n");
 
 }
 

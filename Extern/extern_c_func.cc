@@ -39,7 +39,7 @@ extern "C" {
 }
 
 extern "C" {
-  void  calc_ipdot_gauge_openacc(const su3COM_soa *conf);
+  void  calc_ipdot_gauge_openacc(const su3COM_soa *conf,tamatCOM_soa * com_ipdot);
 }
 
 

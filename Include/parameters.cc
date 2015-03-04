@@ -36,7 +36,7 @@ const REAL residue_metro=1.0e-8;    // stopping residual for CG
 //Rational approximations for MD        
 const int approx_md=9;
 const REAL lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
-const REAL residue_md=1.0e-1;    // stopping residual for CG        
+const REAL residue_md=1.0e-5;    // stopping residual for CG        
 
 
 

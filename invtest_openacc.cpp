@@ -227,22 +227,45 @@ int main(int argc,char **argv){
    //////////////////////////////////////////////////////////////////////////////////////////////////
    //   create_momenta();
    calc_ipdot_gauge();
-   cout << ">>>>>> Ipdot[0] <<<<<<" << endl;
-   cout << gauge_ipdot->ipdot[0] << endl;
-   cout << ">>>>>> Staple[0] <<<<<<" << endl;
-   cout << gauge_staples->staples[0] << endl;
-   cout << ">>>>>> Conf[0] <<<<<<" << endl;
-   cout << gauge_conf->u_work[0] << endl;
-   calc_ipdot_gauge_openacc(conf_soaCOM);
+   cout << ">>>>>> Gauge - Ipdot[19] <<<<<<" << endl;
+   cout << gauge_ipdot->ipdot[19] << endl;
+   tamatCOM_soa COMipdot_gauge[8];
+   calc_ipdot_gauge_openacc(conf_soaCOM,COMipdot_gauge);
+
+   Ipdot *gauge_ipdot_acc;
+   gauge_ipdot_acc=new Ipdot();
+
+
+   for(int index=0;index<8;index++)   gauge_ipdot_acc->ipdot_soaCOM_to_aos(&COMipdot_gauge[index],index);
+   cout << "VERSIONE CONVERTITA" << endl ;
+   cout << gauge_ipdot_acc->ipdot[19] << endl;
+
+   for(int id_h=0; id_h<partial_sum; id_h++)
+     {
+       coord(id_h,x_h,y_h,z_h,t_h);
+       d_vector1[id_h]=0.0;
+       for(mu_h=0; mu_h<4; mu_h++)
+         {
+           pos_h=id_h+mu_h*size;
+           aux_h=(gauge_ipdot->ipdot[pos_h]);
+           aux_h+=(gauge_ipdot_acc->ipdot[pos_h]);
+           normetta=(double)aux_h.l2norm2();
+           d_vector1[id_h]+=normetta;
+         }
+     }
+
+
+   //   global_sum(d_vector1,size);                                                                                                                          
+   global_sum(d_vector1,partial_sum);
+   diff1_h=sqrt(d_vector1[0])*sqrt(0.25/9.0/((double)(partial_sum)));  // 4 directions, 8 components                                                
+   cout << "Delta Gauge Force / d.o.f. = " << diff1_h<<"\n";
 
 
 
+   delete gauge_ipdot_acc;
 
 
-
-
-
-
+   
    //////////////////////////////////////////////////////////////////////////////////////////////////
    /////////////////////// CONFRONTO INVERTITORE MULTISHIFT    //////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -263,12 +286,15 @@ int main(int argc,char **argv){
    COM_RationalApprox *COM_approx;
    COM_approx = new COM_RationalApprox[1];
 
-   //   approx.md_inv_approx_coeff();
-   approx.first_inv_approx_coeff();
+   use_stored=1;//  --> then in the following line the eigenvalues will be computed
+   approx.md_inv_approx_coeff();
+   use_stored=0;//  --> then in the following the stored eigenvals  will be kept
+
+   //   approx.first_inv_approx_coeff();
    cerr << approx << endl;
 
    convert_RationalApprox_to_COM_RationalApprox(&COM_approx[0],approx);
-
+   
    int ips=(int)(2.0*casuale());
    int ish=(int)((sizeh+1)*casuale());
    cout << "ECCOLIIIII   ----------->  " << ips << "    " << ish << endl;
@@ -293,7 +319,24 @@ int main(int argc,char **argv){
    fermion_shiftmulti->ferm_ShiftMulti_to_ShiftMultiCOM(&COMMON_shiftmulti);
    fermion_phi->ferm_Multi_to_MultiCOM(&COMMON_multi);
 
-   first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_multi_out,&COMMON_multi,residue_metro,COM_approx);
+   //   first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_multi_out,&COMMON_multi,residue_metro,COM_approx); // RESIDUO_METRO
+   //   first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_multi_out,&COMMON_multi,residue_md,COM_approx); // RESIDUO_MD
+   tamatCOM_soa COMipdot_ferm[8];
+      fermion_force_openacc(conf_soaCOM,COMipdot_ferm,&COMMON_multi,residue_md,COM_approx);
+
+      Ipdot *ferm_ipdot_acc;
+      ferm_ipdot_acc=new Ipdot();
+
+      for(int index=0;index<8;index++)   ferm_ipdot_acc->ipdot_soaCOM_to_aos(&COMipdot_ferm[index],index);
+
+   cout << "VERSIONE DI FERM IPDOT OPENACC CONVERTITA" << endl;
+   cout << ferm_ipdot_acc->ipdot[19] << endl;
+
+
+
+
+
+
 
    fermion_shiftmulti->ferm_ShiftMultiCOM_to_ShiftMulti(&COMMON_shiftmulti);
    fermion_app->ferm_MultiCOM_to_Multi(&COMMON_multi_out);
@@ -303,9 +346,52 @@ int main(int argc,char **argv){
    cout << "Conversions done!" << endl;
 
 
-   // uncomment this to perform the full comparison between the openacc anf the cpu version of the multishift.
-   // might take a while if the volume is large and if the mass is small
-   //      multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx);
+   //  uncomment this to perform the full comparison between the openacc anf the cpu version of the multishift.
+   //  might take a while if the volume is large and if the mass is small
+
+   //      multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx); // RESIDUO_METRO
+   //   multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_md,approx); // RESIDUO_MD
+
+        calc_ipdot_fermion();
+   // fermionforce(0);
+   // fermionforce_aaa();
+   cout << ">>>>>> Ferm - Ipdot[19] <<<<<<" << endl;
+   cout << gauge_ipdot->ipdot[19] << endl;
+
+
+   partial_sum=size;
+   for(int id_h=0; id_h<partial_sum; id_h++)
+     {
+       coord(id_h,x_h,y_h,z_h,t_h);
+       d_vector1[id_h]=0.0;
+       for(mu_h=0; mu_h<4; mu_h++)
+         {
+           pos_h=id_h+mu_h*size;
+           aux_h=(gauge_ipdot->ipdot[pos_h]);
+           aux_h-=(ferm_ipdot_acc->ipdot[pos_h]);
+           normetta=(double)aux_h.l2norm2();
+           d_vector1[id_h]+=normetta;
+         }
+     }
+
+   cout << "???????????????????????????????????????????????????????????" << endl;
+   cout << ">>>>>> Ferm Ipdot - CPU [sizeh] <<<<<<" << endl;
+   cout << gauge_ipdot->ipdot[sizeh] << endl;
+   cout << ">>>>>> Ferm Ipdot - OPENACC [sizeh] <<<<<<" << endl;
+   cout << ferm_ipdot_acc->ipdot[sizeh] << endl;
+   cout << "???????????????????????????????????????????????????????????" << endl;
+
+   //   global_sum(d_vector1,size);
+   global_sum(d_vector1,partial_sum);
+   diff1_h=sqrt(d_vector1[0])*sqrt(0.25/9.0/((double)(partial_sum)));  // 4 directions, 9 components  
+   cout << "Delta Fermion Force / d.o.f. = " << diff1_h<<"\n";
+
+
+
+
+
+
+      delete ferm_ipdot_acc;
    int iter, pseudofermion,i;
    Vec3 vr_1;
 

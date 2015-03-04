@@ -4,6 +4,15 @@
 #include"../Packer/packer.h"
 #endif
 
+void fermionforce_aaa()
+  {
+    cout << "Inside aaa" << endl;
+    RationalApprox approx;
+    approx.md_inv_approx_coeff();
+    multips_shifted_invert(fermion_shiftmulti, fermion_phi, residue_md, approx); // RESIDUO_MD   
+  }
+
+
 void fermionforce(int moltiplico)
   {
   #ifdef DEBUG_MODE
@@ -25,13 +34,17 @@ void fermionforce(int moltiplico)
   approx.md_inv_approx_coeff();
 
   // shift inverter
+
   #ifdef USE_GPU
     int order;
     get_order(order, approx);
 
     cu_multips_shifted_invert(residue_md, approx);
   #else
-    multips_shifted_invert(fermion_shiftmulti, fermion_chi, residue_md, approx);   //////////////////////////////     che succede se B =/= 0 ??
+    cout << "Before multishift inside fermionforce" << endl;
+    //    multips_shifted_invert(fermion_shiftmulti, fermion_chi, residue_md, approx);   //////////////////////////////     che succede se B =/= 0 ??
+    multips_shifted_invert(fermion_shiftmulti, fermion_phi, residue_md, approx);   //////////////////////////////     che succede se B =/= 0 ??
+    cout << "After multishift inside fermionforce" << endl;
   #endif
 
   // force reconstruction

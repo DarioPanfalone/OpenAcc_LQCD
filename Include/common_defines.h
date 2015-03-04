@@ -11,16 +11,16 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 32
-#define ny 32
-#define nz 32
-#define nt 32
+#define nx 16
+#define ny 16
+#define nz 16
+#define nt 16
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
 
 #define mass 0.32
-#define beta 5.55
+#define beta 3.00
 
 #define therm_updates 0
 #define max_cg 100000

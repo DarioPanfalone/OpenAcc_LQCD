@@ -1016,7 +1016,8 @@ void  calc_staples_openacc(const su3COM_soa *conf,su3COM_soa *COM_staples){
 
 
 
-void  calc_ipdot_gauge_openacc(const su3COM_soa *conf){
+void  calc_ipdot_gauge_openacc(const su3COM_soa *conf,tamatCOM_soa * com_ipdot){
+//void  calc_ipdot_gauge_openacc(const su3COM_soa *conf){
   su3_soa  * conf_acc, * local_staples;
   tamat_soa * ipdot;
   posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));      // --> 4*size
@@ -1044,23 +1045,34 @@ void  calc_ipdot_gauge_openacc(const su3COM_soa *conf){
     for(int mu=0;mu<4;mu++){
       for(int iter=0;iter<3;iter++){
 	calc_loc_staples_removing_stag_phases_nnptrick(conf_acc,local_staples,mu,looping_directions[mu][iter]);
-
+	
       }
     }
     conf_times_staples_ta_part(conf_acc,local_staples,ipdot);
-
+    
     mult_conf_times_stag_phases(conf_acc);
     gettimeofday ( &t2, NULL );
   }
   gettimeofday ( &t3, NULL );
 
-  printf("Ipdot 00 = ( %.18lf )\n", ipdot[0].rc00[0]);
-  printf("Ipdot 11 = ( %.18lf )\n", ipdot[0].rc11[0]);
-  printf("Ipdot 01 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c01[0]) , cimag(ipdot[0].c01[0]));
-  printf("Ipdot 02 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c02[0]) , cimag(ipdot[0].c02[0]));
-  printf("Ipdot 12 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c12[0]) , cimag(ipdot[0].c12[0]));
+  int index = 19;
 
+  printf("Ipdot 00 = ( %.18lf )\n", ipdot[0].rc00[index]);
+  printf("Ipdot 11 = ( %.18lf )\n", ipdot[0].rc11[index]);
+  printf("Ipdot 01 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c01[index]) , cimag(ipdot[0].c01[index]));
+  printf("Ipdot 02 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c02[index]) , cimag(ipdot[0].c02[index]));
+  printf("Ipdot 12 = ( %.18lf , %.18lf )\n", creal(ipdot[0].c12[index]) , cimag(ipdot[0].c12[index]));
 
+  // scrivere le routines di conversione convert_tamat_soa_to_tamatCOM_soa
+    for(dir=0;dir<8;dir++)  convert_tamat_soa_to_tamatCOM_soa(&ipdot[dir],&com_ipdot[dir]);
+
+    /*
+  printf("Ipdot 00 = ( %.18lf )\n", com_ipdot[0].rc00[index]);
+  printf("Ipdot 11 = ( %.18lf )\n", com_ipdot[0].rc11[index]);
+  printf("Ipdot 01 = ( %.18lf , %.18lf )\n", com_ipdot[0].c01[index].Re , com_ipdot[0].c01[index].Im);
+  printf("Ipdot 02 = ( %.18lf , %.18lf )\n", com_ipdot[0].c02[index].Re , com_ipdot[0].c02[index].Im);
+  printf("Ipdot 12 = ( %.18lf , %.18lf )\n", com_ipdot[0].c12[index].Re , com_ipdot[0].c12[index].Im);
+    */
 
 
   double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);

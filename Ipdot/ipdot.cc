@@ -159,6 +159,7 @@ void calc_ipdot_fermion(void)
       {
       (gauge_ipdot->ipdot[r]).zero();
       }
+cout << "Ipdot messo a zero " << endl;
 
    // add fermionic term
    // Se si fa campo magnetico ci sono 2 contributi a ipdot
@@ -175,6 +176,12 @@ void calc_ipdot_fermion(void)
   #ifndef MAGN
      fermionforce(0);
   #endif
+     int index=19;
+cout << "Forza fermionica calcolata " << endl;
+ cout << "Link" << endl;
+ cout << (gauge_conf->u_work[19]) << endl;
+ cout << "Force" << endl;
+ cout << (gauge_ipdot->ipdot[19]) << endl;
 
    // multiply by u_work and take Traceless-Antihermitean part
    for(r=0; r<no_links; r++)
@@ -193,6 +200,8 @@ void calc_ipdot_fermion(void)
        #endif
 
      }
+cout << "Moltiplicato per il link e presa la parte TA" << endl;
+
  #endif
 
  #ifdef TIMING_CUDA_CPP
