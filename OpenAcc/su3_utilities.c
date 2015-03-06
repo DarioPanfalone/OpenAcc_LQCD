@@ -405,6 +405,14 @@ void mult_conf_times_stag_phases( __restrict su3_soa * const u){
 
 }
 
+
+
+
+
+
+
+
+
 // routine for the computation of the average of the plaquettes computed on the plane mu-nu
 // 1) all the plaquettes on the plane mu-nu are computed and saved locally
 // 2) finally the reduction of the traces is performed
@@ -882,6 +890,109 @@ void mom_sum_mult( __restrict tamat_soa * const mom,
     }  // z
   }  // t
 }// closes routine
+
+
+
+static inline void exponetiate_acc(const __restrict thmat_soa * const mom,
+				   const int idx_mom,
+				   __restrict su3_soa * const aux,
+				   const int idx_aux){
+
+  d_complex mat1_00 = mat1->r0.c0[idx_mat1];
+  d_complex mat1_01 = mat1->r0.c1[idx_mat1];
+  d_complex mat1_02 = mat1->r0.c2[idx_mat1];
+
+  d_complex mat1_10 = mat1->r1.c0[idx_mat1];
+  d_complex mat1_11 = mat1->r1.c1[idx_mat1];
+  d_complex mat1_12 = mat1->r1.c2[idx_mat1];
+
+  d_complex mat2_00 = mat2->r0.c0[idx_mat2];
+  d_complex mat2_01 = mat2->r0.c1[idx_mat2];
+  d_complex mat2_02 = mat2->r0.c2[idx_mat2];
+
+  d_complex mat2_10 = mat2->r1.c0[idx_mat2];
+  d_complex mat2_11 = mat2->r1.c1[idx_mat2];
+  d_complex mat2_12 = mat2->r1.c2[idx_mat2];
+
+
+}
+
+void kernel_acc_mom_exp_times_conf(su3_soa *conf,su3_soa *aux_conf,const thmat_soa * mom){
+
+  int x, y, z, t;
+#pragma acc kernels present(mom) present(conf) present(aux_conf)
+#pragma acc loop independent gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent vector(DIM_BLOCK_X)
+        for(x=0; x < nx; x++) {
+          int idxh;
+          int parity;
+          int dir_link;
+          int mu;
+          idxh = snum_acc(x,y,z,t);  // r
+          parity = (x+y+z+t) % 2;
+          for(mu=0;mu<4;mu++){
+            dir_link = 2*mu + parity;
+	    /////////////////////////////////////////////mettere l-istruzione giusta
+          }
+
+        }  // x
+      }  // y
+    }  // z
+  }  // t
+
+}
+
+
+void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
+  su3_soa  * conf_acc,*aux_conf_acc;
+  thmat_soa * momenta;
+  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));    // --> 4*size
+  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));    // --> 4*size
+  posix_memalign((void **)&ipdot, ALIGN, 8*sizeof(thmat_soa)); // --> 4*size
+
+  int dir;
+  for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
+  for(dir=0;dir<8;dir++)  convert_thmatCOM_soa_to_thmat_soa(&com_mom[dir],&momenta[dir]);
+
+  select_working_gpu_homemade(0);
+
+  struct timeval t0, t1,t2,t3;
+
+  gettimeofday ( &t0, NULL );
+#pragma acc data copy(conf_acc[0:8]) copyin(momenta[0:8]) create(aux_conf_acc[0:8])
+  {
+    gettimeofday ( &t1, NULL );
+    mult_conf_times_stag_phases(conf_acc);
+
+    kernel_acc_mom_exp_times_conf(conf_acc,aux_conf_acc,momenta)
+
+    mult_conf_times_stag_phases(conf_acc);
+    gettimeofday ( &t2, NULL );
+  }
+    gettimeofday ( &t3, NULL );
+
+
+  double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
+  double dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+  double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+  double dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
+
+  printf("FULL STAPLES CALC OPENACC                       Tot time          : %f sec  \n",dt_tot);
+  printf("                                                PreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
+  printf("                                                PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+  printf("                                                PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
+
+  free(conf_acc);
+  free(ipdot);
+
+
+}
+
 
 
 

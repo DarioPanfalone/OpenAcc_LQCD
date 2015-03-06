@@ -18,6 +18,10 @@ int *eta;
 class Ipdot;
 Ipdot *gauge_ipdot;
 
+// momenta 
+class Momenta;
+Momenta *gauge_momenta;
+
 
 // normalized coefficients for rational approximations
 class RationalApprox;

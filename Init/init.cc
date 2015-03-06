@@ -22,8 +22,8 @@
 #include "../Exception/exception.cc"
 #include "../Ipdot/ipdot.cc"
 #include "../FermionForce/fermionforce.cc"
+#include "../Momenta/momenta.cc"
 
-     
 #include "../Inverter/inverter.cc"    
 #include "../OpenAcc/inverter_simple.cc"  
 
@@ -53,6 +53,8 @@ int init(int startMode = 1)
      gauge_staples=new Staples();
      // allocate ipdot
      gauge_ipdot=new Ipdot();
+     // allocate momenta
+     gauge_momenta=new Momenta();
 
      // allocate auxiliary global fermion 
      loc_r=new Fermion;
@@ -120,6 +122,10 @@ void end(void)
 
   // clear ipdot 
   delete gauge_ipdot;
+
+  // clear momenta 
+  delete gauge_momenta;
+
 
    // clear gauge configuration
   delete gauge_conf;

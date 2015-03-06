@@ -34,15 +34,24 @@
 #define ONE_BY_THREE 0.33333333333333333333333
 #define beta_by_three beta*ONE_BY_THREE
 
+// strutture native c con i complessi c --> quelle che verranno utilizzate nelle routine che verranno accelerate da openacc
+typedef double complex  d_complex;
+
+const int no_md_acc = 18;
+// le istruzioni che seguono misteriosamente non compilano, nemmeno castando a double o simili
+// ???????????????????????????????????????????????????????????????????????????????????????????????
+//double epsilon_acc = 1.0/no_md_acc;
+//d_complex ieps_acc  = (double)0.0 + (double)(epsilon_acc) * 1.0I; 
+//d_complex iepsh_acc = (double)0.0 + (double)(epsilon_acc) * 0.5 * 1.0I; 
+//d_complex ieps_acc  = 0.0 + epsilon_acc * 1.0I; 
+//d_complex iepsh_acc = 0.0 + epsilon_acc * 0.5 * 1.0I; 
+
+
 static inline int snum_acc(int x, int y, int z, int t) {
   int ris;
   ris = x + (y*vol1) + (z*vol2) + (t*vol3);
   return ris/2;   // <---  /2 Pay attention to even/odd  (see init_geo)
 }
-
-
-// strutture native c con i complessi c --> quelle che verranno utilizzate nelle routine che verranno accelerate da openacc
-typedef double complex  d_complex;
 
 typedef struct vec3_soa_t {
   d_complex c0[sizeh];
@@ -92,8 +101,45 @@ typedef struct tamat_soa_t {
   double rc11[sizeh];
 } tamat_soa;
 
+typedef struct thmat_soa_t {
+  d_complex c01[sizeh];
+  d_complex c02[sizeh];
+  d_complex c12[sizeh];
+  double rc00[sizeh];
+  double rc11[sizeh];
+} thmat_soa;
 
 
+
+
+// funzioni di conversione:    thmat_soa   ==>   thmatCOM_soa 
+void convert_thmat_soa_to_thmatCOM_soa(thmat_soa *in, thmatCOM_soa *out){
+  int i;
+  for(i =0 ; i < sizeh ; i++){
+    out->c01[i].Re = creal(in->c01[i]);
+    out->c02[i].Re = creal(in->c02[i]);
+    out->c12[i].Re = creal(in->c12[i]);
+
+    out->c01[i].Im = cimag(in->c01[i]);
+    out->c02[i].Im = cimag(in->c02[i]);
+    out->c12[i].Im = cimag(in->c12[i]);
+
+    out->rc00[i] = in->rc00[i];
+    out->rc11[i] = in->rc11[i];
+  }
+}
+
+// funzioni di conversione:    thmatCOM_soa   ==>   thmat_soa 
+void convert_thmatCOM_soa_to_thmat_soa(thmatCOM_soa *in, thmat_soa *out){
+  int i;
+  for( i =0 ; i < sizeh ; i++){
+    out->c01[i] = in->c01[i].Re + in->c01[i].Im * 1.0I;
+    out->c02[i] = in->c02[i].Re + in->c02[i].Im * 1.0I;
+    out->c12[i] = in->c12[i].Re + in->c12[i].Im * 1.0I;
+    out->rc00[i] = in->rc00[i];
+    out->rc11[i] = in->rc11[i];
+  }
+}
 
 // funzioni di conversione:    tamat_soa   ==>   tamatCOM_soa 
 void convert_tamat_soa_to_tamatCOM_soa(tamat_soa *in, tamatCOM_soa *out){

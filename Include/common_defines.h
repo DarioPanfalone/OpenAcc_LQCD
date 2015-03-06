@@ -27,6 +27,13 @@
 #define max_approx_order 19
 #define no_ps 2
 
+#define no_md 18 // number of MD steps
+#define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
+#define gauge_scale 10  // Update fermions every gauge_scale gauge updates
+
+
+
+
 typedef struct COM_t{
   double Re;
   double Im;
@@ -46,6 +53,14 @@ typedef struct tamatCOM_soa_t {
   double rc00[sizehh];
   double rc11[sizehh];
 } tamatCOM_soa;
+
+typedef struct thmatCOM_soa_t {
+  COM c01[sizehh];
+  COM c02[sizehh];
+  COM c12[sizehh];
+  double rc00[sizehh];
+  double rc11[sizehh];
+} thmatCOM_soa;
 
 typedef struct vec3COM_t {
   COM c0;

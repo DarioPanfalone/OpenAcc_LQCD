@@ -28,6 +28,12 @@ const int gmp_remez_precision=100; // The precision that gmp uses
 const REAL inv_single_double_prec=1.0e-02;//1.0e-05;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 // const REAL inv_single_double_prec=10.0;  // if stopping residue <inv_single_double_prec inverter use double prec, else single
 
+
+// MD parameters -------> moved as defines in common_defines.cc
+//const int no_md=18; // number of MD steps
+//const int use_multistep=1;  // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
+//const int gauge_scale=10;   // Update fermions every gauge_scale gauge updates
+
 //Rational approximations for Metropolis
 const int approx_metro=19;
 const REAL lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]      

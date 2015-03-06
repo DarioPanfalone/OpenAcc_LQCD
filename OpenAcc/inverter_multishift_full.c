@@ -255,13 +255,13 @@ static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * con
 }
 
 
-static inline  mat1_times_auxmat_into_tamat( const  __restrict su3_soa * const mat1,
-						 const  int idx,
-						 const  int eta,
-						 const  __restrict su3_soa * const auxmat,
-						 const  int idx_aux,
+static inline  void mat1_times_auxmat_into_tamat( const  __restrict su3_soa * const mat1,
+						  const  int idx,
+						  const  int eta,
+						  const  __restrict su3_soa * const auxmat,
+						  const  int idx_aux,
 						  __restrict tamat_soa * const ipdot,
-						 const  int idipdot){
+						  const  int idipdot){
   d_complex mat1_00 = mat1->r0.c0[idx];
   d_complex mat1_01 = mat1->r0.c1[idx];
   d_complex mat1_02 = mat1->r0.c2[idx];

@@ -3,7 +3,7 @@
 
 #include "./parameters.cc"
 #include "./global_macro.cc"
-
+#include<complex>
 
 // derived mass constants
 const REAL one_by_mass=1.0/mass;
@@ -50,6 +50,10 @@ const double min_value_double=1.0e-13;
 #define _MIN_VALUE(x) min_value##_##x
 #define MIN_VALUE(x) _MIN_VALUE(x)
 // in this way MIN_VALUE(REAL) is min_value_float or min_value_double dependig on the value of REAL
+
+const REAL epsilon = 1.0/((double)(no_md));
+const complex<REAL> ieps=complex<REAL>(0.0, epsilon);
+const complex<REAL> iepsh=ieps*complex<REAL>(0.5,0.0);
 
 
 #endif
