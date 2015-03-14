@@ -483,6 +483,7 @@ void Su3::sunitarize(void)
      comp[1][i]*=norm;
      }
 
+
   prod=comp[0][1]*comp[1][2]-comp[0][2]*comp[1][1];
   comp[2][0]=conj(prod);
   prod=comp[0][2]*comp[1][0]-comp[0][0]*comp[1][2];

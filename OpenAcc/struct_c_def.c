@@ -32,6 +32,7 @@
 #define ALIGN 128
 
 #define ONE_BY_THREE 0.33333333333333333333333
+#define ONE_BY_SIX   0.16666666666666666666666
 #define beta_by_three beta*ONE_BY_THREE
 
 // strutture native c con i complessi c --> quelle che verranno utilizzate nelle routine che verranno accelerate da openacc
@@ -63,7 +64,9 @@ typedef struct dcomplex_soa_t {
   d_complex c[sizeh];
 } dcomplex_soa;
 
-
+typedef struct single_su3_t {
+  d_complex comp[3][3];
+} single_su3;
 
 typedef struct vec3_t {
   d_complex c0;

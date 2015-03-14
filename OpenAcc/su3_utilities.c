@@ -892,35 +892,277 @@ void mom_sum_mult( __restrict tamat_soa * const mom,
 }// closes routine
 
 
+/////////////////////////////////////////////////////////////////////////////////////////
+////// maybe it is necessary to separate this routine into smaller routines .... ////////
+/////////////////////////////////////////////////////////////////////////////////////////
+static inline void conf_left_exp_multiply_and_finally_proj(const __restrict thmat_soa * const mom,
+							   const int idx_mom,
+							   __restrict su3_soa * const cnf,
+							   const int idx_cnf,
+							   const double delta){
+  /*
+  //COSTRUISCO LA MATRICE M = i*delta*momento
+  //leggo la prima parte
+  d_complex M01 = mom->c01[idx_mom] * (delta * 1.0I);
+  d_complex M02 = mom->c02[idx_mom] * (delta * 1.0I);
+  d_complex M12 = mom->c12[idx_mom] * (delta * 1.0I);
+  d_complex M00 = mom->rc00[idx_mom] * (delta * 1.0I);
+  d_complex M11 = mom->rc11[idx_mom] * (delta * 1.0I);
+  //ricostruisco quel che manca
+  d_complex M10 = - conj(M01);
+  d_complex M20 = - conj(M02);
+  d_complex M21 = - conj(M12);
+  d_complex M22 = -M00-M11;
 
-static inline void exponetiate_acc(const __restrict thmat_soa * const mom,
-				   const int idx_mom,
-				   __restrict su3_soa * const aux,
-				   const int idx_aux){
+  // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
+  // first iteration
+  // ris=1+x/5
+  d_complex R00 = M00*0.2+1.0;
+  d_complex R01 = M01*0.2;
+  d_complex R02 = M02*0.2;
+  d_complex R10 = M10*0.2;
+  d_complex R11 = M11*0.2+1.0;
+  d_complex R12 = M12*0.2;
+  d_complex R20 = M20*0.2;
+  d_complex R21 = M21*0.2;
+  d_complex R22 = M22*0.2+1.0;
 
-  d_complex mat1_00 = mat1->r0.c0[idx_mat1];
-  d_complex mat1_01 = mat1->r0.c1[idx_mat1];
-  d_complex mat1_02 = mat1->r0.c2[idx_mat1];
-
-  d_complex mat1_10 = mat1->r1.c0[idx_mat1];
-  d_complex mat1_11 = mat1->r1.c1[idx_mat1];
-  d_complex mat1_12 = mat1->r1.c2[idx_mat1];
-
-  d_complex mat2_00 = mat2->r0.c0[idx_mat2];
-  d_complex mat2_01 = mat2->r0.c1[idx_mat2];
-  d_complex mat2_02 = mat2->r0.c2[idx_mat2];
-
-  d_complex mat2_10 = mat2->r1.c0[idx_mat2];
-  d_complex mat2_11 = mat2->r1.c1[idx_mat2];
-  d_complex mat2_12 = mat2->r1.c2[idx_mat2];
+  // second iteration
+  // ris=1.0+x/4*(1+x/5)
+  d_complex S00 = ( M00 * R00 + M01 * R10 + M02 * R20 ) * 0.25 + 1.0;
+  d_complex S01 = ( M00 * R01 + M01 * R11 + M02 * R21 ) * 0.25;
+  d_complex S02 = ( M00 * R02 + M01 * R12 + M02 * R22 ) * 0.25;
+  d_complex S10 = ( M10 * R00 + M11 * R10 + M12 * R20 ) * 0.25;
+  d_complex S11 = ( M10 * R01 + M11 * R11 + M12 * R21 ) * 0.25 + 1.0;
+  d_complex S12 = ( M10 * R02 + M11 * R12 + M12 * R22 ) * 0.25;
+  d_complex S20 = ( M20 * R00 + M21 * R10 + M22 * R20 ) * 0.25;
+  d_complex S21 = ( M20 * R01 + M21 * R11 + M22 * R21 ) * 0.25;
+  d_complex S22 = ( M20 * R02 + M21 * R12 + M22 * R22 ) * 0.25 + 1.0;
 
 
+  // third iteration
+  // ris=1.0+x/3.0*(1.0+x/4*(1+x/5))
+  R00 = ( M00 * S00 + M01 * S10 + M02 * S20 ) * ONE_BY_THREE + 1.0;
+  R01 = ( M00 * S01 + M01 * S11 + M02 * S21 ) * ONE_BY_THREE;
+  R02 = ( M00 * S02 + M01 * S12 + M02 * S22 ) * ONE_BY_THREE;
+  R10 = ( M10 * S00 + M11 * S10 + M12 * S20 ) * ONE_BY_THREE;
+  R11 = ( M10 * S01 + M11 * S11 + M12 * S21 ) * ONE_BY_THREE + 1.0;
+  R12 = ( M10 * S02 + M11 * S12 + M12 * S22 ) * ONE_BY_THREE;
+  R20 = ( M20 * S00 + M21 * S10 + M22 * S20 ) * ONE_BY_THREE;
+  R21 = ( M20 * S01 + M21 * S11 + M22 * S21 ) * ONE_BY_THREE;
+  R22 = ( M20 * S02 + M21 * S12 + M22 * S22 ) * ONE_BY_THREE + 1.0;
+
+  // fourth iteration
+  // ris=1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5)))
+  S00 = ( M00 * R00 + M01 * R10 + M02 * R20 ) * 0.5 + 1.0;
+  S01 = ( M00 * R01 + M01 * R11 + M02 * R21 ) * 0.5;
+  S02 = ( M00 * R02 + M01 * R12 + M02 * R22 ) * 0.5;
+  S10 = ( M10 * R00 + M11 * R10 + M12 * R20 ) * 0.5;
+  S11 = ( M10 * R01 + M11 * R11 + M12 * R21 ) * 0.5 + 1.0;
+  S12 = ( M10 * R02 + M11 * R12 + M12 * R22 ) * 0.5;
+  S20 = ( M20 * R00 + M21 * R10 + M22 * R20 ) * 0.5;
+  S21 = ( M20 * R01 + M21 * R11 + M22 * R21 ) * 0.5;
+  S22 = ( M20 * R02 + M21 * R12 + M22 * R22 ) * 0.5 + 1.0;
+  
+  // fifth iteration
+  // ris=1.0+x*(1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5))))
+  R00 = ( M00 * S00 + M01 * S10 + M02 * S20 ) + 1.0;
+  R01 = ( M00 * S01 + M01 * S11 + M02 * S21 );
+  R02 = ( M00 * S02 + M01 * S12 + M02 * S22 );
+  R10 = ( M10 * S00 + M11 * S10 + M12 * S20 );
+  R11 = ( M10 * S01 + M11 * S11 + M12 * S21 ) + 1.0;
+  R12 = ( M10 * S02 + M11 * S12 + M12 * S22 );
+  R20 = ( M20 * S00 + M21 * S10 + M22 * S20 );
+  R21 = ( M20 * S01 + M21 * S11 + M22 * S21 );
+  R22 = ( M20 * S02 + M21 * S12 + M22 * S22 ) + 1.0;
+
+  
+
+//Multiply: U_new = exp(i*delta*H) * U_old
+  M00 = cnf->r0.c0[idx_cnf];
+  M01 = cnf->r0.c1[idx_cnf];
+  M02 = cnf->r0.c2[idx_cnf];
+
+
+  M10 = cnf->r1.c0[idx_cnf];
+  M11 = cnf->r1.c1[idx_cnf];
+  M12 = cnf->r1.c2[idx_cnf];
+
+  //  M20 = cnf->r2.c0[idx_cnf];
+  //  M21 = cnf->r2.c1[idx_cnf];
+  //  M22 = cnf->r2.c2[idx_cnf];
+  M20 = conj( M01 * M12 - M02 * M11 );
+  M21 = conj( M02 * M10 - M00 * M12 );
+  M22 = conj( M00 * M11 - M01 * M10 );
+
+
+  S00 = R00 * M00 + R01 * M10 + R02 * M20; 
+  S01 = R00 * M01 + R01 * M11 + R02 * M21; 
+  S02 = R00 * M02 + R01 * M12 + R02 * M22; 
+  S10 = R10 * M00 + R11 * M10 + R12 * M20; 
+  S11 = R10 * M01 + R11 * M11 + R12 * M21; 
+  S12 = R10 * M02 + R11 * M12 + R12 * M22; 
+
+  //  S20 = R20 * M00 + R21 * M10 + R22 * M20; 
+  //  S21 = R20 * M01 + R21 * M11 + R22 * M21; 
+  //  S22 = R20 * M02 + R21 * M12 + R22 * M22; 
+
+  // Finally, normalize the result
+  double NORM = creal(S00)*creal(S00)+cimag(S00)*cimag(S00) + creal(S01)*creal(S01)+cimag(S01)*cimag(S01) + creal(S02)*creal(S02)+cimag(S02)*cimag(S02);
+  NORM=1.0/sqrt(NORM);
+  S00 *= NORM;
+  S01 *= NORM;
+  S02 *= NORM;
+
+  R00 = conj(S00) * S10 +  conj(S01) * S11 +  conj(S02) * S12;
+  S10 -= R00 * S00;
+  S11 -= R00 * S01;
+  S12 -= R00 * S02;
+  NORM = creal(S10)*creal(S10)+cimag(S10)*cimag(S10) + creal(S11)*creal(S11)+cimag(S11)*cimag(S11) + creal(S12)*creal(S12)+cimag(S12)*cimag(S12);
+  NORM=1.0/sqrt(NORM);
+  S10 *= NORM;
+  S11 *= NORM;
+  S12 *= NORM;
+
+  cnf->r0.c0[idx_cnf] = S00;
+  cnf->r0.c1[idx_cnf] = S01;
+  cnf->r0.c2[idx_cnf] = S02;
+  cnf->r1.c0[idx_cnf] = S10;
+  cnf->r1.c1[idx_cnf] = S11;
+  cnf->r1.c2[idx_cnf] = S12;
+
+  //  cnf->r2.c0[idx_cnf] = conj( S01 * S12 - S02 * S11 );
+  //  cnf->r2.c1[idx_cnf] = conj( S02 * S10 - S00 * S12 );
+  //  cnf->r2.c2[idx_cnf] = conj( S00 * S11 - S01 * S10 );
+  */
 }
 
-void kernel_acc_mom_exp_times_conf(su3_soa *conf,su3_soa *aux_conf,const thmat_soa * mom){
+/////////////////////////////////////////////////////////////////////////////////////////
+////// in the following i try to separate exp routine into smaller ones           ///////
+//////   also by using a new structure that is a single matrix                    ///////
+/////////////////////////////////////////////////////////////////////////////////////////
+static inline void extract_mom(const __restrict thmat_soa * const mom,
+			       const int idx_mom,
+			       const double delta,
+			       __restrict single_su3 * M){
+  //COSTRUISCO LA MATRICE M = i*delta*momento
+  //leggo la prima parte
+  M->comp[0][0] = mom->rc00[idx_mom] * (delta * 1.0I);
+  M->comp[0][1] = mom->c01[idx_mom] * (delta * 1.0I);
+  M->comp[0][2] = mom->c02[idx_mom] * (delta * 1.0I);
+  M->comp[1][0] = - conj(M->comp[0][1]);
+  M->comp[1][1] = mom->rc11[idx_mom] * (delta * 1.0I);
+  M->comp[1][2] = mom->c12[idx_mom] * (delta * 1.0I);
+  M->comp[2][0] = - conj(M->comp[0][2]);
+  M->comp[2][1] = - conj(M->comp[1][2]);
+  M->comp[2][2] = - M->comp[0][0] - M->comp[1][1];
+}
+
+static inline void matrix_exp_openacc(const __restrict single_su3 * const MOM,
+				      __restrict single_su3 * AUX,
+				      __restrict single_su3 * RES){
+  // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
+  // first iteration
+  // ris=1+x/5
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      RES->comp[r][c] = MOM->comp[r][c] * 0.2;
+    RES->comp[r][r] = RES->comp[r][r] + 1.0;
+  }
+  // second iteration
+  // ris=1.0+x/4*(1+x/5)
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      AUX->comp[r][c] = (MOM->comp[r][0] * RES->comp[0][c] + MOM->comp[r][1] * RES->comp[1][c] + MOM->comp[r][2] * RES->comp[2][c]) * 0.25;
+    AUX->comp[r][r] = AUX->comp[r][r] + 1.0;
+  }
+  // third iteration
+  // ris=1.0+x/3.0*(1.0+x/4*(1+x/5))
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      RES->comp[r][c] = (MOM->comp[r][0] * AUX->comp[0][c] + MOM->comp[r][1] * AUX->comp[1][c] + MOM->comp[r][2] * AUX->comp[2][c]) * ONE_BY_THREE;
+    RES->comp[r][r] = RES->comp[r][r] + 1.0;
+  }
+  // fourth iteration
+  // ris=1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5)))
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      AUX->comp[r][c] = (MOM->comp[r][0] * RES->comp[0][c] + MOM->comp[r][1] * RES->comp[1][c] + MOM->comp[r][2] * RES->comp[2][c]) * 0.5;
+    AUX->comp[r][r] = AUX->comp[r][r] + 1.0;
+  }
+  // fifth iteration
+  // ris=1.0+x*(1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5))))
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      RES->comp[r][c] = (MOM->comp[r][0] * AUX->comp[0][c] + MOM->comp[r][1] * AUX->comp[1][c] + MOM->comp[r][2] * AUX->comp[2][c]);
+    RES->comp[r][r] = RES->comp[r][r] + 1.0;
+  }
+}
+///////ATTENZIONE FORSE HO SCAMBIATO RIGHE E COLONNE ..... CONTROLLARE!  --> direi di no, ma lascio il commento
+static inline void conf_left_exp_multiply(__restrict su3_soa * const cnf,
+					  const int idx_cnf,
+					  const __restrict single_su3 * const  EXP,
+					  __restrict single_su3 * AUX,
+					  __restrict single_su3 * AUX_RIS){
+  
+  //Multiply: U_new = exp(i*delta*H) * U_old =>   cnf = EXP * cnf 
+
+  // leggo le prime due righe
+  AUX->comp[0][0] = cnf->r0.c0[idx_cnf];
+  AUX->comp[0][1] = cnf->r0.c1[idx_cnf];
+  AUX->comp[0][2] = cnf->r0.c2[idx_cnf];
+  AUX->comp[1][0] = cnf->r1.c0[idx_cnf];
+  AUX->comp[1][1] = cnf->r1.c1[idx_cnf];
+  AUX->comp[1][2] = cnf->r1.c2[idx_cnf];
+  // ricostruisco la terza
+  AUX->comp[2][0] = AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1];
+  AUX->comp[2][1] = AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2];
+  AUX->comp[2][2] = AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * AUX->comp[1][0];
+
+
+  for(int r=0;r<2;r++) // qui il loop va fino solo a 2 perche non mi serve calcolare anche la terza riga del prodotto
+    for(int c=0;c<3;c++)
+      AUX_RIS->comp[r][c] = (EXP->comp[r][0] * AUX->comp[0][c] + EXP->comp[r][1] * AUX->comp[1][c] + EXP->comp[r][2] * AUX->comp[2][c]);
+}
+
+static inline void project_on_su3(__restrict su3_soa * const cnf,
+				  const int idx_cnf,
+				  __restrict single_su3 *  AUX){
+  
+  //normalizzo la prima riga
+  double NORM = creal(AUX->comp[0][0])*creal(AUX->comp[0][0])+cimag(AUX->comp[0][0])*cimag(AUX->comp[0][0]) + creal(AUX->comp[0][1])*creal(AUX->comp[0][1])+cimag(AUX->comp[0][1])*cimag(AUX->comp[0][1]) + creal(AUX->comp[0][2])*creal(AUX->comp[0][2])+cimag(AUX->comp[0][2])*cimag(AUX->comp[0][2]);
+  NORM = 1.0/sqrt(creal(AUX->comp[1][0]));
+
+  for(int c=0;c<3;c++)
+    AUX->comp[0][c] *= NORM;
+
+  //faccio il prodotto scalare con la seconda e sottraggo (ortogonalizzo)
+  d_complex SCAL_PROD = conj(AUX->comp[0][0]) * AUX->comp[1][0] + conj(AUX->comp[0][1]) * AUX->comp[1][1] + conj(AUX->comp[0][2]) * AUX->comp[1][2];
+
+  for(int c=0;c<3;c++)
+    AUX->comp[1][c] -= SCAL_PROD * AUX->comp[0][c];  
+
+  //normalizzo la seconda riga
+  NORM = creal(AUX->comp[1][0])*creal(AUX->comp[1][0])+cimag(AUX->comp[1][0])*cimag(AUX->comp[1][0]) + creal(AUX->comp[1][1])*creal(AUX->comp[1][1])+cimag(AUX->comp[1][1])*cimag(AUX->comp[1][1]) + creal(AUX->comp[1][2])*creal(AUX->comp[1][2])+cimag(AUX->comp[1][2])*cimag(AUX->comp[1][2]);
+  NORM = 1.0/sqrt(NORM);
+
+  AUX->comp[1][0] *= NORM;
+  AUX->comp[1][1] *= NORM;
+  AUX->comp[1][2] *= NORM;
+
+  cnf->r0.c0[idx_cnf] = AUX->comp[0][0];
+  cnf->r0.c1[idx_cnf] = AUX->comp[0][1];
+  cnf->r0.c2[idx_cnf] = AUX->comp[0][2];
+  cnf->r1.c0[idx_cnf] = AUX->comp[1][0];
+  cnf->r1.c1[idx_cnf] = AUX->comp[1][1];
+  cnf->r1.c2[idx_cnf] = AUX->comp[1][2];
+}
+
+
+void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const double factor){
 
   int x, y, z, t;
-#pragma acc kernels present(mom) present(conf) present(aux_conf)
+#pragma acc kernels present(mom) present(conf) present(factor)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -933,13 +1175,19 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,su3_soa *aux_conf,const thmat_s
           int parity;
           int dir_link;
           int mu;
+	  single_su3 mom_aux[1];
+	  single_su3 expo[1];
+	  single_su3 aux[1];
           idxh = snum_acc(x,y,z,t);  // r
           parity = (x+y+z+t) % 2;
-          for(mu=0;mu<4;mu++){
-            dir_link = 2*mu + parity;
-	    /////////////////////////////////////////////mettere l-istruzione giusta
-          }
-
+	  for(mu=0;mu<4;mu++){
+	    dir_link = 2*mu + parity;
+	    extract_mom(&mom[dir_link],idxh,factor,&mom_aux[0]);
+	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
+	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
+	    project_on_su3(&conf[dir_link],idxh,&mom_aux[0]);
+	  }
+	  
         }  // x
       }  // y
     }  // z
@@ -949,11 +1197,10 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,su3_soa *aux_conf,const thmat_s
 
 
 void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
-  su3_soa  * conf_acc,*aux_conf_acc;
+  su3_soa  * conf_acc;
   thmat_soa * momenta;
   posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));    // --> 4*size
-  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));    // --> 4*size
-  posix_memalign((void **)&ipdot, ALIGN, 8*sizeof(thmat_soa)); // --> 4*size
+  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa)); // --> 4*size
 
   int dir;
   for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
@@ -962,14 +1209,15 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
   select_working_gpu_homemade(0);
 
   struct timeval t0, t1,t2,t3;
+  double factor = 0.12;
 
   gettimeofday ( &t0, NULL );
-#pragma acc data copy(conf_acc[0:8]) copyin(momenta[0:8]) create(aux_conf_acc[0:8])
+#pragma acc data copy(conf_acc[0:8]) copyin(momenta[0:8]) copyin(factor)
   {
     gettimeofday ( &t1, NULL );
     mult_conf_times_stag_phases(conf_acc);
 
-    kernel_acc_mom_exp_times_conf(conf_acc,aux_conf_acc,momenta)
+    kernel_acc_mom_exp_times_conf(conf_acc,momenta,factor);
 
     mult_conf_times_stag_phases(conf_acc);
     gettimeofday ( &t2, NULL );
@@ -988,7 +1236,7 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
   printf("                                                PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
 
   free(conf_acc);
-  free(ipdot);
+  free(momenta);
 
 
 }
