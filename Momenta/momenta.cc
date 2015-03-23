@@ -6,15 +6,16 @@
 #endif
 
 class Momenta {
-private:
- Su3 momenta[no_links];
+  //private:
 public:
- Momenta(void);
+ Su3 momenta[no_links];
+  
+  Momenta(void);
 
- friend void create_momenta(void);
- friend void conf_left_exp_multiply(const complex<REAL> p);
- friend void momenta_sum_multiply(const complex<REAL> p);
-
+  friend void create_momenta(void);
+  friend void conf_left_exp_multiply(const complex<REAL> p);
+  friend void momenta_sum_multiply(const complex<REAL> p);
+  
   void mom_aos_to_soaCOM(thmatCOM_soa *out,int matdir) const;
   void mom_soaCOM_to_aos(thmatCOM_soa const * const in,int matdir);
 
@@ -22,14 +23,14 @@ public:
   friend void smartpack_thmatrix(float out[8*no_links], Momenta *in);
   friend void smartunpack_thmatrix(Momenta *out, float in[8*no_links]);
 
- // defined in Update/action.cc
- friend void calc_action(double *value, int init);
-
- #ifdef REVERSIBILITY_TEST
-   friend void reverse_momenta(void);
-   friend void save_momenta(void);
-   friend void rev_update(void);
- #endif
+  // defined in Update/action.cc
+  friend void calc_action(double *value, int init);
+  
+#ifdef REVERSIBILITY_TEST
+  friend void reverse_momenta(void);
+  friend void save_momenta(void);
+  friend void rev_update(void);
+#endif
 };
 
 void Momenta::mom_aos_to_soaCOM( thmatCOM_soa *out,int matdir) const{
@@ -42,8 +43,8 @@ void Momenta::mom_aos_to_soaCOM( thmatCOM_soa *out,int matdir) const{
     out->c02[i].Im = (momenta[indice].comp[0][2]).imag();
     out->c12[i].Re = (momenta[indice].comp[1][2]).real();
     out->c12[i].Im = (momenta[indice].comp[1][2]).imag();
-    out->rc00[i] = (momenta[indice].comp[0][0]).imag();
-    out->rc11[i] = (momenta[indice].comp[1][1]).imag();
+    out->rc00[i] = (momenta[indice].comp[0][0]).real();
+    out->rc11[i] = (momenta[indice].comp[1][1]).real();
   }
 }
 
@@ -56,8 +57,8 @@ void Momenta::mom_soaCOM_to_aos( thmatCOM_soa const * const in,int matdir){
     momenta[indice].comp[0][1] = complex<double>(in->c01[i].Re,in->c01[i].Im);
     momenta[indice].comp[0][2] = complex<double>(in->c02[i].Re,in->c02[i].Im);
     momenta[indice].comp[1][2] = complex<double>(in->c12[i].Re,in->c12[i].Im);
-    momenta[indice].comp[0][0] = complex<double>(0.0,in->rc00[i]);
-    momenta[indice].comp[1][1] = complex<double>(0.0,in->rc11[i]);
+    momenta[indice].comp[0][0] = complex<double>(in->rc00[i],0.0);
+    momenta[indice].comp[1][1] = complex<double>(in->rc11[i],0.0);
     //reconstruct the other elements
     momenta[indice].comp[1][0] = conj(momenta[indice].comp[0][1]);
     momenta[indice].comp[2][0] = conj(momenta[indice].comp[0][2]);

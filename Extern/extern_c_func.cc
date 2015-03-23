@@ -43,3 +43,6 @@ extern "C" {
 }
 
 
+extern "C" {
+  void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom);
+}

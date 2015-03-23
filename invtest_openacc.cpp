@@ -225,7 +225,6 @@ int main(int argc,char **argv){
    //////////////////////////////////////////////////////////////////////////////////////////////////
    /////////////////////// CONFRONTO FORZA DI GAUGE            //////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////////////
-   //   create_momenta();
    calc_ipdot_gauge();
    cout << ">>>>>> Gauge - Ipdot[19] <<<<<<" << endl;
    cout << gauge_ipdot->ipdot[19] << endl;
@@ -259,6 +258,20 @@ int main(int argc,char **argv){
    global_sum(d_vector1,partial_sum);
    diff1_h=sqrt(d_vector1[0])*sqrt(0.25/9.0/((double)(partial_sum)));  // 4 directions, 8 components                                                
    cout << "Delta Gauge Force / d.o.f. = " << diff1_h<<"\n";
+
+
+
+
+   create_momenta();
+
+   cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+   cout << gauge_momenta->momenta[0] << endl;
+   cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+   
+   thmatCOM_soa momenta_soaCOM[8];
+   for(int index=0;index<8;index++)   gauge_momenta->mom_aos_to_soaCOM(&momenta_soaCOM[index],index);
+   mom_exp_times_conf_openacc(conf_soaCOM,momenta_soaCOM);
+
 
 
 
@@ -322,13 +335,13 @@ int main(int argc,char **argv){
    //   first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_multi_out,&COMMON_multi,residue_metro,COM_approx); // RESIDUO_METRO
    //   first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_multi_out,&COMMON_multi,residue_md,COM_approx); // RESIDUO_MD
    tamatCOM_soa COMipdot_ferm[8];
-      fermion_force_openacc(conf_soaCOM,COMipdot_ferm,&COMMON_multi,residue_md,COM_approx);
-
-      Ipdot *ferm_ipdot_acc;
-      ferm_ipdot_acc=new Ipdot();
-
-      for(int index=0;index<8;index++)   ferm_ipdot_acc->ipdot_soaCOM_to_aos(&COMipdot_ferm[index],index);
-
+   fermion_force_openacc(conf_soaCOM,COMipdot_ferm,&COMMON_multi,residue_md,COM_approx);
+   
+   Ipdot *ferm_ipdot_acc;
+   ferm_ipdot_acc=new Ipdot();
+   
+   for(int index=0;index<8;index++)   ferm_ipdot_acc->ipdot_soaCOM_to_aos(&COMipdot_ferm[index],index);
+   
    cout << "VERSIONE DI FERM IPDOT OPENACC CONVERTITA" << endl;
    cout << ferm_ipdot_acc->ipdot[19] << endl;
 
@@ -352,7 +365,7 @@ int main(int argc,char **argv){
    //      multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_metro,approx); // RESIDUO_METRO
    //   multips_shifted_invert(fermion_shiftmulti, fermion_phi,residue_md,approx); // RESIDUO_MD
 
-        calc_ipdot_fermion();
+   calc_ipdot_fermion();
    // fermionforce(0);
    // fermionforce_aaa();
    cout << ">>>>>> Ferm - Ipdot[19] <<<<<<" << endl;
@@ -391,7 +404,7 @@ int main(int argc,char **argv){
 
 
 
-      delete ferm_ipdot_acc;
+   delete ferm_ipdot_acc;
    int iter, pseudofermion,i;
    Vec3 vr_1;
 

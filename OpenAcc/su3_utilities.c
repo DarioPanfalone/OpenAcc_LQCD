@@ -866,7 +866,7 @@ void mom_sum_mult( __restrict tamat_soa * const mom,
 		   const double factor){
   // !!!!!!!!!!!!!!!  factor  must be equal to   -beta/3.0*timestep !!!!!!!!!!!!!!!!!!!!
   int x, y, z, t;
-#pragma acc kernels present(mom) present(ipdot)
+#pragma acc kernels present(mom) present(ipdot) present(factor)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -1131,7 +1131,7 @@ static inline void project_on_su3(__restrict su3_soa * const cnf,
   
   //normalizzo la prima riga
   double NORM = creal(AUX->comp[0][0])*creal(AUX->comp[0][0])+cimag(AUX->comp[0][0])*cimag(AUX->comp[0][0]) + creal(AUX->comp[0][1])*creal(AUX->comp[0][1])+cimag(AUX->comp[0][1])*cimag(AUX->comp[0][1]) + creal(AUX->comp[0][2])*creal(AUX->comp[0][2])+cimag(AUX->comp[0][2])*cimag(AUX->comp[0][2]);
-  NORM = 1.0/sqrt(creal(AUX->comp[1][0]));
+  NORM = 1.0/sqrt(NORM);
 
   for(int c=0;c<3;c++)
     AUX->comp[0][c] *= NORM;
@@ -1159,7 +1159,7 @@ static inline void project_on_su3(__restrict su3_soa * const cnf,
 }
 
 
-void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const double factor){
+void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const double * factor){
 
   int x, y, z, t;
 #pragma acc kernels present(mom) present(conf) present(factor)
@@ -1182,7 +1182,7 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const do
           parity = (x+y+z+t) % 2;
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
-	    extract_mom(&mom[dir_link],idxh,factor,&mom_aux[0]);
+	    extract_mom(&mom[dir_link],idxh,factor[0],&mom_aux[0]);
 	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
 	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
 	    project_on_su3(&conf[dir_link],idxh,&mom_aux[0]);
@@ -1209,10 +1209,29 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
   select_working_gpu_homemade(0);
 
   struct timeval t0, t1,t2,t3;
-  double factor = 0.12;
+  double factor[1];
+  factor[0] = 0.1;
+  int index = 0;
+  printf("MOM - 00 = ( %.18lf )\n", momenta[0].rc00[index]);
+  printf("MOM - 11 = ( %.18lf )\n", momenta[0].rc11[index]);
+  printf("MOM - 01 = ( %.18lf , %.18lf )\n", creal(momenta[0].c01[index]) , cimag(momenta[0].c01[index]));
+  printf("MOM - 02 = ( %.18lf , %.18lf )\n", creal(momenta[0].c02[index]) , cimag(momenta[0].c02[index]));
+  printf("MOM - 12 = ( %.18lf , %.18lf )\n\n", creal(momenta[0].c12[index]) , cimag(momenta[0].c12[index]));
+
+  printf("link 0 - before conf_left_exp_multiply\n");
+  printf("Conf00 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c0[0]) , cimag(conf_acc[0].r0.c0[0]));
+  printf("Conf01 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c1[0]) , cimag(conf_acc[0].r0.c1[0]));
+  printf("Conf02 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c2[0]) , cimag(conf_acc[0].r0.c2[0]));
+  printf("Conf10 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c0[0]) , cimag(conf_acc[0].r1.c0[0]));
+  printf("Conf11 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c1[0]) , cimag(conf_acc[0].r1.c1[0]));
+  printf("Conf12 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c2[0]) , cimag(conf_acc[0].r1.c2[0]));
+  printf("Conf20 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c0[0]) , cimag(conf_acc[0].r2.c0[0]));
+  printf("Conf21 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c1[0]) , cimag(conf_acc[0].r2.c1[0]));
+  printf("Conf22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[0]) , cimag(conf_acc[0].r2.c2[0]));
+
 
   gettimeofday ( &t0, NULL );
-#pragma acc data copy(conf_acc[0:8]) copyin(momenta[0:8]) copyin(factor)
+#pragma acc data copy(conf_acc[0:8]) copyin(momenta[0:8]) copyin(factor[0:1])
   {
     gettimeofday ( &t1, NULL );
     mult_conf_times_stag_phases(conf_acc);
@@ -1222,7 +1241,18 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
     mult_conf_times_stag_phases(conf_acc);
     gettimeofday ( &t2, NULL );
   }
-    gettimeofday ( &t3, NULL );
+  gettimeofday ( &t3, NULL );
+  
+  printf("Result of link 0 - after conf_left_exp_multiply\n");
+  printf("Conf00 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c0[0]) , cimag(conf_acc[0].r0.c0[0]));
+  printf("Conf01 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c1[0]) , cimag(conf_acc[0].r0.c1[0]));
+  printf("Conf02 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c2[0]) , cimag(conf_acc[0].r0.c2[0]));
+  printf("Conf10 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c0[0]) , cimag(conf_acc[0].r1.c0[0]));
+  printf("Conf11 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c1[0]) , cimag(conf_acc[0].r1.c1[0]));
+  printf("Conf12 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c2[0]) , cimag(conf_acc[0].r1.c2[0]));
+  printf("Conf20 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c0[0]) , cimag(conf_acc[0].r2.c0[0]));
+  printf("Conf21 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c1[0]) , cimag(conf_acc[0].r2.c1[0]));
+  printf("Conf22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[0]) , cimag(conf_acc[0].r2.c2[0]));
 
 
   double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
@@ -1230,7 +1260,7 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
   double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
   double dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
 
-  printf("FULL STAPLES CALC OPENACC                       Tot time          : %f sec  \n",dt_tot);
+  printf("FULL CONF STEP: U'=EXP(IH)*U                    Tot time          : %f sec  \n",dt_tot);
   printf("                                                PreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
   printf("                                                PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
   printf("                                                PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
