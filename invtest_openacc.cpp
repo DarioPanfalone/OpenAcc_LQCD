@@ -271,6 +271,44 @@ int main(int argc,char **argv){
    thmatCOM_soa momenta_soaCOM[8];
    for(int index=0;index<8;index++)   gauge_momenta->mom_aos_to_soaCOM(&momenta_soaCOM[index],index);
    mom_exp_times_conf_openacc(conf_soaCOM,momenta_soaCOM);
+   complex<REAL> temp=complex<REAL>(0.0,0.01);
+   cout << "XXXXXXXXXXXXX   CONF BEFORE UPDATE                 XXXXXXXXXXXXXXXXXX" << endl;
+   cout << gauge_conf->u_work[0] << endl;
+   cout << gauge_conf->u_work[1] << endl;
+   conf_left_exp_multiply(temp);
+   cout << "XXXXXXXXXXXXX   CONF AFTER UPDATE                 XXXXXXXXXXXXXXXXXX" << endl;
+   cout << gauge_conf->u_work[0] << endl;
+   cout << gauge_conf->u_work[1] << endl;
+
+   Conf *gauge_conf_acc;
+   gauge_conf_acc=new Conf(0);
+   for(int index=0;index<8;index++)   gauge_conf_acc->conf_soaCOM_to_aos(&conf_soaCOM[index],index);
+   partial_sum=sizeh;
+   normetta=0.0;
+   cout << "XXXXXXXXXXXXX   CALCOLO LE DIFFERENZE                 XXXXXXXXXXXXXXXXXX" << endl;
+   cout << gauge_conf->u_work[0] << endl;
+   cout << gauge_conf_acc->u_work[0] << endl;
+
+
+   for(int id_h=0; id_h<partial_sum; id_h++)
+     {
+       coord(id_h,x_h,y_h,z_h,t_h);
+       d_vector1[id_h]=0.0;
+       for(mu_h=0; mu_h<4; mu_h++)
+         {
+           pos_h=id_h+mu_h*size;
+           aux_h=(gauge_conf->u_work[pos_h]);
+           aux_h-=(gauge_conf_acc->u_work[pos_h]);
+           normetta=(double)aux_h.l2norm2();
+           d_vector1[id_h]+=normetta;
+         }
+     }
+
+
+   //   global_sum(d_vector1,size);                                                                                                                          
+   global_sum(d_vector1,partial_sum);
+   diff1_h=sqrt(d_vector1[0])*sqrt(0.25/9.0/((double)(partial_sum)));  // 4 directions, 8 components                                                
+   cout << "Delta Conf after evoluz / d.o.f. = " << diff1_h<<"\n";
 
 
 

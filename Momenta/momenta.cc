@@ -122,7 +122,7 @@ void conf_left_exp_multiply(const complex<REAL> p)
        aux*=(gauge_conf->u_work[i]);
        (gauge_conf->u_work[i])=aux;
        }
-    gauge_conf->unitarize_with_eta(); 
+       gauge_conf->unitarize_with_eta(); 
   #endif
 
   #ifdef TIMING_CUDA_CPP

@@ -567,8 +567,28 @@ void Su3::ta(void)
 // exponential
 void Su3::exp(void)
   {
-  Su3 aux, ris;
+    Su3 aux, ris,uno;
+    uno.one();
+    // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
 
+    aux=*this;
+    aux*=0.2;
+    aux+=uno;
+    aux*=*this;
+    aux*=0.25;
+    aux+=uno;
+    aux*=*this;
+    aux*=one_by_three;
+    aux+=uno;
+    aux*=*this;
+    aux*=0.5;
+    aux+=uno;
+    aux*=*this;
+    aux+=uno;
+    *this=aux;
+ 
+
+  /*
   ris.one();
   aux=*this;
 
@@ -589,14 +609,15 @@ void Su3::exp(void)
   aux*=*this;
   aux*=0.2;
   ris+=aux;  // 5 order
-
+  
   aux*=*this;
   aux*=0.166666666666666666;
   ris+=aux;  // 6 order
 
   ris.sunitarize();
-
   *this=ris;
+  */
+
   }
 
 

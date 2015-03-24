@@ -1047,6 +1047,8 @@ static inline void extract_mom(const __restrict thmat_soa * const mom,
 			       __restrict single_su3 * M){
   //COSTRUISCO LA MATRICE M = i*delta*momento
   //leggo la prima parte
+  // il segno meno sulle componenti M10,M20 e M21 c'e' perche' dopo aver
+  // moltiplicato per 1.0I la matrice diventa anti-hermitiana
   M->comp[0][0] = mom->rc00[idx_mom] * (delta * 1.0I);
   M->comp[0][1] = mom->c01[idx_mom] * (delta * 1.0I);
   M->comp[0][2] = mom->c02[idx_mom] * (delta * 1.0I);
@@ -1099,7 +1101,7 @@ static inline void matrix_exp_openacc(const __restrict single_su3 * const MOM,
   }
 }
 ///////ATTENZIONE FORSE HO SCAMBIATO RIGHE E COLONNE ..... CONTROLLARE!  --> direi di no, ma lascio il commento
-static inline void conf_left_exp_multiply(__restrict su3_soa * const cnf,
+static inline void conf_left_exp_multiply(const __restrict su3_soa * const cnf,
 					  const int idx_cnf,
 					  const __restrict single_su3 * const  EXP,
 					  __restrict single_su3 * AUX,
@@ -1115,14 +1117,16 @@ static inline void conf_left_exp_multiply(__restrict su3_soa * const cnf,
   AUX->comp[1][1] = cnf->r1.c1[idx_cnf];
   AUX->comp[1][2] = cnf->r1.c2[idx_cnf];
   // ricostruisco la terza
-  AUX->comp[2][0] = AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1];
-  AUX->comp[2][1] = AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2];
-  AUX->comp[2][2] = AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * AUX->comp[1][0];
+  AUX->comp[2][0] = conj(AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1]);
+  AUX->comp[2][1] = conj(AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2]);
+  AUX->comp[2][2] = conj(AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * AUX->comp[1][0]);
 
 
   for(int r=0;r<2;r++) // qui il loop va fino solo a 2 perche non mi serve calcolare anche la terza riga del prodotto
     for(int c=0;c<3;c++)
-      AUX_RIS->comp[r][c] = (EXP->comp[r][0] * AUX->comp[0][c] + EXP->comp[r][1] * AUX->comp[1][c] + EXP->comp[r][2] * AUX->comp[2][c]);
+      AUX_RIS->comp[r][c] = (EXP->comp[r][0] * AUX->comp[0][c] + EXP->comp[r][1] * AUX->comp[1][c] + EXP->comp[r][2] * AUX->comp[2][c]);      
+//      AUX_RIS->comp[r][c] = (AUX->comp[r][0] * EXP->comp[0][c] + AUX->comp[r][1] * EXP->comp[1][c] + AUX->comp[r][2] * EXP->comp[2][c]);
+      
 }
 
 static inline void project_on_su3(__restrict su3_soa * const cnf,
@@ -1156,6 +1160,39 @@ static inline void project_on_su3(__restrict su3_soa * const cnf,
   cnf->r1.c0[idx_cnf] = AUX->comp[1][0];
   cnf->r1.c1[idx_cnf] = AUX->comp[1][1];
   cnf->r1.c2[idx_cnf] = AUX->comp[1][2];
+  // temporaneo --> poi togliere!!
+cnf->r2.c0[idx_cnf]= conj(AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1]);
+cnf->r2.c1[idx_cnf]= conj(AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2]);
+cnf->r2.c2[idx_cnf]= conj(AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * AUX->comp[1][0]);
+}
+
+
+static inline void assign_sinlge_su3_to_conf(__restrict su3_soa * const cnf,
+					     const int idx_cnf,
+					     const __restrict single_su3 * const AUX){
+  cnf->r0.c0[idx_cnf] = AUX->comp[0][0];
+  cnf->r0.c1[idx_cnf] = AUX->comp[0][1];
+  cnf->r0.c2[idx_cnf] = AUX->comp[0][2];
+  cnf->r1.c0[idx_cnf] = AUX->comp[1][0];
+  cnf->r1.c1[idx_cnf] = AUX->comp[1][1];
+  cnf->r1.c2[idx_cnf] = AUX->comp[1][2];
+  cnf->r2.c0[idx_cnf] = AUX->comp[2][0];
+  cnf->r2.c1[idx_cnf] = AUX->comp[2][1];
+  cnf->r2.c2[idx_cnf] = AUX->comp[2][2];
+}
+
+static inline void assign_3rd_to_conf(__restrict su3_soa * const cnf,
+				      const int idx_cnf,
+				      const __restrict single_su3 * const AUX){
+  cnf->r0.c0[idx_cnf] = AUX->comp[0][0];
+  cnf->r0.c1[idx_cnf] = AUX->comp[0][1];
+  cnf->r0.c2[idx_cnf] = AUX->comp[0][2];
+  cnf->r1.c0[idx_cnf] = AUX->comp[1][0];
+  cnf->r1.c1[idx_cnf] = AUX->comp[1][1];
+  cnf->r1.c2[idx_cnf] = AUX->comp[1][2];
+  cnf->r2.c0[idx_cnf] = AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1]; // conj!!!!!!!!!!!!
+  cnf->r2.c1[idx_cnf] = AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2];
+  cnf->r2.c2[idx_cnf] = AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * AUX->comp[1][0];
 }
 
 
@@ -1185,6 +1222,8 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const do
 	    extract_mom(&mom[dir_link],idxh,factor[0],&mom_aux[0]);
 	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
 	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
+	    //assign_3rd_to_conf(&conf[dir_link],idxh,&mom_aux[0]);
+	    //assign_sinlge_su3_to_conf(&conf[dir_link],idxh,&mom_aux[0]);
 	    project_on_su3(&conf[dir_link],idxh,&mom_aux[0]);
 	  }
 	  
@@ -1199,8 +1238,8 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const do
 void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
   su3_soa  * conf_acc;
   thmat_soa * momenta;
-  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));    // --> 4*size
-  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa)); // --> 4*size
+  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));    //  -->  4*size
+  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
 
   int dir;
   for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
@@ -1210,7 +1249,7 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
 
   struct timeval t0, t1,t2,t3;
   double factor[1];
-  factor[0] = 0.1;
+  factor[0] = 0.01;
   int index = 0;
   printf("MOM - 00 = ( %.18lf )\n", momenta[0].rc00[index]);
   printf("MOM - 11 = ( %.18lf )\n", momenta[0].rc11[index]);
@@ -1253,6 +1292,18 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
   printf("Conf20 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c0[0]) , cimag(conf_acc[0].r2.c0[0]));
   printf("Conf21 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c1[0]) , cimag(conf_acc[0].r2.c1[0]));
   printf("Conf22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[0]) , cimag(conf_acc[0].r2.c2[0]));
+
+  printf("Conf00 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c0[1]) , cimag(conf_acc[0].r0.c0[1]));
+  printf("Conf01 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c1[1]) , cimag(conf_acc[0].r0.c1[1]));
+  printf("Conf02 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c2[1]) , cimag(conf_acc[0].r0.c2[1]));
+  printf("Conf10 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c0[1]) , cimag(conf_acc[0].r1.c0[1]));
+  printf("Conf11 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c1[1]) , cimag(conf_acc[0].r1.c1[1]));
+  printf("Conf12 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c2[1]) , cimag(conf_acc[0].r1.c2[1]));
+  printf("Conf20 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c0[1]) , cimag(conf_acc[0].r2.c0[1]));
+  printf("Conf21 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c1[1]) , cimag(conf_acc[0].r2.c1[1]));
+  printf("Conf22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[1]) , cimag(conf_acc[0].r2.c2[1]));
+
+  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
 
 
   double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
