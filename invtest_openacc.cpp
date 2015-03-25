@@ -300,6 +300,7 @@ int main(int argc,char **argv){
            aux_h=(gauge_conf->u_work[pos_h]);
            aux_h-=(gauge_conf_acc->u_work[pos_h]);
            normetta=(double)aux_h.l2norm2();
+	   cerr << x_h << "   " << y_h << "   " << z_h << "   " << t_h << "   " << id_h << "   " << normetta << endl;
            d_vector1[id_h]+=normetta;
          }
      }

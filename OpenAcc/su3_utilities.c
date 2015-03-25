@@ -319,11 +319,10 @@ static inline void   mat1_times_int_factor( __restrict su3_soa * const mat1,
   mat1->r1.c2[idx_mat1] *= factor;
 
   //Third row is not multiplied
-  /*
   mat1->r2.c0[idx_mat1] *= factor;
   mat1->r2.c1[idx_mat1] *= factor;
   mat1->r2.c2[idx_mat1] *= factor;
-  */
+
 }
 
 // calcola la traccia della matrice di su3
