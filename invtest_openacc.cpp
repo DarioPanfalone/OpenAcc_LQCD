@@ -283,8 +283,8 @@ int main(int argc,char **argv){
    Conf *gauge_conf_acc;
    gauge_conf_acc=new Conf(0);
    for(int index=0;index<8;index++)   gauge_conf_acc->conf_soaCOM_to_aos(&conf_soaCOM[index],index);
-   partial_sum=sizeh;
-   normetta=0.0;
+   partial_sum=size;
+   normetta=0.000000000000000000000000000000000000000000000000000000000000000;
    cout << "XXXXXXXXXXXXX   CALCOLO LE DIFFERENZE                 XXXXXXXXXXXXXXXXXX" << endl;
    cout << gauge_conf->u_work[0] << endl;
    cout << gauge_conf_acc->u_work[0] << endl;

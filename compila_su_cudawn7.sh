@@ -1,6 +1,6 @@
 #source setenv-pgi-14.9
-source setenv-pgi-14.7
-#source setenv-pgi-15.1
+#source setenv-pgi-14.7
+source setenv-pgi-15.1
 #source setenv-cuda.6.5
 source setenv-cuda.5.5
 
