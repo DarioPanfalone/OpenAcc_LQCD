@@ -503,6 +503,7 @@ static inline void assign_zero_to_su3_soa_component(__restrict su3_soa * const m
   matrix_comp->r2.c2[idx]=0.0+I*0.0;
 }
 
+
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix){
   int hx, y, z, t;
 #pragma acc kernels present(matrix)
@@ -847,32 +848,35 @@ void conf_times_staples_ta_part(const __restrict su3_soa * const u,
 
 }// closes routine
 
-static inline void tamat1_plus_tamat2_times_factor_into_tamat1(__restrict tamat_soa * const tam1,
+static inline void thmat1_plus_tamat2_times_factor_into_thmat1(__restrict thmat_soa * const thm1,
 							       const __restrict tamat_soa * const tam2,
 							       int idx,
 							       const double fact){
-
-  tam1->c01[idx]  += fact * tam2->c01[idx]; // complex
-  tam1->c02[idx]  += fact * tam2->c02[idx]; // complex
-  tam1->c12[idx]  += fact * tam2->c12[idx]; // complex
-  tam1->rc00[idx] += fact * tam2->rc00[idx];  // double
-  tam1->rc11[idx] += fact * tam2->rc11[idx];  // double
+  d_complex ifact = 0.0 + I*fact;
+  // ATTENZIONE, POTREBBE ESSERE CHE SIA INVECE 
+  // IFACT = 0.0 - I*FACT 
+  thm1->c01[idx]  -= ifact * tam2->c01[idx]; // complex
+  thm1->c02[idx]  -= ifact * tam2->c02[idx]; // complex
+  thm1->c12[idx]  -= ifact * tam2->c12[idx]; // complex
+  thm1->rc00[idx] += fact * tam2->rc00[idx];  // double
+  thm1->rc11[idx] += fact * tam2->rc11[idx];  // double
   
 }
 
-void mom_sum_mult( __restrict tamat_soa * const mom,
+void mom_sum_mult( __restrict thmat_soa * const mom,
 		   const __restrict tamat_soa * const ipdot,
-		   const double factor){
+		   double * factor,
+		   int id_factor){
   // !!!!!!!!!!!!!!!  factor  must be equal to   -beta/3.0*timestep !!!!!!!!!!!!!!!!!!!!
   int x, y, z, t;
 #pragma acc kernels present(mom) present(ipdot) present(factor)
-#pragma acc loop independent gang(nt)
+#pragma acc loop independent //gang(nt)
   for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
       for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
+#pragma acc loop independent //vector(DIM_BLOCK_X)
 	for(x=0; x < nx; x++) {
 	  int idxh;
 	  int parity;
@@ -882,7 +886,7 @@ void mom_sum_mult( __restrict tamat_soa * const mom,
 	  parity = (x+y+z+t) % 2;
 	  for(mu=0;mu<4;mu++){ 
 	    dir_link = 2*mu + parity;
-            tamat1_plus_tamat2_times_factor_into_tamat1(&mom[dir_link],&ipdot[dir_link],idxh,factor);
+            thmat1_plus_tamat2_times_factor_into_thmat1(&mom[dir_link],&ipdot[dir_link],idxh,factor[id_factor]);
 	  }
 	}  // x
       }  // y
@@ -1195,7 +1199,7 @@ static inline void assign_3rd_to_conf(__restrict su3_soa * const cnf,
 }
 
 
-void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const double * factor){
+void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const double * factor, int id_factor){
 
   int x, y, z, t;
 #pragma acc kernels present(mom) present(conf) present(factor)
@@ -1218,7 +1222,7 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const do
           parity = (x+y+z+t) % 2;
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
-	    extract_mom(&mom[dir_link],idxh,factor[0],&mom_aux[0]);
+	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux[0]);
 	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
 	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
 	    //assign_3rd_to_conf(&conf[dir_link],idxh,&mom_aux[0]);
@@ -1233,6 +1237,13 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const do
 
 }
 
+
+
+void mom_exp_times_conf_soloopenacc(su3_soa *conf_acc,const thmat_soa * momenta,double * delta, int id_delta){
+  mult_conf_times_stag_phases(conf_acc);
+  kernel_acc_mom_exp_times_conf(conf_acc,momenta,delta, id_delta);
+  mult_conf_times_stag_phases(conf_acc);
+}
 
 void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
   su3_soa  * conf_acc;
@@ -1274,7 +1285,7 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
     gettimeofday ( &t1, NULL );
     mult_conf_times_stag_phases(conf_acc);
 
-    kernel_acc_mom_exp_times_conf(conf_acc,momenta,factor);
+    kernel_acc_mom_exp_times_conf(conf_acc,momenta,factor,0);
 
     mult_conf_times_stag_phases(conf_acc);
     gettimeofday ( &t2, NULL );
@@ -1324,7 +1335,7 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
 
 
 
-
+/// COSTRUIRE ANCHE LA VERSIONE SOLOOPENACC !!!
 void  calc_plaquette_openacc(const su3COM_soa *conf){
   su3_soa  * conf_acc, * local_plaqs;
   posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));    // --> 4*size
@@ -1454,6 +1465,27 @@ void  calc_staples_openacc(const su3COM_soa *conf,su3COM_soa *COM_staples){
 
 
 
+void calc_ipdot_gauge_soloopenacc(const su3_soa *conf_acc,  su3_soa *local_staples,tamat_soa * ipdot){
+  //  compute_nnp_and_nnm_openacc();
+  struct timeval t1,t2;
+  int looping_directions[4][3] = {{1,2,3},{0,2,3},{0,1,3},{0,1,2}};
+  gettimeofday ( &t1, NULL );
+  mult_conf_times_stag_phases(conf_acc);
+  set_su3_soa_to_zero(local_staples);
+  for(int mu=0;mu<4;mu++){
+    for(int iter=0;iter<3;iter++){
+      calc_loc_staples_removing_stag_phases_nnptrick(conf_acc,local_staples,mu,looping_directions[mu][iter]);
+    }
+  }
+  conf_times_staples_ta_part(conf_acc,local_staples,ipdot);
+  
+  mult_conf_times_stag_phases(conf_acc);
+  gettimeofday ( &t2, NULL );
+
+  double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+  printf("FULL STAPLES CALC OPENACC                       PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+
+}
 
 void  calc_ipdot_gauge_openacc(const su3COM_soa *conf,tamatCOM_soa * com_ipdot){
 //void  calc_ipdot_gauge_openacc(const su3COM_soa *conf){

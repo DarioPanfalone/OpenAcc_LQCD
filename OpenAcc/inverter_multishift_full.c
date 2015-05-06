@@ -1,27 +1,6 @@
 #ifndef INVERTER_SHIFT_MULTI_FULL_C_
 #define INVERTER_SHIFT_MULTI_FULL_C_
 
-#ifndef INCLUDE_ACC_X_FERM_MATRIX
-#define INCLUDE_ACC_X_FERM_MATRIX
-#include "openacc.h"
-#include "./struct_c_def.c"
-#include "./fermionic_utilities.c"
-#include "./su3_utilities.c"
-//#include "./gpu_selection.c"
-
-#endif
-
-
-#ifndef INCLUDE_ACC_FERM_MATRIX
-#define INCLUDE_ACC_FERM_MATRIX
-#include "./fermion_matrix.c"
-#endif
-
-#include "./inverter_full.c"
-#include "./find_min_max.c"
-
-
-
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
 
@@ -306,11 +285,11 @@ static inline  void mat1_times_auxmat_into_tamat( const  __restrict su3_soa * co
   mat1_10 = mat1_20 * auxmat_00 + mat1_21 * auxmat_10 + mat1_22 * auxmat_20;
   mat1_11 = mat1_20 * auxmat_01 + mat1_21 * auxmat_11 + mat1_22 * auxmat_21; 
   mat1_12 = mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * auxmat_22;
-  ipdot->c01[idipdot]  += 0.5*((a01) - conj(mat1_00));
-  ipdot->c02[idipdot]  += 0.5*((a02) - conj(mat1_10));
-  ipdot->c12[idipdot]  += 0.5*((mat1_02) - conj(mat1_11));
-  ipdot->rc00[idipdot] += cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
-  ipdot->rc11[idipdot] += cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
+  ipdot->c01[idipdot]  -= 0.5*((a01) - conj(mat1_00));
+  ipdot->c02[idipdot]  -= 0.5*((a02) - conj(mat1_10));
+  ipdot->c12[idipdot]  -= 0.5*((mat1_02) - conj(mat1_11));
+  ipdot->rc00[idipdot] -= cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
+  ipdot->rc11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
   ///////////////////////////////////////////////////
   ///// fine possibilita' numero 1 //////////////////
   ///////////////////////////////////////////////////
@@ -435,7 +414,7 @@ void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix){
 	  x = 2*hx + ((y+z+t) & 0x1);
 	  idxh = snum_acc(x,y,z,t);
 	  for(mu=0; mu<8; mu++) {
-	    assign_zero_to_su3_soa_component(&matrix[mu],idxh);
+	    assign_zero_to_tamat_soa_component(&matrix[mu],idxh);
 	  }
 	}  // x
       }  // y
@@ -625,7 +604,6 @@ void ker_openacc_compute_fermion_force( const __restrict su3_soa * const u,
 					const __restrict ACC_ShiftMultiFermion * const in_shiftmulti,
 					__restrict vec3_soa  * const loc_s,
 					__restrict vec3_soa  * const loc_h,
-					__restrict tamat_soa * const ipdot,
 					const COM_RationalApprox * const approx
 					){
   int ips;
@@ -815,6 +793,27 @@ void first_inv_approx_calc_openacc(const su3COM_soa  *conf, COM_MultiFermion *ou
 }
 
 
+void fermion_force_soloopenacc(const su3_soa  *conf_acc, tamat_soa *ipdot_acc, const ACC_MultiFermion *ferm_in_acc, double res, const COM_RationalApprox *approx, ACC_MultiFermion * ferm_out_acc,su3_soa  * aux_conf_acc,ACC_ShiftMultiFermion * ferm_shiftmulti_acc,vec3_soa * kloc_r,vec3_soa * kloc_h,vec3_soa * kloc_s,vec3_soa * kloc_p,ACC_ShiftFermion *k_p_shiftferm){
+  printf("############################################ \n");
+  printf("#### Inside fermion force soloopenacc ###### \n");
+  printf("############################################ \n");
+
+  struct timeval t1,t2;
+  gettimeofday ( &t1, NULL );
+  ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_in_acc,res,approx,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+  ker_openacc_compute_fermion_force(conf_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,approx);
+  set_tamat_soa_to_zero(ipdot_acc);
+  multiply_conf_times_force_and_take_ta_even(conf_acc,aux_conf_acc,ipdot_acc);
+  multiply_conf_times_force_and_take_ta_odd(conf_acc,aux_conf_acc,ipdot_acc);
+  gettimeofday ( &t2, NULL );
+  double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+  printf("FULL FERMION FORCE COMPUTATION                  PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+  printf("########################################### \n");
+  printf("#### Completed fermion force openacc ###### \n");
+  printf("########################################### \n");
+
+}
+
 
 void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM_MultiFermion *in, double res, const COM_RationalApprox *approx){
   printf("######################################## \n");
@@ -872,7 +871,7 @@ void fermion_force_openacc(const su3COM_soa  *conf, tamatCOM_soa *out, const COM
 
    // I think that for the force reconstruction this is not necessary
   //  ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_in_acc,ferm_out_acc,approx); 
-   ker_openacc_compute_fermion_force(conf_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,ipdot_acc,approx);
+   ker_openacc_compute_fermion_force(conf_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,approx);
 
    //   multiply_conf_times_force_and_take_ta(conf_acc,aux_conf_acc,ipdot_acc);
    multiply_conf_times_force_and_take_ta_even(conf_acc,aux_conf_acc,ipdot_acc);

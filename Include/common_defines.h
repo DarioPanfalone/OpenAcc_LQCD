@@ -11,10 +11,10 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 32
-#define ny 32
-#define nz 32
-#define nt 32
+#define nx 16
+#define ny 16
+#define nz 16
+#define nt 16
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -27,9 +27,9 @@
 #define max_approx_order 19
 #define no_ps 2
 
-#define no_md 18 // number of MD steps
+#define no_md 3 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
-#define gauge_scale 10  // Update fermions every gauge_scale gauge updates
+#define gauge_scale 3  // Update fermions every gauge_scale gauge updates
 
 
 

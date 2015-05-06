@@ -63,6 +63,71 @@ void Conf::calc_plaq(REAL &pls, REAL &plt) const
   #endif
   }
 
+// plaquette measurement 
+void Conf::calc_plaq_uwork(REAL &pls, REAL &plt) const
+  {
+  #ifdef DEBUG_MODE
+  cout << "DEBUG: inside Conf::calc_plaq ..."<<endl;
+  #endif
+
+  Su3 aux;
+  long int r, index_mu, index_nu;
+  int mu, nu;
+  double pls_loc, plt_loc;
+
+	  
+
+  for(r=0; r<size; r++)
+     {
+     d_vector1[r]=0.0;
+     d_vector2[r]=0.0;
+     for(mu=0; mu<3; mu++) 
+        {
+        index_mu=mu*size; 
+        for(nu=mu+1; nu<4; nu++)
+           {
+           //            (3)
+           //          +<---+
+           // nu       |    ^ 
+           // ^    (4) V    | (2)
+           // |        +--->+
+           // |        r (1)
+           // +---> mu
+ 
+           index_nu=nu*size;
+
+           aux=  u_work[index_mu + r];          // 1
+           aux*= u_work[index_nu + nnp[r][mu]]; // 2
+           aux*=~u_work[index_mu + nnp[r][nu]]; // 3
+           aux*=~u_work[index_nu + r];
+
+           if(nu==3)
+             {
+             d_vector1[r]-=(double)aux.retr();  // temporal
+             }
+           else                                 // MINUS SIGN DUE TO STAGGERED PHASES
+             {
+             d_vector2[r]-=(double)aux.retr();  // spatial
+             }
+          
+	   }
+	}   
+     }
+  
+  global_sum(d_vector1, size);
+  global_sum(d_vector2, size);
+
+  plt_loc=d_vector1[0]*inv_size_by_three*one_by_three;
+  pls_loc=d_vector2[0]*inv_size_by_three*one_by_three;   // 3 plaquettes for site and 3 colors
+
+  plt=plt_loc;
+  pls=pls_loc;
+
+  #ifdef DEBUG_MODE
+  cout << "\tterminated Conf::calc_plaq"<<endl;
+  #endif
+  }
+
 /*
 // Calculate all the plaquettes 6 planes x 2 component (real and imag)
 void Conf::calc_all_plaq(REAL &pxyr,REAL &pxyi,REAL &pxzr,REAL &pxzi,REAL &pxtr,REAL &pxti,REAL &pyzr,REAL &pyzi,REAL &pytr,REAL &pyti,REAL &pztr,REAL &pzti) const

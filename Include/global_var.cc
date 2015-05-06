@@ -7,8 +7,8 @@
 int update_iteration;
 
 // eigenvalues
-REAL min_stored=0.0;
-REAL max_stored=0.0;
+REAL min_stored=0.1024;
+REAL max_stored=5.0;
 int use_stored=1;  // when =0 stored eigenvalues are used
 
 // staggered phases , allocated and set in Geometry/geometry.cc :: init_geo()
@@ -64,7 +64,7 @@ Staples *gauge_staples;
 // vectors for global sum (also used in inverters)
 double *d_vector1;
 double *d_vector2;
-
+double *plaq_test;   // this has to be used only in action calculations
 
 //used in the CUDA version, to pack the configuration on the device
 float *gauge_field_packed;

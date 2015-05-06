@@ -1,0 +1,6 @@
+*.bin
+*.gpu
+*.ptx
+*.o
+*~
+.gitignore

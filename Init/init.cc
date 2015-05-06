@@ -23,6 +23,12 @@
 #include "../Ipdot/ipdot.cc"
 #include "../FermionForce/fermionforce.cc"
 #include "../Momenta/momenta.cc"
+#include "../MD_integrators/leapfrog.cc"
+#include "../MD_integrators/minimum_norm2.cc"
+#include "../MD_integrators/multistep_2MN.cc"
+#include "../MD_integrators/multistep_4MN.cc"
+#include "../Action/action.cc"
+#include "../Update/update.cc"
 
 #include "../Inverter/inverter.cc"    
 #include "../OpenAcc/inverter_simple.cc"  
@@ -69,6 +75,7 @@ int init(int startMode = 1)
      // auxiliary vectors for global sums
      d_vector1=new double[size];
      d_vector2=new double[size];
+     plaq_test=new double[size];
 
 #ifdef USEGPU
      gauge_field_packed=new float[12*no_links*2];            // 2 since 1double~2float
@@ -105,6 +112,7 @@ void end(void)
   // clear auxiliary vectors
   delete [] d_vector1;
   delete [] d_vector2;
+  delete [] plaq_test;
 
   // clear auxiliary global fermions
   delete loc_r;

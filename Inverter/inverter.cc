@@ -359,7 +359,6 @@ void multips_shifted_invert (ShiftMultiFermion *out, MultiFermion *in, REAL res,
   cout << "time for multips_shifted_invert = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
   #endif
 
-#if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER))
   cout << "\tterminated multips_shift_invert ( stop_res=" <<res<<" )"<<endl;
   for(i=0; i<no_ps; i++)
     {
@@ -399,7 +398,7 @@ void multips_shifted_invert (ShiftMultiFermion *out, MultiFermion *in, REAL res,
 	  cout << "\t\t[ pseudoferm="<<pseudofermion<<" iter="<<iter<< " res/stop_res="<< sqrt(d_vector1[0])/res << " ]"<<endl;
         }
     }
-  #endif
+
 }
 
 

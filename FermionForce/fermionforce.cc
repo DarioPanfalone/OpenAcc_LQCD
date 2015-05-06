@@ -43,7 +43,8 @@ void fermionforce(int moltiplico)
   #else
     cout << "Before multishift inside fermionforce" << endl;
     //    multips_shifted_invert(fermion_shiftmulti, fermion_chi, residue_md, approx);   //////////////////////////////     che succede se B =/= 0 ??
-    multips_shifted_invert(fermion_shiftmulti, fermion_phi, residue_md, approx);   //////////////////////////////     che succede se B =/= 0 ??
+    //    multips_shifted_invert(fermion_shiftmulti, fermion_phi, residue_md, approx);   //////////////////////////////     che succede se B =/= 0 ??
+    multips_shifted_invert(fermion_shiftmulti, fermion_chi, residue_md, approx);
     cout << "After multishift inside fermionforce" << endl;
   #endif
 

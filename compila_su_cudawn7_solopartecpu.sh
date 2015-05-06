@@ -6,4 +6,4 @@ source setenv-cuda.5.5
 
 #bsub -q gpuday ./compile_multishift_and_gauge.sh
 #bsub -q gpuday ./compile_multishift_and_gauge_CUDAVER.sh
-bsub -q gpuday ./compile_update.sh
+bsub -q gpuday ./compile_update_solopartecpu.sh

@@ -46,3 +46,7 @@ extern "C" {
 extern "C" {
   void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom);
 }
+
+extern "C" {
+  void multistep_2MN_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *approx,const COM_MultiFermion *in,thmatCOM_soa * com_mom);
+}

@@ -160,6 +160,7 @@ void momenta_sum_multiply(const complex<REAL> p)
        aux*=p;
        (gauge_momenta->momenta[i])+=aux;
        }
+    cout << "IPDOT 0"  << endl << (gauge_ipdot->ipdot[0]) << endl;
   #endif
 
   #ifdef TIMING_CUDA_CPP

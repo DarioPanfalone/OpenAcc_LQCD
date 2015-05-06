@@ -21,7 +21,11 @@ public:
 
   Conf(int initMode);
 
+  // defined in Action/action.cc
+  void loc_action(double *value, int init) const;
+
   void  calc_plaq(REAL &pls, REAL &plt) const;
+  void  calc_plaq_uwork(REAL &pls, REAL &plt) const;
   //  void  calc_all_plaq(REAL &pxyr,REAL &pxyi,REAL &pxzr,REAL &pxzi,REAL &pxtr,REAL &pxti,REAL &pyzr,REAL &pyzi,REAL &pytr,REAL &pyti,REAL &pztr,REAL &pzti);
   void  calc_poly(REAL &re, REAL &im) const;
   Su3 get_staple(int index, int mu);
@@ -36,6 +40,12 @@ public:
 
   void conf_aos_to_soaCOM(su3COM_soa *out,int matdir) const;
   void conf_soaCOM_to_aos(su3COM_soa const* const in,int matdir);
+
+  void save(void);
+  void copy_saved(void);
+  void write(void);
+  void write_last(void);
+  void print(void);
 
 
 };
@@ -266,5 +276,132 @@ Su3 Conf::get_staple(int index, int mu)
     }
   return staple;
 }
+
+
+// copy u_work to u_save
+void Conf::save(void)
+{
+ #ifdef DEBUG_MODE
+  cout << "DEBUG: inside Conf::save ..."<<endl;
+ #endif
+  long int r;
+
+  for(r=0; r<no_links; r++)
+    {
+      u_save[r]=u_work[r];
+    }
+ #ifdef DEBUG_MODE
+  cout << "\tterminated Conf::save"<<endl;
+ #endif
+}
+
+// copy u_save to u_work
+void Conf::copy_saved(void)
+{
+ #ifdef DEBUG_MODE
+  cout << "DEBUG: inside Conf::copy_saved ..."<<endl;
+ #endif
+
+  long int r;
+
+  for(r=0; r<no_links; r++)
+    {
+      u_work[r]=u_save[r];
+    }
+ #ifdef DEBUG_MODE
+  cout << "\tterminated Conf::copy_saved"<<endl;
+ #endif
+}
+
+// write configuration to conf_file_0 or conf_file_1 (defined in Include/global_macro.cc) 
+void Conf::write(void)
+{
+ #ifdef DEBUG_MODE
+  cout << "DEBUG: inside Conf::write ..."<<endl;
+ #endif
+
+  static int conf_count=0;
+
+  long int r;
+  ofstream file;
+  char conf_name[50], aux[10];
+
+  strcpy(conf_name, QUOTEME(CONF_FILE));
+  sprintf(aux, "_%d", conf_count);
+  strcat(conf_name, aux);
+
+  file.open(conf_name, ios::out);
+  file.precision(16);
+
+  file << nx << " " << ny << " " << nz << " " << nt << " " << beta << " " << mass << " " <<no_flavours << " " <<  update_iteration <<"\n";
+
+  for(r=0; r<no_links; r++)
+    {
+      file << u_save[r];
+    }
+
+  file.close();
+
+  conf_count=1-conf_count;
+
+ #ifdef DEBUG_MODE
+  cout << "\tterminated Conf::write"<<endl;
+ #endif
+}
+
+
+// write configuration to conf_file (defined in Include/global_macro.cc) 
+void Conf::write_last(void)
+{
+ #ifdef DEBUG_MODE
+  cout << "DEBUG: inside Conf::write_last ..."<<endl;
+ #endif
+
+  long int r;
+  ofstream file;
+
+  file.open(QUOTEME(CONF_FILE), ios::out);
+  file.precision(16);
+
+  file << nx << " " << ny << " " << nz << " " << nt << " " << beta << " " << mass << " " <<no_flavours << " " <<  update_iteration <<"\n";
+
+  for(r=0; r<no_links; r++)
+    {
+      file << u_save[r];
+    }
+
+  file.close();
+
+ #ifdef DEBUG_MODE
+  cout << "\tterminated Conf::write_last"<<endl;
+ #endif
+}
+
+// print configuration 
+void Conf::print(void)
+{
+ #ifdef DEBUG_MODE
+  cout << "DEBUG: inside Conf::print ..."<<endl;
+ #endif
+
+  long int r;
+
+  cout<<"U_SAVE\n";
+  for(r=0; r<no_links; r++)
+    {
+      cout << u_save[r];
+    }
+
+  cout<<"U_WORK\n";
+  for(r=0; r<no_links; r++)
+    {
+      cout << u_work[r];
+    }
+
+ #ifdef DEBUG_MODE
+  cout << "\tterminated Conf::print"<<endl;
+ #endif
+}
+
 
 #endif
