@@ -485,6 +485,65 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
 }// closes routine
 
 
+static inline double half_tr_thmat_squared( __restrict const thmat_soa * const mom,
+					    int idx_mom){
+  double    A = mom->rc00[idx_mom];
+  double    B = mom->rc11[idx_mom];
+  d_complex  C = mom->c01[idx_mom];
+  d_complex  D = mom->c02[idx_mom];
+  d_complex  E = mom->c12[idx_mom];
+  return A*A + B*B + A*B + creal(C)*creal(C) + cimag(C)*cimag(C) + creal(D)*creal(D) + cimag(D)*cimag(D) + creal(E)*creal(E) + cimag(E)*cimag(E);
+  
+}
+
+double calc_momenta_action( __restrict const thmat_soa * const mom,
+			    dcomplex_soa * tr_local){
+  int x, y, z, t;
+
+#pragma acc kernels present(tr_local)
+  for(t=0; t<sizeh; t++) {
+    tr_local[0].c[t] = 0.0 + I*0.0;
+  }
+
+#pragma acc kernels present(mom) present(tr_local)
+#pragma acc loop independent //gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent //vector(DIM_BLOCK_X)
+        for(x=0; x < nx; x++) {
+          int idxh;
+          int parity;
+          int dir_link;
+          int mu;
+          idxh = snum_acc(x,y,z,t);  // r
+          parity = (x+y+z+t) % 2;
+          for(mu=0;mu<4;mu++){
+            dir_link = 2*mu + parity;
+            tr_local[0].c[idxh] += half_tr_thmat_squared(&mom[dir_link],idxh);
+          }
+        }  // x
+      }  // y
+    }  // z
+  }  // t
+
+  double result=0.0;
+#pragma acc kernels present(tr_local)
+#pragma acc loop reduction(+:result)
+  for(t=0; t<sizeh; t++) {
+    result += creal(tr_local[0].c[t]);
+  }
+  
+  return result;
+
+
+}// closes routine
+
+
+
+
 
 
 static inline void assign_zero_to_su3_soa_component(__restrict su3_soa * const matrix_comp,
@@ -1355,6 +1414,8 @@ double  calc_plaquette_soloopenacc(const su3_soa *conf_acc, su3_soa * local_plaq
   return tempo;
 
   }
+
+
 
 void  calc_plaquette_openacc(const su3COM_soa *conf){
   su3_soa  * conf_acc, * local_plaqs;

@@ -88,6 +88,20 @@ int main(int argc,char **argv){
   cout << "LINK 0 BEFORE  " << endl << gauge_conf->u_work[0] << endl;
   cout << "MOME 0 BEFORE  " << endl << gauge_momenta->momenta[0] << endl;
   cout << "CHIFERM 0 0 BEFORE   " << fermion_chi->fermion[0][0] << endl;
+  int r,i;
+  Su3 auxm;
+  for(r=0; r<size; r++)
+    {
+      d_vector1[r]=0.0;
+      for(i=0;i<4;i++)
+	{
+          auxm =(gauge_momenta->momenta[r+i*size]);
+          auxm*=(gauge_momenta->momenta[r+i*size]);
+          d_vector1[r]+=0.5*auxm.retr();
+	}
+    }
+  global_sum(d_vector1,size);
+  cout << "ACT MOMENTA CPU BEFORE   " << d_vector1[0] << endl;
 
 
   //////////////////////////////// MD CPU //////////////////////////////////////////////////////
@@ -101,12 +115,27 @@ int main(int argc,char **argv){
   cout << "Plaquette CPU AFTER CPU UPDATE   =  " << (ps+pt)*0.5 << endl;
   cout << "LINK 0 AFTER CPU UPDATE  " << endl << gauge_conf->u_work[0] << endl;
   cout << "MOME 0 AFTER CPU UPDATE  " << endl << gauge_momenta->momenta[0] << endl;
-  cout << "CHIFERM 0 0 BEFORE   " << fermion_chi->fermion[0][0] << endl;
+  cout << "CHIFERM 0 0 AFTER   " << fermion_chi->fermion[0][0] << endl;
+
+  for(r=0; r<size; r++)
+    {
+      d_vector1[r]=0.0;
+      for(i=0;i<4;i++)
+	{
+          auxm =(gauge_momenta->momenta[r+i*size]);
+          auxm*=(gauge_momenta->momenta[r+i*size]);
+          d_vector1[r]+=0.5*auxm.retr();
+	}
+    }
+  global_sum(d_vector1,size);
+  cout << "ACT MOMENTA CPU AFTER   " << d_vector1[0] << endl;
+
 
   //////////////////////////////// MD ACC //////////////////////////////////////////////////////
 
   time_start=clock();
-  multistep_2MN_ACC(conf_soaCOM,residue_md,COM_approx,&COMMON_chi,momenta_soaCOM);
+  //  multistep_2MN_ACC(conf_soaCOM,residue_md,COM_approx,&COMMON_chi,momenta_soaCOM);
+  UPDATE_ACC(conf_soaCOM,residue_md,COM_approx,&COMMON_chi,momenta_soaCOM);
   time_finish=clock();
   cout << "Time for Update with OPENACC = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 

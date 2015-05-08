@@ -19,109 +19,57 @@
 //
 // p->p+a dS/dq=p+ia(-i dS/dq)=p+ia*ipdot
 
+// the various dt involved are stored into the delta array which is allocated into UPDATE_ACC(args)
 void multistep_2MN_gauge(su3_soa *conf_acc,su3_soa *local_staples,tamat_soa *ipdot,thmat_soa *momenta,double * delta)
  {
  int md;
- // const double lambda=0.1931833275037836; // Omelyan Et Al.
-
  // Step for the P
  // P' = P - l*dt*dS/dq
- // calc_ipdot_gauge();
+ // delta[3]=-cimag(ieps_acc)*scale*lambda;
  calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
- // delta[0]=-cimag(ieps_acc)*scale*lambda;
  mom_sum_mult(momenta,ipdot,delta,3);
- // momenta_sum_multiply(temp);
- 
  for(md=1; md<gauge_scale; md++){
    // Step for the Q
    // Q' = exp[dt/2 *i P] Q
-   //   delta[0]=cimag(iepsh_acc)*scale;
-      mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
-   //   conf_left_exp_multiply(temp);
-
-    // Step for the P
-    // P' = P - (1-2l)*dt*dS/dq
-   //    calc_ipdot_gauge();
-       calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
-   //   delta[0]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
-   //   momenta_sum_multiply(temp);
-       mom_sum_mult(momenta,ipdot,delta,5);
-
+   // delta[4]=cimag(iepsh_acc)*scale;
+   mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
+   // Step for the P
+   // P' = P - (1-2l)*dt*dS/dq
+   // delta[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
+   calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
+   mom_sum_mult(momenta,ipdot,delta,5);
    // Step for the Q
    // Q' = exp[dt/2 *i P] Q
-   //   delta[0]=cimag(iepsh_acc)*scale;
-   //   conf_left_exp_multiply(temp);
-       mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
-
-    // Step for the P
-    // P' = P - 2l*dt*dS/dq
-   //    calc_ipdot_gauge();
-       calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
-   //  delta[0]=-cimag(ieps_acc)*2.0*lambda*scale;
-   //    momenta_sum_multiply(temp);
-       mom_sum_mult(momenta,ipdot,delta,6);
+   // delta[4]=cimag(iepsh_acc)*scale;
+   mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
+   // Step for the P
+   // P' = P - 2l*dt*dS/dq
+   // delta[6]=-cimag(ieps_acc)*2.0*lambda*scale;
+   calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
+   mom_sum_mult(momenta,ipdot,delta,6);
  }
  
  // Step for the Q
  // Q' = exp[dt/2 *i P] Q
- // delta[0]=cimag(iepsh_acc)*scale;
-     mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
- // conf_left_exp_multiply(temp);
-
+ // delta[4]=cimag(iepsh_acc)*scale;
+ mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
  // Step for the P
  // P' = P - (1-2l)*dt*dS/dq
-     calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
+ calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
  // calc_ipdot_gauge();
- // delta[0]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
- // momenta_sum_multiply(temp);
-     mom_sum_mult(momenta,ipdot,delta,5);
-
+ // delta[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
+ mom_sum_mult(momenta,ipdot,delta,5);
  // Step for the Q
  // Q' = exp[dt/2 *i P] Q
- // delta[0]=cimag(iepsh_acc)*scale;
- // conf_left_exp_multiply(temp);
-     mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
-
+ // delta[4]=cimag(iepsh_acc)*scale;
+ mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
  // Step for the P
  // P' = P - l*dt*dS/dq
- // calc_ipdot_gauge();
-     calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
- // delta[0]=-cimag(ieps_acc)*lambda*scale;
- // momenta_sum_multiply(temp);
-     mom_sum_mult(momenta,ipdot,delta,3);
-
-
+ // delta[3]=-cimag(ieps_acc)*lambda*scale;
+ calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
+ mom_sum_mult(momenta,ipdot,delta,3);
+ 
  }
-
-
-
-
-
-// PRIMA DI QUESTA ROUTINE BISOGNA:
-// 1- inizializzare gaussianamente i momenti (thmatCOM_soa * com_mom)
-// 2- inizializzare gaussianamente il multifermione phi (che qui dentro non compare)
-// 3- calcolarsi il multifermione  chi con first_inv_approx_calc, che vuol dire: calcolarsi l'inversa con il multishift, il che sputa un shiftmultifermion
-//                                                     e ricostruire il risultato sommando i vari pezzetti
-/*
- multips_shifted_invert (fermion_shiftmulti, fermion_phi, res, approx);
-
- for(pseudofermion=0; pseudofermion<no_ps; pseudofermion++)
-    {
-    for(i=0; i<sizeh; i++)
-       {
-       vr_1=(approx.RA_a0)*(fermion_phi->fermion[pseudofermion][i]);
-       for(iter=0; iter<(approx.approx_order); iter++)
-          {
-          vr_1+=(approx.RA_a[iter])*(fermion_shiftmulti->fermion[pseudofermion][iter][i]);
-          }
-       fermion_chi->fermion[pseudofermion][i]=vr_1;
-       }
-    }
- */
-//4 - dopodiche' lanciare questa routine dando come const COM_MultiFermion *in il risultato del punto 3, cioe' il multifermione phi! ... o chi?
-
-
-
 void multistep_2MN_SOLOOPENACC( tamat_soa * ipdot_acc,
 				su3_soa  * conf_acc,
 				su3_soa  * aux_conf_acc,
@@ -144,8 +92,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * ipdot_acc,
   
   // Step for the P
   // P' = P - l*dt*dS/dq
-  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
   //    delta[0]=-cimag(ieps_acc)*lambda;
+  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
   mom_sum_mult(momenta,ipdot_acc,delta,0);
   
   for(md=1; md<no_md; md++){
@@ -154,16 +102,16 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * ipdot_acc,
     multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
-    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
     // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
+    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
     mom_sum_mult(momenta,ipdot_acc,delta,1);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
     multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
     // Step for the P
     // P' = P - 2l*dt*dS/dq
-    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
     // delta[2]=-cimag(ieps_acc)*(2.0*lambda);
+    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
     mom_sum_mult(momenta,ipdot_acc,delta,2);
   }  
   // Step for the Q
@@ -171,16 +119,16 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * ipdot_acc,
   multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
   // Step for the P
   // P' = P - (1-2l)*dt*dS/dq
-  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
   // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
+  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
   mom_sum_mult(momenta,ipdot_acc,delta,1);
   // Step for the Q
   // Q' = exp[dt/2 *i P] Q
   multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
   // Step for the P
   // P' = P - l*dt*dS/dq
-  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
   // delta[0]=-cimag(ieps_acc)*lambda;
+  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
   mom_sum_mult(momenta,ipdot_acc,delta,0);
     
 }
@@ -189,7 +137,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * ipdot_acc,
 
 
 
-void multistep_2MN_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *approx,const COM_MultiFermion *in,thmatCOM_soa * com_mom){
+void UPDATE_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *approx,const COM_MultiFermion *in,thmatCOM_soa * com_mom){
   
   // defined in struct_c_def.c
   // contains the assignement of no_md_acc, ieps, ...
@@ -268,20 +216,25 @@ void multistep_2MN_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *app
 
   double action_in;
   double action_fin;
+  double action_mom_in;
+  double action_mom_fin;
 
 #pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_in_acc[0:1]) copy(approx[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:1])
   {
 
     gettimeofday ( &t1, NULL );
 
+    // ora come ora la risuzione delle local sums viene fatta ogni volta.
+    // eventualmente si puo' rendere piu efficiente l'algoritmo facendogli fare la riduzione solo alla fine
     action_in = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-
+    action_mom_in = calc_momenta_action(momenta,local_sums);
 
     multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_in_acc,ferm_out_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res,approx);
 
 
 
     action_fin = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    action_mom_fin = calc_momenta_action(momenta,local_sums);
 
     gettimeofday ( &t2, NULL );    
   } 
@@ -290,6 +243,8 @@ void multistep_2MN_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *app
 
   printf("PLAQ IN  = %.18lf \n",action_in);
   printf("PLAQ OUT = %.18lf \n",action_fin);
+  printf("MOM ACT IN  = %.18lf \n",action_mom_in);
+  printf("MOM ACT OUT = %.18lf \n",action_mom_fin);
 
   double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
   double dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
