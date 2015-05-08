@@ -67,11 +67,11 @@ int main(int argc,char **argv){
   //////  CALCOLO IL MULTIFERMIONE CHI CON OPENACC E LO TRADUCO PER DARLO (ANCHE) IN PASTO ALLA PARTE SERIALE   //////////////////
   COM_MultiFermion    COMMON_chi;
 
-  //  first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_chi,&COMMON_phi,residue_metro,COM_approx); // RESIDUO_METRO
-  //  fermion_chi->ferm_MultiCOM_to_Multi(&COMMON_chi);
+  first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_chi,&COMMON_phi,residue_metro,COM_approx); // RESIDUO_METRO
+  fermion_chi->ferm_MultiCOM_to_Multi(&COMMON_chi);
 
-  first_inv_approx_calc(residue_metro); // RESIDUO_METRO
-  fermion_chi->ferm_Multi_to_MultiCOM(&COMMON_chi);
+  //  first_inv_approx_calc(residue_metro); // RESIDUO_METRO
+  //  fermion_chi->ferm_Multi_to_MultiCOM(&COMMON_chi);
   cout << "Created chi\n";
   
   

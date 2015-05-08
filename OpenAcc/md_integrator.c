@@ -19,10 +19,10 @@
 //
 // p->p+a dS/dq=p+ia(-i dS/dq)=p+ia*ipdot
 
-void multistep_2MN_gauge(double scale,su3_soa *conf_acc,su3_soa *local_staples,tamat_soa *ipdot,thmat_soa *momenta,double * delta)
+void multistep_2MN_gauge(su3_soa *conf_acc,su3_soa *local_staples,tamat_soa *ipdot,thmat_soa *momenta,double * delta)
  {
  int md;
- const double lambda=0.1931833275037836; // Omelyan Et Al.
+ // const double lambda=0.1931833275037836; // Omelyan Et Al.
 
  // Step for the P
  // P' = P - l*dt*dS/dq
@@ -121,6 +121,74 @@ void multistep_2MN_gauge(double scale,su3_soa *conf_acc,su3_soa *local_staples,t
 //4 - dopodiche' lanciare questa routine dando come const COM_MultiFermion *in il risultato del punto 3, cioe' il multifermione phi! ... o chi?
 
 
+
+void multistep_2MN_SOLOOPENACC( tamat_soa * ipdot_acc,
+				su3_soa  * conf_acc,
+				su3_soa  * aux_conf_acc,
+				ACC_MultiFermion * ferm_in_acc,
+				ACC_MultiFermion * ferm_out_acc,
+				ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
+				vec3_soa * kloc_r,
+				vec3_soa * kloc_h,
+				vec3_soa * kloc_s,
+				vec3_soa * kloc_p,
+				ACC_ShiftFermion *k_p_shiftferm,
+				thmat_soa * momenta,
+				dcomplex_soa * local_sums,
+				double * delta,
+				double res,
+				COM_RationalApprox *approx)
+{
+  
+  int md;
+  
+  // Step for the P
+  // P' = P - l*dt*dS/dq
+  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+  //    delta[0]=-cimag(ieps_acc)*lambda;
+  mom_sum_mult(momenta,ipdot_acc,delta,0);
+  
+  for(md=1; md<no_md; md++){
+    // Step for the Q
+    // Q' = exp[dt/2 *i P] Q
+    multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+    // Step for the P
+    // P' = P - (1-2l)*dt*dS/dq
+    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+    // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
+    mom_sum_mult(momenta,ipdot_acc,delta,1);
+    // Step for the Q
+    // Q' = exp[dt/2 *i P] Q
+    multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+    // Step for the P
+    // P' = P - 2l*dt*dS/dq
+    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+    // delta[2]=-cimag(ieps_acc)*(2.0*lambda);
+    mom_sum_mult(momenta,ipdot_acc,delta,2);
+  }  
+  // Step for the Q
+  // Q' = exp[dt/2 *i P] Q
+  multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+  // Step for the P
+  // P' = P - (1-2l)*dt*dS/dq
+  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+  // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
+  mom_sum_mult(momenta,ipdot_acc,delta,1);
+  // Step for the Q
+  // Q' = exp[dt/2 *i P] Q
+  multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+  // Step for the P
+  // P' = P - l*dt*dS/dq
+  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+  // delta[0]=-cimag(ieps_acc)*lambda;
+  mom_sum_mult(momenta,ipdot_acc,delta,0);
+    
+}
+
+
+
+
+
 void multistep_2MN_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *approx,const COM_MultiFermion *in,thmatCOM_soa * com_mom){
   
   // defined in struct_c_def.c
@@ -140,6 +208,8 @@ void multistep_2MN_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *app
   vec3_soa * kloc_p;
   ACC_ShiftFermion *k_p_shiftferm;
   thmat_soa * momenta;
+  dcomplex_soa * local_sums;
+  double delta[7];
 
 
   posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
@@ -154,16 +224,15 @@ void multistep_2MN_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *app
   posix_memalign((void **)&ferm_in_acc  , ALIGN, sizeof(ACC_MultiFermion));
   posix_memalign((void **)&ferm_out_acc , ALIGN, sizeof(ACC_MultiFermion));
   posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, sizeof(ACC_ShiftMultiFermion));
+  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));  // --> size complessi --> vettore per sommare cose locali
   
   int dir;
   for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
   convert_COM_MultiFermion_to_ACC_MultiFermion(in,ferm_in_acc);
   for(dir=0;dir<8;dir++)  convert_thmatCOM_soa_to_thmat_soa(&com_mom[dir],&momenta[dir]);
   
-  int md;
   const double lambda=0.1931833275037836; // Omelyan Et Al.
   const double gs=0.5/(double) gauge_scale_acc;
-  double delta[7];
 
   struct timeval t0, t1,t2,t3;
   gettimeofday ( &t0, NULL );
@@ -197,84 +266,30 @@ void multistep_2MN_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *app
   printf("Conf 22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[index]) , cimag(conf_acc[0].r2.c2[index]));
 
 
+  double action_in;
+  double action_fin;
 
-#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_in_acc[0:1]) copy(approx[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc)
+#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_in_acc[0:1]) copy(approx[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:1])
   {
-
-    //calc_plaquette_soloopenacc(const su3_soa *conf);
-
 
     gettimeofday ( &t1, NULL );
 
-    // Step for the P
-    // P' = P - l*dt*dS/dq
-    //       calc_ipdot_fermion();
-
-    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-    
-    //    delta[0]=-cimag(ieps_acc)*lambda;
-    mom_sum_mult(momenta,ipdot_acc,delta,0);
-
-    for(md=1; md<no_md; md++){
-      // Step for the Q
-      // Q' = exp[dt/2 *i P] Q
-      //multistep_2MN_gauge(gs);// ancora da fare
-            multistep_2MN_gauge(gs,conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
-
-      // Step for the P
-      // P' = P - (1-2l)*dt*dS/dq
-      //       calc_ipdot_fermion();
-      fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-      //      delta[0]=-cimag(ieps_acc)*(1.0-2.0*lambda);
-      mom_sum_mult(momenta,ipdot_acc,delta,1);
-      
-      // Step for the Q
-      // Q' = exp[dt/2 *i P] Q
-      //      multistep_2MN_gauge(gs);
-       multistep_2MN_gauge(gs,conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
-
-      // Step for the P
-      // P' = P - 2l*dt*dS/dq
-      //     calc_ipdot_fermion();
-      fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-      //      delta[0]=-cimag(ieps_acc)*(2.0*lambda);
-      mom_sum_mult(momenta,ipdot_acc,delta,2);
-      //     momenta_sum_multiply(temp);
-    }
-    
-    // Step for the Q
-    // Q' = exp[dt/2 *i P] Q
-    //    multistep_2MN_gauge(gs);
-    multistep_2MN_gauge(gs,conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
-    
+    action_in = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 
 
-    // Step for the P
-    // P' = P - (1-2l)*dt*dS/dq
-    //   calc_ipdot_fermion();
-    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-    //    delta[0]=-cimag(ieps_acc)*(1.0-2.0*lambda);
-    mom_sum_mult(momenta,ipdot_acc,delta,1);
-    //   momenta_sum_multiply(temp);
-    
-    // Step for the Q
-    // Q' = exp[dt/2 *i P] Q
-    //    multistep_2MN_gauge(gs);
-     multistep_2MN_gauge(gs,conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+    multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_in_acc,ferm_out_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res,approx);
 
-    // Step for the P
-    // P' = P - l*dt*dS/dq
-    //   calc_ipdot_fermion();
-    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-    //    delta[0]=-cimag(ieps_acc)*lambda;
-    mom_sum_mult(momenta,ipdot_acc,delta,0);
-    //   momenta_sum_multiply(temp);
-    
+
+
+    action_fin = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+
     gettimeofday ( &t2, NULL );    
   } 
 
   gettimeofday ( &t3, NULL );
 
+  printf("PLAQ IN  = %.18lf \n",action_in);
+  printf("PLAQ OUT = %.18lf \n",action_fin);
 
   double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
   double dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);

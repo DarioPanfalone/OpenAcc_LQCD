@@ -418,7 +418,6 @@ void mult_conf_times_stag_phases( __restrict su3_soa * const u){
 double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa * const u,
 							    __restrict su3_soa * const loc_plaq,
 							    dcomplex_soa * const tr_local_plaqs,
-							    double * const plaqs,
 							    const int mu,
 							    const int nu){
 
@@ -479,8 +478,8 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
     res_I_p += cimag(tr_local_plaqs[1].c[t]);
   }
 
-  plaqs[0] = res_R_p;
-  plaqs[1] = res_I_p;
+  //  plaqs[0] = res_R_p;
+  //  plaqs[1] = res_I_p;
 
   return res_R_p;
 }// closes routine
@@ -1335,7 +1334,28 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
 
 
 
-/// COSTRUIRE ANCHE LA VERSIONE SOLOOPENACC !!!
+///  VERSIONE SOLOOPENACC DEL CALCOLO DELLA PLACCHETTA!!!
+/// ASSUMIAMO CHE NELLA MEMORIA DELLA SCHEDA LA CONF SIA GIA' PRESENTE!!
+/// E CHE ANCHE ESISTA UNO SPAZIO DI MEMORIA LOCAL_PLAQS AUSILIARIO DOVE FARE I CONTI PARZIALI
+double  calc_plaquette_soloopenacc(const su3_soa *conf_acc, su3_soa * local_plaqs, dcomplex_soa * tr_local_plaqs){
+
+  double tempo=0.0;
+  // tolgo le fasi staggered
+  mult_conf_times_stag_phases(conf_acc);
+  // calcolo il valore della plaquette sommata su tutti i siti a fissato piano mu-nu (6 possibili piani)
+  for(int mu=0;mu<3;mu++){
+    for(int nu=mu+1;nu<4;nu++){
+      // sommo i 6 risultati in tempo
+      tempo  += calc_loc_plaquettes_removing_stag_phases_nnptrick(conf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+    }
+  }
+  // rimetto le fasi staggered
+  mult_conf_times_stag_phases(conf_acc);
+
+  return tempo;
+
+  }
+
 void  calc_plaquette_openacc(const su3COM_soa *conf){
   su3_soa  * conf_acc, * local_plaqs;
   posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));    // --> 4*size
@@ -1369,7 +1389,7 @@ void  calc_plaquette_openacc(const su3COM_soa *conf){
     for(int mu=0;mu<3;mu++){
       for(int nu=mu+1;nu<4;nu++){
 	// sommo i 6 risultati in tempo
-	tempo  += calc_loc_plaquettes_removing_stag_phases_nnptrick(conf_acc,local_plaqs,tr_local_plaqs,plaq,mu,nu);
+	tempo  += calc_loc_plaquettes_removing_stag_phases_nnptrick(conf_acc,local_plaqs,tr_local_plaqs,mu,nu);
       }
     }
     // rimetto le fasi staggered

@@ -189,14 +189,14 @@ void RationalApprox::first_inv_approx_coeff(void)
  // normalized coefficients
  *this=*first_inv_approx_norm_coeff;
 
- findminmax(min, max);
- cout << "CPU:      min = " << min << "    max = " << max << endl;
+ // findminmax(min, max);
+ // cout << "CPU:      min = " << min << "    max = " << max << endl;
 
- // findminmax_con_openacc(minmax);
- // min = minmax[0];
- // max = minmax[1];
- // cout << "OPENACC:  min = " << min << "    max = " << max << endl;
-
+ findminmax_con_openacc(minmax);
+ min = minmax[0];
+ max = minmax[1];
+ cout << "OPENACC:  min = " << min << "    max = " << max << endl;
+ 
  min*=0.95;
  max*=1.05;
  cout << "OPENACC times security factors:  min = " << min << "    max = " << max << endl;
