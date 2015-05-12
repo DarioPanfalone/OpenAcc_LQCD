@@ -76,6 +76,10 @@ typedef struct dcomplex_soa_t {
   d_complex c[sizeh];
 } dcomplex_soa;
 
+typedef struct double_soa_t {
+  double d[sizeh];
+} double_soa;
+
 typedef struct single_su3_t {
   d_complex comp[3][3];
 } single_su3;

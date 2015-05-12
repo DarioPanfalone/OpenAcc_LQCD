@@ -46,28 +46,34 @@ int main(int argc,char **argv){
   fermion_phi->ferm_Multi_to_MultiCOM(&COMMON_phi);
   cout << "Created phi\n";
   
-  RationalApprox approx;
-  COM_RationalApprox *COM_approx;
-  COM_approx = new COM_RationalApprox[1];
+  RationalApprox approx1;
+  COM_RationalApprox *COM_approx1;
+  COM_approx1 = new COM_RationalApprox[1];
+  RationalApprox approx2;
+  COM_RationalApprox *COM_approx2;
+  COM_approx2 = new COM_RationalApprox[1];
+  RationalApprox approx3;
+  COM_RationalApprox *COM_approx3;
+  COM_approx3 = new COM_RationalApprox[1];
   
   cout << "HERE 0 \n";
   //  use_stored=1;//  --> then in the following line the eigenvalues will be computed
-  use_stored=1;//  DEBUG CHOICE
+  use_stored=1;
   cout << "HERE 1 \n";
-  approx.first_inv_approx_coeff();
+  approx1.first_inv_approx_coeff();
   cout << "HERE 2 \n";
   use_stored=0;//  --> then in the following the stored eigenvals  will be kept
   cout << "Before Printing Approx \n";
   //  cerr << approx << endl;
   cout << "Before Approx conversion \n";
-  convert_RationalApprox_to_COM_RationalApprox(&COM_approx[0],approx);
+  convert_RationalApprox_to_COM_RationalApprox(&COM_approx1[0],approx1);
   cout << "After Approx conversion \n";
   cout << "Rat approx done\n";
   
   //////  CALCOLO IL MULTIFERMIONE CHI CON OPENACC E LO TRADUCO PER DARLO (ANCHE) IN PASTO ALLA PARTE SERIALE   //////////////////
   COM_MultiFermion    COMMON_chi;
 
-  first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_chi,&COMMON_phi,residue_metro,COM_approx); // RESIDUO_METRO
+  first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_chi,&COMMON_phi,residue_metro,COM_approx1); // RESIDUO_METRO
   fermion_chi->ferm_MultiCOM_to_Multi(&COMMON_chi);
 
   //  first_inv_approx_calc(residue_metro); // RESIDUO_METRO
@@ -76,9 +82,13 @@ int main(int argc,char **argv){
   
   
   //////  PRENDO L'APPROX DA USARE NELLA MD    ///////////////////////////////////////////////
-  approx.md_inv_approx_coeff();
-  convert_RationalApprox_to_COM_RationalApprox(&COM_approx[0],approx);
+  approx2.md_inv_approx_coeff();
+  convert_RationalApprox_to_COM_RationalApprox(&COM_approx2[0],approx2);
   clock_t time_start, time_finish;
+
+  //////  E ANCHE QUELLA DA USARE NELL'ULTIMA INVERSIONE    ///////////////////////////////////////////////
+  approx3.last_inv_approx_coeff();
+  convert_RationalApprox_to_COM_RationalApprox(&COM_approx3[0],approx3);
   
 
   calc_plaquette_openacc(conf_soaCOM);
@@ -90,14 +100,28 @@ int main(int argc,char **argv){
   cout << "CHIFERM 0 0 BEFORE   " << fermion_chi->fermion[0][0] << endl;
   int r,i;
   Su3 auxm;
+  double A,B,RC,IC,RD,ID,RE,IE;
   for(r=0; r<size; r++)
     {
       d_vector1[r]=0.0;
       for(i=0;i<4;i++)
 	{
-          auxm =(gauge_momenta->momenta[r+i*size]);
-          auxm*=(gauge_momenta->momenta[r+i*size]);
-          d_vector1[r]+=0.5*auxm.retr();
+	  //          auxm =(gauge_momenta->momenta[r+i*size]);
+	  //          auxm*=(gauge_momenta->momenta[r+i*size]);
+	  //          d_vector1[r]+=0.5*auxm.retr();
+
+	  auxm =(gauge_momenta->momenta[r+i*size]);
+	  A = (auxm.comp[0][0]).real();
+	  B = (auxm.comp[1][1]).real();
+	  RC = (auxm.comp[0][1]).real();
+	  IC = (auxm.comp[0][1]).imag();
+	  RD = (auxm.comp[0][2]).real();
+	  ID = (auxm.comp[0][2]).imag();
+	  RE = (auxm.comp[1][2]).real();
+	  IE = (auxm.comp[1][2]).imag();
+	  d_vector1[r] += A * A + B * B + A * B + RC * RC + IC * IC + RD * RD + ID * ID + RE * RE + IE * IE;
+
+
 	}
     }
   global_sum(d_vector1,size);
@@ -107,7 +131,7 @@ int main(int argc,char **argv){
   //////////////////////////////// MD CPU //////////////////////////////////////////////////////
 
   time_start=clock();
-  multistep_2MN();
+  //  multistep_2MN();
   time_finish=clock();
   cout << "Time for Update with CPU = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 
@@ -134,8 +158,7 @@ int main(int argc,char **argv){
   //////////////////////////////// MD ACC //////////////////////////////////////////////////////
 
   time_start=clock();
-  //  multistep_2MN_ACC(conf_soaCOM,residue_md,COM_approx,&COMMON_chi,momenta_soaCOM);
-  UPDATE_ACC(conf_soaCOM,residue_md,COM_approx,&COMMON_chi,momenta_soaCOM);
+  UPDATE_ACC(conf_soaCOM,residue_metro,residue_md,COM_approx1,COM_approx2,COM_approx3,&COMMON_phi,momenta_soaCOM); // gli passo phi perche' si calcola chi dentro
   time_finish=clock();
   cout << "Time for Update with OPENACC = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 
@@ -173,6 +196,57 @@ int main(int argc,char **argv){
   cout << "Delta Updated Confs / d.o.f. = " << differ <<"\n";
 
   calc_plaquette_openacc(conf_soaCOM);
+
+
+
+
+
+
+
+  long int iii;
+  int iips;
+  Vec3 vr_1,vr_2;
+
+  for(iii=0; iii<sizeh; iii++){
+    d_vector1[iii] = 0.0;
+  }
+
+  for(iips=0; iips<no_ps; iips++){
+      for(iii=0; iii<sizeh; iii++){
+	vr_1=(fermion_phi->fermion[iips][iii]);
+	d_vector1[iii]+=r_scalprod(vr_1, vr_1);
+      }
+  }
+  double ferm_act ;
+  global_sum(d_vector1,sizeh);
+  cout <<  "FERMIONIC ACTION INIZ   = " << d_vector1[0] << endl;
+
+
+
+
+  first_inv_approx_calc_openacc(conf_soaCOM,&COMMON_phi,&COMMON_chi,residue_metro,COM_approx3); // RESIDUO_METRO
+  fermion_phi->ferm_MultiCOM_to_Multi(&COMMON_phi);
+
+  for(iii=0; iii<sizeh; iii++){
+    d_vector1[iii] = 0.0;
+  }
+
+  for(iips=0; iips<no_ps; iips++){
+      for(iii=0; iii<sizeh; iii++){
+          vr_1=(fermion_phi->fermion[iips][iii]);
+          vr_2=(fermion_chi->fermion[iips][iii]);
+          d_vector1[iii]+=r_scalprod(vr_1, vr_2);
+	}
+    }
+  global_sum(d_vector1,sizeh);
+  cout <<  "FERMIONIC ACTION FINAL  = " << d_vector1[0] << endl;
+
+
+
+
+
+
+
 
   delete gauge_conf_bis;
   end();

@@ -48,5 +48,5 @@ extern "C" {
 }
 
 extern "C" {
-  void UPDATE_ACC(su3COM_soa *conf,double res,const COM_RationalApprox *approx,const COM_MultiFermion *in,thmatCOM_soa * com_mom);
+  void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const COM_RationalApprox *approx1,const COM_RationalApprox *approx2,const COM_RationalApprox *approx3,const COM_MultiFermion *in,thmatCOM_soa * com_mom);
 }

@@ -50,6 +50,31 @@ static inline double scal_prod_loc_1double( const __restrict vec3_soa * const in
   return sum;
 }
 
+
+static inline double scal_prod_between_multi_loc_1double( const __restrict ACC_MultiFermion * const in_vect1,
+							  const __restrict ACC_MultiFermion * const in_vect2,
+							  const int idx_vect,
+							  const int ips
+							  ) {
+  // questa routine potrebbe essere migliorata perche per adesso
+  // nel calcolare la parte reale del prodotto scalare si calcola anche
+  // la parte immaginaria che poi viene buttata via.
+  // forse si puo riscrivere il tutto in modo piu esplicito facendogli fare
+  // solo i conti che contribuiscono al calcolo della parte reale.
+  /*
+  d_complex sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
+  sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
+  sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
+  */
+  //    in->multi[ips].c0[ih];                                                                                                                             
+
+
+  double sum  = creal(in_vect1->multi[ips].c0[idx_vect]) * creal(in_vect2->multi[ips].c0[idx_vect]) + cimag(in_vect1->multi[ips].c0[idx_vect]) * cimag(in_vect2->multi[ips].c0[idx_vect]);
+         sum += creal(in_vect1->multi[ips].c1[idx_vect]) * creal(in_vect2->multi[ips].c1[idx_vect]) + cimag(in_vect1->multi[ips].c1[idx_vect]) * cimag(in_vect2->multi[ips].c1[idx_vect]);
+         sum += creal(in_vect1->multi[ips].c2[idx_vect]) * creal(in_vect2->multi[ips].c2[idx_vect]) + cimag(in_vect1->multi[ips].c2[idx_vect]) * cimag(in_vect2->multi[ips].c2[idx_vect]);
+  return sum;
+}
+
 static inline double l2norm2_loc( const __restrict vec3_soa * const in_vect1,
 				  const int idx_vect
 				  ) {
@@ -137,6 +162,26 @@ void  scal_prod_openacc(const vec3COM_soa *in1,const vec3COM_soa *in2, double *p
 
   free(ferm1_acc);
   free(ferm2_acc);
+}
+
+
+//////////////////uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu
+double  scal_prod_between_multiferm(const ACC_MultiFermion *in1,const ACC_MultiFermion *in2){
+  double result;
+
+  int t,ips;
+  double res_R_p;
+  double resR = 0.0;
+#pragma acc kernels present(in1) present(in2)
+#pragma acc loop reduction(+:resR)
+  for(t=0; t<sizeh; t++) {
+
+    for(ips=0;ips<no_ps;ips++){
+      res_R_p=scal_prod_between_multi_loc_1double(in1,in2,t,ips);
+      resR+=res_R_p;
+    }
+  }
+  return resR;
 }
 
 

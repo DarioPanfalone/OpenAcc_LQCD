@@ -485,25 +485,37 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
 }// closes routine
 
 
-static inline double half_tr_thmat_squared( __restrict const thmat_soa * const mom,
+static inline double half_tr_thmat_squared( const __restrict thmat_soa * const mom,
 					    int idx_mom){
-  double    A = mom->rc00[idx_mom];
-  double    B = mom->rc11[idx_mom];
   d_complex  C = mom->c01[idx_mom];
   d_complex  D = mom->c02[idx_mom];
   d_complex  E = mom->c12[idx_mom];
+  double    A = mom->rc00[idx_mom];
+  double    B = mom->rc11[idx_mom];
   return A*A + B*B + A*B + creal(C)*creal(C) + cimag(C)*cimag(C) + creal(D)*creal(D) + cimag(D)*cimag(D) + creal(E)*creal(E) + cimag(E)*cimag(E);
   
 }
 
-double calc_momenta_action( __restrict const thmat_soa * const mom,
-			    dcomplex_soa * tr_local){
+double calc_momenta_action( const __restrict thmat_soa * const mom,
+			    double_soa * tr_local,
+			    const int mu){
   int x, y, z, t;
-
 #pragma acc kernels present(tr_local)
   for(t=0; t<sizeh; t++) {
-    tr_local[0].c[t] = 0.0 + I*0.0;
+    tr_local[0].d[t] = 0.0;
   }
+
+  /*
+#pragma acc kernels present(tr_local)
+  for(t=0; t<sizeh; t++) {
+    tr_local[0].d[t] = 0.0;
+    int mu;
+    for(mu=0;mu<8;mu++){                                                                                                                               
+      tr_local[0].d[t] += half_tr_thmat_squared(&mom[mu],t);
+    }
+
+  }
+  */
 
 #pragma acc kernels present(mom) present(tr_local)
 #pragma acc loop independent //gang(nt)
@@ -513,27 +525,39 @@ double calc_momenta_action( __restrict const thmat_soa * const mom,
 #pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
       for(y=0; y<ny; y++) {
 #pragma acc loop independent //vector(DIM_BLOCK_X)
-        for(x=0; x < nx; x++) {
+	//	        for(x=0; x < nx; x++) {
+	for(x=0; x < nxh; x++) {
           int idxh;
           int parity;
           int dir_link;
           int mu;
           idxh = snum_acc(x,y,z,t);  // r
-          parity = (x+y+z+t) % 2;
-          for(mu=0;mu<4;mu++){
-            dir_link = 2*mu + parity;
-            tr_local[0].c[idxh] += half_tr_thmat_squared(&mom[dir_link],idxh);
-          }
+
+	  //          parity = (x+y+z+t) % 2;
+	  //          for(mu=0;mu<4;mu++){
+	  //            dir_link = 2*mu + parity;
+	  //            tr_local[0].d[idxh] += half_tr_thmat_squared(&mom[dir_link],idxh);
+	  //          }
+
+	  tr_local[0].d[idxh] = half_tr_thmat_squared(&mom[mu],idxh);
+
+	  //          for(dir_link=0;dir_link<8;dir_link++){
+	  //	  tr_local[0].d[idxh] += half_tr_thmat_squared(&mom[dir_link],idxh);
+	  //	  }
+
+
+
         }  // x
       }  // y
     }  // z
   }  // t
 
+
   double result=0.0;
 #pragma acc kernels present(tr_local)
 #pragma acc loop reduction(+:result)
   for(t=0; t<sizeh; t++) {
-    result += creal(tr_local[0].c[t]);
+    result += tr_local[0].d[t];
   }
   
   return result;
