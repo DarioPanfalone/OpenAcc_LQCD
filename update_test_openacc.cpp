@@ -131,7 +131,7 @@ int main(int argc,char **argv){
   //////////////////////////////// MD CPU //////////////////////////////////////////////////////
 
   time_start=clock();
-  //  multistep_2MN();
+  multistep_2MN();
   time_finish=clock();
   cout << "Time for Update with CPU = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 

@@ -499,57 +499,12 @@ static inline double half_tr_thmat_squared( const __restrict thmat_soa * const m
 double calc_momenta_action( const __restrict thmat_soa * const mom,
 			    double_soa * tr_local,
 			    const int mu){
-  int x, y, z, t;
-#pragma acc kernels present(tr_local)
-  for(t=0; t<sizeh; t++) {
-    tr_local[0].d[t] = 0.0;
-  }
-
-  /*
-#pragma acc kernels present(tr_local)
-  for(t=0; t<sizeh; t++) {
-    tr_local[0].d[t] = 0.0;
-    int mu;
-    for(mu=0;mu<8;mu++){                                                                                                                               
-      tr_local[0].d[t] += half_tr_thmat_squared(&mom[mu],t);
-    }
-
-  }
-  */
+  int t;
 
 #pragma acc kernels present(mom) present(tr_local)
 #pragma acc loop independent //gang(nt)
-  for(t=0; t<nt; t++) {
-#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(z=0; z<nz; z++) {
-#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(y=0; y<ny; y++) {
-#pragma acc loop independent //vector(DIM_BLOCK_X)
-	//	        for(x=0; x < nx; x++) {
-	for(x=0; x < nxh; x++) {
-          int idxh;
-          int parity;
-          int dir_link;
-          int mu;
-          idxh = snum_acc(x,y,z,t);  // r
-
-	  //          parity = (x+y+z+t) % 2;
-	  //          for(mu=0;mu<4;mu++){
-	  //            dir_link = 2*mu + parity;
-	  //            tr_local[0].d[idxh] += half_tr_thmat_squared(&mom[dir_link],idxh);
-	  //          }
-
-	  tr_local[0].d[idxh] = half_tr_thmat_squared(&mom[mu],idxh);
-
-	  //          for(dir_link=0;dir_link<8;dir_link++){
-	  //	  tr_local[0].d[idxh] += half_tr_thmat_squared(&mom[dir_link],idxh);
-	  //	  }
-
-
-
-        }  // x
-      }  // y
-    }  // z
+  for(t=0; t<sizeh; t++) {
+	  tr_local[0].d[t] = half_tr_thmat_squared(&mom[mu],t);
   }  // t
 
 

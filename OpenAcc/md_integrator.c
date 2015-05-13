@@ -229,7 +229,7 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   double action_ferm_in;
   double action_ferm_fin;
   int mu;
-  int tempppp;
+  double temppp[8];
 
 #pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_phi_acc[0:1]) copy(ferm_aux_acc[0:1]) copy(approx1[0:1]) copy(approx2[0:1]) copy(approx3[0:1])  copy(ferm_chi_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])
   {
@@ -242,22 +242,23 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
     action_in = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     action_mom_in = 0.0;
     for(mu =0;mu<8;mu++){
-      //action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
+      //      temppp[mu] = calc_momenta_action(momenta,d_local_sums,mu);
+      action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
     }
     action_ferm_in=scal_prod_between_multiferm(ferm_phi_acc,ferm_phi_acc);
-
+    
     // first inv approx calc
     ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_phi_acc,residue_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
     ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_phi_acc,ferm_chi_acc,approx1);
 
-    //    multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_aux_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,residue_md,approx2);
+    multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_aux_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,residue_md,approx2);
 
 
 
     action_fin = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     action_mom_fin = 0.0;
     for(mu =0;mu<8;mu++){
-      //      action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
+      action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
     }
 
     gettimeofday ( &t2, NULL );    
