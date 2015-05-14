@@ -55,6 +55,18 @@ int main(int argc,char **argv){
   RationalApprox approx3;
   COM_RationalApprox *COM_approx3;
   COM_approx3 = new COM_RationalApprox[1];
+
+  COM_RationalApprox *COM_approx_mother1;
+  COM_approx_mother1 = new COM_RationalApprox[1];
+  convert_RationalApprox_to_COM_RationalApprox(&COM_approx_mother1[0],*first_inv_approx_norm_coeff);
+  COM_RationalApprox *COM_approx_mother2;
+  COM_approx_mother2 = new COM_RationalApprox[1];
+  convert_RationalApprox_to_COM_RationalApprox(&COM_approx_mother1[0],*md_inv_approx_norm_coeff);
+  COM_RationalApprox *COM_approx_mother3;
+  COM_approx_mother3 = new COM_RationalApprox[1];
+  convert_RationalApprox_to_COM_RationalApprox(&COM_approx_mother1[0],*last_inv_approx_norm_coeff);
+
+
   
   cout << "HERE 0 \n";
   //  use_stored=1;//  --> then in the following line the eigenvalues will be computed
@@ -131,7 +143,7 @@ int main(int argc,char **argv){
   //////////////////////////////// MD CPU //////////////////////////////////////////////////////
 
   time_start=clock();
-  multistep_2MN();
+  //  multistep_2MN();
   time_finish=clock();
   cout << "Time for Update with CPU = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 
@@ -158,7 +170,7 @@ int main(int argc,char **argv){
   //////////////////////////////// MD ACC //////////////////////////////////////////////////////
 
   time_start=clock();
-  UPDATE_ACC(conf_soaCOM,residue_metro,residue_md,COM_approx1,COM_approx2,COM_approx3,&COMMON_phi,momenta_soaCOM); // gli passo phi perche' si calcola chi dentro
+  UPDATE_ACC(conf_soaCOM,residue_metro,residue_md,COM_approx_mother1,COM_approx_mother2,COM_approx_mother3,&COMMON_phi,momenta_soaCOM); // gli passo phi perche' si calcola chi dentro
   time_finish=clock();
   cout << "Time for Update with OPENACC = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 

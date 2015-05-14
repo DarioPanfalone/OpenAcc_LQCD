@@ -16,7 +16,6 @@
 #include "../SimplifiedRationalApprox/rationalapprox.cc"      
 #include "../SimplifiedRationalApprox/rationalapprox_calc.cc" 
 #include "../Staples/staples.cc"
-#include "../Rand/random.cc"
 #include "../Geometry/geometry.cc"
 #include "../Include/global_var.cc"
 #include "../Exception/exception.cc"

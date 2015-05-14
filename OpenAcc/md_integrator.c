@@ -137,7 +137,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * ipdot_acc,
 
 
 
-void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const COM_RationalApprox *approx1,const COM_RationalApprox *approx2,const COM_RationalApprox *approx3,const COM_MultiFermion *in,thmatCOM_soa * com_mom){
+void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const COM_RationalApprox *approx_mother1,const COM_RationalApprox *approx_mother2,const COM_RationalApprox *approx_mother3,const COM_MultiFermion *in,thmatCOM_soa * com_mom){
 
   // approx1   --> approssimazione per la prima inversione
   // approx2   --> approssimazione per la dinamica molecolare
@@ -165,7 +165,12 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   double_soa * d_local_sums;
   double delta[7];
 
+  COM_RationalApprox *approx1;
+  COM_RationalApprox *approx2;
+  COM_RationalApprox *approx3;
 
+
+  // if output di posix e' 0 allora tutto ok, altrimenti no. mettere controllo.
   posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
   posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa));
   posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa));
@@ -229,12 +234,37 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   double action_ferm_in;
   double action_ferm_fin;
   int mu;
-  double temppp[8];
 
-#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_phi_acc[0:1]) copy(ferm_aux_acc[0:1]) copy(approx1[0:1]) copy(approx2[0:1]) copy(approx3[0:1])  copy(ferm_chi_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])
+  double minmaxeig[2];
+  int usestoredeigen = 0;
+
+#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_phi_acc[0:1]) copy(ferm_aux_acc[0:1]) copy(approx1[0:1]) copy(approx2[0:1]) copy(approx3[0:1])  copy(ferm_chi_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1]) copy(minmaxeig[0:2]) copy(approx_mother1[0:1]) copy(approx_mother2[0:1]) copy(approx_mother3[0:1])
   {
 
     gettimeofday ( &t1, NULL );
+
+    // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
+    generate_vec3_soa_gauss(kloc_p);
+    // update the fermion kloc_p copying it from the host to the device
+#pragma acc update device(kloc_p[0:1])
+    // compute the highest and lowest eigenvalues of (M^dag M)
+
+    usestoredeigen = 1; // quindi li calcola
+    find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,usestoredeigen,minmaxeig);
+#pragma acc update host(minmaxeig[0:2])
+    usestoredeigen = 0;
+    // rescale the rational approx approx1 --> the one needed for first_inv_approx_calc
+    // here the power that has to be used (the last argument) is power = ((double) no_flavours) /8./ ((double)no_ps);
+    // in this particular case no_flavours = 2 and no_ps = 2 ==> power = 1.0/8.0;
+    rescale_rational_approximation(approx_mother1,approx1,minmaxeig,(1.0/8.0));
+#pragma acc update device(approx1[0:1])
+
+    // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
+    generate_MultiFermion_gauss(ferm_phi_acc);
+#pragma acc update device(ferm_phi_acc[0:1])
+    // generate gauss-randomly the momenta
+    generate_Momenta_gauss(momenta);
+#pragma acc update device(momenta[0:8])
 
     // ora come ora la risuzione delle local sums viene fatta ogni volta.
     // eventualmente si puo' rendere piu efficiente l'algoritmo facendogli fare la riduzione solo alla fine
@@ -242,24 +272,36 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
     action_in = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     action_mom_in = 0.0;
     for(mu =0;mu<8;mu++){
-      //      temppp[mu] = calc_momenta_action(momenta,d_local_sums,mu);
       action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
     }
     action_ferm_in=scal_prod_between_multiferm(ferm_phi_acc,ferm_phi_acc);
-    
-    // first inv approx calc
+
+    // first_inv_approx_calc
     ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_phi_acc,residue_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
     ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_phi_acc,ferm_chi_acc,approx1);
 
+
+    rescale_rational_approximation(approx_mother2,approx2,minmaxeig,-(1.0/4.0));
+#pragma acc update device(approx2[0:1])
     multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_aux_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,residue_md,approx2);
 
 
+    usestoredeigen = 1; // quindi li calcola
+    find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,usestoredeigen,minmaxeig);
+#pragma acc update host(minmaxeig[0:2])
+    usestoredeigen = 0;
+    rescale_rational_approximation(approx_mother3,approx3,minmaxeig,-(1.0/4.0));
+#pragma acc update device(approx3[0:1])
+
+    ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_chi_acc,residue_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+    ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_chi_acc,ferm_phi_acc,approx3);
 
     action_fin = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     action_mom_fin = 0.0;
     for(mu =0;mu<8;mu++){
       action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
     }
+    action_ferm_in=scal_prod_between_multiferm(ferm_chi_acc,ferm_phi_acc);
 
     gettimeofday ( &t2, NULL );    
   } 

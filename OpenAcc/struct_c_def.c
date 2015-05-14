@@ -7,6 +7,7 @@
 #include <complex.h>
 #endif
 
+#include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -34,6 +35,8 @@
 #define ONE_BY_THREE 0.33333333333333333333333
 #define ONE_BY_SIX   0.16666666666666666666666
 #define beta_by_three beta*ONE_BY_THREE
+
+#define acc_pi2 2.0 * M_PI 
 
 // strutture native c con i complessi c --> quelle che verranno utilizzate nelle routine che verranno accelerate da openacc
 typedef double complex  d_complex;

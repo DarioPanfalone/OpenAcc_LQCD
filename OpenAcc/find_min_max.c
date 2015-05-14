@@ -108,6 +108,24 @@ double ker_find_min_eigenvalue_openacc(  const __restrict su3_soa * const u,
   return min;
 }
 
+void find_min_max_eigenvalue_soloopenacc(  const __restrict su3_soa * const u,
+					   __restrict vec3_soa * const loc_r,
+					   __restrict vec3_soa * const loc_h,
+					   __restrict vec3_soa * const loc_p,
+					   int usestored,
+					   double *minmax
+					   ){
+
+
+  if(usestored == 1){
+    minmax[0] =  mass2;
+    minmax[1] =  ker_find_max_eigenvalue_openacc(u,loc_r,loc_h,loc_p);
+  }
+  // altrimenti se usestored == 0 allora lascia gli autocosi al valore che avevano gia' prima
+}
+
+
+
 void find_min_max_openacc(const  su3COM_soa  *conf, const vec3COM_soa *gaussian1, const vec3COM_soa *gaussian2,double *minmax){
   // minmax[0] --> minimo
   // minmax[1] --> massimo
