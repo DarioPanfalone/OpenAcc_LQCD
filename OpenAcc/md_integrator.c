@@ -165,27 +165,43 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   double_soa * d_local_sums;
   double delta[7];
 
-  COM_RationalApprox *approx1;
-  COM_RationalApprox *approx2;
-  COM_RationalApprox *approx3;
+  COM_RationalApprox approx1[1];
+  COM_RationalApprox approx2[1];
+  COM_RationalApprox approx3[1];
 
 
   // if output di posix e' 0 allora tutto ok, altrimenti no. mettere controllo.
-  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
-  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa));
-  posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa));
-  posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa));
-  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa));
-  posix_memalign((void **)&k_p_shiftferm, ALIGN, sizeof(ACC_ShiftFermion));
-  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
-  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
-  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa));
-  posix_memalign((void **)&ferm_phi_acc  , ALIGN, sizeof(ACC_MultiFermion));
-  posix_memalign((void **)&ferm_chi_acc  , ALIGN, sizeof(ACC_MultiFermion));
-  posix_memalign((void **)&ferm_aux_acc  , ALIGN, sizeof(ACC_MultiFermion));
-  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, sizeof(ACC_ShiftMultiFermion));
-  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));  // --> size complessi --> vettore per sommare cose locali
-  posix_memalign((void **)&d_local_sums, ALIGN, sizeof(double_soa));  // --> sizeh double
+  int allocation_check;
+  allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
+  if(allocation_check != 0)  printf("Errore nella allocazione di momenta \n");
+  allocation_check =  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di kloc_r \n");
+  allocation_check =  posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di kloc_h \n");
+  allocation_check =  posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di kloc_s \n");
+  allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di kloc_p \n");
+  allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, sizeof(ACC_ShiftFermion));
+  if(allocation_check != 0)  printf("Errore nella allocazione di k_p_shiftferm \n");
+  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
+  allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_acc \n");
+  allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di ipdot_acc \n");
+  allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, sizeof(ACC_MultiFermion));
+  if(allocation_check != 0)  printf("Errore nella allocazione di ferm_phi_acc \n");
+  allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, sizeof(ACC_MultiFermion));
+  if(allocation_check != 0)  printf("Errore nella allocazione di ferm_chi_acc \n");
+  allocation_check =  posix_memalign((void **)&ferm_aux_acc  , ALIGN, sizeof(ACC_MultiFermion));
+  if(allocation_check != 0)  printf("Errore nella allocazione di  ferm_aux_acc \n");
+  allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, sizeof(ACC_ShiftMultiFermion));
+  if(allocation_check != 0)  printf("Errore nella allocazione di ferm_shiftmulti_acc \n");
+  allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));  // --> size complessi --> vettore per sommare cose locali
+  if(allocation_check != 0)  printf("Errore nella allocazione di local_sums \n");
+  allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, sizeof(double_soa));  // --> sizeh double
+  if(allocation_check != 0)  printf("Errore nella allocazione di d_local_sums \n");
   
   int dir;
   for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
@@ -242,13 +258,13 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   {
 
     gettimeofday ( &t1, NULL );
-
+    
     // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
     generate_vec3_soa_gauss(kloc_p);
     // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
     // compute the highest and lowest eigenvalues of (M^dag M)
-
+    
     usestoredeigen = 1; // quindi li calcola
     find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,usestoredeigen,minmaxeig);
 #pragma acc update host(minmaxeig[0:2])
@@ -367,7 +383,8 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   free(kloc_h);
   free(kloc_p);
   free(k_p_shiftferm);
-  
+  free(local_sums);
+  free(d_local_sums);  
   
   
   
