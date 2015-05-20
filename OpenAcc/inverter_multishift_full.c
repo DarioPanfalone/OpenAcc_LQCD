@@ -266,52 +266,23 @@ static inline  void mat1_times_auxmat_into_tamat( const  __restrict su3_soa * co
   d_complex auxmat_22 = auxmat->r2.c2[idx_aux];
 
   // product;
-  ///////////////////////////////////////////////////
-  ///// possibilita' numero 1 ///////////////////////
-  ///////////////////////////////////////////////////
-  // piu' variabili e piu' scritture, meno conti
   d_complex a00 = mat1_00 * auxmat_00 + mat1_01 * auxmat_10 + mat1_02 * auxmat_20;
   d_complex a01 = mat1_00 * auxmat_01 + mat1_01 * auxmat_11 + mat1_02 * auxmat_21;
   d_complex a02 = mat1_00 * auxmat_02 + mat1_01 * auxmat_12 + mat1_02 * auxmat_22;
-  //  d_complex a10 = mat1_10 * auxmat_00 + mat1_11 * auxmat_10 + mat1_12 * mat1_20;
-  //  d_complex a11 = mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * mat1_21;
-  //  d_complex a12 = mat1_10 * auxmat_02 + mat1_11 * auxmat_12 + mat1_12 * mat1_22;
+
   mat1_00 = mat1_10 * auxmat_00 + mat1_11 * auxmat_10 + mat1_12 * auxmat_20;
   mat1_01 = mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * auxmat_21;
   mat1_02 = mat1_10 * auxmat_02 + mat1_11 * auxmat_12 + mat1_12 * auxmat_22;
-  //  d_complex a20 = mat1_20 * auxmat_00 + mat1_21 * auxmat_10 + mat1_22 * mat1_20;
-  //  d_complex a21 = mat1_20 * auxmat_01 + mat1_21 * auxmat_11 + mat1_22 * mat1_21;
-  //  d_complex a22 = mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * mat1_22;
+
   mat1_10 = mat1_20 * auxmat_00 + mat1_21 * auxmat_10 + mat1_22 * auxmat_20;
   mat1_11 = mat1_20 * auxmat_01 + mat1_21 * auxmat_11 + mat1_22 * auxmat_21; 
   mat1_12 = mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * auxmat_22;
+
   ipdot->c01[idipdot]  -= 0.5*((a01) - conj(mat1_00));
   ipdot->c02[idipdot]  -= 0.5*((a02) - conj(mat1_10));
   ipdot->c12[idipdot]  -= 0.5*((mat1_02) - conj(mat1_11));
   ipdot->rc00[idipdot] -= cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
   ipdot->rc11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
-  ///////////////////////////////////////////////////
-  ///// fine possibilita' numero 1 //////////////////
-  ///////////////////////////////////////////////////
-
-  /*
-//////// ATTENZIONE CHE E' SBAGLIATA PERCHE NEI PRODOTTI IL TERZO AUXMAT E' IN REALTA MESSO A MAT1
-  ///////////////////////////////////////////////////
-  ///// possibilita' numero 2 ///////////////////////
-  ///////////////////////////////////////////////////
-  // meno variabili e meno scritture, piu' conti
-  ipdot->c01[idipdot] +=(mat1_00 * auxmat_01 + mat1_01 * auxmat_11 + mat1_02 * mat1_21)-conj(mat1_10 * auxmat_00 + mat1_11 * auxmat_10 + mat1_12 * mat1_20);
-  ipdot->c02[idipdot] +=(mat1_00 * auxmat_02 + mat1_01 * auxmat_12 + mat1_02 * mat1_22)-conj(mat1_20 * auxmat_00 + mat1_21 * auxmat_10 + mat1_22 * mat1_20);
-  ipdot->c12[idipdot] +=(mat1_10 * auxmat_02 + mat1_11 * auxmat_12 + mat1_12 * mat1_22)-conj(mat1_20 * auxmat_01 + mat1_21 * auxmat_11 + mat1_22 * mat1_21);
-  ipdot->rc00[idipdot]+=cimag(mat1_00 * auxmat_00 + mat1_01 * auxmat_10 + mat1_02 * mat1_20)-ONE_BY_THREE*(cimag(mat1_00 * auxmat_00 + mat1_01 * auxmat_10 + mat1_02 * mat1_20)+cimag(mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * mat1_21)+cimag(mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * mat1_22));
-  ipdot->rc11[idipdot] += cimag(mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * mat1_21)-ONE_BY_THREE*(cimag(mat1_00 * auxmat_00 + mat1_01 * auxmat_10 + mat1_02 * mat1_20)+cimag(mat1_10 * auxmat_01 + mat1_11 * auxmat_11 + mat1_12 * mat1_21)+cimag(mat1_20 * auxmat_02 + mat1_21 * auxmat_12 + mat1_22 * mat1_22));
-  ///////////////////////////////////////////////////
-  ///// fine possibilita' numero 2 //////////////////
-  ///////////////////////////////////////////////////
-  */
-
-
-
 
 
 }

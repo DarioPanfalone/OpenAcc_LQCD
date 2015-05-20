@@ -218,10 +218,10 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   delta[0]= -cimag(ieps_acc) * lambda;
   delta[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
   delta[2]= -cimag(ieps_acc) * 2.0*lambda;
-  delta[3]= -cimag(ieps_acc) * gs*lambda;
+  delta[3]= -cimag(ieps_acc) * gs*lambda * beta_by_three;
   delta[4]=  cimag(iepsh_acc)* gs;
-  delta[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda);
-  delta[6]= -cimag(ieps_acc) * gs*2.0*lambda;
+  delta[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*beta_by_three;
+  delta[6]= -cimag(ieps_acc) * gs*2.0*lambda*beta_by_three;
 
   int index = 0;
 
@@ -243,6 +243,24 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   printf("Conf 22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[index]) , cimag(conf_acc[0].r2.c2[index]));
 
 
+
+  printf("RATAPPROX 1 - OPENACC \n");
+  printf("%.18lf \n",approx_mother1[0].COM_RA_a0);
+  for(int ia=0;ia<approx_mother1[0].COM_approx_order;ia++){
+    printf("RA %.18lf        RB %.18lf \n",approx_mother1[0].COM_RA_a[ia],approx_mother1[0].COM_RA_b[ia]);
+  }
+  printf("RATAPPROX 2 - OPENACC \n");
+  printf("%.18lf \n",approx_mother2[0].COM_RA_a0);
+  for(int ia=0;ia<approx_mother2[0].COM_approx_order;ia++){
+    printf("RA %.18lf        RB %.18lf \n",approx_mother2[0].COM_RA_a[ia],approx_mother2[0].COM_RA_b[ia]);
+  }
+  printf("RATAPPROX 3 - OPENACC \n");
+  printf("%.18lf \n",approx_mother3[0].COM_RA_a0);
+  for(int ia=0;ia<approx_mother3[0].COM_approx_order;ia++){
+    printf("RA %.18lf        RB %.18lf \n",approx_mother3[0].COM_RA_a[ia],approx_mother3[0].COM_RA_b[ia]);
+  }
+
+
   double action_in;
   double action_fin;
   double action_mom_in;
@@ -253,21 +271,26 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
 
   double minmaxeig[2];
   int usestoredeigen = 0;
+  int n_therm=500;
 
 #pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_phi_acc[0:1]) copy(ferm_aux_acc[0:1]) copy(approx1[0:1]) copy(approx2[0:1]) copy(approx3[0:1])  copy(ferm_chi_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1]) copy(minmaxeig[0:2]) copy(approx_mother1[0:1]) copy(approx_mother2[0:1]) copy(approx_mother3[0:1])
   {
 
     gettimeofday ( &t1, NULL );
+    int iter_therm;
+    for(iter_therm=0;iter_therm<n_therm;iter_therm++){
+
     
     // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
     generate_vec3_soa_gauss(kloc_p);
     // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
+
     // compute the highest and lowest eigenvalues of (M^dag M)
-    
     usestoredeigen = 1; // quindi li calcola
     find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,usestoredeigen,minmaxeig);
-#pragma acc update host(minmaxeig[0:2])
+#pragma acc update device(minmaxeig[0:2])
+
     usestoredeigen = 0;
     // rescale the rational approx approx1 --> the one needed for first_inv_approx_calc
     // here the power that has to be used (the last argument) is power = ((double) no_flavours) /8./ ((double)no_ps);
@@ -285,12 +308,19 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
     // ora come ora la risuzione delle local sums viene fatta ogni volta.
     // eventualmente si puo' rendere piu efficiente l'algoritmo facendogli fare la riduzione solo alla fine
     //    --> la cosa puo' essere rilevante soprattutto per la versione salamica
-    action_in = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    action_in = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    printf("INSIDE PRAGMA DATA - PLACC  = %.18lf\n",action_in);
+    action_in = beta_by_three * action_in;
+    printf("INSIDE PRAGMA DATA - GAUGEACT_IN  = %.18lf\n",action_in);
+
     action_mom_in = 0.0;
     for(mu =0;mu<8;mu++){
       action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
     }
+    printf("INSIDE PRAGMA DATA - MOMACT_IN  = %.18lf\n",action_mom_in);
+
     action_ferm_in=scal_prod_between_multiferm(ferm_phi_acc,ferm_phi_acc);
+    printf("INSIDE PRAGMA DATA - FERMACT_IN  = %.18lf\n",action_ferm_in);
 
     // first_inv_approx_calc
     ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_phi_acc,residue_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
@@ -304,31 +334,43 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
 
     usestoredeigen = 1; // quindi li calcola
     find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,usestoredeigen,minmaxeig);
-#pragma acc update host(minmaxeig[0:2])
+#pragma acc update device(minmaxeig[0:2])
     usestoredeigen = 0;
     rescale_rational_approximation(approx_mother3,approx3,minmaxeig,-(1.0/4.0));
 #pragma acc update device(approx3[0:1])
 
-    ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_chi_acc,residue_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+    // first_inv_approx_calc
+    ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_chi_acc,residue_metro,approx3,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
     ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_chi_acc,ferm_phi_acc,approx3);
 
     action_fin = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    printf("INSIDE PRAGMA DATA - GAUGEACT_FIN  = %.18lf\n",action_fin);
     action_mom_fin = 0.0;
     for(mu =0;mu<8;mu++){
       action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
     }
-    action_ferm_in=scal_prod_between_multiferm(ferm_chi_acc,ferm_phi_acc);
+    printf("INSIDE PRAGMA DATA - MOMACT_FIN  = %.18lf\n",action_mom_fin);
+   action_ferm_fin=scal_prod_between_multiferm(ferm_chi_acc,ferm_phi_acc);
+   printf("INSIDE PRAGMA DATA - FERMACT_FIN  = %.18lf\n",action_ferm_fin);
 
+    //action_ferm_fin + action_mom_fin + action_fin - action_ferm_in - action_mom_in - action_in;
+    
+    }
     gettimeofday ( &t2, NULL );    
   } 
 
   gettimeofday ( &t3, NULL );
+
+  printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
+  printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
 
   printf("PLAQ IN  = %.18lf \n",action_in);
   printf("PLAQ OUT = %.18lf \n",action_fin);
   printf("MOM ACT IN  = %.18lf \n",action_mom_in);
   printf("MOM ACT OUT = %.18lf \n",action_mom_fin);
   printf("FERM ACT IN  = %.18lf \n",action_ferm_in);
+
+
 
   double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
   double dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);

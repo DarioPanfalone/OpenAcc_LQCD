@@ -42,31 +42,12 @@ double ker_find_max_eigenvalue_openacc(  const __restrict su3_soa * const u,
       acc_Doe(u,loc_h,loc_p);
       acc_Deo(u,loc_p,loc_h);
 
-      /*
-      if(loop_count==0){
-	char *nomei = "input_fmax_cuda_cpu";
-	FILE *cerri = fopen(nomei, "a");
-	int indh;
-        for(int indh=0;indh<sizeh;indh++){
-	  fprintf(cerri, "%.18lf\n",creal(loc_p->c0[indh]));
-	  fprintf(cerri, "%.18lf\n",cimag(loc_p->c0[indh]));
-	  fprintf(cerri, "%.18lf\n",creal(loc_p->c1[indh]));
-	  fprintf(cerri, "%.18lf\n",cimag(loc_p->c1[indh]));
-	  fprintf(cerri, "%.18lf\n",creal(loc_p->c2[indh]));
-	  fprintf(cerri, "%.18lf\n",cimag(loc_p->c2[indh]));
-	}
-	fclose(cerri);
-      }
-      */
-
-
       // p=(M^dag M)r
       combine_in1xm2_minus_in2(loc_r,loc_p);
       norm=sqrt(l2norm2_global(loc_p));
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
       loop_count++;
-      //      printf("norm  in  %.18lf\n",norm);
     } while(old_norm>1.0e-5);    // loop end
   double max=norm;
   return max;
@@ -115,7 +96,6 @@ void find_min_max_eigenvalue_soloopenacc(  const __restrict su3_soa * const u,
 					   int usestored,
 					   double *minmax
 					   ){
-
 
   if(usestored == 1){
     minmax[0] =  mass2;
