@@ -187,8 +187,9 @@ void RationalApprox::first_inv_approx_coeff(void)
  cout.precision(18);
 
  // normalized coefficients
+ cout << " STARTING TO TAKE MOTHER COEFF " << endl;
  *this=*first_inv_approx_norm_coeff;
-
+ cout << " TAKEN MOTHER COEFF " << endl;
  // findminmax(min, max);
  // cout << "CPU:      min = " << min << "    max = " << max << endl;
 

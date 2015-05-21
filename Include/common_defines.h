@@ -12,24 +12,24 @@
 
 // lattice dimensions
 #define nx 16
-#define ny 16
-#define nz 16
-#define nt 16
+#define ny 8
+#define nz 4
+#define nt 2
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
 
 #define mass 0.32
-#define beta 6.00
+#define beta 3.00
 
 #define therm_updates 0
 #define max_cg 100000
 #define max_approx_order 19
 #define no_ps 2
 
-#define no_md 3 // number of MD steps
+#define no_md 15 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
-#define gauge_scale 3  // Update fermions every gauge_scale gauge updates
+#define gauge_scale 10  // Update fermions every gauge_scale gauge updates
 
 
 

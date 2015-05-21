@@ -61,10 +61,10 @@ int main(int argc,char **argv){
   convert_RationalApprox_to_COM_RationalApprox(&COM_approx_mother1[0],*first_inv_approx_norm_coeff);
   COM_RationalApprox *COM_approx_mother2;
   COM_approx_mother2 = new COM_RationalApprox[1];
-  convert_RationalApprox_to_COM_RationalApprox(&COM_approx_mother1[0],*md_inv_approx_norm_coeff);
+  convert_RationalApprox_to_COM_RationalApprox(&COM_approx_mother2[0],*md_inv_approx_norm_coeff);
   COM_RationalApprox *COM_approx_mother3;
   COM_approx_mother3 = new COM_RationalApprox[1];
-  convert_RationalApprox_to_COM_RationalApprox(&COM_approx_mother1[0],*last_inv_approx_norm_coeff);
+  convert_RationalApprox_to_COM_RationalApprox(&COM_approx_mother3[0],*last_inv_approx_norm_coeff);
 
 
   
@@ -143,9 +143,13 @@ int main(int argc,char **argv){
   //////////////////////////////// MD CPU //////////////////////////////////////////////////////
 
   time_start=clock();
-  //  multistep_2MN();
+  multistep_2MN();
   time_finish=clock();
   cout << "Time for Update with CPU = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
+
+
+
+
 
   gauge_conf->calc_plaq_uwork(ps,pt);
   cout << "Plaquette CPU AFTER CPU UPDATE   =  " << (ps+pt)*0.5 << endl;
