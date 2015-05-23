@@ -95,9 +95,9 @@ void generate_Momenta_gauss_comp(__restrict thmat_soa * const mom){
   for(t=0; t<sizeh; t++) {
   mom->rc00[t] =  casuali[2] + casuali[7] * uno_su_radice_di_tre;
   mom->rc11[t] = -casuali[2] + casuali[7] * uno_su_radice_di_tre;
-  mom->c01[t]  =  casuali[0] + casuali[1] * I;
-  mom->c02[t]  =  casuali[3] + casuali[4] * I;
-  mom->c12[t]  =  casuali[5] + casuali[6] * I;
+  mom->c01[t]  =  casuali[0] - casuali[1] * I;
+  mom->c02[t]  =  casuali[3] - casuali[4] * I;
+  mom->c12[t]  =  casuali[5] - casuali[6] * I;
   }  // t  
 
 }
