@@ -52,6 +52,6 @@ extern "C" {
 }
 
 extern "C" {
-  void UPDATE_ACC_UNOSTEP(su3COM_soa *conf_soaCOM,double residue_md,COM_RationalApprox *COM_approx2,COM_MultiFermion *COMMON_chi,thmatCOM_soa *momenta_soaCOM);
+  void UPDATE_ACC_UNOSTEP(su3COM_soa *conf_soaCOM,double residue_md,COM_RationalApprox *COM_approx2,COM_MultiFermion *COMMON_chi,thmatCOM_soa *momenta_soaCOM, int id_iter);
 }
 
