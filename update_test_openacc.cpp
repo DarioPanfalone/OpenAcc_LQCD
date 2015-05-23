@@ -142,16 +142,22 @@ int main(int argc,char **argv){
 
   //////////////////////////////// MD CPU //////////////////////////////////////////////////////
 
-  time_start=clock();
-  multistep_2MN();
-  time_finish=clock();
-  cout << "Time for Update with CPU = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
+  //  multistep_2MN();
+  int ciao;
+  for(int it=0;it<5;it++){
+    time_start=clock();
+    update(ciao);
+    time_finish=clock();
+    cout << "Time for Update with CPU = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
+    gauge_conf->calc_plaq(ps,pt);
+    cout << "PlaquetteCPU-CPUUPDATES  ["<< it << "] =  " << (ps+pt)*0.5 << endl;
+  }
 
 
 
+    gauge_conf->calc_plaq_uwork(ps,pt);
 
 
-  gauge_conf->calc_plaq_uwork(ps,pt);
   cout << "Plaquette CPU AFTER CPU UPDATE   =  " << (ps+pt)*0.5 << endl;
   cout << "LINK 0 AFTER CPU UPDATE  " << endl << gauge_conf->u_work[0] << endl;
   cout << "MOME 0 AFTER CPU UPDATE  " << endl << gauge_momenta->momenta[0] << endl;
@@ -172,9 +178,8 @@ int main(int argc,char **argv){
 
 
   //////////////////////////////// MD ACC //////////////////////////////////////////////////////
-
   time_start=clock();
-  UPDATE_ACC(conf_soaCOM,residue_metro,residue_md,COM_approx_mother1,COM_approx_mother2,COM_approx_mother3,&COMMON_phi,momenta_soaCOM); // gli passo phi perche' si calcola chi dentro
+  UPDATE_ACC(conf_soaCOM,residue_metro,residue_md,COM_approx_mother1,COM_approx_mother2,COM_approx_mother3,&COMMON_phi,momenta_soaCOM); 
   time_finish=clock();
   cout << "Time for Update with OPENACC = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
 

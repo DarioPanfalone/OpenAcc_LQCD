@@ -1,8 +1,13 @@
+double casuale(void);
+void initrand(unsigned long s);
+void su2_rand(double *pp);
+
+
 #include "openacc.h"
 #include "./struct_c_def.c"
 #include "./rat_approx_rescale.c"
 #include "./fermionic_utilities.c"
-#include "../Rand/random.c"
+//#include "../Rand/random.c"
 #include "./random_assignement.c"
 #include "./su3_utilities.c"
 #include "./fermion_matrix.c"

@@ -271,7 +271,7 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
 
   double minmaxeig[2];
   int usestoredeigen = 0;
-  int n_therm=500;
+  int n_therm=1;
 
 #pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_phi_acc[0:1]) copy(ferm_aux_acc[0:1]) copy(approx1[0:1]) copy(approx2[0:1]) copy(approx3[0:1])  copy(ferm_chi_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1]) copy(minmaxeig[0:2]) copy(approx_mother1[0:1]) copy(approx_mother2[0:1]) copy(approx_mother3[0:1])
   {
@@ -283,13 +283,17 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
     
     // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
     generate_vec3_soa_gauss(kloc_p);
+    generate_vec3_soa_gauss(kloc_s);
     // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
+#pragma acc update device(kloc_s[0:1])
 
     // compute the highest and lowest eigenvalues of (M^dag M)
     usestoredeigen = 1; // quindi li calcola
-    find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,usestoredeigen,minmaxeig);
+    find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,kloc_s,usestoredeigen,minmaxeig);
 #pragma acc update device(minmaxeig[0:2])
+  printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
+  printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
 
     usestoredeigen = 0;
     // rescale the rational approx approx1 --> the one needed for first_inv_approx_calc
@@ -332,9 +336,19 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
     multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_aux_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,residue_md,approx2);
 
 
+
+
+    generate_vec3_soa_gauss(kloc_p);
+    generate_vec3_soa_gauss(kloc_s);
+#pragma acc update device(kloc_p[0:1])
+#pragma acc update device(kloc_s[0:1])
+    // compute the highest and lowest eigenvalues of (M^dag M)
     usestoredeigen = 1; // quindi li calcola
-    find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,usestoredeigen,minmaxeig);
+    find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,kloc_s,usestoredeigen,minmaxeig);
 #pragma acc update device(minmaxeig[0:2])
+    printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
+    printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
+
     usestoredeigen = 0;
     rescale_rational_approximation(approx_mother3,approx3,minmaxeig,-(1.0/4.0));
 #pragma acc update device(approx3[0:1])
@@ -361,8 +375,6 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
 
   gettimeofday ( &t3, NULL );
 
-  printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
-  printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
 
   printf("PLAQ IN  = %.18lf \n",action_in);
   printf("PLAQ OUT = %.18lf \n",action_fin);
@@ -432,3 +444,178 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
   
   
 }
+
+
+
+void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res,COM_RationalApprox *approx, COM_MultiFermion *in,thmatCOM_soa *com_mom){
+  initialize_global_variables();
+  compute_nnp_and_nnm_openacc();
+
+  tamat_soa * ipdot_acc;
+  su3_soa  * conf_acc;
+  su3_soa  * aux_conf_acc;
+  ACC_MultiFermion * ferm_in_acc;
+  ACC_MultiFermion * ferm_out_acc;
+  ACC_ShiftMultiFermion * ferm_shiftmulti_acc;
+  vec3_soa * kloc_r;
+  vec3_soa * kloc_h;
+  vec3_soa * kloc_s;
+  vec3_soa * kloc_p;
+  ACC_ShiftFermion *k_p_shiftferm;
+  thmat_soa * momenta;
+
+
+  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size                                                                                                                                                                                                         
+  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa));
+  posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa));
+  posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa));
+  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa));
+  posix_memalign((void **)&k_p_shiftferm, ALIGN, sizeof(ACC_ShiftFermion));
+  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
+  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa));
+  posix_memalign((void **)&ferm_in_acc  , ALIGN, sizeof(ACC_MultiFermion));
+  posix_memalign((void **)&ferm_out_acc , ALIGN, sizeof(ACC_MultiFermion));
+  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, sizeof(ACC_ShiftMultiFermion));
+
+  int dir;
+  for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
+  convert_COM_MultiFermion_to_ACC_MultiFermion(in,ferm_in_acc);
+  for(dir=0;dir<8;dir++)  convert_thmatCOM_soa_to_thmat_soa(&com_mom[dir],&momenta[dir]);
+
+  int md;
+  const double lambda=0.1931833275037836; // Omelyan Et Al.                                                                                                                                                                                                                                
+  const double gs=0.5/(double) gauge_scale_acc;
+  double delta[7];
+
+  struct timeval t0, t1,t2,t3;
+  gettimeofday ( &t0, NULL );
+
+  double fattore_arbitrario = 1.0;
+  delta[0]= -cimag(ieps_acc) * lambda;
+  delta[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
+  delta[2]= -cimag(ieps_acc) * 2.0*lambda;
+  delta[3]= -cimag(ieps_acc) * gs*lambda * beta_by_three;
+  delta[4]=  cimag(iepsh_acc)* gs;
+  delta[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*beta_by_three;
+  delta[6]= -cimag(ieps_acc) * gs*2.0*lambda*beta_by_three;
+  /*
+  delta[0]= -cimag(ieps_acc) * lambda;
+  delta[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
+  delta[2]= -cimag(ieps_acc) * 2.0*lambda;
+  delta[3]= -cimag(ieps_acc) * gs*lambda;
+  delta[4]=  cimag(iepsh_acc)* gs;
+  delta[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda);
+  delta[6]= -cimag(ieps_acc) * gs*2.0*lambda;
+  */
+
+  int index = 0;
+
+  printf("MOMENTA AND CONF - INSIDE OPENACC MD INTEGRATOR - BEFORE \n");
+  printf("Momenta 00 = ( %.18lf )\n", momenta[0].rc00[index]);
+  printf("Momenta 11 = ( %.18lf )\n", momenta[0].rc11[index]);
+  printf("Momenta 01 = ( %.18lf , %.18lf )\n", creal(momenta[0].c01[index]) , cimag(momenta[0].c01[index]));
+  printf("Momenta 02 = ( %.18lf , %.18lf )\n", creal(momenta[0].c02[index]) , cimag(momenta[0].c02[index]));
+  printf("Momenta 12 = ( %.18lf , %.18lf )\n", creal(momenta[0].c12[index]) , cimag(momenta[0].c12[index]));
+
+  printf("Conf 00 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c0[index]) , cimag(conf_acc[0].r0.c0[index]));
+  printf("Conf 01 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c1[index]) , cimag(conf_acc[0].r0.c1[index]));
+  printf("Conf 02 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c2[index]) , cimag(conf_acc[0].r0.c2[index]));
+  printf("Conf 10 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c0[index]) , cimag(conf_acc[0].r1.c0[index]));
+  printf("Conf 11 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c1[index]) , cimag(conf_acc[0].r1.c1[index]));
+  printf("Conf 12 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c2[index]) , cimag(conf_acc[0].r1.c2[index]));
+  printf("Conf 20 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c0[index]) , cimag(conf_acc[0].r2.c0[index]));
+  printf("Conf 21 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c1[index]) , cimag(conf_acc[0].r2.c1[index]));
+  printf("Conf 22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[index]) , cimag(conf_acc[0].r2.c2[index]));
+
+
+#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_in_acc[0:1]) copy(approx[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc)
+  {
+    gettimeofday ( &t1, NULL );
+    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+    mom_sum_mult(momenta,ipdot_acc,delta,0);
+
+    for(md=1; md<no_md; md++){
+      multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+
+      fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+
+      mom_sum_mult(momenta,ipdot_acc,delta,1);
+      multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+
+      fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+      mom_sum_mult(momenta,ipdot_acc,delta,2);
+    }
+    multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+    mom_sum_mult(momenta,ipdot_acc,delta,1);
+    multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+    fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,ferm_out_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+    mom_sum_mult(momenta,ipdot_acc,delta,0);
+    gettimeofday ( &t2, NULL );
+  }
+
+  gettimeofday ( &t3, NULL );
+
+
+  double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
+  double dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+  double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+  double dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
+
+
+  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
+  for(dir=0;dir<8;dir++)  convert_thmat_soa_to_thmatCOM_soa(&momenta[dir],&com_mom[dir]);
+
+  printf("MOMENTA AND CONF - INSIDE OPENACC MD INTEGRATOR - AFTER \n");
+  printf("Momenta 00 = ( %.18lf )\n", momenta[0].rc00[index]);
+  printf("Momenta 11 = ( %.18lf )\n", momenta[0].rc11[index]);
+  printf("Momenta 01 = ( %.18lf , %.18lf )\n", creal(momenta[0].c01[index]) , cimag(momenta[0].c01[index]));
+  printf("Momenta 02 = ( %.18lf , %.18lf )\n", creal(momenta[0].c02[index]) , cimag(momenta[0].c02[index]));
+  printf("Momenta 12 = ( %.18lf , %.18lf )\n", creal(momenta[0].c12[index]) , cimag(momenta[0].c12[index]));
+
+  printf("Conf 00 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c0[index]) , cimag(conf_acc[0].r0.c0[index]));
+  printf("Conf 01 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c1[index]) , cimag(conf_acc[0].r0.c1[index]));
+  printf("Conf 02 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r0.c2[index]) , cimag(conf_acc[0].r0.c2[index]));
+  printf("Conf 10 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c0[index]) , cimag(conf_acc[0].r1.c0[index]));
+  printf("Conf 11 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c1[index]) , cimag(conf_acc[0].r1.c1[index]));
+  printf("Conf 12 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r1.c2[index]) , cimag(conf_acc[0].r1.c2[index]));
+  printf("Conf 20 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c0[index]) , cimag(conf_acc[0].r2.c0[index]));
+  printf("Conf 21 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c1[index]) , cimag(conf_acc[0].r2.c1[index]));
+  printf("Conf 22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[index]) , cimag(conf_acc[0].r2.c2[index]));
+
+  printf("Ipdot 00 = ( %.18lf )\n", ipdot_acc[0].rc00[index]);
+  printf("Ipdot 11 = ( %.18lf )\n", ipdot_acc[0].rc11[index]);
+  printf("Ipdot 01 = ( %.18lf , %.18lf )\n", creal(ipdot_acc[0].c01[index]) , cimag(ipdot_acc[0].c01[index]));
+  printf("Ipdot 02 = ( %.18lf , %.18lf )\n", creal(ipdot_acc[0].c02[index]) , cimag(ipdot_acc[0].c02[index]));
+  printf("Ipdot 12 = ( %.18lf , %.18lf )\n", creal(ipdot_acc[0].c12[index]) , cimag(ipdot_acc[0].c12[index]));
+
+  printf("FULL UPDATE COMPUTATION TIME                    Tot time          : %f sec  \n",dt_tot);
+  printf("                                                PreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
+  printf("                                                PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+  printf("                                                PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
+
+
+
+  free(conf_acc);
+  free(aux_conf_acc);
+  free(ipdot_acc);
+  free(ferm_in_acc);
+  free(ferm_out_acc);
+  free(ferm_shiftmulti_acc);
+  free(kloc_r);
+  free(kloc_s);
+  free(kloc_h);
+  free(kloc_p);
+  free(k_p_shiftferm);
+
+
+
+
+
+}
+
+
+
+
+

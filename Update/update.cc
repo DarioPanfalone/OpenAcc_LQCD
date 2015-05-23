@@ -70,7 +70,8 @@ void update(int &acc)
     first_inv_approx_calc(residue_metro);
   #endif
 
-  if(update_iteration<therm_updates)
+    //    if(update_iteration<therm_updates)
+    if(0==0)
     { 
     update_nometro();
 

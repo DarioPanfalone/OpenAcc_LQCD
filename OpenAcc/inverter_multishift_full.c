@@ -726,7 +726,7 @@ void first_inv_approx_calc_openacc(const su3COM_soa  *conf, COM_MultiFermion *ou
 
 
   int ips = 1;
-  int ish = 108986;
+  int ish = 0;
 
   printf("%e    %e \n",creal(ferm_out_acc->multi[ips].c0[ish]),cimag(ferm_out_acc->multi[ips].c0[ish]));
   printf("%e    %e \n",creal(ferm_out_acc->multi[ips].c1[ish]),cimag(ferm_out_acc->multi[ips].c1[ish]));

@@ -1,18 +1,17 @@
 #ifndef RANDOM_C_
 #define RANDOM_C_
 
-//#include <math.h>
-//#include <stdlib.h>
+#include <math.h>
+#include <stdlib.h>
 
-//#include"./RANDOM/dSFMT.c"
-
-//dsfmt_t dsfmt;
+#include"./RANDOM/dSFMT.c"
+dsfmt_t dsfmt;
 
 // random number generator in (0,1)
 double casuale(void)
    {   
-     //    return dsfmt_genrand_open_open(&dsfmt);
-     return (double)rand()/((double)(RAND_MAX));
+     return dsfmt_genrand_open_open(&dsfmt);
+     //     return (double)rand()/((double)(RAND_MAX));
    }
 
 
@@ -22,13 +21,13 @@ void initrand(unsigned long s)
    if(s==0)
     {
       time_t t;
-      srand((unsigned) time(&t));
-      //    dsfmt_init_gen_rand(&dsfmt, time(NULL));
+      //      srand((unsigned) time(&t));
+      dsfmt_init_gen_rand(&dsfmt, time(NULL));
     }
   else
     {
-      srand(s);
-      //    dsfmt_init_gen_rand(&dsfmt, s);
+      //      srand(s);
+      dsfmt_init_gen_rand(&dsfmt, s);
     }
   }
 

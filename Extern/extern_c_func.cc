@@ -50,3 +50,8 @@ extern "C" {
 extern "C" {
   void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const COM_RationalApprox *approx1,const COM_RationalApprox *approx2,const COM_RationalApprox *approx3,const COM_MultiFermion *in,thmatCOM_soa * com_mom);
 }
+
+extern "C" {
+  void UPDATE_ACC_UNOSTEP(su3COM_soa *conf_soaCOM,double residue_md,COM_RationalApprox *COM_approx2,COM_MultiFermion *COMMON_chi,thmatCOM_soa *momenta_soaCOM);
+}
+
