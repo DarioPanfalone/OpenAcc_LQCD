@@ -13,8 +13,8 @@
 // lattice dimensions
 #define nx 16
 #define ny 16
-#define nz 16
-#define nt 16
+#define nz 4
+#define nt 4
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
