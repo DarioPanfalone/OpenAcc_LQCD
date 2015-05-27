@@ -12,15 +12,15 @@
 
 // lattice dimensions
 #define nx 16
-#define ny 8
-#define nz 4
-#define nt 2
+#define ny 16
+#define nz 16
+#define nt 16
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
 
-#define mass 0.08
-#define beta 5.71
+#define mass 0.32
+#define beta 6.0
 
 #define therm_updates 0
 #define max_cg 100000

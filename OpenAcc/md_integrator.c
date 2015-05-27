@@ -543,11 +543,12 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res,COM_RationalApprox *approx, 
   printf("Conf 21 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c1[index]) , cimag(conf_acc[0].r2.c1[index]));
   printf("Conf 22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[index]) , cimag(conf_acc[0].r2.c2[index]));
 
-  initrand(15);
   double placchetta;
 #pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_in_acc[0:1]) copy(approx[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2])
   {
     gettimeofday ( &t1, NULL );
+
+    initrand(15);
     // generate gauss-randomly the momenta
     generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
@@ -620,6 +621,7 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res,COM_RationalApprox *approx, 
 
 
 
+  free(momenta);
   free(conf_acc);
   free(aux_conf_acc);
   free(ipdot_acc);
@@ -640,5 +642,27 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res,COM_RationalApprox *approx, 
 
 
 
+
+
+void GENERATE_MOMENTA_ACC(thmatCOM_soa *com_mom){
+  initialize_global_variables();
+  compute_nnp_and_nnm_openacc();
+
+  thmat_soa * momenta;
+  int dir;
+  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
+
+  initrand(15);
+  generate_Momenta_gauss(momenta);
+  int index =1;
+  printf("Momenta 00 = ( %.18lf )\n", momenta[0].rc00[index]);
+  printf("Momenta 11 = ( %.18lf )\n", momenta[0].rc11[index]);
+  printf("Momenta 01 = ( %.18lf , %.18lf )\n", creal(momenta[0].c01[index]) , cimag(momenta[0].c01[index]));
+  printf("Momenta 02 = ( %.18lf , %.18lf )\n", creal(momenta[0].c02[index]) , cimag(momenta[0].c02[index]));
+  printf("Momenta 12 = ( %.18lf , %.18lf )\n", creal(momenta[0].c12[index]) , cimag(momenta[0].c12[index]));
+  for(dir=0;dir<8;dir++)  convert_thmat_soa_to_thmatCOM_soa(&momenta[dir],&com_mom[dir]);
+
+  free(momenta);
+}
 
 

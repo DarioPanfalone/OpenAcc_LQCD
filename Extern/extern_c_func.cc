@@ -55,3 +55,6 @@ extern "C" {
   void UPDATE_ACC_UNOSTEP(su3COM_soa *conf_soaCOM,double residue_md,COM_RationalApprox *COM_approx2,COM_MultiFermion *COMMON_chi,thmatCOM_soa *momenta_soaCOM, int id_iter);
 }
 
+extern "C" {
+  void GENERATE_MOMENTA_ACC(thmatCOM_soa *com_mom);
+}

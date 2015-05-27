@@ -144,6 +144,7 @@ int main(int argc,char **argv){
 
   //  multistep_2MN();
   int ciao;
+  /*
   for(int it=0;it<5;it++){
     time_start=clock();
     update(ciao);
@@ -152,7 +153,7 @@ int main(int argc,char **argv){
     gauge_conf->calc_plaq(ps,pt);
     cout << "PlaquetteCPU-CPUUPDATES  ["<< it << "] =  " << (ps+pt)*0.5 << endl;
   }
-
+  */
 
 
     gauge_conf->calc_plaq_uwork(ps,pt);

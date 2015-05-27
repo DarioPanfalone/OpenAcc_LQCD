@@ -86,20 +86,22 @@ void create_momenta(void)
   cout << "DEBUG: inside create_momenta ..."<<endl;
   #endif
 
-  //  for(long int i=0; i<no_links; i++)
-  //     {
-  //     (gauge_momenta->momenta[i]).gauss();
-  //     }
+    for(long int i=0; i<no_links; i++)
+       {
+       (gauge_momenta->momenta[i]).gauss();
+       }
 
+  /*
   long int r;
-  for(int par=0;par<1;par++){
-    for(int mu=0;mu<4;mu++){
+  for(int mu=0;mu<4;mu++){
+    for(int par=0;par<2;par++){
       for(long int i=0;i<sizeh;i++){
 	r = sizeh*(2*mu+par)+i;
 	(gauge_momenta->momenta[r]).gauss();
       }
     }
   }
+  */
 
   #ifdef DEBUG_MODE
   cout << "\tterminated create_momenta"<<endl;
