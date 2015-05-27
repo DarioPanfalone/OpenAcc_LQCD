@@ -457,7 +457,7 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
 
 
 
-void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx_mother1,COM_RationalApprox *approx2, int id_iter){
+void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx_mother1,COM_RationalApprox *approx_mother2, int id_iter){
   initialize_global_variables();
   compute_nnp_and_nnm_openacc();
 
@@ -477,6 +477,7 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   dcomplex_soa * local_sums;
   int allocation_check;
   COM_RationalApprox *approx1;
+  COM_RationalApprox *approx2;
 
 
   posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size                                                          
@@ -493,6 +494,7 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   posix_memalign((void **)&ferm_out_acc , ALIGN, sizeof(ACC_MultiFermion));
   posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, sizeof(ACC_ShiftMultiFermion));
   posix_memalign((void **)&approx1, ALIGN, sizeof(COM_RationalApprox));
+  posix_memalign((void **)&approx2, ALIGN, sizeof(COM_RationalApprox));
 
   allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));  // --> size complessi --> vettore per sommare cose locali
   if(allocation_check != 0)  printf("Errore nella allocazione di local_sums \n");
@@ -542,7 +544,7 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   double minmaxeig[2];
   int usestoredeigen;
 
-#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_chi_acc[0:1]) copy(ferm_phi_acc[0:1]) copy(approx1[0:1])  copy(approx2[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) copy(approx_mother1[0:1])  copy(minmaxeig[0:2])
+#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_chi_acc[0:1]) copy(ferm_phi_acc[0:1]) copy(approx1[0:1])  copy(approx2[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) copy(approx_mother1[0:1])  copy(approx_mother2[0:1])  copy(minmaxeig[0:2])
   {
     gettimeofday ( &t1, NULL );
 
@@ -571,13 +573,18 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
     rescale_rational_approximation(approx_mother1,approx1,minmaxeig,(1.0/8.0));
 #pragma acc update device(approx1[0:1])
 
-
     // first_inv_approx_calc 
     ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_phi_acc,res_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
     ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_phi_acc,ferm_chi_acc,approx1);
 
+    rescale_rational_approximation(approx_mother2,approx2,minmaxeig,-(1.0/4.0));
+#pragma acc update device(approx2[0:1])
+
     // dinamica molecolare
     multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_out_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md,approx2);
+
+
+
 
     placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     gettimeofday ( &t2, NULL );
