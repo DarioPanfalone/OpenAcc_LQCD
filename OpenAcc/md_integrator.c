@@ -539,7 +539,10 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   printf("Conf 22 = ( %.18lf , %.18lf )\n", creal(conf_acc[0].r2.c2[index]) , cimag(conf_acc[0].r2.c2[index]));
 
   double placchetta;
-#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_chi_acc[0:1]) copy(ferm_phi_acc[0:1]) copy(approx1[0:1])  copy(approx2[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) copy(approx_mother1[0:1])
+  double minmaxeig[2];
+  int usestoredeigen;
+
+#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_chi_acc[0:1]) copy(ferm_phi_acc[0:1]) copy(approx1[0:1])  copy(approx2[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) copy(approx_mother1[0:1])  copy(minmaxeig[0:2])
   {
     gettimeofday ( &t1, NULL );
 
@@ -551,6 +554,23 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
     printf("Id_iter %i   Momenta 00 = ( %.18lf )\n",id_iter, momenta[0].rc00[index]);
     generate_MultiFermion_gauss(ferm_phi_acc);
 #pragma acc update device(ferm_phi_acc[0:1])
+
+    // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
+    generate_vec3_soa_gauss(kloc_p);
+    generate_vec3_soa_gauss(kloc_s);
+    // update the fermion kloc_p copying it from the host to the device
+#pragma acc update device(kloc_p[0:1])
+#pragma acc update device(kloc_s[0:1])
+    usestoredeigen = 1; // quindi li calcola
+    find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,kloc_s,usestoredeigen,minmaxeig);
+#pragma acc update device(minmaxeig[0:2])
+    printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
+    printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
+
+    usestoredeigen = 0;
+    rescale_rational_approximation(approx_mother1,approx1,minmaxeig,(1.0/8.0));
+#pragma acc update device(approx1[0:1])
+
 
     // first_inv_approx_calc 
     ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_phi_acc,res_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);

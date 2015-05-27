@@ -210,6 +210,9 @@ void findminmax_con_openacc(REAL *minmax){
       min_stored=minmax[0];
       max_stored=minmax[1];
 
+      cout << "AUTOVALORE MINIMO  CPU   " << min_stored << endl;
+      cout << "AUTOVALORE MASSIMO CPU   " << max_stored << endl;
+
       /*
       minmax[0]=0.01;
       minmax[1]=7.2;
