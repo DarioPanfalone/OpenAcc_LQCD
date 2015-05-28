@@ -543,60 +543,83 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   double placchetta;
   double minmaxeig[2];
   int usestoredeigen;
+  int iterazioni;
+  double dt_tot;
+  double dt_pretrans_to_preker;
+  double dt_preker_to_postker;
+  double dt_postker_to_posttrans;
 
-#pragma acc data copy(conf_acc[0:8]) copy(momenta[0:8]) create(aux_conf_acc[0:8]) copy(ferm_chi_acc[0:1]) copy(ferm_phi_acc[0:1]) copy(approx1[0:1])  copy(approx2[0:1])  copy(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) copy(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) copy(approx_mother1[0:1])  copy(approx_mother2[0:1])  copy(minmaxeig[0:2])
+
+    
+#pragma acc data copy(conf_acc[0:8]) create(momenta[0:8]) create(aux_conf_acc[0:8]) create(ferm_chi_acc[0:1]) create(ferm_phi_acc[0:1]) copy(approx1[0:1])  copy(approx2[0:1])  create(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) copy(approx_mother1[0:1])  copy(approx_mother2[0:1])  create(minmaxeig[0:2])
   {
-    gettimeofday ( &t1, NULL );
-
-    initrand(15);
-
-    // generate gauss-randomly the momenta
-    generate_Momenta_gauss(momenta);
+    
+    for(iterazioni=0;iterazioni<20;iterazioni++){
+      gettimeofday ( &t1, NULL );
+      //      initrand(15);
+      // generate gauss-randomly the momenta
+      generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
-    printf("Id_iter %i   Momenta 00 = ( %.18lf )\n",id_iter, momenta[0].rc00[index]);
-    generate_MultiFermion_gauss(ferm_phi_acc);
+      printf("Id_iter %i   Momenta 00 = ( %.18lf )\n",iterazioni, momenta[0].rc00[index]);
+      generate_MultiFermion_gauss(ferm_phi_acc);
 #pragma acc update device(ferm_phi_acc[0:1])
+      
 
-    // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
-    generate_vec3_soa_gauss(kloc_p);
-    generate_vec3_soa_gauss(kloc_s);
-    // update the fermion kloc_p copying it from the host to the device
+      // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
+      generate_vec3_soa_gauss(kloc_p);
+      generate_vec3_soa_gauss(kloc_s);
+      // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
-    usestoredeigen = 1; // quindi li calcola
-    find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,kloc_s,usestoredeigen,minmaxeig);
+      usestoredeigen = 1; // quindi li calcola
+      find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,kloc_s,usestoredeigen,minmaxeig);
 #pragma acc update device(minmaxeig[0:2])
-    printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
-    printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
+      printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
+      printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
+      usestoredeigen = 0;
 
-    usestoredeigen = 0;
-    rescale_rational_approximation(approx_mother1,approx1,minmaxeig,(1.0/8.0));
+      rescale_rational_approximation(approx_mother1,approx1,minmaxeig,(1.0/8.0));
 #pragma acc update device(approx1[0:1])
-
-    // first_inv_approx_calc 
-    ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_phi_acc,res_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-    ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_phi_acc,ferm_chi_acc,approx1);
-
-    rescale_rational_approximation(approx_mother2,approx2,minmaxeig,-(1.0/4.0));
+      
+      
+      // first_inv_approx_calc 
+      ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_phi_acc,res_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+      ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_phi_acc,ferm_chi_acc,approx1);
+      
+      rescale_rational_approximation(approx_mother2,approx2,minmaxeig,-(1.0/4.0));
 #pragma acc update device(approx2[0:1])
 
-    // dinamica molecolare
-    multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_out_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md,approx2);
+      // dinamica molecolare
+      multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_out_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md,approx2);
+      
 
+      placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    
+      gettimeofday ( &t2, NULL );
 
+      dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+      printf("iterazione %i       AccUpdateTime   : %f sec  \n",iterazioni,dt_preker_to_postker);
+      printf("iterazione %i       PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
 
-
-    placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-    gettimeofday ( &t2, NULL );
+    }
   }
-
   gettimeofday ( &t3, NULL );
+  
+  dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
+  dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+  dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+  dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
+
+  printf("Id_iter %i   FULL UPDATE COMPUTATION TIME                    Tot time          : %f sec  \n",id_iter,dt_tot);
+  printf("Id_iter %i                                                   PreTrans->Preker  : %f sec  \n",id_iter,dt_pretrans_to_preker);
+  printf("Id_iter %i                                                   PreKer->PostKer   : %f sec  \n",id_iter,dt_preker_to_postker);
+  printf("Id_iter %i                                                   PostKer->PostTrans: %f sec  \n",id_iter,dt_postker_to_posttrans);
+  printf("Id_iter %i  PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",id_iter,placchetta/(2.0*sizeh*6.0*3.0));
 
 
-  double dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
-  double dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
-  double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
-  double dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
+
+
+
 
 
   for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
@@ -625,11 +648,6 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   printf("Ipdot 02 = ( %.18lf , %.18lf )\n", creal(ipdot_acc[0].c02[index]) , cimag(ipdot_acc[0].c02[index]));
   printf("Ipdot 12 = ( %.18lf , %.18lf )\n", creal(ipdot_acc[0].c12[index]) , cimag(ipdot_acc[0].c12[index]));
 
-  printf("Id_iter %i   FULL UPDATE COMPUTATION TIME                    Tot time          : %f sec  \n",id_iter,dt_tot);
-  printf("Id_iter %i                                                   PreTrans->Preker  : %f sec  \n",id_iter,dt_pretrans_to_preker);
-  printf("Id_iter %i                                                   PreKer->PostKer   : %f sec  \n",id_iter,dt_preker_to_postker);
-  printf("Id_iter %i                                                   PostKer->PostTrans: %f sec  \n",id_iter,dt_postker_to_posttrans);
-  printf("Id_iter %i  PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",id_iter,placchetta/(2.0*sizeh*6.0*3.0));
 
 
 
