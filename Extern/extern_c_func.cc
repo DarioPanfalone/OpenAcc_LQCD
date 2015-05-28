@@ -57,7 +57,7 @@ extern "C" {
 }
 */
 extern "C" {
-  void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx1,COM_RationalApprox *approx2,int id_iter);
+  void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx1,COM_RationalApprox *approx2,COM_RationalApprox *approx3,int id_iter);
 }
 
 

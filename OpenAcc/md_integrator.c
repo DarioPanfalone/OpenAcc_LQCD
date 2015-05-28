@@ -457,7 +457,7 @@ void UPDATE_ACC(su3COM_soa *conf,double residue_metro,double residue_md,const CO
 
 
 
-void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx_mother1,COM_RationalApprox *approx_mother2, int id_iter){
+void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx_mother1,COM_RationalApprox *approx_mother2,COM_RationalApprox *approx_mother3, int id_iter){
   initialize_global_variables();
   compute_nnp_and_nnm_openacc();
 
@@ -478,6 +478,8 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   int allocation_check;
   COM_RationalApprox *approx1;
   COM_RationalApprox *approx2;
+  COM_RationalApprox *approx3;
+  double_soa * d_local_sums;
 
 
   posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size                                                          
@@ -495,6 +497,8 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, sizeof(ACC_ShiftMultiFermion));
   posix_memalign((void **)&approx1, ALIGN, sizeof(COM_RationalApprox));
   posix_memalign((void **)&approx2, ALIGN, sizeof(COM_RationalApprox));
+  posix_memalign((void **)&approx3, ALIGN, sizeof(COM_RationalApprox));
+  posix_memalign((void **)&d_local_sums, ALIGN, sizeof(double_soa));
 
   allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));  // --> size complessi --> vettore per sommare cose locali
   if(allocation_check != 0)  printf("Errore nella allocazione di local_sums \n");
@@ -550,17 +554,22 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   double dt_postker_to_posttrans;
 
 
+  double action_in;
+  double action_fin;
+  double action_mom_in;
+  double action_mom_fin;
+  double action_ferm_in;
+  double action_ferm_fin;
+  int mu;
     
-#pragma acc data copy(conf_acc[0:8]) create(momenta[0:8]) create(aux_conf_acc[0:8]) create(ferm_chi_acc[0:1]) create(ferm_phi_acc[0:1]) copy(approx1[0:1])  copy(approx2[0:1])  create(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) copy(approx_mother1[0:1])  copy(approx_mother2[0:1])  create(minmaxeig[0:2])
+#pragma acc data copy(conf_acc[0:8]) create(momenta[0:8]) create(aux_conf_acc[0:8]) create(ferm_chi_acc[0:1]) create(ferm_phi_acc[0:1]) create(approx1[0:1])  create(approx2[0:1])  create(approx3[0:1])  create(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8]) copyin(delta[0:7])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1]) copy(approx_mother1[0:1])  copy(approx_mother2[0:1])  copy(approx_mother3[0:1])  create(minmaxeig[0:2])
   {
     
-    for(iterazioni=0;iterazioni<20;iterazioni++){
+    for(iterazioni=0;iterazioni<100;iterazioni++){
       gettimeofday ( &t1, NULL );
-      //      initrand(15);
-      // generate gauss-randomly the momenta
+
       generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
-      printf("Id_iter %i   Momenta 00 = ( %.18lf )\n",iterazioni, momenta[0].rc00[index]);
       generate_MultiFermion_gauss(ferm_phi_acc);
 #pragma acc update device(ferm_phi_acc[0:1])
       
@@ -577,11 +586,25 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
       printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
       printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
       usestoredeigen = 0;
-
+      
       rescale_rational_approximation(approx_mother1,approx1,minmaxeig,(1.0/8.0));
 #pragma acc update device(approx1[0:1])
       
-      
+      /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
+      action_in = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+      //      printf("iterazione %i   INSIDE PRAGMA DATA - PLACC  = %.18lf\n",iterazioni,action_in);
+      action_in = beta_by_three * action_in;
+      printf("iterazione %i   INSIDE PRAGMA DATA - GAUGEACT_IN  = %.18lf\n",iterazioni,action_in);
+      action_mom_in = 0.0;
+      for(mu =0;mu<8;mu++){
+	action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
+      }
+      printf("iterazione %i   INSIDE PRAGMA DATA - MOMACT_IN  = %.18lf\n",iterazioni,action_mom_in);
+      action_ferm_in=scal_prod_between_multiferm(ferm_phi_acc,ferm_phi_acc);
+      printf("iterazione %i   INSIDE PRAGMA DATA - FERMACT_IN  = %.18lf\n",iterazioni,action_ferm_in);      
+      ///////////////////////////////////////////////////////////////////////////////////////
+
+
       // first_inv_approx_calc 
       ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_phi_acc,res_metro,approx1,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
       ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_phi_acc,ferm_chi_acc,approx1);
@@ -593,10 +616,41 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
       multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_out_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md,approx2);
       
 
-      placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-    
-      gettimeofday ( &t2, NULL );
 
+      generate_vec3_soa_gauss(kloc_p);
+      generate_vec3_soa_gauss(kloc_s);
+#pragma acc update device(kloc_p[0:1])
+#pragma acc update device(kloc_s[0:1])
+      // compute the highest and lowest eigenvalues of (M^dag M)
+      usestoredeigen = 1; // quindi li calcola
+      find_min_max_eigenvalue_soloopenacc(conf_acc,kloc_r,kloc_h,kloc_p,kloc_s,usestoredeigen,minmaxeig);
+#pragma acc update device(minmaxeig[0:2])
+      printf("MINMAX[0] %.18lf \n",minmaxeig[0]);
+      printf("MINMAX[1] %.18lf \n",minmaxeig[1]);
+      usestoredeigen = 0;
+      rescale_rational_approximation(approx_mother3,approx3,minmaxeig,-(1.0/4.0));
+#pragma acc update device(approx3[0:1])
+
+      // last_inv_approx_calc
+      ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_chi_acc,res_metro,approx3,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+      ker_openacc_recombine_shiftmulti_to_multi(ferm_shiftmulti_acc,ferm_chi_acc,ferm_phi_acc,approx3);
+
+
+      ///////////////   FINAL ACTION COMPUTATION  ////////////////////////////////////////////
+      action_fin = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+      printf("iterazione %i   INSIDE PRAGMA DATA - GAUGEACT_FIN  = %.18lf\n",iterazioni,action_fin);
+      action_mom_fin = 0.0;
+      for(mu =0;mu<8;mu++){
+	action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
+      }
+      printf("iterazione %i   INSIDE PRAGMA DATA - MOMACT_FIN  = %.18lf\n",iterazioni,action_mom_fin);
+      action_ferm_fin=scal_prod_between_multiferm(ferm_chi_acc,ferm_phi_acc);
+      printf("iterazione %i   INSIDE PRAGMA DATA - FERMACT_FIN  = %.18lf\n",iterazioni,action_ferm_fin);
+      ////////////////////////////////////////////////////////////////////////////////////////
+
+
+      placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+      gettimeofday ( &t2, NULL );
       dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
       printf("iterazione %i       AccUpdateTime   : %f sec  \n",iterazioni,dt_preker_to_postker);
       printf("iterazione %i       PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
@@ -665,6 +719,10 @@ void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_Rat
   free(kloc_p);
   free(k_p_shiftferm);
   free(local_sums);
+  free(d_local_sums);
+  free(approx1);
+  free(approx2);
+  free(approx3);
 
 
 
