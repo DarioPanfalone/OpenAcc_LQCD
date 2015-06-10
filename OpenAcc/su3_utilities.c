@@ -540,6 +540,18 @@ static inline void assign_zero_to_su3_soa_component(__restrict su3_soa * const m
   matrix_comp->r2.c2[idx]=0.0+I*0.0;
 }
 
+static inline void assign_su3_soa_to_su3_soa_component(__restrict su3_soa * const matrix_comp_in,__restrict su3_soa * const matrix_comp_out,int idx){
+
+  matrix_comp_out->r0.c0[idx] =  matrix_comp_in->r0.c0[idx];
+  matrix_comp_out->r0.c1[idx] =  matrix_comp_in->r0.c1[idx];
+  matrix_comp_out->r0.c2[idx] =  matrix_comp_in->r0.c2[idx];
+
+  matrix_comp_out->r1.c0[idx] =  matrix_comp_in->r1.c0[idx];
+  matrix_comp_out->r1.c1[idx] =  matrix_comp_in->r1.c1[idx];
+  matrix_comp_out->r1.c2[idx] =  matrix_comp_in->r1.c2[idx];
+
+}
+
 
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix){
   int hx, y, z, t;
@@ -563,6 +575,29 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix){
 	  assign_zero_to_su3_soa_component(&matrix[5],idxh);
 	  assign_zero_to_su3_soa_component(&matrix[6],idxh);
 	  assign_zero_to_su3_soa_component(&matrix[7],idxh);
+	}
+      }
+    }
+  }
+}
+
+void set_su3_soa_to_su3_soa( __restrict su3_soa * const matrix_in, __restrict su3_soa * const matrix_out){
+  int hx, y, z, t;
+  for(t=0; t<nt; t++) {
+    for(z=0; z<nz; z++) {
+      for(y=0; y<ny; y++) {
+	for(hx=0; hx < nxh; hx++) {
+	  int x,idxh;
+          x = 2*hx + ((y+z+t) & 0x1);
+          idxh = snum_acc(x,y,z,t);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[0],&matrix_out[0],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[1],&matrix_out[1],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[2],&matrix_out[2],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[3],&matrix_out[3],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[4],&matrix_out[4],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[5],&matrix_out[5],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[6],&matrix_out[6],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[7],&matrix_out[7],idxh);
 	}
       }
     }

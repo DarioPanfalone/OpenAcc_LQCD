@@ -29,7 +29,7 @@
 
 #define no_md 15 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
-#define gauge_scale 10  // Update fermions every gauge_scale gauge updates
+#define gauge_scale 2  // Update fermions every gauge_scale gauge updates
 
 
 
