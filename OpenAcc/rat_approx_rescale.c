@@ -1,4 +1,4 @@
-void rescale_rational_approximation(COM_RationalApprox * mother,COM_RationalApprox * daughter, double *minmax, double power)
+void rescale_rational_approximation(const COM_RationalApprox * mother,COM_RationalApprox * daughter, double *minmax, double power)
 {
 
   daughter[0].COM_approx_order = mother[0].COM_approx_order; 

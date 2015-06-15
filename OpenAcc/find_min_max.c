@@ -15,7 +15,7 @@
 
 // find the maximum eigenvalue of the fermion matrix
 // use loc_h, loc_p, loc_r
-double ker_find_max_eigenvalue_openacc(  const __restrict su3_soa * const u,
+double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
 					 __restrict vec3_soa * const loc_r,
 					 __restrict vec3_soa * const loc_h,
 					 __restrict vec3_soa * const loc_p
@@ -55,7 +55,7 @@ double ker_find_max_eigenvalue_openacc(  const __restrict su3_soa * const u,
 
 // find the minimum eigenvalue of the fermion matrix
 // use loc_h, loc_p, loc_r
-double ker_find_min_eigenvalue_openacc(  const __restrict su3_soa * const u,
+double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
 					 __restrict vec3_soa * const loc_r,
 					 __restrict vec3_soa * const loc_h,
 					 __restrict vec3_soa * const loc_p,
@@ -89,7 +89,7 @@ double ker_find_min_eigenvalue_openacc(  const __restrict su3_soa * const u,
   return min;
 }
 
-void find_min_max_eigenvalue_soloopenacc(  const __restrict su3_soa * const u,
+void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
 					   __restrict vec3_soa * const loc_r,
 					   __restrict vec3_soa * const loc_h,
 					   __restrict vec3_soa * const loc_p1,

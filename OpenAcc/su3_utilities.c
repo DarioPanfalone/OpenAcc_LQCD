@@ -15,12 +15,12 @@ void select_working_gpu_homemade(int dev_index){
 }
 
 // mat3 = mat1 * mat2 
-static inline void    mat1_times_mat2_into_mat3_absent_stag_phases( const __restrict su3_soa * const mat1,
-								  const int idx_mat1,
-								  const __restrict su3_soa * const mat2,
-								  const int idx_mat2,
-								  __restrict su3_soa * const mat3,
-								  const int idx_mat3) {
+static inline void    mat1_times_mat2_into_mat3_absent_stag_phases( __restrict su3_soa * const mat1,
+								    const int idx_mat1,
+								    __restrict su3_soa * const mat2,
+								    const int idx_mat2,
+								    __restrict su3_soa * const mat3,
+								    const int idx_mat3) {
   d_complex mat1_00 = mat1->r0.c0[idx_mat1];
   d_complex mat1_01 = mat1->r0.c1[idx_mat1];
   d_complex mat1_02 = mat1->r0.c2[idx_mat1];
@@ -54,9 +54,9 @@ static inline void    mat1_times_mat2_into_mat3_absent_stag_phases( const __rest
 
 // mat1 = mat1 * hermitian_conjucate(mat2)
 static inline void    mat1_times_conj_mat2_into_mat1_absent_stag_phases( __restrict su3_soa * const mat1,
-								       const int idx_mat1,
-								       const __restrict su3_soa * const mat2,
-								       const int idx_mat2){
+									 const int idx_mat1,
+									 __restrict su3_soa * const mat2,
+									 const int idx_mat2){
   
   d_complex mat1_00 = mat1->r0.c0[idx_mat1];
   d_complex mat1_01 = mat1->r0.c1[idx_mat1];
@@ -92,14 +92,14 @@ static inline void    mat1_times_conj_mat2_into_mat1_absent_stag_phases( __restr
 
 // Routine for the computation of the 3 matrices which contributes to the right part of the staple
 // mat4 = mat1 * hermitian_conjucate(mat2)* hermitian_conjucate(mat3)
-static inline void    mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases( const __restrict su3_soa * const matnu1,
-											  const int idx_mat_nu1,
-											  const __restrict su3_soa * const matmu2,
-											  const int idx_mat_mu2,
-											  const __restrict su3_soa * const matnu3,
-											  const int idx_mat_nu3,
-											  __restrict su3_soa * const mat4,
-											  const int idx_mat4){
+static inline void    mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(  __restrict su3_soa * const matnu1,
+											   const int idx_mat_nu1,
+											   __restrict su3_soa * const matmu2,
+											   const int idx_mat_mu2,
+											   __restrict su3_soa * const matnu3,
+											   const int idx_mat_nu3,
+											   __restrict su3_soa * const mat4,
+											   const int idx_mat4){
   
   d_complex mat1_00 = matnu1->r0.c0[idx_mat_nu1];
   d_complex mat1_01 = matnu1->r0.c1[idx_mat_nu1];
@@ -171,14 +171,14 @@ static inline void    mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_sta
 
 // Routine for the computation of the 3 matrices which contributes to the left part of the staple
 // mat4 = hermitian_conjucate(mat1)* hermitian_conjucate(mat2) * mat3
-static inline void    conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases( const __restrict su3_soa * const matnu1,
-											  const int idx_mat_nu1,
-											  const __restrict su3_soa * const matmu2,
-											  const int idx_mat_mu2,
-											  const __restrict su3_soa * const matnu3,
-											  const int idx_mat_nu3,
-											  __restrict su3_soa * const mat4,
-											  const int idx_mat4){
+static inline void    conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(   __restrict su3_soa * const matnu1,
+											   const int idx_mat_nu1,
+											   __restrict su3_soa * const matmu2,
+											   const int idx_mat_mu2,
+											   __restrict su3_soa * const matnu3,
+											   const int idx_mat_nu3,
+											   __restrict su3_soa * const mat4,
+											   const int idx_mat4){
   // construct (into the variables mat1_ij) the hermitian conjugate of the mat1 matrix  
   d_complex mat1_00 = conj( matnu1->r0.c0[idx_mat_nu1] ) ;
   d_complex mat1_10 = conj( matnu1->r0.c1[idx_mat_nu1] ) ;
@@ -254,9 +254,9 @@ static inline void    conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag
 }
 
 
-static inline void mat1_times_mat2_into_tamat3(const __restrict su3_soa * const mat1,
+static inline void mat1_times_mat2_into_tamat3(__restrict su3_soa * const mat1,
 					       const int idx_mat1,
-					       const __restrict su3_soa * const mat2,
+					       __restrict su3_soa * const mat2,
 					       const int idx_mat2,
 					       __restrict tamat_soa * const mat3,
 					       const int idx_mat3){
@@ -318,7 +318,7 @@ static inline void   mat1_times_int_factor( __restrict su3_soa * const mat1,
   mat1->r1.c1[idx_mat1] *= factor;
   mat1->r1.c2[idx_mat1] *= factor;
 
-  //Third row is not multiplied
+  //Third row needs not to be multiplied
   mat1->r2.c0[idx_mat1] *= factor;
   mat1->r2.c1[idx_mat1] *= factor;
   mat1->r2.c2[idx_mat1] *= factor;
@@ -326,7 +326,7 @@ static inline void   mat1_times_int_factor( __restrict su3_soa * const mat1,
 }
 
 // calcola la traccia della matrice di su3
-static inline d_complex matrix_trace_absent_stag_phase(const __restrict su3_soa * const loc_plaq,
+static inline d_complex matrix_trace_absent_stag_phase(__restrict su3_soa * const loc_plaq,
 						       const int idx){
   d_complex loc_plaq_00 = loc_plaq->r0.c0[idx];
   d_complex loc_plaq_01 = loc_plaq->r0.c1[idx];
@@ -407,6 +407,59 @@ void mult_conf_times_stag_phases( __restrict su3_soa * const u){
 
 
 
+// multiply the whole configuration for the staggered phases field
+void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u){
+  int hx,y,z,t,idxh;
+  for(t=0; t<nt; t++) {
+    for(z=0; z<nz; z++) {
+      for(y=0; y<ny; y++) {
+        for(hx=0; hx < nxh; hx++) {
+          int x,eta;
+
+	  //even sites
+	  x = 2*hx + ((y+z+t) & 0x1);
+	  idxh = snum_acc(x,y,z,t);
+	  // dir  0  =  x even   --> eta = 1 , no multiplication needed
+	  // dir  2  =  y even
+	  eta = 1 - ( 2*(x & 0x1) );
+	  mat1_times_int_factor(&u[2], idxh, eta);
+	  // dir  4  =  z even
+	  eta = 1 - ( 2*((x+y) & 0x1) );
+	  mat1_times_int_factor(&u[4], idxh, eta);
+	  // dir  6  =  t even
+	  eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+	  eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+	  mat1_times_int_factor(&u[6], idxh, eta);
+
+	  //odd sites
+	  x = 2*hx + ((y+z+t+1) & 0x1);
+	  idxh = snum_acc(x,y,z,t);
+	  // dir  1  =  x odd    --> eta = 1 , no multiplication needed
+	  // dir  3  =  y odd
+	  eta = 1 - ( 2*(x & 0x1) );
+	  mat1_times_int_factor(&u[3], idxh, eta);
+	  // dir  5  =  z odd
+	  eta = 1 - ( 2*((x+y) & 0x1) );
+	  mat1_times_int_factor(&u[5], idxh, eta);
+	  // dir  7  =  t odd
+	  eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+	  eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+	  mat1_times_int_factor(&u[7], idxh, eta);
+	  
+	}
+      }
+    }
+  }
+
+}
+
+
+
+
 
 
 
@@ -453,7 +506,7 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
 	  // |        +--->+
 	  // |       r  (A)  r+mu
 	  // +---> mu
-	  
+
 	  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
@@ -605,10 +658,10 @@ void set_su3_soa_to_su3_soa( __restrict su3_soa * const matrix_in, __restrict su
 }
 
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
-void calc_loc_staples_removing_stag_phases_nnptrick(   const __restrict su3_soa * const u,
-						       __restrict su3_soa * const loc_stap,
-						       const int mu,
-						       const int nu){
+void calc_loc_staples_removing_stag_phases_nnptrick(  __restrict su3_soa * const u,
+						      __restrict su3_soa * const loc_stap,
+						      const int mu,
+						      const int nu){
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
   //          |  1L  ^  1R  |
@@ -706,7 +759,7 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idxh = snum_acc(x,y,z,t);  // r 
 	  parity = (x+y+z+t) % 2;
 	  /*
-
+ ///////////COMMENTARE ////////////////////////////////////
 	  ////////////////////////////////// DIR X  //////////////////////////////////////////////////
 	  mu=0;
 	  iter=0;
@@ -873,8 +926,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  //computation of the Left  part of the staple
 	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
+ ///////////COMMENTARE ////////////////////////////////////
+ */
 
-	  */
 	}  // x
       }  // y
     }  // z
@@ -887,8 +941,8 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 
 
 // tamattamat
-void conf_times_staples_ta_part(const __restrict su3_soa * const u,
-				const __restrict su3_soa * const loc_stap,
+void conf_times_staples_ta_part(__restrict su3_soa * const u, // constant --> is not updated
+			        __restrict su3_soa * const loc_stap, // constant --> is not updated
 				__restrict tamat_soa * const ipdot){
 
   int x, y, z, t;
@@ -970,7 +1024,7 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
 /////////////////////////////////////////////////////////////////////////////////////////
 ////// maybe it is necessary to separate this routine into smaller routines .... ////////
 /////////////////////////////////////////////////////////////////////////////////////////
-static inline void conf_left_exp_multiply_and_finally_proj(const __restrict thmat_soa * const mom,
+static inline void conf_left_exp_multiply_and_finally_proj( __restrict thmat_soa * const mom,
 							   const int idx_mom,
 							   __restrict su3_soa * const cnf,
 							   const int idx_cnf,
@@ -1117,9 +1171,9 @@ static inline void conf_left_exp_multiply_and_finally_proj(const __restrict thma
 //////   also by using a new structure that is a single matrix                    ///////
 /////////////////////////////////////////////////////////////////////////////////////////
 static inline void extract_mom(const __restrict thmat_soa * const mom,
-			       const int idx_mom,
-			       const double delta,
-			       __restrict single_su3 * M){
+			       int idx_mom,
+			       double delta,
+			       single_su3 * M){
   //COSTRUISCO LA MATRICE M = i*delta*momento
   //leggo la prima parte
   // il segno meno sulle componenti M10,M20 e M21 c'e' perche' dopo aver
@@ -1175,10 +1229,10 @@ static inline void matrix_exp_openacc(const __restrict single_su3 * const MOM,
     RES->comp[r][r] = RES->comp[r][r] + 1.0;
   }
 }
-///////ATTENZIONE FORSE HO SCAMBIATO RIGHE E COLONNE ..... CONTROLLARE!  --> direi di no, ma lascio il commento
-static inline void conf_left_exp_multiply(const __restrict su3_soa * const cnf,
+
+static inline void conf_left_exp_multiply(__restrict su3_soa * const cnf,  // e' costante e qui dentro non viene modificata
 					  const int idx_cnf,
-					  const __restrict single_su3 * const  EXP,
+					  const __restrict single_su3 * const  EXP, 
 					  __restrict single_su3 * AUX,
 					  __restrict single_su3 * AUX_RIS){
   
@@ -1242,36 +1296,11 @@ cnf->r2.c2[idx_cnf]= conj(AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * 
 }
 
 
-static inline void assign_sinlge_su3_to_conf(__restrict su3_soa * const cnf,
-					     const int idx_cnf,
-					     const __restrict single_su3 * const AUX){
-  cnf->r0.c0[idx_cnf] = AUX->comp[0][0];
-  cnf->r0.c1[idx_cnf] = AUX->comp[0][1];
-  cnf->r0.c2[idx_cnf] = AUX->comp[0][2];
-  cnf->r1.c0[idx_cnf] = AUX->comp[1][0];
-  cnf->r1.c1[idx_cnf] = AUX->comp[1][1];
-  cnf->r1.c2[idx_cnf] = AUX->comp[1][2];
-  cnf->r2.c0[idx_cnf] = AUX->comp[2][0];
-  cnf->r2.c1[idx_cnf] = AUX->comp[2][1];
-  cnf->r2.c2[idx_cnf] = AUX->comp[2][2];
-}
 
-static inline void assign_3rd_to_conf(__restrict su3_soa * const cnf,
-				      const int idx_cnf,
-				      const __restrict single_su3 * const AUX){
-  cnf->r0.c0[idx_cnf] = AUX->comp[0][0];
-  cnf->r0.c1[idx_cnf] = AUX->comp[0][1];
-  cnf->r0.c2[idx_cnf] = AUX->comp[0][2];
-  cnf->r1.c0[idx_cnf] = AUX->comp[1][0];
-  cnf->r1.c1[idx_cnf] = AUX->comp[1][1];
-  cnf->r1.c2[idx_cnf] = AUX->comp[1][2];
-  cnf->r2.c0[idx_cnf] = AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1]; // conj!!!!!!!!!!!!
-  cnf->r2.c1[idx_cnf] = AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2];
-  cnf->r2.c2[idx_cnf] = AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * AUX->comp[1][0];
-}
-
-
-void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const double * factor, int id_factor){
+void kernel_acc_mom_exp_times_conf( __restrict su3_soa * const conf,
+				    thmat_soa * const mom, // e' costante e qui dentro non viene modificato
+				    double * factor,
+				    int id_factor){
 
   int x, y, z, t;
 #pragma acc kernels present(mom) present(conf) present(factor)
@@ -1294,11 +1323,10 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const do
           parity = (x+y+z+t) % 2;
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
+
 	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux[0]);
 	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
 	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
-	    //assign_3rd_to_conf(&conf[dir_link],idxh,&mom_aux[0]);
-	    //assign_sinlge_su3_to_conf(&conf[dir_link],idxh,&mom_aux[0]);
 	    project_on_su3(&conf[dir_link],idxh,&mom_aux[0]);
 	  }
 	  
@@ -1311,13 +1339,16 @@ void kernel_acc_mom_exp_times_conf(su3_soa *conf,const thmat_soa * mom, const do
 
 
 
-void mom_exp_times_conf_soloopenacc(su3_soa *conf_acc,const thmat_soa * momenta,double * delta, int id_delta){
+void mom_exp_times_conf_soloopenacc( __restrict  su3_soa * const conf_acc,
+				     thmat_soa * const momenta, // e' costante e qui dentro non viene modificata
+				     double * delta,
+				     int id_delta){
   mult_conf_times_stag_phases(conf_acc);
   kernel_acc_mom_exp_times_conf(conf_acc,momenta,delta, id_delta);
   mult_conf_times_stag_phases(conf_acc);
 }
 
-void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
+void mom_exp_times_conf_openacc(su3COM_soa *conf, thmatCOM_soa * com_mom){
   su3_soa  * conf_acc;
   thmat_soa * momenta;
   posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));    //  -->  4*size
@@ -1410,7 +1441,7 @@ void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom){
 ///  VERSIONE SOLOOPENACC DEL CALCOLO DELLA PLACCHETTA!!!
 /// ASSUMIAMO CHE NELLA MEMORIA DELLA SCHEDA LA CONF SIA GIA' PRESENTE!!
 /// E CHE ANCHE ESISTA UNO SPAZIO DI MEMORIA LOCAL_PLAQS AUSILIARIO DOVE FARE I CONTI PARZIALI
-double  calc_plaquette_soloopenacc(const su3_soa *conf_acc, su3_soa * local_plaqs, dcomplex_soa * tr_local_plaqs){
+double  calc_plaquette_soloopenacc( __restrict  su3_soa * const conf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
 
   double tempo=0.0;
   // tolgo le fasi staggered
@@ -1560,7 +1591,7 @@ void  calc_staples_openacc(const su3COM_soa *conf,su3COM_soa *COM_staples){
 
 
 
-void calc_ipdot_gauge_soloopenacc(const su3_soa *conf_acc,  su3_soa *local_staples,tamat_soa * ipdot){
+void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const conf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const ipdot){
   //  compute_nnp_and_nnm_openacc();
   struct timeval t1,t2;
   int looping_directions[4][3] = {{1,2,3},{0,2,3},{0,1,3},{0,1,2}};

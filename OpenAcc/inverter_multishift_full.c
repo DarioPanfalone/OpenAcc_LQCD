@@ -4,9 +4,9 @@
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
 
-void ker_invert_openacc_shiftmulti(   const __restrict su3_soa * const u,
-				     __restrict ACC_ShiftMultiFermion * const out,
-				     const __restrict ACC_MultiFermion * const in,
+void ker_invert_openacc_shiftmulti(   __restrict su3_soa * const u, // non viene mai aggiornata qui dentro
+				      __restrict ACC_ShiftMultiFermion * const out,
+				      __restrict ACC_MultiFermion * const in, // non viene mai aggiornato qui dentro
 				     double residuo,
 				     const COM_RationalApprox * const approx,
 				     __restrict vec3_soa * const loc_r,
@@ -206,9 +206,9 @@ void ker_openacc_recombine_shiftmulti_to_multi( const __restrict ACC_ShiftMultiF
 
 static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * const aux_u,
 							int idxh,
-							const  __restrict vec3_soa  * const fer_l,
+							__restrict vec3_soa  * const fer_l, // questo fermione e' costante e non viene modificato qui dentro
 							int idl,
-							const  __restrict vec3_soa  * const fer_r,
+							__restrict vec3_soa  * const fer_r, // questo fermione e' costante e non viene modificato qui dentro
 							int idr,
 							double factor){
   // forse si possono risparmiare un po di conti andando a prendere le sole parti reale e immaginarie 
@@ -234,10 +234,10 @@ static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * con
 }
 
 
-static inline  void mat1_times_auxmat_into_tamat( const  __restrict su3_soa * const mat1,
+static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
 						  const  int idx,
 						  const  int eta,
-						  const  __restrict su3_soa * const auxmat,
+						  __restrict su3_soa * const auxmat,  // e' costante e non viene modificato
 						  const  int idx_aux,
 						  __restrict tamat_soa * const ipdot,
 						  const  int idipdot){
@@ -288,8 +288,8 @@ static inline  void mat1_times_auxmat_into_tamat( const  __restrict su3_soa * co
 }
 
 
-void direct_product_of_fermions_into_auxmat(const  __restrict vec3_soa  * const loc_s,
-					    const  __restrict vec3_soa  * const loc_h,
+void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, // questo fermione e' costante e non viene modificato qui dentro
+					    __restrict vec3_soa  * const loc_h, // questo fermione e' costante e non viene modificato qui dentro
 					    __restrict su3_soa * const aux_u,
 					    const COM_RationalApprox * const approx,
 					    int iter){
@@ -475,8 +475,8 @@ void multiply_conf_times_force_and_take_ta(const __restrict su3_soa * const u,
 */
 
 
-void multiply_conf_times_force_and_take_ta_even(  const __restrict su3_soa * const u,
-						  const __restrict su3_soa * const auxmat,
+void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
+						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
 						  __restrict tamat_soa * const ipdot){
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u) present(auxmat) present(ipdot)
@@ -522,8 +522,8 @@ void multiply_conf_times_force_and_take_ta_even(  const __restrict su3_soa * con
 
 
 
-void multiply_conf_times_force_and_take_ta_odd(  const __restrict su3_soa * const u,
-					         const __restrict su3_soa * const auxmat,
+void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, // e' costante e non viene modificata
+					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
 					         __restrict tamat_soa * const ipdot){
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u) present(auxmat) present(ipdot)
@@ -570,12 +570,12 @@ void multiply_conf_times_force_and_take_ta_odd(  const __restrict su3_soa * cons
 
 
 
-void ker_openacc_compute_fermion_force( const __restrict su3_soa * const u,
+void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
 					__restrict su3_soa * const aux_u,
-					const __restrict ACC_ShiftMultiFermion * const in_shiftmulti,
+					__restrict ACC_ShiftMultiFermion * const in_shiftmulti,  // e' costante e non viene mai modificato qui dentro
 					__restrict vec3_soa  * const loc_s,
 					__restrict vec3_soa  * const loc_h,
-					const COM_RationalApprox * const approx
+					const COM_RationalApprox * const approx  // e' costante e non viene mai modificato qui dentro
 					){
   int ips;
   int ih;
@@ -764,7 +764,19 @@ void first_inv_approx_calc_openacc(const su3COM_soa  *conf, COM_MultiFermion *ou
 }
 
 
-void fermion_force_soloopenacc(const su3_soa  *conf_acc, tamat_soa *ipdot_acc, const ACC_MultiFermion *ferm_in_acc, double res, const COM_RationalApprox *approx, ACC_MultiFermion * ferm_out_acc,su3_soa  * aux_conf_acc,ACC_ShiftMultiFermion * ferm_shiftmulti_acc,vec3_soa * kloc_r,vec3_soa * kloc_h,vec3_soa * kloc_s,vec3_soa * kloc_p,ACC_ShiftFermion *k_p_shiftferm){
+void fermion_force_soloopenacc(__restrict su3_soa  *conf_acc, // la configurazione qui dentro e' costante e non viene modificata
+			       __restrict tamat_soa *ipdot_acc,
+			       __restrict ACC_MultiFermion *ferm_in_acc, // questo multifermione e' costante e non viene modificato
+			       double res,
+			       const COM_RationalApprox *approx,
+			       __restrict ACC_MultiFermion * ferm_out_acc,
+			       __restrict su3_soa  * aux_conf_acc,
+			       __restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
+			       __restrict vec3_soa * kloc_r,
+			       __restrict vec3_soa * kloc_h,
+			       __restrict vec3_soa * kloc_s,
+			       __restrict vec3_soa * kloc_p,
+			       __restrict ACC_ShiftFermion *k_p_shiftferm){
   printf("############################################ \n");
   printf("#### Inside fermion force soloopenacc ###### \n");
   printf("############################################ \n");

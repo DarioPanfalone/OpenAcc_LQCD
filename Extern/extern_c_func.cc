@@ -44,7 +44,7 @@ extern "C" {
 
 
 extern "C" {
-  void mom_exp_times_conf_openacc(su3COM_soa *conf,const thmatCOM_soa * com_mom);
+  void mom_exp_times_conf_openacc(su3COM_soa *conf,thmatCOM_soa * com_mom);
 }
 
 extern "C" {
@@ -56,11 +56,10 @@ extern "C" {
   void UPDATE_ACC_UNOSTEP(su3COM_soa *conf_soaCOM,double residue_md,COM_RationalApprox *COM_approx2,COM_MultiFermion *COMMON_chi,thmatCOM_soa *momenta_soaCOM, int id_iter);
 }
 */
-/*
+
 extern "C" {
   void UPDATE_ACC_UNOSTEP(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx1,COM_RationalApprox *approx2,COM_RationalApprox *approx3,int id_iter);
 }
-*/
 
 extern "C" {
   void THERM_UPDATE_ACC_UNOSTEP_NOMETRO(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx1,COM_RationalApprox *approx2,COM_RationalApprox *approx3,int id_iter);

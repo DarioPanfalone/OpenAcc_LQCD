@@ -29,20 +29,10 @@ static inline void scal_prod_loc_2double( const __restrict vec3_soa * const in_v
   res_ri[0] = creal(sum);
   res_ri[1] = cimag(sum);
 }
-static inline double scal_prod_loc_1double( const __restrict vec3_soa * const in_vect1,
-                                          const __restrict vec3_soa * const in_vect2,
-                                          const int idx_vect
+static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect1,
+					     __restrict vec3_soa * const in_vect2,
+					     const int idx_vect
                                           ) {
-  // questa routine potrebbe essere migliorata perche per adesso
-  // nel calcolare la parte reale del prodotto scalare si calcola anche
-  // la parte immaginaria che poi viene buttata via.
-  // forse si puo riscrivere il tutto in modo piu esplicito facendogli fare
-  // solo i conti che contribuiscono al calcolo della parte reale.
-  /*
-  d_complex sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
-  sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
-  sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
-  */
 
   double sum  = creal(in_vect1->c0[idx_vect]) * creal(in_vect2->c0[idx_vect]) + cimag(in_vect1->c0[idx_vect]) * cimag(in_vect2->c0[idx_vect]);
          sum += creal(in_vect1->c1[idx_vect]) * creal(in_vect2->c1[idx_vect]) + cimag(in_vect1->c1[idx_vect]) * cimag(in_vect2->c1[idx_vect]);
@@ -56,18 +46,6 @@ static inline double scal_prod_between_multi_loc_1double( const __restrict ACC_M
 							  const int idx_vect,
 							  const int ips
 							  ) {
-  // questa routine potrebbe essere migliorata perche per adesso
-  // nel calcolare la parte reale del prodotto scalare si calcola anche
-  // la parte immaginaria che poi viene buttata via.
-  // forse si puo riscrivere il tutto in modo piu esplicito facendogli fare
-  // solo i conti che contribuiscono al calcolo della parte reale.
-  /*
-  d_complex sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
-  sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
-  sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
-  */
-  //    in->multi[ips].c0[ih];                                                                                                                             
-
 
   double sum  = creal(in_vect1->multi[ips].c0[idx_vect]) * creal(in_vect2->multi[ips].c0[idx_vect]) + cimag(in_vect1->multi[ips].c0[idx_vect]) * cimag(in_vect2->multi[ips].c0[idx_vect]);
          sum += creal(in_vect1->multi[ips].c1[idx_vect]) * creal(in_vect2->multi[ips].c1[idx_vect]) + cimag(in_vect1->multi[ips].c1[idx_vect]) * cimag(in_vect2->multi[ips].c1[idx_vect]);
@@ -75,7 +53,7 @@ static inline double scal_prod_between_multi_loc_1double( const __restrict ACC_M
   return sum;
 }
 
-static inline double l2norm2_loc( const __restrict vec3_soa * const in_vect1,
+static inline double l2norm2_loc( __restrict vec3_soa * const in_vect1,
 				  const int idx_vect
 				  ) {
   double sum = creal(in_vect1->c0[idx_vect])*creal(in_vect1->c0[idx_vect])+cimag(in_vect1->c0[idx_vect])*cimag(in_vect1->c0[idx_vect]);
@@ -110,8 +88,8 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
   return res;
 }
 
-double real_scal_prod_global(  const __restrict vec3_soa * const in_vect1,
-			       const __restrict vec3_soa * const in_vect2
+double real_scal_prod_global(  __restrict vec3_soa * const in_vect1,
+			       __restrict vec3_soa * const in_vect2
 			       ){
   int t;
   double res_R_p;
@@ -126,7 +104,7 @@ double real_scal_prod_global(  const __restrict vec3_soa * const in_vect1,
   return resR;
 }
 
-double l2norm2_global( const __restrict vec3_soa * const in_vect1
+double l2norm2_global( __restrict vec3_soa * const in_vect1 // constant --> is not updated
 		       ){
   int t;
   double res_R_p;
@@ -165,8 +143,8 @@ void  scal_prod_openacc(const vec3COM_soa *in1,const vec3COM_soa *in2, double *p
 }
 
 
-//////////////////uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu
-double  scal_prod_between_multiferm(const ACC_MultiFermion *in1,const ACC_MultiFermion *in2){
+double  scal_prod_between_multiferm(const __restrict ACC_MultiFermion * const in1,
+				    const __restrict ACC_MultiFermion * const in2){
   double result;
 
   int t,ips;
@@ -185,9 +163,9 @@ double  scal_prod_between_multiferm(const ACC_MultiFermion *in1,const ACC_MultiF
 }
 
 
-void combine_in1xfactor_plus_in2(  const __restrict vec3_soa * const in_vect1,
+void combine_in1xfactor_plus_in2(  __restrict vec3_soa * const in_vect1,
 				   const double factor,
-                                   const __restrict vec3_soa * const in_vect2,
+                                   __restrict vec3_soa * const in_vect2,
                                    __restrict vec3_soa * const out){
 
 #pragma acc kernels present(in_vect1) present(in_vect2) present(out)
@@ -213,7 +191,7 @@ void multiply_fermion_x_doublefactor(  __restrict vec3_soa * const in1,
   }
 }
 
-void combine_add_factor_x_in2_to_in1( __restrict vec3_soa * const in1,const __restrict vec3_soa * const in2, double factor){
+void combine_add_factor_x_in2_to_in1( __restrict vec3_soa * const in1,__restrict vec3_soa * const in2, double factor){
 #pragma acc kernels present(in1) present(in2)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -225,10 +203,10 @@ void combine_add_factor_x_in2_to_in1( __restrict vec3_soa * const in1,const __re
 
 
 
-void combine_in1xm2_minus_in2_minus_in3(  const __restrict vec3_soa * const in_vect1,
-                                          const __restrict vec3_soa * const in_vect2,
-                                          const __restrict vec3_soa * const in_vect3,
-                                          __restrict vec3_soa * const out){
+void combine_in1xm2_minus_in2_minus_in3(   __restrict vec3_soa * const in_vect1,
+                                           __restrict vec3_soa * const in_vect2,
+                                           __restrict vec3_soa * const in_vect3,
+					   __restrict vec3_soa * const out){ // l'ultimo argomento e' l'unico che viene modificato
 #pragma acc kernels present(in_vect1) present(in_vect2) present(in_vect3) present(out)
 #pragma acc loop independent 
   for(int ih=0; ih<sizeh; ih++) {
@@ -279,7 +257,7 @@ void combine_inside_loop( __restrict vec3_soa * const vect_out,
     vect_r->c2[ih]   -= (vect_s->c2[ih]*omega);
   }
 }
-void combine_in1xm2_minus_in2(const __restrict vec3_soa * const in_vect1,
+void combine_in1xm2_minus_in2(__restrict vec3_soa * const in_vect1,
                               __restrict vec3_soa * const in_vect2){
 #pragma acc kernels present(in_vect1) present(in_vect2)
 #pragma acc loop independent
@@ -305,9 +283,9 @@ void combine_in1xm2_minus_in2(  const __restrict vec3_soa * const in_vect1,
 }
 */
 
-void combine_in1_minus_in2(  const __restrict vec3_soa * const in_vect1,
-                             const __restrict vec3_soa * const in_vect2,
-                             __restrict vec3_soa * const out){
+void combine_in1_minus_in2( __restrict vec3_soa * const in_vect1,
+                            __restrict vec3_soa * const in_vect2,
+                            __restrict vec3_soa * const out){
 #pragma acc kernels present(in_vect1) present(in_vect2) present(out)
 #pragma acc loop independent 
   for(int ih=0; ih<sizeh; ih++) {
@@ -317,7 +295,7 @@ void combine_in1_minus_in2(  const __restrict vec3_soa * const in_vect1,
   }
 }
 
-void assign_in_to_out(  const __restrict vec3_soa * const in_vect1,
+void assign_in_to_out(  __restrict vec3_soa * const in_vect1,
                         __restrict vec3_soa * const out){
 #pragma acc kernels present(in_vect1)  present(out)
 #pragma acc loop independent 
@@ -342,7 +320,8 @@ void set_shiftmulti_to_zero( const int iorder, const int ips, __restrict ACC_Shi
 
 }
 
-void extract_pseudo_and_assign_to_fermion( const  __restrict ACC_MultiFermion * const in, const int ips,  __restrict vec3_soa * const out){
+// il primo argomento e' (di fatto) costante e non viene aggiornato
+void extract_pseudo_and_assign_to_fermion(__restrict ACC_MultiFermion * const in, const int ips,  __restrict vec3_soa * const out){
 #pragma acc kernels present(in) present(out)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -352,7 +331,8 @@ void extract_pseudo_and_assign_to_fermion( const  __restrict ACC_MultiFermion * 
   }
 }
 
-void extract_pseudo_and_assign_to_shiftfermion(const __restrict ACC_MultiFermion * const in, int ips, __restrict ACC_ShiftFermion * const out, int ia){
+// il primo argomento e' (di fatto) costante e non viene aggiornato
+void extract_pseudo_and_assign_to_shiftfermion( __restrict ACC_MultiFermion * const in, int ips, __restrict ACC_ShiftFermion * const out, int ia){
 #pragma acc kernels present(in) present(out)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -362,8 +342,8 @@ void extract_pseudo_and_assign_to_shiftfermion(const __restrict ACC_MultiFermion
   }
 }
 
-
-void combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(__restrict ACC_ShiftMultiFermion * const out,const  __restrict ACC_ShiftFermion * const in,int ips, int ia, double factor){
+// il secondo argomento e' (di fatto) costante e non viene aggiornato
+void combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(__restrict ACC_ShiftMultiFermion * const out,  __restrict ACC_ShiftFermion * const in,int ips, int ia, double factor){
 #pragma acc kernels present(in) present(out)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -373,7 +353,8 @@ void combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(__restr
   }
 }
 
-void combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm( __restrict ACC_ShiftFermion * const in1, int ia, double fact1, const __restrict vec3_soa * const in2, double fact2){
+// il quarto argomento e' (di fatto) costante e non viene aggiornato
+void combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm( __restrict ACC_ShiftFermion * const in1, int ia, double fact1, __restrict vec3_soa * const in2, double fact2){
 #pragma acc kernels present(in1) present(in2)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -383,7 +364,8 @@ void combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm( __restrict
   }
 }
 
-void extract_from_shiftmulti_and_assign_to_fermion( const  __restrict ACC_ShiftMultiFermion * const in, const int ia, const int ips,  __restrict vec3_soa * const out){
+// il primo argomento e' (di fatto) costante e non viene aggiornato
+void extract_from_shiftmulti_and_assign_to_fermion( __restrict ACC_ShiftMultiFermion * const in, const int ia, const int ips,  __restrict vec3_soa * const out){
 #pragma acc kernels present(in) present(out)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -403,7 +385,8 @@ void extract_from_shiftmulti_multiply_for_factor_and_assign_to_fermion( const  _
   }
 }
 
-void combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1( __restrict vec3_soa * const in1,double fact, const __restrict vec3_soa * const in2, const __restrict ACC_MultiFermion * const in3,int ips){
+// il terzo ed il quarto argomento sono (di fatto) costanti e non vengono aggiornati
+void combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1( __restrict vec3_soa * const in1,double fact, __restrict vec3_soa * const in2, __restrict ACC_MultiFermion * const in3,int ips){
 #pragma acc kernels present(in1) present(in2) present(in3)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {

@@ -6,10 +6,10 @@
 #include "openacc.h"
 #include "./fermionic_utilities.c"
 
-static inline vec3 mat_vec_mul( const __restrict su3_soa * const matrix,
+static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
                                 const int idx_mat,
                                 const int eta,
-                                const __restrict vec3_soa * const in_vect,
+                                __restrict vec3_soa * const in_vect,
                                 const int idx_vect) {
 
   vec3 out_vect;
@@ -49,10 +49,10 @@ static inline vec3 mat_vec_mul( const __restrict su3_soa * const matrix,
 }
 
 
-static inline vec3 conjmat_vec_mul( const __restrict su3_soa * const matrix,
+static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
                                     const int idx_mat,
                                     const int eta,
-                                    const __restrict vec3_soa * const in_vect,
+                                    __restrict vec3_soa * const in_vect,
                                     const int idx_vect) {
 
   vec3 out_vect;
@@ -113,7 +113,8 @@ static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 }
 
 
-void acc_Deo(const __restrict su3_soa * const u, __restrict vec3_soa * const out, const __restrict vec3_soa * const in) {
+//void acc_Deo(const __restrict su3_soa * const u, __restrict vec3_soa * const out, const __restrict vec3_soa * const in) {
+void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in) {
 
   int hx, y, z, t;
 #pragma acc kernels present(u) present(out) present(in)
@@ -214,7 +215,8 @@ void acc_Deo(const __restrict su3_soa * const u, __restrict vec3_soa * const out
 
 
 
-void acc_Doe(const __restrict su3_soa * const u, __restrict vec3_soa * const out, const __restrict vec3_soa * const in) {
+//void acc_Doe(const __restrict su3_soa * const u, __restrict vec3_soa * const out, const __restrict vec3_soa * const in) {
+void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __restrict vec3_soa * const in) {
 
   int hx, y, z, t;
 
@@ -332,7 +334,7 @@ void  apply_Deo_openacc(const su3COM_soa *conf,const vec3COM_soa *in,vec3COM_soa
   {
     acc_Deo(conf_acc,ferm2_acc,ferm1_acc);
   }
-  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
+  //  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
   convert_vec3_soa_to_vec3COM_soa(ferm2_acc,out);
   free(conf_acc);
   free(ferm1_acc);
@@ -353,7 +355,7 @@ void  apply_Doe_openacc(const su3COM_soa *conf,const vec3COM_soa *in,vec3COM_soa
   {
     acc_Doe(conf_acc,ferm2_acc,ferm1_acc);
   }
-  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
+  //  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
   convert_vec3_soa_to_vec3COM_soa(ferm2_acc,out);
   free(conf_acc);
   free(ferm1_acc);

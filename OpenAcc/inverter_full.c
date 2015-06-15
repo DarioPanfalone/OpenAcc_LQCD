@@ -16,11 +16,11 @@
                      //     piu leggibile delle due, cioe' quella con piu kernel)
 
 
-int ker_invert_openacc(  const __restrict su3_soa * const u,
+int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata mai qui dentro
 			  __restrict vec3_soa * const out,
-			  const __restrict vec3_soa * const in,
+			  __restrict vec3_soa * const in, // non viene aggiornato mai qui dentro
 			  double res,
-			  const __restrict vec3_soa * const trialSolution,
+			  __restrict vec3_soa * const trialSolution, // non viene aggiornato mai qui dentro
 			  __restrict vec3_soa * const loc_r,
 			  __restrict vec3_soa * const loc_h,
 			  __restrict vec3_soa * const loc_s,

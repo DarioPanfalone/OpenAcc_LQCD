@@ -19,7 +19,7 @@
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
 
-#define mass 0.32
+#define mass 0.05
 #define beta 6.0
 
 #define therm_updates 0

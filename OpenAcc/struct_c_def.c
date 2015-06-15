@@ -218,7 +218,7 @@ void convert_su3_soa_to_su3COM_soa(su3_soa *in, su3COM_soa *out){
 }
 
 // funzioni di conversione:    su3COM_soa   ==>   su3_soa 
-void convert_su3COM_soa_to_su3_soa(su3COM_soa *in, su3_soa *out){
+void convert_su3COM_soa_to_su3_soa(const su3COM_soa *in, su3_soa *out){
   int i;
   for( i =0 ; i < sizeh ; i++){
     out->r0.c0[i] = (in->r0.c0[i].Re) + (in->r0.c0[i].Im) * 1.0I;
@@ -250,7 +250,7 @@ void convert_vec3_soa_to_vec3COM_soa(vec3_soa *in, vec3COM_soa *out){
 }
 
 // funzioni di conversione:    vec3COM_soa  ==>  vec3_soa
-void convert_vec3COM_soa_to_vec3_soa(vec3COM_soa *in, vec3_soa *out){
+void convert_vec3COM_soa_to_vec3_soa(const vec3COM_soa *in, vec3_soa *out){
   int i;
   for( i =0 ; i < sizeh ; i++){
     out->c0[i] = (in->c0[i].Re) + (in->c0[i].Im) * 1.0I;
@@ -305,7 +305,7 @@ void convert_ACC_MultiFermion_to_COM_MultiFermion(ACC_MultiFermion *in, COM_Mult
 }
 
 // funzioni di conversione:    COM_MultiFermion  ==>  ACC_MultiFermion          
-void convert_COM_MultiFermion_to_ACC_MultiFermion(COM_MultiFermion *in, ACC_MultiFermion *out){
+void convert_COM_MultiFermion_to_ACC_MultiFermion(const COM_MultiFermion *in, ACC_MultiFermion *out){
   int i,ips;
   for(ips =0 ; ips < no_ps ; ips++){
     for( i =0 ; i < sizeh ; i++){
