@@ -92,7 +92,7 @@ static inline void    mat1_times_conj_mat2_into_mat1_absent_stag_phases( __restr
 
 // Routine for the computation of the 3 matrices which contributes to the right part of the staple
 // mat4 = mat1 * hermitian_conjucate(mat2)* hermitian_conjucate(mat3)
-static inline void    mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(  __restrict su3_soa * const matnu1,
+static inline void    mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(  __restrict su3_soa * const matnu1,
 											   const int idx_mat_nu1,
 											   __restrict su3_soa * const matmu2,
 											   const int idx_mat_mu2,
@@ -171,7 +171,7 @@ static inline void    mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_sta
 
 // Routine for the computation of the 3 matrices which contributes to the left part of the staple
 // mat4 = hermitian_conjucate(mat1)* hermitian_conjucate(mat2) * mat3
-static inline void    conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(   __restrict su3_soa * const matnu1,
+static inline void    conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(   __restrict su3_soa * const matnu1,
 											   const int idx_mat_nu1,
 											   __restrict su3_soa * const matmu2,
 											   const int idx_mat_mu2,
@@ -673,7 +673,7 @@ void calc_loc_staples_removing_stag_phases_nnptrick(  __restrict su3_soa * const
   //            r is idxh in the following      
 
   int x, y, z, t;
-#pragma acc kernels present(u) present(loc_stap)
+#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -705,13 +705,13 @@ void calc_loc_staples_removing_stag_phases_nnptrick(  __restrict su3_soa * const
 
 	  idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 	  idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	  idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
-	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	}  // x
       }  // y
@@ -771,9 +771,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 
 	  iter=1;
@@ -785,9 +785,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 
 	  iter=2;
@@ -799,9 +799,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  ////////////////////////////////// DIR Y  //////////////////////////////////////////////////
 	  mu=1;
@@ -814,9 +814,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  iter=1;
 	  nu = looping_directions[mu][iter];
@@ -827,9 +827,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  iter=2;
 	  nu = looping_directions[mu][iter];
@@ -840,9 +840,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  ////////////////////////////////// DIR Z  //////////////////////////////////////////////////
 	  mu=2;
@@ -855,9 +855,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  iter=1;
 	  nu = looping_directions[mu][iter];
@@ -868,9 +868,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  iter=2;
 	  nu = looping_directions[mu][iter];
@@ -881,9 +881,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  ////////////////////////////////// DIR T  //////////////////////////////////////////////////
 	  mu=3;
@@ -896,9 +896,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  iter=1;
 	  nu = looping_directions[mu][iter];
@@ -909,9 +909,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
 	  iter=2;
 	  nu = looping_directions[mu][iter];
@@ -922,9 +922,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(   const __restrict su3_
 	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
 	  idx_mnu= nnm_openacc[idxh][nu][parity] ;          // r-nu
 	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2__times_conj_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
+	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
 	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_into_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
+	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
  ///////////COMMENTARE ////////////////////////////////////
  */

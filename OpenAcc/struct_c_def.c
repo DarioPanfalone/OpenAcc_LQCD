@@ -107,19 +107,19 @@ typedef struct ACC_ShiftMultiFermion_t{
 
 
 typedef struct tamat_soa_t {
-  d_complex c01[sizeh];
-  d_complex c02[sizeh];
-  d_complex c12[sizeh];
-  double rc00[sizeh];
-  double rc11[sizeh];
+  d_complex c01[sizeh]; // comp_01
+  d_complex c02[sizeh]; // comp_02
+  d_complex c12[sizeh]; // comp_12
+  double rc00[sizeh];   // Im(comp_00)
+  double rc11[sizeh];   // Im(comp_11)
 } tamat_soa;
 
 typedef struct thmat_soa_t {
-  d_complex c01[sizeh];
-  d_complex c02[sizeh];
-  d_complex c12[sizeh];
-  double rc00[sizeh];
-  double rc11[sizeh];
+  d_complex c01[sizeh]; // comp_01
+  d_complex c02[sizeh]; // comp_02
+  d_complex c12[sizeh]; // comp_12
+  double rc00[sizeh];   // Re(comp_00)
+  double rc11[sizeh];   // Re(comp_11)
 } thmat_soa;
 
 
