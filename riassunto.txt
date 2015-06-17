@@ -1,0 +1,107 @@
+----------------  VARIABILI  della DATA REGION -----------------------------------------------------------------------
+Variabili che vengono allocate sull'host e poi create/copyin-ate/copy-ate sul device:
+ +  thmat_soa * momenta;     // matrici hermitiane a traccia nulla --> sono i momenti 
+ +  tamat_soa * ipdot_acc;   // matrici anti-hermitiane a traccia nulla --> sono gli ipdot, cioe' la derivata prima dei momenti
+                           // lo step elementare di integrazione delle eq di dinamica molecolare per i momenti sara'
+                           // momenta = momenta + i * dt * ipdot_acc
+ +  su3_soa  * conf_acc;     // the working conf that is iteratively modified
+ +  su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.    
+ +  su3_soa  * aux_conf_acc; // configurazione ausiliaria usata come appoggio
+ +  ACC_MultiFermion * ferm_phi_acc; // --> viene estratto in modo random all'inizio della traiettoria     
+ +  ACC_MultiFermion * ferm_chi_acc; // --> viene calcolato all'inizio della traiettoria facendo un'inversione della matrice di Dirac sul fermione phi
+                                   //     durante le traiettorie e' costante
+ +  ACC_MultiFermion * ferm_out_acc;             // fermione ausiliario usato nel multishift
+ +  ACC_ShiftMultiFermion * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift     
+ +  ACC_ShiftFermion *k_p_shiftferm;             // ausiliario per l'invertitore multishift     
+ +  vec3_soa * kloc_r;  // vettore ausiliario    (usato in vari posti)
+ +  vec3_soa * kloc_h;  // vettore ausiliario    (usato in vari posti)
+ +  vec3_soa * kloc_s;  // vettore ausiliario    (usato in vari posti)
+ +  vec3_soa * kloc_p;  // vettore ausiliario    (usato in vari posti)
+ +  COM_RationalApprox *approx1;  // struttura che contiene i coefficienti dell'approssimazione razionale 1
+ +  COM_RationalApprox *approx2;  // struttura che contiene i coefficienti dell'approssimazione razionale 2
+ +  COM_RationalApprox *approx3;  // struttura che contiene i coefficienti dell'approssimazione razionale 3
+ +  COM_RationalApprox *approx_mother1;  // struttura che contiene i coefficienti dell'approssimazione razionale madre 1
+ +  COM_RationalApprox *approx_mother2;  // struttura che contiene i coefficienti dell'approssimazione razionale madre 2
+ +  COM_RationalApprox *approx_mother3;  // struttura che contiene i coefficienti dell'approssimazione razionale madre 3
+ +  dcomplex_soa * local_sums;    // vettore di complessi per le riduzioni 
+ +  double_soa * d_local_sums;    // vettore di double per le riduzioni
+ +  double minmaxeig[2];          // vettore che contiene l'autovettore piu grande e piu piccolo della matrice di Dirac
+ +  int nnp_openacc[sizeh][4][2]; // vettore che contiene il numero del sito primo vicino in direzione positiva (p = plus)
+ +  int nnm_openacc[sizeh][4][2]; // vettore che contiene il numero del sito primo vicino in direzione negativa (m = minus)
+
+--------------------------------------------------
+------------  STRUTTURA DEL CODICE ---------------
+--------------------------------------------------
+
+0) allocazione della memoria
+1) inizializzazione della configurazione di gauge {U} (conf_acc)
+
+for loop
+{
+   #data region di openacc
+   {
+       2) calcolo di alcune osservabili sulla configurazione
+       3) update della configurazione -->  INTEGRATORE + METROPOLIS TEST
+   }
+}
+
+4) salvataggio della configurazione su file
+5) deallocazione della memoria
+
+
+-------------------------------------------------
+-------------------------------------------------
+
+Il punto 3 e' la parte cruciale e piu' time-consuming del codice.
+
+L'idea per costruire una nuova configurazione a partire dalla precedente e' di fare
+un test di accettanza/rigetto alla Metropolis:
+   - si calcola l'energia (azione) iniziale, associata alla configurazione {U}_0   ==>  S_0
+   - si modifica la configurazione facendole seguire delle equazioni del moto = INTEGRATORE ==> passiamo da {U}_0 ad {U}_1
+   - si calcola l'energia (azione )finale  ==> S_1
+   - si effettua il test di Metropolis basato sul rapporto rapp=exp(-S_finale)/exp(-S_iniziale)
+          ~ se si accetta allora la nuova configurazione e'  {U}_1
+          ~ se si rifiuta allora la nuova configurazione e'  {U}_0
+
+Di tutte queste operazioni la parte cruciale e' l'INTEGRATORE
+ed e' costituito da una serie ripetitiva di operazioni.
+Lo scopo dell'integratore e' di modificare per piccoli step
+sia la configurazione che i momenti.
+
+
+
+
+
+
+   A) estrazione random di 
+        - momenta           ==>   generate_Momenta_gauss(thmat_soa * momenta);
+        - ferm_phi_acc      ==>   generate_MultiFermion_gauss(ACC_MultiFermion * ferm_phi_acc);
+
+   B) calcolo dell'azione iniziale 
+        - parte di gauge   
+               ==>  double  calc_plaquette_soloopenacc(   su3_soa * conf_acc,               // e' la conf di gauge e non viene modificata            
+	       	    	    				  su3_soa * local_plaqs,            // configurazione ausiliaria
+							  dcomplex_soa * tr_local_plaqs);   // vettore per le riduzioni
+
+           - parte fermionica  ==>   calc_momenta_action(momenta,d_local_sums,mu);
+					~ momenta        --> non viene modificata
+					~ d_local_sums   --> vettore per le riduzioni
+                                        ~ mu             --> calcola il contributo che viene 
+
+
+--------------------------------------------------
+
+
+
+
+------------  INIZIALIZZAZIONE CONFIGURAZIONE --------------
+  viene costruita la configurazione di gauge iniziale
+
+dentro alla data region che contiene tutte le variabili di cui sopra a
+
+      generate_Momenta_gauss(momenta);
+#pragma acc update device(momenta[0:8])
+      generate_MultiFermion_gauss(ferm_phi_acc);
+#pragma acc update device(ferm_phi_acc[0:1])
+
+

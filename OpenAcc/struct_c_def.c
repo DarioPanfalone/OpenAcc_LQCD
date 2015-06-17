@@ -44,23 +44,14 @@ typedef double complex  d_complex;
 int no_md_acc,gauge_scale_acc;
 double epsilon_acc;
 d_complex ieps_acc,iepsh_acc;
+
 void initialize_global_variables(){
-  no_md_acc = 15;
-  gauge_scale_acc = 2;
+  no_md_acc = no_md ;
+  gauge_scale_acc = gauge_scale;
   epsilon_acc = 1.0/((double)(no_md_acc));
   ieps_acc  = 0.0 + (epsilon_acc) * 1.0I;
   iepsh_acc = 0.0 + (epsilon_acc) * 0.5 * 1.0I;
 }
-
-
-
-// le istruzioni che seguono misteriosamente non compilano, nemmeno castando a double o simili
-// ???????????????????????????????????????????????????????????????????????????????????????????????
-//double epsilon_acc = 1.0/no_md_acc;
-//d_complex ieps_acc  = (double)0.0 + (double)(epsilon_acc) * 1.0I; 
-//d_complex iepsh_acc = (double)0.0 + (double)(epsilon_acc) * 0.5 * 1.0I; 
-//d_complex ieps_acc  = 0.0 + epsilon_acc * 1.0I; 
-//d_complex iepsh_acc = 0.0 + epsilon_acc * 0.5 * 1.0I; 
 
 
 static inline int snum_acc(int x, int y, int z, int t) {
