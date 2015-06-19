@@ -633,12 +633,6 @@ void THERM_UPDATE_ACC_UNOSTEP_NOMETRO(su3COM_soa *conf,double res_metro, double 
 
 
 
-
-
-
-
-
-
 int UPDATE_ACC_UNOSTEP_METRO(su3COM_soa *conf,double res_metro, double res_md,COM_RationalApprox *approx_mother1,COM_RationalApprox *approx_mother2,COM_RationalApprox *approx_mother3, int id_iter,int acc){
 
   initialize_global_variables();
