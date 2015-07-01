@@ -48,49 +48,23 @@ int init(int startMode = 1)
      init_geo();
 
 
-     cerr << " Random number inside init and before gauge conf generation :    " << casuale() << endl;
      // allocate gauge configuration
      gauge_conf=new Conf(startMode);
-     cerr << " Random number inside init and after gauge conf generation :    " << casuale() << endl;
-
-     // allocate staples
-     gauge_staples=new Staples();
-     // allocate ipdot
-     gauge_ipdot=new Ipdot();
-     // allocate momenta
-     gauge_momenta=new Momenta();
-
-     // allocate auxiliary global fermion 
-     loc_r=new Fermion;
-     loc_h=new Fermion;
-     loc_s=new Fermion;
-     loc_p=new Fermion;
-     fermion_phi=new MultiFermion;
-     fermion_chi=new MultiFermion;
-     p_shiftferm=new ShiftFermion;
-     fermion_shiftmulti=new ShiftMultiFermion;
 
      // auxiliary vectors for global sums
      d_vector1=new double[size];
      d_vector2=new double[size];
      plaq_test=new double[size];
 
-#ifdef USEGPU
-     gauge_field_packed=new float[12*no_links*2];            // 2 since 1double~2float
-     shift_table = new int[8*size];//the new nnp and nnm, but to copy on the device
-#endif
-     // test if the simulation details are applicable
-     test_param(); 
-
      }
   catch (exception& e)
-     {
-     cout << e.what() << endl;
-     #ifdef DEBUG_MODE
-     cout << "\tterminated init with exceptions"<< endl;
-     #endif
-     return 1;
-     }
+    {
+      cout << e.what() << endl;
+#ifdef DEBUG_MODE
+      cout << "\tterminated init with exceptions"<< endl;
+#endif
+      return 1;
+    }
 
   #ifdef DEBUG_MODE
   cout << "\tterminated init without exceptions"<< endl;
@@ -112,31 +86,8 @@ void end(void)
   delete [] d_vector2;
   delete [] plaq_test;
 
-  // clear auxiliary global fermions
-  delete loc_r;
-  delete loc_h;
-  delete loc_s;
-  delete loc_p;
-
-  // clear fermions
-  delete fermion_phi;
-  delete fermion_chi;
-
-  // clear shifted fermions
-  delete p_shiftferm;
-  delete fermion_shiftmulti;
-
-  // clear ipdot 
-  delete gauge_ipdot;
-
-  // clear momenta 
-  delete gauge_momenta;
-
-
-   // clear gauge configuration
+  // clear gauge configuration
   delete gauge_conf;
-  // clear staples
-  delete gauge_staples;
 
   // clear geometry variables
   end_geo();
