@@ -30,7 +30,6 @@
 #include "../Update/update.cc"
 
 #include "../Inverter/inverter.cc"    
-#include "../OpenAcc/inverter_simple.cc"  
 
 using namespace std;
 

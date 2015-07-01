@@ -19,7 +19,7 @@
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
 
-#define mass 0.32
+#define mass 0.03
 #define beta 6.0
 
 #define therm_updates 0
@@ -27,9 +27,9 @@
 #define max_approx_order 19
 #define no_ps 2
 
-#define no_md 15 // number of MD steps
+#define no_md 13 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
-#define gauge_scale 2  // Update fermions every gauge_scale gauge updates
+#define gauge_scale 5  // Update fermions every gauge_scale gauge updates
 
 
 

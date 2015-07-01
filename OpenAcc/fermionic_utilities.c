@@ -120,29 +120,6 @@ double l2norm2_global( __restrict vec3_soa * const in_vect1 // constant --> is n
 }
 
 
-void  scal_prod_openacc(const vec3COM_soa *in1,const vec3COM_soa *in2, double *pre, double *pim){
-  vec3_soa * ferm1_acc;
-  vec3_soa * ferm2_acc;
-  posix_memalign((void **)&ferm1_acc, ALIGN, sizeof(vec3_soa));
-  posix_memalign((void **)&ferm2_acc, ALIGN, sizeof(vec3_soa));
-
-  convert_vec3COM_soa_to_vec3_soa(in1,ferm1_acc);
-  convert_vec3COM_soa_to_vec3_soa(in2,ferm2_acc);
-  d_complex result;
-
-#pragma acc data copyin(ferm1_acc[0:1]) copyin(ferm2_acc[0:1])
-  {
-    result = scal_prod_global(ferm1_acc,ferm2_acc);
-  }
-
-  *pre = creal(result);
-  *pim = cimag(result);
-
-  free(ferm1_acc);
-  free(ferm2_acc);
-}
-
-
 double  scal_prod_between_multiferm(const __restrict ACC_MultiFermion * const in1,
 				    const __restrict ACC_MultiFermion * const in2){
   double result;
@@ -268,20 +245,6 @@ void combine_in1xm2_minus_in2(__restrict vec3_soa * const in_vect1,
   }
 }
 
-/*
-//OLD VERSION WITH 3 ARGUMENTS
-void combine_in1xm2_minus_in2(  const __restrict vec3_soa * const in_vect1,
-                                const __restrict vec3_soa * const in_vect2,
-                                __restrict vec3_soa * const out){
-#pragma acc kernels present(in_vect1) present(in_vect2) present(out)
-#pragma acc loop independent 
-  for(int ih=0; ih<sizeh; ih++) {
-    out->c0[ih]=(in_vect1->c0[ih]*mass2)-in_vect2->c0[ih];
-    out->c1[ih]=(in_vect1->c1[ih]*mass2)-in_vect2->c1[ih];
-    out->c2[ih]=(in_vect1->c2[ih]*mass2)-in_vect2->c2[ih];
-  }
-}
-*/
 
 void combine_in1_minus_in2( __restrict vec3_soa * const in_vect1,
                             __restrict vec3_soa * const in_vect2,

@@ -181,26 +181,16 @@ void RationalApprox::first_inv_approx_coeff(void)
  #endif
  int i;
  REAL min, max, epsilon;
- REAL *minmax;
- minmax = new REAL [2];
 
  cout.precision(18);
 
  // normalized coefficients
- cout << " STARTING TO TAKE MOTHER COEFF " << endl;
  *this=*first_inv_approx_norm_coeff;
- cout << " TAKEN MOTHER COEFF " << endl;
- // findminmax(min, max);
- // cout << "CPU:      min = " << min << "    max = " << max << endl;
+ findminmax(min, max);
 
- findminmax_con_openacc(minmax);
- min = minmax[0];
- max = minmax[1];
- cout << "OPENACC:  min = " << min << "    max = " << max << endl;
  
  min*=0.95;
  max*=1.05;
- cout << "OPENACC times security factors:  min = " << min << "    max = " << max << endl;
 
  epsilon=min/max;
  cout << "Epsilon = " << epsilon << endl ;
@@ -242,15 +232,9 @@ void RationalApprox::md_inv_approx_coeff(void)
  int i;
  REAL min, max, epsilon;
 
- REAL *minmax;
- minmax = new REAL [2];
  // normalized coefficients
  *this=*md_inv_approx_norm_coeff;
-
- // findminmax(min, max);
- findminmax_con_openacc(minmax);
- min = minmax[0];
- max = minmax[1];
+ findminmax(min, max);
 
 
  min*=0.95;
@@ -291,16 +275,11 @@ void RationalApprox::last_inv_approx_coeff(void)
  #endif
  int i;
  REAL min, max, epsilon;
- REAL *minmax;
- minmax = new REAL [2];
 
  // normalized coefficients
  *this=*last_inv_approx_norm_coeff;
+ findminmax(min, max);
 
- // findminmax(min, max);
- findminmax_con_openacc(minmax);
- min = minmax[0];
- max = minmax[1];
 
  min*=0.95;
  max*=1.05;

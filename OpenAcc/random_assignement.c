@@ -212,7 +212,7 @@ void generate_Conf_cold_comp(__restrict su3_soa * const conf,double factor){
   }
 }
 
-
+// iterations of random assignements over all the 8 components
 void generate_Momenta_gauss(__restrict thmat_soa * const mom){
   int mu;
   for(mu=0; mu<8; mu++){
@@ -220,6 +220,7 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom){
   }
 }
 
+// iterations of random assignements over all the 8 components
 void generate_Conf_cold(__restrict su3_soa * const conf){
   int mu;
   for(mu=0; mu<8; mu++){
@@ -227,7 +228,6 @@ void generate_Conf_cold(__restrict su3_soa * const conf){
   }
   mult_conf_times_stag_phases_nodev(conf);
 }
-
 
 
 void generate_vec3_soa_z2noise(__restrict vec3_soa * const vect){

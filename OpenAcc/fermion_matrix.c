@@ -113,7 +113,6 @@ static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 }
 
 
-//void acc_Deo(const __restrict su3_soa * const u, __restrict vec3_soa * const out, const __restrict vec3_soa * const in) {
 void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in) {
 
   int hx, y, z, t;
@@ -214,8 +213,6 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 }
 
 
-
-//void acc_Doe(const __restrict su3_soa * const u, __restrict vec3_soa * const out, const __restrict vec3_soa * const in) {
 void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __restrict vec3_soa * const in) {
 
   int hx, y, z, t;
@@ -259,17 +256,14 @@ void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __re
 
           matdir = 1;
           eta = 1;
-	  // mat_vec_mul( &(u_work[snum_acc(x,y,z,t) + sizeh      ]), &(in[ snum_acc(xp,y,z,t) ]), &aux_tmp );   
           aux = mat_vec_mul( &u[1], idxh, eta, in, snum_acc(xp,y,z,t));
 
           matdir = 3;
           eta = 1 - ( 2*(x & 0x1) );
-	  // mat_vec_mul( &(u_work[snum_acc(x,y,z,t) + sizeh + size ]), &(in[ snum_acc(x,yp,z,t) ]), &aux_tmp ); 
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,yp,z,t)) );
 
           matdir = 5;
           eta = 1 - ( 2*((x+y) & 0x1) );
-	  // mat_vec_mul( &( u_work[snum_acc(x,y,z,t) + sizeh + size2]), &(in[ snum_acc(x,y,zp,t) ]), &aux_tmp );
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,zp,t)) );
 
           matdir = 7;
@@ -277,24 +271,20 @@ void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __re
 #ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(t/(nt-1)));
 #endif
-	  // mat_vec_mul( &(u_work[snum_acc(x,y,z,t) + sizeh + size3]), &(in[ snum_acc(x,y,z,tp) ]), &aux_tmp );
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,z,tp)) );
 
 	  //////////////////////////////////////////////////////////////////////////////////////////////
 
           matdir = 0;
           eta = 1;
-	  // conjmat_vec_mul( &(u_work[snum_acc(xm,y,z,t)      ]), &(in[ snum_acc(xm,y,z,t) ]), &aux_tmp );     
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(xm,y,z,t), eta, in, snum_acc(xm,y,z,t)) );
 
           matdir = 2;
           eta = 1 - ( 2*(x & 0x1) );
-	  // conjmat_vec_mul( &(u_work[snum_acc(x,ym,z,t) + size ]), &(in[ snum_acc(x,ym,z,t) ]), &aux_tmp );   
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,ym,z,t), eta, in, snum_acc(x,ym,z,t)) );
 
           matdir = 4;
           eta = 1 - ( 2*((x+y) & 0x1) );
-	  // conjmat_vec_mul( &(u_work[snum_acc(x,y,zm,t) + size2]), &(in[ snum_acc(x,y,zm,t) ]), &aux_tmp );   
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,zm,t), eta, in, snum_acc(x,y,zm,t)) );
 
           matdir = 6;
@@ -302,7 +292,6 @@ void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __re
 #ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(tm/(nt-1)));
 #endif
-	  // conjmat_vec_mul( &(u_work[snum_acc(x,y,z,tm) + size3]), &(in[ snum_acc(x,y,z,tm) ]), &aux_tmp );   
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,z,tm), eta, in, snum_acc(x,y,z,tm)) );
 
 	  //////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,50 +306,6 @@ void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __re
   } // Loop over nt
 }
 
-
-
-
-void  apply_Deo_openacc(const su3COM_soa *conf,const vec3COM_soa *in,vec3COM_soa *out){
-  su3_soa  * conf_acc;
-  vec3_soa * ferm1_acc;
-  vec3_soa * ferm2_acc;
-  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
-  posix_memalign((void **)&ferm1_acc, ALIGN, sizeof(vec3_soa));
-  posix_memalign((void **)&ferm2_acc, ALIGN, sizeof(vec3_soa));
-  int dir;
-  for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
-  convert_vec3COM_soa_to_vec3_soa(in,ferm1_acc);
-#pragma acc data copyin(conf_acc[0:8])  copy(ferm1_acc[0:1]) copyout(ferm2_acc[0:1]) 
-  {
-    acc_Deo(conf_acc,ferm2_acc,ferm1_acc);
-  }
-  //  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
-  convert_vec3_soa_to_vec3COM_soa(ferm2_acc,out);
-  free(conf_acc);
-  free(ferm1_acc);
-  free(ferm2_acc);
-}
-
-void  apply_Doe_openacc(const su3COM_soa *conf,const vec3COM_soa *in,vec3COM_soa *out){
-  su3_soa  * conf_acc;
-  vec3_soa * ferm1_acc;
-  vec3_soa * ferm2_acc;
-  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
-  posix_memalign((void **)&ferm1_acc, ALIGN, sizeof(vec3_soa));
-  posix_memalign((void **)&ferm2_acc, ALIGN, sizeof(vec3_soa));
-  int dir;
-  for(dir=0;dir<8;dir++)  convert_su3COM_soa_to_su3_soa(&conf[dir],&conf_acc[dir]);
-  convert_vec3COM_soa_to_vec3_soa(in,ferm1_acc);
-#pragma acc data copyin(conf_acc[0:8])  copy(ferm1_acc[0:1]) copyout(ferm2_acc[0:1]) 
-  {
-    acc_Doe(conf_acc,ferm2_acc,ferm1_acc);
-  }
-  //  for(dir=0;dir<8;dir++)  convert_su3_soa_to_su3COM_soa(&conf_acc[dir],&conf[dir]);
-  convert_vec3_soa_to_vec3COM_soa(ferm2_acc,out);
-  free(conf_acc);
-  free(ferm1_acc);
-  free(ferm2_acc);
-}
 
 #endif
 

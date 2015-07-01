@@ -19,7 +19,7 @@ int main(int argc,char **argv){
   cerr.precision(18);
   rationalapprox_calc();
   
-  init(0);
+  //  init(0);
   
   cout << "Initialized Random Gauge Matrix.\n";
   
@@ -30,9 +30,10 @@ int main(int argc,char **argv){
   //////////////////////////////////////////////////////////////////////////////////////////////////
   
   su3COM_soa conf_soaCOM[8];
-  thmatCOM_soa momenta_soaCOM[8];
-  COM_MultiFermion    COMMON_phi;
-  COM_MultiFermion    COMMON_chi;
+  //  thmatCOM_soa momenta_soaCOM[8];
+  //  COM_MultiFermion    COMMON_phi;
+  //  COM_MultiFermion    COMMON_chi;
+
   RationalApprox approx1;
   COM_RationalApprox *COM_approx1;
   COM_approx1 = new COM_RationalApprox[1];
@@ -53,8 +54,8 @@ int main(int argc,char **argv){
   int r,i;
   Su3 auxm,auxm_bis;
   double A,B,RC,IC,RD,ID,RE,IE;
-  Conf *gauge_conf_bis;
-  gauge_conf_bis=new Conf(0);
+
+
   Su3 su3_check;
   int partial_sum = size;
   int indice;
@@ -82,7 +83,7 @@ int main(int argc,char **argv){
 
   ////////////////   METROTEST   ////////////////////////////////////////////////////////////
   int accettate=0;
-  for(int id_iter=0;id_iter<10;id_iter++){
+  for(int id_iter=0;id_iter<50;id_iter++){
     time_start=clock();
     accettate = UPDATE_ACC_UNOSTEP_METRO(conf_soaCOM,residue_metro,residue_md,COM_approx_mother1,COM_approx_mother2,COM_approx_mother3,id_iter,accettate);
     time_finish=clock();
@@ -90,7 +91,6 @@ int main(int argc,char **argv){
   }
 
 
-  delete gauge_conf_bis;
   end();
   return 0;
 }
