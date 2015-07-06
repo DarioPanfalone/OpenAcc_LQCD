@@ -12,7 +12,6 @@
 using namespace std;
 
 
-
 int main(int argc,char **argv){
 
   cout.precision(18);
@@ -23,8 +22,23 @@ int main(int argc,char **argv){
   
   cout << "Initialized Random Gauge Matrix.\n";
   
+  //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
+
+  // NVIDIA GPUs
+  acc_device_t my_device_type = acc_device_nvidia;
+
+  // AMD GPUs
+  // acc_device_t my_device_type = acc_device_radeon;
+
+  // Intel XeonPhi
+  //acc_device_t my_device_type = acc_device_xeonphi;
+
+  // Select device ID
+  int dev_index = 0;
+
+  SELECT_INIT_ACC_DEVICE(my_device_type, dev_index);
   
-  
+
   //////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////// CONFRONTO DINAMICA MOLECOLARE    /////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +66,6 @@ int main(int argc,char **argv){
   Su3 auxm,auxm_bis;
   double A,B,RC,IC,RD,ID,RE,IE;
 
-
   Su3 su3_check;
   int partial_sum = size;
   int indice;
@@ -65,9 +78,6 @@ int main(int argc,char **argv){
 
   //////  TRADUCO LA CONFIGURAZIONE    //////////////////////////////////////////////////////
   for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
-
-
-
 
   ////////////////   THERMALIZATION   ////////////////////////////////////////////////////////////
   for(int id_iter=0;id_iter<1;id_iter++){
@@ -87,8 +97,14 @@ int main(int argc,char **argv){
     cout << "Id_iter_metro = " << id_iter << "   " << "Time for Update simetro with OPENACC = " << ((REAL)(time_finish)-(REAL)(time_start))/CLOCKS_PER_SEC << " sec.\n";
   }
 
-
   end();
+
+  //////  OPENACC CONTEXT SHUTDOWN   //////////////////////////////////////////////////////
+
+  SHUTDOWN_ACC_DEVICE(my_device_type);  
+
+  
   return 0;
+
 }
 

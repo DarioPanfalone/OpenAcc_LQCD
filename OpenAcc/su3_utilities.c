@@ -1,18 +1,29 @@
 #ifndef SU3_UTILITIES_C_
 #define SU3_UTILITIES_C_
 
-// ROUTINE TO CHOOSE THE ACTIVE GPU
-//   should be moved elsewhere!
-void select_working_gpu_homemade(int dev_index){
-  acc_device_t my_device_type;
-  my_device_type = acc_device_nvidia;
+// ROUTINE TO CHOOSE AND INITIALIZE THE OPENACC DEVICE
+void SELECT_INIT_ACC_DEVICE(acc_device_t my_device_type, int dev_index) {
+
+  // Initialize context for this device type
+  acc_init(my_device_type);
+
+  // Get available devices of this type
   int num_devices = acc_get_num_devices(my_device_type);
-  printf("Number of OpenAcc exploitable GPUs found: %d \n",num_devices);
+  printf("Number of OpenAcc exploitable devices found: %d \n", num_devices);
 
   // Pick the device number dev_index 
-  acc_set_device_num(dev_index,my_device_type);
-  printf("Selected GPU number: %d \n",dev_index);
+  acc_set_device_num(dev_index, my_device_type);
+  printf("Selected device number: %d \n", dev_index);
+
 }
+
+void SHUTDOWN_ACC_DEVICE(acc_device_t my_device_type) {
+
+  // Close context for this device type
+  acc_shutdown(my_device_type);
+
+}
+
 
 // mat3 = mat1 * mat2 
 static inline void    mat1_times_mat2_into_mat3_absent_stag_phases( __restrict su3_soa * const mat1,
