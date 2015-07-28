@@ -305,17 +305,62 @@ void extract_pseudo_and_assign_to_shiftfermion( __restrict ACC_MultiFermion * co
   }
 }
 
+/*
 // il secondo argomento e' (di fatto) costante e non viene aggiornato
-void combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(__restrict ACC_ShiftMultiFermion * const out,  __restrict ACC_ShiftFermion * const in,int ips, int ia, double factor){
-#pragma acc kernels present(in) present(out)
-#pragma acc loop independent
+void combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti( __restrict ACC_ShiftMultiFermion * const out,  
+                                                                          __restrict ACC_ShiftFermion * const in,
+                                                                          int ips, 
+                                                                          int ia, 
+                                                                          double factor) {
+  #pragma acc kernels present(in) present(out)
+  #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
     out->shiftmulti[ia][ips].c0[ih] -= (factor)*(in->shift[ia].c0[ih]);
     out->shiftmulti[ia][ips].c1[ih] -= (factor)*(in->shift[ia].c1[ih]);
     out->shiftmulti[ia][ips].c2[ih] -= (factor)*(in->shift[ia].c2[ih]);
   }
+
+}
+*/
+
+inline void combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti_all( __restrict ACC_ShiftMultiFermion * const out,  
+                                                                                     __restrict const ACC_ShiftFermion * const in,
+                                                                                                const int ips, 
+                                                                                                const int maxiter, 
+                                                                                     __restrict const int * const flag,
+                                                                                     __restrict const double * const omegas) {
+  int ia, ih;
+
+  #pragma acc kernels present(in) present(out) copyin(omegas[0:maxiter]) copyin(flag[0:maxiter])
+  {
+
+  #pragma acc cache(omegas[0:maxiter]) 
+  #pragma acc cache(flag[0:maxiter]) 
+
+  #pragma acc loop independent gang
+  for (ia=0; ia<maxiter; ia++) {
+    #pragma acc loop independent vector
+    for (ih=0; ih<sizeh; ih++) {
+
+      if (flag[ia] == 1) {
+
+        double factor = omegas[ia];
+
+        out->shiftmulti[ia][ips].c0[ih] -= (factor)*(in->shift[ia].c0[ih]);
+        out->shiftmulti[ia][ips].c1[ih] -= (factor)*(in->shift[ia].c1[ih]);
+        out->shiftmulti[ia][ips].c2[ih] -= (factor)*(in->shift[ia].c2[ih]);
+
+      } //if
+
+    } //ih
+
+  } //ia
+
+  } //acc kernels
+
 }
 
+/*
 // il quarto argomento e' (di fatto) costante e non viene aggiornato
 void combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm( __restrict ACC_ShiftFermion * const in1, int ia, double fact1, __restrict vec3_soa * const in2, double fact2){
 #pragma acc kernels present(in1) present(in2)
@@ -326,6 +371,49 @@ void combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm( __restrict
     in1->shift[ia].c2[ih] = (fact1) * (in1->shift[ia].c2[ih]) + (fact2) * (in2->c2[ih]);
   }
 }
+*/
+
+// il quarto argomento e' (di fatto) costante e non viene aggiornato
+void combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm_all( __restrict ACC_ShiftFermion * const in1, 
+                                                                          int maxiter, 
+                                                                          __restrict const int * const flag,
+                                                                          __restrict const double * const gammas,
+                                                                          __restrict vec3_soa * const in2, 
+                                                                          __restrict const double * const zeta_iii ) {
+
+  int ia, ih;
+
+  #pragma acc kernels present(in1) present(in2) copyin(gammas[0:maxiter]) copyin(flag[0:maxiter]) copyin(zeta_iii[0:maxiter])
+  {
+
+  #pragma acc cache(gammas[0:maxiter]) 
+  #pragma acc cache(zeta_iii[0:maxiter])
+  #pragma acc cache(flag[0:maxiter]) 
+
+  #pragma acc loop independent gang 
+  for (ia=0; ia<maxiter; ia++) {
+    #pragma acc loop independent vector
+    for(ih=0; ih<sizeh; ih++) {
+
+      if (flag[ia] == 1) {
+
+        double fact1 = gammas[ia];
+        double fact2 = zeta_iii[ia];
+
+        in1->shift[ia].c0[ih] = (fact1) * (in1->shift[ia].c0[ih]) + (fact2) * (in2->c0[ih]);
+        in1->shift[ia].c1[ih] = (fact1) * (in1->shift[ia].c1[ih]) + (fact2) * (in2->c1[ih]);
+        in1->shift[ia].c2[ih] = (fact1) * (in1->shift[ia].c2[ih]) + (fact2) * (in2->c2[ih]);
+
+      } //if flag
+
+    } //ih
+
+  } //ia
+
+  } //acc data
+
+}
+
 
 // il primo argomento e' (di fatto) costante e non viene aggiornato
 void extract_from_shiftmulti_and_assign_to_fermion( __restrict ACC_ShiftMultiFermion * const in, const int ia, const int ips,  __restrict vec3_soa * const out){

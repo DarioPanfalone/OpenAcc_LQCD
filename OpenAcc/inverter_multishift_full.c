@@ -29,10 +29,11 @@ void ker_invert_openacc_shiftmulti(   __restrict su3_soa * const u, // non viene
   posix_memalign((void **)&omegas,   ALIGN,  max_approx_order*sizeof(double));
   posix_memalign((void **)&gammas,   ALIGN,  max_approx_order*sizeof(double));
 
-  int pseudofermion,iter;
+  int pseudofermion, iter, maxiter;
   double alpha, delta, lambda, omega, omega_save, gammag, fact;
 
   alpha=0.0;
+
 
   for(pseudofermion=0; pseudofermion<no_ps; pseudofermion++){
 
@@ -57,6 +58,14 @@ void ker_invert_openacc_shiftmulti(   __restrict su3_soa * const u, // non viene
     }
     gammag=0.0;
     cg=0;
+
+    //Find the max approx[0].COM_approx_order where flag[approx[0].COM_approx_order] == 1
+    for(iter=0; iter<(approx[0].COM_approx_order); iter++) {
+      if(flag[iter]==1) {
+        maxiter = iter+1;
+      }
+    }
+
     do {      // loop over cg iterations
       cg++;
 
@@ -71,16 +80,27 @@ void ker_invert_openacc_shiftmulti(   __restrict su3_soa * const u, // non viene
       omega=-delta/alpha;  // omega = (r_j,r_j)/(p_j, Ap_j)               
 
       // out-=omegas*ps
-      for(iter=0; iter<(approx[0].COM_approx_order); iter++){
-	if(flag[iter]==1){
-	  zeta_iii[iter] = (zeta_i[iter]*zeta_ii[iter]*omega_save)/
-	    ( omega*gammag*(zeta_i[iter]-zeta_ii[iter])+
-	      zeta_i[iter]*omega_save*(1.0-(approx[0].COM_RA_b[iter])*omega) );
-	  omegas[iter]=omega*zeta_iii[iter]/zeta_ii[iter];
-	  
-	  combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(out,p_shiftferm,pseudofermion,iter,omegas[iter]);
-	}
+      //for (iter=0; iter<(approx[0].COM_approx_order); iter++) {
+      for (iter=0; iter<maxiter; iter++) {
+
+     	  if (flag[iter]==1) {
+
+	        zeta_iii[iter] = (zeta_i[iter]*zeta_ii[iter]*omega_save)/
+	                         ( omega*gammag*(zeta_i[iter]-zeta_ii[iter])+
+	                         zeta_i[iter]*omega_save*(1.0-(approx[0].COM_RA_b[iter])*omega) );
+
+	        omegas[iter] = omega*zeta_iii[iter]/zeta_ii[iter];
+
+	      }
       }
+
+	    combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti_all(out,p_shiftferm,pseudofermion,maxiter,flag,omegas);
+  
+//	    combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(out,p_shiftferm,pseudofermion,iter,omegas[iter]);
+
+//	      }
+
+//      }
 
       // r+=omega*s; lambda=(r,r)
       combine_add_factor_x_in2_to_in1(loc_r,loc_s,omega);
@@ -90,20 +110,54 @@ void ker_invert_openacc_shiftmulti(   __restrict su3_soa * const u, // non viene
       // p=r+gammag*p
       combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
 
-      for(iter=0; iter<(approx[0].COM_approx_order); iter++){
-	if(flag[iter]==1){
-	  gammas[iter]=gammag*zeta_iii[iter]*omegas[iter]/(zeta_ii[iter]*omega);
-	  combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm(p_shiftferm,iter,gammas[iter],loc_r,zeta_iii[iter]);
+//ORIGINALE
+/*
+      for(iter=0; iter<(approx[0].COM_approx_order); iter++) {
+	      if(flag[iter]==1){
+
+	        gammas[iter]=gammag*zeta_iii[iter]*omegas[iter]/(zeta_ii[iter]*omega);
+
+	        combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm(p_shiftferm,iter,gammas[iter],loc_r,zeta_iii[iter]);
 	  
-	  fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
-	  if(fact<residuo){
-	    flag[iter]=0;
-	  }
-	  zeta_i[iter]=zeta_ii[iter];
-	  zeta_ii[iter]=zeta_iii[iter];
-	}
+	        fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
+
+	        if(fact<residuo){
+	          flag[iter]=0;
+	        }
+	        zeta_i[iter]=zeta_ii[iter];
+	        zeta_ii[iter]=zeta_iii[iter];
+	      }
       }
-      delta=lambda;
+*/
+     for(iter=0; iter<maxiter; iter++) {
+        if(flag[iter]==1){
+          gammas[iter]=gammag*zeta_iii[iter]*omegas[iter]/(zeta_ii[iter]*omega);
+        }
+     }
+
+     combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm_all(p_shiftferm,maxiter,flag,gammas,loc_r,zeta_iii);
+
+     for(iter=0; iter<maxiter; iter++) {
+        if(flag[iter]==1){
+
+          fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
+
+          if(fact<residuo){
+            flag[iter]=0;
+          }
+
+          zeta_i[iter]=zeta_ii[iter];
+          zeta_ii[iter]=zeta_iii[iter];
+        }
+     }
+
+
+//
+
+
+
+
+     delta=lambda;
 
     } while(sqrt(lambda)>residuo && cg<max_cg); // end of cg iterations 
 
