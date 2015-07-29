@@ -337,9 +337,9 @@ inline void combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti_
   #pragma acc cache(omegas[0:maxiter]) 
   #pragma acc cache(flag[0:maxiter]) 
 
-  #pragma acc loop independent gang
+  #pragma acc loop independent gang  
   for (ia=0; ia<maxiter; ia++) {
-    #pragma acc loop independent vector
+    #pragma acc loop independent gang vector(512)
     for (ih=0; ih<sizeh; ih++) {
 
       if (flag[ia] == 1) {
@@ -390,9 +390,9 @@ void combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm_all( __rest
   #pragma acc cache(zeta_iii[0:maxiter])
   #pragma acc cache(flag[0:maxiter]) 
 
-  #pragma acc loop independent gang 
+  #pragma acc loop independent gang
   for (ia=0; ia<maxiter; ia++) {
-    #pragma acc loop independent vector
+    #pragma acc loop independent gang vector(512)
     for(ih=0; ih<sizeh; ih++) {
 
       if (flag[ia] == 1) {
