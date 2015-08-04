@@ -58,7 +58,7 @@ int main(){
   generate_Conf_cold(conf_acc);
   /////////////////////////////////////////////////////////////////////////////////////////////////
 
-#pragma acc data copy(conf_acc[0:8]) create(momenta[0:8]) create(aux_conf_acc[0:8]) create(ferm_chi_acc[0:1]) create(ferm_phi_acc[0:1]) create(approx1[0:1]) create(approx2[0:1])  create(approx3[0:1])  create(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1]) create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1]) copy(approx_mother1[0:1])  copy(approx_mother2[0:1])  copy(approx_mother3[0:1])  create(minmaxeig[0:2])
+#pragma acc data copy(conf_acc[0:8]) create(momenta[0:8]) create(aux_conf_acc[0:8]) create(ferm_chi_acc[0:1]) create(ferm_phi_acc[0:1]) create(approx1[0:1]) create(approx2[0:1])  create(approx3[0:1])  create(ferm_out_acc[0:1])  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1]) create(k_p_shiftferm[0:1]) create(ferm_shiftmulti_acc[0:1]) create(ipdot_acc[0:8])  copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1]) copy(approx_mother1[0:1])  copy(approx_mother2[0:1])  copy(approx_mother3[0:1])  create(minmaxeig[0:2]) copyin(u1_back_field_phases[0:8])
     {
 
     ////////////////   THERMALIZATION   /////////////////////////////////////////////////////////////

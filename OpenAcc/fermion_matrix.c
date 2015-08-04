@@ -113,6 +113,7 @@ static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 }
 
 
+//void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, ferm_param pars, int ferm_id) {
 void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in) {
 
   int hx, y, z, t;
@@ -213,6 +214,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 }
 
 
+//void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __restrict vec3_soa * const in, ferm_param *pars, int ferm_id) {
 void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __restrict vec3_soa * const in) {
 
   int hx, y, z, t;
