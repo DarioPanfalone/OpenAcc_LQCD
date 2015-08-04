@@ -61,8 +61,8 @@ static inline int snum_acc(int x, int y, int z, int t) {
 }
 
 typedef struct ferm_param_t {
-  double charge;
-  double mass;
+  double ferm_charge;
+  double ferm_mass;
 } ferm_param;
 
 typedef struct vec3_soa_t {
@@ -358,7 +358,6 @@ void convert_COM_ShiftMultiFermion_to_ACC_ShiftMultiFermion(COM_ShiftMultiFermio
 int nnp_openacc[sizeh][4][2];
 int nnm_openacc[sizeh][4][2];
 void compute_nnp_and_nnm_openacc(){
-
   int x, y, z, t,parity;
   for(t=0; t<nt; t++) {
     for(z=0; z<nz; z++) {
@@ -404,6 +403,5 @@ void compute_nnp_and_nnm_openacc(){
 }
 
 
-
-
 #endif
+

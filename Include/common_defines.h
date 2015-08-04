@@ -1,4 +1,4 @@
-B1;2c#ifndef COMMON_DEFINES_H_
+#ifndef COMMON_DEFINES_H_
 #define COMMON_DEFINES_H_
 
 /*****************************************
