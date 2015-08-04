@@ -22,10 +22,29 @@
 #define mass 0.03
 #define beta 6.0
 
-#define therm_updates 0
-#define max_cg 100000
+const int no_flavours=2; // number of quark species                                                                                                          
+
+
 #define max_approx_order 19
+double approx_metro=19;
+double approx_md=9;
+const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
+const double lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
+const double residue_metro=1.0e-8;    // stopping residual for CG
+const double residue_md=1.0e-5;    // stopping residual for CG
+
+// quanti di campo esterno
+const double bx_quantum=0.0;
+const double ex_quantum=0.0;
+const double by_quantum=0.0;
+const double ey_quantum=0.0;
+const double bz_quantum=0.0;
+const double ez_quantum=0.0;
+
 #define no_ps 2
+#define therm_updates 0 // not used 
+#define max_cg 100000
+
 
 #define no_md 13 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep

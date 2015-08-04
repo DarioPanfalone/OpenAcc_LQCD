@@ -80,7 +80,7 @@ int main(int argc,char **argv){
   for(int index=0;index<8;index++)   gauge_conf->conf_aos_to_soaCOM(&conf_soaCOM[index],index);
 
   ////////////////   THERMALIZATION   ////////////////////////////////////////////////////////////
-  for(int id_iter=0;id_iter<1;id_iter++){
+  for(int id_iter=0;id_iter<10;id_iter++){
   time_start=clock();
   THERM_UPDATE_ACC_UNOSTEP_NOMETRO(conf_soaCOM,residue_metro,residue_md,COM_approx_mother1,COM_approx_mother2,COM_approx_mother3,id_iter);
   //  UPDATE_ACC_UNOSTEP(conf_soaCOM,residue_metro,residue_md,COM_approx_mother1,COM_approx_mother2,COM_approx_mother3,id_iter);
@@ -90,7 +90,7 @@ int main(int argc,char **argv){
 
   ////////////////   METROTEST   ////////////////////////////////////////////////////////////
   int accettate=0;
-  for(int id_iter=0;id_iter<0;id_iter++){
+  for(int id_iter=0;id_iter<20;id_iter++){
     time_start=clock();
     accettate = UPDATE_ACC_UNOSTEP_METRO(conf_soaCOM,residue_metro,residue_md,COM_approx_mother1,COM_approx_mother2,COM_approx_mother3,id_iter,accettate);
     time_finish=clock();

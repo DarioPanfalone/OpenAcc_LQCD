@@ -16,7 +16,7 @@ void su2_rand(double *pp);
 #include "./md_integrator.c"
 /*
 #include "./md_integrator_soloopenacc.c"
-
+*/
 
 int main(){
 
@@ -38,4 +38,4 @@ int main(){
 
   return 0;
 }
-*/
+
