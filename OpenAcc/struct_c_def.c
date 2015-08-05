@@ -60,10 +60,6 @@ static inline int snum_acc(int x, int y, int z, int t) {
   return ris/2;   // <---  /2 Pay attention to even/odd  (see init_geo)
 }
 
-typedef struct ferm_param_t {
-  double ferm_charge;
-  double ferm_mass;
-} ferm_param;
 
 typedef struct vec3_soa_t {
   d_complex c0[sizeh];

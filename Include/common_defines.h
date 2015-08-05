@@ -50,7 +50,19 @@ const double ez_quantum=0.0;
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
 #define gauge_scale 5  // Update fermions every gauge_scale gauge updates
 
+typedef struct ferm_param_t{
+  double ferm_charge;
+  double ferm_mass;
+} ferm_param;
 
+ferm_param fermions_parameters[2];
+
+void init_ferm_params(){
+  fermions_parameters[0].ferm_charge = -1.0;   //up   charge
+  fermions_parameters[0].ferm_mass   = mass;   //up   mass --> up to now not yet used
+  fermions_parameters[1].ferm_charge =  2.0;   //down charge
+  fermions_parameters[1].ferm_mass    =mass;   //down mass --> up to now not yet used
+}
 
 
 typedef struct COM_t{

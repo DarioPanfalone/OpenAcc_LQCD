@@ -101,7 +101,7 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
   if(usestored == 1){
 
     minmax[1] = ker_find_max_eigenvalue_openacc(u,loc_r,loc_h,loc_p1);
-    minmax[0] = ker_find_min_eigenvalue_openacc(u,loc_r,loc_h,loc_p2,minmax[1]);
+    minmax[0] = ker_find_min_eigenvalue_openacc(u,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2
     //    minmax[0] =  mass2;
     //    minmax[1] =  ker_find_max_eigenvalue_openacc(u,loc_r,loc_h,loc_p);
   }
