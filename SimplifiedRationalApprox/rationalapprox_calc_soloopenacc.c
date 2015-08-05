@@ -9,7 +9,7 @@ char* concat(char *s1, char *s2)
 }
 
 
-void rationalapprox_calc_soloopenacc(COM_RationalApprox *first_inv_approx_norm_coeff,COM_RationalApprox *md_inv_approx_norm_coeff,COM_RationalApprox *last_inv_approx_norm_coeff)
+void rationalapprox_read_soloopenacc(COM_RationalApprox *first_inv_approx_norm_coeff,COM_RationalApprox *md_inv_approx_norm_coeff,COM_RationalApprox *last_inv_approx_norm_coeff)
   {
     char * primop  = "./REMEZ_SAVE/approx_plus_";
     char * primom  = "./REMEZ_SAVE/approx_minus_";

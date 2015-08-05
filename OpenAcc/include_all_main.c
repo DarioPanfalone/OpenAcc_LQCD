@@ -36,7 +36,7 @@ int main(){
   // la 1 e' la "first_inv_approx_norm_coeff"
   // la 2 e' la "md_inv_approx_norm_coeff"
   // la 3 e' la "last_inv_approx_norm_coeff"
-  rationalapprox_calc_soloopenacc(&approx_mother1[0],&approx_mother2[0],&approx_mother3[0]);
+  rationalapprox_read_soloopenacc(&approx_mother1[0],&approx_mother2[0],&approx_mother3[0]);
   printf("ratapprox computation : OK \n");
   /////////////////////////////////////////////////////////////////////////////////////////////////
 
