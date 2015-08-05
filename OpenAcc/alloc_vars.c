@@ -1,3 +1,6 @@
+#ifndef ALLOC_DEF_
+#define ALLOC_DEF_
+
 double_soa * u1_back_field_phases;
 tamat_soa * ipdot_acc;
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
@@ -103,3 +106,4 @@ void mem_free(){
   free(approx_mother3);
 }
 
+#endif
