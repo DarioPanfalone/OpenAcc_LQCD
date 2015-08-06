@@ -35,8 +35,12 @@ double minmaxeig[2];
 
 void mem_alloc(){
   int allocation_check;  
+#ifdef BACKFIELD
   allocation_check =  posix_memalign((void **)&u1_back_field_phases, ALIGN, 8*sizeof(double_soa));   //  -->  4*size phases (as many as links)
   if(allocation_check != 0)  printf("Errore nella allocazione di u1_back_field_phases \n");
+#else
+  u1_back_field_phases=NULL;
+#endif
   allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di momenta \n");
   allocation_check =  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa));
@@ -82,7 +86,9 @@ void mem_alloc(){
 }
 
 void mem_free(){
+#ifdef BACKFIELD
   free(u1_back_field_phases);
+#endif
   free(momenta);
   free(aux_conf_acc);
   free(conf_acc_bkp);
