@@ -156,9 +156,9 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
   int hx, y, z, t;
 
 #ifdef BACKFIELD
-#pragma acc kernels present(u) present(out) present(in)
-#else
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
+#else
+#pragma acc kernels present(u) present(out) present(in)
 #endif
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
@@ -320,9 +320,9 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
   int hx, y, z, t;
 
 #ifdef BACKFIELD
-#pragma acc kernels present(u) present(out) present(in)
-#else
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
+#else
+#pragma acc kernels present(u) present(out) present(in) 
 #endif
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
