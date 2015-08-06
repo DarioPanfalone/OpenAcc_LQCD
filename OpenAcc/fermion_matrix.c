@@ -114,7 +114,7 @@ static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 
 
 //void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, ferm_param pars) {
-void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in) {
+void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in,double_soa * backfield) {
 
   int hx, y, z, t;
 #pragma acc kernels present(u) present(out) present(in)
@@ -308,6 +308,6 @@ void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __re
   } // Loop over nt
 }
 
-inline void fermion_matrix_multiplication( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, __restrict vec3_soa * const temp1, ferm_param *pars);
+inline void fermion_matrix_multiplication( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, __restrict vec3_soa * const temp1, ferm_param *pars,double_soa * backfield);
 #endif
 
