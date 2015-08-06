@@ -308,6 +308,14 @@ void acc_Doe(__restrict su3_soa * const u, __restrict vec3_soa * const out, __re
   } // Loop over nt
 }
 
-inline void fermion_matrix_multiplication( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, __restrict vec3_soa * const temp1, ferm_param *pars);
+inline void fermion_matrix_multiplication( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, __restrict vec3_soa * const temp1, ferm_param *pars){
+
+    acc_Doe(u,temp1,in);
+    acc_Deo(u,out,temp1);
+    combine_in1xm2_minus_in2_gl(in,out);
+
+
+
+}
 #endif
 
