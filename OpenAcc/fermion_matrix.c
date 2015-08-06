@@ -1,4 +1,3 @@
-
 #ifndef FERMION_MATRIX_C
 #define FERMION_MATRIX_C
 
@@ -6,7 +5,7 @@
 #include "openacc.h"
 #include "./fermionic_utilities.c"
 
-#ifdef BACKFIELD
+#ifdef PHASE_MAT_VEC_MULT
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
                                 const int idx_mat,
                                 const int eta,
@@ -61,13 +60,14 @@ static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
 
   return out_vect;
 
-#ifdef BACKFIELD
+  // just to close the same amount of {
+#ifdef PHASE_MAT_VEC_MULT
 }
 #else
 }
 #endif
 
-#ifdef BACKFIELD
+#ifdef PHASE_MAT_VEC_MULT
 static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
                                     const int idx_mat,
                                     const int eta,
@@ -121,7 +121,8 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
 
   return out_vect;
 
-#ifdef BACKFIELD
+  // just to close the same amount of {
+#ifdef PHASE_MAT_VEC_MULT
 }
 #else
 }
@@ -153,7 +154,12 @@ static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in,ferm_param *pars,double_soa * backfield) {
 
   int hx, y, z, t;
+
+#ifdef BACKFIELD
 #pragma acc kernels present(u) present(out) present(in)
+#else
+#pragma acc kernels present(u) present(out) present(in) present(backfield)
+#endif
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -193,11 +199,11 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 0;
           eta = 1;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg   = backfield[matdir].d[idxh] * pars->ferm_charge;
 	  phase = cos(arg) + I * sin(arg);
-          aux = mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(xp,y,z,t) , phase);
+          aux   = mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(xp,y,z,t) , phase);
 #else
-          aux = mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(xp,y,z,t) );
+          aux   = mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(xp,y,z,t) );
 #endif
 
 
@@ -222,25 +228,33 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,zp,t) ) );
 #endif
 
+	  // direzione temporale --> qui gli #ifdef sono piu complicati perche le
+          //                         fasi potrebbero esserci per via del potenziale chimico
+          //                         o per via del campo magnetico
           matdir = 6;
           eta = 1 - ( 2*((x+y+z) & 0x1) );
 #ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(t/(nt-1)));
 #endif
+	  arg = 0;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
-	  phase = cos(arg) + I * sin(arg);
+	  arg   += backfield[matdir].d[idxh] * pars->ferm_charge;
+#endif
+#ifdef IMCHEMPOT
+	  arg   += potenzialechimico;
+#endif
+#ifdef PHASE_MAT_VEC_MULT
+	  phase  = cos(arg) + I * sin(arg);
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,z,tp) , phase) );
 #else
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,z,tp) ) );
 #endif
 
 	  //////////////////////////////////////////////////////////////////////////////////////////////
-
           matdir = 1;
           eta = 1;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(xm,y,z,t)] * pars->ferm_charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(xm,y,z,t), eta, in, snum_acc(xm,y,z,t) , phase) );
 #else
@@ -250,7 +264,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 3;
           eta = 1 - ( 2*(x & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(x,ym,z,t)] * pars->ferm_charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,ym,z,t), eta, in, snum_acc(x,ym,z,t) , phase) );
 #else
@@ -260,7 +274,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 5;
           eta = 1 - ( 2*((x+y) & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(x,y,zm,t)] * pars->ferm_charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,zm,t), eta, in, snum_acc(x,y,zm,t) , phase) );
 #else
@@ -273,9 +287,16 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 #ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(tm/(nt-1)));
 #endif
+
+          arg = 0;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
-	  phase = cos(arg) - I * sin(arg);
+          arg   += backfield[matdir].d[snum_acc(x,y,z,tm)] * pars->ferm_charge;
+#endif
+#ifdef IMCHEMPOT
+          arg   += potenzialechimico;
+#endif
+#ifdef PHASE_MAT_VEC_MULT
+          phase  = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,z,tm), eta, in, snum_acc(x,y,z,tm) , phase) );
 #else
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,z,tm), eta, in, snum_acc(x,y,z,tm) ) );
@@ -298,7 +319,11 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 
   int hx, y, z, t;
 
+#ifdef BACKFIELD
 #pragma acc kernels present(u) present(out) present(in)
+#else
+#pragma acc kernels present(u) present(out) present(in) present(backfield)
+#endif
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -370,9 +395,16 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 #ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(t/(nt-1)));
 #endif
+
+          arg = 0;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
-	  phase = cos(arg) + I * sin(arg);
+          arg   += backfield[matdir].d[idxh] * pars->ferm_charge;
+#endif
+#ifdef IMCHEMPOT
+          arg   += potenzialechimico;
+#endif
+#ifdef PHASE_MAT_VEC_MULT
+          phase  = cos(arg) + I * sin(arg);
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,z,tp) , phase) );
 #else
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,z,tp) ) );
@@ -383,7 +415,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 0;
           eta = 1;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(xm,y,z,t)] * pars->ferm_charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(xm,y,z,t), eta, in, snum_acc(xm,y,z,t) , phase) );
 #else
@@ -393,7 +425,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 2;
           eta = 1 - ( 2*(x & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(x,ym,z,t)] * pars->ferm_charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,ym,z,t), eta, in, snum_acc(x,ym,z,t) , phase) );
 #else
@@ -403,7 +435,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 4;
           eta = 1 - ( 2*((x+y) & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(x,y,zm,t)] * pars->ferm_charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,zm,t), eta, in, snum_acc(x,y,zm,t) , phase) );
 #else
@@ -415,9 +447,15 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 #ifdef ANTIPERIODIC_T_BC
 	  eta *= (1- 2*(int)(tm/(nt-1)));
 #endif
+          arg = 0;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
-	  phase = cos(arg) - I * sin(arg);
+          arg   += backfield[matdir].d[snum_acc(x,y,z,tm)] * pars->ferm_charge;
+#endif
+#ifdef IMCHEMPOT
+          arg   += potenzialechimico;
+#endif
+#ifdef PHASE_MAT_VEC_MULT
+          phase  = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,z,tm), eta, in, snum_acc(x,y,z,tm) , phase) );
 #else
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,z,tm), eta, in, snum_acc(x,y,z,tm) ) );

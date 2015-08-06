@@ -6,6 +6,21 @@
  * and the Openacc Version               *
  * ***************************************/
 
+#define BACKFIELD
+#define IMCHEMPOT
+
+// se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
+// di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
+// in modo hard coded usa l'altra routine moltiplica link per fermione e basta.
+// Per farlo viene definita la variabile PHASE_MAT_VEC_MULT o meno.
+#ifdef BACKFIELD
+  #define PHASE_MAT_VEC_MULT 
+#else
+  #ifdef IMCHEMPOT
+    #define PHASE_MAT_VEC_MULT 
+  #endif
+#endif
+
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
 #define DIM_BLOCK_Y 8 // This should divide ny
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
