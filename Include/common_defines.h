@@ -122,6 +122,7 @@ typedef struct ferm_param_t{
   double ferm_mass;
   double ferm_im_chem_pot; // not yet implemented
   int degeneration;
+  int number_of_ps;
   COM_RationalApprox *approx1; // first inv
   COM_RationalApprox *approx2; // md approx
   COM_RationalApprox *approx3; // last inv
@@ -132,6 +133,7 @@ ferm_param fermions_parameters[2];
 void init_ferm_params(){
   fermions_parameters[0].ferm_charge = -1.0;   //up   charge
   fermions_parameters[0].ferm_mass   = mass;   //up   mass --> up to now not yet used
+
   fermions_parameters[1].ferm_charge =  2.0;   //down charge
   fermions_parameters[1].ferm_mass    =mass;   //down mass --> up to now not yet used
 }
