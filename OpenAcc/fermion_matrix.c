@@ -170,9 +170,12 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
         for(hx=0; hx < nxh; hx++) {
 
           int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, eta, matdir;
+          vec3 aux;
 	  double arg;
 	  d_complex phase;
-          vec3 aux;
+#ifdef IMCHEMPOT
+	  double imchempot = pars->ferm_im_chem_pot/((double)(nt));
+#endif
 
           x = 2*hx + ((y+z+t) & 0x1);
 
@@ -241,7 +244,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 	  arg   += backfield[matdir].d[idxh] * pars->ferm_charge;
 #endif
 #ifdef IMCHEMPOT
-	  arg   += potenzialechimico;
+	  arg   += imchempot;
 #endif
 #ifdef PHASE_MAT_VEC_MULT
 	  phase  = cos(arg) + I * sin(arg);
@@ -293,7 +296,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           arg   += backfield[matdir].d[snum_acc(x,y,z,tm)] * pars->ferm_charge;
 #endif
 #ifdef IMCHEMPOT
-          arg   += potenzialechimico;
+          arg   += imchempot;
 #endif
 #ifdef PHASE_MAT_VEC_MULT
           phase  = cos(arg) - I * sin(arg);
@@ -335,7 +338,11 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 
           int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, eta, matdir;
           vec3 aux;
-
+	  double arg;
+	  d_complex phase;
+#ifdef IMCHEMPOT
+	  double imchempot = pars->ferm_im_chem_pot/((double)(nt));
+#endif
           x = 2*hx + ((y+z+t+1) & 0x1);
 
           idxh = snum_acc(x,y,z,t);
@@ -401,7 +408,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           arg   += backfield[matdir].d[idxh] * pars->ferm_charge;
 #endif
 #ifdef IMCHEMPOT
-          arg   += potenzialechimico;
+          arg   += imchempot;
 #endif
 #ifdef PHASE_MAT_VEC_MULT
           phase  = cos(arg) + I * sin(arg);
@@ -452,7 +459,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           arg   += backfield[matdir].d[snum_acc(x,y,z,tm)] * pars->ferm_charge;
 #endif
 #ifdef IMCHEMPOT
-          arg   += potenzialechimico;
+          arg   += imchempot;
 #endif
 #ifdef PHASE_MAT_VEC_MULT
           phase  = cos(arg) - I * sin(arg);
