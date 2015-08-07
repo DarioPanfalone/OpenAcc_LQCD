@@ -76,21 +76,18 @@ void ker_invert_openacc_shiftmulti(   __restrict su3_soa * const u, // non viene
 
       alpha = real_scal_prod_global(loc_p,loc_s);
 
-      omega_save=omega;   // omega_save=omega_(j-1)                                                                                                        
+      omega_save=omega;   // omega_save=omega_(j-1) 
       omega=-delta/alpha;  // omega = (r_j,r_j)/(p_j, Ap_j)               
 
       // out-=omegas*ps
       //for (iter=0; iter<(approx[0].COM_approx_order); iter++) {
       for (iter=0; iter<maxiter; iter++) {
-
      	  if (flag[iter]==1) {
-
 	        zeta_iii[iter] = (zeta_i[iter]*zeta_ii[iter]*omega_save)/
 	                         ( omega*gammag*(zeta_i[iter]-zeta_ii[iter])+
 	                         zeta_i[iter]*omega_save*(1.0-(approx[0].COM_RA_b[iter])*omega) );
-
-	        omegas[iter] = omega*zeta_iii[iter]/zeta_ii[iter];
-
+	      
+            omegas[iter] = omega*zeta_iii[iter]/zeta_ii[iter];
 	      }
       }
 
@@ -233,6 +230,183 @@ void ker_openacc_recombine_shiftmulti_to_multi( const __restrict ACC_ShiftMultiF
   }
 }
 
+int multishift_invert(const __restrict su3_soa * const u,
+                     ferm_param * pars,
+                     const double_soa * backfield,
+                     const __restrict vec3_soa * const out, // multi-fermion
+				     const __restrict vec3_soa * const in, // single ferm
+				     double residuo,
+				     __restrict vec3_soa * const loc_r,
+				     __restrict vec3_soa * const loc_h,
+				     __restrict vec3_soa * const loc_s,
+				     __restrict vec3_soa * const loc_p,
+				     __restrict vec3_soa * const shiftferm // multi-ferm
+){
+  /*********************
+   * This function takes an input fermion 'in', a rational approximation
+   * 'approx' and writes in 'out' a number of fermions, which are the
+   * result of the inversions of all shifted matrices.
+   * The result written in 'out' must then be summed to obtain the result of
+   *
+   * (M^\dagger M ) ^{fractional exponent} \psi 
+   *
+   * And this is done in the recombine_shifted_vec3_to_vec3_gl() 
+   * function.
+   ****************************/
+  // AUXILIARY VARIABLES FOR THE INVERTER 
+  RationalApprox *approx = pars->approx,
+  int  cg;
+  double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
+  int *flag;
+  posix_memalign((void **)&flag,    ALIGN,approx->approx_order*sizeof(int));
+  posix_memalign((void **)&zeta_i,  ALIGN,approx->approx_order*sizeof(double));
+  posix_memalign((void **)&zeta_ii, ALIGN,approx->approx_order*sizeof(double));
+  posix_memalign((void **)&zeta_iii,ALIGN,approx->approx_order*sizeof(double));
+  posix_memalign((void **)&omegas,  ALIGN,approx->approx_order*sizeof(double));
+  posix_memalign((void **)&gammas,  ALIGN,approx->approx_order*sizeof(double));
+  //  printf("Allocated auxiliary variables \n");
+  int iter;
+  double alpha, delta, lambda, omega, omega_save, gammag, fact;
+  //  printf("Inside the kernel \n");
+  //  printf("Ordine della approssimazione:   %i \n",approx[0].COM_approx_order);
+  alpha=0.0;
+    // trial solution out = 0, set all flag to 1                                                                                                           
+    for(iter=0; iter<(approx->approx_order); iter++){
+        flag[iter]=1;
+        set_vec3_soa_to_zero(&out[iter]);
+    }
+
+    // r=in, p=phi delta=(r,r)                                                                                                                             
+    assign_in_to_out(in,loc_r);
+    assign_in_to_out(loc_r,loc_p);
+    delta=l2norm2_global(loc_r);
+    //printf("delta    %.18lf\n",delta);
+    omega=1.0;
+
+    for(iter=0; iter<(approx->approx_order); iter++){
+      // ps_0=phi
+      assign_in_to_out(in,&shiftferm[iter]);
+      zeta_i[iter]=1.0;         // zeta_{-1}=1.0
+      zeta_ii[iter]=1.0;        // zeta_{ 0}=1.0
+      gammas[iter]=0.0;         // gammas_{-1}=0.0
+    }
+    gammag=0.0;
+    cg=0;
+    do {      // loop over cg iterations
+      cg++;
+
+      // s=(M^dagM)p, alhpa=(p,s)=(p,Ap)
+      fermion_matrix_multiplication(u,loc_s,loc_p,loc_h,pars,backfield);
+      
+//      printf("component_loc_s[0]    %f\n",creal(loc_s->c0[0]));
+//      printf("component_loc_p[0]    %f\n",creal(loc_p->c0[0]));
+
+      alpha = real_scal_prod_global(loc_p,loc_s);
+//      printf("alpha    %.18lf\n",alpha);
+//      printf("mass2    %.18lf\n",mass2);
+
+      omega_save=omega;   // omega_save=omega_(j-1)
+      omega=-delta/alpha;  // omega = (r_j,r_j)/(p_j, Ap_j)               
+//      printf("omega    %.18lf\n",omega);
+
+      // out-=omegas*ps
+      for(iter=0; iter<(approx->approx_order); iter++){
+          if(flag[iter]==1){
+              zeta_iii[iter] = (zeta_i[iter]*zeta_ii[iter]*omega_save)/
+                  ( omega*gammag*(zeta_i[iter]-zeta_ii[iter])+
+                    zeta_i[iter]*omega_save*(1.0-(approx->RA_b[iter])*omega) );
+              omegas[iter]=omega*zeta_iii[iter]/zeta_ii[iter];
+          }
+      }
+      multiple_combine_in1_minus_in2x_factor_back_into_in1(out,shiftferm,approx->approx_order,flag,omegas);
+
+      // r+=omega*s; lambda=(r,r)
+      combine_add_factor_x_in2_to_in1(loc_r,loc_s,omega);
+      lambda=l2norm2_global(loc_r);
+      gammag=lambda/delta;
+
+      // p=r+gammag*p
+      combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
+
+      for(iter=0; iter<(approx->approx_order); iter++)
+          if(flag[iter]==1)
+              gammas[iter]=gammag*zeta_iii[iter]*omegas[iter]/(zeta_ii[iter]*omega);
+      multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(shiftferm,approx->approx_order,flag,gammas,loc_r,zeta_iii);
+
+
+      for(iter=0; iter<(approx->approx_order); iter++)
+          if(flag[iter]==1){
+              fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
+              if(fact<residuo){
+                  flag[iter]=0;
+              }
+              zeta_i[iter]=zeta_ii[iter];
+              zeta_ii[iter]=zeta_iii[iter];
+          }
+      delta=lambda;
+      printf("Iteration: %i    --> residue = %e   (target = %e) \n", cg, sqrt(lambda), residuo);
+//      printf("Inside multishift  ( step = %i )\n");
+//      printf("lambda   %.18lf\n",lambda );
+//      printf("omega    %.18lf\n",omega );
+//      printf("gammag   %.18lf\n",gammag );
+//      for(iter=0; iter<(approx->approx_order); iter++){
+//		printf("zeta_i[%i] =  %.18lf\n",iter,zeta_i[iter]);
+//		printf("gammas[%i] =  %.18lf\n",iter,gammas[iter]);
+//		printf("omegas[%i] =  %.18lf\n",iter,omegas[iter]);
+//      }//DEBUG
+
+
+    } while(sqrt(lambda)>residuo && cg<max_cg); // end of cg iterations 
+
+    if(cg==max_cg)
+      {
+	printf("WARNING: maximum number of iterations reached in invert\n");
+      }
+    
+
+#if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC))
+  printf("Terminated multishift_invert_gl ( target res = %f ) \n ", residuo);
+  int i;
+      printf("\t CG count = %i \n",cg);
+  // test 
+    for(iter=0; iter<approx->approx_order; iter++){
+      assign_in_to_out(&out[iter],loc_p);
+      fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,backfield,approx->RA_b[iter]);
+      combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
+      double  giustoono=l2norm2_global(loc_h);
+      printf("\t\titer_approx= %i      res/stop_res= %e        stop_res= %e \n",iter,sqrt(giustoono)/residuo,residuo);
+      printf("\t\t Shifted mass2  =  %f \n",approx->RA_b[iter]);
+    }
+#endif
+
+  free(flag);
+  free(zeta_i);
+  free(zeta_ii);
+  free(zeta_iii);
+  free(omegas);
+  free(gammas);
+
+  return cg;
+
+}
+void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted /*multi-fermion*/, const __restrict vec3_soa* const in /*single fermion*/, __restrict vec3_soa * const out /*multi fermion*/, const RationalApprox * const approx ){
+  int ih;
+  int iter=0;
+#pragma acc kernels present(out) present(in) present(in_shifted)
+#pragma acc loop independent
+    for(ih=0; ih < SIZEH; ih++){
+
+      out->c0[ih] =  in->c0[ih]*approx->RA_a0;
+      out->c1[ih] =  in->c1[ih]*approx->RA_a0;
+      out->c2[ih] =  in->c2[ih]*approx->RA_a0;
+
+      for(iter=0; iter<approx->approx_order; iter++){  // questo loop non lo vogliamo parallelizzare per forza ... forse puo andare bene cosi'
+	out->c0[ih] +=  approx->RA_a[iter] * in_shifted[iter].c0[ih];
+	out->c1[ih] +=  approx->RA_a[iter] * in_shifted[iter].c1[ih];
+	out->c2[ih] +=  approx->RA_a[iter] * in_shifted[iter].c2[ih];
+      }
+    }
+}
 
 static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * const aux_u,
 							int idxh,
@@ -321,7 +495,7 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
 void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, // questo fermione e' costante e non viene modificato qui dentro
 					    __restrict vec3_soa  * const loc_h, // questo fermione e' costante e non viene modificato qui dentro
 					    __restrict su3_soa * const aux_u,
-					    const COM_RationalApprox * const approx,
+					    const RationalApprox * const approx,
 					    int iter){
   
   //   ////////////////////////////////////////////////////////////////////////   //
@@ -352,7 +526,7 @@ void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, 
 	  for(mu=0;mu<4;mu++){
 	    idxpmu = nnp_openacc[idxh][mu][parity];// r+mu        
 	    dir_mu = 2*mu +  parity;
-	    vec1_directprod_conj_vec2_into_mat1(&aux_u[dir_mu],idxh,loc_h,idxpmu,loc_s,idxh,approx[0].COM_RA_a[iter]);
+	    vec1_directprod_conj_vec2_into_mat1(&aux_u[dir_mu],idxh,loc_h,idxpmu,loc_s,idxh,approx->RA_a[iter]);
 	  }//mu
 
         }  // x     
@@ -382,7 +556,7 @@ void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, 
 	  for(mu=0;mu<4;mu++){
 	    idxpmu = nnp_openacc[idxh][mu][parity];// r+mu        
 	    dir_mu = 2*mu +  parity;
-	    vec1_directprod_conj_vec2_into_mat1(&aux_u[dir_mu],idxh,loc_s,idxpmu,loc_h,idxh,-approx[0].COM_RA_a[iter]);
+	    vec1_directprod_conj_vec2_into_mat1(&aux_u[dir_mu],idxh,loc_s,idxpmu,loc_h,idxh,-approx->RA_a[iter]);
 	  }//mu
         }  // x     
       }  // y       
@@ -521,21 +695,20 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 
 
 void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
+                    double_soa *backfield,
 					__restrict su3_soa * const aux_u,
-					__restrict ACC_ShiftMultiFermion * const in_shiftmulti,  // e' costante e non viene mai modificato qui dentro
+					__restrict vec3_soa * const in_shiftmulti,  // e' costante e non viene mai modificato qui dentro
 					__restrict vec3_soa  * const loc_s,
 					__restrict vec3_soa  * const loc_h,
-					const COM_RationalApprox * const approx  // e' costante e non viene mai modificato qui dentro
+
+					const RationalApprox * const approx  // e' costante e non viene mai modificato qui dentro
 					){
-  int ips;
   int ih;
   int iter=0;
-  set_su3_soa_to_zero(aux_u);
 
-  for(ips=0; ips < no_ps; ips++){
-    for(iter=0; iter<(approx[0].COM_approx_order); iter++){
-      extract_from_shiftmulti_and_assign_to_fermion(in_shiftmulti,iter,ips,loc_s);
-      acc_Doe(u,loc_h,loc_s);
+  for(iter=0; iter<approx->approx_order; iter++){
+      assign_in_to_out(&in_shiftmulti[iter],loc_s);
+      acc_Doe(u,loc_h,loc_s,pars,backfield);
       direct_product_of_fermions_into_auxmat(loc_s,loc_h,aux_u,approx,iter);
     }
   }
@@ -544,18 +717,26 @@ void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' cost
 
 
 void fermion_force_soloopenacc(__restrict su3_soa  *conf_acc, // la configurazione qui dentro e' costante e non viene modificata
+                   __restrict double_soa *backfield,
 			       __restrict tamat_soa *ipdot_acc,
-			       __restrict ACC_MultiFermion *ferm_in_acc, // questo multifermione e' costante e non viene modificato
+                   __restrict ferm_param *tpseudofermion_parameters,
+                   int no_tot_ps,
+			       __restrict vec3_soa *ferm_in_acc, // questo multifermione e' costante e non viene modificato
+			       //__restrict ACC_MultiFermion *ferm_in_acc, // questo multifermione e' costante e non viene modificato
 			       double res,
-			       const COM_RationalApprox *approx,
-			       __restrict ACC_MultiFermion * ferm_out_acc,
+			       //const COM_RationalApprox *approx,
+			       __restrict vec3_soa * ferm_out_acc,
+			       //__restrict ACC_MultiFermion * ferm_out_acc,
 			       __restrict su3_soa  * aux_conf_acc,
-			       __restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
+			       __restrict vec3_soa ** ferm_shiftmulti_acc,//parking variable
+			       //__restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
 			       __restrict vec3_soa * kloc_r,
 			       __restrict vec3_soa * kloc_h,
 			       __restrict vec3_soa * kloc_s,
 			       __restrict vec3_soa * kloc_p,
-			       __restrict ACC_ShiftFermion *k_p_shiftferm){
+			       __restrict vec3_soa *k_p_shiftferm//parking variable
+                   ){
+			       //__restrict ACC_ShiftFermion *k_p_shiftferm){
 
   printf("############################################ \n");
   printf("#### Inside fermion force soloopenacc ###### \n");
@@ -563,8 +744,14 @@ void fermion_force_soloopenacc(__restrict su3_soa  *conf_acc, // la configurazio
 
   struct timeval t1,t2;
   gettimeofday ( &t1, NULL );
-  ker_invert_openacc_shiftmulti(conf_acc,ferm_shiftmulti_acc,ferm_in_acc,res,approx,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-  ker_openacc_compute_fermion_force(conf_acc,aux_conf_acc,ferm_shiftmulti_acc,kloc_s,kloc_h,approx);
+ 
+  for(int ips = 0; ips < no_tot_ps; ips++) 
+      multishift_invert(conf_acc,&tpseudofermion_parameters[ips],backfield,ferm_shiftmulti_acc[ips],&ferm_in_acc[ips],res,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
+
+  set_su3_soa_to_zero(aux_u);
+
+  for(int ips = 0; ips < no_tot_ps; ips++) 
+  ker_openacc_compute_fermion_force(conf_acc,backfield,aux_conf_acc,ferm_shiftmulti_acc[ips],kloc_s,kloc_h,&(tpseudofermion_parameters[approx]));
   set_tamat_soa_to_zero(ipdot_acc);
   multiply_conf_times_force_and_take_ta_even(conf_acc,aux_conf_acc,ipdot_acc);
   multiply_conf_times_force_and_take_ta_odd(conf_acc,aux_conf_acc,ipdot_acc);

@@ -245,6 +245,15 @@ void combine_in1xm2_minus_in2(__restrict vec3_soa * const in_vect1,
   }
 }
 
+void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * const in_vect1,double ferm_mass, __restrict vec3_soa * const in_vect2){
+#pragma acc kernels present(in_vect1) present(in_vect2)
+#pragma acc loop independent
+  for(int ih=0; ih<sizeh; ih++) {
+    in_vect2->c0[ih]=(in_vect1->c0[ih]*ferm_mass)-in_vect2->c0[ih];
+    in_vect2->c1[ih]=(in_vect1->c1[ih]*ferm_mass)-in_vect2->c1[ih];
+    in_vect2->c2[ih]=(in_vect1->c2[ih]*ferm_mass)-in_vect2->c2[ih];
+  }
+}
 
 void combine_in1_minus_in2( __restrict vec3_soa * const in_vect1,
                             __restrict vec3_soa * const in_vect2,
@@ -446,6 +455,79 @@ void combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1( __restrict vec3_
     in1->c2[ih] = (in1->c2[ih]) * fact - (in2->c2[ih]) - (in3->multi[ips].c2[ih]);
   }
 }
+
+
+
+// Altre funzioni aggiunte per l'algebra lineare multishift "versatilizzato"
+void set_vec3_soa_to_zero( RESTRICT vec3_soa* const fermion){
+
+#pragma acc kernels present(gl_fermion)
+#pragma acc loop independent 
+    for(int i= 0; i < SIZEH ; i++){
+        fermion->c0[i]=0;
+        fermion->c1[i]=0;
+        fermion->c2[i]=0;
+    }
+}
+inline void multiple_combine_in1_minus_in2x_factor_back_into_in1( __restrlict vec3_soa const out, __restrict const vec3_soa * const in,const int maxiter, __restrict const int * const flag, __restrict const double * const omegas) {
+  int ia, ih;
+
+  #pragma acc kernels present(in) present(out) copyin(omegas[0:maxiter]) copyin(flag[0:maxiter])
+  {
+  #pragma acc cache(omegas[0:maxiter]) 
+  #pragma acc cache(flag[0:maxiter]) 
+  #pragma acc loop independent gang  
+  for (ia=0; ia<maxiter; ia++) {
+    #pragma acc loop independent gang vector(512)
+    for (ih=0; ih<sizeh; ih++) {
+      if (flag[ia] == 1) {
+        double factor = omegas[ia];
+        out[ia].c0[ih] -= (factor)*(in[ia].c0[ih]);
+        out[ia].c1[ih] -= (factor)*(in[ia].c1[ih]);
+        out[ia].c2[ih] -= (factor)*(in[ia].c2[ih]);
+      } //if
+    } //ih
+  } //ia
+  } //acc kernels
+}
+void multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1( __restrict vec3_soa * const in1, int maxiter, __restrict const int * const flag, __restrict const double * const gammas, __restrict vec3_soa * const in2, __restrict const double * const zeta_iii ) {
+
+  int ia, ih;
+
+  #pragma acc kernels present(in1) present(in2) copyin(gammas[0:maxiter]) copyin(flag[0:maxiter]) copyin(zeta_iii[0:maxiter])
+  {
+
+  #pragma acc cache(gammas[0:maxiter]) 
+  #pragma acc cache(zeta_iii[0:maxiter])
+  #pragma acc cache(flag[0:maxiter]) 
+
+  #pragma acc loop independent gang
+  for (ia=0; ia<maxiter; ia++) {
+    #pragma acc loop independent gang vector(512)
+    for(ih=0; ih<sizeh; ih++) {
+
+      if (flag[ia] == 1) {
+
+        double fact1 = gammas[ia];
+        double fact2 = zeta_iii[ia];
+
+        in1[ia].c0[ih] = fact1 * (in1[ia].c0[ih]) + fact2 * (in2->c0[ih]);
+        in1[ia].c1[ih] = fact1 * (in1[ia].c1[ih]) + fact2 * (in2->c1[ih]);
+        in1[ia].c2[ih] = fact1 * (in1[ia].c2[ih]) + fact2 * (in2->c2[ih]);
+
+      } //if flag
+
+    } //ih
+
+  } //ia
+
+  } //acc data
+
+}
+
+
+
+
 
 
 #endif
