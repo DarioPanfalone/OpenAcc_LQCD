@@ -822,10 +822,10 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * c
 // tamattamat
 void conf_times_staples_ta_part(__restrict su3_soa * const u,        // constant --> is not updated
 			        __restrict su3_soa * const loc_stap, // constant --> is not updated
-				__restrict tamat_soa * const ipdot){
+				__restrict tamat_soa * const tipdot){
 
   int x, y, z, t;
-#pragma acc kernels present(u) present(loc_stap) present(ipdot)
+#pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang //gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang vector //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -842,7 +842,7 @@ void conf_times_staples_ta_part(__restrict su3_soa * const u,        // constant
 	  parity = (x+y+z+t) % 2;
 	  for(mu=0;mu<4;mu++){ 
 	    dir_link = 2*mu + parity;
-	    mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&ipdot[dir_link],idxh);
+	    mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh);
 
 	  }
 
@@ -1067,47 +1067,47 @@ void kernel_acc_mom_exp_times_conf( __restrict su3_soa * const conf,
 
 
 
-void mom_exp_times_conf_soloopenacc( __restrict  su3_soa * const conf_acc,
-				     thmat_soa * const momenta, // e' costante e qui dentro non viene modificata
-				     double * delta,
+void mom_exp_times_conf_soloopenacc( __restrict  su3_soa * const tconf_acc,
+				     thmat_soa * const tmomenta, // e' costante e qui dentro non viene modificata
+				     double * tdelta,
 				     int id_delta){
-  mult_conf_times_stag_phases(conf_acc);
-  kernel_acc_mom_exp_times_conf(conf_acc,momenta,delta, id_delta);
-  mult_conf_times_stag_phases(conf_acc);
+  mult_conf_times_stag_phases(tconf_acc);
+  kernel_acc_mom_exp_times_conf(tconf_acc,tmomenta,tdelta, id_delta);
+  mult_conf_times_stag_phases(tconf_acc);
 }
 
 
-double  calc_plaquette_soloopenacc( __restrict  su3_soa * const conf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
+double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
 
   double tempo=0.0;
   // tolgo le fasi staggered
-  mult_conf_times_stag_phases(conf_acc);
+  mult_conf_times_stag_phases(tconf_acc);
   // calcolo il valore della plaquette sommata su tutti i siti a fissato piano mu-nu (6 possibili piani)
   for(int mu=0;mu<3;mu++){
     for(int nu=mu+1;nu<4;nu++){
       // sommo i 6 risultati in tempo
-      tempo  += calc_loc_plaquettes_removing_stag_phases_nnptrick(conf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+      tempo  += calc_loc_plaquettes_removing_stag_phases_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
     }
   }
   // rimetto le fasi staggered
-  mult_conf_times_stag_phases(conf_acc);
+  mult_conf_times_stag_phases(tconf_acc);
 
   return tempo;
 
   }
 
 
-void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const conf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const ipdot){
+void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
   struct timeval t1,t2;
   gettimeofday ( &t1, NULL );
 
-  mult_conf_times_stag_phases(conf_acc);
+  mult_conf_times_stag_phases(tconf_acc);
 
   set_su3_soa_to_zero(local_staples);
-  calc_loc_staples_removing_stag_phases_nnptrick_all(conf_acc,local_staples);
-  conf_times_staples_ta_part(conf_acc,local_staples,ipdot);  
+  calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
+  conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);  
 
-  mult_conf_times_stag_phases(conf_acc);
+  mult_conf_times_stag_phases(tconf_acc);
 
   gettimeofday ( &t2, NULL );
 
