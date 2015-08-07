@@ -232,15 +232,16 @@ void ker_openacc_recombine_shiftmulti_to_multi( const __restrict ACC_ShiftMultiF
 
 int multishift_invert(const __restrict su3_soa * const u,
                      ferm_param * pars,
+				     const RationalApprox * const approx,
                      const double_soa * backfield,
-                     const __restrict vec3_soa * const out, // multi-fermion
+                     const __restrict vec3_soa * const out, // multi-fermion [nshifts]
 				     const __restrict vec3_soa * const in, // single ferm
 				     double residuo,
 				     __restrict vec3_soa * const loc_r,
 				     __restrict vec3_soa * const loc_h,
 				     __restrict vec3_soa * const loc_s,
 				     __restrict vec3_soa * const loc_p,
-				     __restrict vec3_soa * const shiftferm // multi-ferm
+				     __restrict vec3_soa * const shiftferm // multi-ferm [nshift]
 ){
   /*********************
    * This function takes an input fermion 'in', a rational approximation
@@ -254,7 +255,6 @@ int multishift_invert(const __restrict su3_soa * const u,
    * function.
    ****************************/
   // AUXILIARY VARIABLES FOR THE INVERTER 
-  RationalApprox *approx = pars->approx,
   int  cg;
   double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
   int *flag;
@@ -389,7 +389,11 @@ int multishift_invert(const __restrict su3_soa * const u,
   return cg;
 
 }
-void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted /*multi-fermion*/, const __restrict vec3_soa* const in /*single fermion*/, __restrict vec3_soa * const out /*multi fermion*/, const RationalApprox * const approx ){
+
+void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted /*multi-fermion*/, 
+        const __restrict vec3_soa* const in, // [nshift]
+        __restrict vec3_soa * const out, // [1] 
+        const RationalApprox * const approx ){
   int ih;
   int iter=0;
 #pragma acc kernels present(out) present(in) present(in_shifted)
@@ -684,12 +688,11 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 	  mat1_times_auxmat_into_tamat(&u[7],idxh,eta,&auxmat[7],idxh,&ipdot[7],idxh);
 
 
-        }
-      }
-    }
-  }
-
-}
+        } //hx
+      } //y
+    } // z
+  } // t
+} // end  multiply_conf_times_force_and_take_ta_odd()
 
 
 
@@ -713,28 +716,24 @@ void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' cost
     }
   }
 
- }
 
-
-void fermion_force_soloopenacc(__restrict su3_soa  *conf_acc, // la configurazione qui dentro e' costante e non viene modificata
-                   __restrict double_soa *backfield,
-			       __restrict tamat_soa *ipdot_acc,
-                   __restrict ferm_param *tpseudofermion_parameters,
-                   int no_tot_ps,
-			       __restrict vec3_soa *ferm_in_acc, // questo multifermione e' costante e non viene modificato
-			       //__restrict ACC_MultiFermion *ferm_in_acc, // questo multifermione e' costante e non viene modificato
-			       double res,
-			       //const COM_RationalApprox *approx,
-			       __restrict vec3_soa * ferm_out_acc,
-			       //__restrict ACC_MultiFermion * ferm_out_acc,
-			       __restrict su3_soa  * aux_conf_acc,
-			       __restrict vec3_soa ** ferm_shiftmulti_acc,//parking variable
-			       //__restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
-			       __restrict vec3_soa * kloc_r,
-			       __restrict vec3_soa * kloc_h,
-			       __restrict vec3_soa * kloc_s,
-			       __restrict vec3_soa * kloc_p,
-			       __restrict vec3_soa *k_p_shiftferm//parking variable
+void fermion_force_soloopenacc(__restrict su3_soa  *tconf_acc, // la configurazione qui dentro e' costante e non viene modificata
+       __restrict double_soa *backfield,
+       __restrict tamat_soa *tipdot_acc,
+       __restrict ferm_param *tfermion_parameters,// [nflavs]
+       int tNDiffFlavs,
+       __restrict vec3_soa **ferm_in_acc, // constant, [nflavs][nps]
+       //__restrict ACC_MultiFermion *ferm_in_acc
+       double res,
+       //const COM_RationalApprox *approx, // included in ferm_param
+       __restrict su3_soa  * taux_conf_acc,
+       __restrict vec3_soa ** tferm_shiftmulti_acc,//parking variable [nps][nshift]
+       //__restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
+       __restrict vec3_soa * tkloc_r, // parking
+       __restrict vec3_soa * tkloc_h, // parking
+       __restrict vec3_soa * tkloc_s, // parking
+       __restrict vec3_soa * tkloc_p, // parking
+       __restrict vec3_soa *tk_p_shiftferm//parking variable [max_shifts]
                    ){
 			       //__restrict ACC_ShiftFermion *k_p_shiftferm){
 
@@ -745,17 +744,19 @@ void fermion_force_soloopenacc(__restrict su3_soa  *conf_acc, // la configurazio
   struct timeval t1,t2;
   gettimeofday ( &t1, NULL );
  
-  for(int ips = 0; ips < no_tot_ps; ips++) 
-      multishift_invert(conf_acc,&tpseudofermion_parameters[ips],backfield,ferm_shiftmulti_acc[ips],&ferm_in_acc[ips],res,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-
-  set_su3_soa_to_zero(aux_u);
-
-  for(int ips = 0; ips < no_tot_ps; ips++) 
-  ker_openacc_compute_fermion_force(conf_acc,backfield,aux_conf_acc,ferm_shiftmulti_acc[ips],kloc_s,kloc_h,&(tpseudofermion_parameters[approx]));
-  set_tamat_soa_to_zero(ipdot_acc);
-  multiply_conf_times_force_and_take_ta_even(conf_acc,aux_conf_acc,ipdot_acc);
-  multiply_conf_times_force_and_take_ta_odd(conf_acc,aux_conf_acc,ipdot_acc);
+  set_tamat_soa_to_zero(tipdot_acc);
+  for(int iflav = 0; iflav < tNDiffFlavs; iflav++) {
+      set_su3_soa_to_zero(taux_conf_acc);
+      for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
+          multishift_invert(tconf_acc, &tfermion_parameters[iflav], &(tfermion_parameters[iflav].approx_md), backfield, tferm_shiftmulti_acc[ips], &ferm_in_acc[iflav][ips], res, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+          ker_openacc_compute_fermion_force(tconf_acc, backfield, taux_conf_acc, tferm_shiftmulti_acc[iflav][ips], tkloc_s, tkloc_h, &(tfermion_parameters[iflav].approx_md));
+      } 
+      multiply_conf_times_force_and_take_ta_even(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
+      multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
+  }
+ 
   gettimeofday ( &t2, NULL );
+  
   double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
   printf("FULL FERMION FORCE COMPUTATION                  PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
   printf("########################################### \n");

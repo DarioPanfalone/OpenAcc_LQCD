@@ -41,6 +41,7 @@ const int no_flavours=2; // number of quark species
 
 
 #define max_approx_order 19
+#define max_ps 2
 double approx_metro=19;
 double approx_md=9;
 const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
@@ -135,7 +136,6 @@ typedef struct COM_RationalApprox_t{
 typedef struct ferm_param_t{
   double ferm_charge;
   double ferm_mass;
-  double ferm_im_chem_pot; // not yet implemented
   int degeneracy;
   int number_of_ps;
   COM_RationalApprox approx1; // first inv  // prima c'era *approx1, ora ho messo approx1  e basta

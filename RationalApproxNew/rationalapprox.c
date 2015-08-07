@@ -121,6 +121,26 @@ void rationalapprox_save(const char* nomefile, RationalApprox* rational_approx){
 
 }
 
+void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, double *minmaxeig){
+
+   double ratappexp = (double) in->exponent_num/in->exponent_den;
+ 
+   out->exponent_num        = in->exponent_num       ;
+   out->exponent_den        = in->exponent_den       ;
+   out->approx_order        = in->approx_order       ;
+   out->lambda_min          = minmaxeig[0]           ;
+   out->lambda_max          = minmaxeig[1]          ;
+   out->gmp_remez_precision = in->gmp_remez_precision;              
+   out->error               = in->error              ;
+ // da modificare
+   out->RA_a0               = in->RA_a0       *      ;
+   for(int order = 0; order < in->approx_order; order ++){
+   out->RA_a[order] = in->RA_a[order]*;
+   out->RA_b[order] = in->RA_b[order]*;
+   }
+}
+
+;
 
 #endif
 
