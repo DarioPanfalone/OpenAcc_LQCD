@@ -6,6 +6,21 @@
  * and the Openacc Version               *
  * ***************************************/
 
+#define BACKFIELD
+#define IMCHEMPOT
+
+// se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
+// di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
+// in modo hard coded usa l'altra routine moltiplica link per fermione e basta.
+// Per farlo viene definita la variabile PHASE_MAT_VEC_MULT o meno.
+#ifdef BACKFIELD
+  #define PHASE_MAT_VEC_MULT 
+#else
+  #ifdef IMCHEMPOT
+    #define PHASE_MAT_VEC_MULT 
+  #endif
+#endif
+
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
 #define DIM_BLOCK_Y 8 // This should divide ny
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
@@ -121,22 +136,45 @@ typedef struct ferm_param_t{
   double ferm_charge;
   double ferm_mass;
   double ferm_im_chem_pot; // not yet implemented
-  int degeneration;
+  int degeneracy;
   int number_of_ps;
-  COM_RationalApprox *approx1; // first inv
-  COM_RationalApprox *approx2; // md approx
-  COM_RationalApprox *approx3; // last inv
+  COM_RationalApprox approx1; // first inv  // prima c'era *approx1, ora ho messo approx1  e basta
+  COM_RationalApprox approx2; // md approx
+  COM_RationalApprox approx3; // last inv
 } ferm_param;
 
-ferm_param fermions_parameters[2];
+
+int NDiffFlavs;
+int NPS_tot;
+ferm_param *fermions_parameters;
 
 void init_ferm_params(){
-  fermions_parameters[0].ferm_charge = -1.0;   //up   charge
-  fermions_parameters[0].ferm_mass   = mass;   //up   mass --> up to now not yet used
 
-  fermions_parameters[1].ferm_charge =  2.0;   //down charge
-  fermions_parameters[1].ferm_mass    =mass;   //down mass --> up to now not yet used
+  NDiffFlavs = 2;  // the number of different quark flavours
+
+  int allocation_check;
+  allocation_check =  posix_memalign((void **)&fermions_parameters, ALIGN, NDiffFlavs*sizeof(ferm_param));   //  -->  4*size phases (as many as links)
+  if(allocation_check != 0)  printf("Errore nella allocazione di fermions_parameters \n");
+
+  fermions_parameters[0].ferm_charge       = -1.0;   // up    charge
+  fermions_parameters[0].ferm_mass         = mass;   // up    mass
+  fermions_parameters[0].ferm_im_chem_pot  = 0.0;    // up    chem pot
+  fermions_parameters[0].degeneracy        = 1;      // up    degeneracy
+  fermions_parameters[0].number_of_ps      = 1;      // up    number of pseudo fermions
+
+  fermions_parameters[1].ferm_charge       = 2.0;    // down  charge
+  fermions_parameters[1].ferm_mass         = mass;   // down  mass
+  fermions_parameters[1].ferm_im_chem_pot  = 0.0;    // down  chem pot
+  fermions_parameters[1].degeneracy        = 1;      // down  degeneracy
+  fermions_parameters[1].number_of_ps      = 1;      // down  number of pseudo fermions
+
+  NPS_tot = 0;
+  for(int i=0;i<NDiffFlavs;i++)
+    NPS_tot += fermions_parameters[i].number_of_ps;
+  
+
 }
+
 
 #endif
 
