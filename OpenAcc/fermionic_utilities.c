@@ -461,7 +461,7 @@ void combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1( __restrict vec3_
 // Altre funzioni aggiunte per l'algebra lineare multishift "versatilizzato"
 void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
 
-#pragma acc kernels present(gl_fermion)
+#pragma acc kernels present(fermion)
 #pragma acc loop independent 
     for(int i= 0; i < sizeh ; i++){
         fermion->c0[i]=0;
