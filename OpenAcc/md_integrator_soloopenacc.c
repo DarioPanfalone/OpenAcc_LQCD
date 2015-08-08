@@ -46,26 +46,27 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *conf_acc,double res_metro, double res
 
 #pragma acc data copyin(delta[0:7])
   {
-      gettimeofday ( &t1, NULL );
-      placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-      printf("iterazione %i   -iniziale-    PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
-      generate_Momenta_gauss(momenta);
+    gettimeofday ( &t1, NULL );
+    placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    printf("iterazione %i   -iniziale-    PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
+    generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
- //    generate_MultiFermion_gauss(ferm_phi_acc);
-      for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-	for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-	  vec3_soa *temp = &ferm_phi_acc[iflav][ips];
-	  generate_vec3_soa_gauss(temp);
+    //    generate_MultiFermion_gauss(ferm_phi_acc);
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+      for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	vec3_soa *temp = &ferm_phi_acc[iflav][ips];
+	generate_vec3_soa_gauss(temp);
 #pragma acc update device(temp[0:1])
-	}
-      
-      // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
-      generate_vec3_soa_gauss(kloc_p);
-      generate_vec3_soa_gauss(kloc_s);
-      // update the fermion kloc_p copying it from the host to the device
+      }
+    
+    // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
+    generate_vec3_soa_gauss(kloc_p);
+    generate_vec3_soa_gauss(kloc_s);
+    // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
-      for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       usestoredeigen = 1; // quindi li calcola
       find_min_max_eigenvalue_soloopenacc(conf_acc,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,usestoredeigen,minmaxeig);
 #pragma acc update device(minmaxeig[0:2])
@@ -73,40 +74,39 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *conf_acc,double res_metro, double res
       RationalApprox *approx_fi = &(fermions_parameters[iflav].approx_fi);
       RationalApprox *approx_fi_mother = &(fermions_parameters[iflav].approx_fi_mother);
       rescale_rational_approximation(approx_fi_mother,approx_fi,minmaxeig);
-  
 #pragma acc update device(approx_fi[0:1])
-      }
+    }
 
 
 
 
 
       // first_inv_approx_calc
-      for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-          for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++)
-          {
-              multishift_invert(conf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
-              recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), &(ferm_chi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_fi));
-          }
-      for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
-          RationalApprox *approx_md = &(fermions_parameters[iflav].approx_md);
-          RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+      for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++)
+	{
+	  multishift_invert(conf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+	  recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), &(ferm_chi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_fi));
+	}
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+      RationalApprox *approx_md = &(fermions_parameters[iflav].approx_md);
+      RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
 #pragma acc update device(approx_md[0:1])
-      }
-
-      // dinamica molecolare
-      multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
-      
-      placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-      printf("iterazione %i  -finale-     PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
-
-      gettimeofday ( &t2, NULL );
-      dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
-      printf("iterazione %i       AccUpdateTime   : %f sec  \n",iterazioni,dt_preker_to_postker);
-
+    }
+    
+    // dinamica molecolare
+    multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
+    
+    placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    printf("iterazione %i  -finale-     PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
+    
+    gettimeofday ( &t2, NULL );
+    dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+    printf("iterazione %i       AccUpdateTime   : %f sec  \n",iterazioni,dt_preker_to_postker);
+    
   }
-
+  
   gettimeofday ( &t3, NULL );
   
   dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
@@ -180,21 +180,22 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
 
     generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
-    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-        for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-            vec3_soa *temp = &ferm_phi_acc[iflav][ips];
-            generate_vec3_soa_gauss(temp);
-//    generate_MultiFermion_gauss(ferm_phi_acc);
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+      for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	vec3_soa *temp = &ferm_phi_acc[iflav][ips];
+	generate_vec3_soa_gauss(temp);
+	//    generate_MultiFermion_gauss(ferm_phi_acc);
 #pragma acc update device(temp[0:1])
-          }
+      }
+    }
       
-      // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
-      generate_vec3_soa_gauss(kloc_p);
-      generate_vec3_soa_gauss(kloc_s);
-      // update the fermion kloc_p copying it from the host to the device
+    // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
+    generate_vec3_soa_gauss(kloc_p);
+    generate_vec3_soa_gauss(kloc_s);
+    // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
-      for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       usestoredeigen = 1; // quindi li calcola
       find_min_max_eigenvalue_soloopenacc(conf_acc,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,usestoredeigen,minmaxeig);
 #pragma acc update device(minmaxeig[0:2])
@@ -214,7 +215,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
       for(mu =0;mu<8;mu++){
 	action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
       }
-    action_ferm_in=scal_prod_between_multiferm(ferm_phi_acc,ferm_phi_acc);
+      action_ferm_in=scal_prod_between_multiferm(ferm_phi_acc,ferm_phi_acc);
       ///////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -225,23 +226,18 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
               multishift_invert(conf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
               recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), &(ferm_chi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_fi));
           }
+
+      // rescale the approx for the md
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
-          RationalApprox *approx_md = &(fermions_parameters[iflav].approx_md);
-          RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
-      rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
+	RationalApprox *approx_md = &(fermions_parameters[iflav].approx_md);
+	RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
+	rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
 #pragma acc update device(approx_md[0:1])
       }
 
 
       // dinamica molecolare
-      multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,aux_conf_acc,ferm_chi_acc,ferm_out_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md,approx2);
-
-      
-
-
-     
-     
-     
+      multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
      
      
      
