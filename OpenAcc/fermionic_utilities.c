@@ -469,25 +469,25 @@ void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
         fermion->c2[i]=0;
     }
 }
-inline void multiple_combine_in1_minus_in2x_factor_back_into_in1( __restrict vec3_soa const out, __restrict const vec3_soa * const in,const int maxiter, __restrict const int * const flag, __restrict const double * const omegas) {
+inline void multiple_combine_in1_minus_in2x_factor_back_into_in1( __restrict vec3_soa * const out, __restrict vec3_soa * const in, const int maxiter, __restrict const int * const flag, __restrict const double * const omegas) {
   int ia, ih;
-
-  #pragma acc kernels present(in) present(out) copyin(omegas[0:maxiter]) copyin(flag[0:maxiter])
+  
+#pragma acc kernels present(in) present(out) copyin(omegas[0:maxiter]) copyin(flag[0:maxiter])
   {
-  #pragma acc cache(omegas[0:maxiter]) 
-  #pragma acc cache(flag[0:maxiter]) 
-  #pragma acc loop independent gang  
-  for (ia=0; ia<maxiter; ia++) {
-    #pragma acc loop independent gang vector(512)
-    for (ih=0; ih<sizeh; ih++) {
-      if (flag[ia] == 1) {
-        double factor = omegas[ia];
-        out[ia].c0[ih] -= (factor)*(in[ia].c0[ih]);
-        out[ia].c1[ih] -= (factor)*(in[ia].c1[ih]);
-        out[ia].c2[ih] -= (factor)*(in[ia].c2[ih]);
-      } //if
-    } //ih
-  } //ia
+#pragma acc cache(omegas[0:maxiter])
+#pragma acc cache(flag[0:maxiter])
+#pragma acc loop independent gang
+    for (ia=0; ia<maxiter; ia++) {
+#pragma acc loop independent gang vector(512)
+      for (ih=0; ih<sizeh; ih++) {
+	if (flag[ia] == 1) {
+	  double factor = omegas[ia];
+	  out[ia].c0[ih] -= (factor)*(in[ia].c0[ih]);
+	  out[ia].c1[ih] -= (factor)*(in[ia].c1[ih]);
+	  out[ia].c2[ih] -= (factor)*(in[ia].c2[ih]);
+	} //if
+      } //ih
+    } //ia
   } //acc kernels
 }
 void multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1( __restrict vec3_soa * const in1, int maxiter, __restrict const int * const flag, __restrict const double * const gammas, __restrict vec3_soa * const in2, __restrict const double * const zeta_iii ) {

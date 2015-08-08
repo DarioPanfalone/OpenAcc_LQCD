@@ -16,6 +16,8 @@
 // find the maximum eigenvalue of the fermion matrix
 // use loc_h, loc_p, loc_r
 double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
+					 double_soa * const backfield,
+					 ferm_param *pars,
 					 __restrict vec3_soa * const loc_r,
 					 __restrict vec3_soa * const loc_h,
 					 __restrict vec3_soa * const loc_p
@@ -37,8 +39,8 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       assign_in_to_out(loc_p,loc_r);
       old_norm=norm;
       // p=DeoDoe r
-      acc_Doe(u,loc_h,loc_p);
-      acc_Deo(u,loc_p,loc_h);
+      acc_Doe(u,loc_h,loc_p,pars,backfield);
+      acc_Deo(u,loc_p,loc_h,pars,backfield);
 
       // p=(M^dag M)r
       combine_in1xm2_minus_in2(loc_r,loc_p);
@@ -54,6 +56,8 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
 // find the minimum eigenvalue of the fermion matrix
 // use loc_h, loc_p, loc_r
 double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
+					 double_soa * const backfield,
+					 ferm_param *pars,
 					 __restrict vec3_soa * const loc_r,
 					 __restrict vec3_soa * const loc_h,
 					 __restrict vec3_soa * const loc_p,
@@ -74,8 +78,8 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
     assign_in_to_out(loc_p,loc_r);
     old_norm=norm;
     // p=DeoDoe r 
-    acc_Doe(u,loc_h,loc_p);
-    acc_Deo(u,loc_p,loc_h);
+    acc_Doe(u,loc_h,loc_p,pars,backfield);
+    acc_Deo(u,loc_p,loc_h,pars,backfield);
     // p=max r - (M^dag M)r 
     combine_add_factor_x_in2_to_in1(loc_p,loc_r,delta);
     norm=sqrt(l2norm2_global(loc_p));
@@ -88,6 +92,8 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
 }
 
 void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
+					   double_soa * const backfield,
+					   ferm_param *pars,
 					   __restrict vec3_soa * const loc_r,
 					   __restrict vec3_soa * const loc_h,
 					   __restrict vec3_soa * const loc_p1,
@@ -95,15 +101,11 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
 					   int usestored,
 					   double *minmax
 					   ){
-
   // minmax[0] --> minimo
   // minmax[1] --> massimo
   if(usestored == 1){
-
-    minmax[1] = ker_find_max_eigenvalue_openacc(u,loc_r,loc_h,loc_p1);
-    minmax[0] = ker_find_min_eigenvalue_openacc(u,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2
-    //    minmax[0] =  mass2;
-    //    minmax[1] =  ker_find_max_eigenvalue_openacc(u,loc_r,loc_h,loc_p);
+    minmax[1] = ker_find_max_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p1);
+    minmax[0] = ker_find_min_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2
   }
   // altrimenti se usestored == 0 allora lascia gli autocosi al valore che avevano gia' prima
 }

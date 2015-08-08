@@ -17,6 +17,8 @@
 
 
 int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata mai qui dentro
+			  double_soa * const backfield,
+			  ferm_param *pars,
 			  __restrict vec3_soa * const out,
 			  __restrict vec3_soa * const in, // non viene aggiornato mai qui dentro
 			  double res,
@@ -33,8 +35,8 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
   d_complex aux_comp=0.0+0.0I;
 
   assign_in_to_out(trialSolution,out);
-  acc_Doe(u,loc_h,out);
-  acc_Deo(u,loc_s,loc_h);
+  acc_Doe(u,loc_h,out,pars,backfield);
+  acc_Deo(u,loc_s,loc_h,pars,backfield);
 
 #ifdef OTTIMIZZALO
   //  combine_in1xm2_minus_in2(out,loc_s,loc_s); // --> old version (3 args)
@@ -52,8 +54,8 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
   do {
     cg++;    
     // s=(M^dag M)p    alpha=(p,s)
-    acc_Doe(u,loc_h,loc_p);
-    acc_Deo(u,loc_s,loc_h);
+    acc_Doe(u,loc_h,loc_p,pars,backfield);
+    acc_Deo(u,loc_s,loc_h,pars,backfield);
 
     combine_in1xm2_minus_in2(loc_p,loc_s); 
     alpha = real_scal_prod_global(loc_p,loc_s);
@@ -80,8 +82,8 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
 
   printf("Terminated invert after   %d    iterations [", cg);
-  acc_Doe(u,loc_h,out);
-  acc_Deo(u,loc_s,loc_h);
+  acc_Doe(u,loc_h,out,pars,backfield);
+  acc_Deo(u,loc_s,loc_h,pars,backfield);
   double giustoono;
   combine_in1xm2_minus_in2_minus_in3(out,loc_s,in,loc_p);
   assign_in_to_out(loc_p,loc_h);
