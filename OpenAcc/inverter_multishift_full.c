@@ -3,246 +3,19 @@
 
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
-
-void ker_invert_openacc_shiftmulti(   __restrict su3_soa * const u, // non viene mai aggiornata qui dentro
-				      __restrict ACC_ShiftMultiFermion * const out,
-				      __restrict ACC_MultiFermion * const in, // non viene mai aggiornato qui dentro
-				     double residuo,
-				     const COM_RationalApprox * const approx,
-				     __restrict vec3_soa * const loc_r,
-				     __restrict vec3_soa * const loc_h,
-				     __restrict vec3_soa * const loc_s,
-				     __restrict vec3_soa * const loc_p,
-				     __restrict ACC_ShiftFermion * const p_shiftferm
-){
-  // AUXILIARY VARIABLES FOR THE INVERTER 
-  int  cg;
-  int *cg_aux;
-  posix_memalign((void **)&cg_aux, ALIGN, no_ps*sizeof(int));
-  int *flag;
-  posix_memalign((void **)&flag, ALIGN, max_approx_order*sizeof(int));
-
-  double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
-  posix_memalign((void **)&zeta_i,   ALIGN,  max_approx_order*sizeof(double));
-  posix_memalign((void **)&zeta_ii,  ALIGN,  max_approx_order*sizeof(double));
-  posix_memalign((void **)&zeta_iii, ALIGN,  max_approx_order*sizeof(double));
-  posix_memalign((void **)&omegas,   ALIGN,  max_approx_order*sizeof(double));
-  posix_memalign((void **)&gammas,   ALIGN,  max_approx_order*sizeof(double));
-
-  int pseudofermion, iter, maxiter;
-  double alpha, delta, lambda, omega, omega_save, gammag, fact;
-
-  alpha=0.0;
-
-
-  for(pseudofermion=0; pseudofermion<no_ps; pseudofermion++){
-
-    // trial solution out = 0, set all flag to 1                                                                                                           
-    for(iter=0; iter<(approx[0].COM_approx_order); iter++){
-      flag[iter]=1;
-      set_shiftmulti_to_zero(iter,pseudofermion,out);
-    }
-
-    // r=in, p=phi delta=(r,r)                                                                                                                             
-    extract_pseudo_and_assign_to_fermion(in,pseudofermion,loc_r);
-    assign_in_to_out(loc_r,loc_p);
-    delta=l2norm2_global(loc_r);
-    omega=1.0;
-
-    for(iter=0; iter<(approx[0].COM_approx_order); iter++){
-      // ps_0=phi
-      extract_pseudo_and_assign_to_shiftfermion(in,pseudofermion,p_shiftferm,iter);
-      zeta_i[iter]=1.0;         // zeta_{-1}=1.0
-      zeta_ii[iter]=1.0;        // zeta_{ 0}=1.0
-      gammas[iter]=0.0;         // gammas_{-1}=0.0
-    }
-    gammag=0.0;
-    cg=0;
-
-    //Find the max approx[0].COM_approx_order where flag[approx[0].COM_approx_order] == 1
-    for(iter=0; iter<(approx[0].COM_approx_order); iter++) {
-      if(flag[iter]==1) {
-        maxiter = iter+1;
-      }
-    }
-
-    do {      // loop over cg iterations
-      cg++;
-
-      // s=(M^dagM)p, alhpa=(p,s)=(p,Ap)
-      acc_Doe(u,loc_h,loc_p);
-      acc_Deo(u,loc_s,loc_h);
-      combine_in1xm2_minus_in2(loc_p,loc_s);
-
-      alpha = real_scal_prod_global(loc_p,loc_s);
-
-      omega_save=omega;   // omega_save=omega_(j-1) 
-      omega=-delta/alpha;  // omega = (r_j,r_j)/(p_j, Ap_j)               
-
-      // out-=omegas*ps
-      //for (iter=0; iter<(approx[0].COM_approx_order); iter++) {
-      for (iter=0; iter<maxiter; iter++) {
-     	  if (flag[iter]==1) {
-	        zeta_iii[iter] = (zeta_i[iter]*zeta_ii[iter]*omega_save)/
-	                         ( omega*gammag*(zeta_i[iter]-zeta_ii[iter])+
-	                         zeta_i[iter]*omega_save*(1.0-(approx[0].COM_RA_b[iter])*omega) );
-	      
-            omegas[iter] = omega*zeta_iii[iter]/zeta_ii[iter];
-	      }
-      }
-
-	    combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti_all(out,p_shiftferm,pseudofermion,maxiter,flag,omegas);
-  
-//	    combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(out,p_shiftferm,pseudofermion,iter,omegas[iter]);
-
-//	      }
-
-//      }
-
-      // r+=omega*s; lambda=(r,r)
-      combine_add_factor_x_in2_to_in1(loc_r,loc_s,omega);
-      lambda=l2norm2_global(loc_r);
-      gammag=lambda/delta;
-
-      // p=r+gammag*p
-      combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
-
-//ORIGINALE
-/*
-      for(iter=0; iter<(approx[0].COM_approx_order); iter++) {
-	      if(flag[iter]==1){
-
-	        gammas[iter]=gammag*zeta_iii[iter]*omegas[iter]/(zeta_ii[iter]*omega);
-
-	        combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm(p_shiftferm,iter,gammas[iter],loc_r,zeta_iii[iter]);
-	  
-	        fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
-
-	        if(fact<residuo){
-	          flag[iter]=0;
-	        }
-	        zeta_i[iter]=zeta_ii[iter];
-	        zeta_ii[iter]=zeta_iii[iter];
-	      }
-      }
-*/
-     for(iter=0; iter<maxiter; iter++) {
-        if(flag[iter]==1){
-          gammas[iter]=gammag*zeta_iii[iter]*omegas[iter]/(zeta_ii[iter]*omega);
-        }
-     }
-
-     combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm_all(p_shiftferm,maxiter,flag,gammas,loc_r,zeta_iii);
-
-     for(iter=0; iter<maxiter; iter++) {
-        if(flag[iter]==1){
-
-          fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
-
-          if(fact<residuo){
-            flag[iter]=0;
-          }
-
-          zeta_i[iter]=zeta_ii[iter];
-          zeta_ii[iter]=zeta_iii[iter];
-        }
-     }
-
-
-//
-
-
-
-
-     delta=lambda;
-
-    } while(sqrt(lambda)>residuo && cg<max_cg); // end of cg iterations 
-
-    if(cg==max_cg)
-      {
-	printf("WARNING: maximum number of iterations reached in invert\n");
-      }
-    cg_aux[pseudofermion]=cg;
-
-
-
-    
-  } // end loop on pseudofermions
-
-#if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC))
-  printf("Terminated openacc_multips_shift_invert   ( target res = %f ) \n ", residuo);
-  int i;
-  for(i=0; i<no_ps; i++)
-    {
-      printf("\t CG count [pseudoferm n. %i ] = %i \n",i,cg_aux[i]);
-    }
-  // test 
-  for(pseudofermion=0; pseudofermion<no_ps; pseudofermion++){
-    for(iter=0; iter<(approx[0].COM_approx_order); iter++){
-      extract_from_shiftmulti_and_assign_to_fermion(out,iter,pseudofermion,loc_p);
-      acc_Doe(u,loc_h,loc_p);
-      acc_Deo(u,loc_s,loc_h);
-      combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1(loc_p,mass2+approx[0].COM_RA_b[iter],loc_s,in,pseudofermion);
-      double  giustoono=l2norm2_global(loc_p);
-      printf("\t\t pseudofermion= %i    iter_approx= %i      res/stop_res= %e          stop_res= %e \n",pseudofermion,iter,sqrt(giustoono)/residuo,residuo);
-      printf("\t\t Shifted mass2  =  %f \n",approx[0].COM_RA_b[iter]);
-
-    }
-  }
-#endif
-
-  free(cg_aux);
-  free(flag);
-  free(zeta_i);
-  free(zeta_ii);
-  free(zeta_iii);
-  free(omegas);
-  free(gammas);
-
-}
-
-void ker_openacc_recombine_shiftmulti_to_multi( const __restrict ACC_ShiftMultiFermion * const in_shiftmulti,
-						const __restrict ACC_MultiFermion * const in_multi,
-						__restrict ACC_MultiFermion * const out_multi,
-						const COM_RationalApprox * const approx
-						){
-  int ips;
-  int ih;
-  int iter=0;
-#pragma acc kernels present(out_multi) present(in_multi) present(in_shiftmulti)
-#pragma acc loop independent
-  for(ips=0; ips < no_ps; ips++){
-#pragma acc loop independent
-    for(ih=0; ih < sizeh; ih++){
-
-      out_multi->multi[ips].c0[ih] =  (in_multi->multi[ips].c0[ih])*(approx[0].COM_RA_a0);
-      out_multi->multi[ips].c1[ih] =  (in_multi->multi[ips].c1[ih])*(approx[0].COM_RA_a0);
-      out_multi->multi[ips].c2[ih] =  (in_multi->multi[ips].c2[ih])*(approx[0].COM_RA_a0);
-
-      for(iter=0; iter<(approx[0].COM_approx_order); iter++){  // questo loop non lo vogliamo parallelizzare per forza ... forse puo andare bene cosi'
-	out_multi->multi[ips].c0[ih] +=  (approx[0].COM_RA_a[iter]) * (in_shiftmulti->shiftmulti[iter][ips].c0[ih]);
-	out_multi->multi[ips].c1[ih] +=  (approx[0].COM_RA_a[iter]) * (in_shiftmulti->shiftmulti[iter][ips].c1[ih]);
-	out_multi->multi[ips].c2[ih] +=  (approx[0].COM_RA_a[iter]) * (in_shiftmulti->shiftmulti[iter][ips].c2[ih]);
-      }
-
-
-    }
-  }
-}
-
-int multishift_invert(const __restrict su3_soa * const u,
-                     ferm_param * pars,
-				     const RationalApprox * const approx,
-                     const double_soa * backfield,
-                     const __restrict vec3_soa * const out, // multi-fermion [nshifts]
-				     const __restrict vec3_soa * const in, // single ferm
-				     double residuo,
-				     __restrict vec3_soa * const loc_r,
-				     __restrict vec3_soa * const loc_h,
-				     __restrict vec3_soa * const loc_s,
-				     __restrict vec3_soa * const loc_p,
-				     __restrict vec3_soa * const shiftferm // multi-ferm [nshift]
-){
+int multishift_invert(__restrict su3_soa * const u,
+		      ferm_param * pars,
+		      RationalApprox * const approx,
+		      double_soa * backfield,
+		      __restrict vec3_soa * const out, // multi-fermion [nshifts]
+		      __restrict vec3_soa * const in, // single ferm
+		      double residuo,
+		      __restrict vec3_soa * const loc_r,
+		      __restrict vec3_soa * const loc_h,
+		      __restrict vec3_soa * const loc_s,
+		      __restrict vec3_soa * const loc_p,
+		      __restrict vec3_soa * const shiftferm // multi-ferm [nshift]
+		      ){
   /*********************
    * This function takes an input fermion 'in', a rational approximation
    * 'approx' and writes in 'out' a number of fermions, which are the
@@ -344,17 +117,7 @@ int multishift_invert(const __restrict su3_soa * const u,
               zeta_ii[iter]=zeta_iii[iter];
           }
       delta=lambda;
-      printf("Iteration: %i    --> residue = %e   (target = %e) \n", cg, sqrt(lambda), residuo);
-//      printf("Inside multishift  ( step = %i )\n");
-//      printf("lambda   %.18lf\n",lambda );
-//      printf("omega    %.18lf\n",omega );
-//      printf("gammag   %.18lf\n",gammag );
-//      for(iter=0; iter<(approx->approx_order); iter++){
-//		printf("zeta_i[%i] =  %.18lf\n",iter,zeta_i[iter]);
-//		printf("gammas[%i] =  %.18lf\n",iter,gammas[iter]);
-//		printf("omegas[%i] =  %.18lf\n",iter,omegas[iter]);
-//      }//DEBUG
-
+      //      printf("Iteration: %i    --> residue = %e   (target = %e) \n", cg, sqrt(lambda), residuo);
 
     } while(sqrt(lambda)>residuo && cg<max_cg); // end of cg iterations 
 
@@ -371,7 +134,7 @@ int multishift_invert(const __restrict su3_soa * const u,
   // test 
     for(iter=0; iter<approx->approx_order; iter++){
       assign_in_to_out(&out[iter],loc_p);
-      fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,backfield,approx->RA_b[iter]);
+      fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,backfield,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
       double  giustoono=l2norm2_global(loc_h);
       printf("\t\titer_approx= %i      res/stop_res= %e        stop_res= %e \n",iter,sqrt(giustoono)/residuo,residuo);
@@ -398,7 +161,7 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
   int iter=0;
 #pragma acc kernels present(out) present(in) present(in_shifted)
 #pragma acc loop independent
-    for(ih=0; ih < SIZEH; ih++){
+    for(ih=0; ih < sizeh; ih++){
 
       out->c0[ih] =  in->c0[ih]*approx->RA_a0;
       out->c1[ih] =  in->c1[ih]*approx->RA_a0;
@@ -743,6 +506,11 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 #pragma acc loop independent vector(DIM_BLOCK_X)
         for(hx=0; hx < nxh; hx++) {
           int x,eta;
+	  double arg;
+	  d_complex phase;
+#ifdef IMCHEMPOT
+          double imchempot = tpars->ferm_im_chem_pot/((double)(nt));
+#endif
 
           //odd sites
           x = 2*hx + ((y+z+t+1) & 0x1);
