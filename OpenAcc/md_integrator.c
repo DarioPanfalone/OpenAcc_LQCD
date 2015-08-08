@@ -20,54 +20,54 @@
 // p->p+a dS/dq=p+ia(-i dS/dq)=p+ia*ipdot
 
 // the various dt involved are stored into the delta array which is allocated into UPDATE_ACC(args)
-void multistep_2MN_gauge(su3_soa *conf_acc,su3_soa *local_staples,tamat_soa *ipdot,thmat_soa *momenta,double * delta)
+void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta,double * delta)
  {
  int md;
  // Step for the P
  // P' = P - l*dt*dS/dq
  // delta[3]=-cimag(ieps_acc)*scale*lambda;
- calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
- mom_sum_mult(tmomenta,ipdot,delta,3);
+ calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+ mom_sum_mult(tmomenta,tipdot,delta,3);
  for(md=1; md<gauge_scale; md++){
    // Step for the Q
    // Q' = exp[dt/2 *i P] Q
    // delta[4]=cimag(iepsh_acc)*scale;
-   mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
+   mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,delta,4);
    // Step for the P
    // P' = P - (1-2l)*dt*dS/dq
    // delta[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
-   calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
-   mom_sum_mult(tmomenta,ipdot,delta,5);
+   calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+   mom_sum_mult(tmomenta,tipdot,delta,5);
    // Step for the Q
    // Q' = exp[dt/2 *i P] Q
    // delta[4]=cimag(iepsh_acc)*scale;
-   mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
+   mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,delta,4);
    // Step for the P
    // P' = P - 2l*dt*dS/dq
    // delta[6]=-cimag(ieps_acc)*2.0*lambda*scale;
-   calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
-   mom_sum_mult(tmomenta,ipdot,delta,6);
+   calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+   mom_sum_mult(tmomenta,tipdot,delta,6);
  }
  
  // Step for the Q
  // Q' = exp[dt/2 *i P] Q
  // delta[4]=cimag(iepsh_acc)*scale;
- mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
+ mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,delta,4);
  // Step for the P
  // P' = P - (1-2l)*dt*dS/dq
- calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
+ calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
  // calc_ipdot_gauge();
  // delta[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
- mom_sum_mult(tmomenta,ipdot,delta,5);
+ mom_sum_mult(tmomenta,tipdot,delta,5);
  // Step for the Q
  // Q' = exp[dt/2 *i P] Q
  // delta[4]=cimag(iepsh_acc)*scale;
- mom_exp_times_conf_soloopenacc(conf_acc,momenta,delta,4);
+ mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,delta,4);
  // Step for the P
  // P' = P - l*dt*dS/dq
  // delta[3]=-cimag(ieps_acc)*lambda*scale;
- calc_ipdot_gauge_soloopenacc(conf_acc,local_staples,ipdot);
- mom_sum_mult(tmomenta,ipdot,delta,3);
+ calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+ mom_sum_mult(tmomenta,tipdot,delta,3);
  
  }
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,

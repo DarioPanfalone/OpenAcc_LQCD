@@ -573,25 +573,23 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 
 
 
-
 void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
-					__restrict double_soa * const backfield,
+					double_soa * backfield,
 					__restrict su3_soa * const aux_u,
 					__restrict vec3_soa * const in_shiftmulti,  // e' costante e non viene mai modificato qui dentro
 					__restrict vec3_soa  * const loc_s,
 					__restrict vec3_soa  * const loc_h,
-
-					const RationalApprox * const approx  // e' costante e non viene mai modificato qui dentro
+					ferm_param  *  tpars
 					){
   int ih;
   int iter=0;
 
-  for(iter=0; iter<approx->approx_order; iter++){
-      assign_in_to_out(&in_shiftmulti[iter],loc_s);
-      acc_Doe(u,loc_h,loc_s,pars,backfield);
-      direct_product_of_fermions_into_auxmat(loc_s,loc_h,aux_u,approx,iter);
-    }
+  for(iter=0; iter<tpars->approx_md.approx_order; iter++){
+    assign_in_to_out(&in_shiftmulti[iter],loc_s);
+    acc_Doe(u,loc_h,loc_s,tpars,backfield);
+    direct_product_of_fermions_into_auxmat(loc_s,loc_h,aux_u,&(tpars->approx_md),iter);
   }
+}
 
 
 void fermion_force_soloopenacc(__restrict su3_soa  *tconf_acc, // la configurazione qui dentro e' costante e non viene modificata
@@ -626,7 +624,7 @@ void fermion_force_soloopenacc(__restrict su3_soa  *tconf_acc, // la configurazi
       set_su3_soa_to_zero(taux_conf_acc);
       for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
           multishift_invert(tconf_acc, &tfermion_parameters[iflav], &(tfermion_parameters[iflav].approx_md), backfield, tferm_shiftmulti_acc[ips], &ferm_in_acc[iflav][ips], res, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-          ker_openacc_compute_fermion_force(tconf_acc, backfield, taux_conf_acc, tferm_shiftmulti_acc[iflav][ips], tkloc_s, tkloc_h, &(tfermion_parameters[iflav].approx_md));
+          ker_openacc_compute_fermion_force(tconf_acc, backfield, taux_conf_acc, &(tferm_shiftmulti_acc[iflav][ips]), tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
       } 
       multiply_conf_times_force_and_take_ta_even(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
       multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
