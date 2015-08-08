@@ -139,7 +139,7 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    double max =  minmax[1];
    min*=0.95;
    max*=1.05;
-   epsilon=pow(max, power);  
+   double epsilon=pow(max, power);  
    out->RA_a0               = in->RA_a0       *     epsilon ;
    for(int order = 0; order < in->approx_order; order ++){
    out->RA_a[order] = in->RA_a[order]*max * epsilon;
