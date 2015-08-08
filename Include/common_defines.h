@@ -48,6 +48,7 @@ const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_m
 const double lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double residue_metro=1.0e-8;    // stopping residual for CG
 const double residue_md=1.0e-5;    // stopping residual for CG
+const int gmp_remez_precision=100; // The precision that gmp uses                                                                                                               
 
 // quanti di campo esterno
 const double bx_quantum=0.0;
@@ -168,6 +169,55 @@ void init_ferm_params(){
   NPS_tot = 0;
   for(int i=0;i<NDiffFlavs;i++)
     NPS_tot += fermions_parameters[i].number_of_ps;
+
+  for(int i=0;i<NDiffFlavs;i++){
+    fermions_parameters[i].approx_fi_mother.exponent_num =  +fermions_parameters[i].degeneracy;
+    fermions_parameters[i].approx_md_mother.exponent_num =  -fermions_parameters[i].degeneracy;
+    fermions_parameters[i].approx_li_mother.exponent_num =  -fermions_parameters[i].degeneracy;
+
+    fermions_parameters[i].approx_fi_mother.exponent_den =   fermions_parameters[i].number_of_ps*8;
+    fermions_parameters[i].approx_md_mother.exponent_den =   fermions_parameters[i].number_of_ps*4;
+    fermions_parameters[i].approx_li_mother.exponent_den =   fermions_parameters[i].number_of_ps*4;
+
+    fermions_parameters[i].approx_fi_mother.approx_order =  approx_metro;
+    fermions_parameters[i].approx_md_mother.approx_order =  approx_md;
+    fermions_parameters[i].approx_li_mother.approx_order =  approx_metro;
+
+    fermions_parameters[i].approx_fi_mother.lambda_min =  lambda_min_metro;
+    fermions_parameters[i].approx_md_mother.lambda_min =  lambda_min_md;
+    fermions_parameters[i].approx_li_mother.lambda_min =  lambda_min_metro;
+
+    fermions_parameters[i].approx_fi_mother.lambda_max =  1.0;
+    fermions_parameters[i].approx_md_mother.lambda_max =  1.0;
+    fermions_parameters[i].approx_li_mother.lambda_max =  1.0;
+
+    fermions_parameters[i].approx_fi_mother.lambda_max =  1.0;
+    fermions_parameters[i].approx_md_mother.lambda_max =  1.0;
+    fermions_parameters[i].approx_li_mother.lambda_max =  1.0;
+
+    fermions_parameters[i].approx_fi_mother.gmp_remez_precision = gmp_remez_precision;
+    fermions_parameters[i].approx_md_mother.gmp_remez_precision = gmp_remez_precision;
+    fermions_parameters[i].approx_li_mother.gmp_remez_precision = gmp_remez_precision;
+
+    // copy everything also in the daughter approxs
+    fermions_parameters[i].approx_fi.exponent_num =   fermions_parameters[i].approx_fi_mother.exponent_num;
+    fermions_parameters[i].approx_md.exponent_num =   fermions_parameters[i].approx_md_mother.exponent_num;
+    fermions_parameters[i].approx_li.exponent_num =   fermions_parameters[i].approx_li_mother.exponent_num;
+    fermions_parameters[i].approx_fi.exponent_den =   fermions_parameters[i].approx_fi_mother.exponent_den;
+    fermions_parameters[i].approx_md.exponent_den =   fermions_parameters[i].approx_md_mother.exponent_den;
+    fermions_parameters[i].approx_li.exponent_den =   fermions_parameters[i].approx_li_mother.exponent_den;
+    fermions_parameters[i].approx_fi.approx_order =   fermions_parameters[i].approx_fi_mother.approx_order;
+    fermions_parameters[i].approx_md.approx_order =   fermions_parameters[i].approx_md_mother.approx_order;
+    fermions_parameters[i].approx_li.approx_order =   fermions_parameters[i].approx_li_mother.approx_order;
+    fermions_parameters[i].approx_fi.gmp_remez_precision =   fermions_parameters[i].approx_fi_mother.gmp_remez_precision;
+    fermions_parameters[i].approx_md.gmp_remez_precision =   fermions_parameters[i].approx_md_mother.gmp_remez_precision;
+    fermions_parameters[i].approx_li.gmp_remez_precision =   fermions_parameters[i].approx_li_mother.gmp_remez_precision;
+
+
+
+  }
+
+
   
 
 }

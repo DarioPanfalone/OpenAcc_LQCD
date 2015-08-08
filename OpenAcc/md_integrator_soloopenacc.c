@@ -220,7 +220,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
 
       // first_inv_approx_calc 
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-          for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; iips++)
+          for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++)
           {
               multishift_invert(conf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
               recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), &(ferm_chi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_fi));

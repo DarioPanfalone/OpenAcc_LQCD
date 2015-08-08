@@ -46,10 +46,12 @@ char* rational_approx_filename(int approx_order, int exponent_num, int exponent_
 }
 
 
-void rationalapprox_read(const char* nomefile, RationalApprox* rational_approx )
+void rationalapprox_read(RationalApprox* rational_approx)
 {
 
     // CALCULATION OF COEFFICIENTS FOR FIRST_INV_APPROX_NORM_COEFF
+
+    char * nomefile = rational_approx_filename(rational_approx->approx_order,rational_approx->exponent_num,rational_approx->exponent_den);
 
     FILE *input = fopen(nomefile, "rt");
     printf("%s\n", nomefile );
