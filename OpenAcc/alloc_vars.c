@@ -22,22 +22,6 @@ thmat_soa * momenta;
 dcomplex_soa * local_sums;
 double_soa * d_local_sums;
 
-// RATIONAL APPROX INITIALIZATION ///////////////////////////////////////////////////////////////                                                          
-// la 1 e' la "first_inv_approx_norm_coeff"                                                                                                                
-// la 2 e' la "md_inv_approx_norm_coeff"                                                                                                                   
-// la 3 e' la "last_inv_approx_norm_coeff"                                                                                                                 
-COM_RationalApprox *approx1;
-COM_RationalApprox *approx2;
-COM_RationalApprox *approx3;
-COM_RationalApprox *approx_mother1;
-COM_RationalApprox *approx_mother2;
-COM_RationalApprox *approx_mother3;
-//////////////////////////////////////////////////////////////////////////////////////////////////
-double minmaxeig[2];
-
-
-
-
 void mem_alloc(){
   int allocation_check;  
 #ifdef BACKFIELD

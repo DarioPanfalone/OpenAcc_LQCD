@@ -139,9 +139,12 @@ typedef struct ferm_param_t{
   double ferm_im_chem_pot;
   int degeneracy;
   int number_of_ps;
-  COM_RationalApprox approx1; // first inv  // prima c'era *approx1, ora ho messo approx1  e basta
-  COM_RationalApprox approx2; // md approx
-  COM_RationalApprox approx3; // last inv
+  RationalApprox approx_fi // first inv  // prima c'era *approx1, ora ho messo approx1  e basta
+  RationalApprox approx_md_mother; // md approx
+  RationalApprox approx_li_mother; // last inv
+  RationalApprox approx_fi_mother // first inv  // prima c'era *approx1, ora ho messo approx1  e basta
+  RationalApprox approx_md; // md approx
+  RationalApprox approx_li; // last inv
 } ferm_param;
 
 

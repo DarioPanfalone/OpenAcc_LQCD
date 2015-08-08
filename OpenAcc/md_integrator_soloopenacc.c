@@ -34,14 +34,20 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *conf_acc,double res_metro, double res
   double action_ferm_in;
   double action_ferm_fin;
   int mu;
-    
+  double minmaxeig[2]; 
+
+
+
+
+
+
+
+
 #pragma acc data copyin(delta[0:7])
   {
-    
       gettimeofday ( &t1, NULL );
       placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
       printf("iterazione %i   -iniziale-    PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
-
       generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
@@ -111,10 +117,12 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *conf_acc,double res_metro, double res
 
 int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_md, int id_iter,int acc){
 
-  const double lambda=0.1931833275037836; // Omelyan Et Al.                       
+  const double lambda=0.1931833275037836; // Omelyan Et Al.
   const double gs=0.5/(double) gauge_scale_acc;
   double delta[7];
 
+  struct timeval t0, t1,t2,t3;
+  gettimeofday ( &t0, NULL );
 
   double fattore_arbitrario = 1.0;
   delta[0]= -cimag(ieps_acc) * lambda;
@@ -142,19 +150,16 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
   double action_mom_fin;
   double action_ferm_in;
   double action_ferm_fin;
+  int mu;
+  double minmaxeig[2]; 
+
   double p1;
   double p2;
-  int mu;
-
   int accettata;
-
   double delta_S;
 
   // store old conf   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
   set_su3_soa_to_su3_soa(conf_acc,conf_acc_bkp);
-
-  struct timeval t0, t1,t2,t3;
-  gettimeofday ( &t0, NULL );
 
 #pragma acc data copyin(delta[0:7])
   {
@@ -162,9 +167,10 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
 
 
 
-      generate_Momenta_gauss(momenta);
+
+    generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
-      generate_MultiFermion_gauss(ferm_phi_acc);
+    generate_MultiFermion_gauss(ferm_phi_acc);
 #pragma acc update device(ferm_phi_acc[0:1])
       
       
