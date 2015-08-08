@@ -4,9 +4,9 @@ void su2_rand(double *pp);
 
 
 #include "openacc.h"
+#include "../RationalApprox/rationalapprox.c"
 #include "./struct_c_def.c"
 #include "./alloc_vars.c"
-#include "../RationalApprox/rationalapprox.c"
 #include "./fermionic_utilities.c"
 #include "./su3_utilities.c"
 #include "./random_assignement.c"

@@ -75,18 +75,6 @@ void mem_alloc(){
 //allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc , ALIGN, sizmof(ACC_ShiftMultiFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_shiftmulti_acc \n");
 
-  allocation_check =  posix_memalign((void **)&approx1, ALIGN, sizeof(COM_RationalApprox));
-  if(allocation_check != 0)  printf("Errore nella allocazione di approx1 \n");
-  allocation_check =  posix_memalign((void **)&approx2, ALIGN, sizeof(COM_RationalApprox));
-  if(allocation_check != 0)  printf("Errore nella allocazione di approx2 \n");
-  allocation_check =  posix_memalign((void **)&approx3, ALIGN, sizeof(COM_RationalApprox));
-  if(allocation_check != 0)  printf("Errore nella allocazione di approx3 \n");
-  allocation_check =  posix_memalign((void **)&approx_mother1, ALIGN, sizeof(COM_RationalApprox));
-  if(allocation_check != 0)  printf("Errore nella allocazione di approx_mother1 \n");
-  allocation_check =  posix_memalign((void **)&approx_mother2, ALIGN, sizeof(COM_RationalApprox));
-  if(allocation_check != 0)  printf("Errore nella allocazione di approx_mother2 \n");
-  allocation_check =  posix_memalign((void **)&approx_mother3, ALIGN, sizeof(COM_RationalApprox));
-  if(allocation_check != 0)  printf("Errore nella allocazione di approx_mother3 \n");
   allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, sizeof(double_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di d_local_sums \n");
   allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));  // --> size complessi --> vettore per sommare cose locali
@@ -123,12 +111,6 @@ void mem_free(){
 
   free(local_sums);
   free(d_local_sums);
-  free(approx1);
-  free(approx2);
-  free(approx3);
-  free(approx_mother1);
-  free(approx_mother2);
-  free(approx_mother3);
 }
 
 #endif

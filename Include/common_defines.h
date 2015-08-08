@@ -124,14 +124,6 @@ typedef struct COM_ShiftMultiFermion_t{
   vec3COM_soa shiftmulti[max_approx_order][no_ps];
 } COM_ShiftMultiFermion;
 
-typedef struct COM_RationalApprox_t{
-  double COM_min_epsilon;
-  int COM_approx_order;
-  double COM_RA_a0;
-  double COM_RA_a[max_approx_order];
-  double COM_RA_b[max_approx_order];
-}COM_RationalApprox;
-
 
 typedef struct ferm_param_t{
   double ferm_charge;
@@ -139,12 +131,12 @@ typedef struct ferm_param_t{
   double ferm_im_chem_pot;
   int degeneracy;
   int number_of_ps;
-  RationalApprox approx_fi // first inv  // prima c'era *approx1, ora ho messo approx1  e basta
-  RationalApprox approx_md_mother; // md approx
-  RationalApprox approx_li_mother; // last inv
-  RationalApprox approx_fi_mother // first inv  // prima c'era *approx1, ora ho messo approx1  e basta
-  RationalApprox approx_md; // md approx
-  RationalApprox approx_li; // last inv
+  RationalApprox approx_fi_mother; // first inv   -> mother
+  RationalApprox approx_md_mother; // md approx   -> mother
+  RationalApprox approx_li_mother; // last inv    -> mother
+  RationalApprox approx_fi;        // first inv
+  RationalApprox approx_md;        // md approx
+  RationalApprox approx_li;        // last inv
 } ferm_param;
 
 
