@@ -463,7 +463,7 @@ void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
 
 #pragma acc kernels present(gl_fermion)
 #pragma acc loop independent 
-    for(int i= 0; i < SIZEH ; i++){
+    for(int i= 0; i < sizeh ; i++){
         fermion->c0[i]=0;
         fermion->c1[i]=0;
         fermion->c2[i]=0;

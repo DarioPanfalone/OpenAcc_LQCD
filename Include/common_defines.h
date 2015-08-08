@@ -136,6 +136,7 @@ typedef struct COM_RationalApprox_t{
 typedef struct ferm_param_t{
   double ferm_charge;
   double ferm_mass;
+  double ferm_im_chem_pot;
   int degeneracy;
   int number_of_ps;
   COM_RationalApprox approx1; // first inv  // prima c'era *approx1, ora ho messo approx1  e basta
@@ -152,8 +153,9 @@ void init_ferm_params(){
 
   NDiffFlavs = 2;  // the number of different quark flavours
 
-  int allocation_check;
-  allocation_check =  posix_memalign((void **)&fermions_parameters, ALIGN, NDiffFlavs*sizeof(ferm_param));   //  -->  4*size phases (as many as links)
+  int allocation_check; 
+  // al posto di 128 c'era ALIGN, solo che qui questa variabile non è ancora definita (viene fatto in struct_c_def)
+  allocation_check =  posix_memalign((void **)&fermions_parameters, 128, NDiffFlavs*sizeof(ferm_param));   //  -->  4*size phases (as many as links)
   if(allocation_check != 0)  printf("Errore nella allocazione di fermions_parameters \n");
 
   fermions_parameters[0].ferm_charge       = -1.0;   // up    charge
@@ -177,5 +179,4 @@ void init_ferm_params(){
 
 
 #endif
-
 

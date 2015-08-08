@@ -87,7 +87,7 @@ void mem_alloc(){
   allocation_check +=  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*sizeof(vec3_soa*));
   for(int ips=0; ips < max_ps ; ips ++)
     allocation_check +=  posix_memalign((void **)&ferm_shiftmulti_acc[ips], ALIGN, max_approx_order*sizeof(vec3_soa));
-  }
+  
 //allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc , ALIGN, sizmof(ACC_ShiftMultiFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_shiftmulti_acc \n");
 
@@ -122,7 +122,7 @@ void mem_free(){
       free(ferm_chi_acc[iflav]);
       free(ferm_phi_acc[iflav]);
       free(ferm_out_acc[iflav]);
-
+  }
   free(ferm_chi_acc);
   free(ferm_phi_acc);
   free(ferm_out_acc);
