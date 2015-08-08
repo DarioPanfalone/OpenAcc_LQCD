@@ -1,18 +1,3 @@
-/***************************************************
- *  * The format for the rational approximation files *
- *  (file starts)
- *  Approximation to f(x) = (x)^(%d/%i)
- *  Order: %i
- *  Lambda min: %lf
- *  Lambda max: %lf
- *  GMP Remez Precision: %i
- *  error: %lf
- *  RA_a0 = %lf
- *  RA_a[%i] = %lf, RA_b[%i] = %lf\n#(Order times!)   
- *  (file ends)
- *  **********************************************/
-
-
 #ifndef RATIONAL_APPROX_C_
 #define RATIONAL_APPROX_C_
 
@@ -21,7 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define MAX_APPROX_ORDER 18
+#define MAX_APPROX_ORDER 19
 
 
 typedef struct RationalApprox_t{
