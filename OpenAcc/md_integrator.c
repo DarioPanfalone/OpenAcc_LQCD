@@ -71,26 +71,26 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  
  }
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
-		su3_soa  * tconf_acc,
-        double_soa * backfield,
-		su3_soa  * taux_conf_acc,
-        ferm_param * tfermions_parameters,// [nflavs]
-        int tNDiffFlavs,// [nflavs]
-		vec3_soa ** ferm_in_acc, // [nflavs][nps]
-		//ACC_MultiFermion * ferm_in_acc,
-		vec3_soa ** tferm_shiftmulti_acc, // parking variable [nps][nshift]
-		//ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
-		vec3_soa * tkloc_r, // parking
-		vec3_soa * tkloc_h, // parking
-		vec3_soa * tkloc_s, // parking
-		vec3_soa * tkloc_p, // parking
-		vec3_soa * tk_p_shiftferm, // parking, [max_nshift]
-		//ACC_ShiftFermion *k_p_shiftferm,
-		thmat_soa * tmomenta,
-		dcomplex_soa * local_sums,
-		double * delta,
-		//COM_RationalApprox *approx), // included in ferm_param
-		double res)
+				su3_soa  * tconf_acc,
+				double_soa * backfield,
+				su3_soa  * taux_conf_acc,
+				ferm_param * tfermions_parameters,// [nflavs]
+				int tNDiffFlavs,// [nflavs]
+				vec3_soa ** ferm_in_acc, // [nflavs][nps]
+				//ACC_MultiFermion * ferm_in_acc,
+				vec3_soa ** tferm_shiftmulti_acc, // parking variable [nps][nshift]
+				//ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
+				vec3_soa * tkloc_r, // parking
+				vec3_soa * tkloc_h, // parking
+				vec3_soa * tkloc_s, // parking
+				vec3_soa * tkloc_p, // parking
+				vec3_soa * tk_p_shiftferm, // parking, [max_nshift]
+				//ACC_ShiftFermion *k_p_shiftferm,
+				thmat_soa * tmomenta,
+				dcomplex_soa * local_sums,
+				double * delta,
+				//COM_RationalApprox *approx), // included in ferm_param
+				double res)
 {
   
   int md;
@@ -105,24 +105,24 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   for(md=1; md<no_md; md++){
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
-    multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+    multistep_2MN_gauge(tconf_acc,aux_conf_acc,tipdot_acc,tmomenta,delta);
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
   fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-    mom_sum_mult(tmomenta,ipdot_acc,delta,1);
+    mom_sum_mult(tmomenta,tipdot_acc,delta,1);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
-    multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+    multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);
     // Step for the P
     // P' = P - 2l*dt*dS/dq
     // delta[2]=-cimag(ieps_acc)*(2.0*lambda);
   fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-    mom_sum_mult(tmomenta,ipdot_acc,delta,2);
+    mom_sum_mult(tmomenta,tipdot_acc,delta,2);
   }  
   // Step for the Q
   // Q' = exp[dt/2 *i P] Q
-  multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+  multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);
   // Step for the P
   // P' = P - (1-2l)*dt*dS/dq
   // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
@@ -130,12 +130,12 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   mom_sum_mult(tmomenta,ipdot_acc,delta,1);
   // Step for the Q
   // Q' = exp[dt/2 *i P] Q
-  multistep_2MN_gauge(conf_acc,aux_conf_acc,ipdot_acc,momenta,delta);
+  multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);
   // Step for the P
   // P' = P - l*dt*dS/dq
   // delta[0]=-cimag(ieps_acc)*lambda;
   fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-  mom_sum_mult(tmomenta,ipdot_acc,delta,0);
+  mom_sum_mult(tmomenta,tipdot_acc,delta,0);
     
 }// end multistep_2MN_SOLOOPENACC()
 
