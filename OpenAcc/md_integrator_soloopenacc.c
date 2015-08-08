@@ -51,14 +51,14 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *conf_acc,double res_metro, double res
       printf("iterazione %i   -iniziale-    PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
       generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
+ //    generate_MultiFermion_gauss(ferm_phi_acc);
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-          for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; iips++){
-              vec3_soa *temp = &ferm_phi_acc[iflav][ips];
-              generate_vec3_soa_gauss(temp);
-//    generate_MultiFermion_gauss(ferm_phi_acc);
+	for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	  vec3_soa *temp = &ferm_phi_acc[iflav][ips];
+	  generate_vec3_soa_gauss(temp);
 #pragma acc update device(temp[0:1])
-          }
-
+	}
+      
       // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
       generate_vec3_soa_gauss(kloc_p);
       generate_vec3_soa_gauss(kloc_s);
@@ -81,21 +81,9 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *conf_acc,double res_metro, double res
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
       // first_inv_approx_calc
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-          for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; iips++)
+          for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++)
           {
               multishift_invert(conf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
               recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), &(ferm_chi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_fi));
@@ -108,7 +96,7 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *conf_acc,double res_metro, double res
       }
 
       // dinamica molecolare
-      multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,backfield,aux_conf_acc,fermions_parameters,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
+      multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
       
       placchetta =  calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
       printf("iterazione %i  -finale-     PLACCHETTA CALCOLATA SU OPENACC  %.18lf  \n",iterazioni,placchetta/(2.0*sizeh*6.0*3.0));
@@ -193,7 +181,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
     generate_Momenta_gauss(momenta);
 #pragma acc update device(momenta[0:8])
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-        for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; iips++){
+        for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
             vec3_soa *temp = &ferm_phi_acc[iflav][ips];
             generate_vec3_soa_gauss(temp);
 //    generate_MultiFermion_gauss(ferm_phi_acc);
