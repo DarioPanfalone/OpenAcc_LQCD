@@ -57,15 +57,16 @@ int main(){
 #pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs])
     {
 
+    int accettate=0;
     ////////////////   THERMALIZATION   /////////////////////////////////////////////////////////////
     for(int id_iter=0;id_iter<10;id_iter++){
-      THERM_UPDATE_SOLOACC_NOMETRO(conf_acc,residue_metro,residue_md,id_iter);
+      accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,0);
 #pragma acc update host(conf_acc[0:8])
     }
     ////////////////   METROTEST   //////////////////////////////////////////////////////////////////
-    int accettate=0;
+    accettate=0;
     for(int id_iter=0;id_iter<10;id_iter++){
-      accettate = UPDATE_SOLOACC_UNOSTEP_METRO(conf_acc,residue_metro,residue_md,id_iter,accettate);
+      accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,1);
 #pragma acc update host(conf_acc[0:8])
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////
