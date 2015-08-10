@@ -214,7 +214,7 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
 						   const  int idipdot
 #ifdef BACKFIELD
 						   ,d_complex phase
-#else
+#endif
                            ){
   d_complex mat1_00 = mat1->r0.c0[idx];
   d_complex mat1_01 = mat1->r0.c1[idx];
@@ -241,7 +241,7 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
   mat1_20 *= phase;
   mat1_21 *= phase;
   mat1_22 *= phase;
-#else
+#endif
 
   d_complex auxmat_00 = auxmat->r0.c0[idx_aux];
   d_complex auxmat_01 = auxmat->r0.c1[idx_aux];
