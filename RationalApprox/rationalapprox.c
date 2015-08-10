@@ -33,7 +33,7 @@ char* rational_approx_filename(int approx_order, int exponent_num, int exponent_
   sprintf(Cn1, "%d", approx_order);  // order
   sprintf(Cy1, "%d", exponent_num); // num
   sprintf(Cz1, "%d", exponent_den); // den
-  sprintf(mloglmin, "%1.1f", -log(lambda_min)); // lambda min
+  sprintf(mloglmin, "%1.1f", -log(lambda_min)/log(10.0)); // lambda min
 
   char * nomefile = (char*)malloc(50*sizeof(char));
   strcpy(nomefile,"approx_");
