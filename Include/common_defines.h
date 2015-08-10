@@ -41,9 +41,8 @@ const int no_flavours=2; // number of quark species
 
 
 #define max_approx_order 19
-#define max_ps 2
-double approx_metro=19;
-double approx_md=9;
+int approx_metro=19;
+int approx_md=9;
 const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double residue_metro=1.0e-8;    // stopping residual for CG
@@ -132,6 +131,7 @@ typedef struct ferm_param_t{
   double ferm_im_chem_pot;
   int degeneracy;
   int number_of_ps;
+  int index_of_the_first_ps;
   RationalApprox approx_fi_mother; // first inv   -> mother
   RationalApprox approx_md_mother; // md approx   -> mother
   RationalApprox approx_li_mother; // last inv    -> mother
@@ -143,6 +143,7 @@ typedef struct ferm_param_t{
 
 int NDiffFlavs;
 int NPS_tot;
+int max_ps;
 ferm_param *fermions_parameters;
 
 void init_ferm_params(){
@@ -167,9 +168,20 @@ void init_ferm_params(){
   fermions_parameters[1].number_of_ps      = 1;      // down  number of pseudo fermions
 
   NPS_tot = 0;
-  for(int i=0;i<NDiffFlavs;i++)
+  max_ps = fermions_parameters[i].number_of_ps;
+  for(int i=0;i<NDiffFlavs;i++){
+    // compute the total number of ps
     NPS_tot += fermions_parameters[i].number_of_ps;
-
+    // compute the max number of ps among the various flavs
+    if(fermions_parameters[i].number_of_ps>=max_ps) max_ps = fermions_parameters[i].number_of_ps;
+    // deterime the offset (where does the ps of the flavour i starts?)
+    if(i==0){
+      fermions_parameters[i].index_of_the_first_ps=0;
+    }else{
+      fermions_parameters[i].index_of_the_first_ps = fermions_parameters[i-1].index_of_the_first_ps + fermions_parameters[i-1].number_of_ps;
+    }
+  }
+  
   for(int i=0;i<NDiffFlavs;i++){
     fermions_parameters[i].approx_fi_mother.exponent_num =  +fermions_parameters[i].degeneracy;
     fermions_parameters[i].approx_md_mother.exponent_num =  -fermions_parameters[i].degeneracy;
