@@ -18,12 +18,22 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *tconf_acc,double res_metro, double re
   double dt_preker_to_postker;
   double dt_postker_to_posttrans;
 
-
   int mu;
   double minmaxeig[2]; 
 
+  
+  
+  
+  
+  
+  
+  
   struct timeval t0, t1,t2,t3;
   gettimeofday ( &t0, NULL );
+
+
+
+
 #pragma acc data copyin(delta[0:7])
   {
     gettimeofday ( &t1, NULL );
@@ -37,7 +47,7 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *tconf_acc,double res_metro, double re
 	generate_vec3_soa_gauss(temp);
 #pragma acc update device(temp[0:1])
       }
-    }
+    }//end for iflav
 
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -53,15 +63,27 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *tconf_acc,double res_metro, double re
       RationalApprox *approx_fi_mother = &(fermions_parameters[iflav].approx_fi_mother);
       rescale_rational_approximation(approx_fi_mother,approx_fi,minmaxeig);
 #pragma acc update device(approx_fi[0:1])
-    }
+    }//end for iflav
 
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
 	multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
 	recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), &(ferm_chi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_fi));
       }
-    }
+    }// end for iflav
 
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE MD
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -75,16 +97,101 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *tconf_acc,double res_metro, double re
       RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
 #pragma acc update device(approx_md[0:1])
-    }
+    }//end for iflav
     
     // DINAMICA MOLECOLARE
     multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // LAST INV APPROX CALC
+    
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     gettimeofday ( &t2, NULL );
-  }
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  }//end pragma acc data copyin(delta[0:7])
+
   gettimeofday ( &t3, NULL );
-  
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
   dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
   dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
@@ -93,7 +200,9 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *tconf_acc,double res_metro, double re
   printf("Id_iter %i   FULL UPDATE COMPUTATION TIME                    Tot time          : %f sec  \n",id_iter,dt_tot);
   printf("Id_iter %i                                                   PreTrans->Preker  : %f sec  \n",id_iter,dt_pretrans_to_preker);
   printf("Id_iter %i                                                   PreKer->PostKer   : %f sec  \n",id_iter,dt_preker_to_postker);
-  printf("Id_iter %i                                                   PostKer->PostTrans: %f sec  \n",id_iter,dt_postker_to_posttrans);
+
+
+
 }
 
 
@@ -118,7 +227,6 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res
   double dt_preker_to_postker;
   double dt_postker_to_posttrans;
 
-  double action_in,action_fin,action_mom_in,action_mom_fin,action_ferm_in,action_ferm_fin;
   int mu;
   double minmaxeig[2]; 
 
@@ -126,6 +234,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res
   double p2;
   int accettata;
   double delta_S;
+  double action_in,action_fin,action_mom_in,action_mom_fin,action_ferm_in,action_ferm_fin;
 
   struct timeval t0, t1,t2,t3;
   gettimeofday ( &t0, NULL );
@@ -146,7 +255,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res
 	generate_vec3_soa_gauss(temp);
 #pragma acc update device(temp[0:1])
       }
-    }
+    }// end for iflav
       
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -162,7 +271,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res
       RationalApprox *approx_fi_mother = &(fermions_parameters[iflav].approx_fi_mother);
       rescale_rational_approximation(approx_fi_mother,approx_fi,minmaxeig);
 #pragma acc update device(approx_fi[0:1])
-    }
+    }//end for iflav
     
     /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
     action_in = beta_by_three*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
@@ -178,7 +287,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res
 	multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
 	recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), &(ferm_chi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_fi));
       }
-    }
+    }// end for iflav
     
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE MD
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -192,13 +301,10 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res
       RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
 #pragma acc update device(approx_md[0:1])
-    }
-    
+    }//end for iflav
 
     // DINAMICA MOLECOLARE
     multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
-    
-    
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE LAST_INV
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
@@ -214,7 +320,6 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res
       rescale_rational_approximation(approx_li_mother,approx_li,minmaxeig);
 #pragma acc update device(approx_li[0:1])
     }
-    
     // LAST INV APPROX CALC 
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
@@ -254,7 +359,8 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res
 	  }
       }
     
-  }
+  }// end pragma acc data copyin(delta[0:7])
+
   gettimeofday ( &t3, NULL );
 
   if(accettata==1){
