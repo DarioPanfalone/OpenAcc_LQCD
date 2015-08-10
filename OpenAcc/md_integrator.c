@@ -75,10 +75,10 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				double_soa * backfield,
 				su3_soa  * taux_conf_acc,
 				ferm_param * tfermions_parameters,// [nflavs]
-				int tNDiffFlavs,// [nflavs]
-				vec3_soa ** ferm_in_acc, // [nflavs][nps]
+				int tNDiffFlavs,
+				vec3_soa * ferm_in_acc, //[NPS_tot], will be ferm_chi_acc
 				//ACC_MultiFermion * ferm_in_acc,
-				vec3_soa ** tferm_shiftmulti_acc, // parking variable [nps][nshift]
+				vec3_soa * tferm_shiftmulti_acc,// parking variable [max_ps*max_approx_order]
 				//ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
 				vec3_soa * tkloc_r, // parking
 				vec3_soa * tkloc_h, // parking

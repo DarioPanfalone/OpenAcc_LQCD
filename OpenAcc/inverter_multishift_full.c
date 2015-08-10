@@ -597,12 +597,12 @@ void fermion_force_soloopenacc(__restrict su3_soa  *tconf_acc, // la configurazi
        __restrict tamat_soa *tipdot_acc,
        __restrict ferm_param *tfermion_parameters,// [nflavs]
        int tNDiffFlavs,
-       __restrict vec3_soa **ferm_in_acc, // constant, [nflavs][nps]
+       __restrict vec3_soa *ferm_in_acc, // [NPS_tot]
        //__restrict ACC_MultiFermion *ferm_in_acc
        double res,
        //const COM_RationalApprox *approx, // included in ferm_param
        __restrict su3_soa  * taux_conf_acc,
-       __restrict vec3_soa ** tferm_shiftmulti_acc,//parking variable [nps][nshift]
+       __restrict vec3_soa * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]
        //__restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
        __restrict vec3_soa * tkloc_r, // parking
        __restrict vec3_soa * tkloc_h, // parking
@@ -622,9 +622,22 @@ void fermion_force_soloopenacc(__restrict su3_soa  *tconf_acc, // la configurazi
   set_tamat_soa_to_zero(tipdot_acc);
   for(int iflav = 0; iflav < tNDiffFlavs; iflav++) {
       set_su3_soa_to_zero(taux_conf_acc);
+      int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
       for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
-          multishift_invert(tconf_acc, &tfermion_parameters[iflav], &(tfermion_parameters[iflav].approx_md), backfield, tferm_shiftmulti_acc[ips], &ferm_in_acc[iflav][ips], res, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-          ker_openacc_compute_fermion_force(tconf_acc, backfield, taux_conf_acc, &(tferm_shiftmulti_acc[iflav][ips]), tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
+    // CHECK
+    // tferm_shiftmulti_acc viene utilizzato solo come variabile
+    // temporanea per scambiare dati tra multishift_invert e 
+    // ker_openacc_compute_fermion_force.
+    // Potrebbe essere quindi sovrascritto ad ogni iterazione, no?
+    //
+    // Quindi perche' tferm_shiftmulti_acc dovrebbe essere lungo
+    // max_ps * max_approx_order 
+    // Qui pare che basti avere solo max_approx_order.
+    // Lascio comunque il codice nel modo piu' simile a come l'ho 
+    // trovato.
+    
+          multishift_invert(tconf_acc, &tfermion_parameters[iflav], &(tfermion_parameters[iflav].approx_md), backfield, &(tferm_shiftmulti_acc[ips*max_approx_order]), &(ferm_in_acc[ifps+ips]), res, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+          ker_openacc_compute_fermion_force(tconf_acc, backfield, taux_conf_acc, &(tferm_shiftmulti_acc[ips*max_approx_order]), tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
       } 
       multiply_conf_times_force_and_take_ta_even(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
       multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
