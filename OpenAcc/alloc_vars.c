@@ -5,13 +5,13 @@ double_soa * u1_back_field_phases;
 tamat_soa * ipdot_acc;
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
-vec3_soa ** ferm_chi_acc; // questo e' il chi [NDiffFlavs][nps]
+vec3_soa * ferm_chi_acc; // questo e' il chi [NPS_tot]
 //ACC_MultiFermion * ferm_chi_acc; // questo e' il chi
-vec3_soa ** ferm_phi_acc; // questo e' il phi [NDiffFlavs][nps]
+vec3_soa * ferm_phi_acc; // questo e' il phi [NPS_tot]
 //ACC_MultiFermion * ferm_phi_acc; // questo e' il phi
-vec3_soa ** ferm_out_acc; // questo e' uno ausiliario [NDiffFlavs][nps]
+vec3_soa * ferm_out_acc; // questo e' uno ausiliario [NPS_tot]
 //ACC_MultiFermion * ferm_out_acc; // questo e' uno ausiliario
-vec3_soa ** ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps][max_approx_order]
+vec3_soa * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps*max_approx_order]
 //ACC_ShiftMultiFermion * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps][max_approx_order]
 vec3_soa * kloc_r;  // vettore ausiliario
 vec3_soa * kloc_h;  // vettore ausiliario
@@ -51,27 +51,19 @@ void mem_alloc(){
   allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di ipdot_acc \n");
   
-  allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, NDiffFlavs * sizeof(vec3_soa*));
-  for(int iflav=0; iflav < NDiffFlavs ; iflav++)
-      allocation_check +=  posix_memalign((void **)&ferm_chi_acc[iflav]  , ALIGN, fermions_parameters[iflav].number_of_ps * sizeof(vec3_soa));
+  allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
   //allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, sizeof(ACC_MultiFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_chi_acc \n");
 
-  allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, NDiffFlavs * sizeof(vec3_soa*));
-  for(int iflav=0; iflav < NDiffFlavs ; iflav++)
-      allocation_check +=  posix_memalign((void **)&ferm_phi_acc[iflav]  , ALIGN, fermions_parameters[iflav].number_of_ps * sizeof(vec3_soa));
+  allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
 //allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, sizeof(ACC_MultiFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_phi_acc \n");
 
-   allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NDiffFlavs * sizeof(vec3_soa*));
-  for(int iflav=0; iflav < NDiffFlavs ; iflav++)
-      allocation_check +=  posix_memalign((void **)&ferm_out_acc[iflav]  , ALIGN, fermions_parameters[iflav].number_of_ps * sizeof(vec3_soa));
+   allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
   //allocation_check =  posix_memalign((void **)&ferm_out_acc , ALIGN, sizeof(ACC_MultiFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_out_acc \n");
 
-  allocation_check +=  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*sizeof(vec3_soa*));
-  for(int ips=0; ips < max_ps ; ips ++)
-    allocation_check +=  posix_memalign((void **)&ferm_shiftmulti_acc[ips], ALIGN, max_approx_order*sizeof(vec3_soa));
+  allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*max_approx_order*sizeof(vec3_soa));
   
 //allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc , ALIGN, sizmof(ACC_ShiftMultiFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_shiftmulti_acc \n");
@@ -91,17 +83,10 @@ void mem_free(){
   free(conf_acc_bkp);
   free(ipdot_acc);
 
-  for(int iflav=0; iflav < NDiffFlavs ; iflav++){
-      free(ferm_chi_acc[iflav]);
-      free(ferm_phi_acc[iflav]);
-      free(ferm_out_acc[iflav]);
-  }
   free(ferm_chi_acc);
   free(ferm_phi_acc);
   free(ferm_out_acc);
 
-  for(int ips=0; ips < max_ps ; ips ++)
-      free(ferm_shiftmulti_acc[ips]);
   free(ferm_shiftmulti_acc);
 
   free(kloc_r);
