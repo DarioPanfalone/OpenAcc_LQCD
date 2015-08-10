@@ -185,18 +185,21 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
   
   if(metro==1){
     if(accettata==1){
-      acc = 1;
+      acc++;
       printf("ACCEPTED   ---> [acc/iter] = [%i/%i] \n",acc,iterazioni);
       // configuration accepted   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
       set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
     }else{
-      acc = 0;
       printf("REJECTED   ---> [acc/iter] = [%i/%i] \n",acc,iterazioni);
       // configuration rejected   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
       set_su3_soa_to_su3_soa(conf_acc_bkp,tconf_acc);
 #pragma acc update device(tconf_acc[0:8])
       // sul device aggiorniamo la conf rimettendo quella del passo precedente
     }
+  }
+
+  if(metro==0){// accetta sempre in fase di termalizzazione
+    acc++;
   }
 
   dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
