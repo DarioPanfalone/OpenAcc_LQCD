@@ -19,8 +19,8 @@ void su2_rand(double *pp);
 
 int main(){
 
+  fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
-
   su3_soa  * conf_acc;
   int  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_acc \n");
