@@ -23,14 +23,17 @@ typedef struct RationalApprox_t{
 } RationalApprox;
 
 
-char* rational_approx_filename(int approx_order, int exponent_num, int exponent_den){
+char* rational_approx_filename(int approx_order, int exponent_num, int exponent_den, double lambda_min){
 
   char Cn1[3];
   char Cy1[3];
   char Cz1[3];
+  char mloglmin[5];
+
   sprintf(Cn1, "%d", approx_order);  // order
   sprintf(Cy1, "%d", exponent_num); // num
   sprintf(Cz1, "%d", exponent_den); // den
+  sprintf(mloglmin, "%1.1f", -log(lambda_min)); // lambda min
 
   char * nomefile = (char*)malloc(50*sizeof(char));
   strcpy(nomefile,"approx_");
@@ -39,6 +42,8 @@ char* rational_approx_filename(int approx_order, int exponent_num, int exponent_
   strcat(nomefile,Cz1);
   strcat(nomefile,"_order_");
   strcat(nomefile,Cn1);
+  strcat(nomefile,"_mloglm_");
+  strcat(nomefile,mloglmin);
   strcat(nomefile,".REMEZ");
 
   return nomefile;
@@ -51,7 +56,7 @@ void rationalapprox_read(RationalApprox* rational_approx)
 
     // CALCULATION OF COEFFICIENTS FOR FIRST_INV_APPROX_NORM_COEFF
 
-    char * nomefile = rational_approx_filename(rational_approx->approx_order,rational_approx->exponent_num,rational_approx->exponent_den);
+    char * nomefile = rational_approx_filename(rational_approx->approx_order,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
 
     FILE *input = fopen(nomefile, "rt");
     printf("%s\n", nomefile );

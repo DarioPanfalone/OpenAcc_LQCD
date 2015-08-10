@@ -57,7 +57,7 @@ int main(int argc, char **argv){
   else
       remez1.getIPFE(approx->RA_a,approx->RA_b,&(approx->RA_a0));
 
-  char * nomefile = rational_approx_filename(approx->approx_order, approx->exponent_num, approx->exponent_den);
+  char * nomefile = rational_approx_filename(approx->approx_order, approx->exponent_num, approx->exponent_den, approx->lambda_min);
 
   rationalapprox_save(nomefile, approx);
 
