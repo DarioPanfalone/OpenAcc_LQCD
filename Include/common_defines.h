@@ -181,6 +181,11 @@ void init_ferm_params(){
       fermions_parameters[i].index_of_the_first_ps = fermions_parameters[i-1].index_of_the_first_ps + fermions_parameters[i-1].number_of_ps;
     }
   }
+
+  printf("NPS_tot = %d \n",NPS_tot);
+  printf("max_ps = %d \n",max_ps);
+
+
   
   for(int i=0;i<NDiffFlavs;i++){
     fermions_parameters[i].approx_fi_mother.exponent_num =  +fermions_parameters[i].degeneracy;
