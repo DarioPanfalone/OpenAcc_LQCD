@@ -98,7 +98,7 @@ void THERM_UPDATE_SOLOACC_NOMETRO(su3_soa *tconf_acc,double res_metro, double re
 
 
 
-int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_md, int id_iter,int acc){
+int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *tconf_acc,double res_metro, double res_md, int id_iter,int acc){
 
   // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
   const double lambda=0.1931833275037836; // Omelyan Et Al.
@@ -131,7 +131,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
   gettimeofday ( &t0, NULL );
 
   // store old conf   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
-  set_su3_soa_to_su3_soa(conf_acc,conf_acc_bkp);
+  set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
 
 #pragma acc data copyin(delta[0:7])
   {
@@ -165,7 +165,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
     }
     
     /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
-    action_in = beta_by_three*calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    action_in = beta_by_three*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
     action_mom_in = 0.0;
     for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
     action_ferm_in=scal_prod_between_multiferm(ferm_phi_acc,ferm_phi_acc);
@@ -196,7 +196,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
     
 
     // DINAMICA MOLECOLARE
-    multistep_2MN_SOLOOPENACC(ipdot_acc,conf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
+    multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
     
     
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE LAST_INV
@@ -224,7 +224,7 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
     }
     
     ///////////////   FINAL ACTION COMPUTATION  ////////////////////////////////////////////
-    action_fin = beta_by_three * calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    action_fin = beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
     action_mom_fin = 0.0;
     for(mu =0;mu<8;mu++)    action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
     action_ferm_fin=scal_prod_between_multiferm(ferm_chi_acc,ferm_phi_acc);
@@ -261,12 +261,12 @@ int UPDATE_SOLOACC_UNOSTEP_METRO(su3_soa *conf_acc,double res_metro, double res_
     acc +=1;
     printf("ACCEPTED   ---> [acc/iter] = [%i/%i] \n",acc,iterazioni);
     // configuration accepted   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
-    set_su3_soa_to_su3_soa(conf_acc,conf_acc_bkp);
+    set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
   }else{
     printf("REJECTED   ---> [acc/iter] = [%i/%i] \n",acc,iterazioni);
     // configuration rejected   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
-    set_su3_soa_to_su3_soa(conf_acc_bkp,conf_acc);
-#pragma acc update device(conf_acc[0:8])
+    set_su3_soa_to_su3_soa(conf_acc_bkp,tconf_acc);
+#pragma acc update device(tconf_acc[0:8])
     // sul device aggiorniamo la conf rimettendo quella del passo precedente
   }
   
