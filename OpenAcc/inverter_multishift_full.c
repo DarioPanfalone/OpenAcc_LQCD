@@ -205,44 +205,17 @@ static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * con
 }
 
 
+static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
+						   const  int idx,
+						   const  int eta,
+						   __restrict su3_soa * const auxmat,  // e' costante e non viene modificato
+						   const  int idx_aux,
+						   __restrict tamat_soa * const ipdot,
+						   const  int idipdot
 #ifdef BACKFIELD
-static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
-						   const  int idx,
-						   const  int eta,
-						   __restrict su3_soa * const auxmat,  // e' costante e non viene modificato
-						   const  int idx_aux,
-						   __restrict tamat_soa * const ipdot,
-						   const  int idipdot,
-						   d_complex phase){
-  d_complex mat1_00 = mat1->r0.c0[idx];
-  d_complex mat1_01 = mat1->r0.c1[idx];
-  d_complex mat1_02 = mat1->r0.c2[idx];
-  d_complex mat1_10 = mat1->r1.c0[idx];
-  d_complex mat1_11 = mat1->r1.c1[idx];
-  d_complex mat1_12 = mat1->r1.c2[idx];
-  //Compute 3rd matrix row from the first two
-  d_complex mat1_20 = conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
-  d_complex mat1_21 = conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
-  d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
-
-  mat1_00 *= phase;
-  mat1_01 *= phase;
-  mat1_02 *= phase;
-  mat1_10 *= phase;
-  mat1_11 *= phase;
-  mat1_12 *= phase;
-  //Multiply 3rd row also by eta
-  mat1_20 *= eta * phase;
-  mat1_21 *= eta * phase;
-  mat1_22 *= eta * phase;
+						   ,d_complex phase
 #else
-static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
-						   const  int idx,
-						   const  int eta,
-						   __restrict su3_soa * const auxmat,  // e' costante e non viene modificato
-						   const  int idx_aux,
-						   __restrict tamat_soa * const ipdot,
-						   const  int idipdot){
+                           ){
   d_complex mat1_00 = mat1->r0.c0[idx];
   d_complex mat1_01 = mat1->r0.c1[idx];
   d_complex mat1_02 = mat1->r0.c2[idx];
@@ -257,7 +230,18 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
   mat1_20 *= eta;
   mat1_21 *= eta;
   mat1_22 *= eta;
-#endif
+
+#ifdef BACKFIELD
+  mat1_00 *= phase;
+  mat1_01 *= phase;
+  mat1_02 *= phase;
+  mat1_10 *= phase;
+  mat1_11 *= phase;
+  mat1_12 *= phase;
+  mat1_20 *= phase;
+  mat1_21 *= phase;
+  mat1_22 *= phase;
+#else
 
   d_complex auxmat_00 = auxmat->r0.c0[idx_aux];
   d_complex auxmat_01 = auxmat->r0.c1[idx_aux];
@@ -288,11 +272,7 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
   ipdot->rc00[idipdot] -= cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
   ipdot->rc11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
 
-#ifdef BACKFIELD
 }
-#else
-}
-#endif
 
 
 void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, // questo fermione e' costante e non viene modificato qui dentro
