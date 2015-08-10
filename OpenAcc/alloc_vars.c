@@ -11,7 +11,8 @@ vec3_soa ** ferm_phi_acc; // questo e' il phi [NDiffFlavs][nps]
 //ACC_MultiFermion * ferm_phi_acc; // questo e' il phi
 vec3_soa ** ferm_out_acc; // questo e' uno ausiliario [NDiffFlavs][nps]
 //ACC_MultiFermion * ferm_out_acc; // questo e' uno ausiliario
-ACC_ShiftMultiFermion ** ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps][max_approx_order]
+vec3_soa ** ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps][max_approx_order]
+//ACC_ShiftMultiFermion * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps][max_approx_order]
 vec3_soa * kloc_r;  // vettore ausiliario
 vec3_soa * kloc_h;  // vettore ausiliario
 vec3_soa * kloc_s;  // vettore ausiliario
