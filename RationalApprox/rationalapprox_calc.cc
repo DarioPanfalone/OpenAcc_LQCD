@@ -45,13 +45,17 @@ int main(int argc, char **argv){
   // Instantiate the Remez class
   AlgRemez remez1(approx->lambda_min,approx->lambda_max,approx->gmp_remez_precision);
   // Generate the required approximation
-  approx->error = remez1.generateApprox(approx->approx_order,approx->approx_order,approx->exponent_num,approx->exponent_den);
+  approx->error = remez1.generateApprox(approx->approx_order,approx->approx_order,abs(approx->exponent_num),abs(approx->exponent_den));
   printf("approximation error = %e\n\n", approx->error);
 
   // Find the partial fraction expansion of the approximation 
   // to the function x^{y/z} (this only works currently for 
   // the special case that n = d)
-  remez1.getPFE(approx->RA_a,approx->RA_b,&(approx->RA_a0));
+
+  if(approx->exponent_num*approx->exponent_den > 0)
+      remez1.getPFE(approx->RA_a,approx->RA_b,&(approx->RA_a0));
+  else
+      remez1.getIPFE(approx->RA_a,approx->RA_b,&(approx->RA_a0));
 
   char * nomefile = rational_approx_filename(approx->approx_order, approx->exponent_num, approx->exponent_den);
 
