@@ -46,7 +46,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
 #pragma acc update device(momenta[0:8])
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-	vec3_soa *temp = &ferm_phi_acc[iflav][ips];
+          int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+	vec3_soa *temp = &ferm_phi_acc[ps_index];
 	generate_vec3_soa_gauss(temp);
 #pragma acc update device(temp[0:1])
       }
@@ -89,8 +90,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-	multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
-	recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_phi_acc[iflav][ips]), &(ferm_chi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_fi));
+          int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+	multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+	recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
       }
     }// end for iflav
     
@@ -132,8 +134,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
       // LAST INV APPROX CALC 
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
 	for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-	  multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_li), u1_back_field_phases, ferm_shiftmulti_acc[ips], &(ferm_chi_acc[iflav][ips]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
-	  recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc[ips], &(ferm_chi_acc[iflav][ips]), &(ferm_phi_acc[iflav][ips]),&(fermions_parameters[iflav].approx_li));
+        int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+        multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_li), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+        recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
 	}
       }
       
@@ -145,9 +148,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
       action_ferm_fin=0;
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
           for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-
               int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-              action_ferm_fin += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
+              action_ferm_fin += real_scal_prod_global(&ferm_chi_acc[ps_index],&ferm_phi_acc[ps_index]);
           }
       } // end for iflav
 
