@@ -214,7 +214,9 @@ void init_ferm_params(){
     fermions_parameters[i].approx_li.gmp_remez_precision =   fermions_parameters[i].approx_li_mother.gmp_remez_precision;
   }
 
-
+  rationalapprox_read(&(fermions_parameters[i].approx_fi_mother));
+  rationalapprox_read(&(fermions_parameters[i].approx_md_mother));
+  rationalapprox_read(&(fermions_parameters[i].approx_li_mother));
   
 
 }
