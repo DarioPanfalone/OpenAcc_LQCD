@@ -168,7 +168,7 @@ void init_ferm_params(){
   fermions_parameters[1].number_of_ps      = 1;      // down  number of pseudo fermions
 
   NPS_tot = 0;
-  max_ps = fermions_parameters[i].number_of_ps;
+  max_ps = fermions_parameters[0].number_of_ps;
   for(int i=0;i<NDiffFlavs;i++){
     // compute the total number of ps
     NPS_tot += fermions_parameters[i].number_of_ps;
@@ -224,11 +224,15 @@ void init_ferm_params(){
     fermions_parameters[i].approx_fi.gmp_remez_precision =   fermions_parameters[i].approx_fi_mother.gmp_remez_precision;
     fermions_parameters[i].approx_md.gmp_remez_precision =   fermions_parameters[i].approx_md_mother.gmp_remez_precision;
     fermions_parameters[i].approx_li.gmp_remez_precision =   fermions_parameters[i].approx_li_mother.gmp_remez_precision;
+
+    // READ THE RAT APPROXS FROM THE FILES
+    rationalapprox_read(&(fermions_parameters[i].approx_fi_mother));
+    rationalapprox_read(&(fermions_parameters[i].approx_md_mother));
+    rationalapprox_read(&(fermions_parameters[i].approx_li_mother));
+
+
   }
 
-  rationalapprox_read(&(fermions_parameters[i].approx_fi_mother));
-  rationalapprox_read(&(fermions_parameters[i].approx_md_mother));
-  rationalapprox_read(&(fermions_parameters[i].approx_li_mother));
   
 
 }
