@@ -35,6 +35,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
   if(metro==1){
     // store old conf   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
     set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
+    printf("Backup copy of the initial gauge conf : OK \n");
   }
 
 #pragma acc data copyin(delta[0:7])
@@ -43,38 +44,51 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
 
     // ESTRAZIONI RANDOM
     generate_Momenta_gauss(momenta);
+    printf("Momenta generated : OK \n");
 #pragma acc update device(momenta[0:8])
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	  printf("Ferm generation (flav=%d,ps=%d) : OK \n",iflav,ips);
           int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-	vec3_soa *temp = &ferm_phi_acc[ps_index];
-	generate_vec3_soa_gauss(temp);
+	  printf("   find the index: OK \n"); 
+	  vec3_soa *temp = &ferm_phi_acc[ps_index];
+	  printf("   copy the pointer: OK \n"); 
+	  generate_vec3_soa_gauss(temp);
+	  printf("   generate the ferm: OK \n\n"); 
 #pragma acc update device(temp[0:1])
       }
     }// end for iflav
       
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+      printf("Rat approx rescale (flav=%d) : OK \n",iflav);
       // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
       generate_vec3_soa_gauss(kloc_p);
+      printf("    generate kloc_p: OK \n");
       generate_vec3_soa_gauss(kloc_s);
+      printf("    generate kloc_s: OK \n");
       // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
       find_min_max_eigenvalue_soloopenacc(tconf_acc,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
+      printf("    find min and max eig : OK \n");
 #pragma acc update device(minmaxeig[0:2])
       RationalApprox *approx_fi = &(fermions_parameters[iflav].approx_fi);
+      printf("    get approx_fi pointer : OK \n");
       RationalApprox *approx_fi_mother = &(fermions_parameters[iflav].approx_fi_mother);
+      printf("    get approx_fi_mother pointer : OK \n");
       rescale_rational_approximation(approx_fi_mother,approx_fi,minmaxeig);
+      printf("    rat approx rescaled : OK \n\n");
 #pragma acc update device(approx_fi[0:1])
     }//end for iflav
     
     if(metro==1){
       /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
       action_in = beta_by_three*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+      printf("Gauge action computed : OK \n");
       action_mom_in = 0.0;
       for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
-
+      printf("Momenta action computed : OK \n");
       action_ferm_in=0;
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
           for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
@@ -83,16 +97,20 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
               action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
           }
       }// end for iflav
-
+      printf("Ferm action computed : OK \n\n");
       ///////////////////////////////////////////////////////////////////////////////////////
     }
 
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	  printf("First inv approx calc (flav=%d,ps=%d) : OK \n",iflav,ips);
           int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-	multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
-	recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
+	  printf("    determined the index : OK \n");
+	  multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+	  printf("    computed the inverse : OK \n");
+	  recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
+	  printf("    recombined the fermions : OK \n");
       }
     }// end for iflav
     

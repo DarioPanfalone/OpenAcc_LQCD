@@ -3,6 +3,21 @@
 
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
+/*
+multishift_invert(tconf_acc,
+		  &fermions_parameters[iflav],
+		  &(fermions_parameters[iflav].approx_fi),
+		  u1_back_field_phases,
+		  ferm_shiftmulti_acc,
+		  &(ferm_phi_acc[ps_index]),
+		  res_metro,
+		  kloc_r,
+		  kloc_h,
+		  kloc_s,
+		  kloc_p,
+		  k_p_shiftferm);
+*/
+
 int multishift_invert(__restrict su3_soa * const u,
 		      ferm_param * pars,
 		      RationalApprox * const approx,
@@ -28,26 +43,60 @@ int multishift_invert(__restrict su3_soa * const u,
    * function.
    ****************************/
   // AUXILIARY VARIABLES FOR THE INVERTER 
+  printf("INSIDE MULTISHIFT_INVERT \n");
   int  cg;
   double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
   int *flag;
-  posix_memalign((void **)&flag,    ALIGN,approx->approx_order*sizeof(int));
-  posix_memalign((void **)&zeta_i,  ALIGN,approx->approx_order*sizeof(double));
-  posix_memalign((void **)&zeta_ii, ALIGN,approx->approx_order*sizeof(double));
-  posix_memalign((void **)&zeta_iii,ALIGN,approx->approx_order*sizeof(double));
-  posix_memalign((void **)&omegas,  ALIGN,approx->approx_order*sizeof(double));
-  posix_memalign((void **)&gammas,  ALIGN,approx->approx_order*sizeof(double));
-  //  printf("Allocated auxiliary variables \n");
+  printf("    value of approx_order = %d \n",approx->approx_order);
+  int  allocation_check=0;
+  int dimensione=approx->approx_order;
+  flag =  (int *)malloc((dimensione)*sizeof(int));
+  //  zeta_i =  malloc(dimensione*sizeof(double));
+
+
+  /*
+  zeta_ii   = (double *) malloc(approx->approx_order*sizeof(double));
+  zeta_iii  = (double *) malloc(approx->approx_order*sizeof(double));
+  omegas = (double *) malloc(approx->approx_order*sizeof(double));
+  gammas = (double *) malloc(approx->approx_order*sizeof(double));
+  free(flag);
+  free(zeta_i);
+  free(zeta_ii);
+  free(zeta_iii);
+  free(omegas);
+  free(gammas);
+  */
+
+  /*
+  allocation_check =  posix_memalign((void **)&flag,    ALIGN,approx->approx_order*sizeof(int));
+  if(allocation_check != 0)  printf("Errore nella allocazione di flag \n");
+  allocation_check =  posix_memalign((void **)&zeta_i,  ALIGN,approx->approx_order*sizeof(double));
+  if(allocation_check != 0)  printf("Errore nella allocazione di zeta_i \n");
+  allocation_check =  posix_memalign((void **)&zeta_ii, ALIGN,approx->approx_order*sizeof(double));
+  if(allocation_check != 0)  printf("Errore nella allocazione di zeta_ii \n");
+  allocation_check =  posix_memalign((void **)&zeta_iii,ALIGN,approx->approx_order*sizeof(double));
+  if(allocation_check != 0)  printf("Errore nella allocazione di zeta_iii \n");
+  allocation_check =  posix_memalign((void **)&omegas,  ALIGN,approx->approx_order*sizeof(double));
+  if(allocation_check != 0)  printf("Errore nella allocazione di omegas \n");
+  allocation_check =  posix_memalign((void **)&gammas,  ALIGN,approx->approx_order*sizeof(double));
+  if(allocation_check != 0)  printf("Errore nella allocazione di gammas \n");
+  printf("Allocated auxiliary variables \n");
+  */
+
+
+  /* COMMENT FOR DEBUGGING
+
   int iter;
   double alpha, delta, lambda, omega, omega_save, gammag, fact;
   //  printf("Inside the kernel \n");
   //  printf("Ordine della approssimazione:   %i \n",approx[0].COM_approx_order);
   alpha=0.0;
     // trial solution out = 0, set all flag to 1                                                                                                           
-    for(iter=0; iter<(approx->approx_order); iter++){
-        flag[iter]=1;
-        set_vec3_soa_to_zero(&out[iter]);
-    }
+  for(iter=0; iter<(approx->approx_order); iter++){
+    flag[iter]=1;
+    set_vec3_soa_to_zero(&out[iter]);
+  }
+  printf("Set the out vecs to zero \n");
 
     // r=in, p=phi delta=(r,r)                                                                                                                             
     assign_in_to_out(in,loc_r);
@@ -148,6 +197,7 @@ int multishift_invert(__restrict su3_soa * const u,
   free(zeta_iii);
   free(omegas);
   free(gammas);
+  COMMENT FOR DEBUGGING */
 
   return cg;
 
