@@ -92,7 +92,17 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				//COM_RationalApprox *approx), // included in ferm_param
 				double res)
 {
-  
+
+ 
+  printf("######################################## \n");
+  printf("## Inside multistep_2MN_SOLOOPENACC() ## \n");
+  printf("######################################## \n");
+
+
+
+
+
+
   int md;
   
   // Step for the P

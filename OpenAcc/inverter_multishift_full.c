@@ -20,7 +20,7 @@ multishift_invert(tconf_acc,
 
 int multishift_invert(__restrict su3_soa * const u,
 		      ferm_param * pars,
-		      RationalApprox * const approx,
+		      RationalApprox * approx,
 		      double_soa * backfield,
 		      __restrict vec3_soa * const out, // multi-fermion [nshifts]
 		      __restrict vec3_soa * const in, // single ferm
@@ -45,46 +45,14 @@ int multishift_invert(__restrict su3_soa * const u,
   // AUXILIARY VARIABLES FOR THE INVERTER 
   printf("INSIDE MULTISHIFT_INVERT \n");
   int  cg;
-  double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
-  int *flag;
-  printf("    value of approx_order = %d \n",approx->approx_order);
-  int  allocation_check=0;
-  int dimensione=approx->approx_order;
-  flag =  (int *)malloc((dimensione)*sizeof(int));
-  //  zeta_i =  malloc(dimensione*sizeof(double));
+  //double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
+  double zeta_i[max_approx_order];
+  double zeta_ii[max_approx_order];
+  double zeta_iii[max_approx_order];
+  double omegas[max_approx_order];
+  double gammas[max_approx_order];
+  int flag[max_approx_order];
 
-
-  /*
-  zeta_ii   = (double *) malloc(approx->approx_order*sizeof(double));
-  zeta_iii  = (double *) malloc(approx->approx_order*sizeof(double));
-  omegas = (double *) malloc(approx->approx_order*sizeof(double));
-  gammas = (double *) malloc(approx->approx_order*sizeof(double));
-  free(flag);
-  free(zeta_i);
-  free(zeta_ii);
-  free(zeta_iii);
-  free(omegas);
-  free(gammas);
-  */
-
-  /*
-  allocation_check =  posix_memalign((void **)&flag,    ALIGN,approx->approx_order*sizeof(int));
-  if(allocation_check != 0)  printf("Errore nella allocazione di flag \n");
-  allocation_check =  posix_memalign((void **)&zeta_i,  ALIGN,approx->approx_order*sizeof(double));
-  if(allocation_check != 0)  printf("Errore nella allocazione di zeta_i \n");
-  allocation_check =  posix_memalign((void **)&zeta_ii, ALIGN,approx->approx_order*sizeof(double));
-  if(allocation_check != 0)  printf("Errore nella allocazione di zeta_ii \n");
-  allocation_check =  posix_memalign((void **)&zeta_iii,ALIGN,approx->approx_order*sizeof(double));
-  if(allocation_check != 0)  printf("Errore nella allocazione di zeta_iii \n");
-  allocation_check =  posix_memalign((void **)&omegas,  ALIGN,approx->approx_order*sizeof(double));
-  if(allocation_check != 0)  printf("Errore nella allocazione di omegas \n");
-  allocation_check =  posix_memalign((void **)&gammas,  ALIGN,approx->approx_order*sizeof(double));
-  if(allocation_check != 0)  printf("Errore nella allocazione di gammas \n");
-  printf("Allocated auxiliary variables \n");
-  */
-
-
-  /* COMMENT FOR DEBUGGING
 
   int iter;
   double alpha, delta, lambda, omega, omega_save, gammag, fact;
@@ -190,14 +158,6 @@ int multishift_invert(__restrict su3_soa * const u,
       printf("\t\t Shifted mass2  =  %f \n",approx->RA_b[iter]);
     }
 #endif
-
-  free(flag);
-  free(zeta_i);
-  free(zeta_ii);
-  free(zeta_iii);
-  free(omegas);
-  free(gammas);
-  COMMENT FOR DEBUGGING */
 
   return cg;
 

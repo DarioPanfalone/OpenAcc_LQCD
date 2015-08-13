@@ -2,6 +2,13 @@
 // se metro==0 allora non fa il test di metropolis --> termalizzazione
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double res_md, int id_iter,int acc,int metro){
 
+  
+  printf("############################################### \n");
+  printf("## Inside UPDATE_SOLOACC_UNOSTEP_VERSATILE() ## \n");
+  printf("############################################### \n");
+
+
+
   // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
   const double lambda=0.1931833275037836; // Omelyan Et Al.
   const double gs=0.5/(double) gauge_scale_acc;
