@@ -55,13 +55,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
 #pragma acc update device(momenta[0:8])
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-	  printf("Ferm generation (flav=%d,ps=%d) : OK \n",iflav,ips);
-          int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-	  printf("   find the index: OK \n"); 
+      int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+	  printf("Ferm generation (flav=%d,ps=%d,ps_index=%d) : OK \n",iflav,ips,ps_index);
 	  vec3_soa *temp = &ferm_phi_acc[ps_index];
-	  printf("   copy the pointer: OK \n"); 
 	  generate_vec3_soa_gauss(temp);
-	  printf("   generate the ferm: OK \n\n"); 
+      //printf("Re temp->c0[0]: %f\n",creal(temp->c0[0]));
 #pragma acc update device(temp[0:1])
       }
     }// end for iflav
@@ -111,13 +109,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-	  printf("First inv approx calc (flav=%d,ps=%d) : OK \n",iflav,ips);
           int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-	  printf("    determined the index : OK \n");
+	      printf("First inv approx calc (flav=%d,ps=%d,ps_index=%d) : OK \n",iflav,ips,ps_index);
 	  multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
-	  printf("    computed the inverse : OK \n");
+	
+  printf("    computed the inverse : OK \n");
 	  recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
-	  printf("    recombined the fermions : OK \n");
+  printf("    recombined the fermions : OK \n");
       }
     }// end for iflav
     

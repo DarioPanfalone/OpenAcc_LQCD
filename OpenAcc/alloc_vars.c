@@ -24,6 +24,7 @@ dcomplex_soa * local_sums;
 double_soa * d_local_sums;
 
 void mem_alloc(){
+  printf("Allocating resources for NPS_tot=%d pseudofermions in total, with max_approx_order=%d\n", NPS_tot, max_approx_order);
   int allocation_check;  
 #ifdef BACKFIELD
   allocation_check =  posix_memalign((void **)&u1_back_field_phases, ALIGN, 8*sizeof(double_soa));   //  -->  4*size phases (as many as links)

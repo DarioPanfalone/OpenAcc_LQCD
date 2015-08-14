@@ -26,6 +26,12 @@ int main(){
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_acc \n");
   printf("Allocazione della configurazione : OK \n");
 
+  // RATIONAL APPROX COEFFS READ        ///////////////////////////////////////////////////////////
+  init_ferm_params();
+  printf("ratapprox computation : OK \n");
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+
+
   mem_alloc();
   printf("Allocazione della memoria : OK \n");
   initialize_global_variables();
@@ -34,11 +40,6 @@ int main(){
   printf("nn computation : OK \n");
   init_backfield();
   printf("u1_backfield initialization : OK \n");
-
-  // RATIONAL APPROX COEFFS CALCLUATION ///////////////////////////////////////////////////////////
-  init_ferm_params();
-  printf("ratapprox computation : OK \n");
-  /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
   //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
@@ -65,7 +66,7 @@ int main(){
 
     int accettate=0;
     ////////////////   THERMALIZATION   /////////////////////////////////////////////////////////////
-    for(int id_iter=0;id_iter<10;id_iter++){
+    for(int id_iter=0;id_iter<1;id_iter++){
       printf("Before therm update %d : OK \n",id_iter);
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,0);
       printf("After therm update %d : OK \n",id_iter);
@@ -73,7 +74,7 @@ int main(){
     }
     ////////////////   METROTEST   //////////////////////////////////////////////////////////////////
     accettate=0;
-    for(int id_iter=0;id_iter<10;id_iter++){
+    for(int id_iter=0;id_iter<0;id_iter++){
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,1);
 #pragma acc update host(conf_acc[0:8])
     }

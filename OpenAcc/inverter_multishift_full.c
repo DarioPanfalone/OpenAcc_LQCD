@@ -43,9 +43,10 @@ int multishift_invert(__restrict su3_soa * const u,
    * function.
    ****************************/
   // AUXILIARY VARIABLES FOR THE INVERTER 
-  printf("INSIDE MULTISHIFT_INVERT \n");
+//  printf("INSIDE MULTISHIFT_INVERT \n");
   int  cg;
   //double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
+  // DYNAMIC ALLOCATION OF THESE SMALL ARRAYS SEEMS TO FAIL.
   double zeta_i[max_approx_order];
   double zeta_ii[max_approx_order];
   double zeta_iii[max_approx_order];
@@ -53,25 +54,28 @@ int multishift_invert(__restrict su3_soa * const u,
   double gammas[max_approx_order];
   int flag[max_approx_order];
 
+//  printf("in pointer: %p\n", in);
+
 
   int iter;
   double alpha, delta, lambda, omega, omega_save, gammag, fact;
-  //  printf("Inside the kernel \n");
-  //  printf("Ordine della approssimazione:   %i \n",approx[0].COM_approx_order);
   alpha=0.0;
     // trial solution out = 0, set all flag to 1                                                                                                           
   for(iter=0; iter<(approx->approx_order); iter++){
     flag[iter]=1;
     set_vec3_soa_to_zero(&out[iter]);
   }
-  printf("Set the out vecs to zero \n");
 
-    // r=in, p=phi delta=(r,r)                                                                                                                             
+    // r=in, p=phi delta=(r,r)
     assign_in_to_out(in,loc_r);
     assign_in_to_out(loc_r,loc_p);
     delta=l2norm2_global(loc_r);
     //printf("delta    %.18lf\n",delta);
     omega=1.0;
+
+    //printf("Re in->c0[0]: %f\n"    ,creal(in->c0[0]) );
+    //printf("Re loc_r->c0[0]: %f\n" ,creal(loc_r->c0[0]) );
+    //printf("Re loc_p->c0[0]: %f\n" ,creal(loc_p->c0[0]) );
 
     for(iter=0; iter<(approx->approx_order); iter++){
       // ps_0=phi
@@ -82,33 +86,48 @@ int multishift_invert(__restrict su3_soa * const u,
     }
     gammag=0.0;
     cg=0;
+ 
+    int maxiter; 
+//Find the max approx->approx_order where flag[approx->approx_order] == 1
+    for(iter=0; iter<(approx->approx_order); iter++) {
+      if(flag[iter]==1) {
+        maxiter = iter+1;
+      }
+    }
+  
     do {      // loop over cg iterations
       cg++;
 
       // s=(M^dagM)p, alhpa=(p,s)=(p,Ap)
+//fermion_matrix_multiplication(su3_soa *u,vec3_soa *out,vec3_soa *in,vec3_soa *temp1, ferm_param *pars,double_soa * backfield)
       fermion_matrix_multiplication(u,loc_s,loc_p,loc_h,pars,backfield);
+      
+      
       
 //      printf("component_loc_s[0]    %f\n",creal(loc_s->c0[0]));
 //      printf("component_loc_p[0]    %f\n",creal(loc_p->c0[0]));
 
       alpha = real_scal_prod_global(loc_p,loc_s);
 //      printf("alpha    %.18lf\n",alpha);
-//      printf("mass2    %.18lf\n",mass2);
+//      printf("mass    %.18lf\n",pars->ferm_mass);
 
       omega_save=omega;   // omega_save=omega_(j-1)
       omega=-delta/alpha;  // omega = (r_j,r_j)/(p_j, Ap_j)               
 //      printf("omega    %.18lf\n",omega);
 
       // out-=omegas*ps
-      for(iter=0; iter<(approx->approx_order); iter++){
+      for(iter=0; iter<maxiter; iter++){
           if(flag[iter]==1){
               zeta_iii[iter] = (zeta_i[iter]*zeta_ii[iter]*omega_save)/
                   ( omega*gammag*(zeta_i[iter]-zeta_ii[iter])+
                     zeta_i[iter]*omega_save*(1.0-(approx->RA_b[iter])*omega) );
+
               omegas[iter]=omega*zeta_iii[iter]/zeta_ii[iter];
           }
       }
-      multiple_combine_in1_minus_in2x_factor_back_into_in1(out,shiftferm,approx->approx_order,flag,omegas);
+
+//multiple_combine_in1_minus_in2x_factor_back_into_in1(vec3_soa *out,vec3_soa *in,int maxiter,int *flag,double *omegas)
+      multiple_combine_in1_minus_in2x_factor_back_into_in1(out,shiftferm,maxiter,flag,omegas);
 
       // r+=omega*s; lambda=(r,r)
       combine_add_factor_x_in2_to_in1(loc_r,loc_s,omega);
@@ -118,23 +137,26 @@ int multishift_invert(__restrict su3_soa * const u,
       // p=r+gammag*p
       combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
 
-      for(iter=0; iter<(approx->approx_order); iter++)
-          if(flag[iter]==1)
+      for(iter=0; iter<(approx->approx_order); iter++){
+          if(flag[iter]==1){
               gammas[iter]=gammag*zeta_iii[iter]*omegas[iter]/(zeta_ii[iter]*omega);
-      multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(shiftferm,approx->approx_order,flag,gammas,loc_r,zeta_iii);
+          }
+      }
+      
+//multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(vec3_soa *in1, int maxiter,int *flag,double *gammas,vec3_soa *in2,double *zeta_iii )
+      multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(shiftferm,maxiter,flag,gammas,loc_r,zeta_iii);
 
-
-      for(iter=0; iter<(approx->approx_order); iter++)
+      for(iter=0; iter<(approx->approx_order); iter++){
           if(flag[iter]==1){
               fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
-              if(fact<residuo){
-                  flag[iter]=0;
-              }
+              if(fact<residuo) flag[iter]=0;
+              else maxiter = iter+1;// modifying maxiter
               zeta_i[iter]=zeta_ii[iter];
               zeta_ii[iter]=zeta_iii[iter];
           }
+      }
       delta=lambda;
-      //      printf("Iteration: %i    --> residue = %e   (target = %e) \n", cg, sqrt(lambda), residuo);
+//      printf("Iteration: %i    --> residue = %e   (target = %e) \n", cg, sqrt(lambda), residuo);
 
     } while(sqrt(lambda)>residuo && cg<max_cg); // end of cg iterations 
 
@@ -145,17 +167,19 @@ int multishift_invert(__restrict su3_soa * const u,
     
 
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC))
-  printf("Terminated multishift_invert_gl ( target res = %f ) \n ", residuo);
+  printf("Terminated multishift_invert ( target res = %f ) \n ", residuo);
   int i;
       printf("\t CG count = %i \n",cg);
   // test 
+
+
+    printf("\t\tnshift\tres/stop_res\tstop_res\tshift\n");
     for(iter=0; iter<approx->approx_order; iter++){
       assign_in_to_out(&out[iter],loc_p);
       fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,backfield,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
       double  giustoono=l2norm2_global(loc_h);
-      printf("\t\titer_approx= %i      res/stop_res= %e        stop_res= %e \n",iter,sqrt(giustoono)/residuo,residuo);
-      printf("\t\t Shifted mass2  =  %f \n",approx->RA_b[iter]);
+      printf("\t\t%i\t%e\t%1.1e\t\t%e\n",iter,sqrt(giustoono)/residuo,residuo,approx->RA_b[iter]);
     }
 #endif
 

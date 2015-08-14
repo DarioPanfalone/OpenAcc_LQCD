@@ -83,7 +83,7 @@ void rationalapprox_read(RationalApprox* rational_approx)
     printf("RA_a0 = %18.16e\n", rational_approx->RA_a0);
     for(int i = 0; i < rational_approx->approx_order; i++) 
     {
-        printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
+//      printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
     } 
 }
 

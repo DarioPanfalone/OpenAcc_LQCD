@@ -463,6 +463,9 @@ void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
 
 #pragma acc kernels present(fermion)
 #pragma acc loop independent 
+   // printf("Setting to zero memory from %p to %p ", fermion->c0 , &(fermion->c0[sizeh-1])+1);
+   // printf(", %p to %p  ", fermion->c1 , &(fermion->c1[sizeh-1])+1);
+   // printf(", %p to %p\n", fermion->c2 , &(fermion->c2[sizeh-1])+1);
     for(int i= 0; i < sizeh ; i++){
         fermion->c0[i]=0;
         fermion->c1[i]=0;
