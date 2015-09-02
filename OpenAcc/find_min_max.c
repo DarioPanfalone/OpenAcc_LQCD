@@ -48,7 +48,7 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
       loop_count++;
-    } while(old_norm>1.0e-5);    // loop end
+  } while(old_norm>1.0e-5);    // loop end
   double max=norm;
   return max;
 }
@@ -56,8 +56,8 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
 // find the minimum eigenvalue of the fermion matrix
 // use loc_h, loc_p, loc_r
 double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
-					 double_soa * const backfield,
-					 ferm_param *pars,
+					 __restrict double_soa * const backfield,
+					 __restrict ferm_param * const pars,
 					 __restrict vec3_soa * const loc_r,
 					 __restrict vec3_soa * const loc_h,
 					 __restrict vec3_soa * const loc_p,
@@ -90,7 +90,16 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
   double  min=max-norm;
   return min;
 }
-
+/*
+find_min_max_eigenvalue_soloopenacc(tconf_acc,
+                                    u1_back_field_phases,
+                                    &(fermions_parameters[iflav]),
+                                    kloc_r,
+                                    kloc_h,
+                                    kloc_p,
+                                    kloc_s,
+                                    minmaxeig);
+*/
 void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
 					   double_soa * const backfield,
 					   ferm_param *pars,
@@ -103,8 +112,11 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
   // minmax[0] --> minimo
   // minmax[1] --> massimo
 
-  minmax[1] = ker_find_max_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p1);
+  printf("    Inside find_min_max_eigenvalue_soloopenacc : OK \n");
   minmax[0] = pars->ferm_mass * pars->ferm_mass;
+  printf("    Computed the min eig : OK \n");
+  minmax[1] = ker_find_max_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p1);
+  printf("    Computed the max eig : OK \n");
 
   //  ora il minimo e' messo a m*m, volendo lo si puo' calcolare con la routine seguente.
   //  minmax[0] = ker_find_min_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2

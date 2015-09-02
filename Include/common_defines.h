@@ -6,16 +6,19 @@
  * and the Openacc Version               *
  * ***************************************/
 
-#define BACKFIELD
-#define IMCHEMPOT
+//#define BACKFIELD
+//#define IMCHEMPOT
 
 // se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
 // di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
 // in modo hard coded usa l'altra routine moltiplica link per fermione e basta.
 // Per farlo viene definita la variabile PHASE_MAT_VEC_MULT o meno.
+
 #ifdef BACKFIELD
   #define PHASE_MAT_VEC_MULT 
-#else
+#endif
+
+#ifndef PHASE_MAT_VEC_MULT
   #ifdef IMCHEMPOT
     #define PHASE_MAT_VEC_MULT 
   #endif
@@ -26,10 +29,10 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 4
-#define ny 4
-#define nz 4
-#define nt 4
+#define nx 16
+#define ny 16
+#define nz 16
+#define nt 16
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -62,9 +65,9 @@ const double ez_quantum=0.0;
 #define max_cg 10000
 
 
-#define no_md 1 // number of MD steps
+#define no_md 10 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
-#define gauge_scale 1  // Update fermions every gauge_scale gauge updates
+#define gauge_scale 5  // Update fermions every gauge_scale gauge updates
 
 
 typedef struct COM_t{

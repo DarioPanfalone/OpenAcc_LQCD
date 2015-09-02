@@ -75,9 +75,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
       // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
+      printf("    updated kloc_p and kloc_s on the device : OK \n");
       find_min_max_eigenvalue_soloopenacc(tconf_acc,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
       printf("    find min and max eig : OK \n");
-#pragma acc update device(minmaxeig[0:2])
+      //#pragma acc update device(minmaxeig[0:2])
       RationalApprox *approx_fi = &(fermions_parameters[iflav].approx_fi);
       printf("    get approx_fi pointer : OK \n");
       RationalApprox *approx_fi_mother = &(fermions_parameters[iflav].approx_fi_mother);
@@ -147,7 +148,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
 	find_min_max_eigenvalue_soloopenacc(tconf_acc,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
-#pragma acc update device(minmaxeig[0:2])
+	//#pragma acc update device(minmaxeig[0:2])
 	RationalApprox *approx_li = &(fermions_parameters[iflav].approx_li);
 	RationalApprox *approx_li_mother = &(fermions_parameters[iflav].approx_li_mother);
 	rescale_rational_approximation(approx_li_mother,approx_li,minmaxeig);
@@ -181,7 +182,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
 
       // delta_S = action_new - action_old
       delta_S  = - (-action_in+action_mom_in+action_ferm_in) + (-action_fin+action_mom_fin+action_ferm_fin);
-      printf("iterazione %i:  DELTA_ACTION                       = %.18lf\n",iterazioni,delta_S);
+      printf("iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,-action_in,-action_fin);
+      printf("iterazione %i:  Momen_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,action_mom_in,action_mom_fin);
+      printf("iterazione %i:  Fermi_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,action_ferm_in,action_ferm_fin);
+      printf("iterazione %i:  DELTA_ACTION               = %.18lf\n",iterazioni,delta_S);
       
       if(delta_S<0){
 	accettata=1;

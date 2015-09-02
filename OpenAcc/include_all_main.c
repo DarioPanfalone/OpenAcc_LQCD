@@ -38,9 +38,10 @@ int main(){
   printf("init vars : OK \n");
   compute_nnp_and_nnm_openacc();
   printf("nn computation : OK \n");
+#ifdef BACKFIELD
   init_backfield();
   printf("u1_backfield initialization : OK \n");
-
+#endif
 
   //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
   // NVIDIA GPUs
@@ -65,18 +66,23 @@ int main(){
     {
 
     int accettate=0;
+    double plq;
     ////////////////   THERMALIZATION   /////////////////////////////////////////////////////////////
-    for(int id_iter=0;id_iter<1;id_iter++){
+    for(int id_iter=0;id_iter<3;id_iter++){
       printf("Before therm update %d : OK \n",id_iter);
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,0);
       printf("After therm update %d : OK \n",id_iter);
 #pragma acc update host(conf_acc[0:8])
+      plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+      printf("Therm_iter %d   Placchetta=%f \n",id_iter,plq/size/6.0/3.0);
     }
     ////////////////   METROTEST   //////////////////////////////////////////////////////////////////
     accettate=0;
-    for(int id_iter=0;id_iter<0;id_iter++){
+    for(int id_iter=0;id_iter<3;id_iter++){
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,1);
 #pragma acc update host(conf_acc[0:8])
+      plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+      printf("Metro_iter %d   Placchetta=%f \n",id_iter,plq/size/6.0/3.0);
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////
     

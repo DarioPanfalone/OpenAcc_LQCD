@@ -15,7 +15,7 @@
 #ifndef FERMIONIC_UTILITIES_C_
 #define FERMIONIC_UTILITIES_C_
 
-
+/*
 static inline void scal_prod_loc_2double( const __restrict vec3_soa * const in_vect1,
                                           const __restrict vec3_soa * const in_vect2,
                                           const int idx_vect,
@@ -29,6 +29,8 @@ static inline void scal_prod_loc_2double( const __restrict vec3_soa * const in_v
   res_ri[0] = creal(sum);
   res_ri[1] = cimag(sum);
 }
+*/
+
 static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect1,
 					     __restrict vec3_soa * const in_vect2,
 					     const int idx_vect
@@ -63,7 +65,7 @@ static inline double l2norm2_loc( __restrict vec3_soa * const in_vect1,
 }
 
 
-
+/*
 d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
 			     const __restrict vec3_soa * const in_vect2
 			     ){
@@ -87,6 +89,7 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
   res = resR+resI*1.0I;
   return res;
 }
+*/
 
 double real_scal_prod_global(  __restrict vec3_soa * const in_vect1,
 			       __restrict vec3_soa * const in_vect2
