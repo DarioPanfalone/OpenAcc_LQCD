@@ -1,0 +1,144 @@
+#ifndef DBGTOOLS_OPENACC_
+#define DBGTOOLS_OPENACC_
+
+#ifndef COMPLEX_C_
+#define COMPLEX_C_
+#include <complex.h>
+#endif
+
+#include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+#include <sys/time.h>
+#include "../Include/common_defines.h"
+#include "./struct_c_def.c"
+
+void print_vec3_soa(vec3_soa * const fermion, const char* nomefile){
+
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    for(int i = 0 ; i < sizeh ; i++){
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion.c0[i]),cimag(fermion.c0[i]));
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion.c1[i]),cimag(fermion.c1[i]));
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion.c2[i]),cimag(fermion.c2[i]));
+    }
+    fclose(fp);
+
+}
+
+void read_vec3_soa(vec3_soa * fermion, const char* nomefile){
+
+    FILE *fp;
+    fp = fopen(nomefile,"r");
+    for(int i = 0 ; i < sizeh ; i++){
+        double re,im;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion.c0[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion.c1[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion.c2[i] = re + im * I;
+    }
+    fclose(fp);
+
+}
+
+void print_su3_soa(su3_soa * const conf, const char* nomefile){
+
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    for(int q = 0 ; q < 8 ; q++){
+        for(int i = 0 ; i < sizeh ; i++){
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c0[i]),cimag(conf[q].r0.c0[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c1[i]),cimag(conf[q].r0.c1[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c2[i]),cimag(conf[q].r0.c2[i]));//
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r1.c0[i]),cimag(conf[q].r1.c0[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r1.c1[i]),cimag(conf[q].r1.c1[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r1.c2[i]),cimag(conf[q].r1.c2[i]));//
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r2.c0[i]),cimag(conf[q].r2.c0[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r2.c1[i]),cimag(conf[q].r2.c1[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r2.c2[i]),cimag(conf[q].r2.c2[i]));
+        }
+    }
+    fclose(fp);
+}
+
+void read_su3_soa(su3_soa * conf, const char* nomefile){
+
+    FILE *fp;
+    fp = fopen(nomefile,"r");
+    for(int q = 0 ; q < 8 ; q++){
+        for(int i = 0 ; i < sizeh ; i++){
+            double re,im;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r0.c0[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r0.c1[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r0.c2[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r1.c0[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r1.c1[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r1.c2[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r2.c0[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r2.c1[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r2.c2[i] = re + im * I;
+
+    }
+    fclose(fp);
+
+}
+
+void print_tamat_soa(tamat_soa * const ipdot, const char* nomefile){
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    for(int q = 0 ; q < 8 ; q++){
+        for(int i = 0 ; i < sizeh ; i++){
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
+            fprintf(fp, "%.18lf\t\n",ipdot[q].rc00[i]);
+            fprintf(fp, "%.18lf\t\n",ipdot[q].rc11[i]);
+        }
+    }
+    fclose(fp);
+}
+
+void read_tamat_soa(tamat_soa * ipdot, const char* nomefile){
+
+    FILE *fp;
+    fp = fopen(nomefile,"r");
+    for(int q = 0 ; q < 8 ; q++){
+        for(int i = 0 ; i < sizeh ; i++){
+            double re,im;
+            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c01[i] = re + im * I;
+            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c02[i] = re + im * I;
+            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c12[i] = re + im * I;//
+            fscanf(fp, "%.18lf\t\n",ipdot[q].rc00[i]);
+            fscanf(fp, "%.18lf\t\n",ipdot[q].rc11[i]);
+        }
+    }
+    fclose(fp);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif
