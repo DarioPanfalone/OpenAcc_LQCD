@@ -64,7 +64,7 @@ void read_su3_soa(su3_soa * conf, const char* nomefile){
 
     FILE *fp;
     fp = fopen(nomefile,"r");
-    for(int q = 0 ; q < 8 ; q++){
+    for(int q = 0 ; q < 8 ; q++)
         for(int i = 0 ; i < sizeh ; i++){
             double re,im;
         fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r0.c0[i] = re + im * I;
@@ -115,27 +115,37 @@ void read_tamat_soa(tamat_soa * ipdot, const char* nomefile){
 }
 
 
+void print_thmat_soa(thmat_soa * const ipdot, const char* nomefile){
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    for(int q = 0 ; q < 8 ; q++){
+        for(int i = 0 ; i < sizeh ; i++){
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
+            fprintf(fp, "%.18lf\t\n",ipdot[q].rc00[i]);
+            fprintf(fp, "%.18lf\t\n",ipdot[q].rc11[i]);
+        }
+    }
+    fclose(fp);
+}
 
+void read_thmat_soa(thmat_soa * ipdot, const char* nomefile){
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    FILE *fp;
+    fp = fopen(nomefile,"r");
+    for(int q = 0 ; q < 8 ; q++){
+        for(int i = 0 ; i < sizeh ; i++){
+            double re,im;
+            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c01[i] = re + im * I;
+            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c02[i] = re + im * I;
+            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c12[i] = re + im * I;//
+            fscanf(fp, "%.18lf\t\n",ipdot[q].rc00[i]);
+            fscanf(fp, "%.18lf\t\n",ipdot[q].rc11[i]);
+        }
+    }
+    fclose(fp);
+}
 
 
 
