@@ -1,53 +1,47 @@
-////
-things to check
 
-new code:
+Passi per il bugfix 
 
-1      set_global_vec3_soa_to_zero(&out[iter]);
-2    assign_in_to_out_gl(in,loc_r);
-3     assign_in_to_out_gl(in,&shiftferm[iter]);
-4     fermion_matrix_multiplication_gl(u,loc_s,loc_p,loc_h);
-5     combine_in1_minus_in2x_factor_back_into_in1_gl(&out[iter],&(shiftferm[iter]),omegas[iter]);
-6     combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1_gl(&shiftferm[iter],gammas[iter],loc_r,zeta_iii[iter]);
-7     assign_in_to_out_gl(&out[iter],loc_p);
-8     fermion_matrix_multiplication_shifted_gl(u,loc_s,loc_p,loc_h,approx->RA_b[iter]);
+ - primo step: Vediamo che succede con 1 passo di termalizzazione.
+ - indi, verifichiamo il calcolo dell'azione.
 
-old code:
+Setup:
 
-1      set_shiftmulti_to_zero(iter,pseudofermion,out);
-2    extract_pseudo_and_assign_to_fermion(in,pseudofermion,loc_r);
-3    extract_pseudo_and_assign_to_shiftfermion(in,pseudofermion,p_shiftferm,iter);
-4      acc_Doe(u,loc_h,loc_p);
-      acc_Deo(u,loc_s,loc_h);
-      combine_in1xm2_minus_in2(loc_p,loc_s);
-5	  combine_shiftmulti_minus_shiftfermion_x_factor_back_into_shiftmulti(out,p_shiftferm,pseudofermion,iter,omegas[iter]);
-6     combine_shiftferm_x_fact1_plus_ferm_x_fact2_back_into_shiftferm(p_shiftferm,iter,gammas[iter],loc_r,zeta_iii[iter]);
-7      extract_from_shiftmulti_and_assign_to_fermion(out,iter,pseudofermion,loc_p);
-8     acc_Doe(u,loc_h,loc_p);
-      acc_Deo(u,loc_s,loc_h);
-      combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1(loc_p,mass2+approx[0].COM_RA_b[iter],loc_s,in,pseudofermion);
+IL SEED NON VERRA' USATO.
 
+-Reticolo 4**4
+-Beta 6.0
+-m = 0.03 
+-no_md = 1
+-gauge_scale = 1
+-due flavours , un ps per flavour
+- Approssimaz. Raz. Metro (fi):
+  - Ordine 19
+  - lambda min 4e-7
+  - lambda max 1
+  - num 1
+  - den 8
+  - RESIDUO INVERSIONE: 1e-8
+- Approssimaz. Raz. MD:
+  - Ordine 9
+  - lambda min 4e-7
+  - lambda max 1
+  - num -1
+  - den 4
+  - RESIDUO INVERSIONE: 1e-5
+- Approssimaz. Raz. Metro (li):
+  - Ordine 19
+  - lambda min 4e-7
+  - lambda max 1
+  - num -1
+  - den 4
+  - RESIDUO INVERSIONE: 1e-8
 
-/////////
-Comments and results
-
-1. simple, seems ok.
-2. simple, seems ok.
-3. simple, seems ok. 
-4. seems ok.
-5. simple, seems ok. 
-6. GL_SIZE instead of GL_SIZEH in the new version. Corrected.
-   checked for similar errors in OPENACCREPO/OpenAcc/fermion_linalg_util.c, 
-   none found.
-7. simple, seems ok.
-8. not checked yet.
-   8.1 subcheck needed
-   new code:
-     combine_in1xfactor_minus_in2_into_in2_gl(loc_p,mass2+approx->RA_b[iter],loc_s)
-   old code:
-      combine_in1_x_fact_minus_in2_minus_multiin3_back_into_in1(loc_p,mass2+approx[0].COM_RA_b[iter],loc_s,in,pseudofermion)
-   
-   ////
-   comments:
-   1. seems ok.
+FILES DA GENERARE PER IL TEST:
+- Configurazione iniziale
+- Momenti iniziali
+- Fermioni calcolo min-max. (1 x min, 1 x max) per ogni flavour (tot 4)
+    ******* Il calcolo dell'autovalore minimo nella nuova versione 
+            non viene fatto (si usa la massa al quadrato).
+            Questa cosa va allineata nella versione vecchia!!      
+- Fermioni phi (1 per flavour quindi tot 2)
 
