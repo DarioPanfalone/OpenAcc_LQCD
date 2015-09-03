@@ -60,11 +60,14 @@ int main(){
 
 
   // INIZIALIZZAZIONE DELLA CONFIGURAZIONE
-  //  generate_Conf_cold(conf_acc);
-  //  printf("Gauge conf generated : OK \n");
+  generate_Conf_cold(conf_acc);
+  printf("Gauge conf generated : OK \n");
+
+  /*
   read_su3_soa(conf_acc,"configurazione");
   printf("Gauge conf read from file : OK \n");
   printf("Comp00    %f  %f \n",creal(conf_acc[0].r0.c0[0]),cimag(conf_acc[0].r0.c0[0]));
+  */
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -76,7 +79,7 @@ int main(){
     plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     printf("ALL'INIZIO   Placchetta=%.18lf \n",plq/size/6.0/3.0);
     ////////////////   THERMALIZATION   /////////////////////////////////////////////////////////////
-    for(int id_iter=0;id_iter<100;id_iter++){
+    for(int id_iter=0;id_iter<1;id_iter++){
       printf("Before therm update %d : OK \n",id_iter);
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,0);
       printf("After therm update %d : OK \n",id_iter);

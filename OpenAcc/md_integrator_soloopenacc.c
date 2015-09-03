@@ -50,39 +50,38 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
     gettimeofday ( &t1, NULL );
 
     // ESTRAZIONI RANDOM
-    //    generate_Momenta_gauss(momenta);
-    //    printf("Momenta generated : OK \n");
-    read_thmat_soa(momenta,"momenta");
+    generate_Momenta_gauss(momenta);
+    printf("Momenta generated : OK \n");
+    //    read_thmat_soa(momenta,"momenta");
 #pragma acc update device(momenta[0:8])
-    /* COMMENTATI x DEBUG SEP 2015
+    
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
       int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
 	  printf("Ferm generation (flav=%d,ps=%d,ps_index=%d) : OK \n",iflav,ips,ps_index);
-	  vec3_soa *temp = &ferm_phi_acc[ps_index];
-	  generate_vec3_soa_gauss(temp);
-      //printf("Re temp->c0[0]: %f\n",creal(temp->c0[0]));
-#pragma acc update device(temp[0:1])
+	  generate_vec3_soa_gauss(&ferm_phi_acc[ps_index]);
+
+	  //	  vec3_soa *temp = &ferm_phi_acc[ps_index];
+	  //	  generate_vec3_soa_gauss(temp);
+	  //#pragma acc update device(temp[0:1])
       }
     }// end for iflav
-    */
+#pragma acc update device(ferm_phi_acc[0:NPS_tot])
 
-    read_vec3_soa(&ferm_phi_acc[0],"phi_ps0");
-    read_vec3_soa(&ferm_phi_acc[1],"phi_ps1");
-#pragma acc update device(ferm_phi_acc[0:2])
+    //    read_vec3_soa(&ferm_phi_acc[0],"phi_ps0");
+    //    read_vec3_soa(&ferm_phi_acc[1],"phi_ps1");
+    //    #pragma acc update device(ferm_phi_acc[0:2])
     
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       printf("Rat approx rescale (flav=%d) : OK \n",iflav);
       // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
 
-      /* COMMENTATI x DEBUG SEP 2015
       generate_vec3_soa_gauss(kloc_p);
       printf("    generate kloc_p: OK \n");
       generate_vec3_soa_gauss(kloc_s);
-      printf("    generate kloc_s: OK \n");
-      */
-      
+      printf("    generate kloc_s: OK \n");      
+      /*
       if(iflav==0){
 	read_vec3_soa(kloc_p,"kloc_p_0");
 	read_vec3_soa(kloc_s,"kloc_s_0");
@@ -91,6 +90,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
 	read_vec3_soa(kloc_p,"kloc_p_1");
 	read_vec3_soa(kloc_s,"kloc_s_1");
       }
+      */
+
       // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
