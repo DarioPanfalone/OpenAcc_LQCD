@@ -91,8 +91,8 @@ void print_tamat_soa(tamat_soa * const ipdot, const char* nomefile){
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
-            fprintf(fp, "%.18lf\t\n",ipdot[q].rc00[i]);
-            fprintf(fp, "%.18lf\t\n",ipdot[q].rc11[i]);
+            fprintf(fp, "%.18lf\n",ipdot[q].rc00[i]);
+            fprintf(fp, "%.18lf\n",ipdot[q].rc11[i]);
         }
     }
     fclose(fp);
@@ -108,8 +108,8 @@ void read_tamat_soa(tamat_soa * ipdot, const char* nomefile){
             fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c01[i] = re + im * I;
             fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c02[i] = re + im * I;
             fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c12[i] = re + im * I;//
-            fscanf(fp, "%lf\t\n",ipdot[q].rc00[i]);
-            fscanf(fp, "%lf\t\n",ipdot[q].rc11[i]);
+            fscanf(fp, "%lf\n",&(ipdot[q].rc00[i]));
+            fscanf(fp, "%lf\n",&(ipdot[q].rc11[i]));
         }
     }
     fclose(fp);
@@ -124,8 +124,8 @@ void print_thmat_soa(thmat_soa * const ipdot, const char* nomefile){
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
-            fprintf(fp, "%.18lf\t\n",ipdot[q].rc00[i]);
-            fprintf(fp, "%.18lf\t\n",ipdot[q].rc11[i]);
+            fprintf(fp, "%.18lf\n",ipdot[q].rc00[i]);
+            fprintf(fp, "%.18lf\n",ipdot[q].rc11[i]);
         }
     }
     fclose(fp);
@@ -141,8 +141,8 @@ void read_thmat_soa(thmat_soa * ipdot, const char* nomefile){
             fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c01[i] = re + im * I;
             fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c02[i] = re + im * I;
             fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c12[i] = re + im * I;//
-            fscanf(fp, "%lf\t\n",ipdot[q].rc00[i]);
-            fscanf(fp, "%lf\t\n",ipdot[q].rc11[i]);
+            fscanf(fp, "%lf\n",&(ipdot[q].rc00[i]));
+	    fscanf(fp, "%lf\n",&(ipdot[q].rc11[i]));
         }
     }
     fclose(fp);

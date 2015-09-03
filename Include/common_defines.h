@@ -65,9 +65,9 @@ const double ez_quantum=0.0;
 #define max_cg 10000
 
 
-#define no_md 1 // number of MD steps
+#define no_md 10 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
-#define gauge_scale 1  // Update fermions every gauge_scale gauge updates
+#define gauge_scale 5  // Update fermions every gauge_scale gauge updates
 
 
 typedef struct COM_t{

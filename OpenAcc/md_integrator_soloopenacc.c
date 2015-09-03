@@ -21,7 +21,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
   delta[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*beta_by_three;
   delta[6]= -cimag(ieps_acc) * gs*2.0*lambda*beta_by_three;
 
-  int iterazioni = id_iter;
+  int iterazioni = id_iter+1;
   double dt_tot;
   double dt_pretrans_to_preker;
   double dt_preker_to_postker;

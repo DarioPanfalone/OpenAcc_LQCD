@@ -76,7 +76,7 @@ int main(){
     plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     printf("ALL'INIZIO   Placchetta=%.18lf \n",plq/size/6.0/3.0);
     ////////////////   THERMALIZATION   /////////////////////////////////////////////////////////////
-    for(int id_iter=0;id_iter<1;id_iter++){
+    for(int id_iter=0;id_iter<100;id_iter++){
       printf("Before therm update %d : OK \n",id_iter);
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,0);
       printf("After therm update %d : OK \n",id_iter);

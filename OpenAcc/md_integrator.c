@@ -108,14 +108,18 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   // Step for the P
   // P' = P - l*dt*dS/dq
   //    delta[0]=-cimag(ieps_acc)*lambda;
+  /////  print_thmat_soa(tmomenta,"momenta_before_before");
   fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-//  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm); // OLD
-  mom_sum_mult(tmomenta,ipdot_acc,delta,0);
+  //  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm); // OLD
+  /////  print_thmat_soa(tmomenta,"momenta_before");
+  mom_sum_mult(tmomenta,tipdot_acc,delta,0);
+  /////  print_thmat_soa(tmomenta,"momenta_after");
+  /////  print_tamat_soa(tipdot_acc,"tipdot_new_ver");
   
   for(md=1; md<no_md; md++){
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
-    multistep_2MN_gauge(tconf_acc,aux_conf_acc,tipdot_acc,tmomenta,delta);
+    multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
