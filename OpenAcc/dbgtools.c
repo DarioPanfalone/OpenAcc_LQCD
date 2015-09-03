@@ -18,9 +18,9 @@ void print_vec3_soa(vec3_soa * const fermion, const char* nomefile){
     FILE *fp;
     fp = fopen(nomefile,"w");
     for(int i = 0 ; i < sizeh ; i++){
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion.c0[i]),cimag(fermion.c0[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion.c1[i]),cimag(fermion.c1[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion.c2[i]),cimag(fermion.c2[i]));
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c0[i]),cimag(fermion->c0[i]));
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c1[i]),cimag(fermion->c1[i]));
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c2[i]),cimag(fermion->c2[i]));
     }
     fclose(fp);
 
@@ -32,9 +32,9 @@ void read_vec3_soa(vec3_soa * fermion, const char* nomefile){
     fp = fopen(nomefile,"r");
     for(int i = 0 ; i < sizeh ; i++){
         double re,im;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion.c0[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion.c1[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion.c2[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion->c0[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion->c1[i] = re + im * I;
+        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion->c2[i] = re + im * I;
     }
     fclose(fp);
 

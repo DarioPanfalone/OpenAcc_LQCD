@@ -7,6 +7,7 @@ void su2_rand(double *pp);
 #include "../RationalApprox/rationalapprox.c"
 #include "./struct_c_def.c"
 #include "./alloc_vars.c"
+#include "./dbgtools.c"
 #include "./fermionic_utilities.c"
 #include "./su3_utilities.c"
 #include "./random_assignement.c"
@@ -16,6 +17,7 @@ void su2_rand(double *pp);
 #include "./inverter_multishift_full.c"
 #include "./md_integrator.c"
 #include "./md_integrator_soloopenacc.c"
+
 
 int main(){
 
@@ -71,7 +73,7 @@ int main(){
     int accettate=0;
     double plq;
     ////////////////   THERMALIZATION   /////////////////////////////////////////////////////////////
-    for(int id_iter=0;id_iter<3;id_iter++){
+    for(int id_iter=0;id_iter<1;id_iter++){
       printf("Before therm update %d : OK \n",id_iter);
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,0);
       printf("After therm update %d : OK \n",id_iter);
@@ -81,7 +83,7 @@ int main(){
     }
     ////////////////   METROTEST   //////////////////////////////////////////////////////////////////
     accettate=0;
-    for(int id_iter=0;id_iter<3;id_iter++){
+    for(int id_iter=0;id_iter<0;id_iter++){
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,1);
 #pragma acc update host(conf_acc[0:8])
       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
