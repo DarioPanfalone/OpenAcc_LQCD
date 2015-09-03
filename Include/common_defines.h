@@ -29,10 +29,10 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 16
-#define ny 16
-#define nz 16
-#define nt 16
+#define nx 4
+#define ny 4
+#define nz 4
+#define nt 4
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -40,7 +40,7 @@
 #define mass 0.03
 #define beta 6.0
 
-const int no_flavours=2; // number of quark species                                                                                                          
+const int no_flavours=2; // number of quark species
 
 
 #define max_approx_order 19
@@ -50,7 +50,7 @@ const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_m
 const double lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double residue_metro=1.0e-8;    // stopping residual for CG
 const double residue_md=1.0e-5;    // stopping residual for CG
-const int gmp_remez_precision=100; // The precision that gmp uses                                                                                                               
+const int gmp_remez_precision=100; // The precision that gmp uses                   
 
 // quanti di campo esterno
 const double bx_quantum=0.0;
@@ -65,9 +65,9 @@ const double ez_quantum=0.0;
 #define max_cg 10000
 
 
-#define no_md 10 // number of MD steps
+#define no_md 1 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
-#define gauge_scale 5  // Update fermions every gauge_scale gauge updates
+#define gauge_scale 1  // Update fermions every gauge_scale gauge updates
 
 
 typedef struct COM_t{
