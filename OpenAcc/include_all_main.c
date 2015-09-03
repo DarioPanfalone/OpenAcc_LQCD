@@ -64,6 +64,7 @@ int main(){
   //  printf("Gauge conf generated : OK \n");
   read_su3_soa(conf_acc,"configurazione");
   printf("Gauge conf read from file : OK \n");
+  printf("Comp00    %f  %f \n",creal(conf_acc[0].r0.c0[0]),cimag(conf_acc[0].r0.c0[0]));
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -72,6 +73,8 @@ int main(){
 
     int accettate=0;
     double plq;
+    plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    printf("ALL'INIZIO   Placchetta=%.18lf \n",plq/size/6.0/3.0);
     ////////////////   THERMALIZATION   /////////////////////////////////////////////////////////////
     for(int id_iter=0;id_iter<1;id_iter++){
       printf("Before therm update %d : OK \n",id_iter);
@@ -79,7 +82,7 @@ int main(){
       printf("After therm update %d : OK \n",id_iter);
 #pragma acc update host(conf_acc[0:8])
       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-      printf("Therm_iter %d   Placchetta=%f \n",id_iter,plq/size/6.0/3.0);
+      printf("Therm_iter %d   Placchetta=%.18lf \n",id_iter,plq/size/6.0/3.0);
     }
     ////////////////   METROTEST   //////////////////////////////////////////////////////////////////
     accettate=0;
@@ -87,7 +90,7 @@ int main(){
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,1);
 #pragma acc update host(conf_acc[0:8])
       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-      printf("Metro_iter %d   Placchetta=%f \n",id_iter,plq/size/6.0/3.0);
+      printf("Metro_iter %d   Placchetta=%.18lf \n",id_iter,plq/size/6.0/3.0);
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////
     

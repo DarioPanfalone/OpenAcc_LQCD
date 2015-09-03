@@ -32,9 +32,9 @@ void read_vec3_soa(vec3_soa * fermion, const char* nomefile){
     fp = fopen(nomefile,"r");
     for(int i = 0 ; i < sizeh ; i++){
         double re,im;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion->c0[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion->c1[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);fermion->c2[i] = re + im * I;
+        fscanf(fp, "%lf\t%lf\n",&re,&im);fermion->c0[i] = re + im * I;
+        fscanf(fp, "%lf\t%lf\n",&re,&im);fermion->c1[i] = re + im * I;
+        fscanf(fp, "%lf\t%lf\n",&re,&im);fermion->c2[i] = re + im * I;
     }
     fclose(fp);
 
@@ -62,24 +62,25 @@ void print_su3_soa(su3_soa * const conf, const char* nomefile){
 
 void read_su3_soa(su3_soa * conf, const char* nomefile){
 
-    FILE *fp;
-    fp = fopen(nomefile,"r");
-    for(int q = 0 ; q < 8 ; q++)
-        for(int i = 0 ; i < sizeh ; i++){
-            double re,im;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r0.c0[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r0.c1[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r0.c2[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r1.c0[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r1.c1[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r1.c2[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r2.c0[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r2.c1[i] = re + im * I;
-        fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);conf[q].r2.c2[i] = re + im * I;
-
+  FILE *fp;
+  fp = fopen(nomefile,"r");
+  for(int q = 0 ; q < 8 ; q++)
+    for(int i = 0 ; i < sizeh ; i++){
+      double re,im;
+      //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r0.c0[i] = re + im * I;
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r0.c1[i] = re + im * I;
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r0.c2[i] = re + im * I;
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r1.c0[i] = re + im * I;
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r1.c1[i] = re + im * I;
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r1.c2[i] = re + im * I;
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r2.c0[i] = re + im * I;
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r2.c1[i] = re + im * I;
+      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r2.c2[i] = re + im * I;
+      
     }
-    fclose(fp);
-
+  fclose(fp);
+  
 }
 
 void print_tamat_soa(tamat_soa * const ipdot, const char* nomefile){
@@ -104,11 +105,11 @@ void read_tamat_soa(tamat_soa * ipdot, const char* nomefile){
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
             double re,im;
-            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c01[i] = re + im * I;
-            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c02[i] = re + im * I;
-            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c12[i] = re + im * I;//
-            fscanf(fp, "%.18lf\t\n",ipdot[q].rc00[i]);
-            fscanf(fp, "%.18lf\t\n",ipdot[q].rc11[i]);
+            fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c01[i] = re + im * I;
+            fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c02[i] = re + im * I;
+            fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c12[i] = re + im * I;//
+            fscanf(fp, "%lf\t\n",ipdot[q].rc00[i]);
+            fscanf(fp, "%lf\t\n",ipdot[q].rc11[i]);
         }
     }
     fclose(fp);
@@ -137,11 +138,11 @@ void read_thmat_soa(thmat_soa * ipdot, const char* nomefile){
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
             double re,im;
-            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c01[i] = re + im * I;
-            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c02[i] = re + im * I;
-            fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);ipdot[q].c12[i] = re + im * I;//
-            fscanf(fp, "%.18lf\t\n",ipdot[q].rc00[i]);
-            fscanf(fp, "%.18lf\t\n",ipdot[q].rc11[i]);
+            fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c01[i] = re + im * I;
+            fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c02[i] = re + im * I;
+            fscanf(fp, "%lf\t%lf\n",&re,&im);ipdot[q].c12[i] = re + im * I;//
+            fscanf(fp, "%lf\t\n",ipdot[q].rc00[i]);
+            fscanf(fp, "%lf\t\n",ipdot[q].rc11[i]);
         }
     }
     fclose(fp);
