@@ -43,7 +43,7 @@ void mem_alloc(){
   allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di kloc_p \n");
   allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, max_approx_order* sizeof(vec3_soa));
-// allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, sizeof(ACC_ShiftFermion));
+  // allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, sizeof(ACC_ShiftFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di k_p_shiftferm \n");
   allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_acc \n");
@@ -57,7 +57,7 @@ void mem_alloc(){
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_chi_acc \n");
 
   allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
-//allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, sizeof(ACC_MultiFermion));
+  //allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, sizeof(ACC_MultiFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_phi_acc \n");
 
    allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
@@ -66,7 +66,7 @@ void mem_alloc(){
 
   allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*max_approx_order*sizeof(vec3_soa));
   
-//allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc , ALIGN, sizmof(ACC_ShiftMultiFermion));
+  //allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc , ALIGN, sizmof(ACC_ShiftMultiFermion));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_shiftmulti_acc \n");
 
   allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, sizeof(double_soa));

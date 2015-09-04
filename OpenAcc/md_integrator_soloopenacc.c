@@ -128,17 +128,43 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
     }
 
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
-    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
-      for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-          int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+    /* COMMENTATI PER DEBUG
+        for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+	for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+    */
+    ///// INIZIO ZONA DI DEBUG //////
+#pragma acc update host(ferm_chi_acc[0:2])
+    print_vec3_soa(&(ferm_chi_acc[0]),"printed_ferm_prima_chi0");
+    print_vec3_soa(&(ferm_chi_acc[1]),"printed_ferm_prima_chi1");
+#pragma acc update host(ferm_phi_acc[0:2])
+    print_vec3_soa(&(ferm_phi_acc[0]),"printed_ferm_prima_phi0");
+    print_vec3_soa(&(ferm_phi_acc[1]),"printed_ferm_prima_phi1");
+
+#pragma acc update host(ferm_shiftmulti_acc[0:2])
+
+
+    ///// FINE ZONA DI DEBUG //////	      
+
+    int iflav=0;
+    int ips=0;
+              int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
 	      printf("First inv approx calc (flav=%d,ps=%d,ps_index=%d) : OK \n",iflav,ips,ps_index);
-	  multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
-	
-  printf("    computed the inverse : OK \n");
-	  recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
-  printf("    recombined the fermions : OK \n");
+	      multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+
+
+	      printf("    computed the inverse : OK \n");
+	      recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
+	      printf("    recombined the fermions : OK \n");
+    /* COMMENTATI PER DEBUG
       }
     }// end for iflav
+    */
+    
+    ///// INIZIO ZONA DI DEBUG //////
+#pragma acc update host(ferm_chi_acc[0:2])
+    print_vec3_soa(&(ferm_chi_acc[0]),"printed_ferm_chi0");
+    print_vec3_soa(&(ferm_chi_acc[1]),"printed_ferm_chi1");
+    ///// FINE ZONA DI DEBUG //////
     
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE MD
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){

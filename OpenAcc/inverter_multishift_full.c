@@ -188,12 +188,12 @@ int multishift_invert(__restrict su3_soa * const u,
 }
 
 void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted /*multi-fermion*/, 
-        const __restrict vec3_soa* const in, // [nshift]
-        __restrict vec3_soa * const out, // [1] 
-        const RationalApprox * const approx ){
+				    const __restrict vec3_soa* const in, // [nshift]
+				    __restrict vec3_soa * const out, // [1] 
+				    const RationalApprox * const approx ){
   int ih;
   int iter=0;
-#pragma acc kernels present(out) present(in) present(in_shifted)
+#pragma acc kernels present(out) present(in) present(in_shifted) present(approx)
 #pragma acc loop independent
     for(ih=0; ih < sizeh; ih++){
 
@@ -205,7 +205,10 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
 	out->c0[ih] +=  approx->RA_a[iter] * in_shifted[iter].c0[ih];
 	out->c1[ih] +=  approx->RA_a[iter] * in_shifted[iter].c1[ih];
 	out->c2[ih] +=  approx->RA_a[iter] * in_shifted[iter].c2[ih];
+
       }
+
+
     }
 }
 
@@ -613,26 +616,26 @@ void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' cost
 }
 
 
-void fermion_force_soloopenacc(__restrict su3_soa  *tconf_acc, // la configurazione qui dentro e' costante e non viene modificata
-       __restrict double_soa *backfield,
-       __restrict tamat_soa *tipdot_acc,
-       __restrict ferm_param *tfermion_parameters,// [nflavs]
-       int tNDiffFlavs,
-       __restrict vec3_soa *ferm_in_acc, // [NPS_tot]
-       //__restrict ACC_MultiFermion *ferm_in_acc
-       double res,
-       //const COM_RationalApprox *approx, // included in ferm_param
-       __restrict su3_soa  * taux_conf_acc,
-       __restrict vec3_soa * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]
-       //__restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
-       __restrict vec3_soa * tkloc_r, // parking
-       __restrict vec3_soa * tkloc_h, // parking
-       __restrict vec3_soa * tkloc_s, // parking
-       __restrict vec3_soa * tkloc_p, // parking
-       __restrict vec3_soa *tk_p_shiftferm//parking variable [max_shifts]
-                   ){
-			       //__restrict ACC_ShiftFermion *k_p_shiftferm){
-
+void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata
+			       __restrict double_soa * backfield,
+			       __restrict tamat_soa  * tipdot_acc,
+			       __restrict ferm_param * tfermion_parameters,// [nflavs]
+			       int tNDiffFlavs,
+			       __restrict vec3_soa * ferm_in_acc, // [NPS_tot]
+			       //__restrict ACC_MultiFermion *ferm_in_acc
+			       double res,
+			       //const COM_RationalApprox *approx, // included in ferm_param
+			       __restrict su3_soa  * taux_conf_acc,
+			       __restrict vec3_soa * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]
+			       //__restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
+			       __restrict vec3_soa * tkloc_r, // parking
+			       __restrict vec3_soa * tkloc_h, // parking
+			       __restrict vec3_soa * tkloc_s, // parking
+			       __restrict vec3_soa * tkloc_p, // parking
+			       __restrict vec3_soa * tk_p_shiftferm//parking variable [max_approx_order]
+			       ){
+  //__restrict ACC_ShiftFermion *k_p_shiftferm){
+  
   printf("############################################ \n");
   printf("#### Inside fermion force soloopenacc ###### \n");
   printf("############################################ \n");

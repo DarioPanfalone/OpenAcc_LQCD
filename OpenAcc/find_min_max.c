@@ -114,9 +114,9 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
 
   printf("    Inside find_min_max_eigenvalue_soloopenacc : OK \n");
   minmax[0] = pars->ferm_mass * pars->ferm_mass;
-  printf("    Computed the min eig : OK \n");
+  printf("    Computed the min eig : OK   [min= %.18lf ]  \n",minmax[0]);
   minmax[1] = ker_find_max_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p1);
-  printf("    Computed the max eig : OK \n");
+  printf("    Computed the max eig : OK   [max= %.18lf ]  \n",minmax[1]);
 
   //  ora il minimo e' messo a m*m, volendo lo si puo' calcolare con la routine seguente.
   //  minmax[0] = ker_find_min_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2
