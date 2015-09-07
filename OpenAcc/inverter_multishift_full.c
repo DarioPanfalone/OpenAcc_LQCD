@@ -197,16 +197,18 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
 #pragma acc loop independent
     for(ih=0; ih < sizeh; ih++){
 
+      int ordine=approx->approx_order;
       out->c0[ih] =  in->c0[ih]*approx->RA_a0;
       out->c1[ih] =  in->c1[ih]*approx->RA_a0;
       out->c2[ih] =  in->c2[ih]*approx->RA_a0;
 
-      for(iter=0; iter<approx->approx_order; iter++){  // questo loop non lo vogliamo parallelizzare per forza ... forse puo andare bene cosi'
+      for(iter=0; iter<ordine; iter++){  // questo loop non lo vogliamo parallelizzare per forza ... forse puo andare bene cosi'
 	out->c0[ih] +=  approx->RA_a[iter] * in_shifted[iter].c0[ih];
 	out->c1[ih] +=  approx->RA_a[iter] * in_shifted[iter].c1[ih];
 	out->c2[ih] +=  approx->RA_a[iter] * in_shifted[iter].c2[ih];
-
       }
+
+
 
 
     }
