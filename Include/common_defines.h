@@ -37,8 +37,8 @@
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
 
-#define mass 0.03
-#define beta 6.0
+#define mass 0.075
+#define beta 5.35
 
 const int no_flavours=2; // number of quark species
 
@@ -65,9 +65,9 @@ const double ez_quantum=0.0;
 #define max_cg 10000
 
 
-#define no_md 18 // number of MD steps
+#define no_md 8 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
-#define gauge_scale 5  // Update fermions every gauge_scale gauge updates
+#define gauge_scale 4  // Update fermions every gauge_scale gauge updates
 
 
 typedef struct COM_t{

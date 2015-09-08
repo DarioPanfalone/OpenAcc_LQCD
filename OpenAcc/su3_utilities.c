@@ -1017,17 +1017,19 @@ static inline void project_on_su3(__restrict su3_soa * const cnf,
   cnf->r1.c0[idx_cnf] = AUX->comp[1][0];
   cnf->r1.c1[idx_cnf] = AUX->comp[1][1];
   cnf->r1.c2[idx_cnf] = AUX->comp[1][2];
+
   // temporaneo --> poi togliere!!
-cnf->r2.c0[idx_cnf]= conj(AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1]);
-cnf->r2.c1[idx_cnf]= conj(AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2]);
-cnf->r2.c2[idx_cnf]= conj(AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * AUX->comp[1][0]);
+  //   cnf->r2.c0[idx_cnf]= conj(AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1]);
+  //   cnf->r2.c1[idx_cnf]= conj(AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2]);
+  //   cnf->r2.c2[idx_cnf]= conj(AUX->comp[0][0] * AUX->comp[1][1] - AUX->comp[0][1] * AUX->comp[1][0]);
+  
 }
 
 
 
 void kernel_acc_mom_exp_times_conf( __restrict su3_soa * const conf,
 				    thmat_soa * const mom, // e' costante e qui dentro non viene modificato
-				    double * factor,
+				    double * factor, // questo e' il vettore delta dove sono contenuti tutti i dt richiesti nell'omelyan
 				    int id_factor){
 
   int x, y, z, t;
@@ -1067,13 +1069,15 @@ void kernel_acc_mom_exp_times_conf( __restrict su3_soa * const conf,
 
 
 
+
+// Ora che abbiamo tolto i prodotti con le fasi staggered questo e' diventato un wrapper inutile... lo togliamo poi ... 
 void mom_exp_times_conf_soloopenacc( __restrict  su3_soa * const tconf_acc,
 				     thmat_soa * const tmomenta, // e' costante e qui dentro non viene modificata
 				     double * tdelta,
 				     int id_delta){
-  mult_conf_times_stag_phases(tconf_acc);
+  //    mult_conf_times_stag_phases(tconf_acc);  // toglie le fasi staggered dalla conf
   kernel_acc_mom_exp_times_conf(tconf_acc,tmomenta,tdelta, id_delta);
-  mult_conf_times_stag_phases(tconf_acc);
+  //    mult_conf_times_stag_phases(tconf_acc); // rimette le fasi staggered nella conf
 }
 
 
@@ -1101,13 +1105,13 @@ void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __res
   struct timeval t1,t2;
   gettimeofday ( &t1, NULL );
 
-  mult_conf_times_stag_phases(tconf_acc);
+  //  mult_conf_times_stag_phases(tconf_acc);
 
   set_su3_soa_to_zero(local_staples);
   calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
   conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);  
 
-  mult_conf_times_stag_phases(tconf_acc);
+  //  mult_conf_times_stag_phases(tconf_acc);
 
   gettimeofday ( &t2, NULL );
 

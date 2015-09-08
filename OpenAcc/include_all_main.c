@@ -53,7 +53,7 @@ int main(){
   // Intel XeonPhi
   //acc_device_t my_device_type = acc_device_xeonphi;
   // Select device ID
-  int dev_index = 0;
+  int dev_index = 1;
   SELECT_INIT_ACC_DEVICE(my_device_type, dev_index);
   printf("Device Selected : OK \n");
   /////////////////////////////////////////////////////////////////////////////////////////////////

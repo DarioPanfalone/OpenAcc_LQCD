@@ -26,6 +26,9 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  // Step for the P
  // P' = P - l*dt*dS/dq
  // delta[3]=-cimag(ieps_acc)*scale*lambda;
+
+ mult_conf_times_stag_phases(tconf_acc);
+
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
  mom_sum_mult(tmomenta,tipdot,delta,3);
  for(md=1; md<gauge_scale; md++){
@@ -68,6 +71,9 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  // delta[3]=-cimag(ieps_acc)*lambda*scale;
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
  mom_sum_mult(tmomenta,tipdot,delta,3);
+
+
+ mult_conf_times_stag_phases(tconf_acc);
  
  }
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,

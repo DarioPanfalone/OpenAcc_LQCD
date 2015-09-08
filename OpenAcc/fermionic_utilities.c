@@ -15,21 +15,6 @@
 #ifndef FERMIONIC_UTILITIES_C_
 #define FERMIONIC_UTILITIES_C_
 
-/*
-static inline void scal_prod_loc_2double( const __restrict vec3_soa * const in_vect1,
-                                          const __restrict vec3_soa * const in_vect2,
-                                          const int idx_vect,
-                                          double *res_ri
-                                          ) {
-
-  d_complex sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
-  sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
-  sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
-
-  res_ri[0] = creal(sum);
-  res_ri[1] = cimag(sum);
-}
-*/
 
 static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect1,
 					     __restrict vec3_soa * const in_vect2,
@@ -65,31 +50,32 @@ static inline double l2norm2_loc( __restrict vec3_soa * const in_vect1,
 }
 
 
-/*
+
 d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
 			     const __restrict vec3_soa * const in_vect2
 			     ){
   int t;
-  d_complex res = 0.0 + 0.0I;
-  double * res_RI_p;
-  posix_memalign((void **)&res_RI_p, 64, 2*sizeof(double));
 
-  res_RI_p[0]=0.0;
-  res_RI_p[1]=0.0;
+
   double resR = 0.0;
   double resI = 0.0;
 
 #pragma acc kernels present(in_vect1) present(in_vect2)
 #pragma acc loop reduction(+:resR) reduction(+:resI)
   for(t=0; t<sizeh; t++) {
-    scal_prod_loc_2double(in_vect1,in_vect2,t,res_RI_p);
-    resR+=res_RI_p[0];
-    resI+=res_RI_p[1];
+  d_complex color_sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
+  color_sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
+  color_sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
+
+
+  resR+=creal(color_sum);
+  resI+=cimag(color_sum);
+
   }
-  res = resR+resI*1.0I;
+  res = resR+resI*I;
   return res;
 }
-*/
+
 
 double real_scal_prod_global(  __restrict vec3_soa * const in_vect1,
 			       __restrict vec3_soa * const in_vect2
@@ -527,6 +513,50 @@ void multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1( __restrict ve
 
   } //ia
 
+  } //acc data
+
+}
+void combine_in1_x_fact1_minus_in2_back_into_in2( __restrict vec3_soa * const in1, double fact1, __restrict vec3_soa * const in2 ) {
+
+  int ih;
+
+
+  #pragma acc kernels present(in1) present(in2) 
+  {
+
+
+#pragma acc loop independent gang vector(512)
+    for(ih=0; ih<sizeh; ih++) {
+
+
+        in2->c0[ih] = fact1 * (in1->c0[ih]) - (in2->c0[ih]);
+        in2->c1[ih] = fact1 * (in1->c1[ih]) - (in2->c1[ih]);
+        in2->c2[ih] = fact1 * (in1->c2[ih]) - (in2->c2[ih]);
+
+    } //ih
+  } //acc data
+
+}
+
+
+void combine_in1_minus_in2_allxfact( __restrict vec3_soa * const in1, __restrict vec3_soa * const in2, double fact, _restrict vec3_soa * const out ) {
+
+  int ih;
+
+
+#pragma acc kernels present(in1) present(in2) present(out) 
+  {
+
+
+#pragma acc loop independent gang vector(512)
+    for(ih=0; ih<sizeh; ih++) {
+
+
+        out->c0[ih] = fact * (in1->c0[ih] - in2->c0[ih]);
+        out->c1[ih] = fact * (in1->c1[ih] - in2->c1[ih]);
+        out->c2[ih] = fact * (in1->c2[ih] - in2->c2[ih]);
+
+    } //ih
   } //acc data
 
 }
