@@ -6,8 +6,8 @@
  * and the Openacc Version               *
  * ***************************************/
 
-//#define BACKFIELD
-//#define IMCHEMPOT
+#define BACKFIELD
+#define IMCHEMPOT
 
 // se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
 // di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
@@ -30,9 +30,9 @@
 
 // lattice dimensions
 #define nx 16
-#define ny 8
-#define nz 4
-#define nt 2
+#define ny 16
+#define nz 16
+#define nt 16
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -57,7 +57,7 @@ const double bx_quantum=0.0;
 const double ex_quantum=0.0;
 const double by_quantum=0.0;
 const double ey_quantum=0.0;
-const double bz_quantum=0.0;
+const double bz_quantum=32.0;
 const double ez_quantum=0.0;
 
 #define no_ps 2
@@ -65,7 +65,7 @@ const double ez_quantum=0.0;
 #define max_cg 10000
 
 
-#define no_md 10 // number of MD steps
+#define no_md 18 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
 #define gauge_scale 5  // Update fermions every gauge_scale gauge updates
 
