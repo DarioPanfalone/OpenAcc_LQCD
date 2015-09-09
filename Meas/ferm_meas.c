@@ -45,6 +45,12 @@ d_complex chiral_condensate(vec3_soa * rnd_e,
      
 }
 
+void perform_chiral_measures(){
+
+
+}
+
+
 
 
 /*

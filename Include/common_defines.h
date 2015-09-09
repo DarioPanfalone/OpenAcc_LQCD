@@ -6,8 +6,8 @@
  * and the Openacc Version               *
  * ***************************************/
 
-#define BACKFIELD
-#define IMCHEMPOT
+//#define BACKFIELD
+//#define IMCHEMPOT
 
 // se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
 // di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
@@ -57,7 +57,7 @@ const double bx_quantum=0.0;
 const double ex_quantum=0.0;
 const double by_quantum=0.0;
 const double ey_quantum=0.0;
-const double bz_quantum=32.0;
+const double bz_quantum=0.0;
 const double ez_quantum=0.0;
 
 #define no_ps 2

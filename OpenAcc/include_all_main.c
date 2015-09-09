@@ -82,6 +82,7 @@ int main(){
     for(int id_iter=0;id_iter<20;id_iter++){
       printf("Before therm update %d : OK \n",id_iter);
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,0);
+      perform_chiral_measures();
       printf("After therm update %d : OK \n",id_iter);
 #pragma acc update host(conf_acc[0:8])
       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
@@ -89,7 +90,7 @@ int main(){
     }
     ////////////////   METROTEST   //////////////////////////////////////////////////////////////////
     accettate=0;
-    for(int id_iter=0;id_iter<100;id_iter++){
+    for(int id_iter=0;id_iter<1000;id_iter++){
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,1);
 #pragma acc update host(conf_acc[0:8])
       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);

@@ -56,24 +56,22 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
 			     ){
   int t;
 
-
   double resR = 0.0;
   double resI = 0.0;
 
 #pragma acc kernels present(in_vect1) present(in_vect2)
 #pragma acc loop reduction(+:resR) reduction(+:resI)
   for(t=0; t<sizeh; t++) {
-  d_complex color_sum  =  conj(in_vect1->c0[idx_vect]) *  in_vect2->c0[idx_vect] ;
-  color_sum +=  conj(in_vect1->c1[idx_vect]) *  in_vect2->c1[idx_vect] ;
-  color_sum +=  conj(in_vect1->c2[idx_vect]) *  in_vect2->c2[idx_vect] ;
+  d_complex color_sum  =  conj(in_vect1->c0[t]) *  in_vect2->c0[t] ;
+  color_sum +=  conj(in_vect1->c1[t]) *  in_vect2->c1[t] ;
+  color_sum +=  conj(in_vect1->c2[t]) *  in_vect2->c2[t] ;
 
 
   resR+=creal(color_sum);
   resI+=cimag(color_sum);
 
   }
-  res = resR+resI*I;
-  return res;
+  return resR+resI*I;
 }
 
 
@@ -539,7 +537,7 @@ void combine_in1_x_fact1_minus_in2_back_into_in2( __restrict vec3_soa * const in
 }
 
 
-void combine_in1_minus_in2_allxfact( __restrict vec3_soa * const in1, __restrict vec3_soa * const in2, double fact, _restrict vec3_soa * const out ) {
+void combine_in1_minus_in2_allxfact( __restrict vec3_soa * const in1, __restrict vec3_soa * const in2, double fact, __restrict vec3_soa * const out ) {
 
   int ih;
 
