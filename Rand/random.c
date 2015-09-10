@@ -11,7 +11,7 @@ dsfmt_t dsfmt;
 double casuale(void)
    {   
      return dsfmt_genrand_open_open(&dsfmt);
-     //     return (double)rand()/((double)(RAND_MAX));
+     //return (double)rand()/((double)(RAND_MAX));
    }
 
 
