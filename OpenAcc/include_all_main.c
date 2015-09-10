@@ -17,10 +17,12 @@ void su2_rand(double *pp);
 #include "./inverter_multishift_full.c"
 #include "./md_integrator.c"
 #include "./md_integrator_soloopenacc.c"
+#include "../Meas/ferm_meas.c"
 
 
 int main(){
 
+  initrand(0);
   fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
   su3_soa  * conf_acc;
@@ -63,6 +65,8 @@ int main(){
   generate_Conf_cold(conf_acc);
   printf("Gauge conf generated : OK \n");
 
+
+
   /*
   read_su3_soa(conf_acc,"configurazione");
   printf("Gauge conf read from file : OK \n");
@@ -82,16 +86,41 @@ int main(){
     for(int id_iter=0;id_iter<20;id_iter++){
       printf("Before therm update %d : OK \n",id_iter);
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,0);
-      perform_chiral_measures();
+
+      /// MISURA ROBA FERMIONICA //////
+      FILE *outfile = fopen(nome_file_ferm_output,"at");
+      if(!outfile) outfile = fopen(nome_file_ferm_output,"wt");
+      if(outfile){
+	fprintf(outfile,"%d\t",id_iter);
+	for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),residue_metro,outfile);
+	fprintf(outfile,"\n");
+      }
+      fclose(outfile);
+      ////////////////////////////////// 
+      
       printf("After therm update %d : OK \n",id_iter);
 #pragma acc update host(conf_acc[0:8])
       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
       printf("Therm_iter %d   Placchetta=%.18lf \n",id_iter,plq/size/6.0/3.0);
     }
+
+
     ////////////////   METROTEST   //////////////////////////////////////////////////////////////////
     accettate=0;
     for(int id_iter=0;id_iter<1000;id_iter++){
       accettate = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter,accettate,1);
+
+      /// MISURA ROBA FERMIONICA //////
+      FILE *outfile = fopen(nome_file_ferm_output,"at");
+      if(!outfile) outfile = fopen(nome_file_ferm_output,"wt");
+      if(outfile){
+	fprintf(outfile,"%d\t",id_iter);
+	for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),residue_metro,outfile);
+	fprintf(outfile,"\n");
+      }
+      fclose(outfile);
+      /////////////////////////////////
+
 #pragma acc update host(conf_acc[0:8])
       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
       printf("Metro_iter %d   Placchetta=%.18lf \n",id_iter,plq/size/6.0/3.0);
