@@ -114,6 +114,13 @@ typedef struct tamat_soa_t {
   double rc00[sizeh];   // Im(comp_00)
   double rc11[sizeh];   // Im(comp_11)
 } tamat_soa;
+typedef struct single_tamat_t {
+  d_complex c01; // comp_01
+  d_complex c02; // comp_02
+  d_complex c12; // comp_12
+  double rc00;   // Im(comp_00)
+  double rc11;   // Im(comp_11)
+} single_tamat;
 
 typedef struct thmat_soa_t {
   d_complex c01[sizeh]; // comp_01
@@ -122,6 +129,15 @@ typedef struct thmat_soa_t {
   double rc00[sizeh];   // Re(comp_00)
   double rc11[sizeh];   // Re(comp_11)
 } thmat_soa;
+typedef struct single_thmat_t {
+  d_complex c01; // comp_01
+  d_complex c02; // comp_02
+  d_complex c12; // comp_12
+  double rc00;   // Re(comp_00)
+  double rc11;   // Re(comp_11)
+} single_thmat;
+
+
 
 
 

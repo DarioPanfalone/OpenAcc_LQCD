@@ -1,6 +1,8 @@
 #ifndef COMMON_DEFINES_H_
 #define COMMON_DEFINES_H_
 
+#include "../RationalApprox/rationalapprox.c"
+
 /*****************************************
  * This file is included both in the c++ *
  * and the Openacc Version               *
