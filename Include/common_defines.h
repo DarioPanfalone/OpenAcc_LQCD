@@ -43,10 +43,10 @@
 #define beta 5.35
 
 const int no_flavours=2; // number of quark species
-const int start_opt=1;// 0 --> COLD START; 1 --> START FROM SAVED CONF
+const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=13; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-int therm_ITERATIONS = 44; // the first <therm_ITERATIONS> of the history will be thermalization updates
+int ITERATIONS=3000; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int therm_ITERATIONS = 40; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=10;
 
@@ -64,7 +64,7 @@ const double bx_quantum=0.0;
 const double ex_quantum=0.0;
 const double by_quantum=0.0;
 const double ey_quantum=0.0;
-const double bz_quantum=0.0;
+const double bz_quantum=32.0;
 const double ez_quantum=0.0;
 
 #define no_ps 2

@@ -171,6 +171,9 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 #ifdef IMCHEMPOT
 	  double imchempot = pars->ferm_im_chem_pot/((double)(nt));
 #endif
+#ifdef BACKFIELD
+	  double charge = (double)(pars->ferm_charge);
+#endif
 	  int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, eta, matdir;
 	  vec3 aux;
 	  double arg;
@@ -201,7 +204,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 	  matdir = 0;
 	  eta = 1;
 #ifdef BACKFIELD
-	  arg   = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg   = backfield[matdir].d[idxh] * charge;
 	  phase = cos(arg) + I * sin(arg);
 	  aux   = mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(xp,y,z,t) , phase);
 #else
@@ -212,7 +215,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 	  matdir = 2;
 	  eta = 1 - ( 2*(x & 0x1) ); // if (x % 2 = 0) eta = 1 else -1                       
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[idxh] * charge;
 	  phase = cos(arg) + I * sin(arg);
 	  aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,yp,z,t) , phase) );
 #else
@@ -223,7 +226,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 	  matdir = 4;
 	  eta = 1 - ( 2*((x+y) & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[idxh] * charge;
 	  phase = cos(arg) + I * sin(arg);
 	  aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,zp,t) , phase) );
 #else
@@ -240,7 +243,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 #endif
 	  arg = 0;
 #ifdef BACKFIELD
-	  arg   += backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg   += backfield[matdir].d[idxh] * charge;
 #endif
 #ifdef IMCHEMPOT
 	  arg   += imchempot;
@@ -256,7 +259,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 	  matdir = 1;
 	  eta = 1;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[snum_acc(xm,y,z,t)] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(xm,y,z,t)] * charge;
 	  phase = cos(arg) - I * sin(arg);
 	  aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(xm,y,z,t), eta, in, snum_acc(xm,y,z,t) , phase) );
 #else
@@ -266,7 +269,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 	  matdir = 3;
 	  eta = 1 - ( 2*(x & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[snum_acc(x,ym,z,t)] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(x,ym,z,t)] * charge;
 	  phase = cos(arg) - I * sin(arg);
 	  aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,ym,z,t), eta, in, snum_acc(x,ym,z,t) , phase) );
 #else
@@ -276,7 +279,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 	  matdir = 5;
 	  eta = 1 - ( 2*((x+y) & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[snum_acc(x,y,zm,t)] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(x,y,zm,t)] * charge;
 	  phase = cos(arg) - I * sin(arg);
 	  aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,zm,t), eta, in, snum_acc(x,y,zm,t) , phase) );
 #else
@@ -292,7 +295,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 	  
 	  arg = 0;
 #ifdef BACKFIELD
-	  arg   += backfield[matdir].d[snum_acc(x,y,z,tm)] * pars->ferm_charge;
+	  arg   += backfield[matdir].d[snum_acc(x,y,z,tm)] * charge;
 #endif
 #ifdef IMCHEMPOT
 	  arg   += imchempot;
@@ -342,6 +345,9 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 #ifdef IMCHEMPOT
 	  double imchempot = pars->ferm_im_chem_pot/((double)(nt));
 #endif
+#ifdef BACKFIELD
+          double charge = (double)(pars->ferm_charge);
+#endif
           x = 2*hx + ((y+z+t+1) & 0x1);
 
           idxh = snum_acc(x,y,z,t);
@@ -369,7 +375,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 1;
           eta = 1;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[idxh] * charge;
 	  phase = cos(arg) + I * sin(arg);
           aux = mat_vec_mul( &u[1], idxh, eta, in, snum_acc(xp,y,z,t) , phase);
 #else
@@ -379,7 +385,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 3;
           eta = 1 - ( 2*(x & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[idxh] * charge;
 	  phase = cos(arg) + I * sin(arg);
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,yp,z,t) , phase) );
 #else
@@ -389,7 +395,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 5;
           eta = 1 - ( 2*((x+y) & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[idxh] * pars->ferm_charge;
+	  arg = backfield[matdir].d[idxh] * charge;
 	  phase = cos(arg) + I * sin(arg);
           aux = sumResult(aux, mat_vec_mul( &u[matdir], idxh, eta, in, snum_acc(x,y,zp,t) , phase) );
 #else
@@ -404,7 +410,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 
           arg = 0;
 #ifdef BACKFIELD
-          arg   += backfield[matdir].d[idxh] * pars->ferm_charge;
+          arg   += backfield[matdir].d[idxh] * charge;
 #endif
 #ifdef IMCHEMPOT
           arg   += imchempot;
@@ -421,7 +427,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 0;
           eta = 1;
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[snum_acc(xm,y,z,t)] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(xm,y,z,t)] * charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(xm,y,z,t), eta, in, snum_acc(xm,y,z,t) , phase) );
 #else
@@ -431,7 +437,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 2;
           eta = 1 - ( 2*(x & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[snum_acc(x,ym,z,t)] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(x,ym,z,t)] * charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,ym,z,t), eta, in, snum_acc(x,ym,z,t) , phase) );
 #else
@@ -441,7 +447,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
           matdir = 4;
           eta = 1 - ( 2*((x+y) & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[matdir].d[snum_acc(x,y,zm,t)] * pars->ferm_charge;
+	  arg = backfield[matdir].d[snum_acc(x,y,zm,t)] * charge;
 	  phase = cos(arg) - I * sin(arg);
           aux = subResult(aux, conjmat_vec_mul( &u[matdir], snum_acc(x,y,zm,t), eta, in, snum_acc(x,y,zm,t) , phase) );
 #else
@@ -455,7 +461,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 #endif
           arg = 0;
 #ifdef BACKFIELD
-          arg   += backfield[matdir].d[snum_acc(x,y,z,tm)] * pars->ferm_charge;
+          arg   += backfield[matdir].d[snum_acc(x,y,z,tm)] * charge;
 #endif
 #ifdef IMCHEMPOT
           arg   += imchempot;

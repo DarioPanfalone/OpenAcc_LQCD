@@ -255,6 +255,7 @@ void generate_vec3_soa_z2noise(__restrict vec3_soa * const vect){
   }
 }
 
+/*
 void init_backfield(){
   int X,T,Z,Y;
   double  arg;
@@ -325,12 +326,92 @@ void init_backfield(){
 	      arg -= ((double)(y+1))*((double)ey_quantum)/(((double)ny)*((double)nt));
 	      arg -= ((double)(x+1))*((double)ex_quantum)/(((double)nx)*((double)nt));
 	      u1_back_field_phases[6+parity].d[idxh]= arg;
-	    }
-	  }
-	}
-      }
-    }
+	    } // evod loop
+	  } // hx loop
+	} // y loop
+      } // z loop
+    } // t loop
 }
+*/
+
+
+
+void init_backfield(){
+  int X,T,Z,Y;
+  double  arg;
+
+  int x, y, z, t, parity,idxh;
+    for(t=0; t < nt; t++){
+      for(z=0; z < nz; z++){
+	for(y=0; y < ny; y++){
+	  for(x=0; x < nx; x++){
+	    
+	      if((x+y+z+t)%2==0){
+		parity = 0; //pari
+	      }else{
+		parity = 1; //dispari
+	      }
+	      idxh = snum_acc(x,y,z,t);
+	      
+	      X = x + 1;
+	      Y = y + 1;
+	      Z = z + 1;
+	      
+	      ////////X-oriented////////
+	      // X even --> dir=0
+	      // X odd  --> dir=1
+	      if(X == nx){             // x-oriented links on the boundary
+		arg = ((double)(y+1))*((double)nx)*((double)bz_quantum)/(((double)nx)*((double)ny));
+		arg += ((double)(t+1))*((double)nx)*((double)ex_quantum)/(((double)nx)*((double)nt));
+		arg -= ((double)(z+1))*((double)by_quantum)/(((double)nz)*((double)nx));
+		u1_back_field_phases[parity].d[idxh]= arg; 
+	      }
+	      else {
+		arg = -((double)(z+1))*((double)by_quantum)/(((double)nz)*((double)nx));
+		u1_back_field_phases[parity].d[idxh]= arg; 
+	      }
+	      
+	      ////////Y-oriented/////////
+	      // Y even --> dir=2
+	      // Y odd  --> dir=3
+	      if(Y == ny){             // y-oriented links on the boundary
+		arg = ((double)(z+1))*((double)ny)*((double)bx_quantum)/(((double)ny)*((double)nz));
+		arg += ((double)(t+1))*((double)ny)*((double)ey_quantum)/(((double)ny)*((double)nt));
+		arg -= ((double)(x+1))*((double)bz_quantum)/(((double)nx)*((double)ny));
+		u1_back_field_phases[2+parity].d[idxh]= arg;
+	      }
+	      else {
+		arg = -((double)(x+1))*((double)bz_quantum)/(((double)nx)*((double)ny));
+		u1_back_field_phases[2+parity].d[idxh]= arg;
+	      }
+
+	      ////////Z-oriented////////
+	      // Z even --> dir=4
+	      // Z odd  --> dir=5
+	      if(Z == nz){          // z-oriented links on the boundary
+		arg = ((double)(t+1))*((double)nz)*((double)ez_quantum)/(((double)nz)*((double)nt));
+		arg += ((double)(x+1))*((double)nz)*((double)by_quantum)/(((double)nz)*((double)nx));
+		arg -= ((double)(y+1))*((double)bx_quantum)/(((double)ny)*((double)nz));
+		u1_back_field_phases[4+parity].d[idxh]= arg;
+	      }
+	      else{
+		arg = -((double)(y+1))*((double)bx_quantum)/(((double)ny)*((double)nz));
+		u1_back_field_phases[4+parity].d[idxh]= arg;
+	      }
+
+	      ///////T-oriented////////
+	      // T even --> dir=6
+	      // T odd  --> dir=7
+	      arg = -((double)(z+1))*((double)ez_quantum)/(((double)nz)*((double)nt));
+	      arg -= ((double)(y+1))*((double)ey_quantum)/(((double)ny)*((double)nt));
+	      arg -= ((double)(x+1))*((double)ex_quantum)/(((double)nx)*((double)nt));
+	      u1_back_field_phases[6+parity].d[idxh]= arg;
+	  } // x loop
+	} // y loop
+      } // z loop
+    } // t loop
+}
+
 
 #endif
 

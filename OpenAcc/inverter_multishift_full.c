@@ -202,6 +202,7 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
       out->c1[ih] =  in->c1[ih]*approx->RA_a0;
       out->c2[ih] =  in->c2[ih]*approx->RA_a0;
 
+#pragma acc loop seq
       for(iter=0; iter<ordine; iter++){  // questo loop non lo vogliamo parallelizzare per forza ... forse puo andare bene cosi'
 	out->c0[ih] +=  approx->RA_a[iter] * in_shifted[iter].c0[ih];
 	out->c1[ih] +=  approx->RA_a[iter] * in_shifted[iter].c1[ih];
@@ -448,6 +449,10 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
           double imchempot = tpars->ferm_im_chem_pot/((double)(nt));
 #endif
 
+#ifdef BACKFIELD
+          double charge = (double)(tpars->ferm_charge);
+#endif
+
           //even sites
           x = 2*hx + ((y+z+t) & 0x1);
           idxh = snum_acc(x,y,z,t);
@@ -455,7 +460,7 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
           // dir  0  =  x even   --> eta = 1 , no multiplication needed
 	  eta = 1;
 #ifdef BACKFIELD
-	  arg = backfield[0].d[idxh] * tpars->ferm_charge;
+	  arg = backfield[0].d[idxh] * charge;
           phase = cos(arg) + I * sin(arg);
 	  mat1_times_auxmat_into_tamat(&u[0],idxh,eta,&auxmat[0],idxh,&ipdot[0],idxh,phase);
 #else
@@ -466,7 +471,7 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
           // dir  2  =  y even
           eta = 1 - ( 2*(x & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[2].d[idxh] * tpars->ferm_charge;
+	  arg = backfield[2].d[idxh] * charge;
           phase = cos(arg) + I * sin(arg);
 	  mat1_times_auxmat_into_tamat(&u[2],idxh,eta,&auxmat[2],idxh,&ipdot[2],idxh,phase);
 #else
@@ -477,7 +482,7 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
           // dir  4  =  z even
           eta = 1 - ( 2*((x+y) & 0x1) );
 #ifdef BACKFIELD
-	  arg = backfield[4].d[idxh] * tpars->ferm_charge;
+	  arg = backfield[4].d[idxh] * charge;
           phase = cos(arg) + I * sin(arg);
 	  mat1_times_auxmat_into_tamat(&u[4],idxh,eta,&auxmat[4],idxh,&ipdot[4],idxh,phase);
 #else
@@ -491,7 +496,7 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
 #endif
 	  arg = 0;
 #ifdef BACKFIELD
-	  arg += backfield[6].d[idxh] * tpars->ferm_charge;
+	  arg += backfield[6].d[idxh] * charge;
 #endif
 #ifdef IMCHEMPOT
           arg += imchempot;
@@ -537,6 +542,9 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 #ifdef IMCHEMPOT
           double imchempot = tpars->ferm_im_chem_pot/((double)(nt));
 #endif
+#ifdef BACKFIELD
+          double charge = (double)(tpars->ferm_charge);
+#endif
 
           //odd sites
           x = 2*hx + ((y+z+t+1) & 0x1);
@@ -544,7 +552,7 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
           // dir  1  =  x odd    --> eta = 1 , no multiplication needed
 	  eta = 1;
 #ifdef BACKFIELD
-          arg = backfield[1].d[idxh] * tpars->ferm_charge;
+          arg = backfield[1].d[idxh] * charge;
           phase = cos(arg) + I * sin(arg);
           mat1_times_auxmat_into_tamat(&u[1],idxh,eta,&auxmat[1],idxh,&ipdot[1],idxh,phase);
 #else
@@ -554,7 +562,7 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
           // dir  3  =  y odd
           eta = 1 - ( 2*(x & 0x1) );
 #ifdef BACKFIELD
-          arg = backfield[3].d[idxh] * tpars->ferm_charge;
+          arg = backfield[3].d[idxh] * charge;
           phase = cos(arg) + I * sin(arg);
           mat1_times_auxmat_into_tamat(&u[3],idxh,eta,&auxmat[3],idxh,&ipdot[3],idxh,phase);
 #else
@@ -564,7 +572,7 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
           // dir  5  =  z odd
 	  eta = 1 - ( 2*((x+y) & 0x1) );
 #ifdef BACKFIELD
-          arg = backfield[5].d[idxh] * tpars->ferm_charge;
+          arg = backfield[5].d[idxh] * charge;
           phase = cos(arg) + I * sin(arg);
           mat1_times_auxmat_into_tamat(&u[5],idxh,eta,&auxmat[5],idxh,&ipdot[5],idxh,phase);
 #else
@@ -578,7 +586,7 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 #endif
           arg = 0;
 #ifdef BACKFIELD
-          arg += backfield[7].d[idxh] * tpars->ferm_charge;
+          arg += backfield[7].d[idxh] * charge;
 #endif
 #ifdef IMCHEMPOT
           arg += imchempot;
