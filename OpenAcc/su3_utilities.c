@@ -1102,8 +1102,11 @@ double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __res
 
 
 void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
+
+#ifdef TIMING_ALL
   struct timeval t1,t2;
   gettimeofday ( &t1, NULL );
+#endif
 
   //  mult_conf_times_stag_phases(tconf_acc);
 
@@ -1113,10 +1116,11 @@ void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __res
 
   //  mult_conf_times_stag_phases(tconf_acc);
 
+#ifdef TIMING_ALL
   gettimeofday ( &t2, NULL );
-
   double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
   printf("FULL STAPLES CALC OPENACC                       PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+#endif
 
 }
 

@@ -44,6 +44,7 @@ void print_su3_soa(su3_soa * const conf, const char* nomefile){
 
     FILE *fp;
     fp = fopen(nomefile,"w");
+    fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
             fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c0[i]),cimag(conf[q].r0.c0[i]));
@@ -64,6 +65,14 @@ void read_su3_soa(su3_soa * conf, const char* nomefile){
 
   FILE *fp;
   fp = fopen(nomefile,"r");
+
+  int nxt,nyt,nzt,ntt;
+  fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,&conf_id_iter);
+  if((nx!=nxt)||(ny!=nyt)||(nz!=nzt)||(nz!=nzt)){
+    printf(" Errore: DIMENSIONI DELLA CONFIGURAZIONE LETTA DIVERSE DA QUELLE ATTESE\n");
+    abort();
+  }
+
   for(int q = 0 ; q < 8 ; q++)
     for(int i = 0 ; i < sizeh ; i++){
       double re,im;

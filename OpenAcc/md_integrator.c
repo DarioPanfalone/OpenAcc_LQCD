@@ -100,15 +100,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 {
 
  
-  printf("######################################## \n");
-  printf("## Inside multistep_2MN_SOLOOPENACC() ## \n");
-  printf("######################################## \n");
-
-
-
-
-
-
   int md;
   
   // Step for the P

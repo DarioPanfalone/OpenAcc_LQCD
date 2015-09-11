@@ -39,11 +39,18 @@
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
 
+//#define TIMING_ALL // if defined many computation times are printed in the output
+
 #define mass 0.075
 #define beta 5.35
 
 const int no_flavours=2; // number of quark species
+const int start_opt=1;// 0 --> COLD START; 1 --> START FROM SAVED CONF
+int conf_id_iter;
+int ITERATIONS=13; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int therm_ITERATIONS = 44; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
+int save_conf_every=10;
 
 #define max_approx_order 19
 int approx_metro=19;

@@ -1,12 +1,16 @@
 // se metro==1 allora fa il test di metropolis
 // se metro==0 allora non fa il test di metropolis --> termalizzazione
+
+//#define PRINT_DETAILS_INSIDE_UPDATE
+
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double res_md, int id_iter,int acc,int metro){
 
   
+  /*
   printf("############################################### \n");
   printf("## Inside UPDATE_SOLOACC_UNOSTEP_VERSATILE() ## \n");
   printf("############################################### \n");
-
+  */
 
 
   // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
@@ -42,7 +46,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
   if(metro==1){
     // store old conf   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
     set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
+#ifdef PRINT_DETAILS_INTO_UPDATE
     printf("Backup copy of the initial gauge conf : OK \n");
+#endif
+
   }
 
 #pragma acc data copyin(delta[0:7])
@@ -51,70 +58,56 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
 
     // ESTRAZIONI RANDOM
     generate_Momenta_gauss(momenta);
+#ifdef PRINT_DETAILS_INTO_UPDATE
     printf("Momenta generated : OK \n");
+#endif
+
     //    read_thmat_soa(momenta,"momenta");
 #pragma acc update device(momenta[0:8])
     
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
       int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+#ifdef PRINT_DETAILS_INTO_UPDATE
 	  printf("Ferm generation (flav=%d,ps=%d,ps_index=%d) : OK \n",iflav,ips,ps_index);
+#endif
 	  generate_vec3_soa_gauss(&ferm_phi_acc[ps_index]);
-
-	  //	  vec3_soa *temp = &ferm_phi_acc[ps_index];
-	  //	  generate_vec3_soa_gauss(temp);
-	  //#pragma acc update device(temp[0:1])
       }
     }// end for iflav
 #pragma acc update device(ferm_phi_acc[0:NPS_tot])
 
-    //    read_vec3_soa(&ferm_phi_acc[0],"phi_ps0");
-    //    read_vec3_soa(&ferm_phi_acc[1],"phi_ps1");
-    //    #pragma acc update device(ferm_phi_acc[0:2])
-    
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+#ifdef PRINT_DETAILS_INTO_UPDATE
       printf("Rat approx rescale (flav=%d) : OK \n",iflav);
+#endif
+
       // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
-
       generate_vec3_soa_gauss(kloc_p);
-      printf("    generate kloc_p: OK \n");
       generate_vec3_soa_gauss(kloc_s);
-      printf("    generate kloc_s: OK \n");      
-      /*
-      if(iflav==0){
-	read_vec3_soa(kloc_p,"kloc_p_0");
-	read_vec3_soa(kloc_s,"kloc_s_0");
-      }
-      if(iflav==1){
-	read_vec3_soa(kloc_p,"kloc_p_1");
-	read_vec3_soa(kloc_s,"kloc_s_1");
-      }
-      */
-
       // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
-      printf("    updated kloc_p and kloc_s on the device : OK \n");
+
       find_min_max_eigenvalue_soloopenacc(tconf_acc,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
+#ifdef PRINT_DETAILS_INTO_UPDATE
       printf("    find min and max eig : OK \n");
-      //#pragma acc update device(minmaxeig[0:2])
+#endif
       RationalApprox *approx_fi = &(fermions_parameters[iflav].approx_fi);
-      printf("    get approx_fi pointer : OK \n");
       RationalApprox *approx_fi_mother = &(fermions_parameters[iflav].approx_fi_mother);
-      printf("    get approx_fi_mother pointer : OK \n");
       rescale_rational_approximation(approx_fi_mother,approx_fi,minmaxeig);
+#ifdef PRINT_DETAILS_INTO_UPDATE
       printf("    rat approx rescaled : OK \n\n");
+#endif
+
 #pragma acc update device(approx_fi[0:1])
     }//end for iflav
     
     if(metro==1){
       /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
       action_in = beta_by_three*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
-      printf("Gauge action computed : OK \n");
       action_mom_in = 0.0;
       for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
-      printf("Momenta action computed : OK \n");
       action_ferm_in=0;
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
           for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
@@ -123,53 +116,26 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,double res_metro, double
               action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
           }
       }// end for iflav
-      printf("Ferm action computed : OK \n\n");
       ///////////////////////////////////////////////////////////////////////////////////////
     }
+#ifdef PRINT_DETAILS_INTO_UPDATE
+    printf(" Initial Action Computed : OK \n");
+#endif
 
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
 
         for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
 	for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
 
-
-    /*
-    ///// INIZIO ZONA DI DEBUG //////
-#pragma acc update device(ferm_chi_acc[0:2])
-#pragma acc update host(ferm_chi_acc[0:2])
-    print_vec3_soa(&(ferm_chi_acc[0]),"printed_ferm_prima_chi0");
-    print_vec3_soa(&(ferm_chi_acc[1]),"printed_ferm_prima_chi1");
-#pragma acc update host(ferm_phi_acc[0:2])
-    print_vec3_soa(&(ferm_phi_acc[0]),"printed_ferm_prima_phi0");
-    print_vec3_soa(&(ferm_phi_acc[1]),"printed_ferm_prima_phi1");
-
-#pragma acc update host(ferm_shiftmulti_acc[0:2])
-
-int iflav=0;
-int ips=0;
-
-    ///// FINE ZONA DI DEBUG //////	      
-    */
-
               int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-	      printf("First inv approx calc (flav=%d,ps=%d,ps_index=%d) : OK \n",iflav,ips,ps_index);
 	      multishift_invert(tconf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
-
-
-	      printf("    computed the inverse : OK \n");
 	      recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
-	      printf("    recombined the fermions : OK \n");
 
       }
     }// end for iflav
-    
-	/*
-    ///// INIZIO ZONA DI DEBUG //////
-#pragma acc update host(ferm_chi_acc[0:2])
-    print_vec3_soa(&(ferm_chi_acc[0]),"printed_ferm_chi0");
-    print_vec3_soa(&(ferm_chi_acc[1]),"printed_ferm_chi1");
-    ///// FINE ZONA DI DEBUG //////
-    */
+#ifdef PRINT_DETAILS_INTO_UPDATE
+	printf(" Computed the fermion CHI : OK \n");
+#endif
     
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE MD
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -187,6 +153,9 @@ int ips=0;
 
     // DINAMICA MOLECOLARE
     multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
+#ifdef PRINT_DETAILS_INTO_UPDATE
+    printf(" Molecular Dynamics Completed : OK \n");
+#endif
 
 
     if(metro==1){
@@ -214,6 +183,9 @@ int ips=0;
         recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
 	}
       }
+#ifdef PRINT_DETAILS_INTO_UPDATE
+      printf(" Final Action Computed : OK \n");
+#endif
       
       ///////////////   FINAL ACTION COMPUTATION  ////////////////////////////////////////////
       action_fin = beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
@@ -233,9 +205,11 @@ int ips=0;
 
       // delta_S = action_new - action_old
       delta_S  = - (-action_in+action_mom_in+action_ferm_in) + (-action_fin+action_mom_fin+action_ferm_fin);
+#ifdef PRINT_DETAILS_INTO_UPDATE
       printf("iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,-action_in,-action_fin);
       printf("iterazione %i:  Momen_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,action_mom_in,action_mom_fin);
       printf("iterazione %i:  Fermi_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,action_ferm_in,action_ferm_fin);
+#endif
       printf("iterazione %i:  DELTA_ACTION               = %.18lf\n",iterazioni,delta_S);
       
       if(delta_S<0){
@@ -286,16 +260,16 @@ int ips=0;
   dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
 
   if(metro==0){
-    printf("Id_iter %i   FULL UPDATE COMPUTATION TIME NOMETRO            Tot time          : %f sec  \n",id_iter,dt_tot);
-    printf("Id_iter %i                                                   PreTrans->Preker  : %f sec  \n",id_iter,dt_pretrans_to_preker);
-    printf("Id_iter %i                                                   PreKer->PostKer   : %f sec  \n",id_iter,dt_preker_to_postker);
-    printf("Id_iter %i                                                   PostKer->PostTrans: %f sec  \n",id_iter,dt_postker_to_posttrans);
+    printf("   FULL UPDATE COMPUTATION TIME NOMETRO            Tot time          : %f sec  \n",dt_tot);
+    printf("                                                   PreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
+    printf("                                                   PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+    printf("                                                   PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
   }
   if(metro==1){
-    printf("Id_iter %i   FULL UPDATE COMPUTATION TIME SIMETRO            Tot time          : %f sec  \n",id_iter,dt_tot);
-    printf("Id_iter %i                                                   PreTrans->Preker  : %f sec  \n",id_iter,dt_pretrans_to_preker);
-    printf("Id_iter %i                                                   PreKer->PostKer   : %f sec  \n",id_iter,dt_preker_to_postker);
-    printf("Id_iter %i                                                   PostKer->PostTrans: %f sec  \n",id_iter,dt_postker_to_posttrans);
+    printf("   FULL UPDATE COMPUTATION TIME SIMETRO            Tot time          : %f sec  \n",dt_tot);
+    printf("                                                   PreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
+    printf("                                                   PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+    printf("                                                   PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
   }
 
   return acc;

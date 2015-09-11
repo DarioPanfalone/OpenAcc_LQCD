@@ -12,6 +12,8 @@
 #endif
 #include <stdio.h>
 
+//#define PRINT_EIGENVALUES
+
 
 // find the maximum eigenvalue of the fermion matrix
 // use loc_h, loc_p, loc_r
@@ -90,16 +92,8 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
   double  min=max-norm;
   return min;
 }
-/*
-find_min_max_eigenvalue_soloopenacc(tconf_acc,
-                                    u1_back_field_phases,
-                                    &(fermions_parameters[iflav]),
-                                    kloc_r,
-                                    kloc_h,
-                                    kloc_p,
-                                    kloc_s,
-                                    minmaxeig);
-*/
+
+
 void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
 					   double_soa * const backfield,
 					   ferm_param *pars,
@@ -112,12 +106,12 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
   // minmax[0] --> minimo
   // minmax[1] --> massimo
 
-  printf("    Inside find_min_max_eigenvalue_soloopenacc : OK \n");
   minmax[0] = pars->ferm_mass * pars->ferm_mass;
-  printf("    Computed the min eig : OK   [min= %.18lf ]  \n",minmax[0]);
   minmax[1] = ker_find_max_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p1);
-  printf("    Computed the max eig : OK   [max= %.18lf ]  \n",minmax[1]);
 
+#ifdef PRINT_EIGENVALUES
+  printf("    Computed the min and max eigs : [ min= %.18lf; max= %.18lf ]  \n",minmax[0],minmax[1]);
+#endif
   //  ora il minimo e' messo a m*m, volendo lo si puo' calcolare con la routine seguente.
   //  minmax[0] = ker_find_min_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2
 
