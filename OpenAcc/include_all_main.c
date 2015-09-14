@@ -43,6 +43,7 @@ int main(){
   printf("nn computation : OK \n");
 #ifdef BACKFIELD
   init_backfield();
+  print_double_soa(u1_back_field_phases,"backfield");
   printf("u1_backfield initialization : OK \n");
 #endif
 
@@ -62,7 +63,7 @@ int main(){
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
   if(start_opt==0){ 
-    generate_Conf_cold(conf_acc);
+    generate_Conf_cold(conf_acc,0.0);
     printf("Cold Gauge Conf Generated : OK \n");
     conf_id_iter=0;
   }

@@ -8,8 +8,8 @@
  * and the Openacc Version               *
  * ***************************************/
 
-//#define BACKFIELD
-//#define IMCHEMPOT
+#define BACKFIELD
+#define IMCHEMPOT
 
 // se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
 // di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
@@ -47,10 +47,10 @@
 const int no_flavours=2; // number of quark species
 const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=3000; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-int therm_ITERATIONS = 40; // the first <therm_ITERATIONS> of the history will be thermalization updates
+int ITERATIONS=4000; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int therm_ITERATIONS = 60; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
-int save_conf_every=10;
+int save_conf_every=10000;
 
 #define max_approx_order 19
 int approx_metro=19;
@@ -59,7 +59,7 @@ const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_m
 const double lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double residue_metro=1.0e-8;    // stopping residual for CG
 const double residue_md=1.0e-5;    // stopping residual for CG
-const int gmp_remez_precision=100; // The precision that gmp uses                   
+const int gmp_remez_precision=100; // The precision that gmp uses
 
 // quanti di campo esterno
 const double bx_quantum=0.0;
