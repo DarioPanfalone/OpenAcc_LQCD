@@ -198,15 +198,16 @@ static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT2.comp[1][2] = mat2->r1.c2[idx_mat2];
 
   //Compute 3rd mat2 column from the first two
-  MAT2->comp[2][0] = conj(MAT2->comp[0][1] * MAT2->comp[1][2] - MAT2->comp[0][2] * MAT2->comp[1][1]);
-  MAT2->comp[2][1] = conj(MAT2->comp[0][2] * MAT2->comp[1][0] - MAT2->comp[0][0] * MAT2->comp[1][2]);
-  MAT2->comp[2][2] = conj(MAT2->comp[0][0] * MAT2->comp[1][1] - MAT2->comp[0][1] * MAT2->comp[1][0]);
+  MAT2.comp[2][0] = conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+  MAT2.comp[2][1] = conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+  MAT2.comp[2][2] = conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      AUX.comp[i][j] = (MAT1->comp[i][0] * MAT2->comp[0][j] + MAT1->comp[i][1] * MAT2->comp[1][j] + MAT1->comp[i][2] * MAT2->comp[2][j]);
+
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      AUX.comp[i][j] = (MAT1.comp[i][0] * MAT2.comp[0][j] + MAT1.comp[i][1] * MAT2.comp[1][j] + MAT1.comp[i][2] * MAT2.comp[2][j]);
     }
   }
   
@@ -220,15 +221,15 @@ static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[2][1] = conj(mat3->r1.c2[idx_mat3]);
 
   //Compute 3rd mat3 column from the first two
-  MAT1->comp[0][2] = conj(MAT1->comp[1][0] * MAT1->comp[2][1] - MAT1->comp[2][0] * MAT1->comp[1][1]);
-  MAT1->comp[1][2] = conj(MAT1->comp[2][0] * MAT1->comp[0][1] - MAT1->comp[0][0] * MAT1->comp[2][1]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[1][0] * MAT1->comp[0][1]);
+  MAT1.comp[0][2] = conj(MAT1.comp[1][0] * MAT1.comp[2][1] - MAT1.comp[2][0] * MAT1.comp[1][1]);
+  MAT1.comp[1][2] = conj(MAT1.comp[2][0] * MAT1.comp[0][1] - MAT1.comp[0][0] * MAT1.comp[2][1]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[1][0] * MAT1.comp[0][1]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      MAT2.comp[i][j] = (AUX->comp[i][0] * MAT1->comp[0][j] + AUX->comp[i][1] * MAT1->comp[1][j] + AUX->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -241,16 +242,16 @@ static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[1][1] = conj(mat4->r1.c1[idx_mat4]);
   MAT1.comp[2][1] = conj(mat4->r1.c2[idx_mat4]);
 
-  //Compute 3rd mat3 column from the first two
-  MAT1->comp[0][2] = conj(MAT1->comp[1][0] * MAT1->comp[2][1] - MAT1->comp[2][0] * MAT1->comp[1][1]);
-  MAT1->comp[1][2] = conj(MAT1->comp[2][0] * MAT1->comp[0][1] - MAT1->comp[0][0] * MAT1->comp[2][1]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[1][0] * MAT1->comp[0][1]);
+  //Compute 3rd mat4 column from the first two
+  MAT1.comp[0][2] = conj(MAT1.comp[1][0] * MAT1.comp[2][1] - MAT1.comp[2][0] * MAT1.comp[1][1]);
+  MAT1.comp[1][2] = conj(MAT1.comp[2][0] * MAT1.comp[0][1] - MAT1.comp[0][0] * MAT1.comp[2][1]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[1][0] * MAT1.comp[0][1]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      AUX.comp[i][j] = (MAT2->comp[i][0] * MAT1->comp[0][j] + MAT2->comp[i][1] * MAT1->comp[1][j] + MAT2->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      AUX.comp[i][j] = (MAT2.comp[i][0] * MAT1.comp[0][j] + MAT2.comp[i][1] * MAT1.comp[1][j] + MAT2.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -264,15 +265,15 @@ static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[2][1] = conj(mat3->r1.c2[idx_mat5]);
 
   //Compute 3rd mat5 column from the first two
-  MAT1->comp[0][2] = conj(MAT1->comp[1][0] * MAT1->comp[2][1] - MAT1->comp[2][0] * MAT1->comp[1][1]);
-  MAT1->comp[1][2] = conj(MAT1->comp[2][0] * MAT1->comp[0][1] - MAT1->comp[0][0] * MAT1->comp[2][1]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[1][0] * MAT1->comp[0][1]);
+  MAT1.comp[0][2] = conj(MAT1.comp[1][0] * MAT1.comp[2][1] - MAT1.comp[2][0] * MAT1.comp[1][1]);
+  MAT1.comp[1][2] = conj(MAT1.comp[2][0] * MAT1.comp[0][1] - MAT1.comp[0][0] * MAT1.comp[2][1]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[1][0] * MAT1.comp[0][1]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      MAT2.comp[i][j] = (AUX->comp[i][0] * MAT1->comp[0][j] + AUX->comp[i][1] * MAT1->comp[1][j] + AUX->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -285,9 +286,10 @@ static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
 
   //Compute 3rd result column from the first two
-  mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2->comp[0][1] * MAT2->comp[1][2] - MAT2->comp[0][2] * MAT2->comp[1][1]);
-  mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2->comp[0][2] * MAT2->comp[1][0] - MAT2->comp[0][0] * MAT2->comp[1][2]);
-  mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2->comp[0][0] * MAT2->comp[1][1] - MAT2->comp[0][1] * MAT2->comp[1][0]);
+  mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+  mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+  mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+
 }  // closes PPMMM
 
 
@@ -339,20 +341,20 @@ static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT2.comp[1][0] = conj(mat2->r0.c1[idx_mat2]);
   MAT2.comp[2][0] = conj(mat2->r0.c2[idx_mat2]);
 
-  MAT2.comp[0][1] = conj(mat3->r1.c0[idx_mat2]);
-  MAT2.comp[1][1] = conj(mat3->r1.c1[idx_mat2]);
-  MAT2.comp[2][1] = conj(mat3->r1.c2[idx_mat2]);
+  MAT2.comp[0][1] = conj(mat2->r1.c0[idx_mat2]);
+  MAT2.comp[1][1] = conj(mat2->r1.c1[idx_mat2]);
+  MAT2.comp[2][1] = conj(mat2->r1.c2[idx_mat2]);
 
   //Compute 3rd mat2 column from the first two
-  MAT2->comp[0][2] = conj(MAT2->comp[1][0] * MAT2->comp[2][1] - MAT2->comp[2][0] * MAT2->comp[1][1]);
-  MAT2->comp[1][2] = conj(MAT2->comp[2][0] * MAT2->comp[0][1] - MAT2->comp[0][0] * MAT2->comp[2][1]);
-  MAT2->comp[2][2] = conj(MAT2->comp[0][0] * MAT2->comp[1][1] - MAT2->comp[1][0] * MAT2->comp[0][1]);
+  MAT2.comp[0][2] = conj(MAT2.comp[1][0] * MAT2.comp[2][1] - MAT2.comp[2][0] * MAT2.comp[1][1]);
+  MAT2.comp[1][2] = conj(MAT2.comp[2][0] * MAT2.comp[0][1] - MAT2.comp[0][0] * MAT2.comp[2][1]);
+  MAT2.comp[2][2] = conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[1][0] * MAT2.comp[0][1]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      AUX.comp[i][j] = (MAT1->comp[i][0] * MAT2->comp[0][j] + MAT1->comp[i][1] * MAT2->comp[1][j] + MAT1->comp[i][2] * MAT2->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      AUX.comp[i][j] = (MAT1.comp[i][0] * MAT2.comp[0][j] + MAT1.comp[i][1] * MAT2.comp[1][j] + MAT1.comp[i][2] * MAT2.comp[2][j]);
     }
   }
   
@@ -366,15 +368,15 @@ static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[2][1] = conj(mat3->r1.c2[idx_mat3]);
 
   //Compute 3rd mat3 column from the first two
-  MAT1->comp[0][2] = conj(MAT1->comp[1][0] * MAT1->comp[2][1] - MAT1->comp[2][0] * MAT1->comp[1][1]);
-  MAT1->comp[1][2] = conj(MAT1->comp[2][0] * MAT1->comp[0][1] - MAT1->comp[0][0] * MAT1->comp[2][1]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[1][0] * MAT1->comp[0][1]);
+  MAT1.comp[0][2] = conj(MAT1.comp[1][0] * MAT1.comp[2][1] - MAT1.comp[2][0] * MAT1.comp[1][1]);
+  MAT1.comp[1][2] = conj(MAT1.comp[2][0] * MAT1.comp[0][1] - MAT1.comp[0][0] * MAT1.comp[2][1]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[1][0] * MAT1.comp[0][1]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      MAT2.comp[i][j] = (AUX->comp[i][0] * MAT1->comp[0][j] + AUX->comp[i][1] * MAT1->comp[1][j] + AUX->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -388,15 +390,15 @@ static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[2][1] = conj(mat4->r1.c2[idx_mat4]);
 
   //Compute 3rd mat3 column from the first two
-  MAT1->comp[0][2] = conj(MAT1->comp[1][0] * MAT1->comp[2][1] - MAT1->comp[2][0] * MAT1->comp[1][1]);
-  MAT1->comp[1][2] = conj(MAT1->comp[2][0] * MAT1->comp[0][1] - MAT1->comp[0][0] * MAT1->comp[2][1]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[1][0] * MAT1->comp[0][1]);
+  MAT1.comp[0][2] = conj(MAT1.comp[1][0] * MAT1.comp[2][1] - MAT1.comp[2][0] * MAT1.comp[1][1]);
+  MAT1.comp[1][2] = conj(MAT1.comp[2][0] * MAT1.comp[0][1] - MAT1.comp[0][0] * MAT1.comp[2][1]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[1][0] * MAT1.comp[0][1]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      AUX.comp[i][j] = (MAT2->comp[i][0] * MAT1->comp[0][j] + MAT2->comp[i][1] * MAT1->comp[1][j] + MAT2->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      AUX.comp[i][j] = (MAT2.comp[i][0] * MAT1.comp[0][j] + MAT2.comp[i][1] * MAT1.comp[1][j] + MAT2.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -410,15 +412,15 @@ static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[1][2] = mat5->r1.c2[idx_mat5];
 
   //Compute 3rd mat2 column from the first two
-  MAT1->comp[2][0] = conj(MAT1->comp[0][1] * MAT1->comp[1][2] - MAT1->comp[0][2] * MAT1->comp[1][1]);
-  MAT1->comp[2][1] = conj(MAT1->comp[0][2] * MAT1->comp[1][0] - MAT1->comp[0][0] * MAT1->comp[1][2]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[0][1] * MAT1->comp[1][0]);
+  MAT1.comp[2][0] = conj(MAT1.comp[0][1] * MAT1.comp[1][2] - MAT1.comp[0][2] * MAT1.comp[1][1]);
+  MAT1.comp[2][1] = conj(MAT1.comp[0][2] * MAT1.comp[1][0] - MAT1.comp[0][0] * MAT1.comp[1][2]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[0][1] * MAT1.comp[1][0]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      MAT2.comp[i][j] = (AUX->comp[i][0] * MAT1->comp[0][j] + AUX->comp[i][1] * MAT1->comp[1][j] + AUX->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -431,9 +433,9 @@ static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
 
   //Compute 3rd result column from the first two
-  mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2->comp[0][1] * MAT2->comp[1][2] - MAT2->comp[0][2] * MAT2->comp[1][1]);
-  mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2->comp[0][2] * MAT2->comp[1][0] - MAT2->comp[0][0] * MAT2->comp[1][2]);
-  mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2->comp[0][0] * MAT2->comp[1][1] - MAT2->comp[0][1] * MAT2->comp[1][0]);
+  mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+  mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+  mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
 }  // closes PMMMP
 
 
@@ -479,29 +481,29 @@ static inline void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[2][1] = conj(mat1->r1.c2[idx_mat1]);
 
   //Compute 3rd hc(mat1) column from the first two
-  MAT1->comp[0][2] = conj(MAT1->comp[1][0] * MAT1->comp[2][1] - MAT1->comp[2][0] * MAT1->comp[1][1]);
-  MAT1->comp[1][2] = conj(MAT1->comp[2][0] * MAT1->comp[0][1] - MAT1->comp[0][0] * MAT1->comp[2][1]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[1][0] * MAT1->comp[0][1]); // quest'ultimo forse non serve
+  MAT1.comp[0][2] = conj(MAT1.comp[1][0] * MAT1.comp[2][1] - MAT1.comp[2][0] * MAT1.comp[1][1]);
+  MAT1.comp[1][2] = conj(MAT1.comp[2][0] * MAT1.comp[0][1] - MAT1.comp[0][0] * MAT1.comp[2][1]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[1][0] * MAT1.comp[0][1]); // quest'ultimo forse non serve
 
   // Load columns 1 and 2 of h.c.(mat2)
   MAT2.comp[0][0] = conj(mat2->r0.c0[idx_mat2]);
   MAT2.comp[1][0] = conj(mat2->r0.c1[idx_mat2]);
   MAT2.comp[2][0] = conj(mat2->r0.c2[idx_mat2]);
 
-  MAT2.comp[0][1] = conj(mat3->r1.c0[idx_mat2]);
-  MAT2.comp[1][1] = conj(mat3->r1.c1[idx_mat2]);
-  MAT2.comp[2][1] = conj(mat3->r1.c2[idx_mat2]);
+  MAT2.comp[0][1] = conj(mat2->r1.c0[idx_mat2]);
+  MAT2.comp[1][1] = conj(mat2->r1.c1[idx_mat2]);
+  MAT2.comp[2][1] = conj(mat2->r1.c2[idx_mat2]);
 
   //Compute 3rd mat2 column from the first two
-  MAT2->comp[0][2] = conj(MAT2->comp[1][0] * MAT2->comp[2][1] - MAT2->comp[2][0] * MAT2->comp[1][1]);
-  MAT2->comp[1][2] = conj(MAT2->comp[2][0] * MAT2->comp[0][1] - MAT2->comp[0][0] * MAT2->comp[2][1]);
-  MAT2->comp[2][2] = conj(MAT2->comp[0][0] * MAT2->comp[1][1] - MAT2->comp[1][0] * MAT2->comp[0][1]);
+  MAT2.comp[0][2] = conj(MAT2.comp[1][0] * MAT2.comp[2][1] - MAT2.comp[2][0] * MAT2.comp[1][1]);
+  MAT2.comp[1][2] = conj(MAT2.comp[2][0] * MAT2.comp[0][1] - MAT2.comp[0][0] * MAT2.comp[2][1]);
+  MAT2.comp[2][2] = conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[1][0] * MAT2.comp[0][1]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      AUX.comp[i][j] = (MAT1->comp[i][0] * MAT2->comp[0][j] + MAT1->comp[i][1] * MAT2->comp[1][j] + MAT1->comp[i][2] * MAT2->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      AUX.comp[i][j] = (MAT1.comp[i][0] * MAT2.comp[0][j] + MAT1.comp[i][1] * MAT2.comp[1][j] + MAT1.comp[i][2] * MAT2.comp[2][j]);
     }
   }
   
@@ -515,15 +517,15 @@ static inline void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[2][1] = conj(mat3->r1.c2[idx_mat3]);
 
   //Compute 3rd mat3 column from the first two
-  MAT1->comp[0][2] = conj(MAT1->comp[1][0] * MAT1->comp[2][1] - MAT1->comp[2][0] * MAT1->comp[1][1]);
-  MAT1->comp[1][2] = conj(MAT1->comp[2][0] * MAT1->comp[0][1] - MAT1->comp[0][0] * MAT1->comp[2][1]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[1][0] * MAT1->comp[0][1]);
+  MAT1.comp[0][2] = conj(MAT1.comp[1][0] * MAT1.comp[2][1] - MAT1.comp[2][0] * MAT1.comp[1][1]);
+  MAT1.comp[1][2] = conj(MAT1.comp[2][0] * MAT1.comp[0][1] - MAT1.comp[0][0] * MAT1.comp[2][1]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[1][0] * MAT1.comp[0][1]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      MAT2.comp[i][j] = (AUX->comp[i][0] * MAT1->comp[0][j] + AUX->comp[i][1] * MAT1->comp[1][j] + AUX->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -537,15 +539,15 @@ static inline void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[1][2] = mat4->r1.c2[idx_mat4];
 
   //Compute 3rd mat4 column from the first two
-  MAT1->comp[2][0] = conj(MAT1->comp[0][1] * MAT1->comp[1][2] - MAT1->comp[0][2] * MAT1->comp[1][1]);
-  MAT1->comp[2][1] = conj(MAT1->comp[0][2] * MAT1->comp[1][0] - MAT1->comp[0][0] * MAT1->comp[1][2]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[0][1] * MAT1->comp[1][0]);
+  MAT1.comp[2][0] = conj(MAT1.comp[0][1] * MAT1.comp[1][2] - MAT1.comp[0][2] * MAT1.comp[1][1]);
+  MAT1.comp[2][1] = conj(MAT1.comp[0][2] * MAT1.comp[1][0] - MAT1.comp[0][0] * MAT1.comp[1][2]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[0][1] * MAT1.comp[1][0]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      AUX.comp[i][j] = (MAT2->comp[i][0] * MAT1->comp[0][j] + MAT2->comp[i][1] * MAT1->comp[1][j] + MAT2->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      AUX.comp[i][j] = (MAT2.comp[i][0] * MAT1.comp[0][j] + MAT2.comp[i][1] * MAT1.comp[1][j] + MAT2.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -559,15 +561,15 @@ static inline void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[1][2] = mat5->r1.c2[idx_mat5];
 
   //Compute 3rd mat2 column from the first two
-  MAT1->comp[2][0] = conj(MAT1->comp[0][1] * MAT1->comp[1][2] - MAT1->comp[0][2] * MAT1->comp[1][1]);
-  MAT1->comp[2][1] = conj(MAT1->comp[0][2] * MAT1->comp[1][0] - MAT1->comp[0][0] * MAT1->comp[1][2]);
-  MAT1->comp[2][2] = conj(MAT1->comp[0][0] * MAT1->comp[1][1] - MAT1->comp[0][1] * MAT1->comp[1][0]);
+  MAT1.comp[2][0] = conj(MAT1.comp[0][1] * MAT1.comp[1][2] - MAT1.comp[0][2] * MAT1.comp[1][1]);
+  MAT1.comp[2][1] = conj(MAT1.comp[0][2] * MAT1.comp[1][0] - MAT1.comp[0][0] * MAT1.comp[1][2]);
+  MAT1.comp[2][2] = conj(MAT1.comp[0][0] * MAT1.comp[1][1] - MAT1.comp[0][1] * MAT1.comp[1][0]);
 
-#pragma acc loop seq
-  for(i=0,i<2;i++){
-#pragma acc loop seq
-    for(j=0,j<3;j++){
-      MAT2.comp[i][j] = (AUX->comp[i][0] * MAT1->comp[0][j] + AUX->comp[i][1] * MAT1->comp[1][j] + AUX->comp[i][2] * MAT1->comp[2][j]);
+// #pragma acc loop seq
+  for(i=0;i<2;i++){
+// #pragma acc loop seq
+    for(j=0;j<3;j++){
+      MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
     }
   }
 
@@ -580,9 +582,9 @@ static inline void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
 
   //Compute 3rd result column from the first two
-  mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2->comp[0][1] * MAT2->comp[1][2] - MAT2->comp[0][2] * MAT2->comp[1][1]);
-  mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2->comp[0][2] * MAT2->comp[1][0] - MAT2->comp[0][0] * MAT2->comp[1][2]);
-  mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2->comp[0][0] * MAT2->comp[1][1] - MAT2->comp[0][1] * MAT2->comp[1][0]);
+  mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+  mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+  mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
 }  // closes MMMPP
 
 
@@ -628,19 +630,6 @@ static inline void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
 
 void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
 									 __restrict su3_soa * const loc_stap ){
-  // IMPROVEMENT TYPE A
-  //   AR is of type PPMMM
-  //   AL is of type MMMPP
-  //    r+mu-2nu  r+mu-nu  r+mu   r+mu+nu  r+mu+2nu
-  //          +<-----+<-----+----->+----->+
-  //          |  2L     1L  ^  1R     2R  |
-  // mu    3L |             |             | 3R
-  // ^        V  4L     5L  |  5R     4R  V
-  // |        +----->+----->+<-----+<-----+ 
-  // |     r-2nu    r-nu    r     r+nu     r+2nu
-  // +---> nu
-  //            r is idxh in the following
-
   int x, y, z, t, mu, iter;
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
  #pragma acc loop independent gang
@@ -677,7 +666,7 @@ void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restr
               const int dir_nu_2R = 2*nu +  parity;
               const int dir_mu_3R = 2*mu +  parity;
               const int dir_nu_4R = 2*nu + !parity;
-              const int dir_mu_5R = 2*nu +  parity;
+              const int dir_nu_5R = 2*nu +  parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
               const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
@@ -689,29 +678,39 @@ void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restr
               const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
               const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
               const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu
-	      //////////////////////////ARRIVATO FIN QUI ////////////////////////
+
+	      // IMPROVEMENT TYPE A
+	      //   AR is of type PPMMM
+	      //   AL is of type MMMPP
+	      //    r+mu-2nu  r+mu-nu  r+mu   r+mu+nu  r+mu+2nu
+	      //          +<-----+<-----+----->+----->+
+	      //          |  2L     1L  ^  1R     2R  |
+	      // mu    3L |             |             | 3R
+	      // ^        V  4L     5L  |  5R     4R  V
+	      // |        +----->+----->+<-----+<-----+ 
+	      // |     r-2nu    r-nu    r     r+nu     r+2nu
+	      // +---> nu
+	      //            r is idxh in the following
+	      
 
 
 
-              //computation of the Right part of the staple
-              mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],       idx_pmu,
-                                                                                 &u[dir_mu_2R],       idx_pnu,
-                                                                                 &u[dir_nu_3R],       idxh,
-                                                                                 &loc_stap[dir_link], idxh);
-
-
+	      //computation of the Right part of the staple
+              PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
+							    &u[dir_nu_2R],        idx_pmu_pnu,
+							    &u[dir_mu_3R],        idx_2pnu,
+							    &u[dir_nu_4R],        idx_pnu,
+							    &u[dir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);							    
+	      /*
               //computation of the Left  part of the staple
-              conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],       idx_pmu_mnu,
-                                                                                 &u[dir_mu_2L],       idx_mnu,
-                                                                                 &u[dir_nu_3L],       idx_mnu,
-                                                                                 &loc_stap[dir_link], idxh);
-
-
-
-
-
-
-
+              MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
+							    &u[dir_nu_2L],        idx_pmu_2mnu,
+							    &u[dir_mu_3L],        idx_2mnu,
+							    &u[dir_nu_4L],        idx_mnu,
+							    &u[dir_nu_5L],        idxh,
+							    &loc_stap[dir_link],  idxh);							    
+	      */
             }  // mu
           }  // iter
         }  // x
@@ -744,6 +743,7 @@ double  calc_rettangolo_soloopenacc( __restrict  su3_soa * const tconf_acc, __re
 }
 
 
+/*
 void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
 
 #ifdef TIMING_ALL
@@ -760,7 +760,7 @@ void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __res
   double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
   printf("FULL STAPLES CALC OPENACC                       PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
 #endif
-
+*/
 
 
 
