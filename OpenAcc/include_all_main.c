@@ -1,6 +1,7 @@
 double casuale(void);
 void initrand(unsigned long s);
 void su2_rand(double *pp);
+#define PRINT_DETAILS_INSIDE_UPDATE
 
 
 #include "openacc.h"
@@ -16,14 +17,17 @@ void su2_rand(double *pp);
 #include "./find_min_max.c"
 #include "./inverter_multishift_full.c"
 #include "./md_integrator.c"
-#include "./update_standard_action.c"
 #include "./rettangoli.c"
+#include "./update_standard_action.c"
+#include "./update_tlsm_stdferm.c"
+#include "./update_versatile.c"
 #include "../Meas/ferm_meas.c"
+#include "./ipdot_gauge.c"
 
 
 int main(){
 
-  initrand(0);
+  initrand(1);
   fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
   su3_soa  * conf_acc;
@@ -96,9 +100,9 @@ int main(){
 	       printf(  "#################################################\n\n");
 	       //--------- CONF UPDATE ----------------//
 	       if(id_iter<therm_ITERATIONS){
-		 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset,accettate_therm,0);
+		 //		 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset,accettate_therm,0);
 	       }else{
-		 accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+		 //		 accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
 	       }
 #pragma acc update host(conf_acc[0:8])
 	       //---------------------------------------//
@@ -117,11 +121,13 @@ int main(){
 	       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 	       rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 	       if(id_iter<therm_ITERATIONS){
-		 printf("Therm_iter %d   Placchetta=%.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-		 printf("Therm_iter %d   Rettangolo=%.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+		 printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+		 printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+		 printf("Therm_iter %d   Azione= %.18lf \n",C_ZERO * beta_by_three *plq + C_ONE * beta_by_three * rect);
+
 	       }else{
-		 printf("Metro_iter %d   Placchetta=%.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-		 printf("Metro_iter %d   Rettangolo=%.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+		 printf("Metro_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+		 printf("Metro_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
 	       }
 	       //-------------------------------------------------//
 	       

@@ -205,17 +205,17 @@ static inline void    mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_sta
   mat1_12 = mat1c2_10 * mat2_02 + mat1c2_11 * mat2_12 + mat1c2_12 * mat2_22 ;
 
   //Write results inside mat4
-  mat4->r0.c0[idx_mat4] += mat1_00;
-  mat4->r0.c1[idx_mat4] += mat1_01;
-  mat4->r0.c2[idx_mat4] += mat1_02;
+  mat4->r0.c0[idx_mat4] += C_ZERO * mat1_00;
+  mat4->r0.c1[idx_mat4] += C_ZERO * mat1_01;
+  mat4->r0.c2[idx_mat4] += C_ZERO * mat1_02;
 
-  mat4->r1.c0[idx_mat4] += mat1_10;
-  mat4->r1.c1[idx_mat4] += mat1_11;
-  mat4->r1.c2[idx_mat4] += mat1_12;
+  mat4->r1.c0[idx_mat4] += C_ZERO * mat1_10;
+  mat4->r1.c1[idx_mat4] += C_ZERO * mat1_11;
+  mat4->r1.c2[idx_mat4] += C_ZERO * mat1_12;
 
-  mat4->r2.c0[idx_mat4] += conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
-  mat4->r2.c1[idx_mat4] += conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
-  mat4->r2.c2[idx_mat4] += conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
+  mat4->r2.c0[idx_mat4] += C_ZERO * conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
+  mat4->r2.c1[idx_mat4] += C_ZERO * conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
+  mat4->r2.c2[idx_mat4] += C_ZERO * conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
 }
 
 // Routine for the computation of the 3 matrices which contributes to the left part of the staple
@@ -289,17 +289,17 @@ static inline void    conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_sta
   mat1_12 = matc1c2_10 * mat2_02 + matc1c2_11 * mat2_12 + matc1c2_12 * mat2_22 ;
 
   //Write results inside mat4
-  mat4->r0.c0[idx_mat4] += mat1_00;
-  mat4->r0.c1[idx_mat4] += mat1_01;
-  mat4->r0.c2[idx_mat4] += mat1_02;
+  mat4->r0.c0[idx_mat4] += C_ZERO * mat1_00;
+  mat4->r0.c1[idx_mat4] += C_ZERO * mat1_01;
+  mat4->r0.c2[idx_mat4] += C_ZERO * mat1_02;
 
-  mat4->r1.c0[idx_mat4] += mat1_10;
-  mat4->r1.c1[idx_mat4] += mat1_11;
-  mat4->r1.c2[idx_mat4] += mat1_12;
+  mat4->r1.c0[idx_mat4] += C_ZERO * mat1_10;
+  mat4->r1.c1[idx_mat4] += C_ZERO * mat1_11;
+  mat4->r1.c2[idx_mat4] += C_ZERO * mat1_12;
 
-  mat4->r2.c0[idx_mat4] += conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
-  mat4->r2.c1[idx_mat4] += conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
-  mat4->r2.c2[idx_mat4] += conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
+  mat4->r2.c0[idx_mat4] += C_ZERO * conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
+  mat4->r2.c1[idx_mat4] += C_ZERO * conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
+  mat4->r2.c2[idx_mat4] += C_ZERO * conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
 }
 
 
@@ -1139,29 +1139,6 @@ double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __res
   }
 
 
-
-void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
-
-#ifdef TIMING_ALL
-  struct timeval t1,t2;
-  gettimeofday ( &t1, NULL );
-#endif
-
-  //  mult_conf_times_stag_phases(tconf_acc);
-
-  set_su3_soa_to_zero(local_staples);
-  calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
-  conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);  
-
-  //  mult_conf_times_stag_phases(tconf_acc);
-
-#ifdef TIMING_ALL
-  gettimeofday ( &t2, NULL );
-  double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
-  printf("FULL STAPLES CALC OPENACC                       PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
-#endif
-
-}
 
 #endif
 

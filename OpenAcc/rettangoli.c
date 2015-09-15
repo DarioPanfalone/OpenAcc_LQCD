@@ -148,7 +148,7 @@ double calc_loc_rectangles_1x2_removing_stag_phases_nnptrick(   __restrict su3_s
 
 
 // Routine for the computation of the 5 matrices which contributes to the staples A-Right and B-Right.
-// mat6 += mat1 * mat2 * hermitian_conjucate(mat3) * hermitian_conjucate(mat4) * hermitian_conjucate(mat5)
+// mat6 += mat1 * mat2 * hermitian_conjugate(mat3) * hermitian_conjugate(mat4) * hermitian_conjugate(mat5)
 static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
 								      const int idx_mat1,
 								      __restrict su3_soa * const mat2,
@@ -296,7 +296,7 @@ static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
 
 
 // Routine for the computation of the 5 matrices which contributes to the staples C-Right and B-Left.
-// mat6 += mat1 * hermitian_conjucate(mat2) * hermitian_conjucate(mat3) * hermitian_conjucate(mat4) * mat5
+// mat6 += mat1 * hermitian_conjugate(mat2) * hermitian_conjugate(mat3) * hermitian_conjugate(mat4) * mat5
 static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
 								      const int idx_mat1,
 								      __restrict su3_soa * const mat2,
@@ -440,7 +440,7 @@ static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
 
 
 // Routine for the computation of the 5 matrices which contributes to the staples C-Right and B-Left.
-// mat6 += hermitian_conjucate(mat1) * hermitian_conjucate(mat2) * hermitian_conjucate(mat3) * mat4 * mat5
+// mat6 += hermitian_conjugate(mat1) * hermitian_conjugate(mat2) * hermitian_conjugate(mat3) * mat4 * mat5
 static inline void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
 								      const int idx_mat1,
 								      __restrict su3_soa * const mat2,
@@ -891,7 +891,7 @@ double  calc_rettangolo_soloopenacc( __restrict  su3_soa * const tconf_acc, __re
     for(int nu=mu+1;nu<4;nu++){
       // sommo i 12 risultati in tempo
       tempo  += calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
-      tempo  += calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+      tempo  += calc_loc_rectangles_1x2_removing_stag_phases_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
     }
   }
   // rimetto le fasi staggered
@@ -900,26 +900,6 @@ double  calc_rettangolo_soloopenacc( __restrict  su3_soa * const tconf_acc, __re
   return tempo;
 
 }
-
-
-/*
-void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
-
-#ifdef TIMING_ALL
-  struct timeval t1,t2;
-  gettimeofday ( &t1, NULL );
-#endif
-
-  set_su3_soa_to_zero(local_staples);
-  calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
-  conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
-
-#ifdef TIMING_ALL
-  gettimeofday ( &t2, NULL );
-  double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
-  printf("FULL STAPLES CALC OPENACC                       PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
-#endif
-*/
 
 
 

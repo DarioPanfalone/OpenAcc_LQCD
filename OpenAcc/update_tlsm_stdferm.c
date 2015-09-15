@@ -1,15 +1,15 @@
 // se metro==1 allora fa il test di metropolis
 // se metro==0 allora non fa il test di metropolis --> termalizzazione
 
-#ifndef UPDATE_STANDARD_ACTION_C
-#define UPDATE_STANDARD_ACTION_C
 
+#ifndef UPDATE_TLSM_STDFERM_C
+#define UPDATE_TLSM_STDFERM_C
 
-
-int UPDATE_SOLOACC_UNOSTEP_VERSATILE_STDGAUGE_STDFERM(su3_soa *tconf_acc,double res_metro, double res_md, int id_iter,int acc,int metro){
-
-
+int UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM(su3_soa *tconf_acc,double res_metro, double res_md, int id_iter,int acc,int metro){
   
+  
+  printf("UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: OK \n");
+
   // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
   const double lambda=0.1931833275037836; // Omelyan Et Al.
   const double gs=0.5/(double) gauge_scale_acc;
@@ -102,7 +102,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE_STDGAUGE_STDFERM(su3_soa *tconf_acc,double 
     
     if(metro==1){
       /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
-      action_in = beta_by_three*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+      action_in = C_ZERO * beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+      action_in += C_ONE * beta_by_three * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
       action_mom_in = 0.0;
       for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
       action_ferm_in=0;
@@ -185,7 +186,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE_STDGAUGE_STDFERM(su3_soa *tconf_acc,double 
 #endif
       
       ///////////////   FINAL ACTION COMPUTATION  ////////////////////////////////////////////
-      action_fin = beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+      action_fin = C_ZERO * beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+      action_fin += C_ONE * beta_by_three * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
       action_mom_fin = 0.0;
       for(mu =0;mu<8;mu++)    action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
       
@@ -272,6 +274,5 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE_STDGAUGE_STDFERM(su3_soa *tconf_acc,double 
   return acc;
 
 }
-
 
 #endif
