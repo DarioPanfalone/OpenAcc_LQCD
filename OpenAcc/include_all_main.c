@@ -16,7 +16,7 @@ void su2_rand(double *pp);
 #include "./find_min_max.c"
 #include "./inverter_multishift_full.c"
 #include "./md_integrator.c"
-#include "./md_integrator_soloopenacc.c"
+#include "./update_standard_action.c"
 #include "./rettangoli.c"
 #include "../Meas/ferm_meas.c"
 

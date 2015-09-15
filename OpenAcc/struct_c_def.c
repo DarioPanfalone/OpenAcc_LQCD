@@ -35,9 +35,10 @@
 #define ONE_BY_THREE   0.33333333333333333333333
 #define ONE_BY_SIX     0.16666666666666666666666
 #define beta_by_three  beta*ONE_BY_THREE
+
 #define C_ZERO         5.0*ONE_BY_THREE
 #define C_ONE          -0.25*ONE_BY_THREE
-
+#define GAUGE_ACTION   0     // 0 --> Wilson; 1 --> tree level Symanzik
 
 #define acc_twopi 2.0 * M_PI 
 
