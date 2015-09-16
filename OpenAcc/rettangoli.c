@@ -149,7 +149,9 @@ double calc_loc_rectangles_1x2_removing_stag_phases_nnptrick(   __restrict su3_s
 
 // Routine for the computation of the 5 matrices which contributes to the staples A-Right and B-Right.
 // mat6 += mat1 * mat2 * hermitian_conjugate(mat3) * hermitian_conjugate(mat4) * hermitian_conjugate(mat5)
-static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
+//static inline 
+#pragma acc routine seq
+void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
 								      const int idx_mat1,
 								      __restrict su3_soa * const mat2,
 								      const int idx_mat2,
@@ -297,7 +299,9 @@ static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
 
 // Routine for the computation of the 5 matrices which contributes to the staples C-Right and B-Left.
 // mat6 += mat1 * hermitian_conjugate(mat2) * hermitian_conjugate(mat3) * hermitian_conjugate(mat4) * mat5
-static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
+//static inline 
+#pragma acc routine seq
+void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
 								      const int idx_mat1,
 								      __restrict su3_soa * const mat2,
 								      const int idx_mat2,
@@ -441,7 +445,9 @@ static inline void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
 
 // Routine for the computation of the 5 matrices which contributes to the staples C-Right and B-Left.
 // mat6 += hermitian_conjugate(mat1) * hermitian_conjugate(mat2) * hermitian_conjugate(mat3) * mat4 * mat5
-static inline void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
+//static inline 
+#pragma acc routine seq
+void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
 								      const int idx_mat1,
 								      __restrict su3_soa * const mat2,
 								      const int idx_mat2,

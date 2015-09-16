@@ -27,7 +27,7 @@ void su2_rand(double *pp);
 
 int main(){
 
-  initrand(0);
+  initrand(111);
   fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
   su3_soa  * conf_acc;
