@@ -162,12 +162,15 @@ int NPS_tot;
 int max_ps;
 ferm_param *fermions_parameters;
 
-char *nome_file_ferm_output;
+char * nome_file_gauge_output;
+char * nome_file_ferm_output;
 
 void init_ferm_params(){
 
   nome_file_ferm_output = (char*)malloc(sizeof("ferm_meas.dat"));
   strcpy(nome_file_ferm_output,"ferm_meas.dat");
+  nome_file_gauge_output = (char*)malloc(sizeof("gauge_meas.dat"));
+  strcpy(nome_file_gauge_output,"gauge_meas.dat");
 
 
   NDiffFlavs = 2;  // the number of different quark flavours
