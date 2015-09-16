@@ -10,11 +10,6 @@
 
 #define DEBUG_INVERTER_FULL_OPENACC
 
-#define OTTIMIZZALO  // --> quando e' definito ottimizzalo fa la cosa che pareva essere piu efficiente, vale a dire
-                     //     di lasciare le routine di algebra lineare separate in tanti kernel, piuttosto che farne
-                     //     uno unico. (In realta' le cose sembravano equivalenti, quindi ho lasciato quella
-                     //     piu leggibile delle due, cioe' quella con piu kernel)
-
 
 int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata mai qui dentro
 			  double_soa * const backfield,
@@ -38,14 +33,9 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
   acc_Doe(u,loc_h,out,pars,backfield);
   acc_Deo(u,loc_s,loc_h,pars,backfield);
 
-#ifdef OTTIMIZZALO
-  //  combine_in1xm2_minus_in2(out,loc_s,loc_s); // --> old version (3 args)
-  combine_in1xm2_minus_in2(out,loc_s);
+  combine_in1xferm_mass_minus_in2(out,pars->ferm_mass*pars->ferm_mass,loc_s);
   combine_in1_minus_in2(in,loc_s,loc_r);
   assign_in_to_out(loc_r,loc_p);
-#else
-  combine_before_loop(in,out,loc_r,loc_s,loc_p);
-#endif
 
   delta=l2norm2_global(loc_r);
 
@@ -57,35 +47,30 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
     acc_Doe(u,loc_h,loc_p,pars,backfield);
     acc_Deo(u,loc_s,loc_h,pars,backfield);
 
-    combine_in1xm2_minus_in2(loc_p,loc_s); 
+    combine_in1xferm_mass_minus_in2(loc_p,pars->ferm_mass*pars->ferm_mass,loc_s);
     alpha = real_scal_prod_global(loc_p,loc_s);
 
     omega=delta/alpha;     
     // out+=omega*p  r-=omega*s
     // lambda=(r,r);
-#ifdef OTTIMIZZALO
+
     combine_in1xfactor_plus_in2(loc_p,omega,out,out);
     combine_in1xfactor_plus_in2(loc_s,-omega,loc_r,loc_r);
-#else
-    combine_inside_loop(out,loc_r,loc_s,loc_p,omega);
-#endif
 
     lambda = l2norm2_global(loc_r);
     gammag=lambda/delta;
     delta=lambda;
     // p=r+gammag*p
     combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
-#if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
-#endif
+
   } while( (sqrt(lambda)>res) && cg<max_cg);
 
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
-
   printf("Terminated invert after   %d    iterations [", cg);
   acc_Doe(u,loc_h,out,pars,backfield);
   acc_Deo(u,loc_s,loc_h,pars,backfield);
   double giustoono;
-  combine_in1xm2_minus_in2_minus_in3(out,loc_s,in,loc_p);
+  combine_in1xferm_mass2_minus_in2_minus_in3(out,pars->ferm_mass*pars->ferm_mass,loc_s,in,loc_p);
   assign_in_to_out(loc_p,loc_h);
   giustoono = real_scal_prod_global(loc_h,loc_p);
   printf(" res/stop_res=  %e , stop_res=%e ]\n\n",sqrt(giustoono)/res,res);

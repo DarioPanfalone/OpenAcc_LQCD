@@ -16,18 +16,18 @@ void su2_rand(double *pp);
 #include "./inverter_full.c"
 #include "./find_min_max.c"
 #include "./inverter_multishift_full.c"
-#include "./md_integrator.c"
 #include "./rettangoli.c"
+#include "./ipdot_gauge.c"
+#include "./md_integrator.c"
+#include "../Meas/ferm_meas.c"
 #include "./update_standard_action.c"
 #include "./update_tlsm_stdferm.c"
 #include "./update_versatile.c"
-#include "../Meas/ferm_meas.c"
-#include "./ipdot_gauge.c"
 
 
 int main(){
 
-  initrand(1);
+  initrand(0);
   fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
   su3_soa  * conf_acc;

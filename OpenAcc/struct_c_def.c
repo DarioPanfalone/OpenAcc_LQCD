@@ -28,7 +28,7 @@
 #define sizeh (size / 2)
 #define no_links (4 * vol4)
 
-#define mass2 mass*mass
+//#define mass2 mass*mass
 // used in the dynamical allocation of structures
 #define ALIGN 128
 

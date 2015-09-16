@@ -8,8 +8,8 @@
  * and the Openacc Version               *
  * ***************************************/
 
-#define BACKFIELD
-#define IMCHEMPOT
+//#define BACKFIELD
+//#define IMCHEMPOT
 
 // se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
 // di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
@@ -31,10 +31,10 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 8
-#define ny 8
-#define nz 8
-#define nt 8
+#define nx 4
+#define ny 4
+#define nz 4
+#define nt 4
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -44,15 +44,14 @@
 #define GAUGE_ACT_TLSM
 //#define GAUGE_ACT_WILSON
 
-#define mass 0.075 // 0.075
-#define beta 5.35  // 5.35
+#define beta 5.35 
 
 
 const int no_flavours=2; // number of quark species
 const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=200; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-int therm_ITERATIONS = 20; // the first <therm_ITERATIONS> of the history will be thermalization updates
+int ITERATIONS=20; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int therm_ITERATIONS = 10; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=10000;
 
@@ -70,7 +69,7 @@ const double bx_quantum=0.0;
 const double ex_quantum=0.0;
 const double by_quantum=0.0;
 const double ey_quantum=0.0;
-const double bz_quantum=32.0;
+const double bz_quantum=0.0;
 const double ez_quantum=0.0;
 
 #define no_ps 2
@@ -179,13 +178,13 @@ void init_ferm_params(){
   if(allocation_check != 0)  printf("Errore nella allocazione di fermions_parameters \n");
 
   fermions_parameters[0].ferm_charge       = -1.0;   // up    charge
-  fermions_parameters[0].ferm_mass         = mass;   // up    mass
+  fermions_parameters[0].ferm_mass         = 0.075;  // up    mass
   fermions_parameters[0].ferm_im_chem_pot  = 0.0;    // up    chem pot
   fermions_parameters[0].degeneracy        = 1;      // up    degeneracy
   fermions_parameters[0].number_of_ps      = 1;      // up    number of pseudo fermions
 
   fermions_parameters[1].ferm_charge       = 2.0;    // down  charge
-  fermions_parameters[1].ferm_mass         = mass;   // down  mass
+  fermions_parameters[1].ferm_mass         = 0.075;  // down  mass
   fermions_parameters[1].ferm_im_chem_pot  = 0.0;    // down  chem pot
   fermions_parameters[1].degeneracy        = 1;      // down  degeneracy
   fermions_parameters[1].number_of_ps      = 1;      // down  number of pseudo fermions
