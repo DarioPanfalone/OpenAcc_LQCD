@@ -260,9 +260,9 @@ static inline void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict
   MAT1.comp[1][0] = conj(mat5->r0.c1[idx_mat5]);
   MAT1.comp[2][0] = conj(mat5->r0.c2[idx_mat5]);
 
-  MAT1.comp[0][1] = conj(mat3->r1.c0[idx_mat5]);
-  MAT1.comp[1][1] = conj(mat3->r1.c1[idx_mat5]);
-  MAT1.comp[2][1] = conj(mat3->r1.c2[idx_mat5]);
+  MAT1.comp[0][1] = conj(mat5->r1.c0[idx_mat5]);
+  MAT1.comp[1][1] = conj(mat5->r1.c1[idx_mat5]);
+  MAT1.comp[2][1] = conj(mat5->r1.c2[idx_mat5]);
 
   //Compute 3rd mat5 column from the first two
   MAT1.comp[0][2] = conj(MAT1.comp[1][0] * MAT1.comp[2][1] - MAT1.comp[2][0] * MAT1.comp[1][1]);

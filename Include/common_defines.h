@@ -31,10 +31,10 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 4
-#define ny 4
-#define nz 4
-#define nt 4
+#define nx 8
+#define ny 8
+#define nz 8
+#define nt 8
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -51,7 +51,7 @@
 const int no_flavours=2; // number of quark species
 const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=1; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int ITERATIONS=200; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
 int therm_ITERATIONS = 20; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=10000;

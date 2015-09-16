@@ -68,7 +68,7 @@ int main(){
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
   if(start_opt==0){ 
-    generate_Conf_cold(conf_acc,0.0);
+    generate_Conf_cold(conf_acc,0.05);
     printf("Cold Gauge Conf Generated : OK \n");
     conf_id_iter=0;
   }
@@ -100,9 +100,9 @@ int main(){
 	       printf(  "#################################################\n\n");
 	       //--------- CONF UPDATE ----------------//
 	       if(id_iter<therm_ITERATIONS){
-		 //		 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset,accettate_therm,0);
+		 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset,accettate_therm,0);
 	       }else{
-		 //		 accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+		 accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
 	       }
 #pragma acc update host(conf_acc[0:8])
 	       //---------------------------------------//
