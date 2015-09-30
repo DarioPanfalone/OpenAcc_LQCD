@@ -14,9 +14,7 @@ void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  _
 #endif
 
   set_su3_soa_to_zero(local_staples);
-  calc_loc_staples_removing_stag_phases_nnptrick_all_E_sites(tconf_acc,local_staples);
-  calc_loc_staples_removing_stag_phases_nnptrick_all_O_sites(tconf_acc,local_staples);
-  //  calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
+  calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
   conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 
 #ifdef TIMING_STAPLES
@@ -35,9 +33,7 @@ void calc_ipdot_gauge_soloopenacc_tlsm( __restrict  su3_soa * const tconf_acc,  
 #endif
 
   set_su3_soa_to_zero(local_staples);
-  //  calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
-  calc_loc_staples_removing_stag_phases_nnptrick_all_E_sites(tconf_acc,local_staples);
-  calc_loc_staples_removing_stag_phases_nnptrick_all_O_sites(tconf_acc,local_staples);
+  calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
 
   // QUESTA CHE FA TUTTO IN UNA BOTTA SEMBRA ANDARE PIU' PIANO
   //    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
