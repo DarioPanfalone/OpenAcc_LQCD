@@ -166,7 +166,7 @@ int main(){
 
     struct timeval t1,t2;
     gettimeofday ( &t1, NULL );
-    for(int i=0;i<1;i++){
+    for(int i=0;i<5;i++){
       stout_isotropic(conf_acc,stout_conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
       plq = calc_plaquette_soloopenacc(stout_conf_acc,aux_conf_acc,local_sums);
       printf("STOUT=%d    Placchetta= %.18lf \n",1+2*i,plq/size/6.0/3.0);

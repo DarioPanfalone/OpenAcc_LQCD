@@ -1,6 +1,8 @@
 #ifndef HOME_ACOS_C
 #define HOME_ACOS_C
 
+#include <stdio.h>
+
 #define FC00 1.0000000000000000000
 #define FC01 0.1666666666666666667
 #define FC02 0.4500000000000000000
@@ -66,8 +68,15 @@
 #pragma acc routine seq
 double homebrew_acos(double x){
   double x2=x*x;
-  double y=(double)1.0-fabs(x);
-  double w=sqrt(2.0*y);
+  double y,w;
+  if(x2<=1.0){
+    y=(double)1.0-fabs(x);
+    w=sqrt(2.0*y);
+  }else{
+    //    printf("argument for acos larger then 1.0!!!\n");
+    return 1000.0;
+  }
+
   double r;
   if(x2<=0.25){
   return M_PI*0.5-

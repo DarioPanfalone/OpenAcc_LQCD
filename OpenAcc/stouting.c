@@ -81,11 +81,11 @@ void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
           for(mu=0;mu<4;mu++){
 
             dir_link = 2*mu + parity;
-	    single_su3 tempU;
-	    single_su3 EXP;
-	    single_tamat tempQA;
-	    su3_soa_to_single_su3(&tu[dir_link],idxh,&tempU);
-	    tamat_soa_to_single_tamat(&QA[dir_link],idxh,&tempQA);
+	    //	    single_su3 tempU;
+	    //	    single_su3 EXP;
+	    //	    single_tamat tempQA;
+	    //	    su3_soa_to_single_su3(&tu[dir_link],idxh,&tempU);
+	    //	    tamat_soa_to_single_tamat(&QA[dir_link],idxh,&tempQA);
 
 	    CH_exponential_antihermitian_soa(&exp_aux[dir_link],&QA[dir_link],idxh); // qui la variabile tu_out viene usata come output temporaneo
 	    //	    CH_exponential_antihermitian(&EXP,&tempQA);

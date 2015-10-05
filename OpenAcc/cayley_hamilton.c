@@ -314,9 +314,12 @@ static inline void CH_exponential_antihermitian_soa(__restrict su3_soa * const e
   //   based on Sez. III of http://arXiv.org/abs/hep-lat/0311018v1
 
   double c0 = det_i_times_QA_soa(QA,idx); //(14) // cosi calcolo direttamente il det(Q)
+
+
   double c1  = 0.5 * Tr_i_times_QA_sq_soa(QA,idx); // (15)
   double c0max = 2*pow(c1/3,1.5); // (17) // forse e' meglio mettere (c1/3)*sqrt(c1/3) ?!?!
   double theta = homebrew_acos(c0/c0max);//(25)
+
 
 
   double u = sqrt(c1/3) * cos(theta/3) ;//(23)
@@ -344,12 +347,15 @@ static inline void CH_exponential_antihermitian_soa(__restrict su3_soa * const e
 		 2*u*cos(w) - (3*u*u-w*w)* xi0 * I )) ; 
   d_complex f2 = denom * (exp2iu - expmiu* (cos(w)+ 3*u*xi0*I)); // (32)
   
-
   
 
-  single_su3 Q1, Q2;
+  //  single_su3 Q1, Q2;
+  //  Q1.comp[0][0] = - QA->rc00[idx];
+  /*
   i_times_tamat_soa_to_su3(&Q1,&QA,idx);
+
   single_su3xsu3(&Q2,&Q1,&Q1);
+  */
   
   //  single_su3_times_scalar(&Q1,h1/denom);
   //  single_su3_times_scalar(&Q2,h2/denom);
@@ -357,12 +363,37 @@ static inline void CH_exponential_antihermitian_soa(__restrict su3_soa * const e
   
 
   // first term in eq. 19
-  exp_out->r0.c0[idx] = f0 + f1 * Q1.comp[0][0] + f2 * Q2.comp[0][0];
-  exp_out->r0.c1[idx] =      f1 * Q1.comp[0][1] + f2 * Q2.comp[0][1];
-  exp_out->r0.c0[idx] =      f1 * Q1.comp[0][2] + f2 * Q2.comp[0][2];
-  exp_out->r1.c0[idx] =      f1 * Q1.comp[1][0] + f2 * Q2.comp[1][0];
-  exp_out->r1.c1[idx] = f0 + f1 * Q1.comp[1][1] + f2 * Q2.comp[1][1];
-  exp_out->r1.c2[idx] =      f1 * Q1.comp[1][2] + f2 * Q2.comp[1][2];
+  exp_out->r0.c0[idx] = f0 -   f1    * QA->rc00[idx]
+                      + f2 * (  QA->rc00[idx] *      QA->rc00[idx]
+			      + QA->c01[idx]  * conj(QA->c01[idx])
+		              + QA->c02[idx]  * conj(QA->c02[idx]));
+
+  exp_out->r0.c1[idx] =      ( f1*I) *  QA->c01[idx]
+                             + f2    * (QA->c02[idx] * conj(QA->c12[idx])
+                  	                + (-1.0*I)* QA->c01[idx] * ( QA->rc00[idx] + QA->rc11[idx]));
+
+
+  exp_out->r0.c2[idx] =      ( f1*I) * QA->c02[idx]        
+                             + f2    * (-QA->c01[idx] * QA->c12[idx]
+					+ ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
+
+
+  exp_out->r1.c0[idx] =      (-f1*I) * conj(QA->c01[idx])  
+                             + f2    * ( QA->c12[idx] * conj(QA->c02[idx])
+				        + ( 1.0*I) * conj(QA->c01[idx]) * ( QA->rc00[idx] + QA->rc11[idx]));
+
+
+  exp_out->r1.c1[idx] = f0 -   f1    * QA->rc11[idx]       
+                             + f2    * ( QA->rc11[idx] * QA->rc11[idx])
+                                       + QA->c01[idx] * conj(QA->c01[idx])
+                                       + QA->c12[idx] * conj(QA->c12[idx]);
+
+  exp_out->r1.c2[idx] =      ( f1*I) * QA->c12[idx]        
+                             + f2    * ( QA->rc00[idx] * QA->c12[idx] 
+					 + QA->c02[idx] * conj(QA->c01[idx]));
+
+
+
   //  out->comp[2][0] = 0;
   //  out->comp[2][1] = 0;
   //  out->comp[2][2] = f0;
@@ -371,10 +402,11 @@ static inline void CH_exponential_antihermitian_soa(__restrict su3_soa * const e
   //    print_su3_stdout(&Q1);
   //    print_su3_stdout(&Q2);
 
-  /*
-  single_su3add_no3rdrow(out, &Q1);// second term in (19)
-  single_su3add_no3rdrow(out, &Q2);// third
-  */
+  
+  //  single_su3add_no3rdrow(out, &Q1);// second term in (19)
+  //  single_su3add_no3rdrow(out, &Q2);// third
+
+
 
 }
 

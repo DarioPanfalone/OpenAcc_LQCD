@@ -81,7 +81,7 @@ const double ez_quantum=0.0;
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
 #define gauge_scale 4  // Update fermions every gauge_scale gauge updates
 
-#define RHO 0.02
+#define RHO 0.1
 
 typedef struct COM_t{
   double Re;
