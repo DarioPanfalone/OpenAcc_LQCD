@@ -23,7 +23,8 @@ void su2_rand(double *pp);
 #include "./update_standard_action.c"
 #include "./update_tlsm_stdferm.c"
 #include "./update_versatile.c"
-
+#include "./homebrew_acos.c"
+#include "./stouting.c"
 
 int main(){
 
@@ -80,7 +81,7 @@ int main(){
   //###############################################################################################  
 
 
-#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs])
+#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs]) create(stout_conf_acc[0:8])
     {
 
       double plq,rect;
@@ -154,9 +155,33 @@ int main(){
     }// id_iter loop ends here
     
 
+
     //--------- SALVA LA CONF SU FILE ------------------//
     print_su3_soa(conf_acc,"stored_config");
     //-------------------------------------------------//
+
+
+    plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    printf("STOUT=0    Placchetta= %.18lf \n",plq/size/6.0/3.0);
+
+    struct timeval t1,t2;
+    gettimeofday ( &t1, NULL );
+    for(int i=0;i<1;i++){
+      stout_isotropic(conf_acc,stout_conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
+      plq = calc_plaquette_soloopenacc(stout_conf_acc,aux_conf_acc,local_sums);
+      printf("STOUT=%d    Placchetta= %.18lf \n",1+2*i,plq/size/6.0/3.0);
+      
+      stout_isotropic(stout_conf_acc,conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
+      plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+      printf("STOUT=%d    Placchetta= %.18lf \n",2+2*i,plq/size/6.0/3.0);
+    }
+    gettimeofday ( &t2, NULL );
+    double dt_stout = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+    printf("STOUT COMP TIME: %f sec  \n",dt_stout);
+
+
+
+
 
 
     }// end pragma acc data
@@ -170,6 +195,10 @@ int main(){
   free(conf_acc);
   mem_free();
 
+  double cacca = acos(0.3);
+  printf("ACOS ORIG= %.18lf \n",cacca);
+  cacca = homebrew_acos(0.3);
+  printf("ACOS HOME= %.18lf \n",cacca);
 
   return 0;
 }

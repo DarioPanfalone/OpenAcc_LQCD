@@ -8,7 +8,7 @@
 #endif
 
 #include <stdlib.h>
-#include <math.h>
+//#include <math.h>
 #include <stdio.h>
 #include <sys/time.h>
 #include "../Include/common_defines.h"

@@ -8,8 +8,8 @@
  * and the Openacc Version               *
  * ***************************************/
 
-#define BACKFIELD
-#define IMCHEMPOT
+//#define BACKFIELD
+//#define IMCHEMPOT
 
 // se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
 // di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
@@ -44,14 +44,14 @@
 #define GAUGE_ACT_TLSM
 //#define GAUGE_ACT_WILSON
 
-#define beta 5.35
+#define beta 4.35
 
 
 const int no_flavours=2; // number of quark species
-const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
+const int start_opt=1;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=2; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-int therm_ITERATIONS = 2; // the first <therm_ITERATIONS> of the history will be thermalization updates
+int ITERATIONS=0; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int therm_ITERATIONS = 10; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=10000;
 
@@ -81,7 +81,7 @@ const double ez_quantum=0.0;
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
 #define gauge_scale 4  // Update fermions every gauge_scale gauge updates
 
-
+#define RHO 0.02
 
 typedef struct COM_t{
   double Re;
