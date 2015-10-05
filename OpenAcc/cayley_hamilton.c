@@ -178,7 +178,7 @@ static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
 }
 
 
-void CH_exponential(single_su3 * out, single_thmat * Q ){ // exp(iQ)
+void ch_exponential(single_su3 * out, single_thmat * Q ){ // exp(iQ)
     // based on Sez. III of http://arXiv.org/abs/hep-lat/0311018v1
 
     double c0 = detQ(Q); //(14)
@@ -331,8 +331,9 @@ static inline void CH_exponential_antihermitian_soa(__restrict su3_soa * const e
   // see (23), 
   double xi1 = 1 - w*w/6*(1-w*w/20*(1-w*w/42));
   double xi2 = sin(w)/w;
-  double xi0 = xi1 * (((int) (20*w-1) >> 31) & 0x1) +
-    xi2 * (((int) (1-20*w) >> 31) & 0x1) ;
+
+  double xi0 = xi1 * (((int) (400*w*w-1) >> 31) & 0x1) +
+    xi2 * (((int) (1-400*w*w) >> 31) & 0x1) ;
   
   d_complex expmiu = cos(u) - sin(u)*I;
   d_complex exp2iu = cos(2.0*u) + sin(2.0*u)*I;
@@ -341,7 +342,7 @@ static inline void CH_exponential_antihermitian_soa(__restrict su3_soa * const e
   double denom = 1.0/(9*u*u - w*w);
 
   d_complex f0 =   denom * ((u*u - w*w) * exp2iu + expmiu*( // (30)
-		   8*u*u *cos(w) + 2 * u * (3*u*u+ w*w) * xi0 * I ));
+		       8*u*u *cos(w) + 2 * u * (3*u*u+ w*w) * xi0 * I ));
   
   d_complex f1 = denom * (2*u*exp2iu - expmiu* (  // (31)
 		 2*u*cos(w) - (3*u*u-w*w)* xi0 * I )) ; 
@@ -384,13 +385,13 @@ static inline void CH_exponential_antihermitian_soa(__restrict su3_soa * const e
 
 
   exp_out->r1.c1[idx] = f0 -   f1    * QA->rc11[idx]       
-                             + f2    * ( QA->rc11[idx] * QA->rc11[idx])
+                             + f2    * ( QA->rc11[idx] * QA->rc11[idx]
                                        + QA->c01[idx] * conj(QA->c01[idx])
-                                       + QA->c12[idx] * conj(QA->c12[idx]);
+					 + QA->c12[idx] * conj(QA->c12[idx]));
 
   exp_out->r1.c2[idx] =      ( f1*I) * QA->c12[idx]        
-                             + f2    * ( QA->rc00[idx] * QA->c12[idx] 
-					 + QA->c02[idx] * conj(QA->c01[idx]));
+                                        + f2 * ( (1.0*I)*QA->rc00[idx] * QA->c12[idx] 
+					+ QA->c02[idx] * conj(QA->c01[idx]));
 
 
 
