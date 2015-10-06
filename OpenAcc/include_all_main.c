@@ -160,26 +160,27 @@ int main(){
     print_su3_soa(conf_acc,"stored_config");
     //-------------------------------------------------//
 
+    FILE *soutfile = fopen("RES_STOUT","at");
 
     plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-    printf("STOUT=0    Placchetta= %.18lf \n",plq/size/6.0/3.0);
+    fprintf(soutfile,"RHO= %f  STOUT= 0    Placchetta= %.18lf \n",(double)RHO,plq/size/6.0/3.0);
 
     struct timeval t1,t2;
     gettimeofday ( &t1, NULL );
-    for(int i=0;i<5;i++){
+    for(int i=0;i<50;i++){
       stout_isotropic(conf_acc,stout_conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
       plq = calc_plaquette_soloopenacc(stout_conf_acc,aux_conf_acc,local_sums);
-      printf("STOUT=%d    Placchetta= %.18lf \n",1+2*i,plq/size/6.0/3.0);
+      fprintf(soutfile,"RHO= %f STOUT= %d    Placchetta= %.18lf \n",(double)RHO,1+2*i,plq/size/6.0/3.0);
       
       stout_isotropic(stout_conf_acc,conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-      printf("STOUT=%d    Placchetta= %.18lf \n",2+2*i,plq/size/6.0/3.0);
+      fprintf(soutfile,"RHO= %f STOUT= %d    Placchetta= %.18lf \n",(double)RHO,2+2*i,plq/size/6.0/3.0);
     }
     gettimeofday ( &t2, NULL );
     double dt_stout = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
     printf("STOUT COMP TIME: %f sec  \n",dt_stout);
 
-
+    fclose(soutfile);
 
 
 

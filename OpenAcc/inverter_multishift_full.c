@@ -435,13 +435,13 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
 #else
 #pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars)
 #endif
-#pragma acc loop independent gang(nt)
+#pragma acc loop independent //gang(nt)
   for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
       for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
+#pragma acc loop independent //vector(DIM_BLOCK_X)
         for(hx=0; hx < nxh; hx++) {
           int x,eta;
 
@@ -530,13 +530,13 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 #else
 #pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars)
 #endif
-#pragma acc loop independent gang(nt)
+#pragma acc loop independent //gang(nt)
   for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
       for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
+#pragma acc loop independent //vector(DIM_BLOCK_X)
         for(hx=0; hx < nxh; hx++) {
           int x,eta;
 	  double arg;
