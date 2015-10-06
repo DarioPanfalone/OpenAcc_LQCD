@@ -1,5 +1,5 @@
-module load pgi/15.1
-module load cuda/6.5
+module load pgi/15.9
+module load cuda/7.0
 
 
 export PGI_ACC_BUFFERSIZE=3221225472

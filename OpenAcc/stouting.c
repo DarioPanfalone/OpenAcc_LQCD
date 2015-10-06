@@ -110,7 +110,6 @@ void stout_isotropic( __restrict su3_soa * const u,
   set_su3_soa_to_zero(local_staples);
   mult_conf_times_stag_phases(u);
 
-
   calc_loc_staples_removing_stag_phases_nnptrick_all(u,local_staples);
 
   RHO_times_conf_times_staples_ta_part(u,local_staples,tipdot);
@@ -121,6 +120,178 @@ void stout_isotropic( __restrict su3_soa * const u,
   mult_conf_times_stag_phases(uprime);
 
 }
+
+
+
+
+static inline d_complex  b1(double denom,
+			    double u,
+			    double w,
+			    d_complex r_1,
+			    d_complex r_2,
+			    d_complex f){
+  return  0.5*denom*denom*(2.0*u*r_1 + (3.0*u*u-w*w)*r_2 -2.0*(15.0*u*u+w*w)*f); // (57)
+}
+
+static inline d_complex  b2(double denom,
+			    double u,
+			    d_complex r_1,
+			    d_complex r_2,
+			    d_complex f){
+  return   0.5*denom*denom*(r_1 - 3.0*u*r_2 -24.0*u*f); // (58)
+}
+
+
+//calcolo di lambda
+static inline void compute_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
+				  __restrict tamat_soa * const SP, // Sigma primo --> input
+				  __restrict su3_soa   * const U,    // la configurazione di gauge --> input
+				  __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input
+				  __restrict su3_soa   * const TMP,  // variabile di parcheggio
+				  int idx
+				  ){
+  
+  double c0 = det_i_times_QA_soa(QA,idx); //(14)
+  double c1  = 0.5 * Tr_i_times_QA_sq_soa(QA,idx); // (15)
+  //  double c0max = 2*pow(c1/3,1.5); // (17)
+  double theta = homebrew_acos(c0/(2*pow(c1/3,1.5)));//(25)
+
+  double u = sqrt(c1/3) * cos(theta/3) ;//(23)
+  double w = sqrt(c1) * sin(theta/3) ;//(23)
+  //  double xi0_A = 1 - w*w/6*(1-w*w/20*(1-w*w/42)); // (33 e seguenti)
+  //  double xi0_B = sin(w)/w; // (33 e seguenti)
+
+  double xi0 = (1 - w*w/6*(1-w*w/20*(1-w*w/42))) * (((int) (400*w*w-1) >> 31) & 0x1) +
+    (sin(w)/w) * (((int) (1-400*w*w) >> 31) & 0x1) ; // (33 e seguenti)
+  double xi1 = (cos(w)-xi0)/(w*w); // (67)
+
+  d_complex expmiu = cos(u) - sin(u)*I;
+  d_complex exp2iu = cos(2.0*u) + sin(2.0*u)*I;
+
+  double denom = 1.0/(9*u*u - w*w);
+
+  d_complex f0 =   denom * ((u*u - w*w) * exp2iu + expmiu*( // (30)
+		  8*u*u *cos(w) + 2 * u * (3*u*u+ w*w) * xi0 * I ));
+  d_complex f1 = denom * (2*u*exp2iu - expmiu* (  // (31)
+		    2*u*cos(w) - (3*u*u-w*w)* xi0 * I )) ;
+  d_complex f2 = denom * (exp2iu - expmiu* (cos(w)+ 3*u*xi0*I)); // (32)
+
+  d_complex r0_1 = 2.0*(u+(u*u-w*w)*I)*exp2iu+2.0*expmiu*(4.0*u*(2.0-u*I)*cos(w) + (9*u*u+w*w-(3.0*u*u+w*w)*u*I)*xi0*I); //(60)
+  d_complex r1_1 = 2.0*(1.0+2.0*u*I)*exp2iu+expmiu*(-2.0*(1.0-u*I)*cos(w) + (6.0*u+(w*w-3.0*u*u)*I)*xi0*I) ; // (61)
+  d_complex r2_1 = (2.0*I)*exp2iu+(1.0*I)*expmiu*(cos(w)-3.0*(1.0-u*I)*xi0); // (62)
+
+  d_complex r0_2 = -2.0*exp2iu+(2.0*I)*u*expmiu*(cos(w)+(1.0+4.0*u*I)*xi0+3.0*u*u*xi1); // (63)
+  d_complex r1_2 = (-1.0*I)*expmiu*(cos(w)+(1.0+2.0*u*I)*xi0-3.0*u*u*xi1); // (64)
+  d_complex r2_2 = expmiu*(xi0-3.0*u*xi1*I); // (65)
+
+  d_complex b10 = 0.5*denom*denom*(2.0*u*r0_1 + (3.0*u*u-w*w)*r0_2 -2.0*(15.0*u*u+w*w)*f0); // (57)
+  d_complex b11 = 0.5*denom*denom*(2.0*u*r1_1 + (3.0*u*u-w*w)*r1_2 -2.0*(15.0*u*u+w*w)*f1); // (57)
+  d_complex b12 = 0.5*denom*denom*(2.0*u*r2_1 + (3.0*u*u-w*w)*r2_2 -2.0*(15.0*u*u+w*w)*f2); // (57)
+  //  b10 = b1(denom,u,w,r0_1,r0_2,f0);
+  //  b11 = b1(denom,u,w,r1_1,r1_2,f1);
+  //  b12 = b1(denom,u,w,r2_1,r2_2,f2);
+
+  //  d_complex b20 = 0.5*denom*denom*(r0_1 - 3.0*u*r0_2 -24.0*u*f0); // (58)
+  //  d_complex b21 = 0.5*denom*denom*(r1_1 - 3.0*u*r1_2 -24.0*u*f1); // (58)
+  //  d_complex b22 = 0.5*denom*denom*(r2_1 - 3.0*u*r2_2 -24.0*u*f2); // (58)
+  //  b20 = b1(denom,u,r0_1,r0_2,f0);
+  //  b21 = b1(denom,u,r1_1,r1_2,f1);
+  //  b22 = b1(denom,u,r2_1,r2_2,f2);
+  
+  ////////////CALCOLO DI B1   (EQ 69) ////////////////////////////////////////
+  TMP->r0.c0[idx] =b10 -   b11*QA->rc00[idx]                + b12*(QA->rc00[idx]*QA->rc00[idx]
+								  + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]));
+  TMP->r0.c1[idx] =      ( b11*I) *  QA->c01[idx]           + b12*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]));
+  TMP->r0.c2[idx] =      ( b11*I) * QA->c02[idx]            + b12*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
+  /////////
+  TMP->r1.c0[idx] =      (-b11*I) * conj(QA->c01[idx])     + b12*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]));
+  TMP->r1.c1[idx] =b10 -   b11*QA->rc11[idx]                + b12*( QA->rc11[idx]*QA->rc11[idx]
+								   +QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]));
+  TMP->r1.c2[idx] =      ( b11*I)*QA->c12[idx]              + b12*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
+  /////////
+  TMP->r2.c0[idx] =      (-b11*I)*conj(QA->c02[idx])        + b12*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
+  TMP->r2.c1[idx] =      (-b11*I)*conj(QA->c12[idx])        + b12*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
+  TMP->r2.c2[idx] =b10 +   b11*(QA->rc00[idx]+QA->rc11[idx])+ b12*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
+								  + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
+  //////////////////////////////////////////////////////////////////////////////
+
+  //ricostruisco la terza riga della conf
+  d_complex U20 = conj(U->r0.c1[idx] * U->r1.c2[idx] - U->r0.c2[idx] * U->r1.c1[idx]);
+  d_complex U21 = conj(U->r0.c2[idx] * U->r1.c0[idx] - U->r0.c0[idx] * U->r1.c2[idx]);
+  d_complex U22 = conj(U->r0.c0[idx] * U->r1.c1[idx] - U->r0.c1[idx] * U->r1.c0[idx]);
+
+  /////////////////////////////////
+  // CALCOLO DELLA TRACCIA => tr1 = Tr(Sigma' * B1 * U)
+  d_complex tr1 =       SP->rc00[idx]   *  (TMP->r0.c0[idx]*U->r0.c0[idx] + TMP->r0.c1[idx]*U->r1.c0[idx] + TMP->r0.c2[idx]*U20)
+                 +      SP->c01[idx]    *  (TMP->r1.c0[idx]*U->r0.c0[idx] + TMP->r1.c1[idx]*U->r1.c0[idx] + TMP->r1.c2[idx]*U20)
+                 +      SP->c02[idx]    *  (TMP->r2.c0[idx]*U->r0.c0[idx] + TMP->r2.c1[idx]*U->r1.c0[idx] + TMP->r2.c2[idx]*U20)
+                 - conj(SP->c01[idx])   *  (TMP->r0.c0[idx]*U->r0.c1[idx] + TMP->r0.c1[idx]*U->r1.c1[idx] + TMP->r0.c2[idx]*U21)
+                 +      SP->rc11[idx]   *  (TMP->r1.c0[idx]*U->r0.c1[idx] + TMP->r1.c1[idx]*U->r1.c1[idx] + TMP->r1.c2[idx]*U21)
+                 +      SP->c12[idx]    *  (TMP->r2.c0[idx]*U->r0.c1[idx] + TMP->r2.c1[idx]*U->r1.c1[idx] + TMP->r2.c2[idx]*U21)
+                 - conj(SP->c02[idx])   *  (TMP->r0.c0[idx]*U->r0.c2[idx] + TMP->r0.c1[idx]*U->r1.c2[idx] + TMP->r0.c2[idx]*U22)
+                 - conj(SP->c12[idx])   *  (TMP->r1.c0[idx]*U->r0.c2[idx] + TMP->r1.c1[idx]*U->r1.c2[idx] + TMP->r1.c2[idx]*U22)
+       -(SP->rc00[idx]+SP->rc11[idx])   *  (TMP->r2.c0[idx]*U->r0.c2[idx] + TMP->r2.c1[idx]*U->r1.c2[idx] + TMP->r2.c2[idx]*U22);
+  /////////////////////////////////
+
+
+  /// questi sono i coefficienti b2j (58)
+  b10 = 0.5*denom*denom*(r0_1 - 3.0*u*r0_2 -24.0*u*f0); // (58)
+  b11 = 0.5*denom*denom*(r1_1 - 3.0*u*r1_2 -24.0*u*f1); // (58)
+  b12 = 0.5*denom*denom*(r2_1 - 3.0*u*r2_2 -24.0*u*f2); // (58)
+  ////////////CALCOLO DI B2   (EQ 69) ////////////////////////////////////////
+  TMP->r0.c0[idx] =b10 -   b11*QA->rc00[idx]                + b12*(QA->rc00[idx]*QA->rc00[idx]
+								  + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]));
+  TMP->r0.c1[idx] =      ( b11*I) *  QA->c01[idx]           + b12*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]));
+  TMP->r0.c2[idx] =      ( b11*I) * QA->c02[idx]            + b12*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
+  /////////
+  TMP->r1.c0[idx] =      (-b11*I) * conj(QA->c01[idx])     + b12*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]));
+  TMP->r1.c1[idx] =b10 -   b11*QA->rc11[idx]                + b12*( QA->rc11[idx]*QA->rc11[idx]
+								   +QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]));
+  TMP->r1.c2[idx] =      ( b11*I)*QA->c12[idx]              + b12*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
+  /////////
+  TMP->r2.c0[idx] =      (-b11*I)*conj(QA->c02[idx])        + b12*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
+  TMP->r2.c1[idx] =      (-b11*I)*conj(QA->c12[idx])        + b12*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
+  TMP->r2.c2[idx] =b10 +   b11*(QA->rc00[idx]+QA->rc11[idx])+ b12*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
+								  + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
+  /////////////////////////////////////////////////////////////////////////////
+
+  /////////////////////////////////
+  // CALCOLO DELLA TRACCIA => tr2 = Tr(Sigma' * B2 * U)
+  d_complex tr2 =       SP->rc00[idx]   *  (TMP->r0.c0[idx]*U->r0.c0[idx] + TMP->r0.c1[idx]*U->r1.c0[idx] + TMP->r0.c2[idx]*U20)
+                 +      SP->c01[idx]    *  (TMP->r1.c0[idx]*U->r0.c0[idx] + TMP->r1.c1[idx]*U->r1.c0[idx] + TMP->r1.c2[idx]*U20)
+                 +      SP->c02[idx]    *  (TMP->r2.c0[idx]*U->r0.c0[idx] + TMP->r2.c1[idx]*U->r1.c0[idx] + TMP->r2.c2[idx]*U20)
+                 - conj(SP->c01[idx])   *  (TMP->r0.c0[idx]*U->r0.c1[idx] + TMP->r0.c1[idx]*U->r1.c1[idx] + TMP->r0.c2[idx]*U21)
+                 +      SP->rc11[idx]   *  (TMP->r1.c0[idx]*U->r0.c1[idx] + TMP->r1.c1[idx]*U->r1.c1[idx] + TMP->r1.c2[idx]*U21)
+                 +      SP->c12[idx]    *  (TMP->r2.c0[idx]*U->r0.c1[idx] + TMP->r2.c1[idx]*U->r1.c1[idx] + TMP->r2.c2[idx]*U21)
+                 - conj(SP->c02[idx])   *  (TMP->r0.c0[idx]*U->r0.c2[idx] + TMP->r0.c1[idx]*U->r1.c2[idx] + TMP->r0.c2[idx]*U22)
+                 - conj(SP->c12[idx])   *  (TMP->r1.c0[idx]*U->r0.c2[idx] + TMP->r1.c1[idx]*U->r1.c2[idx] + TMP->r1.c2[idx]*U22)
+       -(SP->rc00[idx]+SP->rc11[idx])   *  (TMP->r2.c0[idx]*U->r0.c2[idx] + TMP->r2.c1[idx]*U->r1.c2[idx] + TMP->r2.c2[idx]*U22);
+  /////////////////////////////////
+
+  ////////////////CALCOLO U*Sigma' e lo metto in TMP che non serve piu'
+  TMP->r0.c0[idx] = U->r0.c0[idx] * SP->rc00[idx]  - U->r0.c1[idx]*conj(SP->c01[idx]) - U->r0.c2[idx]*conj(SP->c02[idx]);
+  TMP->r0.c1[idx] = U->r0.c0[idx] * SP->c01[idx]   + U->r0.c1[idx]*     SP->rc11[idx] - U->r0.c2[idx]*conj(SP->c12[idx]);
+  TMP->r0.c2[idx] = U->r0.c0[idx] * SP->c02[idx]   + U->r0.c1[idx]*     SP->c12[idx]  - U->r0.c2[idx]*(SP->rc00[idx]+SP->rc11[idx]);
+
+  TMP->r1.c0[idx] = U->r1.c0[idx] * SP->rc00[idx]  - U->r1.c1[idx]*conj(SP->c01[idx]) - U->r1.c2[idx]*conj(SP->c02[idx]);
+  TMP->r1.c1[idx] = U->r1.c0[idx] * SP->c01[idx]   + U->r1.c1[idx]*     SP->rc11[idx] - U->r1.c2[idx]*conj(SP->c12[idx]);
+  TMP->r1.c2[idx] = U->r1.c0[idx] * SP->c02[idx]   + U->r1.c1[idx]*     SP->c12[idx]  - U->r1.c2[idx]*(SP->rc00[idx]+SP->rc11[idx]);
+
+  TMP->r2.c0[idx] = U20           * SP->rc00[idx]  - U21          *conj(SP->c01[idx]) - U22          *conj(SP->c02[idx]);
+  TMP->r2.c1[idx] = U20           * SP->c01[idx]   + U21          *     SP->rc11[idx] - U22          *conj(SP->c12[idx]);
+  TMP->r1.c2[idx] = U20           * SP->c02[idx]   + U21          *     SP->c12[idx]  - U22          *(SP->rc00[idx]+SP->rc11[idx]);
+  /////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+}
+
+
+
+
 
 
 
