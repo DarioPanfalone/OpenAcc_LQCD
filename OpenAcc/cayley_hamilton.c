@@ -6,7 +6,7 @@
 // "Analytic Smearing of SU(3) Link Variables in Lattice QCD",
 //  Morningstar & Peardon (2008)
 
-//#include <math.h>
+#include <accelmath.h>
 #include <complex.h>
 #include "../OpenAcc/struct_c_def.c"
 
@@ -318,7 +318,8 @@ static inline void CH_exponential_antihermitian_soa(__restrict su3_soa * const e
 
   double c1  = 0.5 * Tr_i_times_QA_sq_soa(QA,idx); // (15)
   double c0max = 2*pow(c1/3,1.5); // (17) // forse e' meglio mettere (c1/3)*sqrt(c1/3) ?!?!
-  double theta = homebrew_acos(c0/c0max);//(25)
+  //  double theta = homebrew_acos(c0/c0max);//(25)
+  double theta = acos(c0/c0max);//(25)
 
 
 

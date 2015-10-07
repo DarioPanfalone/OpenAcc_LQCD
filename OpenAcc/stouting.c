@@ -283,6 +283,31 @@ static inline void compute_Lambda(__restrict thmat_soa * const L, // la Lambda -
   /////////////////////////////////////////////////////////////////////
 
 
+  ///////////////// CALCOLO DI GAMMA = tr1*Q + tr2*Q^2 + f1* (U * Sigma') + f2 * (Q * U * Sigma' + U * Sigma' * Q ) = 
+  /////////////////                  = tr1*Q + tr2*Q^2 + f1* TMP + f2 * (Q * TMP + TMP * Q)
+  /////////////////  GAMMA_00 = r0_1
+  /////////////////  GAMMA_01 = r1_1
+  /////////////////  GAMMA_02 = r2_1
+  /////////////////  GAMMA_10 = r0_2
+  /////////////////  GAMMA_11 = r1_2
+  /////////////////  GAMMA_12 = r2_2
+  /////////////////  GAMMA_20 = U20
+  /////////////////  GAMMA_21 = U21
+  /////////////////  GAMMA_22 = U22
+
+  r0_1 = -tr1 * QA->rc00[idx]   + tr2 * (QA->rc00[idx]*QA->rc00[idx] + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]))
+    + f1 * TMP->r0.c0[idx] + f2  * (-2.0*TMP->r0.c0[idx]*QA->rc00[idx]+(1.0*I)*(QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]
+										+QA->c02[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c2[idx]));
+  r1_1 =(tr1*I)*QA->c01[idx]    + tr2 * (QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]))
+    + f1 * TMP->r0.c1[idx] + f2  * (-TMP->r0.c1[idx]/*..........*/);
+
+
+
+
+
+
+  ///////////////// INFINE CALCOLO DI LAMBDA = 0.5*(GAMMA + GAMMA^CROCE) - (1/6)* Id * Tr(GAMMA + GAMMA^CROCE)
+
 
 
 

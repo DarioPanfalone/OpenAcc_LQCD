@@ -31,10 +31,10 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 12
-#define ny 12
-#define nz 12
-#define nt 12
+#define nx 16
+#define ny 16
+#define nz 16
+#define nt 16
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -44,13 +44,13 @@
 //#define GAUGE_ACT_TLSM
 #define GAUGE_ACT_WILSON
 
-#define beta 5.70  //5.35
+#define beta 4.00  //5.35
 
 
 const int no_flavours=2; // number of quark species
-const int start_opt=1;// 0 --> COLD START; 1 --> START FROM SAVED CONF
+const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=0; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int ITERATIONS=2; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
 int therm_ITERATIONS = 20; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=10000;
@@ -181,13 +181,13 @@ void init_ferm_params(){
   if(allocation_check != 0)  printf("Errore nella allocazione di fermions_parameters \n");
 
   fermions_parameters[0].ferm_charge       = -1.0;   // up    charge
-  fermions_parameters[0].ferm_mass         = 0.5;    //0.075;  // up    mass
+  fermions_parameters[0].ferm_mass         = 0.05;    //0.075;  // up    mass
   fermions_parameters[0].ferm_im_chem_pot  = 0.0;    // up    chem pot
   fermions_parameters[0].degeneracy        = 1;      // up    degeneracy
   fermions_parameters[0].number_of_ps      = 1;      // up    number of pseudo fermions
 
   fermions_parameters[1].ferm_charge       = 2.0;    // down  charge
-  fermions_parameters[1].ferm_mass         = 0.5;    //0.075;  // down  mass
+  fermions_parameters[1].ferm_mass         = 0.05;    //0.075;  // down  mass
   fermions_parameters[1].ferm_im_chem_pot  = 0.0;    // down  chem pot
   fermions_parameters[1].degeneracy        = 1;      // down  degeneracy
   fermions_parameters[1].number_of_ps      = 1;      // down  number of pseudo fermions
