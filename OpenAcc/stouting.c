@@ -142,14 +142,19 @@ static inline d_complex  b2(double denom,
 }
 
 
+
+
+
+
 //calcolo di lambda
-static inline void compute_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
-				  __restrict tamat_soa * const SP, // Sigma primo --> input
-				  __restrict su3_soa   * const U,    // la configurazione di gauge --> input
-				  __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input
-				  __restrict su3_soa   * const TMP,  // variabile di parcheggio
-				  int idx
-				  ){
+#pragma acc routine seq
+static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
+				      __restrict tamat_soa * const SP, // Sigma primo --> input
+				      __restrict su3_soa   * const U,    // la configurazione di gauge --> input
+				      __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input
+				      __restrict su3_soa   * const TMP,  // variabile di parcheggio
+				      int idx
+				      ){
   
   double c0 = det_i_times_QA_soa(QA,idx); //(14)
   double c1  = 0.5 * Tr_i_times_QA_sq_soa(QA,idx); // (15)
@@ -294,30 +299,90 @@ static inline void compute_Lambda(__restrict thmat_soa * const L, // la Lambda -
   /////////////////  GAMMA_20 = U20
   /////////////////  GAMMA_21 = U21
   /////////////////  GAMMA_22 = U22
-
+  // prima riga
   r0_1 = -tr1 * QA->rc00[idx]   + tr2 * (QA->rc00[idx]*QA->rc00[idx] + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]))
     + f1 * TMP->r0.c0[idx] + f2  * (-2.0*TMP->r0.c0[idx]*QA->rc00[idx]+(1.0*I)*(QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]
 										+QA->c02[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c2[idx]));
   r1_1 =(tr1*I)*QA->c01[idx]    + tr2 * (QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]))
-    + f1 * TMP->r0.c1[idx] + f2  * (-TMP->r0.c1[idx]/*..........*/);
+    + f1 * TMP->r0.c1[idx] + f2  * (-TMP->r0.c1[idx]*(QA->rc11[idx]+QA->rc00[idx])+(1.0*I)*(QA->c01[idx]*(TMP->r0.c0[idx]+TMP->r1.c1[idx])
+									    +QA->c02[idx]*TMP->r2.c1[idx]-conj(QA->c12[idx])*TMP->r0.c2[idx]));
+  r2_1 =(tr1*I)*QA->c02[idx]    + tr2 * (-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx])
+    + f1 * TMP->r0.c2[idx] + f2  * (QA->rc11[idx]*TMP->r0.c2[idx]+(1.0*I)*(QA->c02[idx]*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
+									   QA->c01[idx]*TMP->r1.c2[idx]+QA->c12[idx]*TMP->r0.c1[idx]));
+  // seconda riga
+  r0_2 = (-tr1*I) * conj(QA->c01[idx])  + tr2*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]))
+    + f1 * TMP->r1.c0[idx] + f2 *(-TMP->r1.c0[idx]*(QA->rc00[idx]+QA->rc11[idx])+(1.0*I)*(-conj(QA->c01[idx])*(TMP->r0.c0[idx]+TMP->r1.c1[idx])  
+									       + QA->c12[idx]*TMP->r2.c0[idx] - conj(QA->c02[idx])*TMP->r1.c2[idx]));
 
+  r1_2 = -tr1*QA->rc11[idx]   + tr2*( QA->rc11[idx]*QA->rc11[idx]+QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]))
+    + f1 * TMP->r1.c1[idx] + f2*(-2.0*TMP->r1.c1[idx]*QA->rc11[idx]+(1.0*I)*(QA->c12[idx]*TMP->r2.c1[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]+
+									     QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c12[idx])*TMP->r1.c2[idx]));
+  r2_2 = (tr1*I)*QA->c12[idx] + tr2*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]))
+    + f1 * TMP->r1.c2[idx] + f2*(QA->rc00[idx]*TMP->r1.c2[idx]+(1.0*I)*(QA->c12[idx]*(TMP->r1.c1[idx]+TMP->r2.c2[idx]) 
+									+QA->c02[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c2[idx]));
+  // terza riga
+  U20  = (-tr1*I)*conj(QA->c02[idx]) + tr2*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]))
+    + f1 * TMP->r2.c0[idx] + f2 *(QA->rc11[idx]*TMP->r2.c0[idx]+(-1.0*I)*(conj(QA->c02[idx])*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
+									  conj(QA->c01[idx])*TMP->r2.c1[idx]+conj(QA->c12[idx])*TMP->r1.c0[idx]));
+  U21  = (-tr1*I)*conj(QA->c12[idx]) + tr2*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]))
+    + f1 * TMP->r2.c1[idx] + f2 *(QA->rc00[idx]*TMP->r2.c1[idx]+(1.0*I)*(QA->c01[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c1[idx]
+									 -conj(QA->c12[idx])*(TMP->r1.c1[idx]+TMP->r2.c2[idx])));
+  U22  = tr1*(QA->rc00[idx]+QA->rc11[idx])+ tr2*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
+						 + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]))
+    + f1 * TMP->r2.c2[idx] + f2 *(2.0*(QA->rc00[idx]+QA->rc11[idx])*TMP->r2.c2[idx]+(1.0*I)*(QA->c02[idx]*TMP->r2.c0[idx]+QA->c12[idx]*TMP->r2.c1[idx]
+											     -conj(QA->c02[idx])*TMP->r0.c2[idx]
+											     -conj(QA->c12[idx])*TMP->r1.c2[idx]));
 
-
-
-
-
+  /////////////////////////////////////////
   ///////////////// INFINE CALCOLO DI LAMBDA = 0.5*(GAMMA + GAMMA^CROCE) - (1/6)* Id * Tr(GAMMA + GAMMA^CROCE)
+  ///// LAMBDA_00 = (2*re(G00)-re(G11)-re(G22))/3
+  ///// LAMBDA_11 = (2*re(G11)-re(G00)-re(G22))/3
+  ///// LAMBDA_01 = (G01+conj(G10))/2
+  ///// LAMBDA_02 = (G02+conj(G20))/2
+  ///// LAMBDA_12 = (G12+conj(G21))/2
 
-
-
-
+  L->rc00[idx] = (2*creal(r0_1)-creal(r1_2)-creal(U22))*ONE_BY_THREE;
+  L->rc11[idx] = (2*creal(r1_2)-creal(r0_1)-creal(U22))*ONE_BY_THREE;
+  L->c01[idx]  = (r1_1+conj(r0_2))*0.5;
+  L->c02[idx]  = (r2_1+conj(U20))*0.5;
+  L->c12[idx]  = (r2_2+conj(U21))*0.5;
 
 }
 
 
 
+void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
+		    __restrict tamat_soa * const SP, // Sigma primo --> input
+		    __restrict su3_soa   * const U,    // la configurazione di gauge --> input
+		    __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input
+		    __restrict su3_soa   * const TMP  // variabile di parcheggio
+		    ){
 
 
-
+  int x, y, z, t;
+#pragma acc kernels present(L)  present(SP)  present(U)  present(QA)  present(TMP)
+#pragma acc loop independent gang
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent gang vector
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent gang vector
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent vector
+        for(x=0; x < nx; x++) {
+          const  int idxh   = snum_acc(x,y,z,t);  // r
+          const  int parity = (x+y+z+t) % 2;
+          int dir_link;
+          int mu;
+#pragma acc loop seq
+          for(mu=0;mu<4;mu++){
+            dir_link = 2*mu + parity;
+	    compute_loc_Lambda(&L[dir_link],&SP[dir_link],&U[dir_link],&QA[dir_link],&TMP[dir_link],idxh);
+          }
+        }  // x
+      }  // y
+    }  // z
+  }  // t
+}
 
 #endif
+

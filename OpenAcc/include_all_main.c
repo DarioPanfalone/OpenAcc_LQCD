@@ -18,13 +18,15 @@ void su2_rand(double *pp);
 #include "./inverter_multishift_full.c"
 #include "./rettangoli.c"
 #include "./ipdot_gauge.c"
-#include "./md_integrator.c"
 #include "../Meas/ferm_meas.c"
+#include "./homebrew_acos.c"
+#include "./stouting.c"
+#include "./fermion_force.c"
+#include "./md_integrator.c"
 #include "./update_standard_action.c"
 #include "./update_tlsm_stdferm.c"
 #include "./update_versatile.c"
-#include "./homebrew_acos.c"
-#include "./stouting.c"
+
 
 int main(){
 

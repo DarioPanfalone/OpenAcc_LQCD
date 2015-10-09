@@ -1,7 +1,6 @@
 #ifndef INVERTER_SHIFT_MULTI_FULL_C_
 #define INVERTER_SHIFT_MULTI_FULL_C_
 
-#define TIMING_FERMION_FORCE
 
 //#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
@@ -628,6 +627,7 @@ void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' cost
 }
 
 
+/*
 void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata
 			       __restrict double_soa * backfield,
 			       __restrict tamat_soa  * tipdot_acc,
@@ -696,6 +696,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   //  printf("########################################### \n");
 
 }
+*/
 
 
 #endif
