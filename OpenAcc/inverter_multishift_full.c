@@ -1,6 +1,7 @@
 #ifndef INVERTER_SHIFT_MULTI_FULL_C_
 #define INVERTER_SHIFT_MULTI_FULL_C_
 
+
 //#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
 /*
@@ -433,13 +434,13 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
 #else
 #pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars)
 #endif
-#pragma acc loop independent gang(nt)
+#pragma acc loop independent //gang(nt)
   for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
       for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
+#pragma acc loop independent //vector(DIM_BLOCK_X)
         for(hx=0; hx < nxh; hx++) {
           int x,eta;
 
@@ -528,13 +529,13 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 #else
 #pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars)
 #endif
-#pragma acc loop independent gang(nt)
+#pragma acc loop independent //gang(nt)
   for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
       for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
+#pragma acc loop independent //vector(DIM_BLOCK_X)
         for(hx=0; hx < nxh; hx++) {
           int x,eta;
 	  double arg;
@@ -626,6 +627,7 @@ void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' cost
 }
 
 
+/*
 void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata
 			       __restrict double_soa * backfield,
 			       __restrict tamat_soa  * tipdot_acc,
@@ -650,7 +652,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   //  printf("#### Inside fermion force soloopenacc ###### \n");
   //  printf("############################################ \n");
 
-#ifdef TIMING_ALL
+#ifdef TIMING_FERMION_FORCE
   struct timeval t1,t2;
   gettimeofday ( &t1, NULL );
 #endif
@@ -684,7 +686,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
       multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
   }
  
-#ifdef TIMING_ALL
+#ifdef TIMING_FERMION_FORCE
   gettimeofday ( &t2, NULL );
   double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
   printf("FULL FERMION FORCE COMPUTATION                  PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
@@ -694,6 +696,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   //  printf("########################################### \n");
 
 }
+*/
 
 
 #endif

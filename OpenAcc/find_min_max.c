@@ -45,7 +45,8 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       acc_Deo(u,loc_p,loc_h,pars,backfield);
 
       // p=(M^dag M)r
-      combine_in1xm2_minus_in2(loc_r,loc_p);
+      //      combine_in1xm2_minus_in2(loc_r,loc_p);
+      combine_in1xferm_mass_minus_in2(loc_r,pars->ferm_mass*pars->ferm_mass,loc_p);
       norm=sqrt(l2norm2_global(loc_p));
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
@@ -67,7 +68,7 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
 					 ){
   int loop_count;
   double norm, inorm, old_norm, delta;
-  delta=max-mass2;
+  delta=max-(pars->ferm_mass)*(pars->ferm_mass);
   norm=sqrt(l2norm2_global(loc_p));
   loop_count=0;
   // loop start

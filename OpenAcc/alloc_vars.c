@@ -5,6 +5,8 @@ double_soa * u1_back_field_phases;
 tamat_soa * ipdot_acc;
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
+su3_soa  * auxbis_conf_acc; // auxiliary 
+su3_soa  * stout_conf_acc;
 vec3_soa * ferm_chi_acc; // questo e' il chi [NPS_tot]
 //ACC_MultiFermion * ferm_chi_acc; // questo e' il chi
 vec3_soa * ferm_phi_acc; // questo e' il phi [NPS_tot]
@@ -47,6 +49,10 @@ void mem_alloc(){
   if(allocation_check != 0)  printf("Errore nella allocazione di k_p_shiftferm \n");
   allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_acc \n");
+  allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di auxbis_conf_acc \n");
+  allocation_check =  posix_memalign((void **)&stout_conf_acc, ALIGN, 8*sizeof(su3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di stout_conf_acc \n");
   allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_bkp \n");
   allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa));
@@ -81,6 +87,7 @@ void mem_free(){
 #endif
   free(momenta);
   free(aux_conf_acc);
+  free(stout_conf_acc);
   free(conf_acc_bkp);
   free(ipdot_acc);
 

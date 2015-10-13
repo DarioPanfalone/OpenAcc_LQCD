@@ -41,16 +41,19 @@
 
 //#define TIMING_ALL // if defined many computation times are printed in the output
 
-#define mass 0.075
-#define beta 5.35
+//#define GAUGE_ACT_TLSM
+#define GAUGE_ACT_WILSON
+
+#define beta 4.00  //5.35
+
 
 const int no_flavours=2; // number of quark species
 const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=3000; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-int therm_ITERATIONS = 40; // the first <therm_ITERATIONS> of the history will be thermalization updates
+int ITERATIONS=2; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int therm_ITERATIONS = 20; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
-int save_conf_every=10;
+int save_conf_every=10000;
 
 #define max_approx_order 19
 int approx_metro=19;
@@ -59,14 +62,14 @@ const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_m
 const double lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double residue_metro=1.0e-8;    // stopping residual for CG
 const double residue_md=1.0e-5;    // stopping residual for CG
-const int gmp_remez_precision=100; // The precision that gmp uses                   
+const int gmp_remez_precision=100; // The precision that gmp uses
 
 // quanti di campo esterno
 const double bx_quantum=0.0;
 const double ex_quantum=0.0;
 const double by_quantum=0.0;
 const double ey_quantum=0.0;
-const double bz_quantum=32.0;
+const double bz_quantum=5.0;
 const double ez_quantum=0.0;
 
 #define no_ps 2
@@ -78,7 +81,7 @@ const double ez_quantum=0.0;
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
 #define gauge_scale 4  // Update fermions every gauge_scale gauge updates
 
-
+#define RHO 0.005
 
 typedef struct COM_t{
   double Re;
@@ -159,12 +162,15 @@ int NPS_tot;
 int max_ps;
 ferm_param *fermions_parameters;
 
-char *nome_file_ferm_output;
+char * nome_file_gauge_output;
+char * nome_file_ferm_output;
 
 void init_ferm_params(){
 
   nome_file_ferm_output = (char*)malloc(sizeof("ferm_meas.dat"));
   strcpy(nome_file_ferm_output,"ferm_meas.dat");
+  nome_file_gauge_output = (char*)malloc(sizeof("gauge_meas.dat"));
+  strcpy(nome_file_gauge_output,"gauge_meas.dat");
 
 
   NDiffFlavs = 2;  // the number of different quark flavours
@@ -175,13 +181,13 @@ void init_ferm_params(){
   if(allocation_check != 0)  printf("Errore nella allocazione di fermions_parameters \n");
 
   fermions_parameters[0].ferm_charge       = -1.0;   // up    charge
-  fermions_parameters[0].ferm_mass         = mass;   // up    mass
+  fermions_parameters[0].ferm_mass         = 0.05;    //0.075;  // up    mass
   fermions_parameters[0].ferm_im_chem_pot  = 0.0;    // up    chem pot
   fermions_parameters[0].degeneracy        = 1;      // up    degeneracy
   fermions_parameters[0].number_of_ps      = 1;      // up    number of pseudo fermions
 
   fermions_parameters[1].ferm_charge       = 2.0;    // down  charge
-  fermions_parameters[1].ferm_mass         = mass;   // down  mass
+  fermions_parameters[1].ferm_mass         = 0.05;    //0.075;  // down  mass
   fermions_parameters[1].ferm_im_chem_pot  = 0.0;    // down  chem pot
   fermions_parameters[1].degeneracy        = 1;      // down  degeneracy
   fermions_parameters[1].number_of_ps      = 1;      // down  number of pseudo fermions

@@ -1,6 +1,7 @@
 double casuale(void);
 void initrand(unsigned long s);
 void su2_rand(double *pp);
+#define PRINT_DETAILS_INSIDE_UPDATE
 
 
 #include "openacc.h"
@@ -15,14 +16,21 @@ void su2_rand(double *pp);
 #include "./inverter_full.c"
 #include "./find_min_max.c"
 #include "./inverter_multishift_full.c"
-#include "./md_integrator.c"
-#include "./md_integrator_soloopenacc.c"
+#include "./rettangoli.c"
+#include "./ipdot_gauge.c"
 #include "../Meas/ferm_meas.c"
+#include "./homebrew_acos.c"
+#include "./stouting.c"
+#include "./fermion_force.c"
+#include "./md_integrator.c"
+#include "./update_standard_action.c"
+#include "./update_tlsm_stdferm.c"
+#include "./update_versatile.c"
 
 
 int main(){
 
-  initrand(0);
+  initrand(111);
   fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
   su3_soa  * conf_acc;
@@ -43,6 +51,7 @@ int main(){
   printf("nn computation : OK \n");
 #ifdef BACKFIELD
   init_backfield();
+  print_double_soa(u1_back_field_phases,"backfield");
   printf("u1_backfield initialization : OK \n");
 #endif
 
@@ -62,7 +71,7 @@ int main(){
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
   if(start_opt==0){ 
-    generate_Conf_cold(conf_acc);
+    generate_Conf_cold(conf_acc,0.05);
     printf("Cold Gauge Conf Generated : OK \n");
     conf_id_iter=0;
   }
@@ -74,10 +83,10 @@ int main(){
   //###############################################################################################  
 
 
-#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs])
+#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs]) create(stout_conf_acc[0:8])
     {
 
-    double plq;
+      double plq,rect;
     /*
     plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     printf("ALL'INIZIO   Placchetta=%.18lf \n",plq/size/6.0/3.0);
@@ -85,9 +94,13 @@ int main(){
 
     int accettate_therm=0;
     int accettate_metro=0;
+    int accettate_therm_old=0;
+    int accettate_metro_old=0;
     int id_iter_offset=conf_id_iter;
     //################### THERMALIZATION & METRO    ----   UPDATES ####################//
     for(int id_iter=id_iter_offset;id_iter<(ITERATIONS+id_iter_offset);id_iter++){
+               accettate_therm_old = accettate_therm;
+               accettate_metro_old = accettate_metro;
                conf_id_iter++;
 	       printf("\n#################################################\n");
                printf(  "            GENERATING CONF %d of %d\n",conf_id_iter,ITERATIONS+id_iter_offset);
@@ -102,22 +115,39 @@ int main(){
 	       //---------------------------------------//
 
 	       //--------- MISURA ROBA FERMIONICA ----------------//
-	       FILE *outfile = fopen(nome_file_ferm_output,"at");
-	       if(!outfile) outfile = fopen(nome_file_ferm_output,"wt");
-	       if(outfile){
-		 fprintf(outfile,"%d\t",conf_id_iter);
-		 for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),residue_metro,outfile);
-		 fprintf(outfile,"\n");
+	       FILE *foutfile = fopen(nome_file_ferm_output,"at");
+	       if(!foutfile) foutfile = fopen(nome_file_ferm_output,"wt");
+	       if(foutfile){
+		 fprintf(foutfile,"%d\t",conf_id_iter);
+		 for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),residue_metro,foutfile);
+		 fprintf(foutfile,"\n");
 	       }
-	       fclose(outfile);
+	       fclose(foutfile);
 	       //-------------------------------------------------// 
 	       //--------- MISURA ROBA DI GAUGE ------------------//
 	       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-	       if(id_iter<therm_ITERATIONS){
-		 printf("Therm_iter %d   Placchetta=%.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-	       }else{
-		 printf("Metro_iter %d   Placchetta=%.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+	       rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+
+               FILE *goutfile = fopen(nome_file_gauge_output,"at");
+               if(!goutfile) goutfile = fopen(nome_file_gauge_output,"wt");
+               if(goutfile){
+		 if(id_iter<therm_ITERATIONS){
+		   printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+		   printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+		   
+		   fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_therm-accettate_therm_old);
+		   fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
+		   
+		 }else{
+		   printf("Metro_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+		   printf("Metro_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+		   
+		   fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_metro-accettate_metro_old);
+		   fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
+		   
+		 }
 	       }
+               fclose(goutfile);
 	       //-------------------------------------------------//
 	       
 	       //--------- SALVA LA CONF SU FILE ------------------//
@@ -127,9 +157,34 @@ int main(){
     }// id_iter loop ends here
     
 
+
     //--------- SALVA LA CONF SU FILE ------------------//
     print_su3_soa(conf_acc,"stored_config");
     //-------------------------------------------------//
+
+    FILE *soutfile = fopen("RES_STOUT","at");
+
+    plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    fprintf(soutfile,"RHO= %f  STOUT= 0    Placchetta= %.18lf \n",(double)RHO,plq/size/6.0/3.0);
+
+    struct timeval t1,t2;
+    gettimeofday ( &t1, NULL );
+    for(int i=0;i<50;i++){
+      stout_isotropic(conf_acc,stout_conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
+      plq = calc_plaquette_soloopenacc(stout_conf_acc,aux_conf_acc,local_sums);
+      fprintf(soutfile,"RHO= %f STOUT= %d    Placchetta= %.18lf \n",(double)RHO,1+2*i,plq/size/6.0/3.0);
+      
+      stout_isotropic(stout_conf_acc,conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
+      plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+      fprintf(soutfile,"RHO= %f STOUT= %d    Placchetta= %.18lf \n",(double)RHO,2+2*i,plq/size/6.0/3.0);
+    }
+    gettimeofday ( &t2, NULL );
+    double dt_stout = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+    printf("STOUT COMP TIME: %f sec  \n",dt_stout);
+
+    fclose(soutfile);
+
+
 
 
     }// end pragma acc data
@@ -143,6 +198,10 @@ int main(){
   free(conf_acc);
   mem_free();
 
+  double cacca = acos(0.3);
+  printf("ACOS ORIG= %.18lf \n",cacca);
+  cacca = homebrew_acos(0.3);
+  printf("ACOS HOME= %.18lf \n",cacca);
 
   return 0;
 }

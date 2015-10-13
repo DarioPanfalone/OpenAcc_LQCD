@@ -23,7 +23,7 @@ double double_gauss(void)
 {
   double phi, temp, radius, ris;
 
-  phi=acc_pi2*casuale();
+  phi=acc_twopi*casuale();
   temp=-1.0*log(casuale());
   radius=sqrt(temp);
 
@@ -38,7 +38,7 @@ void two_double_gauss(double *r)
 {
   double phi, temp, radius;
 
-  phi=acc_pi2*casuale();
+  phi=acc_twopi*casuale();
   temp=-1.0*log(casuale());
   radius=sqrt(temp);
 
@@ -221,10 +221,10 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom){
 }
 
 // iterations of random assignements over all the 8 components
-void generate_Conf_cold(__restrict su3_soa * const conf){
+void generate_Conf_cold(__restrict su3_soa * const conf,double factor){
   int mu;
   for(mu=0; mu<8; mu++){
-    generate_Conf_cold_comp(&conf[mu],0.1);
+    generate_Conf_cold_comp(&conf[mu],factor);
   }
   mult_conf_times_stag_phases_nodev(conf);
 }
@@ -364,11 +364,11 @@ void init_backfield(){
 		arg = ((double)(y+1))*((double)nx)*((double)bz_quantum)/(((double)nx)*((double)ny));
 		arg += ((double)(t+1))*((double)nx)*((double)ex_quantum)/(((double)nx)*((double)nt));
 		arg -= ((double)(z+1))*((double)by_quantum)/(((double)nz)*((double)nx));
-		u1_back_field_phases[parity].d[idxh]= arg; 
+		u1_back_field_phases[parity].d[idxh]= acc_twopi*arg; 
 	      }
 	      else {
 		arg = -((double)(z+1))*((double)by_quantum)/(((double)nz)*((double)nx));
-		u1_back_field_phases[parity].d[idxh]= arg; 
+		u1_back_field_phases[parity].d[idxh]= acc_twopi*arg; 
 	      }
 	      
 	      ////////Y-oriented/////////
@@ -378,11 +378,11 @@ void init_backfield(){
 		arg = ((double)(z+1))*((double)ny)*((double)bx_quantum)/(((double)ny)*((double)nz));
 		arg += ((double)(t+1))*((double)ny)*((double)ey_quantum)/(((double)ny)*((double)nt));
 		arg -= ((double)(x+1))*((double)bz_quantum)/(((double)nx)*((double)ny));
-		u1_back_field_phases[2+parity].d[idxh]= arg;
+		u1_back_field_phases[2+parity].d[idxh]= acc_twopi*arg;
 	      }
 	      else {
 		arg = -((double)(x+1))*((double)bz_quantum)/(((double)nx)*((double)ny));
-		u1_back_field_phases[2+parity].d[idxh]= arg;
+		u1_back_field_phases[2+parity].d[idxh]= acc_twopi*arg;
 	      }
 
 	      ////////Z-oriented////////
@@ -392,11 +392,11 @@ void init_backfield(){
 		arg = ((double)(t+1))*((double)nz)*((double)ez_quantum)/(((double)nz)*((double)nt));
 		arg += ((double)(x+1))*((double)nz)*((double)by_quantum)/(((double)nz)*((double)nx));
 		arg -= ((double)(y+1))*((double)bx_quantum)/(((double)ny)*((double)nz));
-		u1_back_field_phases[4+parity].d[idxh]= arg;
+		u1_back_field_phases[4+parity].d[idxh]=acc_twopi* arg;
 	      }
 	      else{
 		arg = -((double)(y+1))*((double)bx_quantum)/(((double)ny)*((double)nz));
-		u1_back_field_phases[4+parity].d[idxh]= arg;
+		u1_back_field_phases[4+parity].d[idxh]= acc_twopi*arg;
 	      }
 
 	      ///////T-oriented////////
@@ -405,7 +405,7 @@ void init_backfield(){
 	      arg = -((double)(z+1))*((double)ez_quantum)/(((double)nz)*((double)nt));
 	      arg -= ((double)(y+1))*((double)ey_quantum)/(((double)ny)*((double)nt));
 	      arg -= ((double)(x+1))*((double)ex_quantum)/(((double)nx)*((double)nt));
-	      u1_back_field_phases[6+parity].d[idxh]= arg;
+	      u1_back_field_phases[6+parity].d[idxh]= acc_twopi*arg;
 	  } // x loop
 	} // y loop
       } // z loop
