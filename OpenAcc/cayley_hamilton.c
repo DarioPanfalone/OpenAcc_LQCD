@@ -57,9 +57,25 @@ static inline void single_su3_times_scalar(single_su3 * m , d_complex scalar){
      m->comp[r][c] *= scalar;
 
 }
+static inline void single_su3_times_scalar_no3rdrow(single_su3 * m , d_complex scalar){
+
+   for(int r=0;r<2;r++)
+    for(int c=0;c<3;c++)
+     m->comp[r][c] *= scalar;
+
+}
 static inline void single_su3xsu3(single_su3 * out , single_su3 *m1, single_su3 *m2){
 
    for(int r=0;r<3;r++)
+    for(int c=0;c<3;c++){
+        out->comp[r][c] = 0;
+        for(int d=0;d<3;d++) out->comp[r][c] += m1->comp[r][d] * m2->comp[d][c] ;
+
+    }
+}
+static inline void single_su3xsu3_no3rdrow(single_su3 * out , single_su3 *m1, single_su3 *m2){
+
+   for(int r=0;r<2;r++)
     for(int c=0;c<3;c++){
         out->comp[r][c] = 0;
         for(int d=0;d<3;d++) out->comp[r][c] += m1->comp[r][d] * m2->comp[d][c] ;
@@ -77,15 +93,27 @@ void print_su3_stdout(single_su3 *m){
 }
 static inline void single_su3add(single_su3 * out , single_su3 *m){
 
-   for(int r=0;r<3;r++)
+   for(int r=0;r<3;r++)// Magari fino alla seconda riga?
+   //for(int r=0;r<2;r++) //??
     for(int c=0;c<3;c++)
         out->comp[r][c] += m->comp[r][c];
 
 }
-void CH_exponential(single_su3 * out, single_thmat * Q ){ // exp(iQ)
+static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
+
+   for(int r=0;r<2;r++)
+    for(int c=0;c<3;c++)
+        out->comp[r][c] += m->comp[r][c];
+
+}
+static inline void CH_exponential(single_su3 * out, single_thmat * Q ){ // exp(iQ)
     // based on Sez. III of http://arXiv.org/abs/hep-lat/0311018v1
 
     double c0 = detQ(Q); //(14)
+
+    single_thmat Qsq_notr ; 
+    Qsq_notr.rc00 = Q.rc00 *R.rc00
+
     double c1  = 0.5 * TrQsq(Q); // (15)
     double c0max = 2*pow(c1/3,1.5); // (17)
 
@@ -112,10 +140,13 @@ void CH_exponential(single_su3 * out, single_thmat * Q ){ // exp(iQ)
     
     single_su3 Q1, Q2;
     thmat_to_su3(&Q1,Q);
-    single_su3xsu3(&Q2,&Q1,&Q1);
+//  single_su3xsu3(&Q2,&Q1,&Q1);
+    single_su3xsu3_no3rdrow(&Q2,&Q1,&Q1);
 
-    single_su3_times_scalar(&Q1,h1/denom);
-    single_su3_times_scalar(&Q2,h2/denom);
+//  single_su3_times_scalar(&Q1,h1/denom);
+//  single_su3_times_scalar(&Q2,h2/denom);
+    single_su3_times_scalar_no3rdrow(&Q1,h1/denom);
+    single_su3_times_scalar_no3rdrow(&Q2,h2/denom);
 
     d_complex f0 = h0/denom ;
 
@@ -126,15 +157,47 @@ void CH_exponential(single_su3 * out, single_thmat * Q ){ // exp(iQ)
     out->comp[1][0] = 0;
     out->comp[1][1] = f0;
     out->comp[1][2] = 0;
-    out->comp[2][0] = 0;
-    out->comp[2][1] = 0;
-    out->comp[2][2] = f0;
+//    out->comp[2][0] = 0;  // DA TOGLIERE?
+//    out->comp[2][1] = 0; // DA TOGLIERE?
+//    out->comp[2][2] = f0; // DA TOGLIERE?
+
 
 //    print_su3_stdout(out);
 //    print_su3_stdout(&Q1);
 //    print_su3_stdout(&Q2);
 
-    single_su3add(out, &Q1);// second term in (19)
-    single_su3add(out, &Q2);// third
+//  single_su3add(out, &Q1);// second term in (19)
+//  single_su3add(out, &Q2);// third
+    single_su3add_no3rdrow(out, &Q1);// second term in (19)
+    single_su3add_no3rdrow(out, &Q2);// third
 
+
+}
+void ker_CH_exponential(su3_soa * out_soa, thmat_soa * Q_soa, int index ){ // exp(iQ)
+    // based on Sez. III of http://arXiv.org/abs/hep-lat/0311018v1
+
+    single_su3 out;
+    single_thmat Q;
+    int dir_eo ;
+    for(dir_eo =0 ; dir_eo < 8 ; dir_eo++){
+        Q.rc00 = Q_soa[dir_eo].rc00[index];
+        Q.rc11 = Q_soa[dir_eo].rc11[index];
+        Q.c01 = Q_soa[dir_eo].c01[index];
+        Q.c02 = Q_soa[dir_eo].c02[index];
+        Q.c12 = Q_soa[dir_eo].c12[index];
+
+        CH_exponential(&out,&Q);
+
+        out_soa[dir_eo].r0.c0[index] = out.comp[0][0];
+        out_soa[dir_eo].r0.c1[index] = out.comp[0][1];
+        out_soa[dir_eo].r0.c2[index] = out.comp[0][2];//
+        out_soa[dir_eo].r1.c0[index] = out.comp[1][0];
+        out_soa[dir_eo].r1.c1[index] = out.comp[1][1];
+        out_soa[dir_eo].r1.c2[index] = out.comp[1][2];//
+        out_soa[dir_eo].r2.c0[index] = out.comp[2][0];  // DA TOGLIERE?
+        out_soa[dir_eo].r2.c1[index] = out.comp[2][1];  // DA TOGLIERE?
+        out_soa[dir_eo].r2.c2[index] = out.comp[2][2];//// DA TOGLIERE?
+
+
+    }
 }
