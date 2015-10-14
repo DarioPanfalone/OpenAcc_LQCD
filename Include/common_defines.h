@@ -44,6 +44,12 @@
 //#define GAUGE_ACT_TLSM
 #define GAUGE_ACT_WILSON
 
+#define STOUT_FERMIONS
+#ifdef STOUT_FERMIONS
+#define STOUT_STEPS 2
+#endif
+
+
 #define beta 4.00  //5.35
 
 
@@ -140,7 +146,7 @@ typedef struct COM_ShiftMultiFermion_t{
   vec3COM_soa shiftmulti[max_approx_order][no_ps];
 } COM_ShiftMultiFermion;
 
-
+//FERMION PARAMETERS
 typedef struct ferm_param_t{
   double ferm_charge;
   double ferm_mass;
