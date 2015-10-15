@@ -1,6 +1,8 @@
 #ifndef ALLOC_DEF_
 #define ALLOC_DEF_
 
+#include "struct_c_def.c"
+
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
 su3_soa  * auxbis_conf_acc; // auxiliary 
@@ -16,10 +18,14 @@ tamat_soa * ipdot_acc;
 
 
 // STOUTING 
-su3_soa  * stout_conf_acc;
-su3_soa  * stout_conf_acc_arr;
-
-
+#ifdef STOUT_FERMIONS
+su3_soa  * gstout_conf_acc; // max stouted conf,
+                           // just pointer
+su3_soa  * gstout_conf_acc_arr; // all stouting steps 
+                               // except the zeroth
+su3_soa * glocal_staples;
+tamat_soa * gtipdot;
+#endif
 
 // FERMIONS
 
@@ -63,11 +69,19 @@ void mem_alloc(){
   if(allocation_check != 0)  printf("Errore nella allocazione di ipdot_acc \n");
 
 
+#ifdef STOUT_FERMIONS
   // STOUTING
-  allocation_check =  posix_memalign((void **)&stout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa));
-  stout_conf_acc = &stout_conf_acc_arr[8*(STOUT_STEPS-1)];
+  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa));
+  gstout_conf_acc = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
   if(allocation_check != 0)  printf("Errore nella allocazione di stout_conf_acc_arr \n");
+  allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di glocal_staples \n");
+  allocation_check =  posix_memalign((void **)&gtipdot, ALIGN, 8*sizeof(tamat_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di gtipdot \n");
 
+
+
+#endif
 
 
   // FERMION ALLOCATIONS
