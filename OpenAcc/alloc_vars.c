@@ -3,6 +3,12 @@
 
 #include "struct_c_def.c"
 
+double_soa * u1_back_field_phases;
+tamat_soa * ipdot_acc;
+
+tamat_soa * aux_ta; // aggiunta per il calcolo della forza stoutata
+thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
+
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
 su3_soa  * auxbis_conf_acc; // auxiliary 
@@ -79,6 +85,11 @@ void mem_alloc(){
   allocation_check =  posix_memalign((void **)&gtipdot, ALIGN, 8*sizeof(tamat_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di gtipdot \n");
 
+  allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
+  if(allocation_check != 0)  printf("Errore nella allocazione di aux_th \n");
+  allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa));   //  -->  4*size
+  if(allocation_check != 0)  printf("Errore nella allocazione di aux_ta \n");
+
 
 
 #endif
@@ -117,6 +128,8 @@ void mem_free(){
 #endif
   free(momenta);
   free(aux_conf_acc);
+  free(aux_ta);
+  free(aux_th);
   free(stout_conf_acc);
   free(conf_acc_bkp);
   free(ipdot_acc);
