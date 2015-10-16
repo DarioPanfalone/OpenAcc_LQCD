@@ -608,6 +608,170 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 
 
 
+#if defined(IMCHEMPOT) || defined(BACKFIELD)
+void multiply_backfield_times_force_even(__restrict ferm_param * const tpars,
+						__restrict double_soa * const backfield,
+						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
+						__restrict su3_soa * const pseudo_ipdot){
+  int hx,y,z,t,idxh;
+#ifdef BACKFIELD
+#pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars) present(backfield)
+#else
+#pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars)
+#endif
+#pragma acc loop independent //gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent //vector(DIM_BLOCK_X)
+        for(hx=0; hx < nxh; hx++) {
+          int x;
+          int eta[4];
+
+          double arg;
+          d_complex phase;
+#ifdef IMCHEMPOT
+          double imchempot = tpars->ferm_im_chem_pot/((double)(nt));
+#endif
+
+#ifdef BACKFIELD
+          double charge = (double)(tpars->ferm_charge);
+#endif
+
+          //even sites
+          x = 2*hx + ((y+z+t) & 0x1);
+          idxh = snum_acc(x,y,z,t);
+
+          // dir  0  =  x even   --> eta = 1 , no multiplication needed
+          eta[0] = 1;
+          // dir  2  =  y even
+          eta[1] = 1 - ( 2*(x & 0x1) );
+          // dir  4  =  z even
+          eta[2] = 1 - ( 2*((x+y) & 0x1) );
+          // dir  6  =  t even
+          eta[3] = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+          eta[3] *= (1- 2*(int)(t/(nt-1)));
+#endif
+
+
+          for(int dirindex =0; dirindex< 4 ; dirindex++ ){
+
+#ifdef BACKFIELD
+              arg = backfield[dirindex*2].d[idxh] * charge;
+#ifdef IMCHEMPOT
+              if(dirindex==3) arg += imchempot;
+#endif
+              phase = cos(arg) + I * sin(arg);
+              phase_times_auxmat_into_auxmat(eta,&auxmat[dirindex*2],idxh,&ipdot[dirindex*2],idxh,phase);
+#else
+              phase_times_auxmat_into_auxmat(eta,&auxmat[dirindex*2],idxh,&ipdot[dirindex*2],idxh);
+#endif
+          }
+//#ifdef PHASE_MAT_VEC_MULT
+//          phase = cos(arg) + I * sin(arg);
+//#endif // Cosa vuol dire?
+
+        }
+      }
+    }
+  }
+
+}
+
+
+
+void multiply_backfield_times_force_odd(__restrict ferm_param * const tpars,
+						 __restrict double_soa * const backfield,
+					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
+					         __restrict tamat_soa * const pseudo_ipdot){
+  int hx,y,z,t,idxh;
+#ifdef BACKFIELD
+#pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars) present(backfield)
+#else
+#pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars)
+#endif
+#pragma acc loop independent //gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent //vector(DIM_BLOCK_X)
+        for(hx=0; hx < nxh; hx++) {
+          int x,eta;
+	  double arg;
+	  d_complex phase;
+#ifdef IMCHEMPOT
+          double imchempot = tpars->ferm_im_chem_pot/((double)(nt));
+#endif
+#ifdef BACKFIELD
+          double charge = (double)(tpars->ferm_charge);
+#endif
+
+          //odd sites
+          x = 2*hx + ((y+z+t+1) & 0x1);
+          idxh = snum_acc(x,y,z,t);
+          // dir  1  =  x odd    --> eta = 1 , no multiplication needed
+	  eta = 1;
+#ifdef BACKFIELD
+          arg = backfield[1].d[idxh] * charge;
+          phase = cos(arg) + I * sin(arg);
+          mat1_times_auxmat_into_tamat(&u[1],idxh,eta,&auxmat[1],idxh,&ipdot[1],idxh,phase);
+#else
+          mat1_times_auxmat_into_tamat(&u[1],idxh,eta,&auxmat[1],idxh,&ipdot[1],idxh);
+#endif
+
+          // dir  3  =  y odd
+          eta = 1 - ( 2*(x & 0x1) );
+#ifdef BACKFIELD
+          arg = backfield[3].d[idxh] * charge;
+          phase = cos(arg) + I * sin(arg);
+          mat1_times_auxmat_into_tamat(&u[3],idxh,eta,&auxmat[3],idxh,&ipdot[3],idxh,phase);
+#else
+          mat1_times_auxmat_into_tamat(&u[3],idxh,eta,&auxmat[3],idxh,&ipdot[3],idxh);
+#endif
+
+          // dir  5  =  z odd
+	  eta = 1 - ( 2*((x+y) & 0x1) );
+#ifdef BACKFIELD
+          arg = backfield[5].d[idxh] * charge;
+          phase = cos(arg) + I * sin(arg);
+          mat1_times_auxmat_into_tamat(&u[5],idxh,eta,&auxmat[5],idxh,&ipdot[5],idxh,phase);
+#else
+	  mat1_times_auxmat_into_tamat(&u[5],idxh,eta,&auxmat[5],idxh,&ipdot[5],idxh);
+#endif
+
+          // dir  7  =  t odd
+          eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+          eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+          arg = 0;
+#ifdef BACKFIELD
+          arg += backfield[7].d[idxh] * charge;
+#endif
+#ifdef IMCHEMPOT
+          arg += imchempot;
+#endif
+#ifdef PHASE_MAT_VEC_MULT
+          phase = cos(arg) + I * sin(arg);
+          mat1_times_auxmat_into_tamat(&u[7],idxh,eta,&auxmat[7],idxh,&ipdot[7],idxh,phase);
+#else
+          mat1_times_auxmat_into_tamat(&u[7],idxh,eta,&auxmat[7],idxh,&ipdot[7],idxh);
+#endif
+
+
+        } //hx
+      } //y
+    } // z
+  } // t
+} // end  multiply_conf_times_force_and_take_ta_odd()
+
+#endif
+
 void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
 					double_soa * backfield,
 					__restrict su3_soa * const aux_u,
