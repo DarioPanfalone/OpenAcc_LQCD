@@ -20,6 +20,13 @@
 // p->p+a dS/dq=p+ia(-i dS/dq)=p+ia*ipdot
 
 // the various dt involved are stored into the delta array which is allocated into UPDATE_ACC(args)
+
+#ifndef MD_INTEGRATOR_C
+#define MD_INTEGRATOR_C
+
+#include "./struct_c_def.c"
+#include "./fermion_force.c"
+
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta,double * delta)
  {
  int md;
@@ -78,6 +85,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  }
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				su3_soa  * tconf_acc,
+                su3_soa  * tstout_conf_acc_arr,
 				double_soa * backfield,
 				su3_soa  * taux_conf_acc,
 				ferm_param * tfermions_parameters,// [nflavs]
@@ -145,4 +153,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   mom_sum_mult(tmomenta,tipdot_acc,delta,0);
     
 }// end multistep_2MN_SOLOOPENACC()
+
+#endif
 
