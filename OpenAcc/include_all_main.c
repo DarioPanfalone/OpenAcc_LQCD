@@ -164,10 +164,13 @@ int main(){
 
     plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     printf("RHO= %f  STOUT= 0    Placchetta= %.18lf \n",(double)RHO,plq/size/6.0/3.0);
+
     stout_isotropic(conf_acc,stout_conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
+
     plq = calc_plaquette_soloopenacc(stout_conf_acc,aux_conf_acc,local_sums);
     printf("RHO= %f STOUT= 1    Placchetta= %.18lf \n",(double)RHO,plq/size/6.0/3.0);
 
+    /*
 
 #pragma acc update host(auxbis_conf_acc[0:8])
     print_su3_soa(auxbis_conf_acc,"FERM_FORCE_BF");
@@ -179,6 +182,8 @@ int main(){
 #pragma acc update host(aux_th[0:8])
     print_thmat_soa(aux_th,"LAMBDA");
     
+    */
+
     }// end pragma acc data
 
 
