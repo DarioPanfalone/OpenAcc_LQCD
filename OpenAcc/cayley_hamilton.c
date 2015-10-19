@@ -143,9 +143,25 @@ static inline void single_su3_times_scalar(single_su3 * m , d_complex scalar){
      m->comp[r][c] *= scalar;
 
 }
+static inline void single_su3_times_scalar_no3rdrow(single_su3 * m , d_complex scalar){
+
+   for(int r=0;r<2;r++)
+    for(int c=0;c<3;c++)
+     m->comp[r][c] *= scalar;
+
+}
 static inline void single_su3xsu3(single_su3 * out , single_su3 *m1, single_su3 *m2){
 
    for(int r=0;r<3;r++)
+    for(int c=0;c<3;c++){
+        out->comp[r][c] = 0;
+        for(int d=0;d<3;d++) out->comp[r][c] += m1->comp[r][d] * m2->comp[d][c] ;
+
+    }
+}
+static inline void single_su3xsu3_no3rdrow(single_su3 * out , single_su3 *m1, single_su3 *m2){
+
+   for(int r=0;r<2;r++)
     for(int c=0;c<3;c++){
         out->comp[r][c] = 0;
         for(int d=0;d<3;d++) out->comp[r][c] += m1->comp[r][d] * m2->comp[d][c] ;
@@ -163,7 +179,15 @@ void print_su3_stdout(single_su3 *m){
 }
 static inline void single_su3add(single_su3 * out , single_su3 *m){
 
-   for(int r=0;r<3;r++)
+   for(int r=0;r<3;r++)// Magari fino alla seconda riga?
+   //for(int r=0;r<2;r++) //??
+    for(int c=0;c<3;c++)
+        out->comp[r][c] += m->comp[r][c];
+
+}
+static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
+
+   for(int r=0;r<2;r++)
     for(int c=0;c<3;c++)
         out->comp[r][c] += m->comp[r][c];
 
