@@ -82,14 +82,7 @@ void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
           for(mu=0;mu<4;mu++){
 
             dir_link = 2*mu + parity;
-	    //	    single_su3 tempU;
-	    //	    single_su3 EXP;
-	    //	    single_tamat tempQA;
-	    //	    su3_soa_to_single_su3(&tu[dir_link],idxh,&tempU);
-	    //	    tamat_soa_to_single_tamat(&QA[dir_link],idxh,&tempQA);
-
-	    CH_exponential_antihermitian_soa(&exp_aux[dir_link],&QA[dir_link],idxh); // qui la variabile tu_out viene usata come output temporaneo
-	    //	    CH_exponential_antihermitian(&EXP,&tempQA);
+	    CH_exponential_antihermitian_soa_nissalike(&exp_aux[dir_link],&QA[dir_link],idxh);
 	    conf_left_exp_multiply_to_su3_soa(&tu[dir_link],idxh,&exp_aux[dir_link],&tu_out[dir_link]);
           }
 
@@ -102,27 +95,23 @@ void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
 
 
 
-void stout_isotropic( __restrict su3_soa * const u,
-		      __restrict su3_soa * const uprime,
-		      __restrict su3_soa * const local_staples,
-		      __restrict su3_soa * const auxiliary,
-		      __restrict tamat_soa * const tipdot){
+void stout_isotropic( __restrict su3_soa * const u,               // --> input conf
+		      __restrict su3_soa * const uprime,          // --> output conf [stouted]
+		      __restrict su3_soa * const local_staples,   // --> parking variable
+		      __restrict su3_soa * const auxiliary,       // --> parking variable
+		      __restrict tamat_soa * const tipdot){       // --> parking variable
 
   set_su3_soa_to_zero(local_staples);
   mult_conf_times_stag_phases(u);
 
   calc_loc_staples_removing_stag_phases_nnptrick_all(u,local_staples);
-
   RHO_times_conf_times_staples_ta_part(u,local_staples,tipdot);
-
   exp_minus_QA_times_conf(u,tipdot,uprime,auxiliary);
 
   mult_conf_times_stag_phases(u);
   mult_conf_times_stag_phases(uprime);
 
 }
-
-
 
 
 static inline d_complex  b1(double denom,
@@ -142,11 +131,6 @@ static inline d_complex  b2(double denom,
   return   0.5*denom*denom*(r_1 - 3.0*u*r_2 -24.0*u*f); // (58)
 }
 
-
-
-
-
-
 //calcolo di lambda
 #pragma acc routine seq
 static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
@@ -157,30 +141,77 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
 				      int idx
 				      ){
   
-  double c0 = det_i_times_QA_soa(QA,idx); //(14)
-  double c1  = 0.5 * Tr_i_times_QA_sq_soa(QA,idx); // (15)
-  //  double c0max = 2*pow(c1/3,1.5); // (17)
-  double theta = homebrew_acos(c0/(2*pow(c1/3,1.5)));//(25)
+  double c0 = det_i_times_QA_soa(QA,idx);
+  double c1  = 0.5 * Tr_i_times_QA_sq_soa(QA,idx);
+  double c0max = 2*pow(c1/3,1.5);
+  d_complex f0,f1,f2;
+  if(c1<4e-3)
+    {
+      f0 = (1-c0*c0/720) + (1.0*I)*(-c0*(1-c1*(1-c1/42)/20)/6);
+      f1 = (c0*(1-c1*(1-3*c1/112)/15)/24) + (1.0*I)*(1-c1*(1-c1*(1-c1/42)/20)/6-c0*c0/5040);
+      f2 = (0.5*(-1+c1*(1-c1*(1-c1/56)/30)/12+c0*c0/20160)) + (1.0*I)*(0.5*(c0*(1-c1*(1-c1/48)/21)/60));
+    }
+  else
+    {
+      int segno=1;
+      if(c0<0)
+        {
+          segno=-1;
+          c0=-c0;
+        }
 
-  double u = sqrt(c1/3) * cos(theta/3) ;//(23)
-  double w = sqrt(c1) * sin(theta/3) ;//(23)
-  //  double xi0_A = 1 - w*w/6*(1-w*w/20*(1-w*w/42)); // (33 e seguenti)
-  //  double xi0_B = sin(w)/w; // (33 e seguenti)
+      double eps=(c0max-c0)/c0max;
+      double theta;
+      if(eps<0) theta=0.0;
+      else
+        if(eps<1e-3) theta=sqrt(2*eps)*(1+(1.0/12+(3.0/160+(5.0/896+(35.0/18432+63.0/90112*eps)*eps)*eps)*eps)*eps);
+        else theta=acos(c0/c0max);
+      double u = sqrt(c1/3) * cos(theta/3) ;
+      double w = sqrt(c1) * sin(theta/3) ;
+      double u2=u*u,w2=w*w,u2mw2=u2-w2,w2p3u2=w2+3*u2,w2m3u2=w2-3*u2;
+      double cu=cos(u),c2u=cos(2*u);
+      double su=sin(u),s2u=sin(2*u);
+      double cw=cos(w);
+      double xi0w;
+      if(fabs(w)<0.05)
+        {
+          double temp0=w*w,temp1=1-temp0/42,temp2=1.0-temp0/20*temp1;
+          xi0w=1-temp0/6*temp2;
+        }
+      else xi0w=sin(w)/w;
 
-  double xi0 = (1 - w*w/6*(1-w*w/20*(1-w*w/42))) * (((int) (400*w*w-1) >> 31) & 0x1) +
-    (sin(w)/w) * (((int) (1-400*w*w) >> 31) & 0x1) ; // (33 e seguenti)
-  double xi1 = (cos(w)-xi0)/(w*w); // (67)
+      double denom = 1/(9*u*u - w*w);
 
-  d_complex expmiu = cos(u) - sin(u)*I;
-  d_complex exp2iu = cos(2.0*u) + sin(2.0*u)*I;
+      f0=(u2mw2*c2u+ //(u2-w2)*cos(2u)
+	  cu*8*u2*cw+ //cos(u)*8*u2*cos(w)
+	  2*su*u*w2p3u2*xi0w) //sin(u)*2*mu*(3*u2+w2)*xi0(w)
+        +(1.0*I)*(u2mw2*s2u+ //(u2-w2)*sin(2u)
+		  -su*8*u2*cw+ //-sin(u)*8*u2*cos(w)
+		  cu*2*u*w2p3u2*xi0w); //cos(u)*2*u*(3*u2+w2)*xi0(w)
+      f0 *= denom;
+      f1=(2*u*c2u+ //2*u*cos(2u)
+	  -cu*2*u*cw+ //cos(u)*2*u*cos(w)
+	  -su*w2m3u2*xi0w) //sin(u)*(u2-3*w2)*xi0(w)
+        +(1.0*I)*(2*u*s2u+ //2*u*sin(2u)
+		  su*2*u*cos(w)+ //sin(u)*2*u*cos(w)
+                  -cu*w2m3u2*xi0w);//cos(u)*(3*u2-w2)*xi0(w)
+      f1 *= denom;
+      f2=(c2u+ //cos(2u)
+	  -cu*cw+ //-cos(u)*cos(w)
+          -3*su*u*xi0w) //-3*sin(u)*u*xi0(w)
+        +(1.0*I)*(s2u+ //sin(2u)
+		  su*cw+ //sin(w)*cos(w)
+                  -cu*3*u*xi0w);//-cos(u)*3*u*xi0(w)
+      f2 *= denom;
 
-  double denom = 1.0/(9*u*u - w*w);
+      if(segno==-1){
+        f0 =  conj(f0);
+        f1 = -conj(f1);
+        f2 =  conj(f2);
+      }
 
-  d_complex f0 =   denom * ((u*u - w*w) * exp2iu + expmiu*( // (30)
-		  8*u*u *cos(w) + 2 * u * (3*u*u+ w*w) * xi0 * I ));
-  d_complex f1 = denom * (2*u*exp2iu - expmiu* (  // (31)
-		    2*u*cos(w) - (3*u*u-w*w)* xi0 * I )) ;
-  d_complex f2 = denom * (exp2iu - expmiu* (cos(w)+ 3*u*xi0*I)); // (32)
+    }
+
 
   d_complex r0_1 = 2.0*(u+(u*u-w*w)*I)*exp2iu+2.0*expmiu*(4.0*u*(2.0-u*I)*cos(w) + (9*u*u+w*w-(3.0*u*u+w*w)*u*I)*xi0*I); //(60)
   d_complex r1_1 = 2.0*(1.0+2.0*u*I)*exp2iu+expmiu*(-2.0*(1.0-u*I)*cos(w) + (6.0*u+(w*w-3.0*u*u)*I)*xi0*I) ; // (61)
@@ -385,14 +416,17 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
   }  // t
 }
 
-inline void stout_wrapper(su3_soa * tconf_acc, su3_soa tstout_conf_acc_arr){
+
+#ifdef STOT_FERMIONS
+inline void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr){
+
 
     stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, glocal_staples, aux_conf_acc, gtipdot );
     for(int stoutlevel=1;stoutlevel < STOUT_STEPS; stoutlevel++)
         stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),&(RHO_times_conf_times_staples_ta_part[8*stoutlevel]),glocal_staples, aux_conf_acc, gtipdot );
 
 }
-
+#endif
 
 
 
@@ -594,9 +628,6 @@ static inline void RIGHT_iFABC_absent_stag_phases(  __restrict su3_soa * const U
   d_complex matT_20 = (RHO*I)*(conj(LF->c02[idxF])*matA_00 + conj(LF->c12[idxF])*matA_10 - (LF->rc00[idxF]+LF->rc11[idxF])*matA_20);
   d_complex matT_21 = (RHO*I)*(conj(LF->c02[idxF])*matA_01 + conj(LF->c12[idxF])*matA_11 - (LF->rc00[idxF]+LF->rc11[idxF])*matA_21);
   d_complex matT_22 = (RHO*I)*(conj(LF->c02[idxF])*matA_02 + conj(LF->c12[idxF])*matA_12 - (LF->rc00[idxF]+LF->rc11[idxF])*matA_22);
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  /////////////// SONO ARRIVATO A SCRIVERE FINO A QUI!!!!!! /////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // construct (into the variables matB_ij) the hermitian conjugate of the UB matrix
   // --> non le salvo in temporanei [che lascio commentati], ma le scrivo direttamente nel prodotto
   //  matB_00 = conj( UB->r0.c0[idxB] ) ;
@@ -650,6 +681,116 @@ static inline void RIGHT_iFABC_absent_stag_phases(  __restrict su3_soa * const U
   RES->r2.c2[idxRES]+= matA_20 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] ) + matA_21 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]  - UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matA_22 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
 }
 
+
+/*
+// Questa e' di quelle della categoria RIGHT 
+#pragma acc routine seq
+static inline void RIGHT_miABGC_absent_stag_phases(  __restrict su3_soa * const UA,
+						     const int idxA,
+						     __restrict su3_soa * const UB,
+						     const int idxB,
+						     __restrict su3_soa * const UC,
+						     const int idxC,
+						     __restrict thmat_soa * const LG,
+						     const int idxG,
+						     __restrict su3_soa * const RES,
+						     const int idxRES){
+  // Cosa calcoliamo in questa routine:
+  //  RES +=  UA * dag(UB) * ((-RHO*I)*LG) * dag(UC)
+
+  d_complex matA_00 = UA->r0.c0[idxA];
+  d_complex matA_01 = UA->r0.c1[idxA];
+  d_complex matA_02 = UA->r0.c2[idxA];
+  d_complex matA_10 = UA->r1.c0[idxA];
+  d_complex matA_11 = UA->r1.c1[idxA];
+  d_complex matA_12 = UA->r1.c2[idxA];
+  //Compute 3rd matA row from the first two
+  d_complex matA_20 = conj( ( matA_01 * matA_12 ) - ( matA_02 * matA_11) ) ;
+  d_complex matA_21 = conj( ( matA_02 * matA_10 ) - ( matA_00 * matA_12) ) ;
+  d_complex matA_22 = conj( ( matA_00 * matA_11 ) - ( matA_01 * matA_10) ) ;
+
+  d_complex matT_00,matT_01,matT_02,matT_10,matT_11,matT_12,matT_20,matT_21,matT_22;
+  //Compute the first two rows of the result of (RHO*I)*LF * UA * ~UB = T * ~UB and assign to matA
+  matA_00 = matT_00 * conj( UB->r0.c0[idxB] ) + matT_01 * conj( UB->r0.c1[idxB] ) + matT_02 * conj( UB->r0.c2[idxB] ) ;
+  matA_10 = matT_10 * conj( UB->r0.c0[idxB] ) + matT_11 * conj( UB->r0.c1[idxB] ) + matT_12 * conj( UB->r0.c2[idxB] ) ;
+  matA_20 = matT_20 * conj( UB->r0.c0[idxB] ) + matT_21 * conj( UB->r0.c1[idxB] ) + matT_22 * conj( UB->r0.c2[idxB] ) ;
+
+  matA_01 = matT_00 * conj( UB->r1.c0[idxB] ) + matT_01 * conj( UB->r1.c1[idxB] ) + matT_02 * conj( UB->r1.c2[idxB] ) ;
+  matA_11 = matT_10 * conj( UB->r1.c0[idxB] ) + matT_11 * conj( UB->r1.c1[idxB] ) + matT_12 * conj( UB->r1.c2[idxB] ) ;
+  matA_21 = matT_20 * conj( UB->r1.c0[idxB] ) + matT_21 * conj( UB->r1.c1[idxB] ) + matT_22 * conj( UB->r1.c2[idxB] ) ;
+
+  matA_02 = matT_00 * ( UB->r0.c1[idxB] * UB->r1.c2[idxB]  - UB->r0.c2[idxB] * UB->r1.c1[idxB] ) + matT_01 * ( UB->r0.c2[idxB] * UB->r1.c0[idxB]  - UB->r0.c0[idxB] * UB->r1.c2[idxB] ) + matT_02 * ( UB->r0.c0[idxB] * UB->r1.c1[idxB]  - UB->r0.c1[idxB] * UB->r1.c0[idxB] ) ;
+  matA_12 = matT_10 * ( UB->r0.c1[idxB] * UB->r1.c2[idxB]  - UB->r0.c2[idxB] * UB->r1.c1[idxB] ) + matT_11 * ( UB->r0.c2[idxB] * UB->r1.c0[idxB]  - UB->r0.c0[idxB] * UB->r1.c2[idxB] ) + matT_12 * ( UB->r0.c0[idxB] * UB->r1.c1[idxB]  - UB->r0.c1[idxB] * UB->r1.c0[idxB] ) ;
+  matA_22 = matT_20 * ( UB->r0.c1[idxB] * UB->r1.c2[idxB]  - UB->r0.c2[idxB] * UB->r1.c1[idxB] ) + matT_21 * ( UB->r0.c2[idxB] * UB->r1.c0[idxB]  - UB->r0.c0[idxB] * UB->r1.c2[idxB] ) + matT_22 * ( UB->r0.c0[idxB] * UB->r1.c1[idxB]  - UB->r0.c1[idxB] * UB->r1.c0[idxB] ) ;
+  
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+  //Compute the first two rows of the result of LF * UA and assign to matT
+  d_complex matT_00 = (RHO*I)*(LF->rc00[idxF]     *matA_00 + LF->c01[idxF]      *matA_10 + LF->c02[idxF]                  *matA_20);
+  d_complex matT_01 = (RHO*I)*(LF->rc00[idxF]     *matA_01 + LF->c01[idxF]      *matA_11 + LF->c02[idxF]                  *matA_21);
+  d_complex matT_02 = (RHO*I)*(LF->rc00[idxF]     *matA_02 + LF->c01[idxF]      *matA_12 + LF->c02[idxF]                  *matA_22);
+  d_complex matT_10 = (RHO*I)*(conj(LF->c01[idxF])*matA_00 + LF->rc11[idxF]     *matA_10 + LF->c12[idxF]                  *matA_20);
+  d_complex matT_11 = (RHO*I)*(conj(LF->c01[idxF])*matA_01 + LF->rc11[idxF]     *matA_11 + LF->c12[idxF]                  *matA_21);
+  d_complex matT_12 = (RHO*I)*(conj(LF->c01[idxF])*matA_02 + LF->rc11[idxF]     *matA_12 + LF->c12[idxF]                  *matA_22);
+  d_complex matT_20 = (RHO*I)*(conj(LF->c02[idxF])*matA_00 + conj(LF->c12[idxF])*matA_10 - (LF->rc00[idxF]+LF->rc11[idxF])*matA_20);
+  d_complex matT_21 = (RHO*I)*(conj(LF->c02[idxF])*matA_01 + conj(LF->c12[idxF])*matA_11 - (LF->rc00[idxF]+LF->rc11[idxF])*matA_21);
+  d_complex matT_22 = (RHO*I)*(conj(LF->c02[idxF])*matA_02 + conj(LF->c12[idxF])*matA_12 - (LF->rc00[idxF]+LF->rc11[idxF])*matA_22);
+
+
+  // construct (into the variables matB_ij) the hermitian conjugate of the UB matrix
+  // --> non le salvo in temporanei [che lascio commentati], ma le scrivo direttamente nel prodotto
+  //  matB_00 = conj( UB->r0.c0[idxB] ) ;
+  //  matB_10 = conj( UB->r0.c1[idxB] ) ;
+  //  matB_20 = conj( UB->r0.c2[idxB] ) ;
+  //  matB_01 = conj( UB->r1.c0[idxB] ) ;
+  //  matB_11 = conj( UB->r1.c1[idxB] ) ;
+  //  matB_21 = conj( UB->r1.c2[idxB] ) ;
+  //Compute 3rd matB column from the first two
+  //  matB_02 = ( UB->r0.c1[idxB] * UB->r1.c2[idxB]  - UB->r0.c2[idxB] * UB->r1.c1[idxB] ) ;
+  //  matB_12 = ( UB->r0.c2[idxB] * UB->r1.c0[idxB]  - UB->r0.c0[idxB] * UB->r1.c2[idxB] ) ;
+  //  matB_22 = ( UB->r0.c0[idxB] * UB->r1.c1[idxB]  - UB->r0.c1[idxB] * UB->r1.c0[idxB] ) ;
+
+
+
+
+
+
+
+
+  // construct (into the variables matC_ij) the hermitian conjugate of the matC matrix
+  // --> non le salvo in temporanei [che lascio commentati], ma le scrivo direttamente nel prodotto
+  //  matC_00 = conj( UC->r0.c0[idxC] ) ;
+  //  matC_10 = conj( UC->r0.c1[idxC] ) ;
+  //  matC_20 = conj( UC->r0.c2[idxC] ) ;
+  //  matC_01 = conj( UC->r1.c0[idxC] ) ;
+  //  matC_11 = conj( UC->r1.c1[idxC] ) ;
+  //  matC_21 = conj( UC->r1.c2[idxC] ) ;
+  //Compute 3rd UC column from the first two
+  //  matC_02 = ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] ) ;
+  //  matC_12 = ( UC->r0.c2[idxC] * UC->r1.c0[idxC]  - UC->r0.c0[idxC] * UC->r1.c2[idxC] ) ;
+  //  matC_22 = ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
+  // add to RES the product I * F * ABC 
+  //  RES += matA * ~UC
+  RES->r0.c0[idxRES]+= matA_00 * conj( UC->r0.c0[idxB] ) + matA_01 * conj( UC->r0.c1[idxB] ) + matA_02 * conj( UC->r0.c2[idxB] ) ;
+  RES->r1.c0[idxRES]+= matA_10 * conj( UC->r0.c0[idxB] ) + matA_11 * conj( UC->r0.c1[idxB] ) + matA_12 * conj( UC->r0.c2[idxB] ) ;
+  RES->r2.c0[idxRES]+= matA_20 * conj( UC->r0.c0[idxB] ) + matA_21 * conj( UC->r0.c1[idxB] ) + matA_22 * conj( UC->r0.c2[idxB] ) ;
+
+  RES->r0.c1[idxRES]+= matA_00 * conj( UC->r1.c0[idxB] ) + matA_01 * conj( UC->r1.c1[idxB] ) + matA_02 * conj( UC->r1.c2[idxB] ) ;
+  RES->r1.c1[idxRES]+= matA_10 * conj( UC->r1.c0[idxB] ) + matA_11 * conj( UC->r1.c1[idxB] ) + matA_12 * conj( UC->r1.c2[idxB] ) ;
+  RES->r2.c1[idxRES]+= matA_20 * conj( UC->r1.c0[idxB] ) + matA_21 * conj( UC->r1.c1[idxB] ) + matA_22 * conj( UC->r1.c2[idxB] ) ;
+
+  RES->r0.c2[idxRES]+= matA_00 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] ) + matA_01 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]  - UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matA_02 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
+  RES->r1.c2[idxRES]+=matA_10 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] )  + matA_11 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]  - UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matA_12 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
+  RES->r2.c2[idxRES]+= matA_20 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] ) + matA_21 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]  - UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matA_22 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
+}
+*/
 
 
 
@@ -731,14 +872,14 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
 					     &L[dir_nu_1R],       idx_pmu, // F
 					     &S[dir_link],        idxh);
 	      // -iABGC
-	      /*
-              RIGHT_miABGC_absent_stag_phases(&U[dir_nu_1R],       idx_pmu, // A
-					&U[dir_mu_2R],       idx_pnu, // B
-					&U[dir_nu_3R],       idxh,    // C
-					&L[dir_mu_2R],       idx_pnu, // G
-					&RES[dir_link],      idxh);
-	      */
+	      /*	      
+	      RIGHT_miABGC_absent_stag_phases(&U[dir_nu_1R],       idx_pmu, // A
+					      &U[dir_mu_2R],       idx_pnu, // B
+					      &U[dir_nu_3R],       idxh,    // C
+					      &L[dir_mu_2R],       idx_pnu, // G
+					      &S[dir_link],        idxh);
 	      
+	      */  
               const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
               const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
 

@@ -19,7 +19,7 @@ const int rand_seed=48102;
 const int ferm_temp_bc=0;
 
 // start parameter
-const int start=1;  //=0 ordered start, =1 random start, =2 start from saved conf
+const int start=2;  //=0 ordered start, =1 random start, =2 start from saved conf
 
 
 // RHMC parameters
