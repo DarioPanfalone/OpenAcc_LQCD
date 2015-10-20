@@ -809,6 +809,10 @@ static inline void RIGHT_miABGC_absent_stag_phases(  __restrict su3_soa * const 
   d_complex matB_22 = conj( ( matB_00 * matB_11 ) - ( matB_10 * matB_01) ) ;
 
   //Compute the first two rows of the result of UA * ~UB and assign to matT and matA
+  //   the result is stored in the variables:
+  // T00 T01 T02
+  // A00 A01 A02
+  // A10 A11 A12
   d_complex matT_00 = matA_00 * matB_00 + matA_01 * matB_10 + matA_02 * matB_20 ;
   d_complex matT_01 = matA_00 * matB_01 + matA_01 * matB_11 + matA_02 * matB_21 ;
   d_complex matT_02 = matA_00 * matB_02 + matA_01 * matB_12 + matA_02 * matB_22 ;
@@ -823,9 +827,10 @@ static inline void RIGHT_miABGC_absent_stag_phases(  __restrict su3_soa * const 
   matA_00 = matA_10 * matB_00 + matA_11 * matB_10 + matA_12 * matB_20 ;
   matA_01 = matA_10 * matB_01 + matA_11 * matB_11 + matA_12 * matB_21 ;
   matA_02 = matA_10 * matB_02 + matA_11 * matB_12 + matA_12 * matB_22 ;
-  matA_10 = 0;//SCRIVERCI L_OPPORTUNO PRODOTTO VETTORE DELLE PRIME DUE RIGHE
-  matA_11 = 0;//
-  matA_12 = 0;//
+  // prodotto vettore per ricostruire la terza dalle prime due righe
+  matA_10 = conj(matT_01*matA_02-matT_02*matA_01);
+  matA_11 = conj(matT_02*matA_00-matT_00*matA_02);
+  matA_12 = conj(matT_00*matA_01-matT_01*matA_00);
 
 
   matB_00=(-RHO*I)*(matT_00*(LG->rc00[idxG])+matT_01*conj(LG->c01[idxG])+matT_02*conj(LG->c02[idxG]));
@@ -839,20 +844,101 @@ static inline void RIGHT_miABGC_absent_stag_phases(  __restrict su3_soa * const 
   matB_22=(-RHO*I)*(matA_10*(LG->c02[idxG])+matA_11*(LG->c12[idxG])-matA_12*(LG->rc00[idxG]+LG->rc11[idxG]));
 
   //  RES += matB * ~UC
-  RES->r0.c0[idxRES]+= matB_00 * conj( UC->r0.c0[idxB] ) + matB_01 * conj( UC->r0.c1[idxB] ) + matB_02 * conj( UC->r0.c2[idxB] ) ;
-  RES->r1.c0[idxRES]+= matB_10 * conj( UC->r0.c0[idxB] ) + matB_11 * conj( UC->r0.c1[idxB] ) + matB_12 * conj( UC->r0.c2[idxB] ) ;
-  RES->r2.c0[idxRES]+= matB_20 * conj( UC->r0.c0[idxB] ) + matB_21 * conj( UC->r0.c1[idxB] ) + matB_22 * conj( UC->r0.c2[idxB] ) ;
+  RES->r0.c0[idxRES]+= matB_00 * conj( UC->r0.c0[idxC] ) + matB_01 * conj( UC->r0.c1[idxC] ) + matB_02 * conj( UC->r0.c2[idxC] ) ;
+  RES->r1.c0[idxRES]+= matB_10 * conj( UC->r0.c0[idxC] ) + matB_11 * conj( UC->r0.c1[idxC] ) + matB_12 * conj( UC->r0.c2[idxC] ) ;
+  RES->r2.c0[idxRES]+= matB_20 * conj( UC->r0.c0[idxC] ) + matB_21 * conj( UC->r0.c1[idxC] ) + matB_22 * conj( UC->r0.c2[idxC] ) ;
 
-  RES->r0.c1[idxRES]+= matB_00 * conj( UC->r1.c0[idxB] ) + matB_01 * conj( UC->r1.c1[idxB] ) + matB_02 * conj( UC->r1.c2[idxB] ) ;
-  RES->r1.c1[idxRES]+= matB_10 * conj( UC->r1.c0[idxB] ) + matB_11 * conj( UC->r1.c1[idxB] ) + matB_12 * conj( UC->r1.c2[idxB] ) ;
-  RES->r2.c1[idxRES]+= matB_20 * conj( UC->r1.c0[idxB] ) + matB_21 * conj( UC->r1.c1[idxB] ) + matB_22 * conj( UC->r1.c2[idxB] ) ;
+  RES->r0.c1[idxRES]+= matB_00 * conj( UC->r1.c0[idxC] ) + matB_01 * conj( UC->r1.c1[idxC] ) + matB_02 * conj( UC->r1.c2[idxC] ) ;
+  RES->r1.c1[idxRES]+= matB_10 * conj( UC->r1.c0[idxC] ) + matB_11 * conj( UC->r1.c1[idxC] ) + matB_12 * conj( UC->r1.c2[idxC] ) ;
+  RES->r2.c1[idxRES]+= matB_20 * conj( UC->r1.c0[idxC] ) + matB_21 * conj( UC->r1.c1[idxC] ) + matB_22 * conj( UC->r1.c2[idxC] ) ;
 
-  RES->r0.c2[idxRES]+= matB_00 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] ) + matB_01 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]- UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matB_02 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
-  RES->r1.c2[idxRES]+=matB_10 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] )  + matB_11 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]- UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matB_12 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
-  RES->r2.c2[idxRES]+= matB_20 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] ) + matB_21 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]- UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matB_22 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
+  RES->r0.c2[idxRES]+= matB_00 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] ) + matB_01 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]- UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matB_02 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
+  RES->r1.c2[idxRES]+=matB_10 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] )  + matB_11 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]- UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matB_12 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
+  RES->r2.c2[idxRES]+= matB_20 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] ) + matB_21 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]- UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matB_22 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
 }
 
 
+
+#pragma acc routine seq
+static inline void LEFT_iAB_times_GminusE_times_C_absent_stag_phases(  __restrict su3_soa * const UA,
+								       const int idxA,
+								       __restrict su3_soa * const UB,
+								       const int idxB,
+								       __restrict su3_soa * const UC,
+								       const int idxC,
+								       __restrict thmat_soa * const LG,
+								       const int idxG,
+								       __restrict thmat_soa * const LE,
+								       const int idxE,
+								       __restrict su3_soa * const RES,
+								       const int idxRES){
+  // Cosa calcoliamo in questa routine:
+  //  RES += dag(UA) * dag(UB) * ((RHO*I)*(LG - LE)) * UC
+  // construct (into the variables matA_ij) the hermitian conjugate of the UA matrix
+  d_complex matA_00 = conj( UB->r0.c0[idxB] ) ;
+  d_complex matA_10 = conj( UB->r0.c1[idxB] ) ;
+  d_complex matA_20 = conj( UB->r0.c2[idxB] ) ;
+  d_complex matA_01 = conj( UB->r1.c0[idxB] ) ;
+  d_complex matA_11 = conj( UB->r1.c1[idxB] ) ;
+  d_complex matA_21 = conj( UB->r1.c2[idxB] ) ;
+  //Compute 3rd matA column from the first two
+  d_complex matA_02 = conj( ( matA_10 * matA_21 ) - ( matA_20 * matA_11) ) ;
+  d_complex matA_12 = conj( ( matA_20 * matA_01 ) - ( matA_00 * matA_21) ) ;
+  d_complex matA_22 = conj( ( matA_00 * matA_11 ) - ( matA_10 * matA_01) ) ;//questo nel passo dopo non serve
+
+  // construct (into the variables matB_ij) the hermitian conjugate of the UB matrix
+  d_complex matB_00 = conj( UB->r0.c0[idxB] ) ;
+  d_complex matB_10 = conj( UB->r0.c1[idxB] ) ;
+  d_complex matB_20 = conj( UB->r0.c2[idxB] ) ;
+  d_complex matB_01 = conj( UB->r1.c0[idxB] ) ;
+  d_complex matB_11 = conj( UB->r1.c1[idxB] ) ;
+  d_complex matB_21 = conj( UB->r1.c2[idxB] ) ;
+  //Compute 3rd matB column from the first two
+  d_complex matB_02 = conj( ( matB_10 * matB_21 ) - ( matB_20 * matB_11) ) ;
+  d_complex matB_12 = conj( ( matB_20 * matB_01 ) - ( matB_00 * matB_21) ) ;
+  d_complex matB_22 = conj( ( matB_00 * matB_11 ) - ( matB_10 * matB_01) ) ;
+
+  //Compute the first two rows of the result of ~UA * ~UB and assign to matT
+  d_complex matT_00 = matA_00 * matB_00 + matA_01 * matB_10 + matA_02 * matB_20 ;
+  d_complex matT_01 = matA_00 * matB_01 + matA_01 * matB_11 + matA_02 * matB_21 ;
+  d_complex matT_02 = matA_00 * matB_02 + matA_01 * matB_12 + matA_02 * matB_22 ;
+  d_complex matT_10 = matA_10 * matB_00 + matA_11 * matB_10 + matA_12 * matB_20 ;
+  d_complex matT_11 = matA_10 * matB_01 + matA_11 * matB_11 + matA_12 * matB_21 ;
+  d_complex matT_12 = matA_10 * matB_02 + matA_11 * matB_12 + matA_12 * matB_22 ;
+  //matT_20 = (conj(matT_01*matT_12-matT_02*matT_11));
+  //matT_21 = (conj(matT_02*matT_10-matT_00*matT_12));
+  //matT_22 = (conj(matT_00*matT_11-matT_01*matT_10));
+
+  // write into RES the product (~A*~B) * ((RHO*I)*(LG-LE)) = matT * ((RHO*I)*(LG-LE))
+  //  RES += matA
+  matA_00 = (RHO*I)*(matT_00*(LG->rc00[idxG]-LE->rc00[idxE])+matT_01*conj(LG->c01[idxG]-LE->c01[idxE])+matT_02*conj(LG->c02[idxG]-LE->c02[idxE]));
+  matA_10 = (RHO*I)*(matT_10*(LG->rc00[idxG]-LE->rc00[idxG])+matT_11*conj(LG->c01[idxG]-LE->c01[idxE])+matT_12*conj(LG->c02[idxG]-LE->c02[idxE]));
+  matA_20 = (RHO*I)*((conj(matT_01*matT_12-matT_02*matT_11))*(LG->rc00[idxG]-LE->rc00[idxE])+(conj(matT_02*matT_10-matT_00*matT_12))*conj(LG->c01[idxG]-LE->c01[idxE])+(conj(matT_00*matT_11-matT_01*matT_10))*conj(LG->c02[idxG]-LE->c02[idxE]));
+
+  matA_01 = (RHO*I)*(matT_00*(LG->c01[idxG]-LE->c01[idxE])+matT_01*(LG->rc11[idxG]-LE->rc11[idxE])+matT_02*conj(LG->c12[idxG]-LE->c12[idxE]));
+  matA_11 = (RHO*I)*(matT_10*(LG->c01[idxG]-LE->c01[idxE])+matT_11*(LG->rc11[idxG]-LE->rc11[idxE])+matT_12*conj(LG->c12[idxG]-LE->c12[idxE]));
+  matA_21 = (RHO*I)*((conj(matT_01*matT_12-matT_02*matT_11))*(LG->c01[idxG]-LE->c01[idxE])+(conj(matT_02*matT_10-matT_00*matT_12))*(LG->rc11[idxG]-LE->rc11[idxE])+(conj(matT_00*matT_11-matT_01*matT_10))*conj(LG->c12[idxG]-LE->c12[idxE]));
+
+  matA_02 = (RHO*I)*(matT_00*(LG->c02[idxG]-LE->c02[idxE])+matT_01*(LG->c12[idxG]-LE->c12[idxE])-matT_02*(LG->rc00[idxG]-LE->rc00[idxE]+LG->rc11[idxG]-LE->rc11[idxE]));
+  matA_12 = (RHO*I)*(matT_10*(LG->c02[idxG]-LE->c02[idxE])+matT_11*(LG->c12[idxG]-LE->c12[idxE])-matT_12*(LG->rc00[idxG]-LE->rc00[idxE]+LG->rc11[idxG]-LE->rc11[idxE]));
+  matA_22 = (RHO*I)*((conj(matT_01*matT_12-matT_02*matT_11))*(LG->c02[idxG]-LE->c02[idxE])+(conj(matT_02*matT_10-matT_00*matT_12))*(LG->c12[idxG]-LE->c12[idxE])-(conj(matT_00*matT_11-matT_01*matT_10))*(LG->rc00[idxG]-LE->rc00[idxE]+LG->rc11[idxG]-LE->rc11[idxE]));
+
+
+  /////
+  //  RES += matA * UC                                                                 /////3rd row!! /////////
+  RES->r0.c0[idxRES]+= matA_00 *  UC->r0.c0[idxC]+ matA_01 *  UC->r1.c0[idxC]+ matA_02 *  UC->r2.c0[idxC];
+  RES->r1.c0[idxRES]+= matA_10 *  UC->r0.c0[idxC]+ matA_11 *  UC->r1.c0[idxC]+ matA_12 *  UC->r2.c0[idxC];
+  RES->r2.c0[idxRES]+= matA_20 *  UC->r0.c0[idxC]+ matA_21 *  UC->r1.c0[idxC]+ matA_22 *  UC->r2.c0[idxC];
+
+  RES->r0.c1[idxRES]+= matA_00 *  UC->r0.c1[idxC]+ matA_01 *  UC->r1.c1[idxC]+ matA_20 *  UC->r1.c2[idxC];
+  RES->r1.c1[idxRES]+= matA_10 *  UC->r0.c1[idxC]+ matA_11 *  UC->r1.c1[idxC]+ matA_21 *  UC->r1.c2[idxC];
+  RES->r2.c1[idxRES]+= matA_20 *  UC->r0.c1[idxC]+ matA_21 *  UC->r1.c1[idxC]+ matA_22 *  UC->r1.c2[idxC];
+
+  RES->r0.c2[idxRES]+= matA_00 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] ) + matA_01 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]- UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matA_02 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
+  RES->r1.c2[idxRES]+=matA_10 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] )  + matA_11 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]- UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matA_12 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
+  RES->r2.c2[idxRES]+= matA_20 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] ) + matA_21 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]- UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matA_22 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
+
+}
 
 
 void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
