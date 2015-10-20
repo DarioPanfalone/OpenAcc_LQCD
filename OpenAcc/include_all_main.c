@@ -23,8 +23,6 @@ void su2_rand(double *pp);
 #include "./stouting.c"
 #include "./fermion_force.c"
 #include "./md_integrator.c"
-#include "./update_standard_action.c"
-#include "./update_tlsm_stdferm.c"
 #include "./update_versatile.c"
 
 
@@ -83,7 +81,7 @@ int main(){
   //###############################################################################################  
 
 
-#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs]) create(stout_conf_acc[0:8]) create(aux_th[0:8]) create(aux_ta[0:8]) create(gstout_conf_acc_arr[0:(8*STOUT_STEPS)]) create(glocal_staples[0:8]) create(gipdot[0:8]) 
+#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs]) create(aux_th[0:8]) create(aux_ta[0:8]) create(gstout_conf_acc_arr[0:(8*STOUT_STEPS)]) create(glocal_staples[0:8]) create(gipdot[0:8]) 
     {
 
       double plq,rect;
@@ -160,27 +158,6 @@ int main(){
     print_su3_soa(conf_acc,"stored_config");
     //-------------------------------------------------//
 
-    plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-    printf("RHO= %f  STOUT= 0    Placchetta= %.18lf \n",(double)RHO,plq/size/6.0/3.0);
-
-    stout_isotropic(conf_acc,stout_conf_acc,aux_conf_acc,auxbis_conf_acc,ipdot_acc);
-
-    plq = calc_plaquette_soloopenacc(stout_conf_acc,aux_conf_acc,local_sums);
-    printf("RHO= %f STOUT= 1    Placchetta= %.18lf \n",(double)RHO,plq/size/6.0/3.0);
-
-    /*
-
-#pragma acc update host(auxbis_conf_acc[0:8])
-    print_su3_soa(auxbis_conf_acc,"FERM_FORCE_BF");
-
-    fermion_force_soloopenacc_stout(auxbis_conf_acc,aux_th,aux_ta,conf_acc,aux_conf_acc);
-#pragma acc update host(auxbis_conf_acc[0:8])
-    print_su3_soa(auxbis_conf_acc,"FERM_FORCE_AF");
-
-#pragma acc update host(aux_th[0:8])
-    print_thmat_soa(aux_th,"LAMBDA");
-    
-    */
 
     }// end pragma acc data
 

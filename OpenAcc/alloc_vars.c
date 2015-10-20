@@ -82,7 +82,7 @@ void mem_alloc(){
   // STOUTING
   allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa));
   gstout_conf_acc = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
-  if(allocation_check != 0)  printf("Errore nella allocazione di stout_conf_acc_arr \n");
+  if(allocation_check != 0)  printf("Errore nella allocazione di gstout_conf_acc_arr \n");
   allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di glocal_staples \n");
   allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa));
@@ -133,7 +133,7 @@ void mem_free(){
   free(aux_conf_acc);
   free(aux_ta);
   free(aux_th);
-  free(stout_conf_acc);
+  free(gstout_conf_acc);
   free(conf_acc_bkp);
   free(ipdot_acc);
 

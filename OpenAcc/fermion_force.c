@@ -8,6 +8,41 @@
 #define TIMING_FERMION_FORCE
 
 
+
+
+
+void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
+							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
+							   __restrict tamat_soa  * QA, // la var globale e' aux_ta
+							   __restrict su3_soa    * const U, // la var globale e' .... per adesso conf_acc
+							   __restrict su3_soa    * const TMP// la var globale e' aux_conf_acc //PARCHEGGIO??
+							   ){
+
+  printf("INSIDE fermion_force_soloopenacc_stout \n");
+  set_su3_soa_to_zero(TMP);
+  mult_conf_times_stag_phases(U);
+  printf("         Removed stag phases  \n");
+  calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
+  printf("         computed staples  \n");
+  RHO_times_conf_times_staples_ta_part(U,TMP,QA);
+  printf("         computed Q  \n");
+  compute_lambda(Lambda,Sigma,U,QA,TMP);
+  printf("         computed Lambda  \n");
+  compute_sigma(Lambda,U,Sigma,QA,TMP);
+  
+  mult_conf_times_stag_phases(U);
+  printf("         Restored stag phases  \n");
+  
+  
+}
+
+
+
+
+
+
+
+
 //STANDARD VERSION OF THE FERMIONIC FORCE
 void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata           
 #ifdef STOUT_FERMIONS        
@@ -80,8 +115,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
        compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, aux_conf_acc );
        }
        compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, aux_conf_acc );
-       multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc,&(tfermion_parameters[iflav]), taux_conf_acc,tipdot_acc);
-       multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc,&(tfermion_parameters[iflav]), taux_conf_acc,tipdot_acc);
+       multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc, taux_conf_acc,tipdot_acc);
+       multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc, taux_conf_acc,tipdot_acc);
 #endif
 
 #ifdef TIMING_FERMION_FORCE
@@ -95,38 +130,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
     //  printf("########################################### \n");
 
 }
-
-
-
-
-
-
-void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
-							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
-							   __restrict tamat_soa  * QA, // la var globale e' aux_ta
-							   __restrict su3_soa    * const U, // la var globale e' .... per adesso conf_acc
-							   __restrict su3_soa    * const TMP// la var globale e' aux_conf_acc //PARCHEGGIO??
-							   ){
-
-  printf("INSIDE fermion_force_soloopenacc_stout \n");
-  set_su3_soa_to_zero(TMP);
-  mult_conf_times_stag_phases(U);
-  printf("         Removed stag phases  \n");
-  calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
-  printf("         computed staples  \n");
-  RHO_times_conf_times_staples_ta_part(U,TMP,QA);
-  printf("         computed Q  \n");
-  compute_lambda(Lambda,Sigma,U,QA,TMP);
-  printf("         computed Lambda  \n");
-  compute_sigma(Lambda,U,Sigma,QA,TMP);
-  
-  mult_conf_times_stag_phases(U);
-  printf("         Restored stag phases  \n");
-  
-  
-}
-
-
 
 
 
