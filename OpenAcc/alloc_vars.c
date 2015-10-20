@@ -28,12 +28,12 @@ su3_soa * gconf_as_fermionmatrix; // conf to use in either cases
                                   // computation (with or without stouting)
 // STOUTING 
 #ifdef STOUT_FERMIONS
-su3_soa  * gstout_conf_acc; // max stouted conf,
+su3_soa * gstout_conf_acc; // max stouted conf,
                            // just pointer
-su3_soa  * gstout_conf_acc_arr; // all stouting steps 
+su3_soa * gstout_conf_acc_arr; // all stouting steps 
                                // except the zeroth
 su3_soa * glocal_staples;
-tamat_soa * gtipdot;
+tamat_soa * gipdot;
 #endif
 
 // FERMIONS
@@ -85,8 +85,8 @@ void mem_alloc(){
   if(allocation_check != 0)  printf("Errore nella allocazione di stout_conf_acc_arr \n");
   allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di glocal_staples \n");
-  allocation_check =  posix_memalign((void **)&gtipdot, ALIGN, 8*sizeof(tamat_soa));
-  if(allocation_check != 0)  printf("Errore nella allocazione di gtipdot \n");
+  allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di gipdot \n");
 
   allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_th \n");
