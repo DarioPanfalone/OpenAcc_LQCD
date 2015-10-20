@@ -23,6 +23,9 @@ tamat_soa * ipdot_acc;
 
 
 
+su3_soa * gconf_as_fermionmatrix; // conf to use in either cases 
+                                  //in fermion related
+                                  // computation (with or without stouting)
 // STOUTING 
 #ifdef STOUT_FERMIONS
 su3_soa  * gstout_conf_acc; // max stouted conf,
@@ -68,7 +71,7 @@ void mem_alloc(){
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_bkp \n");
 
 
-  // GAUGE EVOUTION
+  // GAUGE EVOLUTION
   allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));   //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di momenta \n");
   allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa));

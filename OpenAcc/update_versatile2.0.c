@@ -7,7 +7,11 @@
 #include "./stouting.c"
 #include "./md_integrator.c"
 
-int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,su3_soa *tstout_conf_acc_arr, double res_metro, double res_md, int id_iter,int acc,int metro){
+int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
+#ifdef STOUT_FERMIONS        
+        su3_soa *tstout_conf_acc_arr,
+#endif
+        double res_metro, double res_md, int id_iter,int acc,int metro){
   
   stout_conf_acc = &stout_conf_acc_arr[8*(STOUT_STEPS-1)];
   
@@ -79,11 +83,14 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,su3_soa *tstout_conf_acc
 
 
 
+#ifdef STOUT_FERMIONS 
     // USO DELLA VERSIONE STOUTATA GIA' PER LO STIRACCHIAMENTO
     // STOUTING...(ALREADY ON DEVICE)
-    
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
-
+    gconf_as_fermionmatrix = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
+#else
+    gconf_as_fermionmatrix = tconf_acc;
+#endif
 
 
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
@@ -99,7 +106,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,su3_soa *tstout_conf_acc
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
       // USING STOUTED GAUGE MATRIX
-      find_min_max_eigenvalue_soloopenacc(&gstout_conf_acc_arr[8*(STOUT_STEPS-1)],u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
+      find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
 #ifdef PRINT_DETAILS_INSIDE_UPDATE
       printf("    find min and max eig : OK \n");
 #endif
@@ -144,7 +151,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,su3_soa *tstout_conf_acc
 
         int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
         // USING STOUTED GAUGE MATRIX
-        multishift_invert(gstout_conf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+        multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
         recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
 
       }
@@ -168,16 +175,27 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,su3_soa *tstout_conf_acc
     }//end for iflav
 
     // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
-    multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,tstout_conf_acc_arr,u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm,momenta,local_sums,delta,res_md);
+    multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
+#ifdef STOUT_FERMIONS
+            tstout_conf_acc_arr,
+            auxbis_conf_acc, // globale
+#endif
+            u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,
+            ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
+            k_p_shiftferm,momenta,local_sums,delta,res_md);
+
 #ifdef PRINT_DETAILS_INSIDE_UPDATE
     printf(" Molecular Dynamics Completed : OK \n");
 #endif
 
 
+#ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
-
-
+    gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
+#else
+    gconf_as_fermionmatrix = tconf_acc;
+#endif
 
     if(metro==1){
       // STIRACCHIAMENTO DELL'APPROX RAZIONALE LAST_INV
@@ -189,7 +207,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,su3_soa *tstout_conf_acc
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
     // USING STOUTED CONF
-	find_min_max_eigenvalue_soloopenacc(&(gstout_conf_acc_arr[8*(STOUT_STEPS-1)]),u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
+	find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
 	//#pragma acc update device(minmaxeig[0:2])
 	RationalApprox *approx_li = &(fermions_parameters[iflav].approx_li);
 	RationalApprox *approx_li_mother = &(fermions_parameters[iflav].approx_li_mother);
@@ -202,7 +220,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,su3_soa *tstout_conf_acc
 	for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
         int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
         // USING STOUTED CONF
-        multishift_invert(gstout_conf_acc, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_li), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+        multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], 
+                &(fermions_parameters[iflav].approx_li), u1_back_field_phases,
+                ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro, 
+                kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
         recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
 	}
       }

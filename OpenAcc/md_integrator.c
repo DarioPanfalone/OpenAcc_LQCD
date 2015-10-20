@@ -85,25 +85,24 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  }
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				su3_soa  * tconf_acc,
-                su3_soa  * tstout_conf_acc_arr,
+#ifdef STOUT_FERMIONS
+                su3_soa  * tstout_conf_acc_arr, // huge parking for stouting
+                su3_soa  * tauxbis_conf_acc, 
+#endif
 				double_soa * backfield,
 				su3_soa  * taux_conf_acc,
 				ferm_param * tfermions_parameters,// [nflavs]
 				int tNDiffFlavs,
 				vec3_soa * ferm_in_acc, //[NPS_tot], will be ferm_chi_acc
-				//ACC_MultiFermion * ferm_in_acc,
 				vec3_soa * tferm_shiftmulti_acc,// parking variable [max_ps*max_approx_order]
-				//ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
 				vec3_soa * tkloc_r, // parking
 				vec3_soa * tkloc_h, // parking
 				vec3_soa * tkloc_s, // parking
 				vec3_soa * tkloc_p, // parking
 				vec3_soa * tk_p_shiftferm, // parking, [max_nshift]
-				//ACC_ShiftFermion *k_p_shiftferm,
 				thmat_soa * tmomenta,
 				dcomplex_soa * local_sums,
 				double * delta,
-				//COM_RationalApprox *approx), // included in ferm_param
 				double res)
 {
 
@@ -113,7 +112,13 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   // Step for the P
   // P' = P - l*dt*dS/dq
   //    delta[0]=-cimag(ieps_acc)*lambda;
-  fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+  fermion_force_soloopenacc(tconf_acc, 
+#ifdef STOUT_FERMIONS
+          tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
+#endif
+          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, 
+          ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
+          tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
   //  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm); // OLD
   mom_sum_mult(tmomenta,tipdot_acc,delta,0);
   
@@ -124,7 +129,13 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
-  fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+  fermion_force_soloopenacc(tconf_acc, 
+#ifdef STOUT_FERMIONS
+          tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
+#endif
+          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs,
+          ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc,
+          tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
     mom_sum_mult(tmomenta,tipdot_acc,delta,1);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
@@ -132,7 +143,11 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     // Step for the P
     // P' = P - 2l*dt*dS/dq
     // delta[2]=-cimag(ieps_acc)*(2.0*lambda);
-  fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+  fermion_force_soloopenacc(tconf_acc,
+#ifdef STOUT_FERMIONS
+          tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
+#endif
+          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
     mom_sum_mult(tmomenta,tipdot_acc,delta,2);
   }  
   // Step for the Q
@@ -141,7 +156,11 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   // Step for the P
   // P' = P - (1-2l)*dt*dS/dq
   // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
-  fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+  fermion_force_soloopenacc(tconf_acc,
+#ifdef STOUT_FERMIONS
+          tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
+#endif
+          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
   mom_sum_mult(tmomenta,ipdot_acc,delta,1);
   // Step for the Q
   // Q' = exp[dt/2 *i P] Q
@@ -149,7 +168,11 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   // Step for the P
   // P' = P - l*dt*dS/dq
   // delta[0]=-cimag(ieps_acc)*lambda;
-  fermion_force_soloopenacc(tconf_acc, backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+  fermion_force_soloopenacc(tconf_acc,
+#ifdef STOUT_FERMIONS
+          tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
+#endif
+          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
   mom_sum_mult(tmomenta,tipdot_acc,delta,0);
     
 }// end multistep_2MN_SOLOOPENACC()

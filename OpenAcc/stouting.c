@@ -472,9 +472,9 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
 inline void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr){
 
 
-    stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, glocal_staples, aux_conf_acc, gtipdot );
+    stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, glocal_staples, gtipdot );
     for(int stoutlevel=1;stoutlevel < STOUT_STEPS; stoutlevel++)
-        stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),&(RHO_times_conf_times_staples_ta_part[8*stoutlevel]),glocal_staples, aux_conf_acc, gtipdot );
+        stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),&(tstout_conf_acc_arr[8*stoutlevel]),auxbis_conf_acc, glocal_staples,  gtipdot );
 
 }
 #endif

@@ -316,6 +316,8 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
 
 }
 
+
+#ifdef STOUT_FERMIONS
 static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
 						   const  int idx,
 						   const  int eta,
@@ -369,7 +371,7 @@ static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * 
   ipdot->rc11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
 
 }
-
+#endif // ifdef STOUT_FERMIONS
 
 
 #if defined(BACKFIELD) || defined(IMCHEMPOT)
@@ -393,7 +395,27 @@ static inline  void phase_times_auxmat_into_auxmat(
 
 }
 
-#endif
+#else  //if defined(BACKFIELD) || defined(IMCHEMPOT)
+static inline void accumulate_auxmat1_into_auxmat2(
+						   __restrict su3_soa * const auxmat1,  // e' costante e non viene modificato
+						   __restrict su3_soa * const auxmat2,
+						   const  int idx
+                           ){
+
+    auxmat2.r0.c0[idx] += auxmat1.r0.c0[idx];
+    auxmat2.r0.c1[idx] += auxmat1.r0.c1[idx];
+    auxmat2.r0.c2[idx] += auxmat1.r0.c2[idx];
+    auxmat2.r1.c0[idx] += auxmat1.r1.c0[idx];
+    auxmat2.r1.c1[idx] += auxmat1.r1.c1[idx];
+    auxmat2.r1.c2[idx] += auxmat1.r1.c2[idx];
+    auxmat2.r2.c0[idx] += auxmat1.r2.c0[idx];
+    auxmat2.r2.c1[idx] += auxmat1.r2.c1[idx];
+    auxmat2.r2.c2[idx] += auxmat1.r2.c2[idx];
+
+}
+
+#endif  //if defined(BACKFIELD) || defined(IMCHEMPOT)
+
 
 
 
@@ -687,6 +709,8 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
   } // t
 } // end  multiply_conf_times_force_and_take_ta_odd()
 
+
+#ifdef STOUT_FERMIONS
 void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
 						__restrict ferm_param * const tpars,
 						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
@@ -774,7 +798,7 @@ void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * co
     } // z
   } // t
 } // end  multiply_conf_times_force_and_take_ta_odd()
-
+#endif //ifdef STOUT_FERMIONS
 
 
 #if defined(IMCHEMPOT) || defined(BACKFIELD)
@@ -789,7 +813,10 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
 #endif
     double charge = (double)(tpars->ferm_charge);
     int idxh;
+#pragma acc data present(backfield) present(auxmat) present(pseudo_ipdot)
+#pragma acc loop independent
     for(int dirindex = 0 ; dirindex < 8 ; dirindex++)
+#pragma acc loop independent
         for( idxh = 0 ; idxh < sizeh; idxh++){
     
             arg = backfield[dirindex].d[idxh] * charge;
@@ -797,10 +824,31 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
             if(dirindex>6) arg += imchempot;
 #endif
             phase = cos(arg) + I * sin(arg);
-            phase_times_auxmat_into_auxmat(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh,phase); // not implemented yet
+            phase_times_auxmat_into_auxmat(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh,phase);
         }
 
 } // end multiply_backfield_times_force()
+
+#else 
+void accumulate_gl3soa_into_gl3soa(
+        __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
+        __restrict su3_soa * const pseudo_ipdot){
+
+    int idxh;
+#pragma acc data present(backfield) present(auxmat) present(pseudo_ipdot)
+#pragma acc loop independent
+    for(int dirindex = 0 ; dirindex < 8 ; dirindex++)
+#pragma acc loop independent
+        for( idxh = 0 ; idxh < sizeh; idxh++){
+            accumulate_auxmat1_into_auxmat2(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh);
+        }
+
+
+
+
+
+}
+
 #endif
 
 void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
