@@ -192,7 +192,7 @@ static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
         out->comp[r][c] += m->comp[r][c];
 
 }
-
+/*
 static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
 
    for(int r=0;r<2;r++)
@@ -200,7 +200,7 @@ static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
         out->comp[r][c] += m->comp[r][c];
 
 }
-
+*/
 #pragma acc routine seq
 static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa * const exp_out,
 							      __restrict tamat_soa * const QA,const int idx){

@@ -112,9 +112,9 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("         computed staples  \n");
   RHO_times_conf_times_staples_ta_part(U,TMP,QA);
   printf("         computed Q  \n");
-  compute_lambda(Lambda,ferm_force,U,QA,TMP);
+  compute_lambda(Lambda,Sigma,U,QA,TMP);
   printf("         computed Lambda  \n");
-  compute_sigma(Lambda,U,ferm_force,QA,TMP);
+  compute_sigma(Lambda,U,Sigma,QA,TMP);
   
   mult_conf_times_stag_phases(U);
   printf("         Restored stag phases  \n");
