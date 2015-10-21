@@ -401,11 +401,11 @@ static inline void RHO_times_mat1_times_mat2_into_tamat3(__restrict su3_soa * co
   mat1_11 = mat1_20 * mat2_01 + mat1_21 * mat2_11 + mat1_22 * mat2_21; // mat3_21
   mat1_12 = mat1_20 * mat2_02 + mat1_21 * mat2_12 + mat1_22 * mat2_22; // mat3_22
 
-  mat3->c01[idx_mat3]  = RHO*0.5*(mat3_01-conj(mat1_00));
-  mat3->c02[idx_mat3]  = RHO*0.5*(mat3_02-conj(mat1_10));
-  mat3->c12[idx_mat3]  = RHO*0.5*(mat1_02-conj(mat1_11));
-  mat3->rc00[idx_mat3] = RHO*(cimag(mat3_00)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12)));
-  mat3->rc11[idx_mat3] = RHO*(cimag(mat1_01)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12)));
+  mat3->c01[idx_mat3]  = RHO*(0.5*(mat3_01-conj(mat1_00)));
+  mat3->c02[idx_mat3]  = RHO*(0.5*(mat3_02-conj(mat1_10)));
+  mat3->c12[idx_mat3]  = RHO*(0.5*(mat1_02-conj(mat1_11)));
+  mat3->rc00[idx_mat3] = RHO*((cimag(mat3_00)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12))));
+  mat3->rc11[idx_mat3] = RHO*((cimag(mat1_01)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12))));
 }
 
 

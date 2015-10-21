@@ -119,7 +119,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
           backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, 
           ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
           tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-  //  fermion_force_soloopenacc(conf_acc,ipdot_acc,ferm_in_acc,res,approx,aux_conf_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm); // OLD
+
   mom_sum_mult(tmomenta,tipdot_acc,delta,0);
   
   for(md=1; md<no_md; md++){

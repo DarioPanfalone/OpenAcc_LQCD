@@ -83,6 +83,30 @@ void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
 
             dir_link = 2*mu + parity;
 	    CH_exponential_antihermitian_soa_nissalike(&exp_aux[dir_link],&QA[dir_link],idxh);
+	    if(dir_link==0){
+	      if(idxh==0){
+		printf("-------------Q------------------\n");
+		printf("Q00 = %.18lf\n",QA[0].rc00[0]);
+		printf("Q00 = %.18lf\n",QA[0].rc11[0]);
+		printf("Q01 = %.18lf + (%.18lf)*I\n",creal(QA[0].c01[0]),cimag(QA[0].c01[0]));
+		printf("Q02 = %.18lf + (%.18lf)*I\n",creal(QA[0].c02[0]),cimag(QA[0].c02[0]));
+		printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
+
+		printf("-------------EXPO------------------\n");
+		printf("EXP00 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r0.c0[0]),cimag(exp_aux[0].r0.c0[0]));
+		printf("EXP01 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r0.c1[0]),cimag(exp_aux[0].r0.c1[0]));
+		printf("EXP02 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r0.c2[0]),cimag(exp_aux[0].r0.c2[0]));
+		printf("EXP10 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r1.c0[0]),cimag(exp_aux[0].r1.c0[0]));
+		printf("EXP11 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r1.c1[0]),cimag(exp_aux[0].r1.c1[0]));
+		printf("EXP12 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r1.c2[0]),cimag(exp_aux[0].r1.c2[0]));
+		printf("EXP20 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r2.c0[0]),cimag(exp_aux[0].r2.c0[0]));
+		printf("EXP21 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r2.c1[0]),cimag(exp_aux[0].r2.c1[0]));
+		printf("EXP22 = %.18lf + (%.18lf)*I\n\n",creal(exp_aux[0].r2.c2[0]),cimag(exp_aux[0].r2.c2[0]));
+
+	      }
+	    }
+
+
 	    conf_left_exp_multiply_to_su3_soa(&tu[dir_link],idxh,&exp_aux[dir_link],&tu_out[dir_link]);
           }
 

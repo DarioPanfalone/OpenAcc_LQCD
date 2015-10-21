@@ -5,21 +5,6 @@
 
 //#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
-/*
-multishift_invert(tconf_acc,
-		  &fermions_parameters[iflav],
-		  &(fermions_parameters[iflav].approx_fi),
-		  u1_back_field_phases,
-		  ferm_shiftmulti_acc,
-		  &(ferm_phi_acc[ps_index]),
-		  res_metro,
-		  kloc_r,
-		  kloc_h,
-		  kloc_s,
-		  kloc_p,
-		  k_p_shiftferm);
-*/
-
 int multishift_invert(__restrict su3_soa * const u,
 		      ferm_param * pars,
 		      RationalApprox * approx,
@@ -382,15 +367,15 @@ static inline  void phase_times_auxmat_into_auxmat(
                            d_complex phase
                            ){
 
-    pseudo_ipdot.r0.c0[idx] += phase * auxmat.r0.c0[idx];
-    pseudo_ipdot.r0.c1[idx] += phase * auxmat.r0.c1[idx];
-    pseudo_ipdot.r0.c2[idx] += phase * auxmat.r0.c2[idx];
-    pseudo_ipdot.r1.c0[idx] += phase * auxmat.r1.c0[idx];
-    pseudo_ipdot.r1.c1[idx] += phase * auxmat.r1.c1[idx];
-    pseudo_ipdot.r1.c2[idx] += phase * auxmat.r1.c2[idx];
-    pseudo_ipdot.r2.c0[idx] += phase * auxmat.r2.c0[idx];
-    pseudo_ipdot.r2.c1[idx] += phase * auxmat.r2.c1[idx];
-    pseudo_ipdot.r2.c2[idx] += phase * auxmat.r2.c2[idx];
+    pseudo_ipdot->r0.c0[idx] += phase * auxmat->r0.c0[idx];
+    pseudo_ipdot->r0.c1[idx] += phase * auxmat->r0.c1[idx];
+    pseudo_ipdot->r0.c2[idx] += phase * auxmat->r0.c2[idx];
+    pseudo_ipdot->r1.c0[idx] += phase * auxmat->r1.c0[idx];
+    pseudo_ipdot->r1.c1[idx] += phase * auxmat->r1.c1[idx];
+    pseudo_ipdot->r1.c2[idx] += phase * auxmat->r1.c2[idx];
+    pseudo_ipdot->r2.c0[idx] += phase * auxmat->r2.c0[idx];
+    pseudo_ipdot->r2.c1[idx] += phase * auxmat->r2.c1[idx];
+    pseudo_ipdot->r2.c2[idx] += phase * auxmat->r2.c2[idx];
 
 
 }
@@ -804,26 +789,27 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot){
 
-
+  double arg;
+  d_complex phase;
 #ifdef IMCHEMPOT
-    double imchempot = tpars->ferm_im_chem_pot/((double)(nt));
+  double imchempot = tpars->ferm_im_chem_pot/((double)(nt));
 #endif
-    double charge = (double)(tpars->ferm_charge);
-    int idxh;
+  double charge = (double)(tpars->ferm_charge);
+  int idxh;
 #pragma acc data present(backfield) present(auxmat) present(pseudo_ipdot)
 #pragma acc loop independent
-    for(int dirindex = 0 ; dirindex < 8 ; dirindex++){
+  for(int dirindex = 0 ; dirindex < 8 ; dirindex++){
 #pragma acc loop independent
-        for( idxh = 0 ; idxh < sizeh; idxh++){
-    
-            arg = backfield[dirindex].d[idxh] * charge;
+    for( idxh = 0 ; idxh < sizeh; idxh++){
+      
+      arg = backfield[dirindex].d[idxh] * charge;
 #ifdef IMCHEMPOT
-            if(dirindex>6) arg += imchempot;
+      if(dirindex>6) arg += imchempot;
 #endif
-            phase = cos(arg) + I * sin(arg);
-            phase_times_auxmat_into_auxmat(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh,phase);
-        }
+      phase = cos(arg) + I * sin(arg);
+      phase_times_auxmat_into_auxmat(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh,phase);
     }
+  }
 } // end multiply_backfield_times_force()
 
 #else 
@@ -861,79 +847,6 @@ void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' cost
     direct_product_of_fermions_into_auxmat(loc_s,loc_h,aux_u,&(tpars->approx_md),iter);
   }
 }
-
-
-/*
-void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata
-			       __restrict double_soa * backfield,
-			       __restrict tamat_soa  * tipdot_acc,
-			       __restrict ferm_param * tfermion_parameters,// [nflavs]
-			       int tNDiffFlavs,
-			       __restrict vec3_soa * ferm_in_acc, // [NPS_tot]
-			       //__restrict ACC_MultiFermion *ferm_in_acc
-			       double res,
-			       //const COM_RationalApprox *approx, // included in ferm_param
-			       __restrict su3_soa  * taux_conf_acc,
-			       __restrict vec3_soa * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]
-			       //__restrict ACC_ShiftMultiFermion * ferm_shiftmulti_acc,
-			       __restrict vec3_soa * tkloc_r, // parking
-			       __restrict vec3_soa * tkloc_h, // parking
-			       __restrict vec3_soa * tkloc_s, // parking
-			       __restrict vec3_soa * tkloc_p, // parking
-			       __restrict vec3_soa * tk_p_shiftferm//parking variable [max_approx_order]
-			       ){
-  //__restrict ACC_ShiftFermion *k_p_shiftferm){
-  
-  //  printf("############################################ \n");
-  //  printf("#### Inside fermion force soloopenacc ###### \n");
-  //  printf("############################################ \n");
-
-#ifdef TIMING_FERMION_FORCE
-  struct timeval t1,t2;
-  gettimeofday ( &t1, NULL );
-#endif
- 
-  set_tamat_soa_to_zero(tipdot_acc);
-  for(int iflav = 0; iflav < tNDiffFlavs; iflav++) {
-      set_su3_soa_to_zero(taux_conf_acc);
-      int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
-      for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
-    // CHECK
-    // tferm_shiftmulti_acc viene utilizzato solo come variabile
-    // temporanea per scambiare dati tra multishift_invert e 
-    // ker_openacc_compute_fermion_force.
-    // Potrebbe essere quindi sovrascritto ad ogni iterazione, no?
-    //
-    // Quindi perche' tferm_shiftmulti_acc dovrebbe essere lungo
-    // max_ps * max_approx_order 
-    // Qui pare che basti avere solo max_approx_order.
-    //
-    // Pertanto, ho deciso di lasciare l'accesso a 
-    // tferm_shiftmulti_acc
-    // all'inizio. Molta parte dell'array non verra' usata.
-    // Se si vuole cambiare l'allocazione in una versione piu'
-    // minimale , il codice come e'scritto ora 
-    // dovrebbe funzionare lo stesso.
-
-          multishift_invert(tconf_acc, &tfermion_parameters[iflav], &(tfermion_parameters[iflav].approx_md), backfield, tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-          ker_openacc_compute_fermion_force(tconf_acc, backfield, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
-      } 
-      multiply_conf_times_force_and_take_ta_even(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
-      multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
-  }
- 
-#ifdef TIMING_FERMION_FORCE
-  gettimeofday ( &t2, NULL );
-  double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
-  printf("FULL FERMION FORCE COMPUTATION                  PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
-#endif
-  //  printf("########################################### \n");
-  //  printf("#### Completed fermion force openacc ###### \n");
-  //  printf("########################################### \n");
-
-}
-*/
-
 
 #endif
 
