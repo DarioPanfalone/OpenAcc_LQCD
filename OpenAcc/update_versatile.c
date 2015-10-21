@@ -8,12 +8,14 @@
 #include "./md_integrator.c"
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
-#ifdef STOUT_FERMIONS        
-        su3_soa *tstout_conf_acc_arr,
-#endif
         double res_metro, double res_md, int id_iter,int acc,int metro){
   
-  stout_conf_acc = &stout_conf_acc_arr[8*(STOUT_STEPS-1)];
+#ifdef STOUT_FERMIONS        
+    su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
+#endif
+
+
+
   
   printf("UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: OK \n");
   // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
@@ -57,6 +59,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 #pragma acc data copyin(delta[0:7])
   {
+  
     gettimeofday ( &t1, NULL );
 
     // ESTRAZIONI RANDOM
@@ -79,15 +82,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     }// end for iflav
 #pragma acc update device(ferm_phi_acc[0:NPS_tot])
 
-
-
-
-
 #ifdef STOUT_FERMIONS 
     // USO DELLA VERSIONE STOUTATA GIA' PER LO STIRACCHIAMENTO
     // STOUTING...(ALREADY ON DEVICE)
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
-    gconf_as_fermionmatrix = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
+    gconf_as_fermionmatrix = &tstout_conf_acc_arr[8*(STOUT_STEPS-1)];
 #else
     gconf_as_fermionmatrix = tconf_acc;
 #endif
@@ -283,7 +282,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     gettimeofday ( &t2, NULL );
   }// end pragma acc data copyin(delta[0:7])
   
-  gettimeofday ( &t3, NULL );
+gettimeofday ( &t3, NULL );
   
   if(metro==1){
     if(accettata==1){

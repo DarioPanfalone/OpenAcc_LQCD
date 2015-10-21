@@ -3,11 +3,6 @@
 
 #include "struct_c_def.c"
 
-double_soa * u1_back_field_phases;
-tamat_soa * ipdot_acc;
-
-tamat_soa * aux_ta; // aggiunta per il calcolo della forza stoutata
-thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
 
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
@@ -34,6 +29,8 @@ su3_soa * gstout_conf_acc_arr; // all stouting steps
                                // except the zeroth
 su3_soa * glocal_staples;
 tamat_soa * gipdot;
+tamat_soa * aux_ta; // aggiunta per il calcolo della forza stoutata
+thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
 #endif
 
 // FERMIONS
@@ -83,7 +80,7 @@ void mem_alloc(){
   // STOUTING
   allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa)); gstout_conf_acc_arr->flag = 0 ;
   gstout_conf_acc = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
-  if(allocation_check != 0)  printf("Errore nella allocazione di stout_conf_acc_arr \n");
+  if(allocation_check != 0)  printf("Errore nella allocazione di gstout_conf_acc_arr \n");
   allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); glocal_staples->flag = 0 ;
   if(allocation_check != 0)  printf("Errore nella allocazione di glocal_staples \n");
   allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); gipdot->flag = 0 ; 
@@ -133,9 +130,18 @@ void mem_free(){
 #endif
   free(momenta);
   free(aux_conf_acc);
+  free(auxbis_conf_acc);
+
+
+#ifdef STOUT_FERMIONS
+  free(gstout_conf_acc_arr);
+  free(glocal_staples);
+  free(gipdot);
   free(aux_ta);
   free(aux_th);
-  free(stout_conf_acc);
+#endif
+
+
   free(conf_acc_bkp);
   free(ipdot_acc);
 

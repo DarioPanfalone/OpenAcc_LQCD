@@ -468,7 +468,7 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
 }
 
 
-#ifdef STOT_FERMIONS
+#ifdef STOUT_FERMIONS
 inline void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr){
 
 
