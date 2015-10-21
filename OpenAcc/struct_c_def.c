@@ -76,19 +76,37 @@ static inline int snum_acc(int x, int y, int z, int t) {
 
 
 typedef struct vec3_soa_t {
-  d_complex c0[sizeh];
-  d_complex c1[sizeh];
-  d_complex c2[sizeh];
+    int flag;
+    d_complex c0[sizeh];
+    d_complex c1[sizeh];
+    d_complex c2[sizeh];
 } vec3_soa;
 
+void checkfree_vec3soa(vec3_soa* fermion){
+    if (fermion->flag !=0) 
+        printf("CHECK: FERMION AT %p IS NOT FREE.\n", fermion);
+}
+
+
+
 typedef struct dcomplex_soa_t {
-  d_complex c[sizeh];
+    int flag;
+    d_complex c[sizeh];
 } dcomplex_soa;
 
+void checkfree_dcomplex_soa(dcomplex_soa* x){
+    if (x->flag !=0) 
+        printf("CHECK: DCOMPLEX_SOA AT %p IS NOT FREE.\n", x);
+}
 typedef struct double_soa_t {
-  double d[sizeh];
+    int flag;
+    double d[sizeh];
 } double_soa;
 
+void checkfree_dcomplex_soa(double_soa* x){
+    if (x->flag !=0) 
+        printf("CHECK: DOUBLE_SOA AT %p IS NOT FREE.\n", x);
+}
 typedef struct single_su3_t {
   d_complex comp[3][3];
 } single_su3;
@@ -100,34 +118,31 @@ typedef struct vec3_t {
 } vec3;
 
 typedef struct su3_soa_t {
+  int flag;  
   vec3_soa r0;
   vec3_soa r1;
   vec3_soa r2;
 } su3_soa;
-
-//SHIFT FERMIONS
-typedef struct ACC_ShiftFermion_t{
-  vec3_soa shift[max_approx_order];
-} ACC_ShiftFermion;
-
-//MULTI FERMIONS
-typedef struct ACC_MultiFermion_t{
-  vec3_soa multi[no_ps];
-} ACC_MultiFermion;
-
-//SHIFT MULTI FERMIONS
-typedef struct ACC_ShiftMultiFermion_t{
-  vec3_soa shiftmulti[max_approx_order][no_ps];
-} ACC_ShiftMultiFermion;
+void checkfree_su3soa(su_3soa* M){
+    if (M->flag !=0) 
+        printf("CHECK: GAUGE MATRIX AT %p IS NOT FREE.\n", M);
+}
 
 
 typedef struct tamat_soa_t {
+  int flag;
   d_complex c01[sizeh]; // comp_01
   d_complex c02[sizeh]; // comp_02
   d_complex c12[sizeh]; // comp_12
   double rc00[sizeh];   // Im(comp_00)
   double rc11[sizeh];   // Im(comp_11)
 } tamat_soa;
+
+void checkfree_tamat_soa(tamat_soa* M){
+    if (M->flag !=0) 
+        printf("CHECK: TAMAT_SOA AT %p IS NOT FREE.\n", M);
+}
+
 typedef struct single_tamat_t {
   d_complex c01; // comp_01
   d_complex c02; // comp_02
@@ -137,12 +152,22 @@ typedef struct single_tamat_t {
 } single_tamat;
 
 typedef struct thmat_soa_t {
+  int flag;
   d_complex c01[sizeh]; // comp_01
   d_complex c02[sizeh]; // comp_02
   d_complex c12[sizeh]; // comp_12
   double rc00[sizeh];   // Re(comp_00)
   double rc11[sizeh];   // Re(comp_11)
 } thmat_soa;
+
+void checkfree_thmat_soa(thmat_soa* M){
+    if (M->flag !=0) 
+        printf("CHECK: THMAT_SOA AT %p IS NOT FREE.\n", M);
+}
+
+
+
+
 typedef struct single_thmat_t {
   d_complex c01; // comp_01
   d_complex c02; // comp_02
@@ -155,222 +180,6 @@ typedef struct single_thmat_t {
 
 
 
-
-// funzioni di conversione:    thmat_soa   ==>   thmatCOM_soa 
-void convert_thmat_soa_to_thmatCOM_soa(thmat_soa *in, thmatCOM_soa *out){
-  int i;
-  for(i =0 ; i < sizeh ; i++){
-    out->c01[i].Re = creal(in->c01[i]);
-    out->c02[i].Re = creal(in->c02[i]);
-    out->c12[i].Re = creal(in->c12[i]);
-
-    out->c01[i].Im = cimag(in->c01[i]);
-    out->c02[i].Im = cimag(in->c02[i]);
-    out->c12[i].Im = cimag(in->c12[i]);
-
-    out->rc00[i] = in->rc00[i];
-    out->rc11[i] = in->rc11[i];
-  }
-}
-
-// funzioni di conversione:    thmatCOM_soa   ==>   thmat_soa 
-void convert_thmatCOM_soa_to_thmat_soa(thmatCOM_soa *in, thmat_soa *out){
-  int i;
-  for( i =0 ; i < sizeh ; i++){
-    out->c01[i] = in->c01[i].Re + in->c01[i].Im * 1.0I;
-    out->c02[i] = in->c02[i].Re + in->c02[i].Im * 1.0I;
-    out->c12[i] = in->c12[i].Re + in->c12[i].Im * 1.0I;
-    out->rc00[i] = in->rc00[i];
-    out->rc11[i] = in->rc11[i];
-  }
-}
-
-// funzioni di conversione:    tamat_soa   ==>   tamatCOM_soa 
-void convert_tamat_soa_to_tamatCOM_soa(tamat_soa *in, tamatCOM_soa *out){
-  int i;
-  for(i =0 ; i < sizeh ; i++){
-    out->c01[i].Re = creal(in->c01[i]);
-    out->c02[i].Re = creal(in->c02[i]);
-    out->c12[i].Re = creal(in->c12[i]);
-
-    out->c01[i].Im = cimag(in->c01[i]);
-    out->c02[i].Im = cimag(in->c02[i]);
-    out->c12[i].Im = cimag(in->c12[i]);
-
-    out->rc00[i] = in->rc00[i];
-    out->rc11[i] = in->rc11[i];
-  }
-}
-
-// funzioni di conversione:    tamatCOM_soa   ==>   tamat_soa 
-void convert_tamatCOM_soa_to_tamat_soa(tamatCOM_soa *in, tamat_soa *out){
-  int i;
-  for( i =0 ; i < sizeh ; i++){
-    out->c01[i] = in->c01[i].Re + in->c01[i].Im * 1.0I;
-    out->c02[i] = in->c02[i].Re + in->c02[i].Im * 1.0I;
-    out->c12[i] = in->c12[i].Re + in->c12[i].Im * 1.0I;
-    out->rc00[i] = in->rc00[i];
-    out->rc11[i] = in->rc11[i];
-  }
-}
-// funzioni di conversione:    su3_soa   ==>   su3COM_soa 
-void convert_su3_soa_to_su3COM_soa(su3_soa *in, su3COM_soa *out){
-  int i;
-  for(i =0 ; i < sizeh ; i++){
-    out->r0.c0[i].Re = creal(in->r0.c0[i]);
-    out->r1.c0[i].Re = creal(in->r1.c0[i]);
-    out->r2.c0[i].Re = creal(in->r2.c0[i]);
-    out->r0.c1[i].Re = creal(in->r0.c1[i]);
-    out->r1.c1[i].Re = creal(in->r1.c1[i]);
-    out->r2.c1[i].Re = creal(in->r2.c1[i]);
-    out->r0.c2[i].Re = creal(in->r0.c2[i]);
-    out->r1.c2[i].Re = creal(in->r1.c2[i]);
-    out->r2.c2[i].Re = creal(in->r2.c2[i]);
-
-    out->r0.c0[i].Im = cimag(in->r0.c0[i]);
-    out->r1.c0[i].Im = cimag(in->r1.c0[i]);
-    out->r2.c0[i].Im = cimag(in->r2.c0[i]);
-    out->r0.c1[i].Im = cimag(in->r0.c1[i]);
-    out->r1.c1[i].Im = cimag(in->r1.c1[i]);
-    out->r2.c1[i].Im = cimag(in->r2.c1[i]);
-    out->r0.c2[i].Im = cimag(in->r0.c2[i]);
-    out->r1.c2[i].Im = cimag(in->r1.c2[i]);
-    out->r2.c2[i].Im = cimag(in->r2.c2[i]);
-  }
-}
-
-// funzioni di conversione:    su3COM_soa   ==>   su3_soa 
-void convert_su3COM_soa_to_su3_soa(const su3COM_soa *in, su3_soa *out){
-  int i;
-  for( i =0 ; i < sizeh ; i++){
-    out->r0.c0[i] = (in->r0.c0[i].Re) + (in->r0.c0[i].Im) * 1.0I;
-    out->r1.c0[i] = (in->r1.c0[i].Re) + (in->r1.c0[i].Im) * 1.0I;
-    out->r2.c0[i] = (in->r2.c0[i].Re) + (in->r2.c0[i].Im) * 1.0I;
-
-    out->r0.c1[i] = (in->r0.c1[i].Re) + (in->r0.c1[i].Im) * 1.0I;
-    out->r1.c1[i] = (in->r1.c1[i].Re) + (in->r1.c1[i].Im) * 1.0I;
-    out->r2.c1[i] = (in->r2.c1[i].Re) + (in->r2.c1[i].Im) * 1.0I;
-
-    out->r0.c2[i] = (in->r0.c2[i].Re) + (in->r0.c2[i].Im) * 1.0I;
-    out->r1.c2[i] = (in->r1.c2[i].Re) + (in->r1.c2[i].Im) * 1.0I;
-    out->r2.c2[i] = (in->r2.c2[i].Re) + (in->r2.c2[i].Im) * 1.0I;
-  }
-}
-
-// funzioni di conversione:    vec3_soa  ==>  vec3COM_soa
-void convert_vec3_soa_to_vec3COM_soa(vec3_soa *in, vec3COM_soa *out){
-  int i;
-  for( i =0 ; i < sizeh ; i++){
-    out->c0[i].Re = creal(in->c0[i]);
-    out->c1[i].Re = creal(in->c1[i]);
-    out->c2[i].Re = creal(in->c2[i]);
-
-    out->c0[i].Im = cimag(in->c0[i]);
-    out->c1[i].Im = cimag(in->c1[i]);
-    out->c2[i].Im = cimag(in->c2[i]);
-  }
-}
-
-// funzioni di conversione:    vec3COM_soa  ==>  vec3_soa
-void convert_vec3COM_soa_to_vec3_soa(const vec3COM_soa *in, vec3_soa *out){
-  int i;
-  for( i =0 ; i < sizeh ; i++){
-    out->c0[i] = (in->c0[i].Re) + (in->c0[i].Im) * 1.0I;
-    out->c1[i] = (in->c1[i].Re) + (in->c1[i].Im) * 1.0I;
-    out->c2[i] = (in->c2[i].Re) + (in->c2[i].Im) * 1.0I;
-  }
-}
-
-
-// funzioni di conversione:    ACC_ShiftFermion  ==>  COM_ShiftFermion          
-void convert_ACC_ShiftFermion_to_COM_ShiftFermion(ACC_ShiftFermion *in, COM_ShiftFermion *out){
-  int i,ia;
-  for(ia =0 ; ia < max_approx_order ; ia++){
-    for( i =0 ; i < sizeh ; i++){
-      out->shift[ia].c0[i].Re = creal(in->shift[ia].c0[i]);
-      out->shift[ia].c1[i].Re = creal(in->shift[ia].c1[i]);
-      out->shift[ia].c2[i].Re = creal(in->shift[ia].c2[i]);
-
-      out->shift[ia].c0[i].Im = cimag(in->shift[ia].c0[i]);
-      out->shift[ia].c1[i].Im = cimag(in->shift[ia].c1[i]);
-      out->shift[ia].c2[i].Im = cimag(in->shift[ia].c2[i]);
-    }
-  }
-}
-
-// funzioni di conversione:    COM_ShiftFermion  ==>  ACC_ShiftFermion          
-void convert_COM_ShiftFermion_to_ACC_ShiftFermion(COM_ShiftFermion *in, ACC_ShiftFermion *out){
-  int i,ia;
-  for(ia =0 ; ia < max_approx_order ; ia++){
-    for( i =0 ; i < sizeh ; i++){
-      out->shift[ia].c0[i] = (in->shift[ia].c0[i].Re) + (in->shift[ia].c0[i].Im) * 1.0I;
-      out->shift[ia].c1[i] = (in->shift[ia].c1[i].Re) + (in->shift[ia].c1[i].Im) * 1.0I;
-      out->shift[ia].c2[i] = (in->shift[ia].c2[i].Re) + (in->shift[ia].c2[i].Im) * 1.0I;
-    }
-  }
-}
-
-// funzioni di conversione:    ACC_MultiFermion  ==>  COM_MultiFermion          
-void convert_ACC_MultiFermion_to_COM_MultiFermion(ACC_MultiFermion *in, COM_MultiFermion *out){
-  int i,ips;
-  for(ips =0 ; ips < no_ps ; ips++){
-    for( i =0 ; i < sizeh ; i++){
-      out->multi[ips].c0[i].Re = creal(in->multi[ips].c0[i]);
-      out->multi[ips].c1[i].Re = creal(in->multi[ips].c1[i]);
-      out->multi[ips].c2[i].Re = creal(in->multi[ips].c2[i]);
-
-      out->multi[ips].c0[i].Im = cimag(in->multi[ips].c0[i]);
-      out->multi[ips].c1[i].Im = cimag(in->multi[ips].c1[i]);
-      out->multi[ips].c2[i].Im = cimag(in->multi[ips].c2[i]);
-    }
-  }
-}
-
-// funzioni di conversione:    COM_MultiFermion  ==>  ACC_MultiFermion          
-void convert_COM_MultiFermion_to_ACC_MultiFermion(const COM_MultiFermion *in, ACC_MultiFermion *out){
-  int i,ips;
-  for(ips =0 ; ips < no_ps ; ips++){
-    for( i =0 ; i < sizeh ; i++){
-      out->multi[ips].c0[i] = (in->multi[ips].c0[i].Re) + (in->multi[ips].c0[i].Im) * 1.0I;
-      out->multi[ips].c1[i] = (in->multi[ips].c1[i].Re) + (in->multi[ips].c1[i].Im) * 1.0I;
-      out->multi[ips].c2[i] = (in->multi[ips].c2[i].Re) + (in->multi[ips].c2[i].Im) * 1.0I;
-    }
-  }
-}
-
-
-
-// funzioni di conversione:    ACC_ShiftMultiFermion  ==>  COM_ShiftMultiFermion
-void convert_ACC_ShiftMultiFermion_to_COM_ShiftMultiFermion(ACC_ShiftMultiFermion *in, COM_ShiftMultiFermion *out){
-  int i,ips,ia;
-  for(ips =0 ; ips < no_ps ; ips++){
-    for(ia =0 ; ia < max_approx_order ; ia++){
-      for( i =0 ; i < sizeh ; i++){
-        out->shiftmulti[ia][ips].c0[i].Re = creal(in->shiftmulti[ia][ips].c0[i]);
-        out->shiftmulti[ia][ips].c1[i].Re = creal(in->shiftmulti[ia][ips].c1[i]);
-        out->shiftmulti[ia][ips].c2[i].Re = creal(in->shiftmulti[ia][ips].c2[i]);
-
-        out->shiftmulti[ia][ips].c0[i].Im = cimag(in->shiftmulti[ia][ips].c0[i]);
-        out->shiftmulti[ia][ips].c1[i].Im = cimag(in->shiftmulti[ia][ips].c1[i]);
-        out->shiftmulti[ia][ips].c2[i].Im = cimag(in->shiftmulti[ia][ips].c2[i]);
-      }
-    }
-  }
-}
-
-// funzioni di conversione:    COM_ShiftMultiFermion  ==>  ACC_ShiftMultiFermion
-void convert_COM_ShiftMultiFermion_to_ACC_ShiftMultiFermion(COM_ShiftMultiFermion *in, ACC_ShiftMultiFermion *out){
-  int i,ips,ia;
-  for(ia =0 ; ia < max_approx_order ; ia++){
-    for(ips =0 ; ips < no_ps ; ips++){
-      for( i =0 ; i < sizeh ; i++){
-        out->shiftmulti[ia][ips].c0[i] = (in->shiftmulti[ia][ips].c0[i].Re) + (in->shiftmulti[ia][ips].c0[i].Im) * 1.0I;
-        out->shiftmulti[ia][ips].c1[i] = (in->shiftmulti[ia][ips].c1[i].Re) + (in->shiftmulti[ia][ips].c1[i].Im) * 1.0I;
-        out->shiftmulti[ia][ips].c2[i] = (in->shiftmulti[ia][ips].c2[i].Re) + (in->shiftmulti[ia][ips].c2[i].Im) * 1.0I;
-      }
-    }
-  }
-}
 
 
 
