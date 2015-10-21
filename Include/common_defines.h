@@ -41,23 +41,24 @@
 
 //#define TIMING_ALL // if defined many computation times are printed in the output
 
-//#define GAUGE_ACT_TLSM
-#define GAUGE_ACT_WILSON
+#define GAUGE_ACT_TLSM
+//#define GAUGE_ACT_WILSON
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
-#define STOUT_STEPS 2
+#define STOUT_STEPS 1
 #endif
+#define RHO 0.0
 
 
-#define beta 4.00  //5.35
+#define beta 3.7  //5.35
 
 
 const int no_flavours=2; // number of quark species
-const int start_opt=1;// 0 --> COLD START; 1 --> START FROM SAVED CONF
+const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=0; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-int therm_ITERATIONS = 20; // the first <therm_ITERATIONS> of the history will be thermalization updates
+int ITERATIONS=20; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int therm_ITERATIONS = 10; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=10000;
 
@@ -87,7 +88,6 @@ const double ez_quantum=0.0;
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
 #define gauge_scale 4  // Update fermions every gauge_scale gauge updates
 
-#define RHO 0.02
 
 typedef struct COM_t{
   double Re;

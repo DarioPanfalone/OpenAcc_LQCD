@@ -3,11 +3,6 @@
 
 #include "struct_c_def.c"
 
-double_soa * u1_back_field_phases;
-tamat_soa * ipdot_acc;
-
-tamat_soa * aux_ta; // aggiunta per il calcolo della forza stoutata
-thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
 
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
@@ -34,6 +29,8 @@ su3_soa * gstout_conf_acc_arr; // all stouting steps
                                // except the zeroth
 su3_soa * glocal_staples;
 tamat_soa * gipdot;
+tamat_soa * aux_ta; // aggiunta per il calcolo della forza stoutata
+thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
 #endif
 
 // FERMIONS
@@ -68,7 +65,7 @@ void mem_alloc(){
   allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di auxbis_conf_acc \n");
   allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
-  if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_bkp \n");
+  if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc_bkp \n");
 
 
   // GAUGE EVOLUTION
@@ -131,9 +128,18 @@ void mem_free(){
 #endif
   free(momenta);
   free(aux_conf_acc);
+  free(auxbis_conf_acc);
+
+
+#ifdef STOUT_FERMIONS
+  free(gstout_conf_acc_arr);
+  free(glocal_staples);
+  free(gipdot);
   free(aux_ta);
   free(aux_th);
-  free(gstout_conf_acc);
+#endif
+
+
   free(conf_acc_bkp);
   free(ipdot_acc);
 
