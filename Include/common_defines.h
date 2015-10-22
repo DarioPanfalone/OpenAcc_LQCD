@@ -35,6 +35,12 @@
 #define ny 4
 #define nz 4
 #define nt 4
+/*
+#define nx 16
+#define ny 16
+#define nz 16
+#define nt 16
+*/
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -48,7 +54,7 @@
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 1
 #endif
-#define RHO 0.0
+#define RHO 0.01
 
 
 #define beta 3.7  //5.35
@@ -57,7 +63,7 @@
 const int no_flavours=2; // number of quark species
 const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=1; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int ITERATIONS=20; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
 int therm_ITERATIONS = 10; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=10000;
@@ -67,16 +73,16 @@ int approx_metro=19;
 int approx_md=9;
 const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
-const double residue_metro=1.0e-8;    // stopping residual for CG
-const double residue_md=1.0e-5;    // stopping residual for CG
+const double residue_metro=1.0e-14;//-8    // stopping residual for CG
+const double residue_md=1.0e-12;//-5    // stopping residual for CG
 const int gmp_remez_precision=100; // The precision that gmp uses
 
 // quanti di campo esterno
-const double bx_quantum=-1.0;
-const double ex_quantum=1.0;
-const double by_quantum=-1.0;
-const double ey_quantum=1.0;
-const double bz_quantum=-1.0;
+const double bx_quantum=0.0;
+const double ex_quantum=0.0;
+const double by_quantum=0.0;
+const double ey_quantum=0.0;
+const double bz_quantum=0.0;
 const double ez_quantum=1.0;
 
 #define no_ps 2

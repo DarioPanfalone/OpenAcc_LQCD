@@ -51,7 +51,7 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
       loop_count++;
-  } while(old_norm>1.0e-5);    // loop end
+  } while(old_norm>1.0e-10);    // loop end
   double max=norm;
   return max;
 }
@@ -89,7 +89,7 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
     old_norm=fabs(old_norm-norm);
     old_norm/=norm;
     loop_count++;
-  }  while(old_norm>1.0e-5);   // loop end
+  }  while(old_norm>1.0e-10);   // loop end
   double  min=max-norm;
   return min;
 }

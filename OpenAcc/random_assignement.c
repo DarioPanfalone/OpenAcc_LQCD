@@ -68,19 +68,6 @@ void generate_vec3_soa_gauss(__restrict vec3_soa * const vect){
   }
 }
 
-void generate_MultiFermion_gauss( __restrict ACC_MultiFermion * const vect){
-  int t;
-  int ips;
-  
-  for(ips=0;ips<no_ps;ips++){
-    for(t=0; t<sizeh; t++) {
-      vect->multi[ips].c0[t] = d_complex_gauss();
-      vect->multi[ips].c1[t] = d_complex_gauss();
-      vect->multi[ips].c2[t] = d_complex_gauss();
-    }
-  }
-}
-
 void generate_Momenta_gauss_comp(__restrict thmat_soa * const mom){
   int i,t;
   double casuali[8], aux[2];

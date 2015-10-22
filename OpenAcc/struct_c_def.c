@@ -103,7 +103,7 @@ typedef struct double_soa_t {
     double d[sizeh];
 } double_soa;
 
-void checkfree_dcomplex_soa(double_soa* x){
+void checkfree_double_soa(double_soa* x){
     if (x->flag !=0) 
         printf("CHECK: DOUBLE_SOA AT %p IS NOT FREE.\n", x);
 }
@@ -123,7 +123,7 @@ typedef struct su3_soa_t {
   vec3_soa r1;
   vec3_soa r2;
 } su3_soa;
-void checkfree_su3soa(su_3soa* M){
+void checkfree_su3soa(su3_soa* M){
     if (M->flag !=0) 
         printf("CHECK: GAUGE MATRIX AT %p IS NOT FREE.\n", M);
 }

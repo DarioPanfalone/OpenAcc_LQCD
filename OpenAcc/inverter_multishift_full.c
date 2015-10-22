@@ -151,6 +151,7 @@ int multishift_invert(__restrict su3_soa * const u,
       {
 	printf("WARNING: maximum number of iterations reached in invert\n");
       }
+      printf("\t CG count = %i \n",cg);
     
 
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC))
@@ -697,8 +698,8 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 
 #ifdef STOUT_FERMIONS
 void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
-						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
-						__restrict tamat_soa * const ipdot){
+							__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante; non viene modificata
+							__restrict tamat_soa * const ipdot){
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u) present(auxmat) present(ipdot) 
 #pragma acc loop independent //gang(nt)
@@ -740,8 +741,8 @@ void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * con
 
 
 void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * const u, // e' costante e non viene modificata
-					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
-					         __restrict tamat_soa * const ipdot){
+							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
+							 __restrict tamat_soa * const ipdot){
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u) present(auxmat) present(ipdot)
 #pragma acc loop independent //gang(nt)
@@ -802,7 +803,12 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
 #pragma acc loop independent
     for( idxh = 0 ; idxh < sizeh; idxh++){
       
+#ifdef BACKFIELD
       arg = backfield[dirindex].d[idxh] * charge;
+#else
+      arg = 0.0;
+#endif
+
 #ifdef IMCHEMPOT
       if(dirindex>6) arg += imchempot;
 #endif

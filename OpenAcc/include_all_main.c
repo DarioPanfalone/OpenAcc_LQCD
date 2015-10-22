@@ -34,6 +34,7 @@ int main(){
   su3_soa  * conf_acc;
   int  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
+  conf_acc->flag = 1;
   printf("Allocazione della configurazione : OK \n");
 
   // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
@@ -167,7 +168,8 @@ int main(){
 #endif
  
   }// end pragma acc data
-  
+
+  checkfree_su3soa(conf_acc);
 
   //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
   SHUTDOWN_ACC_DEVICE(my_device_type);

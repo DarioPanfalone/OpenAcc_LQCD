@@ -9,7 +9,7 @@
 
 
 
-
+#define STAMPA_UN_CASINO_DI_ROBA
 
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
 							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
@@ -18,17 +18,72 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 							   __restrict su3_soa    * const TMP// la var globale e' aux_conf_acc //PARCHEGGIO??
 							   ){
 
-  printf("INSIDE SIGMA_PRIME --> SIGMA \n");
+
+
+  printf("\n\n\nINSIDE SIGMA_PRIME --> SIGMA \n\n");
+#ifdef STAMPA_UN_CASINO_DI_ROBA
+#pragma acc update host(Sigma[0:8])
+  printf("-------------Sigma[old]------------------\n");                                                                                             
+  printf("Sigma[old]00 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c0[0]),cimag(Sigma[0].r0.c0[0]));                                               
+  printf("Sigma[old]01 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c1[0]),cimag(Sigma[0].r0.c1[0]));                                               
+  printf("Sigma[old]02 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c2[0]),cimag(Sigma[0].r0.c2[0]));                                               
+  printf("Sigma[old]10 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c0[0]),cimag(Sigma[0].r1.c0[0]));                                               
+  printf("Sigma[old]11 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c1[0]),cimag(Sigma[0].r1.c1[0]));                                               
+  printf("Sigma[old]12 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c2[0]),cimag(Sigma[0].r1.c2[0]));                                               
+  printf("Sigma[old]20 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c0[0]),cimag(Sigma[0].r2.c0[0]));                                               
+  printf("Sigma[old]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
+  printf("Sigma[old]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
+#endif
+
+
+
   set_su3_soa_to_zero(TMP);
   mult_conf_times_stag_phases(U);
   printf("         Removed stag phases  \n");
   calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
   printf("         computed staples  \n");
+
   RHO_times_conf_times_staples_ta_part(U,TMP,QA);
   printf("         computed Q  \n");
+#ifdef STAMPA_UN_CASINO_DI_ROBA
+#pragma acc update host(QA[0:8])
+  printf("-------------Q------------------\n");
+  printf("Q00 = %.18lf\n",QA[0].rc00[0]);
+  printf("Q00 = %.18lf\n",QA[0].rc11[0]);
+  printf("Q01 = %.18lf + (%.18lf)*I\n",creal(QA[0].c01[0]),cimag(QA[0].c01[0]));
+  printf("Q02 = %.18lf + (%.18lf)*I\n",creal(QA[0].c02[0]),cimag(QA[0].c02[0]));
+  printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
+#endif
+
   compute_lambda(Lambda,Sigma,U,QA,TMP);
   printf("         computed Lambda  \n");
+#ifdef STAMPA_UN_CASINO_DI_ROBA
+#pragma acc update host(Lambda[0:8])
+  printf("-------------LAMBDA------------------\n");
+  printf("Lambda00 = %.18lf\n",Lambda[0].rc00[0]);
+  printf("Lambda00 = %.18lf\n",Lambda[0].rc11[0]);
+  printf("Lambda01 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c01[0]),cimag(Lambda[0].c01[0]));
+  printf("Lambda02 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c02[0]),cimag(Lambda[0].c02[0]));
+  printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
+#endif
+
   compute_sigma(Lambda,U,Sigma,QA,TMP);
+  printf("         computed Sigma  \n");
+#ifdef STAMPA_UN_CASINO_DI_ROBA
+#pragma acc update host(Sigma[0:8])
+  printf("-------------Sigma[new]------------------\n");                                                                                             
+  printf("Sigma[new]00 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c0[0]),cimag(Sigma[0].r0.c0[0]));                                               
+  printf("Sigma[new]01 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c1[0]),cimag(Sigma[0].r0.c1[0]));                                               
+  printf("Sigma[new]02 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c2[0]),cimag(Sigma[0].r0.c2[0]));                                               
+  printf("Sigma[new]10 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c0[0]),cimag(Sigma[0].r1.c0[0]));                                               
+  printf("Sigma[new]11 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c1[0]),cimag(Sigma[0].r1.c1[0]));                                               
+  printf("Sigma[new]12 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c2[0]),cimag(Sigma[0].r1.c2[0]));                                               
+  printf("Sigma[new]20 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c0[0]),cimag(Sigma[0].r2.c0[0]));                                               
+  printf("Sigma[new]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
+  printf("Sigma[new]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
+#endif
+
+
   
   mult_conf_times_stag_phases(U);
   printf("         Restored stag phases  \n");
@@ -79,6 +134,12 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
   conf_to_use =  &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
   set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
+
+  /*
+  print_su3_soa(conf_to_use,"conf_stoutata");
+  print_su3_soa(tconf_acc,"conf_originale");
+  */
+
 #else
   conf_to_use = tconf_acc;
 #endif
@@ -93,10 +154,16 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			&(tfermion_parameters[iflav].approx_md), backfield,
 			tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, 
 			tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+
       ker_openacc_compute_fermion_force(conf_to_use, backfield, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
+      printf("COEFF %.18lf\n",tfermion_parameters[iflav].approx_md.RA_a[0]);
+      printf("FERMSHIFTED00 = %.18lf\n",tferm_shiftmulti_acc[0].c0[0]);
+      printf("PSEUDO00 = %.18lf\n",taux_conf_acc[0].r0.c0[0]);
+
     }
     
 #ifdef STOUT_FERMIONS
+
 #if defined(IMCHEMPOT) || defined(BACKFIELD)
     // JUST MULTIPLY BY BACK FIELD AND/OR CHEMICAL POTENTIAL
     multiply_backfield_times_force(&(tfermion_parameters[iflav]),backfield,taux_conf_acc,gl3_aux);
@@ -107,28 +174,31 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 #else
     multiply_conf_times_force_and_take_ta_even(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
     multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
+
 #endif
   }
-  
+
 #ifdef STOUT_FERMIONS
-	  for(int stout_level = STOUT_STEPS ; stout_level > 1 ; stout_level--){
-	    conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
-	    compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, aux_conf_acc );
-	  }
-       compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, aux_conf_acc );
-       multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc, taux_conf_acc,tipdot_acc);
-       multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc, taux_conf_acc,tipdot_acc);
+  for(int stout_level = STOUT_STEPS ; stout_level > 1 ; stout_level--){
+    printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl %d to lvl %d] <<<<<<<<<<<<<<<<<<<<<<<<<\n",stout_level,stout_level-1);
+    conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
+    compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, aux_conf_acc );
+  }
+  printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl 1 to lvl 0] <<<<<<<<<<<<<<<<<<<<<<<<<\n");
+  compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, aux_conf_acc );
+  multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc, gl3_aux,tipdot_acc);
+  multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc, gl3_aux,tipdot_acc);
 #endif
 
 
 #pragma acc update host(tipdot_acc[0:8])
-       printf("-------------FFORCE------------------\n");
+
+  printf("-------------FFORCE------------------\n");
        printf("F00 = %.18lf\n",tipdot_acc[0].rc00[0]);
-       printf("F00 = %.18lf\n",tipdot_acc[0].rc11[0]);
+       printf("F11 = %.18lf\n",tipdot_acc[0].rc11[0]);
        printf("F01 = %.18lf + (%.18lf)*I\n",creal(tipdot_acc[0].c01[0]),cimag(tipdot_acc[0].c01[0]));
        printf("F02 = %.18lf + (%.18lf)*I\n",creal(tipdot_acc[0].c02[0]),cimag(tipdot_acc[0].c02[0]));
        printf("F12 = %.18lf + (%.18lf)*I\n\n",creal(tipdot_acc[0].c12[0]),cimag(tipdot_acc[0].c12[0]));
-
 
 #ifdef TIMING_FERMION_FORCE
     gettimeofday ( &t2, NULL );
