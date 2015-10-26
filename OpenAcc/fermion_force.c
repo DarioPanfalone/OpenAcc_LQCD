@@ -55,6 +55,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
 #endif
 
+  mult_conf_times_stag_phases(U);
+
   compute_lambda(Lambda,Sigma,U,QA,TMP);
   printf("         computed Lambda  \n");
 #ifdef STAMPA_UN_CASINO_DI_ROBA
@@ -85,7 +87,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
   
-  mult_conf_times_stag_phases(U);
+  //mult_conf_times_stag_phases(U);
   printf("         Restored stag phases  \n");
   
   
@@ -101,8 +103,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 //STANDARD VERSION OF THE FERMIONIC FORCE
 void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata           
 #ifdef STOUT_FERMIONS        
-                   __restrict su3_soa * tstout_conf_acc_arr,// parking
-                   __restrict su3_soa * gl3_aux, // gl(3) parking
+			       __restrict su3_soa * tstout_conf_acc_arr,// parking
+			       __restrict su3_soa * gl3_aux, // gl(3) parking
 #endif
 			       __restrict double_soa * backfield,
 			       __restrict tamat_soa  * tipdot_acc,
@@ -135,10 +137,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   conf_to_use =  &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
   set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
 
-  /*
   print_su3_soa(conf_to_use,"conf_stoutata");
   print_su3_soa(tconf_acc,"conf_originale");
-  */
 
 #else
   conf_to_use = tconf_acc;
@@ -154,7 +154,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			&(tfermion_parameters[iflav].approx_md), backfield,
 			tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, 
 			tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-
+      
       ker_openacc_compute_fermion_force(conf_to_use, backfield, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
       printf("COEFF %.18lf\n",tfermion_parameters[iflav].approx_md.RA_a[0]);
       printf("FERMSHIFTED00 = %.18lf\n",tferm_shiftmulti_acc[0].c0[0]);

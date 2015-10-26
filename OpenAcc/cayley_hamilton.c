@@ -242,7 +242,7 @@ static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa
       double u = sqrt(c1/3) * cos(theta/3) ;//(23)
       double w = sqrt(c1) * sin(theta/3) ;//(23)
       
-      //auxiliary variables for the computation of h0, h1, h2                                                                                              
+      //auxiliary variables for the computation of h0, h1, h2 
       double u2=u*u,w2=w*w,u2mw2=u2-w2,w2p3u2=w2+3*u2,w2m3u2=w2-3*u2;
       double cu=cos(u),c2u=cos(2*u);
       double su=sin(u),s2u=sin(2*u);
@@ -318,6 +318,16 @@ static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa
                                         + f2 * ( (1.0*I)*QA->rc00[idx] * QA->c12[idx] 
 					+ QA->c02[idx] * conj(QA->c01[idx]));
 
+
+  if(idx==0){
+    printf("c0 = %.18lf\n",c0);
+    printf("c1 = %.18lf\n",c1);
+    printf("f0 = (%.18lf) + (%.18lf)*I\n",creal(f0),cimag(f0));
+    printf("f1 = (%.18lf) + (%.18lf)*I\n",creal(f1),cimag(f1));
+    printf("f2 = (%.18lf) + (%.18lf)*I\n",creal(f2),cimag(f2));
+    printf("\n");
+
+  }
 
 }
 

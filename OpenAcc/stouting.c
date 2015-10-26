@@ -295,24 +295,26 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
   d_complex U20 = conj(U->r0.c1[idx] * U->r1.c2[idx] - U->r0.c2[idx] * U->r1.c1[idx]);
   d_complex U21 = conj(U->r0.c2[idx] * U->r1.c0[idx] - U->r0.c0[idx] * U->r1.c2[idx]);
   d_complex U22 = conj(U->r0.c0[idx] * U->r1.c1[idx] - U->r0.c1[idx] * U->r1.c0[idx]);
-
+  
   ////////////CALCOLO DI B1   (EQ 69) ////////////////////////////////////////
   TMP->r0.c0[idx] =b10 -   b11*QA->rc00[idx]                + b12*(QA->rc00[idx]*QA->rc00[idx]
-								  + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]));
+								   + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]));
   TMP->r0.c1[idx] =      ( b11*I) *  QA->c01[idx]           + b12*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]));
   TMP->r0.c2[idx] =      ( b11*I) * QA->c02[idx]            + b12*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
   /////////
   TMP->r1.c0[idx] =      (-b11*I) * conj(QA->c01[idx])     + b12*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]));
   TMP->r1.c1[idx] =b10 -   b11*QA->rc11[idx]                + b12*( QA->rc11[idx]*QA->rc11[idx]
-								   +QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]));
+								    +QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]));
   TMP->r1.c2[idx] =      ( b11*I)*QA->c12[idx]              + b12*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
   /////////
+
   TMP->r2.c0[idx] =      (-b11*I)*conj(QA->c02[idx])        + b12*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
+
   TMP->r2.c1[idx] =      (-b11*I)*conj(QA->c12[idx])        + b12*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
   TMP->r2.c2[idx] =b10 +   b11*(QA->rc00[idx]+QA->rc11[idx])+ b12*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
-								  + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
+								   + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
   //////////////////////////////////////////////////////////////////////////////
-
+  
   /////////////////////////////////
   // CALCOLO DELLA TRACCIA => tr1 = Tr(Sigma' * B1 * U)
   d_complex tr1 =    SP->r0.c0[idx]   *  (TMP->r0.c0[idx]*U->r0.c0[idx] + TMP->r0.c1[idx]*U->r1.c0[idx] + TMP->r0.c2[idx]*U20)
@@ -358,17 +360,17 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
   /////////////////////////////////
 
   ////////////////CALCOLO U*Sigma' e lo metto in TMP che non serve piu'
-  TMP->r0.c0[idx] = U->r0.c0[idx] * SP->r0.c0[idx]  - U->r0.c1[idx] * SP->r1.c0[idx] - U->r0.c2[idx] * SP->r2.c0[idx];
-  TMP->r0.c1[idx] = U->r0.c0[idx] * SP->r0.c1[idx]  - U->r0.c1[idx] * SP->r1.c1[idx] - U->r0.c2[idx] * SP->r2.c1[idx];
-  TMP->r0.c2[idx] = U->r0.c0[idx] * SP->r0.c2[idx]  - U->r0.c1[idx] * SP->r1.c2[idx] - U->r0.c2[idx] * SP->r2.c2[idx];
+  TMP->r0.c0[idx] = U->r0.c0[idx] * SP->r0.c0[idx]  + U->r0.c1[idx] * SP->r1.c0[idx] + U->r0.c2[idx] * SP->r2.c0[idx];
+  TMP->r0.c1[idx] = U->r0.c0[idx] * SP->r0.c1[idx]  + U->r0.c1[idx] * SP->r1.c1[idx] + U->r0.c2[idx] * SP->r2.c1[idx];
+  TMP->r0.c2[idx] = U->r0.c0[idx] * SP->r0.c2[idx]  + U->r0.c1[idx] * SP->r1.c2[idx] + U->r0.c2[idx] * SP->r2.c2[idx];
 
-  TMP->r1.c0[idx] = U->r1.c0[idx] * SP->r0.c0[idx]  - U->r1.c1[idx] * SP->r1.c0[idx] - U->r1.c2[idx] * SP->r2.c0[idx];
-  TMP->r1.c1[idx] = U->r1.c0[idx] * SP->r0.c1[idx]  - U->r1.c1[idx] * SP->r1.c1[idx] - U->r1.c2[idx] * SP->r2.c1[idx];
-  TMP->r1.c2[idx] = U->r1.c0[idx] * SP->r0.c2[idx]  - U->r1.c1[idx] * SP->r1.c2[idx] - U->r1.c2[idx] * SP->r2.c2[idx];
+  TMP->r1.c0[idx] = U->r1.c0[idx] * SP->r0.c0[idx]  + U->r1.c1[idx] * SP->r1.c0[idx] + U->r1.c2[idx] * SP->r2.c0[idx];
+  TMP->r1.c1[idx] = U->r1.c0[idx] * SP->r0.c1[idx]  + U->r1.c1[idx] * SP->r1.c1[idx] + U->r1.c2[idx] * SP->r2.c1[idx];
+  TMP->r1.c2[idx] = U->r1.c0[idx] * SP->r0.c2[idx]  + U->r1.c1[idx] * SP->r1.c2[idx] + U->r1.c2[idx] * SP->r2.c2[idx];
 
-  TMP->r2.c0[idx] = U->r2.c0[idx] * SP->r0.c0[idx]  - U->r2.c1[idx] * SP->r1.c0[idx] - U->r2.c2[idx] * SP->r2.c0[idx];
-  TMP->r2.c1[idx] = U->r2.c0[idx] * SP->r0.c1[idx]  - U->r2.c1[idx] * SP->r1.c1[idx] - U->r2.c2[idx] * SP->r2.c1[idx];
-  TMP->r2.c2[idx] = U->r2.c0[idx] * SP->r0.c2[idx]  - U->r2.c1[idx] * SP->r1.c2[idx] - U->r2.c2[idx] * SP->r2.c2[idx];
+  TMP->r2.c0[idx] = U20           * SP->r0.c0[idx]  + U21           * SP->r1.c0[idx] + U22           * SP->r2.c0[idx];
+  TMP->r2.c1[idx] = U20           * SP->r0.c1[idx]  + U21           * SP->r1.c1[idx] + U22           * SP->r2.c1[idx];
+  TMP->r2.c2[idx] = U20           * SP->r0.c2[idx]  + U21           * SP->r1.c2[idx] + U22           * SP->r2.c2[idx];
   /////////////////////////////////////////////////////////////////////
 
 
@@ -387,12 +389,15 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
   r0_1 = -tr1 * QA->rc00[idx]   + tr2 * (QA->rc00[idx]*QA->rc00[idx] + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]))
     + f1 * TMP->r0.c0[idx] + f2  * (-2.0*TMP->r0.c0[idx]*QA->rc00[idx]+(1.0*I)*(QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]
 										+QA->c02[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c2[idx]));
+
   r1_1 =(tr1*I)*QA->c01[idx]    + tr2 * (QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]))
     + f1 * TMP->r0.c1[idx] + f2  * (-TMP->r0.c1[idx]*(QA->rc11[idx]+QA->rc00[idx])+(1.0*I)*(QA->c01[idx]*(TMP->r0.c0[idx]+TMP->r1.c1[idx])
 									    +QA->c02[idx]*TMP->r2.c1[idx]-conj(QA->c12[idx])*TMP->r0.c2[idx]));
+
   r2_1 =(tr1*I)*QA->c02[idx]    + tr2 * (-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx])
     + f1 * TMP->r0.c2[idx] + f2  * (QA->rc11[idx]*TMP->r0.c2[idx]+(1.0*I)*(QA->c02[idx]*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
 									   QA->c01[idx]*TMP->r1.c2[idx]+QA->c12[idx]*TMP->r0.c1[idx]));
+
   // seconda riga
   r0_2 = (-tr1*I) * conj(QA->c01[idx])  + tr2*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]))
     + f1 * TMP->r1.c0[idx] + f2 *(-TMP->r1.c0[idx]*(QA->rc00[idx]+QA->rc11[idx])+(1.0*I)*(-conj(QA->c01[idx])*(TMP->r0.c0[idx]+TMP->r1.c1[idx])  
@@ -401,6 +406,7 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
   r1_2 = -tr1*QA->rc11[idx]   + tr2*( QA->rc11[idx]*QA->rc11[idx]+QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]))
     + f1 * TMP->r1.c1[idx] + f2*(-2.0*TMP->r1.c1[idx]*QA->rc11[idx]+(1.0*I)*(QA->c12[idx]*TMP->r2.c1[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]+
 									     QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c12[idx])*TMP->r1.c2[idx]));
+
   r2_2 = (tr1*I)*QA->c12[idx] + tr2*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]))
     + f1 * TMP->r1.c2[idx] + f2*(QA->rc00[idx]*TMP->r1.c2[idx]+(1.0*I)*(QA->c12[idx]*(TMP->r1.c1[idx]+TMP->r2.c2[idx]) 
 									+QA->c02[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c2[idx]));
@@ -408,9 +414,11 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
   U20  = (-tr1*I)*conj(QA->c02[idx]) + tr2*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]))
     + f1 * TMP->r2.c0[idx] + f2 *(QA->rc11[idx]*TMP->r2.c0[idx]+(-1.0*I)*(conj(QA->c02[idx])*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
 									  conj(QA->c01[idx])*TMP->r2.c1[idx]+conj(QA->c12[idx])*TMP->r1.c0[idx]));
+
   U21  = (-tr1*I)*conj(QA->c12[idx]) + tr2*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]))
     + f1 * TMP->r2.c1[idx] + f2 *(QA->rc00[idx]*TMP->r2.c1[idx]+(1.0*I)*(QA->c01[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c1[idx]
 									 -conj(QA->c12[idx])*(TMP->r1.c1[idx]+TMP->r2.c2[idx])));
+
   U22  = tr1*(QA->rc00[idx]+QA->rc11[idx])+ tr2*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
 						 + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]))
     + f1 * TMP->r2.c2[idx] + f2 *(2.0*(QA->rc00[idx]+QA->rc11[idx])*TMP->r2.c2[idx]+(1.0*I)*(QA->c02[idx]*TMP->r2.c0[idx]+QA->c12[idx]*TMP->r2.c1[idx]
@@ -424,12 +432,56 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
   ///// LAMBDA_01 = (G01+conj(G10))/2
   ///// LAMBDA_02 = (G02+conj(G20))/2
   ///// LAMBDA_12 = (G12+conj(G21))/2
-
   L->rc00[idx] = (2*creal(r0_1)-creal(r1_2)-creal(U22))*ONE_BY_THREE;
   L->rc11[idx] = (2*creal(r1_2)-creal(r0_1)-creal(U22))*ONE_BY_THREE;
   L->c01[idx]  = (r1_1+conj(r0_2))*0.5;
   L->c02[idx]  = (r2_1+conj(U20))*0.5;
   L->c12[idx]  = (r2_2+conj(U21))*0.5;
+
+
+
+    /*
+  if(idx==0){
+
+    printf("c0 = %.18lf\n",c0);
+    printf("c1 = %.18lf\n",c1);
+    printf("f0 = %.18lf\n",f0);
+    printf("f1 = %.18lf\n",f1);
+    printf("f2 = %.18lf\n",f2);
+    printf("tr1 = (%.18lf) + (%.18lf)*I\n",creal(tr1),cimag(tr1));
+    printf("tr2 = (%.18lf) + (%.18lf)*I\n",creal(tr2),cimag(tr2));
+    printf("b10 = (%.18lf) + (%.18lf)*I\n",creal(b10),cimag(b10));
+    printf("b20 = (%.18lf) + (%.18lf)*I\n",creal(b20),cimag(b20));
+
+
+    printf("(U*SP)_00 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r0.c0[idx]),cimag(TMP->r0.c0[idx]));
+    printf("(U*SP)_01 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r0.c1[idx]),cimag(TMP->r0.c1[idx]));
+    printf("(U*SP)_02 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r0.c2[idx]),cimag(TMP->r0.c2[idx]));
+    printf("(U*SP)_10 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r1.c0[idx]),cimag(TMP->r1.c0[idx]));
+    printf("(U*SP)_11 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r1.c1[idx]),cimag(TMP->r1.c1[idx]));
+    printf("(U*SP)_12 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r1.c2[idx]),cimag(TMP->r1.c2[idx]));
+    printf("(U*SP)_20 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r2.c0[idx]),cimag(TMP->r2.c0[idx]));
+    printf("(U*SP)_21 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r2.c1[idx]),cimag(TMP->r2.c1[idx]));
+    printf("(U*SP)_22 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r2.c2[idx]),cimag(TMP->r2.c2[idx]));
+
+    printf("GAMMA_00  = (%.18lf) + (%.18lf)*I \n",creal(r0_1),cimag(r0_1));
+    printf("GAMMA_01  = (%.18lf) + (%.18lf)*I \n",creal(r1_1),cimag(r1_1));
+    printf("GAMMA_02  = (%.18lf) + (%.18lf)*I \n",creal(r2_1),cimag(r2_1));
+    printf("GAMMA_10  = (%.18lf) + (%.18lf)*I \n",creal(r0_2),cimag(r0_2));
+    printf("GAMMA_11  = (%.18lf) + (%.18lf)*I \n",creal(r1_2),cimag(r1_2));
+    printf("GAMMA_12  = (%.18lf) + (%.18lf)*I \n",creal(r2_2),cimag(r2_2));
+    printf("GAMMA_20  = (%.18lf) + (%.18lf)*I \n",creal(U20),cimag(U20));
+    printf("GAMMA_21  = (%.18lf) + (%.18lf)*I \n",creal(U21),cimag(U21));
+    printf("GAMMA_22  = (%.18lf) + (%.18lf)*I \n",creal(U22),cimag(U22));
+
+
+    printf("\n");
+
+  }
+    */
+
+
+
 
 }
 

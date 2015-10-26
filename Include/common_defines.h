@@ -54,7 +54,7 @@
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 1
 #endif
-#define RHO 0.01
+#define RHO 0.1
 
 
 #define beta 3.7  //5.35
@@ -90,7 +90,7 @@ const double ez_quantum=1.0;
 #define max_cg 10000
 
 
-#define no_md 8 // number of MD steps
+#define no_md 16 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
 #define gauge_scale 4  // Update fermions every gauge_scale gauge updates
 
