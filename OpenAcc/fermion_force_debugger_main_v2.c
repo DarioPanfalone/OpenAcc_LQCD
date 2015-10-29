@@ -54,6 +54,41 @@ int main(){
   //  generate_Conf_cold(conf_acc,0.1);
   printf("Cold Gauge Conf Generated : OK \n");
   conf_id_iter=0;
+    // CAMBIARE UN LINK!!!!!!!!!!
+    //    conf_acc[0].r0.c0[0] += 0.001 + 0.0*I;
+    double eps=0.00001;
+    set_tamat_soa_to_zero(ipdot_acc);
+    int i=0;
+    int s=0;
+    //    ipdot_acc[i].c01[s]= 0.0 + eps*I;
+    ipdot_acc[i].c01[s]= 0.0 + eps*I;
+    //    ipdot_acc[i].c02[s]= eps + 0.0*I;
+    //    ipdot_acc[i].rc00[s]= eps/sqrt(3.0) ;
+    //    ipdot_acc[i].rc11[s]= eps/sqrt(3.0) ;
+    CH_exponential_antihermitian_soa_nissalike(&(aux_conf_acc[i]),&(ipdot_acc[i]),s);
+    single_su3 M;
+    M.comp[0][0] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c0[s];
+    M.comp[0][1] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c1[s];
+    M.comp[0][2] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c2[s];
+    M.comp[1][0] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c0[s];
+    M.comp[1][1] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c1[s];
+    M.comp[1][2] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c2[s];
+    M.comp[2][0] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c0[s];
+    M.comp[2][1] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c1[s];
+    M.comp[2][2] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c2[s];
+
+    conf_acc[i].r0.c0[s] = M.comp[0][0];
+    conf_acc[i].r0.c1[s] = M.comp[0][1];
+    conf_acc[i].r0.c2[s] = M.comp[0][2];
+    conf_acc[i].r1.c0[s] = M.comp[1][0];
+    conf_acc[i].r1.c1[s] = M.comp[1][1];
+    conf_acc[i].r1.c2[s] = M.comp[1][2];
+    conf_acc[i].r2.c0[s] = M.comp[2][0];
+    conf_acc[i].r2.c1[s] = M.comp[2][1];
+    conf_acc[i].r2.c2[s] = M.comp[2][2];
+
+    print_su3_soa(conf_acc,"conf_mod");
+
 
 
 #ifdef STOUT_FERMIONS        
@@ -123,7 +158,7 @@ int main(){
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
     }
 
-    fermion_force_soloopenacc( conf_acc,
+    fermion_force_soloopenacc(conf_acc,
 #ifdef STOUT_FERMIONS
 			      gstout_conf_acc_arr, auxbis_conf_acc, // parkeggio
 #endif
@@ -131,41 +166,6 @@ int main(){
 			      ferm_chi_acc, residue_metro, aux_conf_acc, ferm_shiftmulti_acc, kloc_r,
 			      kloc_h, kloc_s, kloc_p, k_p_shiftferm);
 
-
-    // CAMBIARE UN LINK!!!!!!!!!!
-    //    conf_acc[0].r0.c0[0] += 0.001 + 0.0*I;
-    double eps=0.00001;
-    set_tamat_soa_to_zero(ipdot_acc);
-    int i=0;
-    int s=0;
-    //    ipdot_acc[i].c01[s]= 0.0 + eps*I;
-    ipdot_acc[i].c01[s]= eps + 0.0*I;
-    //    ipdot_acc[i].c02[s]= eps + 0.0*I;
-    //    ipdot_acc[i].rc00[s]= eps/sqrt(3.0) ;
-    //    ipdot_acc[i].rc11[s]= eps/sqrt(3.0) ;
-    CH_exponential_antihermitian_soa_nissalike(&(aux_conf_acc[i]),&(ipdot_acc[i]),s);
-    single_su3 M;
-    M.comp[0][0] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c0[s];
-    M.comp[0][1] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c1[s];
-    M.comp[0][2] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c2[s];
-    M.comp[1][0] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c0[s];
-    M.comp[1][1] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c1[s];
-    M.comp[1][2] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c2[s];
-    M.comp[2][0] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c0[s];
-    M.comp[2][1] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c1[s];
-    M.comp[2][2] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c2[s];
-
-    conf_acc[i].r0.c0[s] = M.comp[0][0];
-    conf_acc[i].r0.c1[s] = M.comp[0][1];
-    conf_acc[i].r0.c2[s] = M.comp[0][2];
-    conf_acc[i].r1.c0[s] = M.comp[1][0];
-    conf_acc[i].r1.c1[s] = M.comp[1][1];
-    conf_acc[i].r1.c2[s] = M.comp[1][2];
-    conf_acc[i].r2.c0[s] = M.comp[2][0];
-    conf_acc[i].r2.c1[s] = M.comp[2][1];
-    conf_acc[i].r2.c2[s] = M.comp[2][2];
-
-    print_su3_soa(conf_acc,"conf_mod");
 
 
 

@@ -55,8 +55,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
 #endif
 
-  mult_conf_times_stag_phases(U);
-
   compute_lambda(Lambda,Sigma,U,QA,TMP);
   printf("         computed Lambda  \n");
 #ifdef STAMPA_UN_CASINO_DI_ROBA
@@ -87,7 +85,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
   
-  //mult_conf_times_stag_phases(U);
+  mult_conf_times_stag_phases(U);
   printf("         Restored stag phases  \n");
   
   

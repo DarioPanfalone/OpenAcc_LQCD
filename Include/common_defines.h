@@ -31,16 +31,18 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
+/*
 #define nx 4
 #define ny 4
 #define nz 4
 #define nt 4
-/*
+*/
+
 #define nx 16
 #define ny 16
 #define nz 16
 #define nt 16
-*/
+
 #define sizehh nx*ny*nz*nt/2 
 
 #define ANTIPERIODIC_T_BC  // else periodic time bc are taken
@@ -50,7 +52,7 @@
 #define GAUGE_ACT_TLSM
 //#define GAUGE_ACT_WILSON
 
-#define STOUT_FERMIONS
+//#define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 1
 #endif
@@ -63,7 +65,7 @@
 const int no_flavours=2; // number of quark species
 const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=20; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int ITERATIONS=2; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
 int therm_ITERATIONS = 10; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=10000;
@@ -90,7 +92,7 @@ const double ez_quantum=1.0;
 #define max_cg 10000
 
 
-#define no_md 16 // number of MD steps
+#define no_md 8 // number of MD steps
 #define use_multistep 1 // =0 does not use multistep,   =1 2MN_multistep,   =2 4MN_multistep
 #define gauge_scale 4  // Update fermions every gauge_scale gauge updates
 

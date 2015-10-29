@@ -743,6 +743,7 @@ static inline void RIGHT_iABC_times_DminusE_absent_stag_phases(  __restrict su3_
   RES->r0.c2[idxRES]+=(RHO*I)*(matA_00*(LD->c02[idxD]-LE->c02[idxE])+matA_01*(LD->c12[idxD]-LE->c12[idxE])-matA_02*(LD->rc00[idxD]-LE->rc00[idxE]+LD->rc11[idxD]-LE->rc11[idxE]));
   RES->r1.c2[idxRES]+=(RHO*I)*(matA_10*(LD->c02[idxD]-LE->c02[idxE])+matA_11*(LD->c12[idxD]-LE->c12[idxE])-matA_12*(LD->rc00[idxD]-LE->rc00[idxE]+LD->rc11[idxD]-LE->rc11[idxE]));
   RES->r2.c2[idxRES]+=(RHO*I)*(matT_00*(LD->c02[idxD]-LE->c02[idxE])+matT_01*(LD->c12[idxD]-LE->c12[idxE])-matT_02*(LD->rc00[idxD]-LE->rc00[idxE]+LD->rc11[idxD]-LE->rc11[idxE]));
+
 }
 
 
@@ -1267,7 +1268,6 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
 	      //  F = LAMBDA_nu(x+mu-nu)
 	      //  G = LAMBDA_nu(x-nu)
 	      //  iABGC and -iABEC
-
 	      LEFT_iAB_times_GminusE_times_C_absent_stag_phases(&U[dir_nu_1L],       idx_pmu_mnu, // A
 							   &U[dir_mu_2L],       idx_mnu,     // B
 							   &U[dir_nu_3L],       idx_mnu,     // C
@@ -1288,7 +1288,6 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
 					     &U[dir_nu_3L],       idx_mnu,     // C
 					     &L[dir_nu_1L],       idx_pmu_mnu, // F
 					     &S[dir_link],        idxh);
-	      
             }  // iter
 	    
 

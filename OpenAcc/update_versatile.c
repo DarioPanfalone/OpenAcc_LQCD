@@ -86,7 +86,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // USO DELLA VERSIONE STOUTATA GIA' PER LO STIRACCHIAMENTO
     // STOUTING...(ALREADY ON DEVICE)
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
-    gconf_as_fermionmatrix = &tstout_conf_acc_arr[8*(STOUT_STEPS-1)];
+    gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
 #else
     gconf_as_fermionmatrix = tconf_acc;
 #endif
@@ -122,20 +122,20 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     if(metro==1){
       /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
       if(GAUGE_ACTION == 0)// Standard gauge action 
-          action_in = beta_by_three*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+	action_in = beta_by_three*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
       if(GAUGE_ACTION == 1){ //Tlsym gauge action
-      action_in = C_ZERO * beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
-      action_in += C_ONE * beta_by_three * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+	action_in = C_ZERO * beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+	action_in += C_ONE * beta_by_three * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
       }
       action_mom_in = 0.0;
       for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
       action_ferm_in=0;
       for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
-          for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-
-              int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-              action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
-          }
+	for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	  
+	  int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+	  action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
+	}
       }// end for iflav
       ///////////////////////////////////////////////////////////////////////////////////////
     }
@@ -145,18 +145,18 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
 
-        for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
-	for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+      for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	
         int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
         // USING STOUTED GAUGE MATRIX
         multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), u1_back_field_phases, ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
         recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
-
+	
       }
     }// end for iflav
 #ifdef PRINT_DETAILS_INSIDE_UPDATE
-	printf(" Computed the fermion CHI : OK \n");
+    printf(" Computed the fermion CHI : OK \n");
 #endif
     
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE MD
@@ -172,17 +172,17 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
 #pragma acc update device(approx_md[0:1])
     }//end for iflav
-
+    
     // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
     multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
 #ifdef STOUT_FERMIONS
-            tstout_conf_acc_arr,
-            auxbis_conf_acc, // globale
+			      tstout_conf_acc_arr,
+			      auxbis_conf_acc, // globale
 #endif
-            u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,
-            ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-            k_p_shiftferm,momenta,local_sums,delta,res_md);
-
+			      u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,
+			      ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
+			      k_p_shiftferm,momenta,local_sums,delta,res_md);
+    
 #ifdef PRINT_DETAILS_INSIDE_UPDATE
     printf(" Molecular Dynamics Completed : OK \n");
 #endif

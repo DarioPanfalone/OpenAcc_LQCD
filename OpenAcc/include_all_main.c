@@ -11,6 +11,7 @@ void su2_rand(double *pp);
 #include "./dbgtools.c"
 #include "./fermionic_utilities.c"
 #include "./su3_utilities.c"
+#include "./su3_utilities_V2.c"
 #include "./random_assignement.c"
 #include "./fermion_matrix.c"
 #include "./inverter_full.c"
@@ -89,7 +90,7 @@ int main(){
       {
 #endif
 	
-      double plq,rect;
+	double plq,plqbis,rect;
 
     int accettate_therm=0;
     int accettate_metro=0;
@@ -126,7 +127,10 @@ int main(){
 	       fclose(foutfile);
 	       //-------------------------------------------------// 
 	       //--------- MISURA ROBA DI GAUGE ------------------//
-	       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+	       for(int ipp=0;ipp<200;ipp++){
+		 plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+		 plqbis = calc_plaquette_soloopenacc_V2(conf_acc,aux_conf_acc,local_sums);
+	       }
 	       rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 
                FILE *goutfile = fopen(nome_file_gauge_output,"at");
@@ -134,6 +138,7 @@ int main(){
                if(goutfile){
 		 if(id_iter<therm_ITERATIONS){
 		   printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+		   printf("Therm_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
 		   printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
 		   
 		   fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_therm-accettate_therm_old);
@@ -141,6 +146,7 @@ int main(){
 		   
 		 }else{
 		   printf("Metro_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+		   printf("Metro_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
 		   printf("Metro_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
 		   
 		   fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_metro-accettate_metro_old);

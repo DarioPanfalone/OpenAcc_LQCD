@@ -319,6 +319,7 @@ static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa
 					+ QA->c02[idx] * conj(QA->c01[idx]));
 
 
+  /*
   if(idx==0){
     printf("c0 = %.18lf\n",c0);
     printf("c1 = %.18lf\n",c1);
@@ -328,6 +329,7 @@ static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa
     printf("\n");
 
   }
+  */
 
 }
 

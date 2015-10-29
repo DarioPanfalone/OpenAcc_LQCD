@@ -25,6 +25,7 @@ void SHUTDOWN_ACC_DEVICE(acc_device_t my_device_type) {
 }
 
 
+
 // mat3 = mat1 * mat2 
 #pragma acc routine seq
 static inline void    mat1_times_mat2_into_mat3_absent_stag_phases( __restrict su3_soa * const mat1,
@@ -63,8 +64,6 @@ static inline void    mat1_times_mat2_into_mat3_absent_stag_phases( __restrict s
   mat3->r1.c1[idx_mat3] = mat1_10 * mat2_01 + mat1_11 * mat2_11 + mat1_12 * mat2_21 ;
   mat3->r1.c2[idx_mat3] = mat1_10 * mat2_02 + mat1_11 * mat2_12 + mat1_12 * mat2_22 ;
 }
-
-
 
 // mat1 = mat1 * mat2 
 #pragma acc routine seq
@@ -141,6 +140,7 @@ static inline void    mat1_times_conj_mat2_into_mat1_absent_stag_phases( __restr
   mat1->r1.c1[idx_mat1] = mat1_10 * mat2_01 + mat1_11 * mat2_11 + mat1_12 * mat2_21 ;
   mat1->r1.c2[idx_mat1] = mat1_10 * mat2_02 + mat1_11 * mat2_12 + mat1_12 * mat2_22 ;
 }
+
 
 // Routine for the computation of the 3 matrices which contributes to the right part of the staple
 // mat4 = mat1 * hermitian_conjucate(mat2)* hermitian_conjucate(mat3)
