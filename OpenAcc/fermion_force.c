@@ -21,6 +21,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
   printf("\n\n\nINSIDE SIGMA_PRIME --> SIGMA \n\n");
+  {
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Sigma[0:8])
   printf("-------------Sigma[old]------------------\n");                                                                                             
@@ -34,7 +35,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Sigma[old]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
   printf("Sigma[old]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
 #endif
-
+ }
 
 
   set_su3_soa_to_zero(TMP);
@@ -45,6 +46,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
   RHO_times_conf_times_staples_ta_part(U,TMP,QA);
   printf("         computed Q  \n");
+  {
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(QA[0:8])
   printf("-------------Q------------------\n");
@@ -54,9 +56,11 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Q02 = %.18lf + (%.18lf)*I\n",creal(QA[0].c02[0]),cimag(QA[0].c02[0]));
   printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
 #endif
-
+  }
   compute_lambda(Lambda,Sigma,U,QA,TMP);
   printf("         computed Lambda  \n");
+
+  {
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Lambda[0:8])
   printf("-------------LAMBDA------------------\n");
@@ -66,9 +70,11 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Lambda02 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c02[0]),cimag(Lambda[0].c02[0]));
   printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
 #endif
-
+  }
   compute_sigma(Lambda,U,Sigma,QA,TMP);
   printf("         computed Sigma  \n");
+
+  {
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Sigma[0:8])
   printf("-------------Sigma[new]------------------\n");                                                                                             
@@ -82,7 +88,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Sigma[new]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
   printf("Sigma[new]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
 #endif
-
+  }
 
   
   mult_conf_times_stag_phases(U);
