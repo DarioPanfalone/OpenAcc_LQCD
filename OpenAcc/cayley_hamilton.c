@@ -9,73 +9,60 @@
 #include <accelmath.h>
 #include <complex.h>
 #include "../OpenAcc/struct_c_def.c"
-
-static inline void thmat_to_su3(single_su3 * out, single_thmat * Q){
-
-    out->comp[0][0] =      Q->rc00 ; 
-    out->comp[0][1] =      Q->c01 ;
-    out->comp[0][2] =      Q->c02 ;
-    out->comp[1][0] = conj(Q->c01) ;
-    out->comp[1][1] =      Q->rc11 ; 
-    out->comp[1][2] =      Q->c12 ;
-    out->comp[2][0] = conj(Q->c02);
-    out->comp[2][1] = conj(Q->c12);
-    out->comp[2][2] =    - Q->rc00 - Q->rc11 ; 
+#include "../OpenAcc/single_types.h"
 
 
-}
-static inline void i_times_tamat_to_su3(single_su3 * out, single_tamat * QA){
-  //I*tamat is a thmat
-    out->comp[0][0] =           - QA->rc00 ; 
-    out->comp[0][1] =   (1.0*I) * QA->c01  ;
-    out->comp[0][2] =   (1.0*I) * QA->c02  ;
-
-    out->comp[1][0] =   (-1.0*I) * conj(QA->c01) ;
-    out->comp[1][1] =           - QA->rc11 ; 
-    out->comp[1][2] =   (1.0*I) * QA->c12  ;
-
-    out->comp[2][0] =   (-1.0*I) * conj(QA->c02) ;
-    out->comp[2][1] =   (-1.0*I) * conj(QA->c12) ;
-    out->comp[2][2] =   QA->rc00 + QA->rc11; 
+inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out){
+// this is a degree 2 polynomial in Q= iQA, that is
+// P = f0 + f1 * Q + f2 * Q^2 = f0 + i * f1 * QA - f2 * QA^2
 
 
-}
+    out->comp[0][0] = f0 -   f1    * QA->rc00
+        + f2 * (  QA->rc00 *      QA->rc00
+                + QA->c01  * conj(QA->c01)
+                + QA->c02  * conj(QA->c02));
 
-static inline void i_times_tamat_soa_to_su3(single_su3 * out, __restrict tamat_soa * const QA,const int idx){
-  //I*tamat is a thmat
-    out->comp[0][0] =           - QA->rc00[idx] ; 
-    out->comp[0][1] =   (1.0*I) * QA->c01[idx]  ;
-    out->comp[0][2] =   (1.0*I) * QA->c02[idx]  ;
+    out->comp[0][1] =      ( f1*I) *  QA->c01
+        + f2    * (QA->c02 * conj(QA->c12)
+                + (-1.0*I)* QA->c01 * ( QA->rc00 + QA->rc11));
 
-    out->comp[1][0] =   (-1.0*I) * conj(QA->c01[idx]) ;
-    out->comp[1][1] =           - QA->rc11[idx] ; 
-    out->comp[1][2] =   (1.0*I) * QA->c12[idx]  ;
 
-    out->comp[2][0] =   (-1.0*I) * conj(QA->c02[idx]) ;
-    out->comp[2][1] =   (-1.0*I) * conj(QA->c12[idx]) ;
-    out->comp[2][2] =   QA->rc00[idx] + QA->rc11[idx]; 
+    out->comp[0][2] =      ( f1*I) * QA->c02        
+        + f2    * (-QA->c01 * QA->c12
+                + ( 1.0*I)* QA->c02 * QA->rc11);
 
+
+    out->[1][0] =      (-f1*I) * conj(QA->c01)  
+        + f2    * ( QA->c12 * conj(QA->c02)
+                + ( 1.0*I) * conj(QA->c01) * ( QA->rc00 + QA->rc11));
+
+
+    out->[1][1] = f0 -   f1    * QA->rc11       
+        + f2    * ( QA->rc11 * QA->rc11
+                + QA->c01 * conj(QA->c01)
+                + QA->c12 * conj(QA->c12));
+
+    out->[1][2] =      ( f1*I) * QA->c12        
+        + f2 * ( (1.0*I)*QA->rc00 * QA->c12 
+                + QA->c02 * conj(QA->c01));
 
 }
+inline void tamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out){
 
-static inline double detQ(single_thmat *Q){
 
-    double rc22 = -Q->rc00-Q->rc11 ; 
-    return creal(Q->rc00*Q->rc11*rc22 + 2*creal(Q->c01*Q->c12*conj(Q->c02)) -
-        Q->rc00 * Q->c12 * conj(Q->c12) - rc22 * Q->c01 * conj(Q->c01) - 
-        Q->rc11 * Q->c02 * conj(Q->c02));
+    tamat_2ndDeg_poly_no3rdrow(f0,f1,f2,QA,out);
 
-}
+    out->comp[2][0] = (f1*I) * (-conj(QA->c02)) 
+        - f2 * conj(QA->c01 * QA->c12 - QA->c02 * QA->rc11 * I );
 
-static inline double det_i_times_QA(single_tamat *QA){
+    out->comp[2][1] = (f1*I) * (-conj(QA->c12))
+        - f2 * (-conj(QA->c02) * QA->c01 + conj(QA->c12)* QA->rc00 * I );
 
-    double rc22 = -QA->rc00-QA->rc11 ; 
 
-    return -creal(  QA->rc00 * QA->rc11 * rc22
-		  + 2*cimag(QA->c01 * QA->c12 * conj(QA->c02))
-		  - QA->rc00 * QA->c12 * conj(QA->c12)
-		  - QA->rc11 * QA->c02 * conj(QA->c02)
-      	          - rc22 * QA->c01 * conj(QA->c01) );
+    out->comp[2][2] = f0 + f1*(QA->rc00 + QA->rc11)
+        +  f2 * (QA->c02 * conj(QA->c02) + QA->c12 * conj(QA->c12)
+               +  (QA->rc00 + QA->rc11 ) *  (QA->rc00 + QA->rc11 ) );
+
 
 }
 
@@ -90,39 +77,6 @@ static inline double det_i_times_QA_soa( __restrict tamat_soa * const QA,const i
       	          -         QA->c01[idx]  * conj(QA->c01[idx]) * rc22  );
 
 }
-
-static inline d_complex detSu3(single_su3 *m){
-
-
-    return  
-    m->comp[0][0]* m->comp[1][1] * m->comp[2][2] +
-    m->comp[0][1]* m->comp[1][2] * m->comp[2][0] +
-    m->comp[0][2]* m->comp[1][0] * m->comp[2][1] -
-    m->comp[0][0]* m->comp[1][2] * m->comp[2][1] -
-    m->comp[0][1]* m->comp[1][0] * m->comp[2][2] -
-    m->comp[0][2]* m->comp[1][1] * m->comp[2][0] ;
-
-}
-static inline double TrQsq(single_thmat *Q){
-
-  return 2 * creal( Q->rc00 * Q->rc00 +
-                    Q->rc11 * Q->rc11 +
-                    Q->c01 * conj(Q->c01) +
-                    Q->c02 * conj(Q->c02) +
-                    Q->c12 * conj(Q->c12) +
-	            Q->rc00 * Q->rc11 );
-
-}
-static inline double Tr_i_times_QA_sq(single_tamat *QA){
-  // computes Tr( (i*QA)^2 )
-    return 2 * creal( QA->rc00 * QA->rc00 +
-		      QA->rc11 * QA->rc11 +
-		      QA->rc00 * QA->rc11 +
-		      QA->c01  * conj(QA->c01) +
-		      QA->c02  * conj(QA->c02) +
-		      QA->c12  * conj(QA->c12) );
-}
-
 static inline double Tr_i_times_QA_sq_soa( __restrict tamat_soa * const QA,const int idx){
   // computes Tr( (i*QA)^2 )
     return 2 * creal( QA->rc00[idx] * QA->rc00[idx] +
@@ -133,74 +87,6 @@ static inline double Tr_i_times_QA_sq_soa( __restrict tamat_soa * const QA,const
 		      QA->c12[idx]  * conj(QA->c12[idx]) );
 }
 
-
-
-
-static inline void single_su3_times_scalar(single_su3 * m , d_complex scalar){
-
-   for(int r=0;r<3;r++)
-    for(int c=0;c<3;c++)
-     m->comp[r][c] *= scalar;
-
-}
-static inline void single_su3_times_scalar_no3rdrow(single_su3 * m , d_complex scalar){
-
-   for(int r=0;r<2;r++)
-    for(int c=0;c<3;c++)
-     m->comp[r][c] *= scalar;
-
-}
-static inline void single_su3xsu3(single_su3 * out , single_su3 *m1, single_su3 *m2){
-
-   for(int r=0;r<3;r++)
-    for(int c=0;c<3;c++){
-        out->comp[r][c] = 0;
-        for(int d=0;d<3;d++) out->comp[r][c] += m1->comp[r][d] * m2->comp[d][c] ;
-
-    }
-}
-static inline void single_su3xsu3_no3rdrow(single_su3 * out , single_su3 *m1, single_su3 *m2){
-
-   for(int r=0;r<2;r++)
-    for(int c=0;c<3;c++){
-        out->comp[r][c] = 0;
-        for(int d=0;d<3;d++) out->comp[r][c] += m1->comp[r][d] * m2->comp[d][c] ;
-
-    }
-}
-void print_su3_stdout(single_su3 *m){
-
-    printf("\n");
-   for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++) printf("%.18lf + %.18lf I   ",  creal(m->comp[r][c]), cimag(m->comp[r][c]));
-    printf("\n");
-
-   }
-}
-static inline void single_su3add(single_su3 * out , single_su3 *m){
-
-   for(int r=0;r<3;r++)// Magari fino alla seconda riga?
-   //for(int r=0;r<2;r++) //??
-    for(int c=0;c<3;c++)
-        out->comp[r][c] += m->comp[r][c];
-
-}
-static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
-
-   for(int r=0;r<2;r++)
-    for(int c=0;c<3;c++)
-        out->comp[r][c] += m->comp[r][c];
-
-}
-/*
-static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
-
-   for(int r=0;r<2;r++)
-    for(int c=0;c<3;c++)
-        out->comp[r][c] += m->comp[r][c];
-
-}
-*/
 #pragma acc routine seq
 static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa * const exp_out,
 							      __restrict tamat_soa * const QA,const int idx){

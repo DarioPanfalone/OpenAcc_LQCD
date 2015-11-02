@@ -107,10 +107,6 @@ void checkfree_double_soa(double_soa* x){
     if (x->flag !=0) 
         printf("CHECK: DOUBLE_SOA AT %p IS NOT FREE.\n", x);
 }
-typedef struct single_su3_t {
-  d_complex comp[3][3];
-} single_su3;
-
 typedef struct vec3_t {
   d_complex c0;
   d_complex c1;
@@ -142,15 +138,6 @@ void checkfree_tamat_soa(tamat_soa* M){
     if (M->flag !=0) 
         printf("CHECK: TAMAT_SOA AT %p IS NOT FREE.\n", M);
 }
-
-typedef struct single_tamat_t {
-  d_complex c01; // comp_01
-  d_complex c02; // comp_02
-  d_complex c12; // comp_12
-  double rc00;   // Im(comp_00)
-  double rc11;   // Im(comp_11)
-} single_tamat;
-
 typedef struct thmat_soa_t {
   int flag;
   d_complex c01[sizeh]; // comp_01
@@ -166,15 +153,6 @@ void checkfree_thmat_soa(thmat_soa* M){
 }
 
 
-
-
-typedef struct single_thmat_t {
-  d_complex c01; // comp_01
-  d_complex c02; // comp_02
-  d_complex c12; // comp_12
-  double rc00;   // Re(comp_00)
-  double rc11;   // Re(comp_11)
-} single_thmat;
 
 
 
