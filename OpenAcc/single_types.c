@@ -244,6 +244,15 @@ static inline void single_su3xsu3(single_su3 * out , single_su3 *m1, single_su3 
 
     }
 }
+static inline void single_su3xsu3_add_to_out(single_su3 * out , single_su3 *m1, single_su3 *m2){
+
+   for(int r=0;r<3;r++)
+    for(int c=0;c<3;c++){
+        //   out->comp[r][c] = 0; // add to out!
+        for(int d=0;d<3;d++) out->comp[r][c] += m1->comp[r][d] * m2->comp[d][c] ;
+
+    }
+}
 static inline void single_su3add(single_su3 * out , single_su3 *m){
 
    for(int r=0;r<3;r++)// Magari fino alla seconda riga?
@@ -283,6 +292,9 @@ static inline double Tr_i_times_QA_sq(single_tamat *QA){
 		      QA->c02  * conj(QA->c02) +
 		      QA->c12  * conj(QA->c12) );
 }
+
+
+
 
 //no 3rd row
 static inline void single_su3xsu3_no3rdrow(single_su3 * out , single_su3 *m1, single_su3 *m2){

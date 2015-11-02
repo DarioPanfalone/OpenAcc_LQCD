@@ -3,7 +3,7 @@
 
 #include "./cayley_hamilton.c"
 #include "./struct_c_def.c"
-#include "./single_types.h"
+#include "./single_types.c"
 
 
 // DEOPTIMIZED?
@@ -17,13 +17,10 @@ static inline void conf_left_exp_multiply_to_su3_soa(__restrict su3_soa * const 
   //Multiply: U_new = EXP * U_old
 
   //Extraction
-  su3_soa_to_single_su3(cnf,idx,&AUX); // deoptimized?
+  single_gl3_from_su3_soa(cnf, idx, &AUX);
 
+  rebuild3row(&AUX);
 
-  // ricostruisco la terza
-  AUX.comp[2][0] = conj(AUX.comp[0][1] * AUX.comp[1][2] - AUX.comp[0][2] * AUX.comp[1][1]);
-  AUX.comp[2][1] = conj(AUX.comp[0][2] * AUX.comp[1][0] - AUX.comp[0][0] * AUX.comp[1][2]);
-  AUX.comp[2][2] = conj(AUX.comp[0][0] * AUX.comp[1][1] - AUX.comp[0][1] * AUX.comp[1][0]);
 
   // moltiplica
   cnf_out->r0.c0[idx] = EXP->r0.c0[idx] * AUX.comp[0][0] + EXP->r0.c1[idx] * AUX.comp[1][0] + EXP->r0.c2[idx] * AUX.comp[2][0];
@@ -270,165 +267,63 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
       }
     }
 
-
-  //DA DEOTTIMIZZARE
-  //ricostruisco la terza riga della conf
-  d_complex U20 = conj(U->r0.c1[idx] * U->r1.c2[idx] - U->r0.c2[idx] * U->r1.c1[idx]);
-  d_complex U21 = conj(U->r0.c2[idx] * U->r1.c0[idx] - U->r0.c0[idx] * U->r1.c2[idx]);
-  d_complex U22 = conj(U->r0.c0[idx] * U->r1.c1[idx] - U->r0.c1[idx] * U->r1.c0[idx]);
   
-  //DA DEOTTIMIZZARE
-  ////////////CALCOLO DI B1   (EQ 69) ////////////////////////////////////////
-  TMP->r0.c0[idx] =b10 -   b11*QA->rc00[idx]                + b12*(QA->rc00[idx]*QA->rc00[idx]
-								   + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]));
-  TMP->r0.c1[idx] =      ( b11*I) *  QA->c01[idx]           + b12*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]));
-  TMP->r0.c2[idx] =      ( b11*I) * QA->c02[idx]            + b12*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
-  /////////
-  TMP->r1.c0[idx] =      (-b11*I) * conj(QA->c01[idx])     + b12*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]));
-  TMP->r1.c1[idx] =b10 -   b11*QA->rc11[idx]                + b12*( QA->rc11[idx]*QA->rc11[idx]
-								    +QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]));
-  TMP->r1.c2[idx] =      ( b11*I)*QA->c12[idx]              + b12*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
-  /////////
+  single_su3 gl3_temp1,gl3_temp2;
+  // estrazione di sQA,sU,sSP
+  single_tamat sQA;
+  single_tamat_from_tamat_soa(QA,idx,&sQA);
 
-  TMP->r2.c0[idx] =      (-b11*I)*conj(QA->c02[idx])        + b12*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
-
-  TMP->r2.c1[idx] =      (-b11*I)*conj(QA->c12[idx])        + b12*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
-  TMP->r2.c2[idx] =b10 +   b11*(QA->rc00[idx]+QA->rc11[idx])+ b12*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
-								   + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
-  //////////////////////////////////////////////////////////////////////////////
+  single_su3 sU;
+  single_su3_from_su3_soa(U,idx,&sU); rebuild3row(&U);
   
-  //DA DEOTTIMIZZARE
-  /////////////////////////////////
+  single_gl3_from_su3_soa(SP,idx,&sSP);
+
+  // Calcolo di B1   
+  single_su3 B1; 
+  Itamat_2ndDeg_poly(b10,b11,b12,&sQA,&B1);
+
+
   // CALCOLO DELLA TRACCIA => tr1 = Tr(Sigma' * B1 * U)
-  d_complex tr1 =    SP->r0.c0[idx]   *  (TMP->r0.c0[idx]*U->r0.c0[idx] + TMP->r0.c1[idx]*U->r1.c0[idx] + TMP->r0.c2[idx]*U20)
-                 +   SP->r0.c1[idx]   *  (TMP->r1.c0[idx]*U->r0.c0[idx] + TMP->r1.c1[idx]*U->r1.c0[idx] + TMP->r1.c2[idx]*U20)
-                 +   SP->r0.c2[idx]   *  (TMP->r2.c0[idx]*U->r0.c0[idx] + TMP->r2.c1[idx]*U->r1.c0[idx] + TMP->r2.c2[idx]*U20)
-                 +   SP->r1.c0[idx]   *  (TMP->r0.c0[idx]*U->r0.c1[idx] + TMP->r0.c1[idx]*U->r1.c1[idx] + TMP->r0.c2[idx]*U21)
-                 +   SP->r1.c1[idx]   *  (TMP->r1.c0[idx]*U->r0.c1[idx] + TMP->r1.c1[idx]*U->r1.c1[idx] + TMP->r1.c2[idx]*U21)
-                 +   SP->r1.c2[idx]   *  (TMP->r2.c0[idx]*U->r0.c1[idx] + TMP->r2.c1[idx]*U->r1.c1[idx] + TMP->r2.c2[idx]*U21)
-                 +   SP->r2.c0[idx]   *  (TMP->r0.c0[idx]*U->r0.c2[idx] + TMP->r0.c1[idx]*U->r1.c2[idx] + TMP->r0.c2[idx]*U22)
-                 +   SP->r2.c1[idx]   *  (TMP->r1.c0[idx]*U->r0.c2[idx] + TMP->r1.c1[idx]*U->r1.c2[idx] + TMP->r1.c2[idx]*U22)
-                 +   SP->r2.c2[idx]   *  (TMP->r2.c0[idx]*U->r0.c2[idx] + TMP->r2.c1[idx]*U->r1.c2[idx] + TMP->r2.c2[idx]*U22);
-  /////////////////////////////////
+  
+  single_su3xsu3(&gl3_temp1,&sU,&sSP);
+  single_su3xsu3(&gl3_temp2,&B1,&gl3_temp1);
+  d_complex tr1= gl3_temp2[2][2]+gl3_temp2[1][1]+gl3_temp2[0][0];
 
+  // Calcolo di B2
+  single_su3 B2; 
+  Itamat_2ndDeg_poly(b20,b21,b22,&sQA,&B2);
 
-  //DA DEOTTIMIZZARE
-  ////////////CALCOLO DI B2   (EQ 69) ////////////////////////////////////////
-  TMP->r0.c0[idx] =b20 -   b21*QA->rc00[idx]                + b22*(QA->rc00[idx]*QA->rc00[idx]
-								  + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]));
-  TMP->r0.c1[idx] =      ( b21*I) *  QA->c01[idx]           + b22*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]));
-  TMP->r0.c2[idx] =      ( b21*I) * QA->c02[idx]            + b22*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
-  /////////
-  TMP->r1.c0[idx] =      (-b21*I) * conj(QA->c01[idx])     + b22*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]));
-  TMP->r1.c1[idx] =b20 -   b21*QA->rc11[idx]                + b22*( QA->rc11[idx]*QA->rc11[idx]
-								   +QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]));
-  TMP->r1.c2[idx] =      ( b21*I)*QA->c12[idx]              + b22*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
-  /////////
-  TMP->r2.c0[idx] =      (-b21*I)*conj(QA->c02[idx])        + b22*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
-  TMP->r2.c1[idx] =      (-b21*I)*conj(QA->c12[idx])        + b22*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
-  TMP->r2.c2[idx] =b20 +   b21*(QA->rc00[idx]+QA->rc11[idx])+ b22*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
-								  + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
-  /////////////////////////////////////////////////////////////////////////////
-
-  //DA DEOTTIMIZZARE
-  /////////////////////////////////
   // CALCOLO DELLA TRACCIA => tr2 = Tr(Sigma' * B2 * U)
-  d_complex tr2 =    SP->r0.c0[idx]   *  (TMP->r0.c0[idx]*U->r0.c0[idx] + TMP->r0.c1[idx]*U->r1.c0[idx] + TMP->r0.c2[idx]*U20)
-                 +   SP->r0.c1[idx]   *  (TMP->r1.c0[idx]*U->r0.c0[idx] + TMP->r1.c1[idx]*U->r1.c0[idx] + TMP->r1.c2[idx]*U20)
-                 +   SP->r0.c2[idx]   *  (TMP->r2.c0[idx]*U->r0.c0[idx] + TMP->r2.c1[idx]*U->r1.c0[idx] + TMP->r2.c2[idx]*U20)
-                 +   SP->r1.c0[idx]   *  (TMP->r0.c0[idx]*U->r0.c1[idx] + TMP->r0.c1[idx]*U->r1.c1[idx] + TMP->r0.c2[idx]*U21)
-                 +   SP->r1.c1[idx]   *  (TMP->r1.c0[idx]*U->r0.c1[idx] + TMP->r1.c1[idx]*U->r1.c1[idx] + TMP->r1.c2[idx]*U21)
-                 +   SP->r1.c2[idx]   *  (TMP->r2.c0[idx]*U->r0.c1[idx] + TMP->r2.c1[idx]*U->r1.c1[idx] + TMP->r2.c2[idx]*U21)
-                 +   SP->r2.c0[idx]   *  (TMP->r0.c0[idx]*U->r0.c2[idx] + TMP->r0.c1[idx]*U->r1.c2[idx] + TMP->r0.c2[idx]*U22)
-                 +   SP->r2.c1[idx]   *  (TMP->r1.c0[idx]*U->r0.c2[idx] + TMP->r1.c1[idx]*U->r1.c2[idx] + TMP->r1.c2[idx]*U22)
-                 +   SP->r2.c2[idx]   *  (TMP->r2.c0[idx]*U->r0.c2[idx] + TMP->r2.c1[idx]*U->r1.c2[idx] + TMP->r2.c2[idx]*U22);
-  /////////////////////////////////
+  single_su3xsu3(&gl3_temp2,&B2,&gl3_temp1);
+  d_complex tr2= gl3_temp2[2][2]+gl3_temp2[1][1]+gl3_temp2[0][0];
 
-  //DA DEOTTIMIZZARE
   ////////////////CALCOLO U*Sigma' e lo metto in TMP che non serve piu'
-  TMP->r0.c0[idx] = U->r0.c0[idx] * SP->r0.c0[idx]  + U->r0.c1[idx] * SP->r1.c0[idx] + U->r0.c2[idx] * SP->r2.c0[idx];
-  TMP->r0.c1[idx] = U->r0.c0[idx] * SP->r0.c1[idx]  + U->r0.c1[idx] * SP->r1.c1[idx] + U->r0.c2[idx] * SP->r2.c1[idx];
-  TMP->r0.c2[idx] = U->r0.c0[idx] * SP->r0.c2[idx]  + U->r0.c1[idx] * SP->r1.c2[idx] + U->r0.c2[idx] * SP->r2.c2[idx];
-
-  TMP->r1.c0[idx] = U->r1.c0[idx] * SP->r0.c0[idx]  + U->r1.c1[idx] * SP->r1.c0[idx] + U->r1.c2[idx] * SP->r2.c0[idx];
-  TMP->r1.c1[idx] = U->r1.c0[idx] * SP->r0.c1[idx]  + U->r1.c1[idx] * SP->r1.c1[idx] + U->r1.c2[idx] * SP->r2.c1[idx];
-  TMP->r1.c2[idx] = U->r1.c0[idx] * SP->r0.c2[idx]  + U->r1.c1[idx] * SP->r1.c2[idx] + U->r1.c2[idx] * SP->r2.c2[idx];
-
-  TMP->r2.c0[idx] = U20           * SP->r0.c0[idx]  + U21           * SP->r1.c0[idx] + U22           * SP->r2.c0[idx];
-  TMP->r2.c1[idx] = U20           * SP->r0.c1[idx]  + U21           * SP->r1.c1[idx] + U22           * SP->r2.c1[idx];
-  TMP->r2.c2[idx] = U20           * SP->r0.c2[idx]  + U21           * SP->r1.c2[idx] + U22           * SP->r2.c2[idx];
-  /////////////////////////////////////////////////////////////////////
+   // gia' fatto , e' in 'gl3_temp1'
+   // single_su3xsu3(&gl3_temp1,&sU,&sSP);
 
 
   //DA DEOTTIMIZZARE
   ///////////////// CALCOLO DI GAMMA = tr1*Q + tr2*Q^2 + f1* (U * Sigma') + f2 * (Q * U * Sigma' + U * Sigma' * Q ) = 
   /////////////////                  = tr1*Q + tr2*Q^2 + f1* TMP + f2 * (Q * TMP + TMP * Q)
-  /////////////////  GAMMA_00 = r0_1
-  /////////////////  GAMMA_01 = r1_1
-  /////////////////  GAMMA_02 = r2_1
-  /////////////////  GAMMA_10 = r0_2
-  /////////////////  GAMMA_11 = r1_2
-  /////////////////  GAMMA_12 = r2_2
-  /////////////////  GAMMA_20 = U20
-  /////////////////  GAMMA_21 = U21
-  /////////////////  GAMMA_22 = U22
-  // prima riga
-  r0_1 = -tr1 * QA->rc00[idx]   + tr2 * (QA->rc00[idx]*QA->rc00[idx] + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]))
-    + f1 * TMP->r0.c0[idx] + f2  * (-2.0*TMP->r0.c0[idx]*QA->rc00[idx]+(1.0*I)*(QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]
-										+QA->c02[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c2[idx]));
+  //                                   --gl3_temp3---  -gl3_temp1-  ---gl3_temp2---
+  single_su3 gl3_temp3; 
+  i_times_tamat_to_su3(&gl3_temp3,&sQA);
+  single_su3xsu3(&gl3_temp2,&gl3_temp3,&gl3_temp1);
+  single_su3xsu3_add_to_out(&gl3_temp2,&gl3_temp1,&gl3_temp3);
 
-  r1_1 =(tr1*I)*QA->c01[idx]    + tr2 * (QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]))
-    + f1 * TMP->r0.c1[idx] + f2  * (-TMP->r0.c1[idx]*(QA->rc11[idx]+QA->rc00[idx])+(1.0*I)*(QA->c01[idx]*(TMP->r0.c0[idx]+TMP->r1.c1[idx])
-									    +QA->c02[idx]*TMP->r2.c1[idx]-conj(QA->c12[idx])*TMP->r0.c2[idx]));
-
-  r2_1 =(tr1*I)*QA->c02[idx]    + tr2 * (-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx])
-    + f1 * TMP->r0.c2[idx] + f2  * (QA->rc11[idx]*TMP->r0.c2[idx]+(1.0*I)*(QA->c02[idx]*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
-									   QA->c01[idx]*TMP->r1.c2[idx]+QA->c12[idx]*TMP->r0.c1[idx]));
-
-  // seconda riga
-  r0_2 = (-tr1*I) * conj(QA->c01[idx])  + tr2*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]))
-    + f1 * TMP->r1.c0[idx] + f2 *(-TMP->r1.c0[idx]*(QA->rc00[idx]+QA->rc11[idx])+(1.0*I)*(-conj(QA->c01[idx])*(TMP->r0.c0[idx]+TMP->r1.c1[idx])  
-									       + QA->c12[idx]*TMP->r2.c0[idx] - conj(QA->c02[idx])*TMP->r1.c2[idx]));
-
-  r1_2 = -tr1*QA->rc11[idx]   + tr2*( QA->rc11[idx]*QA->rc11[idx]+QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]))
-    + f1 * TMP->r1.c1[idx] + f2*(-2.0*TMP->r1.c1[idx]*QA->rc11[idx]+(1.0*I)*(QA->c12[idx]*TMP->r2.c1[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]+
-									     QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c12[idx])*TMP->r1.c2[idx]));
-
-  r2_2 = (tr1*I)*QA->c12[idx] + tr2*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]))
-    + f1 * TMP->r1.c2[idx] + f2*(QA->rc00[idx]*TMP->r1.c2[idx]+(1.0*I)*(QA->c12[idx]*(TMP->r1.c1[idx]+TMP->r2.c2[idx]) 
-									+QA->c02[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c2[idx]));
-  // terza riga
-  U20  = (-tr1*I)*conj(QA->c02[idx]) + tr2*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]))
-    + f1 * TMP->r2.c0[idx] + f2 *(QA->rc11[idx]*TMP->r2.c0[idx]+(-1.0*I)*(conj(QA->c02[idx])*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
-									  conj(QA->c01[idx])*TMP->r2.c1[idx]+conj(QA->c12[idx])*TMP->r1.c0[idx]));
-
-  U21  = (-tr1*I)*conj(QA->c12[idx]) + tr2*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]))
-    + f1 * TMP->r2.c1[idx] + f2 *(QA->rc00[idx]*TMP->r2.c1[idx]+(1.0*I)*(QA->c01[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c1[idx]
-									 -conj(QA->c12[idx])*(TMP->r1.c1[idx]+TMP->r2.c2[idx])));
-
-  U22  = tr1*(QA->rc00[idx]+QA->rc11[idx])+ tr2*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
-						 + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]))
-    + f1 * TMP->r2.c2[idx] + f2 *(2.0*(QA->rc00[idx]+QA->rc11[idx])*TMP->r2.c2[idx]+(1.0*I)*(QA->c02[idx]*TMP->r2.c0[idx]+QA->c12[idx]*TMP->r2.c1[idx]
-											     -conj(QA->c02[idx])*TMP->r0.c2[idx]
-											     -conj(QA->c12[idx])*TMP->r1.c2[idx]));
+  single_su3_times_scalar(&gl3_temp2,f2);
+  single_su3_times_scalar(&gl3_temp1,f1);
+  Itamat_2ndDeg_poly(0,tr1,tr2,&sQA,&gl3_temp3);
 
 
-  
-  //DA DEOTTIMIZZARE
-  /////////////////////////////////////////
+  single_su3add(&gl3_temp1,&gl3_temp2);
+  single_su3add(&gl3_temp1,&gl3_temp3);
+
   ///////////////// INFINE CALCOLO DI LAMBDA = 0.5*(GAMMA + GAMMA^CROCE) - (1/6)* Id * Tr(GAMMA + GAMMA^CROCE)
-  ///// LAMBDA_00 = (2*re(G00)-re(G11)-re(G22))/3
-  ///// LAMBDA_11 = (2*re(G11)-re(G00)-re(G22))/3
-  ///// LAMBDA_01 = (G01+conj(G10))/2
-  ///// LAMBDA_02 = (G02+conj(G20))/2
-  ///// LAMBDA_12 = (G12+conj(G21))/2
-  L->rc00[idx] = (2*creal(r0_1)-creal(r1_2)-creal(U22))*ONE_BY_THREE;
-  L->rc11[idx] = (2*creal(r1_2)-creal(r0_1)-creal(U22))*ONE_BY_THREE;
-  L->c01[idx]  = (r1_1+conj(r0_2))*0.5;
-  L->c02[idx]  = (r2_1+conj(U20))*0.5;
-  L->c12[idx]  = (r2_2+conj(U21))*0.5;
+  single_thmat sLambda;
+  gl3_to_thmat(&gl3_temp1,&sLambda);
 
-
+  single_thmat_into_thmat_soa(L,&sLambda);
 
     /*
   if(idx==0){
@@ -469,9 +364,6 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
 
   }
     */
-
-
-
 
 }
 
