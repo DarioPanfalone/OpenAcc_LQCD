@@ -307,17 +307,17 @@ static inline double Tr_i_times_QA_sq(single_tamat *QA){
 		      QA->c02  * conj(QA->c02) +
 		      QA->c12  * conj(QA->c12) );
 }
-static inline single_thmatAeqAmB(single_thmat *A, single_thmat* B){
+static inline void single_thmatAeqAmB(single_thmat *A, single_thmat* B){
 
     A->rc00 -= B->rc00;
     A->rc11 -= B->rc11;
-    A->c00 -= B->c01;
+    A->c01 -= B->c01;
     A->c02 -= B->c02;
     A->c12 -= B->c12;
 
 }
 
-static inline gl3_dagger(single_su3 * inout){
+static inline void gl3_dagger(single_su3 * inout){
 
     inout->comp[0][0] = conj(inout->comp[0][0]);
     inout->comp[1][1] = conj(inout->comp[1][1]);

@@ -56,7 +56,7 @@
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 1
 #endif
-#define RHO 0.0
+#define RHO 0.1
 
 
 #define beta 3.7  //5.35

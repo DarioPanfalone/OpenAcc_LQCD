@@ -56,7 +56,7 @@ int main(){
   printf("u1_backfield initialization : OK \n");
 #endif
 
-  generate_Conf_cold(conf_acc,0.0);
+  generate_Conf_cold(conf_acc,0.1);
   //  generate_Conf_cold(conf_acc,0.1);
   printf("Cold Gauge Conf Generated : OK \n");
   conf_id_iter=0;
@@ -163,8 +163,21 @@ int main(){
       RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
     }
-
+    /*
     fermion_force_soloopenacc(conf_acc,
+#ifdef STOUT_FERMIONS
+			      gstout_conf_acc_arr, auxbis_conf_acc, // parkeggio
+#endif
+			      u1_back_field_phases, ipdot_acc, fermions_parameters, NDiffFlavs,
+			      ferm_chi_acc, residue_metro, aux_conf_acc, ferm_shiftmulti_acc, kloc_r,
+			      kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+
+
+    */
+
+
+
+    DEOTT_fermion_force_soloopenacc(conf_acc,
 #ifdef STOUT_FERMIONS
 			      gstout_conf_acc_arr, auxbis_conf_acc, // parkeggio
 #endif

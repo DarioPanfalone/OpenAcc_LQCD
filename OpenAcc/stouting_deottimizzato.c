@@ -238,8 +238,10 @@ static inline void DEOTT_compute_loc_Lambda(__restrict thmat_soa * const L, // l
     single_tamat_from_tamat_soa(QA,idx,&sQA);
 
     single_su3 sU;
-    single_su3_from_su3_soa(U,idx,&sU); rebuild3row(&U);
+    single_su3_from_su3_soa(U,idx,&sU);
+    rebuild3row(&sU);
 
+    single_su3 sSP;
     single_gl3_from_su3_soa(SP,idx,&sSP);
 
     // Calcolo di B1   
@@ -251,7 +253,7 @@ static inline void DEOTT_compute_loc_Lambda(__restrict thmat_soa * const L, // l
 
     single_su3xsu3(&gl3_temp1,&sU,&sSP);// gl3_temp1 = u*Sigma'
     single_su3xsu3(&gl3_temp2,&B1,&gl3_temp1);
-    d_complex tr1= gl3_temp2[2][2]+gl3_temp2[1][1]+gl3_temp2[0][0];
+    d_complex tr1= gl3_temp2.comp[2][2]+gl3_temp2.comp[1][1]+gl3_temp2.comp[0][0];
 
     // Calcolo di B2
     single_su3 B2; 
@@ -259,7 +261,7 @@ static inline void DEOTT_compute_loc_Lambda(__restrict thmat_soa * const L, // l
 
     // CALCOLO DELLA TRACCIA => tr2 = Tr(Sigma' * B2 * U)
     single_su3xsu3(&gl3_temp2,&B2,&gl3_temp1);
-    d_complex tr2= gl3_temp2[2][2]+gl3_temp2[1][1]+gl3_temp2[0][0];
+    d_complex tr2= gl3_temp2.comp[2][2]+gl3_temp2.comp[1][1]+gl3_temp2.comp[0][0];
 
     ////////////////CALCOLO U*Sigma' e lo metto in TMP che non serve piu'
     // gia' fatto , e' in 'gl3_temp1'
@@ -287,7 +289,7 @@ static inline void DEOTT_compute_loc_Lambda(__restrict thmat_soa * const L, // l
     single_thmat sLambda;
     gl3_to_thmat(&gl3_temp1,&sLambda);
 
-    single_thmat_into_thmat_soa(L,&sLambda);
+    single_thmat_into_thmat_soa(L,idx,&sLambda);
 
     /*
        if(idx==0){
