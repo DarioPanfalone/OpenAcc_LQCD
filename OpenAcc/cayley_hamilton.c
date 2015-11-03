@@ -8,8 +8,8 @@
 
 #include <accelmath.h>
 #include <complex.h>
-#include "../OpenAcc/struct_c_def.c"
-#include "../OpenAcc/single_types.h"
+#include "./struct_c_def.c"
+#include "./single_types.c"
 
 
 inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out){
@@ -32,17 +32,17 @@ inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2
                 + ( 1.0*I)* QA->c02 * QA->rc11);
 
 
-    out->[1][0] =      (-f1*I) * conj(QA->c01)  
+    out->comp[1][0] =      (-f1*I) * conj(QA->c01)  
         + f2    * ( QA->c12 * conj(QA->c02)
                 + ( 1.0*I) * conj(QA->c01) * ( QA->rc00 + QA->rc11));
 
 
-    out->[1][1] = f0 -   f1    * QA->rc11       
+    out->comp[1][1] = f0 -   f1    * QA->rc11       
         + f2    * ( QA->rc11 * QA->rc11
                 + QA->c01 * conj(QA->c01)
                 + QA->c12 * conj(QA->c12));
 
-    out->[1][2] =      ( f1*I) * QA->c12        
+    out->comp[1][2] =      ( f1*I) * QA->c12        
         + f2 * ( (1.0*I)*QA->rc00 * QA->c12 
                 + QA->c02 * conj(QA->c01));
 

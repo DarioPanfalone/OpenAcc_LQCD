@@ -10,6 +10,7 @@ void su2_rand(double *pp);
 #include "./alloc_vars.c"
 #include "./dbgtools.c"
 #include "./fermionic_utilities.c"
+#include "./single_types.c"
 #include "./su3_utilities.c"
 #include "./random_assignement.c"
 #include "./fermion_matrix.c"
@@ -21,9 +22,14 @@ void su2_rand(double *pp);
 #include "../Meas/ferm_meas.c"
 #include "./homebrew_acos.c"
 #include "./stouting.c"
+#include "./stouting_deottimizzato.c"
 #include "./fermion_force.c"
 #include "./md_integrator.c"
 #include "./update_versatile.c"
+
+
+
+
 int main(){
 
   initrand(111);
