@@ -140,12 +140,27 @@ static inline void single_su3_into_su3_soa( __restrict su3_soa * const mat, cons
   mat->r1.c1[idx_mat] = Imat->comp[1][1];
   mat->r1.c2[idx_mat] = Imat->comp[1][2];
 }
+static inline void single_su3_addinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat,  single_su3 * Imat){
+  mat->r0.c0[idx_mat] += Imat->comp[0][0];
+  mat->r0.c1[idx_mat] += Imat->comp[0][1];
+  mat->r0.c2[idx_mat] += Imat->comp[0][2];
+  mat->r1.c0[idx_mat] += Imat->comp[1][0];
+  mat->r1.c1[idx_mat] += Imat->comp[1][1];
+  mat->r1.c2[idx_mat] += Imat->comp[1][2];
+}
 static inline void single_gl3_into_su3_soa( __restrict su3_soa * const mat, const int idx_mat,						   single_su3 * Imat){
 
  single_su3_into_su3_soa(mat,idx_mat,Imat);
   mat->r2.c0[idx_mat] = Imat->comp[2][0];
   mat->r2.c1[idx_mat] = Imat->comp[2][1];
   mat->r2.c2[idx_mat] = Imat->comp[2][2];
+}
+static inline void single_gl3_addinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat,						   single_su3 * Imat){
+
+ single_su3_addinto_su3_soa(mat,idx_mat,Imat);
+  mat->r2.c0[idx_mat] += Imat->comp[2][0];
+  mat->r2.c1[idx_mat] += Imat->comp[2][1];
+  mat->r2.c2[idx_mat] += Imat->comp[2][2];
 }
 static inline void single_tamat_into_tamat_soa(__restrict tamat_soa * out, int idx, single_tamat * in){
 
@@ -292,7 +307,35 @@ static inline double Tr_i_times_QA_sq(single_tamat *QA){
 		      QA->c02  * conj(QA->c02) +
 		      QA->c12  * conj(QA->c12) );
 }
+static inline single_thmatAeqAmB(single_thmat *A, single_thmat* B){
 
+    A->rc00 -= B->rc00;
+    A->rc11 -= B->rc11;
+    A->c00 -= B->c01;
+    A->c02 -= B->c02;
+    A->c12 -= B->c12;
+
+}
+
+static inline gl3_dagger(single_su3 * inout){
+
+    inout->comp[0][0] = conj(inout->comp[0][0]);
+    inout->comp[1][1] = conj(inout->comp[1][1]);
+    inout->comp[2][2] = conj(inout->comp[2][2]);
+
+    d_complex temp;
+
+    temp = inout->comp[0][1]; inout->comp[0][1] = conj(inout->comp[1][0]);
+    inout->comp[1][0] = conj(temp);
+
+    temp = inout->comp[0][2]; inout->comp[0][2] = conj(inout->comp[2][0]);
+    inout->comp[2][0] = conj(temp);
+
+    temp = inout->comp[2][1]; inout->comp[2][1] = conj(inout->comp[1][2]);
+    inout->comp[1][2] = conj(temp);
+
+
+}
 
 
 
