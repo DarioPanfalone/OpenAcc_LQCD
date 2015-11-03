@@ -31,17 +31,17 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-/*
 #define nx 4
 #define ny 4
 #define nz 4
 #define nt 4
-*/
 
+/*
 #define nx 16
 #define ny 16
 #define nz 16
 #define nt 16
+*/
 
 #define sizehh nx*ny*nz*nt/2 
 
@@ -52,11 +52,11 @@
 #define GAUGE_ACT_TLSM
 //#define GAUGE_ACT_WILSON
 
-//#define STOUT_FERMIONS
+#define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 1
 #endif
-#define RHO 0.1
+#define RHO 0.0
 
 
 #define beta 3.7  //5.35
