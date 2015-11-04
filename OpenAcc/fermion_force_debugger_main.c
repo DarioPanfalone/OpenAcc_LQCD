@@ -10,6 +10,7 @@ void su2_rand(double *pp);
 #include "./alloc_vars.c"
 #include "./dbgtools.c"
 #include "./fermionic_utilities.c"
+#include "./single_types.c"
 #include "./su3_utilities.c"
 #include "./random_assignement.c"
 #include "./fermion_matrix.c"
@@ -21,6 +22,7 @@ void su2_rand(double *pp);
 #include "../Meas/ferm_meas.c"
 #include "./homebrew_acos.c"
 #include "./stouting.c"
+#include "./stouting_deottimizzato.c"
 #include "./fermion_force.c"
 #include "./md_integrator.c"
 #include "./update_versatile.c"
@@ -50,7 +52,7 @@ int main(){
   printf("u1_backfield initialization : OK \n");
 #endif
 
-  generate_Conf_cold(conf_acc,0.0);
+  generate_Conf_cold(conf_acc,0.1);
   //  generate_Conf_cold(conf_acc,0.1);
   printf("Cold Gauge Conf Generated : OK \n");
   conf_id_iter=0;
@@ -134,7 +136,7 @@ int main(){
 
     // CAMBIARE UN LINK!!!!!!!!!!
     //    conf_acc[0].r0.c0[0] += 0.001 + 0.0*I;
-    double eps=0.00001;
+    double eps=0.0000;
     set_tamat_soa_to_zero(ipdot_acc);
     int i=0;
     int s=0;

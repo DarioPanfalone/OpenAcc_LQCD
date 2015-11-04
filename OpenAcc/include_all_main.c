@@ -10,8 +10,8 @@ void su2_rand(double *pp);
 #include "./alloc_vars.c"
 #include "./dbgtools.c"
 #include "./fermionic_utilities.c"
+#include "./single_types.c"
 #include "./su3_utilities.c"
-#include "./su3_utilities_V2.c"
 #include "./random_assignement.c"
 #include "./fermion_matrix.c"
 #include "./inverter_full.c"
@@ -22,6 +22,7 @@ void su2_rand(double *pp);
 #include "../Meas/ferm_meas.c"
 #include "./homebrew_acos.c"
 #include "./stouting.c"
+#include "./stouting_deottimizzato.c"
 #include "./fermion_force.c"
 #include "./md_integrator.c"
 #include "./update_versatile.c"
@@ -127,12 +128,9 @@ int main(){
 	       fclose(foutfile);
 	       //-------------------------------------------------// 
 	       //--------- MISURA ROBA DI GAUGE ------------------//
-	       for(int ipp=0;ipp<200;ipp++){
-		 plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-		 plqbis = calc_plaquette_soloopenacc_V2(conf_acc,aux_conf_acc,local_sums);
-	       }
+	       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 	       rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-
+	       
                FILE *goutfile = fopen(nome_file_gauge_output,"at");
                if(!goutfile) goutfile = fopen(nome_file_gauge_output,"wt");
                if(goutfile){
