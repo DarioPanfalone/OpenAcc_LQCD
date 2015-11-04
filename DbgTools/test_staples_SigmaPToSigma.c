@@ -18,7 +18,9 @@ void su2_rand(double *pp);
 #include "../OpenAcc/struct_c_def.c"
 #include "../OpenAcc/dbgtools.c"
 #include "../OpenAcc/single_types.c"
+#include "../OpenAcc/cayley_hamilton.c"
 #include "../OpenAcc/stouting_deottimizzato.c"
+
 
 
 int main(){
@@ -113,15 +115,15 @@ DEOTT_RIGHT_iFABC_absent_stag_phases(//((RHO*I)*LF)*UA*dag(UB)*dag(UC)
             gauge_matrix,
             idxC,
             thmats,
-            idxD,
+            idxLD,
 //          thmats,
-//          idxE,
+//          idxLE,
             result,
             idxRES);
 
  print_1su3_soa(gauge_matrix,"GaugeMatric.su3");
  print_1su3_soa(result,"result.gl3");
- print_1thmat_soa(thmats,"thmats,thmat");
+ print_1thmat_soa(thmats,"thmat");
 
 
 

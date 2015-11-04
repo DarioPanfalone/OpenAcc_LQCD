@@ -223,7 +223,7 @@ static inline double detQ(single_thmat *Q){
         Q->rc11 * Q->c02 * conj(Q->c02));
 
 }
-static inline double det_i_times_QA(single_tamat *QA){
+static inline double det_i_times_QA(__restrict single_tamat * const QA){
 
     double rc22 = -QA->rc00-QA->rc11 ; 
 
@@ -298,7 +298,7 @@ static inline d_complex detSu3(single_su3 *m){
     m->comp[0][2]* m->comp[1][1] * m->comp[2][0] ;
 
 }
-static inline double Tr_i_times_QA_sq(single_tamat *QA){
+static inline double Tr_i_times_QA_sq(__restrict single_tamat * const QA){
   // computes Tr( (i*QA)^2 )
     return 2 * creal( QA->rc00 * QA->rc00 +
 		      QA->rc11 * QA->rc11 +

@@ -1,36 +1,38 @@
 #ifndef DEOTT_STOUTING_C
 #define DEOTT_STOUTING_C
 
+/*
 #include "./cayley_hamilton.c"
 #include "./struct_c_def.c"
 #include "./single_types.c"
+*/
 
 
 static inline void DEOTT_conf_left_exp_multiply_to_su3_soa(__restrict su3_soa * const cnf,
-        const int idx,
-        __restrict su3_soa * const  EXP,
-        __restrict su3_soa * const cnf_out){
+							   const int idx,
+							   __restrict su3_soa * const  EXP,
+							   __restrict su3_soa * const cnf_out){
+  
+  
+  single_su3 AUX;
+  //Multiply: U_new = EXP * U_old
+  
+  //Extraction
+  single_gl3_from_su3_soa(cnf, idx, &AUX);
+  
+  rebuild3row(&AUX);
+  
+  
+  // moltiplica
+  cnf_out->r0.c0[idx] = EXP->r0.c0[idx] * AUX.comp[0][0] + EXP->r0.c1[idx] * AUX.comp[1][0] + EXP->r0.c2[idx] * AUX.comp[2][0];
+  cnf_out->r0.c1[idx] = EXP->r0.c0[idx] * AUX.comp[0][1] + EXP->r0.c1[idx] * AUX.comp[1][1] + EXP->r0.c2[idx] * AUX.comp[2][1];
+  cnf_out->r0.c2[idx] = EXP->r0.c0[idx] * AUX.comp[0][2] + EXP->r0.c1[idx] * AUX.comp[1][2] + EXP->r0.c2[idx] * AUX.comp[2][2];
+  
+  cnf_out->r1.c0[idx] = EXP->r1.c0[idx] * AUX.comp[0][0] + EXP->r1.c1[idx] * AUX.comp[1][0] + EXP->r1.c2[idx] * AUX.comp[2][0];
+  cnf_out->r1.c1[idx] = EXP->r1.c0[idx] * AUX.comp[0][1] + EXP->r1.c1[idx] * AUX.comp[1][1] + EXP->r1.c2[idx] * AUX.comp[2][1];
+  cnf_out->r1.c2[idx] = EXP->r1.c0[idx] * AUX.comp[0][2] + EXP->r1.c1[idx] * AUX.comp[1][2] + EXP->r1.c2[idx] * AUX.comp[2][2];
 
-
-    single_su3 AUX;
-    //Multiply: U_new = EXP * U_old
-
-    //Extraction
-    single_gl3_from_su3_soa(cnf, idx, &AUX);
-
-    rebuild3row(&AUX);
-
-
-    // moltiplica
-    cnf_out->r0.c0[idx] = EXP->r0.c0[idx] * AUX.comp[0][0] + EXP->r0.c1[idx] * AUX.comp[1][0] + EXP->r0.c2[idx] * AUX.comp[2][0];
-    cnf_out->r0.c1[idx] = EXP->r0.c0[idx] * AUX.comp[0][1] + EXP->r0.c1[idx] * AUX.comp[1][1] + EXP->r0.c2[idx] * AUX.comp[2][1];
-    cnf_out->r0.c2[idx] = EXP->r0.c0[idx] * AUX.comp[0][2] + EXP->r0.c1[idx] * AUX.comp[1][2] + EXP->r0.c2[idx] * AUX.comp[2][2];
-
-    cnf_out->r1.c0[idx] = EXP->r1.c0[idx] * AUX.comp[0][0] + EXP->r1.c1[idx] * AUX.comp[1][0] + EXP->r1.c2[idx] * AUX.comp[2][0];
-    cnf_out->r1.c1[idx] = EXP->r1.c0[idx] * AUX.comp[0][1] + EXP->r1.c1[idx] * AUX.comp[1][1] + EXP->r1.c2[idx] * AUX.comp[2][1];
-    cnf_out->r1.c2[idx] = EXP->r1.c0[idx] * AUX.comp[0][2] + EXP->r1.c1[idx] * AUX.comp[1][2] + EXP->r1.c2[idx] * AUX.comp[2][2];
-
-
+  
 }
 
 
