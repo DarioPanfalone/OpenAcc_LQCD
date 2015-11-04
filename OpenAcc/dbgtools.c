@@ -60,6 +60,26 @@ void print_su3_soa(su3_soa * const conf, const char* nomefile){
     }
     fclose(fp);
 }
+void print_1su3_soa(su3_soa * const conf, const char* nomefile){
+
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
+    for(int q = 0 ; q < 1 ; q++){ // q = 0 !!!!!
+        for(int i = 0 ; i < sizeh ; i++){
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c0[i]),cimag(conf[q].r0.c0[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c1[i]),cimag(conf[q].r0.c1[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c2[i]),cimag(conf[q].r0.c2[i]));//
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r1.c0[i]),cimag(conf[q].r1.c0[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r1.c1[i]),cimag(conf[q].r1.c1[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r1.c2[i]),cimag(conf[q].r1.c2[i]));//
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r2.c0[i]),cimag(conf[q].r2.c0[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r2.c1[i]),cimag(conf[q].r2.c1[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r2.c2[i]),cimag(conf[q].r2.c2[i]));
+        }
+    }
+    fclose(fp);
+}
 
 void read_su3_soa(su3_soa * conf, const char* nomefile){
 
@@ -129,6 +149,20 @@ void print_thmat_soa(thmat_soa * const ipdot, const char* nomefile){
     FILE *fp;
     fp = fopen(nomefile,"w");
     for(int q = 0 ; q < 8 ; q++){
+        for(int i = 0 ; i < sizeh ; i++){
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
+            fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
+            fprintf(fp, "%.18lf\n",ipdot[q].rc00[i]);
+            fprintf(fp, "%.18lf\n",ipdot[q].rc11[i]);
+        }
+    }
+    fclose(fp);
+}
+void print_1thmat_soa(thmat_soa * const ipdot, const char* nomefile){
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    for(int q = 0 ; q < 1 ; q++){// q = 1 !!!!
         for(int i = 0 ; i < sizeh ; i++){
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
