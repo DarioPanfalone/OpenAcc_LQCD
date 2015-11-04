@@ -15,6 +15,7 @@ void su2_rand(double *pp);
 
 
 #include "openacc.h"
+#include <complex.h>
 #include "../OpenAcc/struct_c_def.c"
 #include "../OpenAcc/dbgtools.c"
 #include "../OpenAcc/single_types.c"
@@ -32,6 +33,8 @@ int main(){
     thmat_soa * thmats = (thmat_soa * ) malloc(sizeof(thmat_soa));
     single_thmat thmat_temp0;
 
+    const double a = 1/sqrt(2.0);
+
 
     int idxA,idxB,idxC,idxLD,idxLE,idxRES;
 
@@ -44,8 +47,8 @@ int main(){
     gl3_temp0.comp[0][1] = 0 ; 
     gl3_temp0.comp[0][2] = 0 ; 
     gl3_temp0.comp[1][0] = 0 ; 
-    gl3_temp0.comp[1][1] = 1 ; 
-    gl3_temp0.comp[1][2] = 0 ; 
+    gl3_temp0.comp[1][1] = a ; 
+    gl3_temp0.comp[1][2] = a*I ; 
     single_su3_into_su3_soa(gauge_matrix,idxA,&gl3_temp0);
     //B
     idxB = 15 ; 
@@ -102,8 +105,8 @@ int main(){
 
 
 
-//DEOTT_RIGHT_iABC_times_DminusE_absent_stag_phases(//UA*dag(UB)*dag(UC)*RHO*I*(LD - LE))
-DEOTT_RIGHT_iFABC_absent_stag_phases(//((RHO*I)*LF)*UA*dag(UB)*dag(UC)
+DEOTT_RIGHT_iABC_times_DminusE_absent_stag_phases(//UA*dag(UB)*dag(UC)*RHO*I*(LD - LE))
+//DEOTT_RIGHT_iFABC_absent_stag_phases(//((RHO*I)*LF)*UA*dag(UB)*dag(UC)
 //DEOTT_RIGHT_miABGC_absent_stag_phases(//-UA*dag(UB)*RHO*I*LG*dag(UC)
 //DEOTT_LEFT_iAB_times_GminusE_times_C_absent_stag_phases(//dag(UA)*dag(UB)*RHO*I*(LG-LE)*UC
 //DEOTT_LEFT_iABCD_absent_stag_phases(//dag(UA)*dag(UB)*UC*RHO*I*LD
@@ -116,8 +119,8 @@ DEOTT_RIGHT_iFABC_absent_stag_phases(//((RHO*I)*LF)*UA*dag(UB)*dag(UC)
             idxC,
             thmats,
             idxLD,
-//          thmats,
-//          idxLE,
+            thmats,
+            idxLE,
             result,
             idxRES);
 

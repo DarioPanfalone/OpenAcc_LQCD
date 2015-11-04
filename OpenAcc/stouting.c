@@ -930,10 +930,10 @@ static inline void LEFT_iAB_times_GminusE_times_C_absent_stag_phases(  __restric
 								       const int idxB,
 								       __restrict su3_soa * const UC,
 								       const int idxC,
-								       __restrict thmat_soa * const LG,
-								       const int idxG,
 								       __restrict thmat_soa * const LE,
 								       const int idxE,
+								       __restrict thmat_soa * const LG,
+								       const int idxG,
 								       __restrict su3_soa * const RES,
 								       const int idxRES){
   // Cosa calcoliamo in questa routine:
