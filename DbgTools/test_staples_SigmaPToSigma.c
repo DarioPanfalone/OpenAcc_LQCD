@@ -21,6 +21,7 @@ void su2_rand(double *pp);
 #include "../OpenAcc/single_types.c"
 #include "../OpenAcc/cayley_hamilton.c"
 #include "../OpenAcc/stouting_deottimizzato.c"
+#include "../OpenAcc/stouting.c"
 
 
 
@@ -42,7 +43,7 @@ int main(){
     // gauge_matrix and thmats.
 
     //A
-    idxA = 11 ; 
+    idxA = 0 ; 
     gl3_temp0.comp[0][0] = 1 ; 
     gl3_temp0.comp[0][1] = 0 ; 
     gl3_temp0.comp[0][2] = 0 ; 
@@ -51,42 +52,42 @@ int main(){
     gl3_temp0.comp[1][2] = a*I ; 
     single_su3_into_su3_soa(gauge_matrix,idxA,&gl3_temp0);
     //B
-    idxB = 15 ; 
-    gl3_temp0.comp[0][0] = 1 ; 
+    idxB = 1 ; 
+    gl3_temp0.comp[0][0] = a ; 
     gl3_temp0.comp[0][1] = 0 ; 
-    gl3_temp0.comp[0][2] = 0 ; 
+    gl3_temp0.comp[0][2] = a ; 
     gl3_temp0.comp[1][0] = 0 ; 
-    gl3_temp0.comp[1][1] = 1 ; 
+    gl3_temp0.comp[1][1] = -1 ; 
     gl3_temp0.comp[1][2] = 0 ; 
     single_su3_into_su3_soa(gauge_matrix,idxB,&gl3_temp0);
     //C
-    idxC = 100 ; 
-    gl3_temp0.comp[0][0] = 1 ; 
-    gl3_temp0.comp[0][1] = 0 ; 
+    idxC = 2 ; 
+    gl3_temp0.comp[0][0] = -a ; 
+    gl3_temp0.comp[0][1] = a*I ; 
     gl3_temp0.comp[0][2] = 0 ; 
-    gl3_temp0.comp[1][0] = 0 ; 
-    gl3_temp0.comp[1][1] = 1 ; 
+    gl3_temp0.comp[1][0] = a ; 
+    gl3_temp0.comp[1][1] = a*I ; 
     gl3_temp0.comp[1][2] = 0 ; 
     single_su3_into_su3_soa(gauge_matrix,idxC,&gl3_temp0);
     //LD
-    idxLD = 100 ; 
+    idxLD = 0 ; 
     thmat_temp0.rc00 = 1 ; 
     thmat_temp0.rc11 = 0 ; 
-    thmat_temp0.c01 = 0 ; 
-    thmat_temp0.c02 = 0 ; 
-    thmat_temp0.c12 = 1 ; 
+    thmat_temp0.c01 = I ; 
+    thmat_temp0.c02 = -1 ; 
+    thmat_temp0.c12 = 0 ; 
     single_thmat_into_thmat_soa(thmats,idxLD,&thmat_temp0);
     //LE
-    idxLE = 23 ; 
-    thmat_temp0.rc00 = 1 ; 
-    thmat_temp0.rc11 = 0 ; 
-    thmat_temp0.c01 = 0 ; 
+    idxLE = 1 ; 
+    thmat_temp0.rc00 = 0 ; 
+    thmat_temp0.rc11 = 1 ; 
+    thmat_temp0.c01 = 1 ; 
     thmat_temp0.c02 = 0 ; 
-    thmat_temp0.c12 = 1 ; 
+    thmat_temp0.c12 = -I ; 
     single_thmat_into_thmat_soa(thmats,idxLE,&thmat_temp0);
 
     //res
-    idxRES = 23 ; 
+    idxRES = 0 ; 
     gl3_temp0.comp[0][0] = 0 ; 
     gl3_temp0.comp[0][1] = 0 ; 
     gl3_temp0.comp[0][2] = 0 ; 
@@ -96,21 +97,44 @@ int main(){
     gl3_temp0.comp[2][0] = 0 ; 
     gl3_temp0.comp[2][1] = 0 ; 
     gl3_temp0.comp[2][2] = 0 ; 
-    single_gl3_into_su3_soa(gauge_matrix,idxRES,&gl3_temp0);
+    single_gl3_into_su3_soa(result,idxRES,&gl3_temp0);
 
+//#define DEOTT
+#define NFUNC 6
 
+#ifdef DEOTT
 
+  #if NFUNC == 1
+  DEOTT_RIGHT_iABC_times_DminusE_absent_stag_phases(//UA*dag(UB)*dag(UC)*RHO*I*(LD - LE))
+  #elif NFUNC == 2
+  DEOTT_RIGHT_iFABC_absent_stag_phases(//((RHO*I)*LF)*UA*dag(UB)*dag(UC)
+  #elif NFUNC == 3
+  DEOTT_RIGHT_miABGC_absent_stag_phases(//-UA*dag(UB)*RHO*I*LG*dag(UC)
+  #elif NFUNC == 4
+  DEOTT_LEFT_iAB_times_GminusE_times_C_absent_stag_phases(//dag(UA)*dag(UB)*RHO*I*(LG-LE)*UC
+  #elif NFUNC == 5
+  DEOTT_LEFT_iABCD_absent_stag_phases(//dag(UA)*dag(UB)*UC*RHO*I*LD
+  #elif NFUNC == 6
+  DEOTT_LEFT_miAFBC_absent_stag_phases(//-dag(UA)*RHO*I*LF*dag(UB)*UC
+  #endif
 
+#else
 
-
-
-
-DEOTT_RIGHT_iABC_times_DminusE_absent_stag_phases(//UA*dag(UB)*dag(UC)*RHO*I*(LD - LE))
-//DEOTT_RIGHT_iFABC_absent_stag_phases(//((RHO*I)*LF)*UA*dag(UB)*dag(UC)
-//DEOTT_RIGHT_miABGC_absent_stag_phases(//-UA*dag(UB)*RHO*I*LG*dag(UC)
-//DEOTT_LEFT_iAB_times_GminusE_times_C_absent_stag_phases(//dag(UA)*dag(UB)*RHO*I*(LG-LE)*UC
-//DEOTT_LEFT_iABCD_absent_stag_phases(//dag(UA)*dag(UB)*UC*RHO*I*LD
-//DEOTT_LEFT_miAFBC_absent_stag_phases(//-dag(UA)*RHO*I*LF*dag(UB)*UC
+  #if NFUNC == 1
+  RIGHT_iABC_times_DminusE_absent_stag_phases(//UA*dag(UB)*dag(UC)*RHO*I*(LD - LE))
+  #elif NFUNC == 2
+  RIGHT_iFABC_absent_stag_phases(//((RHO*I)*LF)*UA*dag(UB)*dag(UC)
+  #elif NFUNC == 3
+  RIGHT_miABGC_absent_stag_phases(//-UA*dag(UB)*RHO*I*LG*dag(UC)
+  #elif NFUNC == 4
+  LEFT_iAB_times_GminusE_times_C_absent_stag_phases(//dag(UA)*dag(UB)*RHO*I*(LG-LE)*UC
+  #elif NFUNC == 5
+  LEFT_iABCD_absent_stag_phases(//dag(UA)*dag(UB)*UC*RHO*I*LD
+  #elif NFUNC == 6
+  LEFT_miAFBC_absent_stag_phases(//-dag(UA)*RHO*I*LF*dag(UB)*UC
+  #endif
+  
+#endif
             gauge_matrix,
             idxA,
             gauge_matrix,
@@ -119,8 +143,10 @@ DEOTT_RIGHT_iABC_times_DminusE_absent_stag_phases(//UA*dag(UB)*dag(UC)*RHO*I*(LD
             idxC,
             thmats,
             idxLD,
+#if (NFUNC == 1 ) || (NFUNC == 4)
             thmats,
             idxLE,
+#endif
             result,
             idxRES);
 

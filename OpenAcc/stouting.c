@@ -3,6 +3,8 @@
 
 #include "./cayley_hamilton.c"
 #include "./struct_c_def.c"
+#include "../OpenAcc/alloc_vars.c"
+#include "../OpenAcc/su3_utilities.c"
 
 #pragma acc routine seq
 static inline void su3_soa_to_single_su3(__restrict su3_soa * const in,

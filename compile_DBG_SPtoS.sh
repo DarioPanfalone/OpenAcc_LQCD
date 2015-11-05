@@ -4,7 +4,7 @@ module load cuda/7.0
 
 export PGI_ACC_BUFFERSIZE=3221225472
 
-rm prog_deb
+rm prog_deb_SPtoS
 rm *.o
 
 
