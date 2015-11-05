@@ -293,20 +293,24 @@ static inline void DEOTT_compute_loc_Lambda(__restrict thmat_soa * const L, // l
 
     single_thmat_into_thmat_soa(L,idx,&sLambda);
 
-    /*
-       if(idx==0){
 
        printf("c0 = %.18lf\n",c0);
        printf("c1 = %.18lf\n",c1);
        printf("f0 = %.18lf\n",f0);
        printf("f1 = %.18lf\n",f1);
        printf("f2 = %.18lf\n",f2);
-       printf("tr1 = (%.18lf) + (%.18lf)*I\n",creal(tr1),cimag(tr1));
-       printf("tr2 = (%.18lf) + (%.18lf)*I\n",creal(tr2),cimag(tr2));
+//       printf("tr1 = (%.18lf) + (%.18lf)*I\n",creal(tr1),cimag(tr1));
+//       printf("tr2 = (%.18lf) + (%.18lf)*I\n",creal(tr2),cimag(tr2));
        printf("b10 = (%.18lf) + (%.18lf)*I\n",creal(b10),cimag(b10));
        printf("b20 = (%.18lf) + (%.18lf)*I\n",creal(b20),cimag(b20));
+       printf("b11 = (%.18lf) + (%.18lf)*I\n",creal(b11),cimag(b11));
+       printf("b21 = (%.18lf) + (%.18lf)*I\n",creal(b21),cimag(b21));
+       printf("b12 = (%.18lf) + (%.18lf)*I\n",creal(b12),cimag(b12));
+       printf("b22 = (%.18lf) + (%.18lf)*I\n",creal(b22),cimag(b22));
 
 
+
+/*
        printf("(U*SP)_00 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r0.c0[idx]),cimag(TMP->r0.c0[idx]));
        printf("(U*SP)_01 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r0.c1[idx]),cimag(TMP->r0.c1[idx]));
        printf("(U*SP)_02 = (%.18lf) + (%.18lf)*I \n",creal(TMP->r0.c2[idx]),cimag(TMP->r0.c2[idx]));
@@ -326,12 +330,10 @@ static inline void DEOTT_compute_loc_Lambda(__restrict thmat_soa * const L, // l
        printf("GAMMA_20  = (%.18lf) + (%.18lf)*I \n",creal(U20),cimag(U20));
        printf("GAMMA_21  = (%.18lf) + (%.18lf)*I \n",creal(U21),cimag(U21));
        printf("GAMMA_22  = (%.18lf) + (%.18lf)*I \n",creal(U22),cimag(U22));
-
+*/
 
        printf("\n");
 
-       }
-       */
 
 }
 

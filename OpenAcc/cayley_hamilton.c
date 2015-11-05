@@ -48,8 +48,8 @@ inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2
 
 }
 inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out){
-
-
+   // See comments in Itamat_2ndDeg_poly_no3rdrow(f0,f1,f2,QA,out);
+   
     Itamat_2ndDeg_poly_no3rdrow(f0,f1,f2,QA,out);
 
     out->comp[2][0] = (f1*I) * (-conj(QA->c02)) 

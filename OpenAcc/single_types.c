@@ -54,6 +54,20 @@ static inline void thmat_to_su3(single_su3 * out, single_thmat * Q){
 
 
 }
+static inline void tamat_to_su3(single_su3 * out, single_thmat * QA){
+
+    out->comp[0][0] =     I* QA->rc00 ; 
+    out->comp[0][1] =      QA->c01 ;
+    out->comp[0][2] =      QA->c02 ;
+    out->comp[1][0] = -conj(QA->c01) ;
+    out->comp[1][1] =     I* QA->rc11 ; 
+    out->comp[1][2] =      QA->c12 ;
+    out->comp[2][0] = -conj(QA->c02);
+    out->comp[2][1] = -conj(QA->c12);
+    out->comp[2][2] =    (- QA->rc00 - QA->rc11)*I ; 
+
+
+}
 static inline void i_times_tamat_to_su3(single_su3 * out, single_tamat * QA){
   //I*tamat is a thmat
     out->comp[0][0] =           - QA->rc00 ; 
@@ -336,7 +350,13 @@ static inline void gl3_dagger(single_su3 * inout){
 
 
 }
+static inline void single_su3_copy(const single_su3 * const in, single_su3 * out){
 
+    for(int i =0;i<3;i++)    
+        for(int j =0;j<3;j++)    
+            out->comp[i][j] = in->comp[i][j];
+
+}
 
 
 //no 3rd row
