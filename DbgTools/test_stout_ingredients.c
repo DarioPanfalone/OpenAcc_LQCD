@@ -6,7 +6,7 @@
 #include "../OpenAcc/cayley_hamilton.c"
 #include "../OpenAcc/stouting_deottimizzato.c"
 
-struct anti_hermitian_exp_ingredients
+typedef struct anti_hermitian_exp_ingredients_t
 {
     int sign;
     double c0,c1;
@@ -17,43 +17,43 @@ struct anti_hermitian_exp_ingredients
     double xi0w;
     double cw;
     d_complex f[3];
-};
+} anti_hermitian_exp_ingredients ;
 
 
 
-void anti_hermitian_exact_i_exponentiate_ingredients(anti_hermitian_exp_ingredients &out,single_tamat * QA)
+void anti_hermitian_exact_i_exponentiate_ingredients(anti_hermitian_exp_ingredients * out,single_tamat * QA)
   {
     //copy Q
 
-    tamat_to_su3(&(out.Q),QA);
+    tamat_to_su3(&(out->Q),QA);
 
-    double c0 = out.c0 = det_i_times_QA(QA); //(14) // cosi calcolo direttamente il det(Q)
+    double c0 = out->c0 = det_i_times_QA(QA); //(14) // cosi calcolo direttamente il det(Q)
     
     //takes the square of Q
-    single_su3xsu3(&out.Q2,&out.Q,&out.Q);
+    single_su3xsu3(&out->Q2,&out->Q,&out->Q);
     
     //takes 1/2 of the real part of the trace of Q2 (eq. 15)
-    double c1=out.c1=0.5 * Tr_i_times_QA_sq(QA); // (15)
+    double c1=out->c1=0.5 * Tr_i_times_QA_sq(QA); // (15)
     //compute c0_max (eq. 17)
     double c0_max=2*pow(c1/3,1.5);
     
     //consider the case in which c1<4*10^-3 apart, as done in MILC
     if(c1<4e-3)
       {
-	out.f[0]=     1-c0*c0/720;
-	out.f[0]+=  -c0*(1-c1*(1-c1/42)/20)/6 * I;
-	out.f[1]=c0*(1-c1*(1-3*c1/112)/15)/24;
-	out.f[1]+=1-c1*(1-c1*(1-c1/42)/20)/6-c0*c0/5040*I;
-	out.f[2]=0.5*(-1+c1*(1-c1*(1-c1/56)/30)/12+c0*c0/20160);
-	out.f[2]+=0.5*(c0*(1-c1*(1-c1/48)/21)/60)*I;
+	out->f[0]=     1-c0*c0/720;
+	out->f[0]+=  -c0*(1-c1*(1-c1/42)/20)/6 * I;
+	out->f[1]=c0*(1-c1*(1-3*c1/112)/15)/24;
+	out->f[1]+=1-c1*(1-c1*(1-c1/42)/20)/6-c0*c0/5040*I;
+	out->f[2]=0.5*(-1+c1*(1-c1*(1-c1/56)/30)/12+c0*c0/20160);
+	out->f[2]+=0.5*(c0*(1-c1*(1-c1/48)/21)/60)*I;
       }
     else
       {
 	//take c0 module and write separately its sign (see note after eq. 34)
-	out.sign=0;
+	out->sign=0;
 	if(c0<0)
 	  {
-	    out.sign=1;
+	    out->sign=1;
 	    c0=-c0;
 	  }
 	
@@ -62,18 +62,18 @@ void anti_hermitian_exact_i_exponentiate_ingredients(anti_hermitian_exp_ingredie
 	
 	//(eqs. 23-24)
 	double theta;
-	if(eps<0) theta=out.theta=0; //only possible as an effect of rounding error when c0/c0_max=1
+	if(eps<0) theta=out->theta=0; //only possible as an effect of rounding error when c0/c0_max=1
 	else
-	  if(eps<1e-3) theta=out.theta=sqrt(2*eps)*(1+(1.0/12+(3.0/160+(5.0/896+(35.0/18432+63.0/90112*eps)*eps)*eps)*eps)*eps);
-	  else theta=out.theta=acos(c0/c0_max);
-	double u=out.u=sqrt(c1/3)*cos(theta/3);
-	double w=out.w=sqrt(c1)*sin(theta/3);
+	  if(eps<1e-3) theta=out->theta=sqrt(2*eps)*(1+(1.0/12+(3.0/160+(5.0/896+(35.0/18432+63.0/90112*eps)*eps)*eps)*eps)*eps);
+	  else theta=out->theta=acos(c0/c0_max);
+	double u=out->u=sqrt(c1/3)*cos(theta/3);
+	double w=out->w=sqrt(c1)*sin(theta/3);
 	
 	//auxiliary variables for the computation of h0, h1, h2
 	double u2=u*u,w2=w*w,u2mw2=u2-w2,w2p3u2=w2+3*u2,w2m3u2=w2-3*u2;
-	double cu=out.cu=cos(u),c2u=out.c2u=cos(2*u);
-	double su=out.su=sin(u),s2u=out.s2u=sin(2*u);
-	double cw=out.cw=cos(w);
+	double cu=out->cu=cos(u),c2u=out->c2u=cos(2*u);
+	double su=out->su=sin(u),s2u=out->s2u=sin(2*u);
+	double cw=out->cw=cos(w);
 	
 	//compute xi function defined after (eq. 33)
 	double xi0w;
@@ -83,7 +83,7 @@ void anti_hermitian_exact_i_exponentiate_ingredients(anti_hermitian_exp_ingredie
 	    xi0w=1-temp0/6*temp2;
 	  }
 	else xi0w=sin(w)/w;
-	out.xi0w=xi0w;
+	out->xi0w=xi0w;
 	
 	//computation of h0, h1, h2 (eqs. 30-32)
 	d_complex h0=
@@ -106,29 +106,31 @@ void anti_hermitian_exact_i_exponentiate_ingredients(anti_hermitian_exp_ingredie
 	  -3*su*u*xi0w +  //-3*sin(u)*u*xi0(w)
 	  I * (s2u+ //sin(2u)
 	  su*cw+ //sin(w)*cos(w)
-	  -cu*3*u*xi0w)};//-cos(u)*3*u*xi0(w)
+	  -cu*3*u*xi0w);//-cos(u)*3*u*xi0(w)
 	
 	//build f (eq. 29)
 	double fact=1/(9*u*u-w*w);
-	out.f[0] = h0*fact;
-	out.f[1] = h1*fact;
-	out.f[2] = h2*fact;
+	out->f[0] = h0*fact;
+	out->f[1] = h1*fact;
+	out->f[2] = h2*fact;
 	
 	//change sign to f according to (eq. 34)
-	if(out.sign!=0)
-	  {
-	    //out.f[0][IM]*=-1;
-	    out.f[0]=conj(out.f[0]);
-	    //out.f[1][RE]*=-1;
-	    out.f[1]=-conj(out.f[1]);
-	    //out.f[2][IM]*=-1;
-	    out.f[2]=-conj(out.f[2]);
-	  }
+    if(out->sign!=0)
+    {
+        //out->f[0][IM]*=-1;
+        out->f[0]=conj(out->f[0]);
+        //out->f[1][RE]*=-1;
+        out->f[1]=-conj(out->f[1]);
+        //out->f[2][IM]*=-1;
+        out->f[2]=-conj(out->f[2]);
+    }
       }
+  }
 
 void stouted_force_compute_coeffs_NISSA(anti_hermitian_exp_ingredients *ing, single_tamat *QA)
   {
     d_complex b[2][3];
+    printf("ing->c1 = %f \n", ing->c1 );
     
     if(ing->c1<4e-3)
       {
@@ -305,11 +307,11 @@ int main(){
     // FOR Lambda testing
     idx = 0;
 
-    sQA.rc00 = -0.5;
-    sQA.rc11 = 0.5+1.2*I;
-    sQA.c01 = -1.0*I;
-    sQA.c02 = 1.2+2*I;
-    sQA.c12 = 2.3*I;
+    sQA.rc00 =2*( -0.5);
+    sQA.rc11 =2*( 0.5+1.2*I);
+    sQA.c01  =2*( -1.0*I);
+    sQA.c02  =2*( 1.2+2*I);
+    sQA.c12  =2*( 2.3*I);
 
     CH_exponential_antihermitian_nissalike(&gl3_temp0,&sQA);
     // sSP for lambda

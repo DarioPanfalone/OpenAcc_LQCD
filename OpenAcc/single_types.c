@@ -54,7 +54,7 @@ static inline void thmat_to_su3(single_su3 * out, single_thmat * Q){
 
 
 }
-static inline void tamat_to_su3(single_su3 * out, single_thmat * QA){
+static inline void tamat_to_su3(single_su3 * out, single_tamat * QA){
 
     out->comp[0][0] =     I* QA->rc00 ; 
     out->comp[0][1] =      QA->c01 ;
