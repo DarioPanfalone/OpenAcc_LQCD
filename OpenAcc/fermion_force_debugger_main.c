@@ -52,7 +52,7 @@ int main(){
   printf("u1_backfield initialization : OK \n");
 #endif
 
-  generate_Conf_cold(conf_acc,0.1);
+  generate_Conf_cold(conf_acc,0.0);
   //  generate_Conf_cold(conf_acc,0.1);
   printf("Cold Gauge Conf Generated : OK \n");
   conf_id_iter=0;
@@ -125,7 +125,7 @@ int main(){
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
     }
 
-    fermion_force_soloopenacc( conf_acc,
+    DEOTT_fermion_force_soloopenacc( conf_acc,
 #ifdef STOUT_FERMIONS
 			      gstout_conf_acc_arr, auxbis_conf_acc, // parkeggio
 #endif
@@ -136,7 +136,7 @@ int main(){
 
     // CAMBIARE UN LINK!!!!!!!!!!
     //    conf_acc[0].r0.c0[0] += 0.001 + 0.0*I;
-    double eps=0.0000;
+    double eps=0.00001;
     set_tamat_soa_to_zero(ipdot_acc);
     int i=0;
     int s=0;

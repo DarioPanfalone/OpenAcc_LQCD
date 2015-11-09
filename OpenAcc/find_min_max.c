@@ -51,7 +51,8 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
       loop_count++;
-  } while(old_norm>1.0e-10);    // loop end
+      if(loop_count %100 == 0)   printf("        iterations of max computat  = \n",loop_count);
+  } while(old_norm>1.0e-5);    // loop end
   double max=norm;
   return max;
 }
@@ -89,7 +90,7 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
     old_norm=fabs(old_norm-norm);
     old_norm/=norm;
     loop_count++;
-  }  while(old_norm>1.0e-10);   // loop end
+  }  while(old_norm>1.0e-5);   // loop end
   double  min=max-norm;
   return min;
 }
@@ -109,6 +110,7 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
 
   minmax[0] = pars->ferm_mass * pars->ferm_mass;
   minmax[1] = ker_find_max_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p1);
+  printf("    Computed the min and max eigs : [ min= %.18lf; max= %.18lf ]  \n",minmax[0],minmax[1]);
 
 #ifdef PRINT_EIGENVALUES
   printf("    Computed the min and max eigs : [ min= %.18lf; max= %.18lf ]  \n",minmax[0],minmax[1]);

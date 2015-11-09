@@ -46,30 +46,42 @@ int main(){
 
     //A
     idxA = 0 ; 
-    QA.rc00 = 1; QA.rc11 = I; QA.c01 = 3.2*I; QA.c02 = 5; QA.c12 = 1;
+    QA.rc00 = 1.13;
+    QA.rc11 = -0.734*I;
+    QA.c01 = 3.21*I;
+    QA.c02 = 5.15-2.0*I;
+    QA.c12 = 1.1*I+0.1;
     CH_exponential_antihermitian_nissalike(&gl3_temp0,&QA);
     single_su3_into_su3_soa(gauge_matrix,idxA,&gl3_temp0);
     //B
-    idxB = 1 ; 
-    QA.rc00 = 0.1; QA.rc11 = 3+I; QA.c01 = 2+I; QA.c02 =0.1*I; QA.c12 = -0.02;
+    idxB = 11 ; 
+    QA.rc00 = 0.1;
+    QA.rc11 = 3+I;
+    QA.c01 = 2+I;
+    QA.c02 =0.1*I;
+    QA.c12 = -0.02;
     CH_exponential_antihermitian_nissalike(&gl3_temp0,&QA);
     single_su3_into_su3_soa(gauge_matrix,idxB,&gl3_temp0);
     //C
-    idxC = 2 ; 
-    QA.rc00 = -0.5; QA.rc11 = 0.5+1.2*I; QA.c01 = -1.0*I; QA.c02 = 1.2+2*I; QA.c12 = 2.3*I;
+    idxC = 21 ; 
+    QA.rc00 = -0.5;
+    QA.rc11 = 0.5+1.2*I;
+    QA.c01 = -1.0*I;
+    QA.c02 = 1.2+2*I;
+    QA.c12 = 2.3*I;
     CH_exponential_antihermitian_nissalike(&gl3_temp0,&QA);
     single_su3_into_su3_soa(gauge_matrix,idxC,&gl3_temp0);
     //LD
-    idxLD = 0 ; 
-    thmat_temp0.rc00 = 1 ; 
+    idxLD = 7 ; 
+    thmat_temp0.rc00 = 1.0 ; 
     thmat_temp0.rc11 = 2.1 ; 
-    thmat_temp0.c01 = 1.5*I ; 
-    thmat_temp0.c02 = -1.2 ; 
+    thmat_temp0.c01 = 1.5*I ;
+    thmat_temp0.c02 = -1.2 ;
     thmat_temp0.c12 = 0.1 ; 
     single_thmat_into_thmat_soa(thmats,idxLD,&thmat_temp0);
     //LE
-    idxLE = 1 ; 
-    thmat_temp0.rc00 = .02 ; 
+    idxLE = 16 ; 
+    thmat_temp0.rc00 = 0.2 ; 
     thmat_temp0.rc11 = 1.2 ; 
     thmat_temp0.c01 = -1.2*I ; 
     thmat_temp0.c02 = 0.8 ; 
@@ -88,9 +100,9 @@ int main(){
     gl3_temp0.comp[2][1] = 0 ; 
     gl3_temp0.comp[2][2] = 0 ; 
     single_gl3_into_su3_soa(result,idxRES,&gl3_temp0);
-
+    
 #define DEOTT
-#define NFUNC 6
+#define NFUNC 2
 
 #ifdef DEOTT
 
@@ -142,7 +154,7 @@ int main(){
 
  print_1su3_soa(gauge_matrix,"GaugeMatric.su3");
  print_1su3_soa(result,"result.gl3");
- print_1thmat_soa(thmats,"thmat");
+ print_1thmat_soa(thmats,"thmats.thmat");
 
 
  

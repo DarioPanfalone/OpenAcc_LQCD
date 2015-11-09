@@ -198,7 +198,6 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
 
 
 
-
 //STANDARD VERSION OF THE FERMIONIC FORCE
 void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata           
 #ifdef STOUT_FERMIONS        
@@ -426,7 +425,6 @@ void DEOTT_fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la co
     //  printf("########################################### \n");
 
 }
-
 
 
 
