@@ -978,7 +978,7 @@ static inline void LEFT_iAB_times_GminusE_times_C_absent_stag_phases(  __restric
   // write into RES the product (~A*~B) * ((RHO*I)*(LG-LE)) = matT * ((RHO*I)*(LG-LE))
   //  RES += matA
   matA_00 = (RHO*I)*(matT_00*(LG->rc00[idxG]-LE->rc00[idxE])+matT_01*conj(LG->c01[idxG]-LE->c01[idxE])+matT_02*conj(LG->c02[idxG]-LE->c02[idxE]));
-  matA_10 = (RHO*I)*(matT_10*(LG->rc00[idxG]-LE->rc00[idxG])+matT_11*conj(LG->c01[idxG]-LE->c01[idxE])+matT_12*conj(LG->c02[idxG]-LE->c02[idxE]));
+  matA_10 = (RHO*I)*(matT_10*(LG->rc00[idxG]-LE->rc00[idxE])+matT_11*conj(LG->c01[idxG]-LE->c01[idxE])+matT_12*conj(LG->c02[idxG]-LE->c02[idxE]));
   matA_20 = (RHO*I)*((conj(matT_01*matT_12-matT_02*matT_11))*(LG->rc00[idxG]-LE->rc00[idxE])+(conj(matT_02*matT_10-matT_00*matT_12))*conj(LG->c01[idxG]-LE->c01[idxE])+(conj(matT_00*matT_11-matT_01*matT_10))*conj(LG->c02[idxG]-LE->c02[idxE]));
 
   matA_01 = (RHO*I)*(matT_00*(LG->c01[idxG]-LE->c01[idxE])+matT_01*(LG->rc11[idxG]-LE->rc11[idxE])+matT_02*conj(LG->c12[idxG]-LE->c12[idxE]));
