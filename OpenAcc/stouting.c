@@ -825,17 +825,17 @@ static inline void RIGHT_iFABC_absent_stag_phases(  __restrict su3_soa * const U
   //  matC_22 = ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
   // add to RES the product I * F * ABC 
   //  RES += matA * ~UC
-  RES->r0.c0[idxRES]+= matA_00 * conj( UC->r0.c0[idxB] ) + matA_01 * conj( UC->r0.c1[idxB] ) + matA_02 * conj( UC->r0.c2[idxB] ) ;
-  RES->r1.c0[idxRES]+= matA_10 * conj( UC->r0.c0[idxB] ) + matA_11 * conj( UC->r0.c1[idxB] ) + matA_12 * conj( UC->r0.c2[idxB] ) ;
-  RES->r2.c0[idxRES]+= matA_20 * conj( UC->r0.c0[idxB] ) + matA_21 * conj( UC->r0.c1[idxB] ) + matA_22 * conj( UC->r0.c2[idxB] ) ;
+  RES->r0.c0[idxRES]+= matA_00 * conj( UC->r0.c0[idxC] ) + matA_01 * conj( UC->r0.c1[idxC] ) + matA_02 * conj( UC->r0.c2[idxC] ) ;
+  RES->r1.c0[idxRES]+= matA_10 * conj( UC->r0.c0[idxC] ) + matA_11 * conj( UC->r0.c1[idxC] ) + matA_12 * conj( UC->r0.c2[idxC] ) ;
+  RES->r2.c0[idxRES]+= matA_20 * conj( UC->r0.c0[idxC] ) + matA_21 * conj( UC->r0.c1[idxC] ) + matA_22 * conj( UC->r0.c2[idxC] ) ;
 
-  RES->r0.c1[idxRES]+= matA_00 * conj( UC->r1.c0[idxB] ) + matA_01 * conj( UC->r1.c1[idxB] ) + matA_02 * conj( UC->r1.c2[idxB] ) ;
-  RES->r1.c1[idxRES]+= matA_10 * conj( UC->r1.c0[idxB] ) + matA_11 * conj( UC->r1.c1[idxB] ) + matA_12 * conj( UC->r1.c2[idxB] ) ;
-  RES->r2.c1[idxRES]+= matA_20 * conj( UC->r1.c0[idxB] ) + matA_21 * conj( UC->r1.c1[idxB] ) + matA_22 * conj( UC->r1.c2[idxB] ) ;
+  RES->r0.c1[idxRES]+= matA_00 * conj( UC->r1.c0[idxC] ) + matA_01 * conj( UC->r1.c1[idxC] ) + matA_02 * conj( UC->r1.c2[idxC] ) ;
+  RES->r1.c1[idxRES]+= matA_10 * conj( UC->r1.c0[idxC] ) + matA_11 * conj( UC->r1.c1[idxC] ) + matA_12 * conj( UC->r1.c2[idxC] ) ;
+  RES->r2.c1[idxRES]+= matA_20 * conj( UC->r1.c0[idxC] ) + matA_21 * conj( UC->r1.c1[idxC] ) + matA_22 * conj( UC->r1.c2[idxC] ) ;
 
-  RES->r0.c2[idxRES]+= matA_00 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] ) + matA_01 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]  - UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matA_02 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
-  RES->r1.c2[idxRES]+=matA_10 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] )  + matA_11 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]  - UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matA_12 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
-  RES->r2.c2[idxRES]+= matA_20 * ( UC->r0.c1[idxB] * UC->r1.c2[idxB]  - UC->r0.c2[idxB] * UC->r1.c1[idxB] ) + matA_21 * ( UC->r0.c2[idxB] * UC->r1.c0[idxB]  - UC->r0.c0[idxB] * UC->r1.c2[idxB] ) + matA_22 * ( UC->r0.c0[idxB] * UC->r1.c1[idxB]  - UC->r0.c1[idxB] * UC->r1.c0[idxB] ) ;
+  RES->r0.c2[idxRES]+= matA_00 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] ) + matA_01 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]  - UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matA_02 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
+  RES->r1.c2[idxRES]+=matA_10 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] )  + matA_11 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]  - UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matA_12 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
+  RES->r2.c2[idxRES]+= matA_20 * ( UC->r0.c1[idxC] * UC->r1.c2[idxC]  - UC->r0.c2[idxC] * UC->r1.c1[idxC] ) + matA_21 * ( UC->r0.c2[idxC] * UC->r1.c0[idxC]  - UC->r0.c0[idxC] * UC->r1.c2[idxC] ) + matA_22 * ( UC->r0.c0[idxC] * UC->r1.c1[idxC]  - UC->r0.c1[idxC] * UC->r1.c0[idxC] ) ;
 }
 
 

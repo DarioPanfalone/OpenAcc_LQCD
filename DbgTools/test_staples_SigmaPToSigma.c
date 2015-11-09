@@ -101,8 +101,8 @@ int main(){
     gl3_temp0.comp[2][2] = 0 ; 
     single_gl3_into_su3_soa(result,idxRES,&gl3_temp0);
     
-    //#define DEOTT
-#define NFUNC 4
+#define DEOTT
+#define NFUNC 2
 
 #ifdef DEOTT
 
