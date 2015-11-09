@@ -2,7 +2,7 @@
 #define ALLOC_DEF_
 
 #include "struct_c_def.c"
-
+#include "../DbgTools/debug_macros_glvarcheck.c"
 
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
@@ -55,40 +55,40 @@ void mem_alloc(){
   int allocation_check;  
 #ifdef BACKFIELD
   allocation_check =  posix_memalign((void **)&u1_back_field_phases, ALIGN, 8*sizeof(double_soa));   //  -->  4*size phases (as many as links)
-  u1_back_field_phases->status = FREE;
+  SETFREE(u1_back_field_phases);
   if(allocation_check != 0)  printf("Errore nella allocazione di u1_back_field_phases \n");
 #else
   u1_back_field_phases=NULL;
 #endif
 
-  allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));  aux_conf_acc->status = FREE ; 
+  allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));  SETFREE(aux_conf_acc); 
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_acc \n");
-  allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa)); auxbis_conf_acc->status = FREE ; 
+  allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa)); SETFREE(auxbis_conf_acc); 
   if(allocation_check != 0)  printf("Errore nella allocazione di auxbis_conf_acc \n");
-  allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa)); conf_acc_bkp->status = FREE; 
+  allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa)); SETFREE(conf_acc_bkp); 
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_bkp \n");
 
 
   // GAUGE EVOLUTION
-  allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  momenta->status = FREE ;  //  -->  4*size
+  allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  SETFREE(momenta);  //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di momenta \n");
-  allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); ipdot_acc->status = FREE ; 
+  allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); SETFREE(ipdot_acc); 
   if(allocation_check != 0)  printf("Errore nella allocazione di ipdot_acc \n");
 
 
 #ifdef STOUT_FERMIONS
   // STOUTING
-  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa)); gstout_conf_acc_arr->status = FREE ;
+  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa)); SETFREE(gstout_conf_acc_arr);
   gstout_conf_acc = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
   if(allocation_check != 0)  printf("Errore nella allocazione di gstout_conf_acc_arr \n");
-  allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); glocal_staples->status = FREE ;
+  allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); SETFREE(glocal_staples);
   if(allocation_check != 0)  printf("Errore nella allocazione di glocal_staples \n");
-  allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); gipdot->status = FREE ; 
+  allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); SETFREE(gipdot); 
   if(allocation_check != 0)  printf("Errore nella allocazione di gipdot \n");
 
-  allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); aux_th->status = FREE;   //  -->  4*size
+  allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); SETFREE(aux_th);   //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_th \n");
-  allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa));  aux_ta->status = FREE; //  -->  4*size
+  allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa));  SETFREE(aux_ta); //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_ta \n");
 
 

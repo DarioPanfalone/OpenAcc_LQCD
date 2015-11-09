@@ -18,6 +18,12 @@ int multishift_invert(__restrict su3_soa * const u,
 		      __restrict vec3_soa * const loc_p,
 		      __restrict vec3_soa * const shiftferm // multi-ferm [nshift]
 		      ){
+    SETINUSE(loc_r);
+    SETINUSE(loc_h);
+    SETINUSE(loc_s);
+    SETINUSE(loc_p);
+    SETINUSE(shiftferm);
+    SETINUSE(out);
   /*********************
    * This function takes an input fermion 'in', a rational approximation
    * 'approx' and writes in 'out' a number of fermions, which are the
@@ -170,6 +176,11 @@ int multishift_invert(__restrict su3_soa * const u,
       printf("\t\t%i\t%e\t%1.1e\t\t%e\n",iter,sqrt(giustoono)/residuo,residuo,approx->RA_b[iter]);
     }
 #endif
+    SETFREE(loc_r);
+    SETFREE(loc_h);
+    SETFREE(loc_s);
+    SETFREE(loc_p);
+    SETFREE(shiftferm);
 
   return cg;
 
@@ -179,6 +190,7 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
 				    const __restrict vec3_soa* const in, // [nshift]
 				    __restrict vec3_soa * const out, // [1] 
 				    const RationalApprox * const approx ){
+    SETINUSE(out);
   int ih;
   int iter=0;
 #pragma acc kernels present(out) present(in) present(in_shifted) present(approx)
@@ -402,14 +414,12 @@ static inline void accumulate_auxmat1_into_auxmat2(
 
 #endif  //if defined(BACKFIELD) || defined(IMCHEMPOT)
 
-
-
-
 void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, // questo fermione e' costante e non viene modificato qui dentro
 					    __restrict vec3_soa  * const loc_h, // questo fermione e' costante e non viene modificato qui dentro
 					    __restrict su3_soa * const aux_u,
 					    const RationalApprox * const approx,
 					    int iter){
+    SETINUSE(aux_u);
   
   //   ////////////////////////////////////////////////////////////////////////   //
   //    Riflettere se conviene tenere i loop sui siti pari e su quelli dispari    //
@@ -489,6 +499,7 @@ static inline void assign_zero_to_tamat_soa_component(__restrict tamat_soa * con
 void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix){
   int hx, y, z, t;
   int mu;
+  SETINUSE(matrix);
 #pragma acc kernels present(matrix)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
@@ -508,6 +519,7 @@ void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix){
       }  // y
     }  // z
   }  // t
+  SETREQUESTED(matrix);
 }
 
 
@@ -517,6 +529,8 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
 						__restrict double_soa * const backfield,
 						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
 						__restrict tamat_soa * const ipdot){
+
+  SETINUSE(ipdot);
   int hx,y,z,t,idxh;
 #ifdef BACKFIELD
 #pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars) present(backfield)
@@ -611,7 +625,8 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 						 __restrict ferm_param * const tpars,
 						 __restrict double_soa * const backfield,
 					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
-					         __restrict tamat_soa * const ipdot){
+					         __restrict tamat_soa * const ipdot){ 
+    SETINUSE(ipdot);
   int hx,y,z,t,idxh;
 #ifdef BACKFIELD
 #pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars) present(backfield)
@@ -700,6 +715,7 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
 void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
 							__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante; non viene modificata
 							__restrict tamat_soa * const ipdot){
+SETINUSE(ipdot);
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u) present(auxmat) present(ipdot) 
 #pragma acc loop independent //gang(nt)
@@ -743,6 +759,7 @@ void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * con
 void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * const u, // e' costante e non viene modificata
 							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
 							 __restrict tamat_soa * const ipdot){
+    SETINUSE(ipdot);
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u) present(auxmat) present(ipdot)
 #pragma acc loop independent //gang(nt)
@@ -789,6 +806,7 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
         __restrict double_soa * const backfield,
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot){
+    SETINUSE(pseudo_ipdot);
 
   double arg;
   d_complex phase;
@@ -822,6 +840,8 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
 void accumulate_gl3soa_into_gl3soa(
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot){
+
+    SETINUSE(pseudo_ipdot);
 
     int idxh;
 #pragma acc data present(auxmat) present(pseudo_ipdot)

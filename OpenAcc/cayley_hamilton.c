@@ -10,6 +10,7 @@
 #include <complex.h>
 #include "./struct_c_def.c"
 #include "./single_types.c"
+#include "../DbgTools/debug_macros_glvarcheck.c"
 
 
 inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, __restrict single_tamat * const QA, single_su3 * const out){
@@ -225,6 +226,8 @@ static inline void CH_exponential_antihermitian_nissalike(single_su3 * const exp
   //        ~~>  QA is anti-hermitian
   //        ~~>  hence Q=i*QA is hermitian
   //   based on Sez. III of http://arXiv.org/abs/hep-lat/0311018v1
+
+
 
   double c0 = det_i_times_QA(QA); //(14) // cosi calcolo direttamente il det(Q)
   double c1  = 0.5 * Tr_i_times_QA_sq(QA); // (15)

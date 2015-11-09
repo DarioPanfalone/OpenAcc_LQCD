@@ -839,6 +839,7 @@ void calc_loc_staples_removing_stag_phases_nnptrick(  __restrict su3_soa * const
 
 void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
 							  __restrict su3_soa * const loc_stap ){
+    SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
   //          |  1L  ^  1R  |
@@ -957,6 +958,7 @@ void RHO_times_conf_times_staples_ta_part(__restrict su3_soa * const u,        /
 					  __restrict su3_soa * const loc_stap, // constant --> is not updated
 					  __restrict tamat_soa * const tipdot){
 
+    SETINUSE(tiptot);
   int x, y, z, t;
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang //gang(nt)

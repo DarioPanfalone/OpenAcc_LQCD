@@ -152,7 +152,7 @@ static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 
 
 void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in,ferm_param *pars,double_soa * backfield) {
-
+  SETINUSE(out);
   int hx, y, z, t;
 #ifdef BACKFIELD
 #pragma acc kernels present(u) present(out) present(in) present(pars) present(backfield)
@@ -322,6 +322,7 @@ void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 
 void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in,ferm_param *pars,double_soa * backfield) {
 
+  SETINUSE(out);
   int hx, y, z, t;
 
 #ifdef BACKFIELD
@@ -487,10 +488,12 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
 
 
 inline void fermion_matrix_multiplication( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, __restrict vec3_soa * const temp1, ferm_param *pars,double_soa * backfield){
+  SETREQUESTED(temp1);
+  SETREQUESTED(out);
   acc_Doe(u,temp1,in,pars,backfield);
   acc_Deo(u,out,temp1,pars,backfield);
   combine_in1xferm_mass_minus_in2(in,pars->ferm_mass*pars->ferm_mass,out);// Nuova funzione in OpenAcc/fermionic_utilities.c
-
+  SETFREE(temp1);
 }
 inline void fermion_matrix_multiplication_shifted( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, __restrict vec3_soa * const temp1, ferm_param *pars,double_soa * backfield, double shift){
   acc_Doe(u,temp1,in,pars,backfield);

@@ -20,8 +20,9 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
 
+
   printf("\n\n\nINSIDE SIGMA_PRIME --> SIGMA \n\n");
-  {
+  {// printing stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Sigma[0:8])
   printf("-------------Sigma[old]------------------\n");                                                                                             
@@ -37,16 +38,20 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 #endif
  }
 
-
+  SETREQUESTED(TMP);
   set_su3_soa_to_zero(TMP);
+
   mult_conf_times_stag_phases(U);
   printf("         Removed stag phases  \n");
   calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
   printf("         computed staples  \n");
 
+
   RHO_times_conf_times_staples_ta_part(U,TMP,QA);
+  // check: TMP = local staples.
+  SETFREE(TMP);
   printf("         computed Q  \n");
-  {
+  {// printing stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(QA[0:8])
   printf("-------------Q------------------\n");
@@ -57,10 +62,11 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
 #endif
   }
+  SETREQUESTED(Lambda);
   compute_lambda(Lambda,Sigma,U,QA,TMP);
   printf("         computed Lambda  \n");
 
-  {
+  {// printing stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Lambda[0:8])
   printf("-------------LAMBDA------------------\n");
@@ -71,10 +77,11 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
 #endif
   }
+  SETREQUESTED(Sigma);
   compute_sigma(Lambda,U,Sigma,QA,TMP);
   printf("         computed Sigma  \n");
 
-  {
+  {// printing stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Sigma[0:8])
   printf("-------------Sigma[new]------------------\n");                                                                                             
@@ -90,7 +97,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 #endif
   }
 
-  
+  SETFREE(Lambda);
   mult_conf_times_stag_phases(U);
   printf("         Restored stag phases  \n");
   
@@ -110,7 +117,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
 
 
   printf("\n\n\n=== DEOTT === \nINSIDE SIGMA_PRIME --> SIGMA \n\n");
-  {
+  {// print stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Sigma[0:8])
   printf("-------------=== DEOTT === Sigma[old]------------------\n");                                                                                             
@@ -126,7 +133,6 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
 #endif
  }
 
-
   set_su3_soa_to_zero(TMP);
   mult_conf_times_stag_phases(U);
   printf("         Removed stag phases  \n");
@@ -135,7 +141,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
 
   RHO_times_conf_times_staples_ta_part(U,TMP,QA);
   printf("         computed Q  \n");
-  {
+  { // print stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(QA[0:8])
   printf("-------------=== DEOTT === Q------------------\n");
@@ -149,7 +155,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
   DEOTT_compute_lambda(Lambda,Sigma,U,QA,TMP);
   printf("         computed Lambda  \n");
 
-  {
+  { // print stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Lambda[0:8])
   printf("------------- === DEOTT === LAMBDA------------------\n");
@@ -163,7 +169,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
   DEOTT_compute_sigma(Lambda,U,Sigma,QA,TMP);
   printf("         computed Sigma  \n");
 
-  {
+  { // print stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Sigma[0:8])
   printf("------------- === DEOTT === Sigma[new]------------------\n");                                                                                             

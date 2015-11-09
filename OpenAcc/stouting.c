@@ -136,7 +136,7 @@ static inline d_complex  b2(double denom,
 
 //calcolo di lambda
 #pragma acc routine seq
-static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
+static inlinE void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
 				      __restrict su3_soa   * const SP, // Sigma primo --> input
 				      __restrict su3_soa   * const U,    // la configurazione di gauge --> input
 				      __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input
@@ -214,7 +214,7 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
       if(fabs(w)<0.05) xi1w=-(1-w2*(1-w2*(1-w2/54)/28)/10)/3;
       else xi1w=cw/w2-sin(w)/(w2*w);
       
-      double denom = 1/(9*u*u - w*w);
+      doublE denom = 1/(9*u*u - w*w);
       
       f0=(u2mw2*c2u+ //(u2-w2)*cos(2u)
 	  cu*8*u2*cw+ //cos(u)*8*u2*cos(w)
@@ -495,7 +495,8 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
 		    __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
 		    __restrict su3_soa   * const TMP  // variabile di parcheggio
 		    ){
-
+  SETINUSE(L);
+  SETINUSE(TMP);
 
   int x, y, z, t;
 #pragma acc kernels present(L)  present(SP)  present(U)  present(QA)  present(TMP)
@@ -1178,7 +1179,8 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
 		   __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
 		   __restrict su3_soa   * const TMP // variabile di parcheggio
 		   ){
-  
+  SETINUSE(TMP) ;
+  SETINUSE(S);
   int x, y, z, t, mu, iter;
 
 #pragma acc kernels present(L) present(U) present(nnp_openacc) present(nnm_openacc) present(S) present(QA) present(TMP)
@@ -1300,6 +1302,7 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
     }  // z
   }  // t
 
+  SETFREE(TMP);
 }// closes routine
 
 
