@@ -113,6 +113,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   // P' = P - l*dt*dS/dq
   //    delta[0]=-cimag(ieps_acc)*lambda;
   DEOTT_fermion_force_soloopenacc(tconf_acc, 
+  //  fermion_force_soloopenacc(tconf_acc, 
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
@@ -129,7 +130,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
-  DEOTT_fermion_force_soloopenacc(tconf_acc, 
+    DEOTT_fermion_force_soloopenacc(tconf_acc, 
+    //    fermion_force_soloopenacc(tconf_acc, 
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
@@ -143,7 +145,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     // Step for the P
     // P' = P - 2l*dt*dS/dq
     // delta[2]=-cimag(ieps_acc)*(2.0*lambda);
-  DEOTT_fermion_force_soloopenacc(tconf_acc,
+    DEOTT_fermion_force_soloopenacc(tconf_acc,
+    //    fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
@@ -157,6 +160,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   // P' = P - (1-2l)*dt*dS/dq
   // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
   DEOTT_fermion_force_soloopenacc(tconf_acc,
+  //  fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
@@ -169,6 +173,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   // P' = P - l*dt*dS/dq
   // delta[0]=-cimag(ieps_acc)*lambda;
   DEOTT_fermion_force_soloopenacc(tconf_acc,
+  //  fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
