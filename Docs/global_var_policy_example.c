@@ -6,10 +6,18 @@
 
 // EXAMPLE
 
+#define FREE 0 
+#define REQUESTED 1
+#define IN_USE 2
+#define PRINT(x) (#x)
+#define SETINUSE(var)  if(var->status & IN_USE ) { printf("%s is in use!\n",PRINT(var)); } else {printf("%s is not in use, using it!\n", PRINT(var)); var->status = var->status | IN_USE;}
+#define SETREQUESTED(var)  if(var->status != FREE ) { printf("%s is in use or requested!\n",PRINT(var)); }else {printf("%s is not in use or requested, requiring it!\n", PRINT(var)); var->status = var->status | REQUESTED;}
+
+
 
 typedef struct global_parking_t{
 
-  int in_use;
+  int status;
 
   // stuff
 
@@ -25,15 +33,19 @@ global_parking * global_thingy1, global_thingy2;
 void b(global_parking * tglobal_thing){// will be probably global_thingy2
 
 
-     if(tglobal_thing->in_use) printf("ARGH111!!!\n");
-     
-     global_thing->in_use = 1 ; 
+//    if(tglobal_thing->in_use) printf("ARGH111!!!\n");
+//    tglobal_thing-> status = 1 ; 
+     SETINUSE(tglobal_thing);
+
+     // perhaps...
+     SETREQUESTED(global_thingy2);
+
 
      //do stuff
      //..
 
      // so long and thanks for all the fish
-     global_thing->in_use = 0 ; 
+     tglobal_thing->in_use = 0 ; 
      
 
 }
@@ -42,9 +54,9 @@ void b(global_parking * tglobal_thing){// will be probably global_thingy2
 void a(tglobal_thing * tglobal_thing){ // will be probably global_thingy1
 
 
-     if(tglobal_thing->in_use) printf("ARGH111!!!\n");
-     
-     global_thing->in_use = 1 ; 
+//   if(tglobal_thing->in_use) printf("ARGH111!!!\n");
+//   tglobal_thing->in_use = 1 ; 
+     SETINUSE(tglobal_thing);
 
      //do stuff
      //..
@@ -56,11 +68,8 @@ void a(tglobal_thing * tglobal_thing){ // will be probably global_thingy1
     
 
      // so long and thanks for all the fish
-     global_thing->in_use = 0 ; 
+     tglobal_thing->in_use = 0 ; 
  
-
-
-     
 }
 
 

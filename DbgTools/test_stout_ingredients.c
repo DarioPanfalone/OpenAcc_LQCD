@@ -307,11 +307,11 @@ int main(){
     // FOR Lambda testing
     idx = 0;
 
-    sQA.rc00 =2*( -0.5);
-    sQA.rc11 =2*( 0.5+1.2*I);
-    sQA.c01  =2*( -1.0*I);
-    sQA.c02  =2*( 1.2+2*I);
-    sQA.c12  =2*( 2.3*I);
+    sQA.rc00 =0.00913728*2*( -0.5);
+    sQA.rc11 =0.00913728*2*( 0.5+1.2*I);
+    sQA.c01  =0.00913728*2*( -1.0*I);
+    sQA.c02  =0.00913728*2*( 1.2+2*I);
+    sQA.c12  =0.00913728*2*( 2.3*I);
 
     CH_exponential_antihermitian_nissalike(&gl3_temp0,&sQA);
     // sSP for lambda

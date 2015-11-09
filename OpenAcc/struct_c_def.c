@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include "../Include/common_defines.h"
 
+
 #define vol1 nx
 #define vol2 (ny * vol1)
 #define vol3 (nz * vol2)
@@ -76,91 +77,46 @@ static inline int snum_acc(int x, int y, int z, int t) {
 
 
 typedef struct vec3_soa_t {
-    int flag;
+    int status;
     d_complex c0[sizeh];
     d_complex c1[sizeh];
     d_complex c2[sizeh];
 } vec3_soa;
-
-void checkfree_vec3soa(vec3_soa* fermion){
-    if (fermion->flag !=0) 
-        printf("CHECK: FERMION AT %p IS NOT FREE.\n", fermion);
-}
-
-
-
 typedef struct dcomplex_soa_t {
-    int flag;
+    int status;
     d_complex c[sizeh];
 } dcomplex_soa;
-
-void checkfree_dcomplex_soa(dcomplex_soa* x){
-    if (x->flag !=0) 
-        printf("CHECK: DCOMPLEX_SOA AT %p IS NOT FREE.\n", x);
-}
 typedef struct double_soa_t {
-    int flag;
+    int status;
     double d[sizeh];
 } double_soa;
-
-void checkfree_double_soa(double_soa* x){
-    if (x->flag !=0) 
-        printf("CHECK: DOUBLE_SOA AT %p IS NOT FREE.\n", x);
-}
 typedef struct vec3_t {
   d_complex c0;
   d_complex c1;
   d_complex c2;
 } vec3;
-
 typedef struct su3_soa_t {
-  int flag;  
+  int status;  
   vec3_soa r0;
   vec3_soa r1;
   vec3_soa r2;
 } su3_soa;
-void checkfree_su3soa(su3_soa* M){
-    if (M->flag !=0) 
-        printf("CHECK: GAUGE MATRIX AT %p IS NOT FREE.\n", M);
-}
-
-
 typedef struct tamat_soa_t {
-  int flag;
+  int status;
   d_complex c01[sizeh]; // comp_01
   d_complex c02[sizeh]; // comp_02
   d_complex c12[sizeh]; // comp_12
   double rc00[sizeh];   // Im(comp_00)
   double rc11[sizeh];   // Im(comp_11)
 } tamat_soa;
-
-void checkfree_tamat_soa(tamat_soa* M){
-    if (M->flag !=0) 
-        printf("CHECK: TAMAT_SOA AT %p IS NOT FREE.\n", M);
-}
 typedef struct thmat_soa_t {
-  int flag;
+  int status;
   d_complex c01[sizeh]; // comp_01
   d_complex c02[sizeh]; // comp_02
   d_complex c12[sizeh]; // comp_12
   double rc00[sizeh];   // Re(comp_00)
   double rc11[sizeh];   // Re(comp_11)
 } thmat_soa;
-
-void checkfree_thmat_soa(thmat_soa* M){
-    if (M->flag !=0) 
-        printf("CHECK: THMAT_SOA AT %p IS NOT FREE.\n", M);
-}
-
-
-
-
-
-
-
-
-
-
 
 // TABLES FOR THE NEAREST NEIGHBOURS       
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            
@@ -214,7 +170,6 @@ void compute_nnp_and_nnm_openacc(){
   }
 
 }
-
 
 #endif
 
