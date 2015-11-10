@@ -267,9 +267,9 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
   d_complex mat1_21 = conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
   d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
   //Multiply 3rd row by eta
-  mat1_20 *= eta;
-  mat1_21 *= eta;
-  mat1_22 *= eta;
+  //  mat1_20 *= eta;
+  //  mat1_21 *= eta;
+  //  mat1_22 *= eta;
 
 #if defined(BACKFIELD) || defined(IMCHEMPOT)
   mat1_00 *= phase;
@@ -335,9 +335,9 @@ static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * 
   d_complex mat1_21 = conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
   d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
   //Multiply 3rd row by eta
-  mat1_20 *= eta;
-  mat1_21 *= eta;
-  mat1_22 *= eta;
+  //  mat1_20 *= eta;
+  //  mat1_21 *= eta;
+  //  mat1_22 *= eta;
 
   d_complex auxmat_00 = auxmat->r0.c0[idx_aux];
   d_complex auxmat_01 = auxmat->r0.c1[idx_aux];

@@ -49,17 +49,18 @@
 
 //#define TIMING_ALL // if defined many computation times are printed in the output
 
-//#define GAUGE_ACT_TLSM
+#define GAUGE_ACT_TLSM
 #define GAUGE_ACT_WILSON
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 1
 #endif
-#define RHO 0.001
+#define RHO 0.1
 
 
-#define beta 5.2  // 3.7  //5.35
+#define beta 3.7
+  // 3.7  //5.35
 
 
 const int no_flavours=2; // number of quark species

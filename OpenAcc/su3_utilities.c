@@ -459,7 +459,16 @@ static inline void set_traces_to_value( dcomplex_soa * const tr_local_plaqs,
 
 }
 
+
+
+void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u){
+}
+
+void mult_conf_times_stag_phases( __restrict su3_soa * const u){
+}
+
 // multiply the whole configuration for the staggered phases field
+/*
 void mult_conf_times_stag_phases( __restrict su3_soa * const u){
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u)
@@ -514,6 +523,7 @@ void mult_conf_times_stag_phases( __restrict su3_soa * const u){
   }
 
 }
+
 
 
 
@@ -573,7 +583,7 @@ void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u){
 
 
 
-
+*/
 
 
 // routine for the computation of the average of the plaquettes computed on the plane mu-nu

@@ -13,30 +13,17 @@
 //          i2 = 0010010011
 //   risultato = 0000010001
 
-#define SETINUSE(var)\
-if(var->status & IN_USE )\
-  { printf("SETINUSE %s:%d, var %s is in use! (%p)\n",__FILE__,__LINE__,PRINT(var)),var; }\
-  else {printf("SETINUSE %s:%d, var %s is not in use, using it! (%p)\n",\
-	       __FILE__,__LINE__, PRINT(var),var);				\
-      var->status = var->status | IN_USE;}
 
-#define SETREQUESTED(var)\
-{if(var->status == REQUESTED )	   /* richiesta ma non in uso */\
- printf("SETREQUESTED %s:%d, var %s is already requested (%p).\n",\
-        __FILE__,__LINE__,PRINT(var),var);\
-else if(var->status & IN_USE)    /* in uso (sia gia' richiesta che no)*/ \
- printf("SETREQUESTED %s:%d, var %s is in use! (%p)\n",\
-        __FILE__,__LINE__,PRINT(var),var); /* ne' richiesta ne' in uso*/ \
-else printf("SETREQUESTED %s:%d, var %s is not in use or requested, requiring it!(%p)\n"\
-        ,__FILE__,__LINE__, PRINT(var),var);\
- var->status = REQUESTED;}
+#define SETINUSE(var)
 
-#define SETFREE(var)\
-  {printf("SETFREE %s:%d, freeing %s (%p)  [previous status = %d] \n",__FILE__,__LINE__,PRINT(var),var,var->status); var->status = FREE;}
+#define SETREQUESTED(var)
+
+#define SETFREE(var)
+
+#define CHECKSTATUS(var)
 
 
-#define CHECKSTATUS(var)\
-  {printf("CHECKSTATUS %s:%d, var %s (%p) has status %d.\n",__FILE__,__LINE__,PRINT(var),var,var->status);}
+
 
 #endif
 
