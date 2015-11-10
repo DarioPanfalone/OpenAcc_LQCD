@@ -29,7 +29,6 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
   double norm, inorm, old_norm;
   double temp;
   // starting gauss vector p   (deve arrivargli gia' gaussiano)
-
   norm=sqrt(l2norm2_global(loc_p));
   loop_count=0;
   // loop start
@@ -38,15 +37,23 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       // and r=p
       inorm=1.0/norm;
       multiply_fermion_x_doublefactor(loc_p,inorm);
+      SETREQUESTED(loc_r);
       assign_in_to_out(loc_p,loc_r);
+
       old_norm=norm;
       // p=DeoDoe r
+      SETREQUESTED(loc_h);
       acc_Doe(u,loc_h,loc_p,pars,backfield);
+      SETFREE(loc_p);
+      SETREQUESTED(loc_p);
       acc_Deo(u,loc_p,loc_h,pars,backfield);
+      SETFREE(loc_h);
 
       // p=(M^dag M)r
       //      combine_in1xm2_minus_in2(loc_r,loc_p);
       combine_in1xferm_mass_minus_in2(loc_r,pars->ferm_mass*pars->ferm_mass,loc_p);
+      SETFREE(loc_r);
+
       norm=sqrt(l2norm2_global(loc_p));
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
@@ -118,7 +125,10 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
   //  ora il minimo e' messo a m*m, volendo lo si puo' calcolare con la routine seguente.
   //  minmax[0] = ker_find_min_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2
 
-
+  SETFREE(loc_r);
+  SETFREE(loc_h);
+  SETFREE(loc_p1);
+  SETFREE(loc_p2);
 }
 
 

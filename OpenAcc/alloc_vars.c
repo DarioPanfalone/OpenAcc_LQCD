@@ -61,66 +61,72 @@ void mem_alloc(){
   u1_back_field_phases=NULL;
 #endif
 
-  allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));  SETFREE(aux_conf_acc); 
+  //the double bracket in the setfree macro MUST be there (because of operators precedence)
+  allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_conf_acc[mu])); 
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_acc \n");
-  allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa)); SETFREE(auxbis_conf_acc); 
+  allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&auxbis_conf_acc[mu])); 
   if(allocation_check != 0)  printf("Errore nella allocazione di auxbis_conf_acc \n");
-  allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa)); SETFREE(conf_acc_bkp); 
+  allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&conf_acc_bkp[mu])); 
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_conf_bkp \n");
-
+  
 
   // GAUGE EVOLUTION
-  allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  SETFREE(momenta);  //  -->  4*size
+  allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  for(int mu=0;mu<8;mu++) SETFREE((&momenta[mu]));  //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di momenta \n");
-  allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); SETFREE(ipdot_acc); 
+  allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_acc[mu])); 
   if(allocation_check != 0)  printf("Errore nella allocazione di ipdot_acc \n");
 
+  
 
 #ifdef STOUT_FERMIONS
   // STOUTING
-  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa)); SETFREE(gstout_conf_acc_arr);
+  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&gstout_conf_acc_arr[mu]));
   gstout_conf_acc = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
   if(allocation_check != 0)  printf("Errore nella allocazione di gstout_conf_acc_arr \n");
-  allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); SETFREE(glocal_staples);
+  allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&glocal_staples[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di glocal_staples \n");
-  allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); SETFREE(gipdot); 
+  allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&gipdot[mu])); 
   if(allocation_check != 0)  printf("Errore nella allocazione di gipdot \n");
 
-  allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); SETFREE(aux_th);   //  -->  4*size
+  allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_th[mu]));   //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_th \n");
-  allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa));  SETFREE(aux_ta); //  -->  4*size
+  allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++)  SETFREE((&aux_ta[mu])); //  -->  4*size
   if(allocation_check != 0)  printf("Errore nella allocazione di aux_ta \n");
 
 
 
 #endif
 
+  
 
   // FERMION ALLOCATIONS
-  allocation_check =  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa)); kloc_r->status = FREE;
+  allocation_check =  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_r);
   if(allocation_check != 0)  printf("Errore nella allocazione di kloc_r \n");
-  allocation_check =  posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa)); kloc_h->status = FREE;
+  allocation_check =  posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_h);
   if(allocation_check != 0)  printf("Errore nella allocazione di kloc_h \n");
-  allocation_check =  posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa)); kloc_s->status = FREE;
+  allocation_check =  posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_s);
   if(allocation_check != 0)  printf("Errore nella allocazione di kloc_s \n");
-  allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa)); kloc_p->status = FREE;
+  allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_p);
   if(allocation_check != 0)  printf("Errore nella allocazione di kloc_p \n");
-  allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, max_approx_order* sizeof(vec3_soa)); k_p_shiftferm->status = FREE; 
+  allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, max_approx_order* sizeof(vec3_soa)); SETFREE(k_p_shiftferm);
+
+  
 
   if(allocation_check != 0)  printf("Errore nella allocazione di k_p_shiftferm \n");
-  allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); ferm_chi_acc->status = FREE;
+  allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); for(int mu=0;mu<NPS_tot;mu++) SETFREE((&ferm_chi_acc[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_chi_acc \n");
-  allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); ferm_phi_acc->status = FREE ;
+  allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); for(int mu=0;mu<NPS_tot;mu++) SETFREE((&ferm_phi_acc[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_phi_acc \n");
-   allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); ferm_out_acc->status = FREE;
+  allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); for(int mu=0;mu<NPS_tot;mu++) SETFREE((&ferm_out_acc[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_out_acc \n");
-  allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*max_approx_order*sizeof(vec3_soa)); ferm_shiftmulti_acc->status = FREE ; 
+  allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*max_approx_order*sizeof(vec3_soa)); for(int mu=0;mu<max_ps*max_approx_order;mu++) SETFREE((&ferm_shiftmulti_acc[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_shiftmulti_acc \n");
 
+  
 
-  allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, sizeof(double_soa)); d_local_sums->status = FREE;
+  allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, sizeof(double_soa)); SETFREE(d_local_sums);
   if(allocation_check != 0)  printf("Errore nella allocazione di d_local_sums \n");
-  allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa)); local_sums->status = FREE;// --> size complessi --> vettore per sommare cose locali
+  allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa)); for(int mu=0;mu<2;mu++) SETFREE((&local_sums[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di local_sums \n");
 }
 
