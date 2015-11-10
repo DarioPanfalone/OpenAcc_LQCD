@@ -958,7 +958,7 @@ void RHO_times_conf_times_staples_ta_part(__restrict su3_soa * const u,        /
 					  __restrict su3_soa * const loc_stap, // constant --> is not updated
 					  __restrict tamat_soa * const tipdot){
 
-    SETINUSE(tiptot);
+    SETINUSE(tipdot);
   int x, y, z, t;
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang //gang(nt)

@@ -136,7 +136,7 @@ static inline d_complex  b2(double denom,
 
 //calcolo di lambda
 #pragma acc routine seq
-static inlinE void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
+static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
 				      __restrict su3_soa   * const SP, // Sigma primo --> input
 				      __restrict su3_soa   * const U,    // la configurazione di gauge --> input
 				      __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input
@@ -214,7 +214,7 @@ static inlinE void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
       if(fabs(w)<0.05) xi1w=-(1-w2*(1-w2*(1-w2/54)/28)/10)/3;
       else xi1w=cw/w2-sin(w)/(w2*w);
       
-      doublE denom = 1/(9*u*u - w*w);
+      double denom = 1/(9*u*u - w*w);
       
       f0=(u2mw2*c2u+ //(u2-w2)*cos(2u)
 	  cu*8*u2*cw+ //cos(u)*8*u2*cos(w)
