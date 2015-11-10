@@ -80,7 +80,7 @@ void mem_alloc(){
 
 #ifdef STOUT_FERMIONS
   // STOUTING
-  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&gstout_conf_acc_arr[mu]));
+  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa)); for(int mu=0;mu<8*STOUT_STEPS;mu++) SETFREE((&gstout_conf_acc_arr[mu]));
   gstout_conf_acc = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
   if(allocation_check != 0)  printf("Errore nella allocazione di gstout_conf_acc_arr \n");
   allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&glocal_staples[mu]));
@@ -108,11 +108,10 @@ void mem_alloc(){
   if(allocation_check != 0)  printf("Errore nella allocazione di kloc_s \n");
   allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_p);
   if(allocation_check != 0)  printf("Errore nella allocazione di kloc_p \n");
-  allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, max_approx_order* sizeof(vec3_soa)); SETFREE(k_p_shiftferm);
-
-  
-
+  allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, max_approx_order* sizeof(vec3_soa)); for(int mu=0;mu<max_approx_order;mu++) SETFREE((&k_p_shiftferm[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di k_p_shiftferm \n");
+
+
   allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); for(int mu=0;mu<NPS_tot;mu++) SETFREE((&ferm_chi_acc[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di ferm_chi_acc \n");
   allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); for(int mu=0;mu<NPS_tot;mu++) SETFREE((&ferm_phi_acc[mu]));

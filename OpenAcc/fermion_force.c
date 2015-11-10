@@ -355,6 +355,7 @@ void DEOTT_fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la co
   su3_soa * conf_to_use; // CONF TO USE IN CALCULATION OF 
   // FERMION FORCE
 #ifdef STOUT_FERMIONS
+  for(int mu = 0; mu < 8*STOUT_STEPS; mu ++) SETREQUESTED((&tstout_conf_acc_arr[mu]));
   stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
   conf_to_use =  &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
   set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
@@ -365,10 +366,12 @@ void DEOTT_fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la co
 #else
   conf_to_use = tconf_acc;
 #endif
-  
+ 
+  SETREQUESTED(tipdot_acc);
   set_tamat_soa_to_zero(tipdot_acc);
   
   for(int iflav = 0; iflav < tNDiffFlavs; iflav++) {
+    SETREQUESTED(taux_conf_acc);
     set_su3_soa_to_zero(taux_conf_acc);
     int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
     for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){

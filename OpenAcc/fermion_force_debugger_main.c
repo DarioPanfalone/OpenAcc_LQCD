@@ -34,7 +34,7 @@ int main(){
   su3_soa  * conf_acc;
   int  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
-  conf_acc->flag = 1;
+  SETREQUESTED(conf_acc);
   printf("Allocazione della configurazione : OK \n");
 
   // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
@@ -141,7 +141,7 @@ int main(){
     int i=0;
     int s=0;
     //    ipdot_acc[i].c01[s]= 0.0 + eps*I;
-    ipdot_acc[i].c01[s]= eps + 0.0*I;
+    ipdot_acc[i].c01[s]= 0.0 + eps*I;
     //    ipdot_acc[i].c02[s]= eps + 0.0*I;
     //    ipdot_acc[i].rc00[s]= eps/sqrt(3.0) ;
     //    ipdot_acc[i].rc11[s]= eps/sqrt(3.0) ;

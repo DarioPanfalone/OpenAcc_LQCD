@@ -720,6 +720,7 @@ static inline void assign_su3_soa_to_su3_soa_component(__restrict su3_soa * cons
 
 
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix){
+  SETINUSE(matrix);
   int hx, y, z, t;
 #pragma acc kernels present(matrix)
 #pragma acc loop independent gang //gang(nt)

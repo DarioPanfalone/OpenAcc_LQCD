@@ -18,12 +18,11 @@ int multishift_invert(__restrict su3_soa * const u,
 		      __restrict vec3_soa * const loc_p,
 		      __restrict vec3_soa * const shiftferm // multi-ferm [nshift]
 		      ){
-    SETINUSE(loc_r);
-    SETINUSE(loc_h);
-    SETINUSE(loc_s);
-    SETINUSE(loc_p);
-    SETINUSE(shiftferm);
-    SETINUSE(out);
+    SETREQUESTED(loc_r);
+    SETREQUESTED(loc_h);
+    SETREQUESTED(loc_s);
+    SETREQUESTED(loc_p);
+    SETREQUESTED(shiftferm);
   /*********************
    * This function takes an input fermion 'in', a rational approximation
    * 'approx' and writes in 'out' a number of fermions, which are the
@@ -73,6 +72,7 @@ int multishift_invert(__restrict su3_soa * const u,
     for(iter=0; iter<(approx->approx_order); iter++){
       // ps_0=phi
       assign_in_to_out(in,&shiftferm[iter]);
+      printf("SETINUSE_TEST\n");
       zeta_i[iter]=1.0;         // zeta_{-1}=1.0
       zeta_ii[iter]=1.0;        // zeta_{ 0}=1.0
       gammas[iter]=0.0;         // gammas_{-1}=0.0
@@ -519,7 +519,6 @@ void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix){
       }  // y
     }  // z
   }  // t
-  SETREQUESTED(matrix);
 }
 
 

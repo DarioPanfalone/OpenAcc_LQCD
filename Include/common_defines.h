@@ -52,11 +52,11 @@
 //#define GAUGE_ACT_TLSM
 #define GAUGE_ACT_WILSON
 
-//#define STOUT_FERMIONS
+#define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 1
 #endif
-#define RHO 0.1
+#define RHO 0.001
 
 
 #define beta 5.2  // 3.7  //5.35
