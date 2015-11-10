@@ -5,6 +5,7 @@ void su2_rand(double *pp);
 
 
 #include "openacc.h"
+#include "../DbgTools/debug_macros_glvarcheck.c"
 #include "../RationalApprox/rationalapprox.c"
 #include "./struct_c_def.c"
 #include "./alloc_vars.c"
@@ -36,7 +37,7 @@ int main(){
   su3_soa  * conf_acc;
   int  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
   if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
-  conf_acc->flag = 1;
+  conf_acc->status = IN_USE;
   printf("Allocazione della configurazione : OK \n");
 
   // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
@@ -173,7 +174,7 @@ int main(){
  
   }// end pragma acc data
 
-  checkfree_su3soa(conf_acc);
+  CHECKSTATUS(conf_acc);
 
   //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
   SHUTDOWN_ACC_DEVICE(my_device_type);

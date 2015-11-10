@@ -80,7 +80,7 @@ double real_scal_prod_global(  __restrict vec3_soa * const in_vect1,
   return resR;
 }
 
-double l2norm2_global( __restrict vec3_soa * const in_vect1 // constant --> is not updated
+double l2norm2_global( __restrict  vec3_soa * const in_vect1 // constant --> is not updated
 		       ){
   int t;
   double res_R_p;
@@ -222,13 +222,13 @@ void combine_in1xm2_minus_in2(__restrict vec3_soa * const in_vect1,
 }
 */
 
-void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * const in_vect1,double ferm_mass, __restrict vec3_soa * const in_vect2){
+void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * const in_vect1,double ferm_mass2, __restrict vec3_soa * const in_vect2){
 #pragma acc kernels present(in_vect1) present(in_vect2)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
-    in_vect2->c0[ih]=(in_vect1->c0[ih]*ferm_mass)-in_vect2->c0[ih];
-    in_vect2->c1[ih]=(in_vect1->c1[ih]*ferm_mass)-in_vect2->c1[ih];
-    in_vect2->c2[ih]=(in_vect1->c2[ih]*ferm_mass)-in_vect2->c2[ih];
+    in_vect2->c0[ih]=(in_vect1->c0[ih]*ferm_mass2)-in_vect2->c0[ih];
+    in_vect2->c1[ih]=(in_vect1->c1[ih]*ferm_mass2)-in_vect2->c1[ih];
+    in_vect2->c2[ih]=(in_vect1->c2[ih]*ferm_mass2)-in_vect2->c2[ih];
   }
 }
 
@@ -246,6 +246,7 @@ void combine_in1_minus_in2( __restrict vec3_soa * const in_vect1,
 
 void assign_in_to_out(  __restrict vec3_soa * const in_vect1,
                         __restrict vec3_soa * const out){
+  SETINUSE(out);
 #pragma acc kernels present(in_vect1)  present(out)
 #pragma acc loop independent 
   for(int ih=0; ih<sizeh; ih++) {

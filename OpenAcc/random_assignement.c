@@ -60,6 +60,7 @@ d_complex d_complex_gauss(void)
 
 
 void generate_vec3_soa_gauss(__restrict vec3_soa * const vect){
+  SETINUSE(vect);
   int t;
   for(t=0; t<sizeh; t++) {
     vect->c0[t]=d_complex_gauss();
@@ -201,6 +202,7 @@ void generate_Conf_cold_comp(__restrict su3_soa * const conf,double factor){
 
 // iterations of random assignements over all the 8 components
 void generate_Momenta_gauss(__restrict thmat_soa * const mom){
+  SETINUSE(mom);
   int mu;
   for(mu=0; mu<8; mu++){
     generate_Momenta_gauss_comp(&mom[mu]);
@@ -209,6 +211,7 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom){
 
 // iterations of random assignements over all the 8 components
 void generate_Conf_cold(__restrict su3_soa * const conf,double factor){
+  SETINUSE(conf);
   int mu;
   for(mu=0; mu<8; mu++){
     generate_Conf_cold_comp(&conf[mu],factor);
@@ -218,6 +221,7 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor){
 
 
 void generate_vec3_soa_z2noise(__restrict vec3_soa * const vect){
+  SETINUSE(vect);
   int t;
   double p;
   for(t=0; t<sizeh; t++) {
