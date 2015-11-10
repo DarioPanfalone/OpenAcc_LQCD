@@ -133,6 +133,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
 #endif
  }
 
+  SETREQUESTED(TMP);
   set_su3_soa_to_zero(TMP);
   mult_conf_times_stag_phases(U);
   printf("         Removed stag phases  \n");
@@ -140,6 +141,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
   printf("         computed staples  \n");
 
   RHO_times_conf_times_staples_ta_part(U,TMP,QA);
+  SETFREE(TMP);
   printf("         computed Q  \n");
   { // print stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
@@ -152,6 +154,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
   printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
 #endif
   }
+  SETREQUESTED(Lambda);
   DEOTT_compute_lambda(Lambda,Sigma,U,QA,TMP);
   printf("         computed Lambda  \n");
 
@@ -166,6 +169,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
   printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
 #endif
   }
+  SETREQUESTED(Sigma);
   DEOTT_compute_sigma(Lambda,U,Sigma,QA,TMP);
   printf("         computed Sigma  \n");
 
@@ -186,6 +190,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
   }
 
   
+  SETFREE(Lambda);
   mult_conf_times_stag_phases(U);
   printf("         Restored stag phases  \n");
   
@@ -222,7 +227,10 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   //  printf("############################################ \n");
   //  printf("#### Inside fermion force soloopenacc ###### \n");
   //  printf("############################################ \n");
+
+
   
+
 #ifdef TIMING_FERMION_FORCE
   struct timeval t1,t2;
   gettimeofday ( &t1, NULL );

@@ -41,6 +41,8 @@ void DEOTT_exp_minus_QA_times_conf(__restrict su3_soa * const tu,
         __restrict su3_soa * const tu_out,
         __restrict su3_soa * const exp_aux){
 
+    SETINUSE(exp_aux);
+    SETINUSE(tu_out);
     int x, y, z, t;
 #pragma acc kernels present(tu) present(QA) present(tu_out) present(exp_aux)
 #pragma acc loop independent gang
@@ -69,6 +71,7 @@ void DEOTT_exp_minus_QA_times_conf(__restrict su3_soa * const tu,
         }  // z
     }  // t
 
+    SETFREE(exp_aux);
 }// closes routine
 
 
@@ -345,6 +348,9 @@ void DEOTT_compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
         __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
         __restrict su3_soa   * const TMP  // variabile di parcheggio
         ){
+  SETINUSE(L);
+  SETINUSE(TMP);
+
 
 
     int x, y, z, t;
@@ -821,7 +827,8 @@ void DEOTT_compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput
         __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
         __restrict su3_soa   * const TMP // variabile di parcheggio
         ){
-
+  SETINUSE(TMP) ;
+  SETINUSE(S);
     int x, y, z, t, mu, iter;
 
 #pragma acc kernels present(L) present(U) present(nnp_openacc) present(nnm_openacc) present(S) present(QA) present(TMP)
@@ -943,6 +950,7 @@ void DEOTT_compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput
         }  // z
     }  // t
 
+  SETFREE(TMP);
 }// closes routine
 
 
