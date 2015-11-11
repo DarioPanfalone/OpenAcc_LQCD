@@ -434,6 +434,28 @@ static inline void   mat1_times_int_factor( __restrict su3_soa * const mat1,
 
 }
 
+
+
+// mat1 = mat1 * integer factor
+#pragma acc routine seq
+static inline void   gl3_times_int_factor( __restrict su3_soa * const mgl3,
+					   const int idx_mgl3,
+					   int factor){
+
+  mgl3->r0.c0[idx_mgl3] *= factor;
+  mgl3->r0.c1[idx_mgl3] *= factor;
+  mgl3->r0.c2[idx_mgl3] *= factor;
+
+  mgl3->r1.c0[idx_mgl3] *= factor;
+  mgl3->r1.c1[idx_mgl3] *= factor;
+  mgl3->r1.c2[idx_mgl3] *= factor;
+
+  mgl3->r2.c0[idx_mgl3] *= factor;
+  mgl3->r2.c1[idx_mgl3] *= factor;
+  mgl3->r2.c2[idx_mgl3] *= factor;
+
+}
+
 // calcola la traccia della matrice di su3
 #pragma acc routine seq
 static inline d_complex matrix_trace_absent_stag_phase(__restrict su3_soa * const loc_plaq,
@@ -461,14 +483,7 @@ static inline void set_traces_to_value( dcomplex_soa * const tr_local_plaqs,
 
 
 
-void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u){
-}
-
-void mult_conf_times_stag_phases( __restrict su3_soa * const u){
-}
-
 // multiply the whole configuration for the staggered phases field
-/*
 void mult_conf_times_stag_phases( __restrict su3_soa * const u){
   int hx,y,z,t,idxh;
 #pragma acc kernels present(u)
@@ -515,6 +530,68 @@ void mult_conf_times_stag_phases( __restrict su3_soa * const u){
 	  eta *= (1- 2*(int)(t/(nt-1)));
 #endif
 	  mat1_times_int_factor(&u[7], idxh, eta);	  
+
+	  
+	}
+      }
+    }
+  }
+
+}
+
+
+
+
+
+
+
+// multiply the whole configuration for the staggered phases field
+void mult_gl3_soa_times_stag_phases( __restrict su3_soa * const u){
+  int hx,y,z,t,idxh;
+#pragma acc kernels present(u)
+#pragma acc loop independent gang // gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent gang vector // gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent gang vector // //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent vector // vector(DIM_BLOCK_X)
+        for(hx=0; hx < nxh; hx++) {
+          int x,eta;
+
+	  //even sites
+	  x = 2*hx + ((y+z+t) & 0x1);
+	  idxh = snum_acc(x,y,z,t);
+	  // dir  0  =  x even   --> eta = 1 , no multiplication needed
+	  // dir  2  =  y even
+	  eta = 1 - ( 2*(x & 0x1) );
+	  gl3_times_int_factor(&u[2], idxh, eta);
+	  // dir  4  =  z even
+	  eta = 1 - ( 2*((x+y) & 0x1) );
+	  gl3_times_int_factor(&u[4], idxh, eta);
+	  // dir  6  =  t even
+	  eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+	  eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+	  gl3_times_int_factor(&u[6], idxh, eta);
+
+	  //odd sites
+	  x = 2*hx + ((y+z+t+1) & 0x1);
+	  idxh = snum_acc(x,y,z,t);
+	  // dir  1  =  x odd    --> eta = 1 , no multiplication needed
+	  // dir  3  =  y odd
+	  eta = 1 - ( 2*(x & 0x1) );
+	  gl3_times_int_factor(&u[3], idxh, eta);
+	  // dir  5  =  z odd
+	  eta = 1 - ( 2*((x+y) & 0x1) );
+	  gl3_times_int_factor(&u[5], idxh, eta);
+	  // dir  7  =  t odd
+	  eta = 1 - ( 2*((x+y+z) & 0x1) );
+#ifdef ANTIPERIODIC_T_BC
+	  eta *= (1- 2*(int)(t/(nt-1)));
+#endif
+	  gl3_times_int_factor(&u[7], idxh, eta);	  
 
 	  
 	}
@@ -579,11 +656,6 @@ void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u){
 }
 
 
-
-
-
-
-*/
 
 
 // routine for the computation of the average of the plaquettes computed on the plane mu-nu

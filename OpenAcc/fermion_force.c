@@ -285,15 +285,20 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   }
 
 #ifdef STOUT_FERMIONS
+  mult_gl3_soa_times_stag_phases(gl3_aux);
+
   for(int stout_level = STOUT_STEPS ; stout_level > 1 ; stout_level--){
     printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl %d to lvl %d] <<<<<<<<<<<<<<<<<<<<<<<<<\n",stout_level,stout_level-1);
     conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
-    compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, aux_conf_acc );
+    compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, taux_conf_acc );
   }
   printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl 1 to lvl 0] <<<<<<<<<<<<<<<<<<<<<<<<<\n");
-  compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, aux_conf_acc );
-  multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc, gl3_aux,tipdot_acc);
-  multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc, gl3_aux,tipdot_acc);
+  compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, taux_conf_acc );
+
+  mult_gl3_soa_times_stag_phases(gl3_aux);
+
+  multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc, gl3_aux,tipdot_acc); // stag
+  multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc, gl3_aux,tipdot_acc); // stag
 #endif
 
 
@@ -404,13 +409,23 @@ void DEOTT_fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la co
   }
 
 #ifdef STOUT_FERMIONS
+  // Moltiplichiamo la sigma al livello di stouting n-esimo per la fase staggered
+  mult_gl3_soa_times_stag_phases(gl3_aux);
+
   for(int stout_level = STOUT_STEPS ; stout_level > 1 ; stout_level--){
     printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl %d to lvl %d] <<<<<<<<<<<<<<<<<<<<<<<<<\n",stout_level,stout_level-1);
     conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
-    DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, aux_conf_acc );
+    DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, taux_conf_acc );
   }
   printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl 1 to lvl 0] <<<<<<<<<<<<<<<<<<<<<<<<<\n");
-  DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, aux_conf_acc );
+  DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, taux_conf_acc );
+
+  // qui dovrei moltiplicare per la conf senza le fasi staggered
+  ////////// invece //////////////////////////////////////
+  // per come sono fatte le cose adesso (bisogna sistemare pero' ... )
+  // si deve moltiplicare per la conf con le fasi staggered (nelle routine multiply_conf_times_force_and_take_ta_odd_nophase)
+  // quindi prima devo moltiplicare per le fasi il risultato ==> moltiplico 2 volte ==> non moltiplico
+  mult_gl3_soa_times_stag_phases(gl3_aux);
   multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc, gl3_aux,tipdot_acc);
   multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc, gl3_aux,tipdot_acc);
 #endif
