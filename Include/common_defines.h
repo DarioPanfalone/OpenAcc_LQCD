@@ -50,16 +50,16 @@
 //#define TIMING_ALL // if defined many computation times are printed in the output
 
 #define GAUGE_ACT_TLSM
-#define GAUGE_ACT_WILSON
+//#define GAUGE_ACT_WILSON
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
-#define STOUT_STEPS 1
+#define STOUT_STEPS 3
 #endif
 #define RHO 0.1
 
 
-#define beta 3.7
+#define beta 4.3
   // 3.7  //5.35
 
 

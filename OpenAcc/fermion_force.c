@@ -9,7 +9,7 @@
 
 
 
-#define STAMPA_UN_CASINO_DI_ROBA
+//#define STAMPA_UN_CASINO_DI_ROBA
 
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
 							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
@@ -21,7 +21,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
 
-  printf("\n\n\nINSIDE SIGMA_PRIME --> SIGMA \n\n");
+  //  printf("\n\n\nINSIDE SIGMA_PRIME --> SIGMA \n\n");
   {// printing stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(Sigma[0:8])
@@ -42,15 +42,15 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   set_su3_soa_to_zero(TMP);
 
   mult_conf_times_stag_phases(U);
-  printf("         Removed stag phases  \n");
+  //  printf("         Removed stag phases  \n");
   calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
-  printf("         computed staples  \n");
+  //  printf("         computed staples  \n");
 
 
   RHO_times_conf_times_staples_ta_part(U,TMP,QA);
   // check: TMP = local staples.
   SETFREE(TMP);
-  printf("         computed Q  \n");
+  //  printf("         computed Q  \n");
   {// printing stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
 #pragma acc update host(QA[0:8])
@@ -64,7 +64,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   }
   SETREQUESTED(Lambda);
   compute_lambda(Lambda,Sigma,U,QA,TMP);
-  printf("         computed Lambda  \n");
+  //  printf("         computed Lambda  \n");
 
   {// printing stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
@@ -79,7 +79,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   }
   SETREQUESTED(Sigma);
   compute_sigma(Lambda,U,Sigma,QA,TMP);
-  printf("         computed Sigma  \n");
+  //  printf("         computed Sigma  \n");
 
   {// printing stuff
 #ifdef STAMPA_UN_CASINO_DI_ROBA
@@ -99,7 +99,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
   SETFREE(Lambda);
   mult_conf_times_stag_phases(U);
-  printf("         Restored stag phases  \n");
+  //  printf("         Restored stag phases  \n");
   
   
 }
@@ -108,6 +108,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
 
+/*
 void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
 								 __restrict thmat_soa  * Lambda, // la var globale e' aux_th
 								 __restrict tamat_soa  * QA, // la var globale e' aux_ta
@@ -196,7 +197,7 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
   
   
 }
-
+*/
 
 
 
@@ -262,9 +263,9 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
       
       ker_openacc_compute_fermion_force(conf_to_use, backfield, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
-      printf("COEFF %.18lf\n",tfermion_parameters[iflav].approx_md.RA_a[0]);
-      printf("FERMSHIFTED00 = %.18lf\n",tferm_shiftmulti_acc[0].c0[0]);
-      printf("PSEUDO00 = %.18lf\n",taux_conf_acc[0].r0.c0[0]);
+      //      printf("COEFF %.18lf\n",tfermion_parameters[iflav].approx_md.RA_a[0]);
+      //      printf("FERMSHIFTED00 = %.18lf\n",tferm_shiftmulti_acc[0].c0[0]);
+      //      printf("PSEUDO00 = %.18lf\n",taux_conf_acc[0].r0.c0[0]);
 
     }
     
@@ -304,12 +305,15 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 
 #pragma acc update host(tipdot_acc[0:8])
 
+  /*
   printf("-------------FFORCE------------------\n");
        printf("F00 = %.18lf\n",tipdot_acc[0].rc00[0]);
        printf("F11 = %.18lf\n",tipdot_acc[0].rc11[0]);
        printf("F01 = %.18lf + (%.18lf)*I\n",creal(tipdot_acc[0].c01[0]),cimag(tipdot_acc[0].c01[0]));
        printf("F02 = %.18lf + (%.18lf)*I\n",creal(tipdot_acc[0].c02[0]),cimag(tipdot_acc[0].c02[0]));
        printf("F12 = %.18lf + (%.18lf)*I\n\n",creal(tipdot_acc[0].c12[0]),cimag(tipdot_acc[0].c12[0]));
+
+  */
 
 #ifdef TIMING_FERMION_FORCE
     gettimeofday ( &t2, NULL );
@@ -326,6 +330,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 
 
 
+/*
 
 //STANDARD VERSION OF THE FERMIONIC FORCE
 void DEOTT_fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata           
@@ -453,5 +458,6 @@ void DEOTT_fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la co
 }
 
 
+*/
 
 #endif

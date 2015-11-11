@@ -23,7 +23,7 @@ void su2_rand(double *pp);
 #include "../Meas/ferm_meas.c"
 #include "./homebrew_acos.c"
 #include "./stouting.c"
-#include "./stouting_deottimizzato.c"
+//#include "./stouting_deottimizzato.c"
 #include "./fermion_force.c"
 #include "./md_integrator.c"
 #include "./update_versatile.c"

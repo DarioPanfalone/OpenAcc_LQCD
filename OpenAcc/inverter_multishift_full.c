@@ -72,7 +72,6 @@ int multishift_invert(__restrict su3_soa * const u,
     for(iter=0; iter<(approx->approx_order); iter++){
       // ps_0=phi
       assign_in_to_out(in,&shiftferm[iter]);
-      printf("SETINUSE_TEST\n");
       zeta_i[iter]=1.0;         // zeta_{-1}=1.0
       zeta_ii[iter]=1.0;        // zeta_{ 0}=1.0
       gammas[iter]=0.0;         // gammas_{-1}=0.0

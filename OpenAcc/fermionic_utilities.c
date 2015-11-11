@@ -261,7 +261,7 @@ void assign_in_to_out(  __restrict vec3_soa * const in_vect1,
 
 // Altre funzioni aggiunte per l'algebra lineare multishift "versatilizzato"
 void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
-  printf(" puntatore incriminato (%p) \n",fermion);
+  //  printf(" puntatore incriminato (%p) \n",fermion);
   SETINUSE((fermion));
 #pragma acc kernels present(fermion)
 #pragma acc loop independent 
