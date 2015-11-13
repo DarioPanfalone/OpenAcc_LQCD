@@ -93,85 +93,86 @@ int main(){
 #endif
 	
 	double plq,plqbis,rect;
-
-    int accettate_therm=0;
-    int accettate_metro=0;
-    int accettate_therm_old=0;
-    int accettate_metro_old=0;
-    int id_iter_offset=conf_id_iter;
-    //################### THERMALIZATION & METRO    ----   UPDATES ####################//
-    for(int id_iter=id_iter_offset;id_iter<(ITERATIONS+id_iter_offset);id_iter++){
-               accettate_therm_old = accettate_therm;
-               accettate_metro_old = accettate_metro;
-               conf_id_iter++;
-	       printf("\n#################################################\n");
-               printf(  "            GENERATING CONF %d of %d\n",conf_id_iter,ITERATIONS+id_iter_offset);
-	       printf(  "#################################################\n\n");
-	       //--------- CONF UPDATE ----------------//
-	       if(id_iter<therm_ITERATIONS){
-		 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                 residue_metro,residue_md,id_iter-id_iter_offset,
-                 accettate_therm,0);
-	       }else{
-		 accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
-	       }
+	
+	int accettate_therm=0;
+	int accettate_metro=0;
+	int accettate_therm_old=0;
+	int accettate_metro_old=0;
+	int id_iter_offset=conf_id_iter;
+	//################### THERMALIZATION & METRO    ----   UPDATES ####################//
+	for(int id_iter=id_iter_offset;id_iter<(ITERATIONS+id_iter_offset);id_iter++){
+	  accettate_therm_old = accettate_therm;
+	  accettate_metro_old = accettate_metro;
+	  conf_id_iter++;
+	  printf("\n#################################################\n");
+	  printf(  "            GENERATING CONF %d of %d\n",conf_id_iter,ITERATIONS+id_iter_offset);
+	  printf(  "#################################################\n\n");
+	  //--------- CONF UPDATE ----------------//
+	  if(id_iter<therm_ITERATIONS){
+	    accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
+							       residue_metro,residue_md,id_iter-id_iter_offset,
+							       accettate_therm,0);
+	  }else{
+	    accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+	  }
 #pragma acc update host(conf_acc[0:8])
-	       //---------------------------------------//
-
-	       //--------- MISURA ROBA FERMIONICA ----------------//
-	       FILE *foutfile = fopen(nome_file_ferm_output,"at");
-	       if(!foutfile) foutfile = fopen(nome_file_ferm_output,"wt");
-	       if(foutfile){
-		 fprintf(foutfile,"%d\t",conf_id_iter);
-		 for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),residue_metro,foutfile);
-		 fprintf(foutfile,"\n");
-	       }
-	       fclose(foutfile);
-	       //-------------------------------------------------// 
-	       //--------- MISURA ROBA DI GAUGE ------------------//
-	       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-	       rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+	  //---------------------------------------//
+	  
+	  //--------- MISURA ROBA FERMIONICA ----------------//
+	  FILE *foutfile = fopen(nome_file_ferm_output,"at");
+	  if(!foutfile) foutfile = fopen(nome_file_ferm_output,"wt");
+	  if(foutfile){
+	    fprintf(foutfile,"%d\t",conf_id_iter);
+	    for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),residue_metro,foutfile);
+	    fprintf(foutfile,"\n");
+	  }
+	  fclose(foutfile);
+	  //-------------------------------------------------// 
+	  //--------- MISURA ROBA DI GAUGE ------------------//
+	  plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+	  rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 	       
-               FILE *goutfile = fopen(nome_file_gauge_output,"at");
-               if(!goutfile) goutfile = fopen(nome_file_gauge_output,"wt");
-               if(goutfile){
-		 if(id_iter<therm_ITERATIONS){
-		   printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-		   printf("Therm_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
-		   printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
-		   
-		   fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_therm-accettate_therm_old);
-		   fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
-		   
-		 }else{
-		   printf("Metro_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-		   printf("Metro_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
-		   printf("Metro_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
-		   
-		   fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_metro-accettate_metro_old);
-		   fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
-		   
-		 }
-	       }
-               fclose(goutfile);
-	       //-------------------------------------------------//
-	       
-	       //--------- SALVA LA CONF SU FILE ------------------//
-	       if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config");
-	       //-------------------------------------------------//
-	       
-    }// id_iter loop ends here
-    
+	  FILE *goutfile = fopen(nome_file_gauge_output,"at");
+	  if(!goutfile) goutfile = fopen(nome_file_gauge_output,"wt");
+	  if(goutfile){
+	    if(id_iter<therm_ITERATIONS){
+	      printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+	      printf("Therm_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
+	      printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+	      
+	      fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_therm-accettate_therm_old);
+	      fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
+	      
+	    }else{
+	      printf("Metro_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+	      printf("Metro_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
+	      printf("Metro_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+	      
+	      fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_metro-accettate_metro_old);
+	      fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
+	      
+	    }
+	  }
+	  fclose(goutfile);
+	  //-------------------------------------------------//
+	  
+	  //--------- SALVA LA CONF SU FILE ------------------//
+	  //	  if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config");
+	  //-------------------------------------------------//
+	  
+	}// id_iter loop ends here
+	
+		
+	//--------- SALVA LA CONF SU FILE ------------------//
+	//	print_su3_soa(conf_acc,"stored_config");
+	//-------------------------------------------------//
 
 
-    //--------- SALVA LA CONF SU FILE ------------------//
-    print_su3_soa(conf_acc,"stored_config");
-    //-------------------------------------------------//
-
+	
 #ifdef STOUT_FERMIONS
-    }
+      } // end pragma acc data (le cose del caso stout)
 #endif
- 
+      
   }// end pragma acc data
 
   CHECKSTATUS(conf_acc);

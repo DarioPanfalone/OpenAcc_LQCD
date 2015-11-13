@@ -64,9 +64,9 @@
 
 
 const int no_flavours=2; // number of quark species
-const int start_opt=0;// 0 --> COLD START; 1 --> START FROM SAVED CONF
+const int start_opt=1;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=20; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int ITERATIONS=1; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
 int therm_ITERATIONS = 10; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 int save_conf_every=2;

@@ -704,7 +704,8 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
 	  
-	  tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+	  tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
 	  
 
 	}  // x
@@ -731,6 +732,7 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
 }// closes routine
 
 
+#pragma acc routine seq
 static inline double half_tr_thmat_squared( const __restrict thmat_soa * const mom,
 					    int idx_mom){
   d_complex  C = mom->c01[idx_mom];
@@ -770,7 +772,7 @@ double calc_momenta_action( const __restrict thmat_soa * const mom,
 
 
 
-
+#pragma acc routine seq
 static inline void assign_zero_to_su3_soa_component(__restrict su3_soa * const matrix_comp,
 						    int idx){
   matrix_comp->r0.c0[idx]=0.0+I*0.0;
@@ -1071,6 +1073,7 @@ void RHO_times_conf_times_staples_ta_part(__restrict su3_soa * const u,        /
 
 }// closes routine
 
+#pragma acc routine seq
 static inline void thmat1_plus_tamat2_times_factor_into_thmat1(__restrict thmat_soa * const thm1,
 							       const __restrict tamat_soa * const tam2,
 							       int idx,
@@ -1116,6 +1119,7 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
 }// closes routine
 
 
+#pragma acc routine seq
 static inline void extract_mom(const __restrict thmat_soa * const mom,
 			       int idx_mom,
 			       double delta,
@@ -1137,6 +1141,7 @@ static inline void extract_mom(const __restrict thmat_soa * const mom,
 
 
 
+#pragma acc routine seq
 static inline void matrix_exp_openacc(const __restrict single_su3 * const MOM,
 				      __restrict single_su3 * AUX,
 				      __restrict single_su3 * RES){
@@ -1178,6 +1183,7 @@ static inline void matrix_exp_openacc(const __restrict single_su3 * const MOM,
   }
 }
 
+#pragma acc routine seq
 static inline void conf_left_exp_multiply(__restrict su3_soa * const cnf,  // e' costante e qui dentro non viene modificata
 					  const int idx_cnf,
 					  const __restrict single_su3 * const  EXP, 
@@ -1206,6 +1212,7 @@ static inline void conf_left_exp_multiply(__restrict su3_soa * const cnf,  // e'
       
 }
 
+#pragma acc routine seq
 static inline void project_on_su3(__restrict su3_soa * const cnf,
 				  const int idx_cnf,
 				  __restrict single_su3 *  AUX){

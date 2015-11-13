@@ -67,6 +67,7 @@ inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_
 
 }
 
+#pragma acc routine seq
 static inline double det_i_times_QA_soa( __restrict tamat_soa * const QA,const int idx){
 
     double rc22 = -QA->rc00[idx]-QA->rc11[idx] ;
@@ -78,6 +79,7 @@ static inline double det_i_times_QA_soa( __restrict tamat_soa * const QA,const i
       	          -         QA->c01[idx]  * conj(QA->c01[idx]) * rc22  );
 
 }
+#pragma acc routine seq
 static inline double Tr_i_times_QA_sq_soa( __restrict tamat_soa * const QA,const int idx){
   // computes Tr( (i*QA)^2 )
     return 2 * creal( QA->rc00[idx] * QA->rc00[idx] +
@@ -220,6 +222,7 @@ static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa
 
 }
 
+#pragma acc routine seq
 static inline void CH_exponential_antihermitian_nissalike(single_su3 * const exp_out,
 							      __restrict single_tamat * const QA){
   // exp( - QA) , where Q=i*QA ==> exp(-QA) = exp(i*Q)

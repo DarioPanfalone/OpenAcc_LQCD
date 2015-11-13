@@ -68,7 +68,7 @@ void initialize_global_variables(){
   iepsh_acc = 0.0 + (epsilon_acc) * 0.5 * 1.0I;
 }
 
-
+#pragma acc routine seq
 static inline int snum_acc(int x, int y, int z, int t) {
   int ris;
   ris = x + (y*vol1) + (z*vol2) + (t*vol3);

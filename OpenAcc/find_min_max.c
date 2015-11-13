@@ -58,7 +58,7 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
       loop_count++;
-      if(loop_count %100 == 0)   printf("        iterations of max computat  = \n",loop_count);
+      if(loop_count %100 == 0)   printf("        iterations of max computat  = %d\n",loop_count);
   } while(old_norm>1.0e-5);    // loop end
   double max=norm;
   return max;

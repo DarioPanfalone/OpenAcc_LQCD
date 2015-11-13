@@ -15,7 +15,7 @@
 #ifndef FERMIONIC_UTILITIES_C_
 #define FERMIONIC_UTILITIES_C_
 
-
+#pragma acc routine seq
 static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect1,
 					     __restrict vec3_soa * const in_vect2,
 					     const int idx_vect
@@ -29,6 +29,7 @@ static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect
 
 
 
+#pragma acc routine seq
 static inline double l2norm2_loc( __restrict vec3_soa * const in_vect1,
 				  const int idx_vect
 				  ) {

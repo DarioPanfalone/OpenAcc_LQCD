@@ -214,6 +214,7 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
     }
 }
 
+#pragma acc routine seq
 static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * const aux_u,
 							int idxh,
 							__restrict vec3_soa  * const fer_l, // questo fermione e' costante e non viene modificato qui dentro
@@ -244,6 +245,7 @@ static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * con
 }
 
 
+#pragma acc routine seq
 static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
 						   const  int idx,
 						   const  int eta,
@@ -315,6 +317,7 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
 
 
 #ifdef STOUT_FERMIONS
+#pragma acc routine seq
 static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
 						   const  int idx,
 						   const  int eta,
@@ -372,6 +375,7 @@ static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * 
 
 
 #if defined(BACKFIELD) || defined(IMCHEMPOT)
+#pragma acc routine seq
 static inline  void phase_times_auxmat_into_auxmat(
 						   __restrict su3_soa * const auxmat,  // e' costante e non viene modificato
 						   __restrict su3_soa * const pseudo_ipdot,
@@ -393,6 +397,7 @@ static inline  void phase_times_auxmat_into_auxmat(
 }
 
 #else  //if defined(BACKFIELD) || defined(IMCHEMPOT)
+//#pragma acc routine seq
 static inline void accumulate_auxmat1_into_auxmat2(
 						   __restrict su3_soa * const auxmat1,  // e' costante e non viene modificato
 						   __restrict su3_soa * const auxmat2,
@@ -486,6 +491,7 @@ void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, 
   }  // t
 }// closes routine     
 
+#pragma acc routine seq
 static inline void assign_zero_to_tamat_soa_component(__restrict tamat_soa * const matrix_comp,
 						      int idx){
   matrix_comp->c01[idx]=0.0+I*0.0;
@@ -841,10 +847,11 @@ void accumulate_gl3soa_into_gl3soa(
 
     SETINUSE(pseudo_ipdot);
 
-    int idxh;
-#pragma acc data present(auxmat) present(pseudo_ipdot)
-#pragma acc loop independent 
-    for(int dirindex = 0 ; dirindex < 8 ; dirindex++){
+    int idxh, dirindex;
+//
+#pragma acc kernels present(auxmat) present(pseudo_ipdot)
+#pragma acc loop independent
+    for(dirindex = 0 ; dirindex < 8 ; dirindex++){
 #pragma acc loop independent
         for( idxh = 0 ; idxh < sizeh; idxh++){
             accumulate_auxmat1_into_auxmat2(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh);

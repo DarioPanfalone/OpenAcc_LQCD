@@ -30,7 +30,7 @@ static inline void tamat_soa_to_single_tamat( __restrict tamat_soa * const in,
 
 }
 
-
+#pragma acc routine seq
 static inline void conf_left_exp_multiply_to_su3_soa(__restrict su3_soa * const cnf,
 						     const int idx,
 						     __restrict su3_soa * const  EXP,
@@ -134,6 +134,7 @@ void stout_isotropic( __restrict su3_soa * const u,               // --> input c
 }
 
 
+#pragma acc routine seq
 static inline d_complex  b1(double denom,
 			    double u,
 			    double w,
@@ -143,6 +144,7 @@ static inline d_complex  b1(double denom,
   return  0.5*denom*denom*(2.0*u*r_1 + (3.0*u*u-w*w)*r_2 -2.0*(15.0*u*u+w*w)*f); // (57)
 }
 
+#pragma acc routine seq
 static inline d_complex  b2(double denom,
 			    double u,
 			    d_complex r_1,
@@ -558,7 +560,7 @@ inline void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr){
 
 
 #pragma acc routine seq
-void compute_sigma_local_PEZZO1(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
+static inline void compute_sigma_local_PEZZO1(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
 				__restrict su3_soa   * const U,  // la configurazione di gauge --> input
 				__restrict su3_soa   * const SP,  // entra Sigma primo (input: fermforce del passo precedente) ED esce Sigma --> sia input che ouput
 				__restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))

@@ -3,6 +3,8 @@
 
 #include "struct_c_def.c"
 #include "../DbgTools/debug_macros_glvarcheck.c"
+int fermion_force_debug_count=0;
+int number_calls_sigma=0;
 
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 

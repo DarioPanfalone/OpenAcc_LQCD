@@ -6,6 +6,7 @@
 #include "./fermionic_utilities.c"
 
 #ifdef PHASE_MAT_VEC_MULT
+#pragma acc routine seq
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
                                 const int idx_mat,
                                 const int eta,
@@ -18,7 +19,7 @@ static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
   d_complex vec1 = (in_vect->c1[idx_vect])*phase;
   d_complex vec2 = (in_vect->c2[idx_vect])*phase;
 #else
-
+#pragma acc routine seq
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
                                 const int idx_mat,
                                 const int eta,
@@ -68,6 +69,7 @@ static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
 #endif
 
 #ifdef PHASE_MAT_VEC_MULT
+#pragma acc routine seq
 static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
                                     const int idx_mat,
                                     const int eta,
@@ -81,6 +83,7 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
   d_complex vec2 = in_vect->c2[idx_vect]*phase;
 
 #else
+#pragma acc routine seq
 static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
                                     const int idx_mat,
                                     const int eta,
@@ -130,6 +133,7 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
 
 
 
+#pragma acc routine seq
 static inline vec3 sumResult ( vec3 aux, vec3 aux_tmp) {
 
   aux.c0 += aux_tmp.c0;
@@ -140,6 +144,7 @@ static inline vec3 sumResult ( vec3 aux, vec3 aux_tmp) {
 
 }
 
+#pragma acc routine seq
 static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 
   aux.c0 -= aux_tmp.c0;
