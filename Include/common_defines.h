@@ -31,10 +31,10 @@
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
 
 // lattice dimensions
-#define nx 4
-#define ny 4
-#define nz 4
-#define nt 4
+#define nx 24
+#define ny 24
+#define nz 24
+#define nt 6
 
 /*
 #define nx 32
@@ -54,22 +54,22 @@
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
-#define STOUT_STEPS 3
+#define STOUT_STEPS 2
 #endif
-#define RHO 0.1
+#define RHO 0.15
 
 
-#define beta 4.3
+#define beta 3.55
   // 3.7  //5.35
 
 
 const int no_flavours=2; // number of quark species
 const int start_opt=1;// 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-int ITERATIONS=1; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-int therm_ITERATIONS = 10; // the first <therm_ITERATIONS> of the history will be thermalization updates
+int ITERATIONS=0; // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+int therm_ITERATIONS = 30; // the first <therm_ITERATIONS> of the history will be thermalization updates
 
-int save_conf_every=2;
+int save_conf_every=10;
 
 #define max_approx_order 19
 int approx_metro=19;
@@ -77,7 +77,7 @@ int approx_md=9;
 const double lambda_min_metro=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double lambda_min_md=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double residue_metro=1.0e-8;//-8    // stopping residual for CG
-const double residue_md=1.0e-5;//-5    // stopping residual for CG
+const double residue_md=1.0e-6;//-5    // stopping residual for CG
 const int gmp_remez_precision=100; // The precision that gmp uses
 
 // quanti di campo esterno
@@ -188,7 +188,7 @@ void init_ferm_params(){
   strcpy(nome_file_gauge_output,"gauge_meas.dat");
 
 
-  NDiffFlavs = 2;  // the number of different quark flavours
+  NDiffFlavs = 3;  // the number of different quark flavours
 
   int allocation_check; 
   // al posto di 128 c'era ALIGN, solo che qui questa variabile non è ancora definita (viene fatto in struct_c_def)
@@ -196,16 +196,22 @@ void init_ferm_params(){
   if(allocation_check != 0)  printf("Errore nella allocazione di fermions_parameters \n");
 
   fermions_parameters[0].ferm_charge       = -1.0;   // up    charge
-  fermions_parameters[0].ferm_mass         = 0.05;    //0.075;  // up    mass
+  fermions_parameters[0].ferm_mass         = 0.00362345;    //0.075;  // up    mass
   fermions_parameters[0].ferm_im_chem_pot  = 0.0;    // up    chem pot
   fermions_parameters[0].degeneracy        = 1;      // up    degeneracy
   fermions_parameters[0].number_of_ps      = 1;      // up    number of pseudo fermions
 
   fermions_parameters[1].ferm_charge       = 2.0;    // down  charge
-  fermions_parameters[1].ferm_mass         = 0.05;    //0.075;  // down  mass
+  fermions_parameters[1].ferm_mass         = 0.00362345;    //0.075;  // down  mass
   fermions_parameters[1].ferm_im_chem_pot  = 0.0;    // down  chem pot
   fermions_parameters[1].degeneracy        = 1;      // down  degeneracy
   fermions_parameters[1].number_of_ps      = 1;      // down  number of pseudo fermions
+
+  fermions_parameters[2].ferm_charge       = -1.0;    // strange  charge
+  fermions_parameters[2].ferm_mass         = 0.102;    //0.075;  // strange  mass
+  fermions_parameters[2].ferm_im_chem_pot  = 0.0;    // strange  chem pot
+  fermions_parameters[2].degeneracy        = 1;      // strange  degeneracy
+  fermions_parameters[2].number_of_ps      = 1;      // strange  number of pseudo fermions
 
   NPS_tot = 0;
   max_ps = fermions_parameters[0].number_of_ps;

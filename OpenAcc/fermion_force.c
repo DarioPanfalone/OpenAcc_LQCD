@@ -229,8 +229,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   //  printf("#### Inside fermion force soloopenacc ###### \n");
   //  printf("############################################ \n");
 
-  fermion_force_debug_count++;
-  
 
 #ifdef TIMING_FERMION_FORCE
   struct timeval t1,t2;
@@ -243,14 +241,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
   conf_to_use =  &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
   set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
-
-  if(fermion_force_debug_count==1){
-#pragma acc update host(conf_to_use[0:8])
-    print_su3_soa(conf_to_use,"conf_stoutata");
-#pragma acc update host(tconf_acc[0:8])
-    print_su3_soa(tconf_acc,"conf_originale");
-  }
-
 #else
   conf_to_use = tconf_acc;
 #endif
@@ -267,11 +257,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
       
       ker_openacc_compute_fermion_force(conf_to_use, backfield, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
-      //      printf("COEFF %.18lf\n",tfermion_parameters[iflav].approx_md.RA_a[0]);
-      //      printf("FERMSHIFTED00 = %.18lf\n",tferm_shiftmulti_acc[0].c0[0]);
-      //      printf("PSEUDO00 = %.18lf\n",taux_conf_acc[0].r0.c0[0]);
-
-
     }
     
 #ifdef STOUT_FERMIONS
@@ -280,17 +265,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
     // JUST MULTIPLY BY BACK FIELD AND/OR CHEMICAL POTENTIAL
     multiply_backfield_times_force(&(tfermion_parameters[iflav]),backfield,taux_conf_acc,gl3_aux);
  #else
-
-      if(iflav==0 && fermion_force_debug_count == 1){
-#pragma acc update host(taux_conf_acc[0:8])
-	print_su3_soa(taux_conf_acc,"force_contrib_0");
-      }
     accumulate_gl3soa_into_gl3soa(taux_conf_acc,gl3_aux);
-      if(iflav==0 && fermion_force_debug_count == 1){
-#pragma acc update host(gl3_aux[0:8])
-	print_su3_soa(gl3_aux,"force_contrib_0_gl3_aux");
-      }
-
 
  #endif 
     
@@ -302,27 +277,12 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   }
 
 #ifdef STOUT_FERMIONS
-
-
-  if(fermion_force_debug_count==1){
-#pragma acc update host(gl3_aux[0:8])
-    print_su3_soa(gl3_aux,"pseudoforza_ridotta_maxstout");
-  }
-
   mult_gl3_soa_times_stag_phases(gl3_aux);
 
   for(int stout_level = STOUT_STEPS ; stout_level > 1 ; stout_level--){
     printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl %d to lvl %d] <<<<<<<<<<<<<<<<<<<<<<<<<\n",stout_level,stout_level-1);
     conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
     compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, taux_conf_acc );
-
-    if(fermion_force_debug_count==1){
-      if(stout_level == STOUT_STEPS){
-#pragma acc update host(gl3_aux[0:8])
-	print_su3_soa(gl3_aux,"pseudoforza_ridotta_maxstout_m1");
-      }
-    }
-
   }
   printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl 1 to lvl 0] <<<<<<<<<<<<<<<<<<<<<<<<<\n");
   compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, taux_conf_acc );
@@ -400,9 +360,6 @@ void DEOTT_fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la co
   stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
   conf_to_use =  &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
   set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
-
-  print_su3_soa(conf_to_use,"conf_stoutata");
-  print_su3_soa(tconf_acc,"conf_originale");
 
 #else
   conf_to_use = tconf_acc;

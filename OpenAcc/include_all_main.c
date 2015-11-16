@@ -27,7 +27,7 @@ void su2_rand(double *pp);
 #include "./fermion_force.c"
 #include "./md_integrator.c"
 #include "./update_versatile.c"
-
+#include "./cooling.c"
 
 int main(){
 
@@ -157,17 +157,24 @@ int main(){
 	  //-------------------------------------------------//
 	  
 	  //--------- SALVA LA CONF SU FILE ------------------//
-	  //	  if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config");
+	  if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config");
 	  //-------------------------------------------------//
 	  
 	}// id_iter loop ends here
 	
 		
 	//--------- SALVA LA CONF SU FILE ------------------//
-	//	print_su3_soa(conf_acc,"stored_config");
+	print_su3_soa(conf_acc,"stored_config");
 	//-------------------------------------------------//
 
 
+	plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+	printf("COOL 0  Placchetta= %.18lf \n",plq/size/6.0/3.0);
+	for(int icool=0;icool<100;icool++){
+	  cool_conf(conf_acc,aux_conf_acc);
+	  plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+	  printf("COOL %d  Placchetta= %.18lf \n",icool+1,plq/size/6.0/3.0);
+	}
 	
 #ifdef STOUT_FERMIONS
       } // end pragma acc data (le cose del caso stout)

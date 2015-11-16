@@ -27,11 +27,8 @@
 #include "./struct_c_def.c"
 #include "./fermion_force.c"
 
-int ncall_gauge_force=0;
-
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta,double * delta)
  {
-   ncall_gauge_force++;
  int md;
  // Step for the P
  // P' = P - l*dt*dS/dq
@@ -40,11 +37,6 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  mult_conf_times_stag_phases(tconf_acc);
 
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
-
- if(ncall_gauge_force==1){
-#pragma acc update host(tipdot[0:8])
-   print_tamat_soa(tipdot,"tipdot_after_gforce");
- }
  mom_sum_mult(tmomenta,tipdot,delta,3);
  for(md=1; md<gauge_scale; md++){
    // Step for the Q
@@ -128,10 +120,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
           backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, 
           ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
 	  tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-
-#pragma acc update host(tipdot_acc[0:8])
-  print_tamat_soa(tipdot_acc,"tipdot_after_fforce");
-
 
   mom_sum_mult(tmomenta,tipdot_acc,delta,0);
   

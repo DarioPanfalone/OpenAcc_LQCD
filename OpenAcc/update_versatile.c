@@ -91,9 +91,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     gconf_as_fermionmatrix = tconf_acc;
 #endif
 
-#pragma acc update host(gconf_as_fermionmatrix[0:8])
-    print_su3_soa(gconf_as_fermionmatrix,"matrice_da_usare");
-
 
 
 
@@ -168,12 +165,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef PRINT_DETAILS_INSIDE_UPDATE
     printf(" Computed the fermion CHI : OK \n");
 #endif
-
-
-#pragma acc update host(ferm_chi_acc[0:NPS_tot])
-    print_vec3_soa(&(ferm_chi_acc[fermions_parameters[0].index_of_the_first_ps]),"fermione_chi_0");
-    print_vec3_soa(&(ferm_chi_acc[fermions_parameters[1].index_of_the_first_ps]),"fermione_chi_1");
-
     
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE MD
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){

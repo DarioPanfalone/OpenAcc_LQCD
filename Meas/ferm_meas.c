@@ -4,6 +4,11 @@
 #ifndef FERM_MEAS_C 
 #define FERM_MEAS_C
 
+#ifdef STOUT_FERMIONS
+#include "../OpenAcc/stouting.c"
+#endif
+
+
 // vedi tesi LS F.Negro per ragguagli (Appendici)
 void eo_inversion(su3_soa *tconf_acc,
 		  double_soa * tbackfield,
@@ -45,6 +50,11 @@ d_complex chiral_condensate(vec3_soa * rnd_e,
      
 }
 
+
+
+
+
+
 void perform_chiral_measures( su3_soa * tconf_acc,
 			      double_soa * tbackfield,
 			      ferm_param * tfermions_parameters,
@@ -55,6 +65,15 @@ void perform_chiral_measures( su3_soa * tconf_acc,
   vec3_soa * phi_e,* phi_o;
   vec3_soa * trial_sol;
 
+  su3_soa * conf_to_use;
+
+#ifdef STOUT_FERMIONS
+    SETREQUESTED(gstout_conf_acc_arr);
+    stout_wrapper(tconf_acc ,gstout_conf_acc_arr);
+    conf_to_use = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
+#else
+    conf_to_use = tconf_acc;
+#endif
 
   int allocation_check;
   allocation_check =  posix_memalign((void **)&rnd_e, ALIGN, sizeof(vec3_soa));
@@ -81,7 +100,7 @@ void perform_chiral_measures( su3_soa * tconf_acc,
 #pragma acc data create(phi_e[0:1]) create(phi_o[0:1]) create(chi_e[0:1]) create(chi_o[0:1]) copyin(rnd_e[0:1]) copyin(rnd_o[0:1]) copyin(trial_sol[0:1])
   {
     // i fermioni ausiliari kloc_* sono quelli GLOBALI !!!
-    eo_inversion(tconf_acc,tbackfield,tfermions_parameters,res,rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+    eo_inversion(conf_to_use,tbackfield,tfermions_parameters,res,rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
     chircond = chiral_condensate(rnd_e,rnd_o,chi_e,chi_o);
     double factor = tfermions_parameters->degeneracy*0.25/size;
     fprintf(out_file,"%.16lf\t%.16lf\t",creal(chircond)*factor,cimag(chircond)*factor);
