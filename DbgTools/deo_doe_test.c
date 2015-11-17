@@ -8,6 +8,8 @@
 #include "../OpenAcc/random_assignement.c"
 #include "../OpenAcc/dbgtools.c"
 
+//double casuale(void);
+
 
 int main(){
 
@@ -52,23 +54,23 @@ int main(){
 
 
   // init conf
-  generate_Conf_cold(conf_acc,0.05);
-  print_su3_soa(conf_acc, "conf_acc");
-  printf("Cold Gauge Conf Generated : OK \n");
-  //read_su3_soa(conf_acc,"conf_acc");
-  //printf("Cold Gauge Conf READ : OK \n");
+  //generate_Conf_cold(conf_acc,0.05);
+  //print_su3_soa(conf_acc, "conf_acc");
+  //printf("Cold Gauge Conf Generated : OK \n");
+  read_su3_soa(conf_acc,"indaddr_conf_acc");
+  printf("Cold Gauge Conf READ : OK \n");
 
   conf_id_iter=0;
 
 
   // init fermion
-  generate_vec3_soa_gauss(ferm_chi_acc);
-  print_vec3_soa(ferm_chi_acc,"ferm_chi_acc");
-  // read_vec3_soa(ferm_chi_acc,"ferm_chi_acc" );
+  //generate_vec3_soa_gauss(ferm_chi_acc);
+  //print_vec3_soa(ferm_chi_acc,"ferm_chi_acc");
+  read_vec3_soa(ferm_chi_acc,"indaddr_ferm_chi_acc" );
 
 #pragma acc data   copy(conf_acc[0:8]) copy(ferm_chi_acc) copyout(ferm_phi_acc)
   {
-  acc_Deo(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters,u1_back_field_phases ) ;
+  acc_Doe(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters,u1_back_field_phases ) ;
 
 
   print_vec3_soa(ferm_phi_acc,"ferm_phi_acc");
