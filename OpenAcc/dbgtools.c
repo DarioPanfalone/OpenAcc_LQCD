@@ -205,5 +205,15 @@ void print_double_soa(double_soa * const backfield, const char* nomefile){
     fclose(fp);
 }
 
+void print_1double_soa(double_soa * const vettore, const char* nomefile){
+
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    for(int i = 0 ; i < sizeh ; i++){
+      fprintf(fp, "%.18lf\n",vettore->d[i]);
+    }
+    fclose(fp);
+}
+
 
 #endif
