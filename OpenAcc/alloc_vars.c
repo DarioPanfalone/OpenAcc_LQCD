@@ -123,7 +123,7 @@ void mem_alloc(){
 
   
 
-  allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, sizeof(double_soa)); SETFREE(d_local_sums);
+  allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, 2*sizeof(double_soa)); SETFREE(d_local_sums);
   if(allocation_check != 0)  printf("Errore nella allocazione di d_local_sums \n");
   allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa)); for(int mu=0;mu<2;mu++) SETFREE((&local_sums[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di local_sums \n");

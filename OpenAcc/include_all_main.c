@@ -20,6 +20,7 @@ void su2_rand(double *pp);
 #include "./inverter_multishift_full.c"
 #include "./rettangoli.c"
 #include "./ipdot_gauge.c"
+#include "../Meas/gauge_meas.c"
 #include "../Meas/ferm_meas.c"
 #include "./homebrew_acos.c"
 #include "./stouting.c"
@@ -73,7 +74,7 @@ int main(){
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
   if(start_opt==0){ 
-    generate_Conf_cold(conf_acc,0.05);
+    generate_Conf_cold(conf_acc,0.2);
     printf("Cold Gauge Conf Generated : OK \n");
     conf_id_iter=0;
   }
@@ -85,14 +86,14 @@ int main(){
   //###############################################################################################  
 
 
-#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs])
+#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:2])  copyin(fermions_parameters[0:NDiffFlavs])
   {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8]) create(gstout_conf_acc_arr[0:(8*STOUT_STEPS)]) create(glocal_staples[0:8]) create(gipdot[0:8]) 
       {
 #endif
 	
-	double plq,plqbis,rect;
+	double plq,plqbis,rect,topoch;
 	
 	int accettate_therm=0;
 	int accettate_metro=0;
@@ -169,12 +170,16 @@ int main(){
 
 
 	plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-	printf("COOL 0  Placchetta= %.18lf \n",plq/size/6.0/3.0);
-	for(int icool=0;icool<100;icool++){
+	topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
+	printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/size/6.0/3.0,topoch);
+
+	for(int icool=0;icool<5000;icool++){
 	  cool_conf(conf_acc,aux_conf_acc);
 	  plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-	  printf("COOL %d  Placchetta= %.18lf \n",icool+1,plq/size/6.0/3.0);
+	  topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
+	  printf("COOL %d  Placchetta= %.18lf  TopCh= %.18lf \n",icool+1,plq/size/6.0/3.0,topoch);
 	}
+
 	
 #ifdef STOUT_FERMIONS
       } // end pragma acc data (le cose del caso stout)

@@ -164,6 +164,7 @@ void cool_conf(__restrict su3_soa   * const U,
   compute_cooled_even_links(U,TMP);
   calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd(U,TMP);
   compute_cooled_odd_links(U,TMP);
+  unitarize_conf(U);
 
   mult_conf_times_stag_phases(U);
 }

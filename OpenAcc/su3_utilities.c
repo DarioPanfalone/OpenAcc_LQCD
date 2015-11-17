@@ -2,6 +2,47 @@
 #define SU3_UTILITIES_C_
 
 
+#pragma acc routine seq
+static inline void loc_unitarize_conf(__restrict su3_soa * const cnf,
+				      const int idx_cnf){
+  d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
+  A00 = cnf->r0.c0[idx_cnf];
+  A01 = cnf->r0.c1[idx_cnf];
+  A02 = cnf->r0.c2[idx_cnf];
+  A10 = cnf->r1.c0[idx_cnf];
+  A11 = cnf->r1.c1[idx_cnf];
+  A12 = cnf->r1.c2[idx_cnf];
+
+  //normalizzo la prima riga
+  double NORM = creal(A00)*creal(A00)+cimag(A00)*cimag(A00) + creal(A01)*creal(A01)+cimag(A01)*cimag(A01) + creal(A02)*creal(A02)+cimag(A02)*cimag(A02);
+  NORM = 1.0/sqrt(NORM);
+  A00 *= NORM;
+  A01 *= NORM;
+  A02 *= NORM;
+  //faccio il prodotto scalare con la seconda e sottraggo (ortogonalizzo)
+  d_complex SCAL_PROD = conj(A00) * A10 + conj(A01) * A11 + conj(A02) * A12;
+
+  A10 -= SCAL_PROD * A00;
+  A11 -= SCAL_PROD * A01;
+  A12 -= SCAL_PROD * A02;
+
+  //normalizzo la seconda riga
+  NORM = creal(A10)*creal(A10)+cimag(A10)*cimag(A10) + creal(A11)*creal(A11)+cimag(A11)*cimag(A11) + creal(A12)*creal(A12)+cimag(A12)*cimag(A12);
+  NORM = 1.0/sqrt(NORM);
+  A10 *= NORM;
+  A11 *= NORM;
+  A12 *= NORM;
+
+  cnf->r0.c0[idx_cnf] = A00;
+  cnf->r0.c1[idx_cnf] = A01;
+  cnf->r0.c2[idx_cnf] = A02;
+  cnf->r1.c0[idx_cnf] = A10;
+  cnf->r1.c1[idx_cnf] = A11;
+  cnf->r1.c2[idx_cnf] = A12;
+  
+}
+
+
 
 #include "../OpenAcc/deviceinit.c"
 #include "../OpenAcc/struct_c_def.c"
@@ -635,6 +676,21 @@ void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u){
   }
 
 }
+
+
+// reunitarize the conf by brute force
+void unitarize_conf( __restrict su3_soa * const u){
+  int idxh, dirindex;
+#pragma acc kernels present(u)
+#pragma acc loop independent
+  for(dirindex = 0 ; dirindex < 8 ; dirindex++){
+#pragma acc loop independent
+    for( idxh = 0 ; idxh < sizeh; idxh++){
+      loc_unitarize_conf(&u[dirindex],idxh);
+    }
+  }
+}
+
 
 
 
