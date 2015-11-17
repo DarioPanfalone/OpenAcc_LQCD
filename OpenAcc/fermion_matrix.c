@@ -4,6 +4,8 @@
 #include "./struct_c_def.c"
 #include "openacc.h"
 #include "./fermionic_utilities.c"
+#include "../DbgTools/debug_macros_glvarcheck.c"
+
 
 #ifdef PHASE_MAT_VEC_MULT
 #pragma acc routine seq
