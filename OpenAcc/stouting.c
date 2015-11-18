@@ -5,30 +5,12 @@
 #include "./struct_c_def.c"
 #include "../OpenAcc/alloc_vars.c"
 #include "../OpenAcc/su3_utilities.c"
+#include "./stouting.h"
 
-#pragma acc routine seq
-static inline void su3_soa_to_single_su3(__restrict su3_soa * const in,
-					int idx,
-					single_su3 * out){
-  out->comp[0][0] = in->r0.c0[idx];
-  out->comp[0][1] = in->r0.c1[idx];
-  out->comp[0][2] = in->r0.c2[idx];
-  out->comp[1][0] = in->r1.c0[idx];
-  out->comp[1][1] = in->r1.c1[idx];
-  out->comp[1][2] = in->r1.c2[idx];
-}
+#include "./single_types.h"
 
-#pragma acc routine seq
-static inline void tamat_soa_to_single_tamat( __restrict tamat_soa * const in,
-					      int idx,
-					      single_tamat * out){
-  out->c01  = in->c01[idx];
-  out->c02  = in->c02[idx];
-  out->c12  = in->c12[idx];
-  out->rc00 = in->rc00[idx];
-  out->rc11 = in->rc11[idx];
 
-}
+
 
 #pragma acc routine seq
 static inline void conf_left_exp_multiply_to_su3_soa(__restrict su3_soa * const cnf,
@@ -101,57 +83,6 @@ void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
 }// closes routine
 
 
-
-void stout_isotropic( __restrict su3_soa * const u,               // --> input conf
-		      __restrict su3_soa * const uprime,          // --> output conf [stouted]
-		      __restrict su3_soa * const local_staples,   // --> parking variable
-		      __restrict su3_soa * const auxiliary,       // --> parking variable
-		      __restrict tamat_soa * const tipdot){       // --> parking variable
-
-    SETREQUESTED(uprime);
-    SETREQUESTED(local_staples);
-    SETREQUESTED(auxiliary);
-    SETREQUESTED(tipdot);
-
-
-  set_su3_soa_to_zero(local_staples);
-
-  mult_conf_times_stag_phases(u);
-
-  calc_loc_staples_removing_stag_phases_nnptrick_all(u,local_staples);
-
-  RHO_times_conf_times_staples_ta_part(u,local_staples,tipdot);
-  SETFREE(local_staples);
-
-
-  exp_minus_QA_times_conf(u,tipdot,uprime,auxiliary);
-  SETFREE(tipdot);
-
-
-  mult_conf_times_stag_phases(u);
-  mult_conf_times_stag_phases(uprime);
-
-}
-
-
-#pragma acc routine seq
-static inline d_complex  b1(double denom,
-			    double u,
-			    double w,
-			    d_complex r_1,
-			    d_complex r_2,
-			    d_complex f){
-  return  0.5*denom*denom*(2.0*u*r_1 + (3.0*u*u-w*w)*r_2 -2.0*(15.0*u*u+w*w)*f); // (57)
-}
-
-#pragma acc routine seq
-static inline d_complex  b2(double denom,
-			    double u,
-			    d_complex r_1,
-			    d_complex r_2,
-			    d_complex f){
-  return   0.5*denom*denom*(r_1 - 3.0*u*r_2 -24.0*u*f); // (58)
-}
 
 //calcolo di lambda
 #pragma acc routine seq
@@ -541,22 +472,6 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
     }  // z
   }  // t
 }
-
-
-#ifdef STOUT_FERMIONS
-inline void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr){
-
-
-  for(int mu = 0; mu < 8*STOUT_STEPS; mu ++) SETREQUESTED((&tstout_conf_acc_arr[mu]));
-    stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, glocal_staples, gipdot );
-    for(int stoutlevel=1;stoutlevel < STOUT_STEPS; stoutlevel++)
-        stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),&(tstout_conf_acc_arr[8*stoutlevel]),auxbis_conf_acc, glocal_staples,  gipdot );
-
-}
-#endif
-
-
-
 
 
 #pragma acc routine seq

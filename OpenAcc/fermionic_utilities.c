@@ -16,31 +16,7 @@
 #define FERMIONIC_UTILITIES_C_
 
 #include "../DbgTools/debug_macros_glvarcheck.c"
-
-#pragma acc routine seq
-static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect1,
-					     __restrict vec3_soa * const in_vect2,
-					     const int idx_vect
-                                          ) {
-
-  double sum  = creal(in_vect1->c0[idx_vect]) * creal(in_vect2->c0[idx_vect]) + cimag(in_vect1->c0[idx_vect]) * cimag(in_vect2->c0[idx_vect]);
-         sum += creal(in_vect1->c1[idx_vect]) * creal(in_vect2->c1[idx_vect]) + cimag(in_vect1->c1[idx_vect]) * cimag(in_vect2->c1[idx_vect]);
-         sum += creal(in_vect1->c2[idx_vect]) * creal(in_vect2->c2[idx_vect]) + cimag(in_vect1->c2[idx_vect]) * cimag(in_vect2->c2[idx_vect]);
-  return sum;
-}
-
-
-
-#pragma acc routine seq
-static inline double l2norm2_loc( __restrict vec3_soa * const in_vect1,
-				  const int idx_vect
-				  ) {
-  double sum = creal(in_vect1->c0[idx_vect])*creal(in_vect1->c0[idx_vect])+cimag(in_vect1->c0[idx_vect])*cimag(in_vect1->c0[idx_vect]);
-  sum += creal(in_vect1->c1[idx_vect])*creal(in_vect1->c1[idx_vect])+cimag(in_vect1->c1[idx_vect])*cimag(in_vect1->c1[idx_vect]);
-  sum += creal(in_vect1->c2[idx_vect])*creal(in_vect1->c2[idx_vect])+cimag(in_vect1->c2[idx_vect])*cimag(in_vect1->c2[idx_vect]);
-  return sum;
-}
-
+#include "./fermionic_utilities.h"
 
 
 d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
@@ -140,20 +116,6 @@ void combine_add_factor_x_in2_to_in1( __restrict vec3_soa * const in1,__restrict
 
 
 
-/*
-void combine_in1xm2_minus_in2_minus_in3(   __restrict vec3_soa * const in_vect1,
-                                           __restrict vec3_soa * const in_vect2,
-                                           __restrict vec3_soa * const in_vect3,
-					   __restrict vec3_soa * const out){ // l'ultimo argomento e' l'unico che viene modificato
-#pragma acc kernels present(in_vect1) present(in_vect2) present(in_vect3) present(out)
-#pragma acc loop independent 
-  for(int ih=0; ih<sizeh; ih++) {
-    out->c0[ih]=(in_vect1->c0[ih]*mass2)-in_vect2->c0[ih]-in_vect3->c0[ih];
-    out->c1[ih]=(in_vect1->c1[ih]*mass2)-in_vect2->c1[ih]-in_vect3->c1[ih];
-    out->c2[ih]=(in_vect1->c2[ih]*mass2)-in_vect2->c2[ih]-in_vect3->c2[ih];
-  }
-}
-*/
 
 void combine_in1xferm_mass2_minus_in2_minus_in3(   __restrict vec3_soa * const in_vect1,
 						   double ferm_mass,
@@ -169,30 +131,6 @@ void combine_in1xferm_mass2_minus_in2_minus_in3(   __restrict vec3_soa * const i
   }
 }
 
-/*
-void combine_before_loop(  const __restrict vec3_soa * const vect_in,
-			   const __restrict vec3_soa * const vect_out,
-			   __restrict vec3_soa * const vect_r,
-			   __restrict vec3_soa * const vect_s,
-			   __restrict vec3_soa * const vect_p){
-#pragma acc kernels present(vect_in) present(vect_out) present(vect_r) present(vect_s) present(vect_p)
-#pragma acc loop independent 
-  for(int ih=0; ih<sizeh; ih++) {
-    //s=m^2*out-s
-    vect_s->c0[ih] = (vect_out->c0[ih]*mass2)-vect_s->c0[ih];
-    vect_s->c1[ih] = (vect_out->c1[ih]*mass2)-vect_s->c1[ih];
-    vect_s->c2[ih] = (vect_out->c2[ih]*mass2)-vect_s->c2[ih];
-    //r=in-s
-    vect_r->c0[ih] =  vect_in->c0[ih]-vect_s->c0[ih];
-    vect_r->c1[ih] =  vect_in->c1[ih]-vect_s->c1[ih];
-    vect_r->c2[ih] =  vect_in->c2[ih]-vect_s->c2[ih];
-    //p=r
-    vect_p->c0[ih] =  vect_r->c0[ih];
-    vect_p->c1[ih] =  vect_r->c1[ih];
-    vect_p->c2[ih] =  vect_r->c2[ih];
-  }
-}
-*/
 
 void combine_inside_loop( __restrict vec3_soa * const vect_out,
 			  __restrict vec3_soa * const vect_r,
@@ -212,18 +150,6 @@ void combine_inside_loop( __restrict vec3_soa * const vect_out,
     vect_r->c2[ih]   -= (vect_s->c2[ih]*omega);
   }
 }
-/*
-void combine_in1xm2_minus_in2(__restrict vec3_soa * const in_vect1,
-                              __restrict vec3_soa * const in_vect2){
-#pragma acc kernels present(in_vect1) present(in_vect2)
-#pragma acc loop independent
-  for(int ih=0; ih<sizeh; ih++) {
-    in_vect2->c0[ih]=(in_vect1->c0[ih]*mass2)-in_vect2->c0[ih];
-    in_vect2->c1[ih]=(in_vect1->c1[ih]*mass2)-in_vect2->c1[ih];
-    in_vect2->c2[ih]=(in_vect1->c2[ih]*mass2)-in_vect2->c2[ih];
-  }
-}
-*/
 
 void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * const in_vect1,double ferm_mass2, __restrict vec3_soa * const in_vect2){
 #pragma acc kernels present(in_vect1) present(in_vect2)
@@ -277,7 +203,7 @@ void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
         fermion->c2[i]=0;
     }
 }
-inline void multiple_combine_in1_minus_in2x_factor_back_into_in1( __restrict vec3_soa * const out, __restrict vec3_soa * const in, const int maxiter, __restrict const int * const flag, __restrict const double * const omegas) {
+void multiple_combine_in1_minus_in2x_factor_back_into_in1( __restrict vec3_soa * const out, __restrict vec3_soa * const in, const int maxiter, __restrict const int * const flag, __restrict const double * const omegas) {
   int ia, ih;
   
 #pragma acc kernels present(in) present(out) copyin(omegas[0:maxiter]) copyin(flag[0:maxiter])

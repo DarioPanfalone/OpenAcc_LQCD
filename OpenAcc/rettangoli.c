@@ -1,6 +1,10 @@
 #ifndef RETTANGOLI_C
 #define RETTANGOLI_C
 
+#include "./struct_c_def.h"
+#include "./rettangoli.h"
+
+
 double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(   __restrict su3_soa * const u,
 								__restrict su3_soa * const loc_plaq,
 								dcomplex_soa * const tr_local_plaqs,
@@ -593,14 +597,6 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * con
   mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
 }  // closes MMMPP
 
-
-
-
-
-
-
-
-
 void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
 									 __restrict su3_soa * const loc_stap ){
   int x, y, z, t, mu, iter;
@@ -689,10 +685,6 @@ void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restr
   }  // t
 
 }// closes routine
-
-
-
-
 
 void calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
 									 __restrict su3_soa * const loc_stap ){
@@ -787,9 +779,6 @@ void calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all(  __restr
 
 }// closes routine
 
-
-
-
 void calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
 									 __restrict su3_soa * const loc_stap ){
   int x, y, z, t, mu, iter;
@@ -882,8 +871,6 @@ void calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all(  __restr
   }  // t
 
 }// closes routine
-
-
 
 void calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
 									   __restrict su3_soa * const loc_stap ){
@@ -1028,11 +1015,6 @@ void calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all(  __res
   }  // t
 
 }// closes routine
-
-
-
-
-
 
 double  calc_rettangolo_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
 
