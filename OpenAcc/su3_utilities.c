@@ -1,28 +1,6 @@
 #ifndef SU3_UTILITIES_C_
 #define SU3_UTILITIES_C_
 
-// ROUTINE TO CHOOSE AND INITIALIZE THE OPENACC DEVICE
-void SELECT_INIT_ACC_DEVICE(acc_device_t my_device_type, int dev_index) {
-
-  // Initialize context for this device type
-  acc_init(my_device_type);
-
-  // Get available devices of this type
-  int num_devices = acc_get_num_devices(my_device_type);
-  printf("Number of OpenAcc exploitable devices found: %d \n", num_devices);
-
-  // Pick the device number dev_index 
-  acc_set_device_num(dev_index, my_device_type);
-  printf("Selected device number: %d \n", dev_index);
-
-}
-
-void SHUTDOWN_ACC_DEVICE(acc_device_t my_device_type) {
-
-  // Close context for this device type
-  acc_shutdown(my_device_type);
-
-}
 
 #pragma acc routine seq
 static inline void loc_unitarize_conf(__restrict su3_soa * const cnf,
@@ -66,6 +44,9 @@ static inline void loc_unitarize_conf(__restrict su3_soa * const cnf,
 
 
 
+#include "../OpenAcc/deviceinit.c"
+#include "../OpenAcc/struct_c_def.c"
+#include "../OpenAcc/single_types.c"
 
 // mat3 = mat1 * mat2 
 #pragma acc routine seq

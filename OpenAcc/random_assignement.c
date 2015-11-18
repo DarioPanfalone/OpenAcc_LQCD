@@ -17,6 +17,7 @@ extern "C" {
 }
 */
 
+#include "../OpenAcc/su3_utilities.c"
 
 // gaussian random number generator
 double double_gauss(void)
