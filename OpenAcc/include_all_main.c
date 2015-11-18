@@ -74,7 +74,7 @@ int main(){
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
   if(start_opt==0){ 
-    generate_Conf_cold(conf_acc,0.2);
+    generate_Conf_cold(conf_acc,0.1);
     printf("Cold Gauge Conf Generated : OK \n");
     conf_id_iter=0;
   }
@@ -173,12 +173,14 @@ int main(){
 	topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
 	printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/size/6.0/3.0,topoch);
 
+	/*
 	for(int icool=0;icool<5000;icool++){
 	  cool_conf(conf_acc,aux_conf_acc);
 	  plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 	  topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
 	  printf("COOL %d  Placchetta= %.18lf  TopCh= %.18lf \n",icool+1,plq/size/6.0/3.0,topoch);
 	}
+	*/
 
 	
 #ifdef STOUT_FERMIONS
