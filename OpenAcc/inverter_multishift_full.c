@@ -3,7 +3,7 @@
 
 #include "./struct_c_def.c"
 
-#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
+//#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
 int multishift_invert(__restrict su3_soa * const u,
 		      ferm_param * pars,
