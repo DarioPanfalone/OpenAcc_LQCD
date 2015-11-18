@@ -2,7 +2,8 @@ module load pgi/15.9
 module load cuda/7.0
 
 
-export PGI_ACC_BUFFERSIZE=3221225472
+#export PGI_ACC_BUFFERSIZE=3221225472
+export PGI_ACC_BUFFERSIZE=700000000
 
 rm prog_solo_GPU
 rm *.o
