@@ -3,8 +3,8 @@
 
 #include "./cayley_hamilton.h"
 #include "./struct_c_def.h"
-#include "../OpenAcc/alloc_vars.c"
-#include "../OpenAcc/su3_utilities.c"
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/su3_utilities.h"
 
 
 void exp_minus_QA_times_conf(__restrict su3_soa * const tu,

@@ -1,5 +1,5 @@
-#ifndef ALLOC_DEF_
-#define ALLOC_DEF_
+#ifndef ALLOC_VARS_C_
+#define ALLOC_VARS_C_
 
 #include "struct_c_def.h"
 #include "../DbgTools/debug_macros_glvarcheck.c"
@@ -54,7 +54,7 @@ vec3_soa * k_p_shiftferm; // ausiliario [max_nshift=max_approx_order]
 dcomplex_soa * local_sums;
 double_soa * d_local_sums;
 
-void mem_alloc(){
+inline void mem_alloc(){
   printf("Allocating resources for NPS_tot=%d pseudofermions in total, with max_approx_order=%d\n", NPS_tot, max_approx_order);
   int allocation_check;  
 #ifdef BACKFIELD
@@ -133,7 +133,7 @@ void mem_alloc(){
   if(allocation_check != 0)  printf("Errore nella allocazione di local_sums \n");
 }
 
-void mem_free(){
+inline void mem_free(){
 #ifdef BACKFIELD
   free(u1_back_field_phases);
 #endif

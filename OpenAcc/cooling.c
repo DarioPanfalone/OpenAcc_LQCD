@@ -1,9 +1,10 @@
 #ifndef COOLING_C
 #define COOLING_C
 
-#include "./struct_c_def.c"
-#include "../OpenAcc/alloc_vars.c"
-#include "../OpenAcc/su3_utilities.c"
+#include "./struct_c_def.h"
+#include "../OpenAcc/su3_utilities.h"
+#include "./cooling.h"
+
 
 #pragma acc routine seq
 static inline void cabibbo_marinari_cooling(__restrict su3_soa   * const U, // configurazione "calda" in entrata

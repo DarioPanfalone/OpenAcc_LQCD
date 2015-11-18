@@ -1,10 +1,10 @@
 #ifndef STOUTING_C
 #define STOUTING_C
 
-#include "./cayley_hamilton.c"
-#include "./struct_c_def.c"
-#include "../OpenAcc/alloc_vars.c"
-#include "../OpenAcc/su3_utilities.c"
+#include "./cayley_hamilton.h"
+#include "./struct_c_def.h"
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/su3_utilities.h"
 #include "./stouting.h"
 
 #include "./single_types.h"
