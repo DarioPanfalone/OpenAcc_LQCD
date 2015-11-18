@@ -52,7 +52,7 @@ __restrict su3_soa   * const TMP  // variabile di parcheggio
 		    );
 
 #ifdef STOUT_FERMIONS
-inline void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr);{
+inline void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr){
 
 
   for(int mu = 0; mu < 8*STOUT_STEPS; mu ++) SETREQUESTED((&tstout_conf_acc_arr[mu]));

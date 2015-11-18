@@ -3,9 +3,9 @@
 #ifndef GAUGE_MEAS_C
 #define GAUGE_MEAS_C
 
-#include "../OpenAcc/struct_c_def.c"
-#include "../OpenAcc/alloc_vars.c"
-#include "../OpenAcc/su3_utilities.c"
+#include "../OpenAcc/struct_c_def.h"
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/su3_utilities.h"
 
 
 

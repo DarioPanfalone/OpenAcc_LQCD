@@ -1,23 +1,23 @@
 #ifndef MD_INTEGRATOR_H
 #define MD_INTEGRATOR_H
 
-#include "./struct_c_def.h"
-#include "./fermion_force.h"
-
+//#include "./struct_c_def.h"
+//#include "./fermion_force.h"
+//#include "../Include/common_defines.h"
 
 int no_md_acc,gauge_scale_acc;
 double epsilon_acc;
 d_complex ieps_acc,iepsh_acc;
 
 
-inline void initialize_global_variables(){
+inline void initialize_global_variables(void )
+{
   no_md_acc = no_md ;
   gauge_scale_acc = gauge_scale;
   epsilon_acc = 1.0/((double)(no_md_acc));
   ieps_acc  = 0.0 + (epsilon_acc) * 1.0I;
   iepsh_acc = 0.0 + (epsilon_acc) * 0.5 * 1.0I;
 }
-
 
 
 

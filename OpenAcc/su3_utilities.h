@@ -38,7 +38,7 @@ double calc_momenta_action( const __restrict thmat_soa * const mom,
 double_soa * tr_local,const int mu);
 
 
-void set_su3_soa_to_zero( __restrict su3_soa * const matrix);:
+void set_su3_soa_to_zero( __restrict su3_soa * const matrix);
 
 //copy matrix in into matrix out, this has to happen on the host
 void set_su3_soa_to_su3_soa( __restrict su3_soa * const matrix_in,

@@ -5,7 +5,7 @@ void su2_rand(double *pp);
 
 
 #include "openacc.h"
-#include "../DbgTools/debug_macros_glvarcheck.c"
+#include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../RationalApprox/rationalapprox.c"
 #include "./struct_c_def.h"
 #include "./alloc_vars.h"

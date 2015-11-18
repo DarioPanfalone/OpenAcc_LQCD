@@ -1,16 +1,14 @@
+#ifndef FIND_MIN_MAX_C_
+#define FIND_MIN_MAX_C_
 
-#ifndef FIND_MIN_MAX_FULLACC_C_
-#define FIND_MIN_MAX_FULLACC_C_
 
-
-#ifndef INCLUDE_ACC
-#define INCLUDE_ACC
-#include "./struct_c_def.c"
-#include "./fermionic_utilities.c"
-#include "./fermion_matrix.c"
+#include "./struct_c_def.h"
+#include "./fermionic_utilities.h"
+#include "./fermion_matrix.h"
 #include "openacc.h"
-#endif
 #include <stdio.h>
+#include "./find_min_max.h"
+
 
 //#define PRINT_EIGENVALUES
 

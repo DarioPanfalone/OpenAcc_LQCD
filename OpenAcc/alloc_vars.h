@@ -2,7 +2,7 @@
 #define ALLOC_VARS_C_
 
 #include "struct_c_def.h"
-#include "../DbgTools/debug_macros_glvarcheck.c"
+#include "../DbgTools/debug_macros_glvarcheck.h"
 
 // used in the dynamical allocation of structures
 #define ALIGN 128

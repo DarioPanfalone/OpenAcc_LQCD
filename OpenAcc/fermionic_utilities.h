@@ -1,7 +1,7 @@
 #ifndef FERMIONIC_UTILITIES_H_
 #define FERMIONIC_UTILITIES_H_
 
-#include "../DbgTools/debug_macros_glvarcheck.c"
+#include "../DbgTools/debug_macros_glvarcheck.h"
 
 #pragma acc routine seq
 static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect1,

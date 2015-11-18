@@ -8,9 +8,9 @@
 
 #include <accelmath.h>
 #include <complex.h>
-#include "./struct_c_def.c"
-#include "./single_types.c"
-#include "../DbgTools/debug_macros_glvarcheck.c"
+#include "./struct_c_def.h"
+#include "./single_types.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
 
 
 inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, __restrict single_tamat * const QA, single_su3 * const out){
