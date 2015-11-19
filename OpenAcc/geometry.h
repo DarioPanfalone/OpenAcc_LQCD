@@ -3,6 +3,11 @@
 
 #include "../Include/common_defines.h"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
 #define vol1 nx
 #define vol2 (ny * vol1)
 #define vol3 (nz * vol2)

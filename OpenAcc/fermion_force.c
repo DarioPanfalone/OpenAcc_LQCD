@@ -4,8 +4,16 @@
 #include "./stouting.c"
 #include "./struct_c_def.c"
 #include "./inverter_multishift_full.c"
+#include "./fermion_force.h"
+
 
 #define TIMING_FERMION_FORCE
+
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
 
 
 

@@ -5,6 +5,12 @@
 #include "./stouting.h"
 #include "./md_integrator.h"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 // se metro==1 allora fa il test di metropolis
 // se metro==0 allora non fa il test di metropolis --> termalizzazione
 

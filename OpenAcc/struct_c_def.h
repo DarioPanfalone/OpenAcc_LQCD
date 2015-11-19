@@ -4,6 +4,12 @@
 #include "./geometry.h"
 #include <complex.h>
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 typedef double complex  d_complex;
 typedef float  complex  f_complex;
 

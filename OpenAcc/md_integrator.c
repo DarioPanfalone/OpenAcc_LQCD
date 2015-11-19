@@ -24,8 +24,9 @@
 #ifndef MD_INTEGRATOR_C
 #define MD_INTEGRATOR_C
 
-#include "./struct_c_def.c"
-#include "./fermion_force.c"
+#include "./struct_c_def.h"
+#include "./fermion_force.h"
+#include "./md_integrator.h"
 
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta,double * delta)
  {

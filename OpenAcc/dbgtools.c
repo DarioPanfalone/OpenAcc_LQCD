@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include "../Include/common_defines.h"
-#include "./struct_c_def.c"
+#include "./struct_c_def.h"
 
 void print_vec3_soa(vec3_soa * const fermion, const char* nomefile){
 

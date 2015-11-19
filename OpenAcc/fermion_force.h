@@ -6,6 +6,12 @@
 #include "./struct_c_def.h"
 #include "./inverter_multishift_full.h"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
 							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th

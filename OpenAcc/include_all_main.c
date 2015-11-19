@@ -4,7 +4,14 @@ void su2_rand(double *pp);
 #define PRINT_DETAILS_INSIDE_UPDATE
 
 
-#include "openacc.h"
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+#ifndef __GNUC__
+ #include "openacc.h"
+#endif
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../RationalApprox/rationalapprox.c"
 #include "./struct_c_def.h"
@@ -56,6 +63,7 @@ int main(){
   printf("u1_backfield initialization : OK \n");
 #endif
 
+#ifndef __GNUC__
   //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
   // NVIDIA GPUs
   acc_device_t my_device_type = acc_device_nvidia;
@@ -67,7 +75,7 @@ int main(){
   int dev_index = 0;
   SELECT_INIT_ACC_DEVICE(my_device_type, dev_index);
   printf("Device Selected : OK \n");
-
+#endif
 
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
@@ -189,10 +197,12 @@ int main(){
 
   CHECKSTATUS(conf_acc);
 
+
+#ifndef __GNUC__
   //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
   SHUTDOWN_ACC_DEVICE(my_device_type);
   /////////////////////////////////////////////////////////////////////////////////////////////////
-
+#endif
 
   free(conf_acc);
   mem_free();

@@ -4,6 +4,12 @@
 #include <complex.h>
 #include "./struct_c_def.c"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 /****************************************************
  * (Perhaps) Check if adding                        *
  *                                                  *
@@ -13,6 +19,7 @@
  ****************************************************/
 
 //Type definitions
+#ifndef __GNUC__
 typedef struct single_su3_t {
   d_complex comp[3][3];
 } single_su3;
@@ -30,6 +37,27 @@ typedef struct single_thmat_t {
   double rc00;   // Re(comp_00)
   double rc11;   // Re(comp_11)
 } single_thmat;
+#else
+struct single_su3 {
+  d_complex comp[3][3];
+};
+struct single_tamat{
+  d_complex c01; // comp_01
+  d_complex c02; // comp_02
+  d_complex c12; // comp_12
+  double rc00;   // Im(comp_00)
+  double rc11;   // Im(comp_11)
+};
+struct single_thmat{
+  d_complex c01; // comp_01
+  d_complex c02; // comp_02
+  d_complex c12; // comp_12
+  double rc00;   // Re(comp_00)
+  double rc11;   // Re(comp_11)
+};
+#endif
+
+
 
 // 3rd row reconstruction on site
 void static inline rebuild3row(single_su3 *AUX){

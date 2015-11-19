@@ -4,6 +4,12 @@
 
 #include "../OpenAcc/struct_c_def.h"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 double double_gauss(void);
 void two_double_gauss(double *r);
 d_complex d_complex_gauss(void);

@@ -5,6 +5,12 @@
 #include "../OpenAcc/struct_c_def.c"
 #include "../OpenAcc/single_types.c"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 
 
 double calc_momenta_action( const __restrict thmat_soa * const mom,

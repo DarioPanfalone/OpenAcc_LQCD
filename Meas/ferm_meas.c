@@ -5,7 +5,7 @@
 #define FERM_MEAS_C
 
 #ifdef STOUT_FERMIONS
-#include "../OpenAcc/stouting.c"
+#include "../OpenAcc/stouting.h"
 #endif
 
 

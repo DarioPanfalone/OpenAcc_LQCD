@@ -5,12 +5,17 @@
 // This is based on http://arXiv.org/abs/hep-lat/0311018v1,
 // "Analytic Smearing of SU(3) Link Variables in Lattice QCD",
 //  Morningstar & Peardon (2008)
-
-#include <accelmath.h>
 #include <complex.h>
 #include "./struct_c_def.h"
 #include "./single_types.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
+#include "./cayley_hamilton.h"
+
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
 
 
 inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, __restrict single_tamat * const QA, single_su3 * const out){

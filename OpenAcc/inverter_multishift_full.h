@@ -4,6 +4,12 @@
 #include "./struct_c_def.h"
 #include "./fermion_matrix.h"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 int multishift_invert(__restrict su3_soa * const u,
 		      ferm_param * pars,
 		      RationalApprox * approx,

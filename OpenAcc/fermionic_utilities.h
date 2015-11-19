@@ -3,6 +3,13 @@
 
 #include "../DbgTools/debug_macros_glvarcheck.h"
 
+
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 #pragma acc routine seq
 static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect1,
 					     __restrict vec3_soa * const in_vect2,

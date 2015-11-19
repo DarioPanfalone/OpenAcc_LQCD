@@ -4,6 +4,12 @@
 #include "./struct_c_def.h"
 #include "./rettangoli.h"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 
 double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick( 
         __restrict su3_soa * const u,__restrict su3_soa * const loc_plaq, 

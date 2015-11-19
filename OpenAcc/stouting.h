@@ -6,6 +6,12 @@
 #include "../OpenAcc/alloc_vars.h"
 #include "../OpenAcc/su3_utilities.h"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 
 void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
 			     __restrict tamat_soa * const QA,

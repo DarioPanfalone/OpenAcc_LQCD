@@ -1,5 +1,7 @@
 #ifndef DEVICE_INIT_C_
-#define DEVICE_INIT_C_
+#define DEVICE_INIT_Ci_
+
+#ifndef __GNUC__
 // ROUTINE TO CHOOSE AND INITIALIZE THE OPENACC DEVICE
 void SELECT_INIT_ACC_DEVICE(acc_device_t my_device_type, int dev_index) {
 
@@ -22,5 +24,7 @@ void SHUTDOWN_ACC_DEVICE(acc_device_t my_device_type) {
   acc_shutdown(my_device_type);
 
 }
+
+#endif
 #endif
 

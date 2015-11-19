@@ -5,7 +5,15 @@
 #include "./fermionic_utilities.h"
 #include "./fermion_matrix.h"
 #include "./find_min_max.h"
+#ifndef __GNUC__
 #include "openacc.h"
+#endif
+
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
 
 #define DEBUG_INVERTER_FULL_OPENACC
 

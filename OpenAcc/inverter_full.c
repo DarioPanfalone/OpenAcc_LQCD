@@ -6,7 +6,10 @@
 #include "./fermionic_utilities.c"
 #include "./fermion_matrix.c"
 #include "./find_min_max.c"
-#include "openacc.h"
+#ifndef __GNUC__
+ #include "openacc.h"
+#endif
+
 
 #define DEBUG_INVERTER_FULL_OPENACC
 

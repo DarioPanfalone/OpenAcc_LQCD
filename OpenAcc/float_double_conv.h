@@ -3,6 +3,11 @@
 
 #include "../OpenAcc/struct_c_def.h"
 
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
 typedef float  complex  f_complex;
 
 typedef struct f_vec3_soa_t {

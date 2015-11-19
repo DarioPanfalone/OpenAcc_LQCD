@@ -1,8 +1,8 @@
 #ifndef IPDOT_GAUGE_C
 #define IPDOT_GAUGE_C
 
-#include "./su3_utilities.c"
-#include "./rettangoli.c"
+#include "./su3_utilities.h"
+#include "./rettangoli.h"
 #include "./ipdot_gauge.h"
 
 #define TIMING_STAPLES

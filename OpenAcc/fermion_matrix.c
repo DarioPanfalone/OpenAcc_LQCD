@@ -2,9 +2,12 @@
 #define FERMION_MATRIX_C
 
 #include "./struct_c_def.h"
-#include "openacc.h"
+#ifndef __GNUC__
+ #include "openacc.h"
+#endif
 #include "./fermionic_utilities.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
+#include "./fermion_matrix.h"
 
 
 #ifdef PHASE_MAT_VEC_MULT

@@ -4,8 +4,15 @@
 #include "./struct_c_def.h"
 #include "./fermionic_utilities.h"
 #include "./fermion_matrix.h"
-#include "openacc.h"
+#ifndef __GNUC__
+ #include "openacc.h"
+#endif
 #include <stdio.h>
+
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
 
 // find the maximum eigenvalue of the fermion matrix
 // use loc_h, loc_p, loc_r

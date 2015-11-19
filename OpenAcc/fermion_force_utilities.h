@@ -3,6 +3,13 @@
 
 #include "./struct_c_def.h"
 
+
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
+
 #pragma acc routine seq
 static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * const aux_u,
 							int idxh,

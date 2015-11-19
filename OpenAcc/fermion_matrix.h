@@ -1,10 +1,20 @@
 #ifndef FERMION_MATRIX_H
 #define FERMION_MATRIX_H
 
+
 #include "./struct_c_def.h"
-#include "openacc.h"
+#ifndef __GNUC__
+ #include "openacc.h"
+#endif
 #include "./fermionic_utilities.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
+
+
+// if using GCC, there are some problems with __restrict.
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
 
 
 void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in,ferm_param *pars,double_soa * backfield);
