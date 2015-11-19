@@ -22,10 +22,14 @@
 
 
 
-
+/*
 inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, __restrict single_tamat * const QA, single_su3 * const out);
 
 inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out);
+*/
+
+
+
 
 static inline double det_i_times_QA_soa( __restrict tamat_soa * const QA,const int idx);
 

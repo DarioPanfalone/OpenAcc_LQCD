@@ -18,6 +18,7 @@ extern "C" {
 */
 
 #include "./su3_utilities.h"
+#include "./alloc_vars.h"
 #include "./random_assignement.h"
 
 #define acc_twopi 2.0 * M_PI 

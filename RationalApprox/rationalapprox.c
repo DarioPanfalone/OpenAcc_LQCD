@@ -1,26 +1,7 @@
 #ifndef RATIONAL_APPROX_C_
 #define RATIONAL_APPROX_C_
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
-
-#define MAX_APPROX_ORDER 19
-
-
-typedef struct RationalApprox_t{
-    int exponent_num;
-    int exponent_den;
-    int approx_order;
-    double lambda_min;
-    double lambda_max; // usually equal to one
-    int gmp_remez_precision;
-    double error;
-    double RA_a0;
-    double RA_a[MAX_APPROX_ORDER];
-    double RA_b[MAX_APPROX_ORDER];
-} RationalApprox;
+#include "./rationalapprox.h"
 
 
 char* rational_approx_filename(int approx_order, int exponent_num, int exponent_den, double lambda_min){

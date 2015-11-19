@@ -2,8 +2,8 @@
 #define SU3_UTILITIES_H_
 
 #include "../OpenAcc/deviceinit.c"
-#include "../OpenAcc/struct_c_def.c"
-#include "../OpenAcc/single_types.c"
+#include "../OpenAcc/struct_c_def.h"
+#include "../OpenAcc/single_types.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

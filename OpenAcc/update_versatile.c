@@ -4,6 +4,9 @@
 #define UPDATE_VERSATILE_C_
 
 #include "./update_versatile.h"
+#ifdef __GNUC__
+#include "sys/time.h"
+#endif
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro){

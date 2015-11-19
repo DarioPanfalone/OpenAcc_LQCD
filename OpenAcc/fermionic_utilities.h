@@ -2,7 +2,7 @@
 #define FERMIONIC_UTILITIES_H_
 
 #include "../DbgTools/debug_macros_glvarcheck.h"
-
+#include "./struct_c_def.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

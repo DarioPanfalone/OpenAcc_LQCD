@@ -5,6 +5,7 @@
 #include "./rettangoli.h"
 #include "./ipdot_gauge.h"
 
+#include "sys/time.h"
 #define TIMING_STAPLES
 
 void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){

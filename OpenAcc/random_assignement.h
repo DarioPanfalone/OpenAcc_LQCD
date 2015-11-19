@@ -9,6 +9,14 @@
  #define __restrict
 #endif
 
+#ifdef __GNUC__
+ #include "math.h"
+ #ifndef M_PI
+  #define M_PI 3.14159265358979323846
+ #endif
+#endif
+
+
 
 double double_gauss(void);
 void two_double_gauss(double *r);

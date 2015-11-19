@@ -7,6 +7,12 @@
 #include "../OpenAcc/alloc_vars.h"
 #include "../OpenAcc/su3_utilities.h"
 
+#ifdef __GNUC__
+ #include "math.h"
+ #ifndef M_PI
+  #define M_PI 3.14159265358979323846
+ #endif
+#endif
 
 
 #pragma acc routine seq
