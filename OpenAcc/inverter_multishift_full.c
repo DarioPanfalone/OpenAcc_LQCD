@@ -159,7 +159,7 @@ int multishift_invert(__restrict su3_soa * const u,
       {
 	printf("WARNING: maximum number of iterations reached in invert\n");
       }
-      printf("\t CG count = %i \n",cg);
+//      printf("\t CG count = %i \n",cg);
     
 
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC))

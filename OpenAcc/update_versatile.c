@@ -119,7 +119,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
       // USING STOUTED GAUGE MATRIX
-      printf("    before min and max eig comp : OK \n");
+      //printf("    before min and max eig comp : OK \n");
       SETREQUESTED(kloc_r);
       SETREQUESTED(kloc_h);
       find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);

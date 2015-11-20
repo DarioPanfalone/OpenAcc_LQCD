@@ -287,11 +287,11 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   mult_gl3_soa_times_stag_phases(gl3_aux);
 
   for(int stout_level = STOUT_STEPS ; stout_level > 1 ; stout_level--){
-    printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl %d to lvl %d] <<<<<<<<<<<<<<<<<<<<<<<<<\n",stout_level,stout_level-1);
+   // printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl %d to lvl %d] <<<<<<<<<<<<<<<<<<<<<<<<<\n",stout_level,stout_level-1);
     conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
     compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, taux_conf_acc );
   }
-  printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl 1 to lvl 0] <<<<<<<<<<<<<<<<<<<<<<<<<\n");
+//  printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl 1 to lvl 0] <<<<<<<<<<<<<<<<<<<<<<<<<\n");
   compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, taux_conf_acc );
 
   mult_gl3_soa_times_stag_phases(gl3_aux);

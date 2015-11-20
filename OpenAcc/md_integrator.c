@@ -137,6 +137,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   mom_sum_mult(tmomenta,tipdot_acc,delta,0);
   
   for(md=1; md<no_md; md++){
+      printf("Doing Molecular Dynamic step %d of %d...\n", md, no_md);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
     multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);

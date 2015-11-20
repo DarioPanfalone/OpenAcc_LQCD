@@ -59,7 +59,7 @@
 
 #define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-#define ITERATIONS 1 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+#define ITERATIONS 1500 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
 #define therm_ITERATIONS 30 // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 #define save_conf_every 10

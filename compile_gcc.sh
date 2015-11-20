@@ -29,15 +29,15 @@ Include/fermion_parameters.c \
 "
 
 
-gcc -O0  -c  Rand/random.c                 2> gccmsg_err_0  
+gcc -O3  -c  Rand/random.c                 2> gccmsg_err_0  
 echo Compiling OpenAcc/include_all_main.c ...
-gcc -std=c99 -O0  -c  OpenAcc/include_all_main.c  2> gccmsg_err_1
+gcc -std=c99 -O3  -c  OpenAcc/include_all_main.c  2> gccmsg_err_1
 for sourcefile in $SOURCES
 do 
 echo Compiling $sourcefile ...
-gcc -std=c99 -O0  -c  $sourcefile           2>> gccmsg_err_1
+gcc -std=c99 -O3  -c  $sourcefile           2>> gccmsg_err_1
 done 
-gcc -O0  *.o -o prog_GCC  -lm              2> gccmsg_err_3
+gcc -O3  *.o -o prog_GCC  -lm              2> gccmsg_err_3
 
 
 

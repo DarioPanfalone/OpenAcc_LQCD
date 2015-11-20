@@ -11,7 +11,7 @@
 #endif
 
 
-#define DEBUG_INVERTER_FULL_OPENACC
+//#define DEBUG_INVERTER_FULL_OPENACC
 
 
 int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata mai qui dentro
