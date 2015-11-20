@@ -27,6 +27,18 @@
 #include "./struct_c_def.h"
 #include "./fermion_force.h"
 #include "./md_integrator.h"
+#include "./alloc_vars.h"
+#include "./ipdot_gauge.h"
+
+
+void initialize_md_global_variables(void )
+{
+  no_md_acc = no_md ;
+  gauge_scale_acc = gauge_scale;
+  epsilon_acc = 1.0/((double)(no_md_acc));
+  ieps_acc  = 0.0 + (epsilon_acc) * 1.0I;
+  iepsh_acc = 0.0 + (epsilon_acc) * 0.5 * 1.0I;
+}
 
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta,double * delta)
  {

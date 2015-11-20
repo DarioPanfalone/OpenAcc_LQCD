@@ -13,7 +13,6 @@
 #include "../Include/common_defines.h"
 #include "./geometry.h"
 #include "./struct_c_def.h"
-#include "./geometry.c"
 #include "./md_integrator.h" // (Forse si puo' togliere per primo)
 
 #endif

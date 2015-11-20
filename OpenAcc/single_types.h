@@ -3,6 +3,7 @@
 
 #include <complex.h>
 #include "./struct_c_def.h"
+#include <stdio.h>
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -254,7 +255,7 @@ static inline double det_i_times_QA(__restrict single_tamat * const QA){
       	          - rc22 * QA->c01 * conj(QA->c01) );
 
 }
-void print_su3_stdout(single_su3 *m){
+static inline void print_su3_stdout(single_su3 *m){
 
     printf("\n");
    for(int r=0;r<3;r++){

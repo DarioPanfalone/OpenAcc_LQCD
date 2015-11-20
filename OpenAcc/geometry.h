@@ -8,6 +8,18 @@
  #define __restrict
 #endif
 
+// lattice dimensions
+#define nx 4
+#define ny 4
+#define nz 4
+#define nt 4
+
+
+#define sizehh nx*ny*nz*nt/2 
+
+#define ANTIPERIODIC_T_BC  // else periodic time bc are taken
+
+
 #define vol1 nx
 #define vol2 (ny * vol1)
 #define vol3 (nz * vol2)
@@ -28,7 +40,7 @@
 static inline int snum_acc(int x, int y, int z, int t) {
   int ris;
   ris = x + (y*vol1) + (z*vol2) + (t*vol3);
-  return ris/2;   // <---  /2 Pay attention to even/odd  (see init_geo)
+  return ris/2;   // <---  /2 Pay attention to even/odd 
 }
 
 // TABLES FOR THE NEAREST NEIGHBOURS       

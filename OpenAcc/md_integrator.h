@@ -10,20 +10,17 @@
  #define __restrict
 #endif
 
+#ifndef MD_INTEGRATOR_C 
+#define EXT_TO_MD_INTEGRATOR extern
+#else
+#define EXT_TO_MD_INTEGRATOR 
+#endif
 
-int no_md_acc,gauge_scale_acc;
-double epsilon_acc;
-d_complex ieps_acc,iepsh_acc;
+EXT_TO_MD_INTEGRATOR int no_md_acc,gauge_scale_acc;
+EXT_TO_MD_INTEGRATOR double epsilon_acc;
+EXT_TO_MD_INTEGRATOR d_complex ieps_acc,iepsh_acc;
 
-
-inline void initialize_global_variables(void )
-{
-  no_md_acc = no_md ;
-  gauge_scale_acc = gauge_scale;
-  epsilon_acc = 1.0/((double)(no_md_acc));
-  ieps_acc  = 0.0 + (epsilon_acc) * 1.0I;
-  iepsh_acc = 0.0 + (epsilon_acc) * 0.5 * 1.0I;
-}
+void initialize_md_global_variables(void );
 
 
 

@@ -4,7 +4,7 @@
 #include "./struct_c_def.h"
 #include "../OpenAcc/su3_utilities.h"
 #include "./cooling.h"
-
+#include <math.h>
 
 #pragma acc routine seq
 static inline void cabibbo_marinari_cooling(__restrict su3_soa   * const U, // configurazione "calda" in entrata

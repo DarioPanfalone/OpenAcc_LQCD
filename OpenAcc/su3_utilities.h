@@ -1,13 +1,21 @@
 #ifndef SU3_UTILITIES_H_
 #define SU3_UTILITIES_H_
 
-#include "../OpenAcc/deviceinit.c"
+
+#ifndef __GNUC__
+ #include "../OpenAcc/deviceinit.c"
+#endif
+
+
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/single_types.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
+
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
  #define __restrict
+ #include <math.h>
 #endif
 
 
@@ -83,12 +91,10 @@ double * factor, // questo e' il vettore delta dove sono contenuti tutti i dt ri
 int id_factor);
 
 // Ora che abbiamo tolto i prodotti con le fasi staggered questo e' diventato un wrapper inutile... lo togliamo poi ... 
-inline void mom_exp_times_conf_soloopenacc(
+void mom_exp_times_conf_soloopenacc(
         __restrict  su3_soa * const tconf_acc,
  thmat_soa * const tmomenta, // e' costante e qui dentro non viene modificata
- double * tdelta,  int id_delta){
-  kernel_acc_mom_exp_times_conf(tconf_acc,tmomenta,tdelta, id_delta);
-}
+ double * tdelta,  int id_delta);
 
 double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs);
 

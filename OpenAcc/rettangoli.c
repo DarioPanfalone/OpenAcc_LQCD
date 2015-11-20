@@ -4,6 +4,7 @@
 #include "./struct_c_def.h"
 #include "./single_types.h"
 #include "./rettangoli.h"
+#include "./su3_utilities.h"
 
 
 double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(   __restrict su3_soa * const u,

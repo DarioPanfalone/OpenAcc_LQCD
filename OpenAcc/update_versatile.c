@@ -4,9 +4,18 @@
 #define UPDATE_VERSATILE_C_
 
 #include "./update_versatile.h"
+#include "./random_assignement.h"
+#include "./find_min_max.h"
+#include "./rettangoli.h"
+#include "./alloc_vars.h"
+
+
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
+
+extern double casuale();
+
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro){

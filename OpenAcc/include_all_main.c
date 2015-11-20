@@ -34,6 +34,13 @@ void su2_rand(double *pp);
 #include "./md_integrator.h"
 #include "./update_versatile.h"
 #include "./cooling.h"
+#include "./backfield.h"
+
+const char *nome_file_gauge_output ="gauge_meas.dat";
+const char *nome_file_ferm_output  ="ferm_meas.dat";
+
+
+
 
 int main(){
 
@@ -53,12 +60,12 @@ int main(){
 
   mem_alloc();
   printf("Allocazione della memoria : OK \n");
-  initialize_global_variables();
+  initialize_md_global_variables();
   printf("init vars : OK \n");
   compute_nnp_and_nnm_openacc();
   printf("nn computation : OK \n");
 #ifdef BACKFIELD
-  init_backfield();
+  init_backfield(u1_back_field_phases);
   print_double_soa(u1_back_field_phases,"backfield");
   printf("u1_backfield initialization : OK \n");
 #endif

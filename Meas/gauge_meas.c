@@ -4,7 +4,7 @@
 #define GAUGE_MEAS_C
 
 #include "../OpenAcc/struct_c_def.h"
-#include "../OpenAcc/alloc_vars.h"
+//#include "../OpenAcc/alloc_vars.h"
 #include "../OpenAcc/su3_utilities.h"
 
 #ifdef __GNUC__

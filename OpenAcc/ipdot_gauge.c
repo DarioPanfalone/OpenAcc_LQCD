@@ -6,7 +6,7 @@
 #include "./ipdot_gauge.h"
 
 #include "sys/time.h"
-#define TIMING_STAPLES
+//#define TIMING_STAPLES
 
 void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
 
@@ -51,6 +51,18 @@ void calc_ipdot_gauge_soloopenacc_tlsm( __restrict  su3_soa * const tconf_acc,  
   double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
   printf("FULL STAPLES CALC OPENACC                       PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
 #endif
+
+}
+
+
+void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
+  if(GAUGE_ACTION==0){
+    calc_ipdot_gauge_soloopenacc_std(tconf_acc,local_staples,tipdot);
+  }
+  if(GAUGE_ACTION==1){
+    calc_ipdot_gauge_soloopenacc_tlsm(tconf_acc,local_staples,tipdot);
+  }
+
 
 }
 

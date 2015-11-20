@@ -3,6 +3,7 @@
 
 
 #include "../OpenAcc/struct_c_def.h"
+#include "../OpenAcc/backfield.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -37,7 +38,5 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor);
 void generate_vec3_soa_z2noise(__restrict vec3_soa * const vect);
 
 
-
-void init_backfield();
 
 #endif

@@ -42,12 +42,12 @@ int multishift_invert(__restrict su3_soa * const u,
   int  cg;
   //double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
   // DYNAMIC ALLOCATION OF THESE SMALL ARRAYS SEEMS TO FAIL.
-  double zeta_i[max_approx_order];
-  double zeta_ii[max_approx_order];
-  double zeta_iii[max_approx_order];
-  double omegas[max_approx_order];
-  double gammas[max_approx_order];
-  int flag[max_approx_order];
+  double zeta_i[MAX_APPROX_ORDER];
+  double zeta_ii[MAX_APPROX_ORDER];
+  double zeta_iii[MAX_APPROX_ORDER];
+  double omegas[MAX_APPROX_ORDER];
+  double gammas[MAX_APPROX_ORDER];
+  int flag[MAX_APPROX_ORDER];
 
 //  printf("in pointer: %p\n", in);
 
@@ -218,7 +218,6 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
 }
 
 
-#include "./fermion_force_utilities.c"
 
 #endif
 

@@ -2,7 +2,10 @@
 #define FERMION_FORCE_UTILITIES_H
 
 #include "./struct_c_def.h"
-
+#include "../Include/fermion_parameters.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
+#include "./fermionic_utilities.h"
+#include "./fermion_matrix.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -229,32 +232,67 @@ static inline void assign_zero_to_tamat_soa_component(__restrict tamat_soa * con
   matrix_comp->rc11[idx]=0.0;
 }
 
-void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix){
-  int hx, y, z, t;
-  int mu;
-  SETINUSE(matrix);
-#pragma acc kernels present(matrix)
-#pragma acc loop independent gang(nt)
-  for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
-	for(hx=0; hx < nxh; hx++) {
-	  int x,idxh;
-	  x = 2*hx + ((y+z+t) & 0x1);
-	  idxh = snum_acc(x,y,z,t);
-	  for(mu=0; mu<8; mu++) {
-	    assign_zero_to_tamat_soa_component(&matrix[mu],idxh);
-	  }
-	}  // x
-      }  // y
-    }  // z
-  }  // t
-}
+void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix);
+
+/// ADD ALL NON INLINE FUNCTIONS!!
+
+
+void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, // questo fermione e' costante e non viene modificato qui dentro
+					    __restrict vec3_soa  * const loc_h, // questo fermione e' costante e non viene modificato qui dentro
+					    __restrict su3_soa * const aux_u,
+					    const RationalApprox * const approx,
+					    int iter);
 
 
 
+void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
+						__restrict ferm_param * const tpars,
+						__restrict double_soa * const backfield,
+						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
+						__restrict tamat_soa * const ipdot);
+
+
+
+void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, // e' costante e non viene modificata
+						 __restrict ferm_param * const tpars,
+						 __restrict double_soa * const backfield,
+					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
+					         __restrict tamat_soa * const ipdot);
+
+
+#ifdef STOUT_FERMIONS
+void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
+							__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante; non viene modificata
+							__restrict tamat_soa * const ipdot);
+
+
+void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * const u, // e' costante e non viene modificata
+							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
+							 __restrict tamat_soa * const ipdot);
+
+#endif //ifdef STOUT_FERMIONS
+
+
+#if defined(IMCHEMPOT) || defined(BACKFIELD)
+void multiply_backfield_times_force(__restrict ferm_param * const tpars,
+        __restrict double_soa * const backfield,
+        __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
+        __restrict su3_soa * const pseudo_ipdot)i;
+
+#else 
+void accumulate_gl3soa_into_gl3soa(
+        __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
+        __restrict su3_soa * const pseudo_ipdot);
+
+#endif
+
+void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
+					double_soa * backfield,
+					__restrict su3_soa * const aux_u,
+					__restrict vec3_soa * const in_shiftmulti,  // e' costante e non viene mai modificato qui dentro
+					__restrict vec3_soa  * const loc_s,
+					__restrict vec3_soa  * const loc_h,
+					ferm_param  *  tpars
+					);
 
 #endif

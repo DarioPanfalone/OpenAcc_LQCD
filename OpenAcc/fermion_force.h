@@ -5,6 +5,8 @@
 #include "./stouting.h"
 #include "./struct_c_def.h"
 #include "./inverter_multishift_full.h"
+#include "./fermion_force_utilities.h"
+
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

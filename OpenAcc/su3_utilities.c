@@ -1,7 +1,7 @@
 #ifndef SU3_UTILITIES_C_
 #define SU3_UTILITIES_C_
 
-
+#include <math.h>
 #include "su3_utilities.h"
 
 
@@ -814,6 +814,13 @@ void kernel_acc_mom_exp_times_conf( __restrict su3_soa * const conf,
 }
 
 
+
+void mom_exp_times_conf_soloopenacc(
+        __restrict  su3_soa * const tconf_acc,
+ thmat_soa * const tmomenta, // e' costante e qui dentro non viene modificata
+ double * tdelta,  int id_delta){
+  kernel_acc_mom_exp_times_conf(tconf_acc,tmomenta,tdelta, id_delta);
+}
 
 
 

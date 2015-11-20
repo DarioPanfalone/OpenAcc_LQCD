@@ -2,10 +2,10 @@
 #ifndef INVERTER_FULL_C_
 #define INVERTER_FULL_C_
 
-#include "./struct_c_def.c"
-#include "./fermionic_utilities.c"
-#include "./fermion_matrix.c"
-#include "./find_min_max.c"
+#include "./struct_c_def.h"
+#include "./fermionic_utilities.h"
+#include "./fermion_matrix.h"
+#include "./find_min_max.h"
 #ifndef __GNUC__
  #include "openacc.h"
 #endif

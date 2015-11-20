@@ -4,6 +4,40 @@
 
 #include "./struct_c_def.h"
 #include "./fermion_force_utilities.h"
+#include "../Include/fermion_parameters.h"
+
+
+
+void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix)
+{
+  int hx, y, z, t;
+  int mu;
+  SETINUSE(matrix);
+#pragma acc kernels present(matrix)
+#pragma acc loop independent gang(nt)
+  for(t=0; t<nt; t++) {
+#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(z=0; z<nz; z++) {
+#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(y=0; y<ny; y++) {
+#pragma acc loop independent vector(DIM_BLOCK_X)
+	for(hx=0; hx < nxh; hx++) {
+	  int x,idxh;
+	  x = 2*hx + ((y+z+t) & 0x1);
+	  idxh = snum_acc(x,y,z,t);
+	  for(mu=0; mu<8; mu++) {
+	    assign_zero_to_tamat_soa_component(&matrix[mu],idxh);
+	  }
+	}  // x
+      }  // y
+    }  // z
+  }  // t
+}
+
+
+
+
+
 
 void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, // questo fermione e' costante e non viene modificato qui dentro
 					    __restrict vec3_soa  * const loc_h, // questo fermione e' costante e non viene modificato qui dentro

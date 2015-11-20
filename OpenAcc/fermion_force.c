@@ -1,13 +1,16 @@
 #ifndef FERMION_FORCE_C
 #define FERMION_FORCE_C
 
-#include "./stouting.c"
-#include "./struct_c_def.c"
-#include "./inverter_multishift_full.c"
+#include "./stouting.h"
+#include "./struct_c_def.h"
+#include "./inverter_multishift_full.h"
+#include "./alloc_vars.h"
 #include "./fermion_force.h"
+#include "./fermion_force_utilities.h"
 
-
-#define TIMING_FERMION_FORCE
+#ifndef __GNUC__
+ #define TIMING_FERMION_FORCE
+#endif
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -206,10 +209,6 @@ void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_
   
 }
 */
-
-
-
-
 
 
 //STANDARD VERSION OF THE FERMIONIC FORCE
