@@ -3,10 +3,9 @@
 #include <math.h>
 #include <string.h>
 
-#include "./rationalapprox.c"
+#include "./rationalapprox.h"
 #include"./Remez/bigfloat.h"
 #include"./Remez/alg_remez.h"
-#include"./Remez/alg_remez.cc"
 
 
 //using namespace std;
