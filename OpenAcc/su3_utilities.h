@@ -2,20 +2,17 @@
 #define SU3_UTILITIES_H_
 
 
-#ifndef __GNUC__
- #include "../OpenAcc/deviceinit.c"
-#endif
-
-
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/single_types.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
-
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
  #define __restrict
  #include <math.h>
+#else // assuming compilation with PGI for accelerators
+ #include <accelmath.h>
+ #include "../OpenAcc/deviceinit.h"
 #endif
 
 

@@ -19,7 +19,7 @@ extern "C" {
 #include "./alloc_vars.h"
 #include "./random_assignement.h"
 
-#define acc_twopi 2.0 * M_PI 
+#define acc_twopi 2*3.14159265358979323846
 
 // gaussian random number generator
 double double_gauss(void)

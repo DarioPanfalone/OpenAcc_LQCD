@@ -12,7 +12,7 @@
 
 
 #ifdef STOUT_FERMIONS
-void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr){
+void stout_wrapper(__restrict su3_soa * tconf_acc,__restrict su3_soa * tstout_conf_acc_arr){
 
 
   for(int mu = 0; mu < 8*STOUT_STEPS; mu ++) SETREQUESTED((&tstout_conf_acc_arr[mu]));

@@ -287,12 +287,12 @@ void accumulate_gl3soa_into_gl3soa(
 #endif
 
 void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
-					double_soa * backfield,
+					__restrict double_soa * backfield,
 					__restrict su3_soa * const aux_u,
 					__restrict vec3_soa * const in_shiftmulti,  // e' costante e non viene mai modificato qui dentro
 					__restrict vec3_soa  * const loc_s,
 					__restrict vec3_soa  * const loc_h,
-					ferm_param  *  tpars
+					__restrict ferm_param  *  tpars
 					);
 
 #endif

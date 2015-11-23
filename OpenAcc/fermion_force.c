@@ -242,7 +242,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   gettimeofday ( &t1, NULL );
 #endif
   
-  su3_soa * conf_to_use; // CONF TO USE IN CALCULATION OF 
+  __restrict su3_soa * conf_to_use; // CONF TO USE IN CALCULATION OF 
   // FERMION FORCE
 #ifdef STOUT_FERMIONS
   stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
@@ -259,7 +259,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
     int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
     for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
       multishift_invert(conf_to_use, &tfermion_parameters[iflav], 
-			&(tfermion_parameters[iflav].approx_md), backfield,
+			&(tfermion_parameters[iflav].approx_md),  backfield,
 			tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, 
 			tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
       

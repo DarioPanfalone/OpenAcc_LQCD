@@ -9,17 +9,17 @@
 //#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
 int multishift_invert(__restrict su3_soa * const u,
-		      ferm_param * pars,
+		      __restrict ferm_param * pars,
 		      RationalApprox * approx,
-		      double_soa * backfield,
-		      __restrict vec3_soa * const out, // multi-fermion [nshifts]
+		      __restrict double_soa * backfield,
+		      __restrict vec3_soa * out, // multi-fermion [nshifts]
 		      __restrict vec3_soa * const in, // single ferm
 		      double residuo,
-		      __restrict vec3_soa * const loc_r,
-		      __restrict vec3_soa * const loc_h,
-		      __restrict vec3_soa * const loc_s,
-		      __restrict vec3_soa * const loc_p,
-		      __restrict vec3_soa * const shiftferm // multi-ferm [nshift]
+		      __restrict vec3_soa * loc_r,
+		      __restrict vec3_soa * loc_h,
+		      __restrict vec3_soa * loc_s,
+		      __restrict vec3_soa * loc_p,
+		      __restrict vec3_soa * shiftferm // multi-ferm [nshift]
 		      ){
     SETREQUESTED(loc_r);
     SETREQUESTED(loc_h);

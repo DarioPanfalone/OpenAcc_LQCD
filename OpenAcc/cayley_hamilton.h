@@ -6,9 +6,7 @@
 // "Analytic Smearing of SU(3) Link Variables in Lattice QCD",
 //  Morningstar & Peardon (2008)
 
-#ifndef __GNUC__
- #include <accelmath.h>
-#endif
+
 #include <complex.h>
 #include "./struct_c_def.h"
 #include "./single_types.h"
@@ -17,7 +15,9 @@
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
  #define __restrict
- #include "math.h"
+ #include <math.h>
+#else  // assuming PGI is used for compilation on accelerators
+ #include <accelmath.h>
 #endif
 
 

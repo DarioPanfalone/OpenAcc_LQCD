@@ -3,8 +3,9 @@
 
 #include "./geometry.h"
 #include "./backfield.h"
-#ifdef __GNUC__
- #define acc_twopi 2*3.14159265358979323846
+#define acc_twopi 2*3.14159265358979323846
+#ifndef __GNUC__
+ #include <accelmath.h>
 #endif
 
 void init_backfield(double_soa * tu1_back_field_phases){

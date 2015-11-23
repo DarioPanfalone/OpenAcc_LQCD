@@ -33,7 +33,7 @@ __restrict su3_soa   * const TMP  // variabile di parcheggio
 		    );
 
 #ifdef STOUT_FERMIONS
-void stout_wrapper(su3_soa * tconf_acc, su3_soa * tstout_conf_acc_arr);
+void stout_wrapper(__restrict su3_soa * tconf_acc,__restrict su3_soa * tstout_conf_acc_arr);
 #endif
 
 void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)

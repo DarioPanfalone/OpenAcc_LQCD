@@ -1,7 +1,11 @@
 #ifndef SU3_UTILITIES_C_
 #define SU3_UTILITIES_C_
 
-#include <math.h>
+#ifdef __GNUC__
+ #include <math.h>
+#else // assuming PGI is used to compile on accelerators
+ #include <accelmath.h>
+#endif
 #include "su3_utilities.h"
 
 
