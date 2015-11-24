@@ -3,7 +3,6 @@
 
 #include "./cayley_hamilton.h"
 #include "./struct_c_def.h"
-//#include "../OpenAcc/alloc_vars.h"
 #include "../OpenAcc/su3_utilities.h"
 
 // if using GCC, there are some problems with __restrict.

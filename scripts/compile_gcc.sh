@@ -22,6 +22,8 @@ OpenAcc/random_assignement.c       \
 OpenAcc/rettangoli.c               \
 OpenAcc/single_types.c             \
 OpenAcc/stouting.c                 \
+Meas/gauge_meas.c                 \
+Meas/ferm_meas.c                 \
 OpenAcc/su3_utilities.c            \
 OpenAcc/update_versatile.c         \
 RationalApprox/rationalapprox.c         \
@@ -30,8 +32,8 @@ Include/fermion_parameters.c \
 
 
 gcc -O3  -c  Rand/random.c                 2> gccmsg_err_0  
-echo Compiling OpenAcc/include_all_main.c ...
-gcc -std=c99 -O3  -c  OpenAcc/include_all_main.c  2> gccmsg_err_1
+echo Compiling OpenAcc/main.c ...
+gcc -std=c99 -O3  -c  OpenAcc/main.c  2> gccmsg_err_1
 for sourcefile in $SOURCES
 do 
 echo Compiling $sourcefile ...

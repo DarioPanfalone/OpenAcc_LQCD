@@ -4,11 +4,15 @@
 #ifndef FERM_MEAS_C 
 #define FERM_MEAS_C
 
+
+
 #ifdef STOUT_FERMIONS
 #include "../OpenAcc/stouting.h"
 #endif
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/inverter_full.h"
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/random_assignement.h"
 #include "./ferm_meas.h"
 
 

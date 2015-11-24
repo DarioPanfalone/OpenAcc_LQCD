@@ -25,13 +25,14 @@ OpenAcc/stouting.c                 \
 OpenAcc/su3_utilities.c            \
 OpenAcc/update_versatile.c         \
 RationalApprox/rationalapprox.c         \
-Include/fermion_parameters.c \
-"
+Meas/ferm_meas.c         \
+Meas/gauge_meas.c         \
+Include/fermion_parameters.c"
 
 
 pgcc -O0  -c  Rand/random.c                 2> pgccmsg_err_0  
-echo Compiling OpenAcc/include_all_main.c ...
-pgcc -O0  -c  OpenAcc/include_all_main.c  2> pgccmsg_err_1
+echo Compiling OpenAcc/main.c ...
+pgcc -O0  -c  OpenAcc/main.c  2> pgccmsg_err_1
 for sourcefile in $SOURCES
 do 
 echo Compiling $sourcefile ...
