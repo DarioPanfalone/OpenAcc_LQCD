@@ -9,7 +9,7 @@
 #endif
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/inverter_full.h"
-
+#include "./ferm_meas.h"
 
 
 // vedi tesi LS F.Negro per ragguagli (Appendici)
