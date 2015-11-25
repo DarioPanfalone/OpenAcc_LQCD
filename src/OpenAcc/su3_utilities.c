@@ -7,6 +7,7 @@
  #include <accelmath.h>
 #endif
 #include "su3_utilities.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
 
 
 // multiply the whole configuration for the staggered phases field

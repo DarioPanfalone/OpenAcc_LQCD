@@ -3,9 +3,6 @@
 
 #include "./struct_c_def.h"
 #include "../Include/fermion_parameters.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
-#include "./fermionic_utilities.h"
-#include "./fermion_matrix.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -234,7 +231,6 @@ static inline void assign_zero_to_tamat_soa_component(__restrict tamat_soa * con
 
 void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix);
 
-/// ADD ALL NON INLINE FUNCTIONS!!
 
 
 void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, // questo fermione e' costante e non viene modificato qui dentro

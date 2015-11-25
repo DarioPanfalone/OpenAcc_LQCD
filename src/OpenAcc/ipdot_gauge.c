@@ -1,6 +1,7 @@
 #ifndef IPDOT_GAUGE_C
 #define IPDOT_GAUGE_C
 
+#include "struct_c_def.h"
 #include "./su3_utilities.h"
 #include "./rettangoli.h"
 #include "./ipdot_gauge.h"
@@ -53,7 +54,6 @@ void calc_ipdot_gauge_soloopenacc_tlsm( __restrict  su3_soa * const tconf_acc,  
 #endif
 
 }
-
 
 void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
   if(GAUGE_ACTION==0){

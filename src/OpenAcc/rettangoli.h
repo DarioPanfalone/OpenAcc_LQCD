@@ -2,7 +2,6 @@
 #define RETTANGOLI_H
 
 #include "./struct_c_def.h"
-#include "./rettangoli.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

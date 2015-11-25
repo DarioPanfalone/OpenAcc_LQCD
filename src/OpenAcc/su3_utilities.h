@@ -4,7 +4,6 @@
 
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/single_types.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

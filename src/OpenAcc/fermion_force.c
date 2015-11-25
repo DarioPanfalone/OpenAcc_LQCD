@@ -7,6 +7,9 @@
 #include "./alloc_vars.h"
 #include "./fermion_force.h"
 #include "./fermion_force_utilities.h"
+#include "../Include/fermion_parameters.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
+#include "./su3_utilities.h"
 
 #ifndef __GNUC__
  #define TIMING_FERMION_FORCE

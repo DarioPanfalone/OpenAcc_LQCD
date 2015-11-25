@@ -2,11 +2,11 @@
 #define FERMION_FORCE_UTILITIES_C
 
 
-#include "./struct_c_def.h"
 #include "./fermion_force_utilities.h"
+#include "./struct_c_def.h"
 #include "../Include/fermion_parameters.h"
-
-
+#include "./fermionic_utilities.h"
+#include "./fermion_matrix.h"
 
 void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix)
 {

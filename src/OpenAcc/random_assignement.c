@@ -18,8 +18,20 @@ extern "C" {
 #include "./su3_utilities.h"
 #include "./alloc_vars.h"
 #include "./random_assignement.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
 
 #define acc_twopi 2*3.14159265358979323846
+
+#ifdef __GNUC__
+ #include "math.h"
+ #ifndef M_PI
+  #define M_PI 3.14159265358979323846
+ #endif
+#endif
+
+
+
+
 
 // gaussian random number generator
 double double_gauss(void)

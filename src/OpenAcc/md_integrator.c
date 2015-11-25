@@ -29,6 +29,9 @@
 #include "./md_integrator.h"
 #include "./alloc_vars.h"
 #include "./ipdot_gauge.h"
+#include "./su3_utilities.h"
+#include "../Include/common_defines.h"
+#include "../Include/fermion_parameters.h"
 
 
 void initialize_md_global_variables(void )

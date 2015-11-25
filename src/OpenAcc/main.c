@@ -16,7 +16,7 @@ void su2_rand(double *pp);
 #include "../RationalApprox/rationalapprox.h"
 #include "./struct_c_def.h"
 #include "./alloc_vars.h"
-#include "./dbgtools.c"
+#include "./dbgtools.h"
 #include "./fermionic_utilities.h"
 #include "./single_types.h"
 #include "./su3_utilities.h"

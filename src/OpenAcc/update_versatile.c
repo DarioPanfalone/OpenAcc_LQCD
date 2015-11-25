@@ -8,6 +8,12 @@
 #include "./find_min_max.h"
 #include "./rettangoli.h"
 #include "./alloc_vars.h"
+#include "./stouting.h"
+#include "./md_integrator.h"
+#include "./su3_utilities.h"
+#include "./inverter_multishift_full.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
+#include "./fermionic_utilities.h"
 
 
 #ifdef __GNUC__

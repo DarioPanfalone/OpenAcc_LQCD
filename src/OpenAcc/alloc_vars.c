@@ -1,10 +1,13 @@
 #ifndef ALLOC_VARS_C_
 #define ALLOC_VARS_C_
 
+#include <stdio.h>
 #include "./alloc_vars.h"
 #include "../Include/fermion_parameters.h"
-#include <stdio.h>
+#include "../DbgTools/debug_macros_glvarcheck.h"
+#include "../Include/fermion_parameters.h"
 
+#define ALIGN 128
 
 void mem_alloc()
 {

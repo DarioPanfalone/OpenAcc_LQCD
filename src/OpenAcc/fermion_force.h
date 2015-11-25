@@ -2,10 +2,8 @@
 #define FERMION_FORCE_H
 
 
-#include "./stouting.h"
 #include "./struct_c_def.h"
-#include "./inverter_multishift_full.h"
-#include "./fermion_force_utilities.h"
+#include "../Include/fermion_parameters.h"
 
 
 // if using GCC, there are some problems with __restrict.

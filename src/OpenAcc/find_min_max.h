@@ -2,12 +2,7 @@
 #define FIND_MIN_MAX_H_
 
 #include "./struct_c_def.h"
-#include "./fermionic_utilities.h"
-#include "./fermion_matrix.h"
-#ifndef __GNUC__
- #include "openacc.h"
-#endif
-#include <stdio.h>
+#include "../Include/fermion_parameters.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

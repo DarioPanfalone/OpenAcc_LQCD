@@ -2,7 +2,8 @@
 #define INVERTER_SHIFT_MULTI_FULL_C_
 
 #include "./struct_c_def.h"
-#include "./fermion_matrix.h"
+#include "../RationalApprox/rationalapprox.h"
+#include "../Include/fermion_parameters.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

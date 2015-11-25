@@ -6,6 +6,7 @@
 #include "./su3_utilities.h"
 #include "./alloc_vars.h"
 #include "./stouting.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
 
 #include "./single_types.h"
 

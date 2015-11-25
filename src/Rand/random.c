@@ -3,7 +3,7 @@
 
 #include <math.h>
 #include <stdlib.h>
-
+#include "sys/time.h"
 #include"./RANDOM/dSFMT.c"
 dsfmt_t dsfmt;
 

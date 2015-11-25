@@ -2,7 +2,6 @@
 #define COOLING_C
 
 #include "./struct_c_def.h"
-#include "../OpenAcc/su3_utilities.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

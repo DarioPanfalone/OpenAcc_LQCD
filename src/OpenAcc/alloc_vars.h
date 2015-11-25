@@ -1,17 +1,9 @@
 #ifndef ALLOC_VARS_H_
 #define ALLOC_VARS_H_
 
-#include "struct_c_def.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
+#include "./struct_c_def.h"
 
 // used in the dynamical allocation of structures
-#define ALIGN 128
-
-// if using GCC, there are some problems with __restrict.
-#ifdef __GNUC__
- #define __restrict
-#endif
-#include "../Include/fermion_parameters.h"
 
 #ifndef ALLOC_VARS_C_ 
 #define EXT_TO_ALLOC_VARS extern

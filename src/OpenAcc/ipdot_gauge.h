@@ -1,8 +1,7 @@
 #ifndef IPDOT_GAUGE_H
 #define IPDOT_GAUGE_H
 
-#include "./su3_utilities.h"
-#include "./rettangoli.h"
+#include "struct_c_def.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

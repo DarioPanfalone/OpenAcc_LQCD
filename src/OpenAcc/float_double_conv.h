@@ -50,7 +50,7 @@ typedef struct f_thmat_soa_t {
   f_complex c12[sizeh]; // comp_12
   float  rc00[sizeh];   // Re(comp_00)
   float  rc11[sizeh];   // Re(comp_11)
-} thmat_soa;
+} f_thmat_soa;
 
 
 ////////////  VEC3_SOA    float <==> double conversions /////////////////////////

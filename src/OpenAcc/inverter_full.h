@@ -2,12 +2,7 @@
 #define INVERTER_FULL_H_
 
 #include "./struct_c_def.h"
-#include "./fermionic_utilities.h"
-#include "./fermion_matrix.h"
-#include "./find_min_max.h"
-#ifndef __GNUC__
-#include "openacc.h"
-#endif
+#include "../Include/fermion_parameters.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

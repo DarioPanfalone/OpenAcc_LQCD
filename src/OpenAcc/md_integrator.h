@@ -2,8 +2,6 @@
 #define MD_INTEGRATOR_H
 
 #include "./struct_c_def.h"
-#include "./fermion_force.h"
-#include "../Include/common_defines.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
