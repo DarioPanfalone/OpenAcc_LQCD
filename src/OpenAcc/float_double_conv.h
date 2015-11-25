@@ -9,7 +9,6 @@
  #define __restrict
 #endif
 
-typedef float  complex  f_complex;
 
 typedef struct f_vec3_soa_t {
     int status;
