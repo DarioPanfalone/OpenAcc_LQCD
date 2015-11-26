@@ -5,6 +5,13 @@ PGIcls = \
         'COMPILER=pgcc\n\
         COMPILER_FLAGS=-O3 -acc -Minfo=accel -v -ta=tesla:cc35,cuda7.0 \n\
         LINKER_FLAGS=-acc  -Minfo=accel -O3 -v -ta=tesla:cc35,cuda7.0 \n' 
+PGIclsSLOW = \
+        'COMPILER=pgcc\n\
+        COMPILER_FLAGS=-O0 \n\
+        LINKER_FLAGS=-O0 \n' 
+
+
+
 GNUcls = \
         'COMPILER=gcc\n\
         COMPILER_FLAGS=-O3 -std=c99\n\
@@ -114,7 +121,7 @@ if __name__ == '__main__':
 #        stderr.write(filename + '\n')
         makestring = node.generate_make_string()
         stdout.write(makestring)
-    mainlinking_string += '\n\t$(COMPILER) -o main $(LINKER_FLAGS) *.o\n'
+    mainlinking_string += '\n\t$(COMPILER) -o main $(LINKER_FLAGS) *.o\n\tif ! [ -d run ] ; then mkdir run; fi ; cp main run/\n '
     stdout.write(mainlinking_string)
     makeclean_string='clean:\n\trm -f *.o main\n'
     stdout.write(makeclean_string)
