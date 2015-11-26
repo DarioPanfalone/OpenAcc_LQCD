@@ -1,7 +1,7 @@
 // use z2 noise instead of gaussian noise (see hep-lat/9308015)
 // use the global defined fermions loc_chi, loc_phi, rnd_o, rnd_e, chi_o and loc_h
-#ifndef FERM_MEAS_C 
-#define FERM_MEAS_C
+#ifndef FERM_MEAS_H 
+#define FERM_MEAS_H
 
 #include "../OpenAcc/struct_c_def.h"
 void eo_inversion(su3_soa *tconf_acc,

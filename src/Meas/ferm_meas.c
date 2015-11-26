@@ -4,7 +4,11 @@
 #ifndef FERM_MEAS_C 
 #define FERM_MEAS_C
 
+#define ALIGN 128
 
+
+
+#include "../Include/common_defines.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/inverter_full.h"
 #include "../OpenAcc/alloc_vars.h"

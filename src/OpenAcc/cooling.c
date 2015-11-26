@@ -1,6 +1,7 @@
 #ifndef COOLING_C
 #define COOLING_C
 
+#include "../Include/common_defines.h"
 #include "./struct_c_def.h"
 #include "../OpenAcc/su3_utilities.h"
 #include "./cooling.h"

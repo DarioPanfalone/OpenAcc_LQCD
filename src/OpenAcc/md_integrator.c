@@ -24,6 +24,7 @@
 #ifndef MD_INTEGRATOR_C
 #define MD_INTEGRATOR_C
 
+#include "../Include/common_defines.h"
 #include "./struct_c_def.h"
 #include "./fermion_force.h"
 #include "./md_integrator.h"

@@ -1,6 +1,7 @@
 #ifndef FERMION_FORCE_UTILITIES_H
 #define FERMION_FORCE_UTILITIES_H
 
+#include "../Include/common_defines.h"
 #include "./struct_c_def.h"
 #include "../Include/fermion_parameters.h"
 

@@ -13,6 +13,7 @@ GNUcls = \
 compiler_linker_settings = GNUcls
 
 
+
 import os.path as path
 from sys import exit,argv,stderr,stdout
 
@@ -33,14 +34,14 @@ def header_scanner(filename):
                 end_filename_position = line.rfind('"')
             if init_filename_position != -1 and end_filename_position != -1:
                 filefound = line[init_filename_position+1:end_filename_position]
-                stderr.write("File found : " + line + ' \n')
+#                stderr.write("File found : " + line + ' \n')
                 if filefound[0] is '.':
                     filesfound.append(filefound)
-                    stderr.write(filefound+\
-                            ' is in the package, adding it.\n')
-                else:
-                    stderr.write(filefound +\
-                            ' is not in this package, not adding it.\n')
+#                    stderr.write(filefound+\
+#                            ' is in the package, adding it.\n')
+#                else:
+#                    stderr.write(filefound +\
+#                            ' is not in this package, not adding it.\n')
             else:
                 stderr.write( "#include line incorrect:" + filename + ' ' + line + '\n')
 
@@ -56,16 +57,18 @@ class file_node:
         return res
 
     def __init__(self,filename):
+        self.direct_dependences_relative = []
         self.direct_dependences = []
         self.all_dependences = []
         self.sons = []
         self.name = filename
-        stderr.write("Scanning " + filename + "...\n" )
-        self.direct_dependences = header_scanner(filename)
-        for dependence in self.direct_dependences:
-            dependencem = path.dirname(self.name)+ '/'+dependence
+#        stderr.write("Scanning " + filename + "...\n" )
+        self.direct_dependences_relative = header_scanner(filename)
+        for dependence in self.direct_dependences_relative:
+            dependencem = path.abspath(path.dirname(self.name)+ '/'+dependence)
             son = file_node(dependencem)
             self.sons.append(son)
+            self.direct_dependences.append(dependencem)
         self.all_dependences_raw = self.get_all_dependences_raw();
         if self.all_dependences_raw is not None:
             for dependence in self.all_dependences_raw:
@@ -87,8 +90,7 @@ class file_node:
             return ''
 
         for dependence in self.direct_dependences:
-            dependencem = path.dirname(self.name)+ '/'+dependence
-            makestring += ' ' + dependencem 
+            makestring += ' ' + dependence
         makestring += '\n\t'
         if '.h' in self.name:
             makestring += 'touch ' + self.name + '\n'
@@ -109,10 +111,10 @@ if __name__ == '__main__':
         if '.c' in filename:
             mainlinking_string += ' ' + path.basename(filename)[:-2] + '.o'
         node = file_node(filename)
-        stderr.write(filename + '\n')
+#        stderr.write(filename + '\n')
         makestring = node.generate_make_string()
         stdout.write(makestring)
-    mainlinking_string += '\n\t$(COMPILER) -o main $(LINKER_FLAGS) *.o\n'
+    mainlinking_string += '\n\t$(COMPILER) -o main $(LINKER_FLAGS) *.o\n\tif ! [ -d run ] ; then mkdir run; fi ; cp main run/\n '
     stdout.write(mainlinking_string)
     makeclean_string='clean:\n\trm -f *.o main\n'
     stdout.write(makeclean_string)

@@ -15,6 +15,7 @@ extern "C" {
 }
 */
 
+#include "./geometry.h"
 #include "./su3_utilities.h"
 #include "./alloc_vars.h"
 #include "./random_assignement.h"
