@@ -5,6 +5,13 @@ PGIcls = \
         'COMPILER=pgcc\n\
         COMPILER_FLAGS=-O3 -acc -Minfo=accel -v -ta=tesla:cc35,cuda7.0 \n\
         LINKER_FLAGS=-acc  -Minfo=accel -O3 -v -ta=tesla:cc35,cuda7.0 \n' 
+PGIclsSLOW = \
+        'COMPILER=pgcc\n\
+        COMPILER_FLAGS=-O0 \n\
+        LINKER_FLAGS=-O0 \n' 
+
+
+
 GNUcls = \
         'COMPILER=gcc\n\
         COMPILER_FLAGS=-O3 -std=c99\n\
