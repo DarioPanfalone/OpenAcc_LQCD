@@ -3,6 +3,8 @@
 
 #include "./fermion_parameters.h"
 
+#define ALIGN 128
+
 void init_ferm_params(){
 
 

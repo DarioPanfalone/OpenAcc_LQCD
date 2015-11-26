@@ -4,6 +4,8 @@
 #ifndef FERM_MEAS_C 
 #define FERM_MEAS_C
 
+#define ALIGN 128
+
 
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/inverter_full.h"
