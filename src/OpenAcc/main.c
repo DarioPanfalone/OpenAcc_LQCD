@@ -2,7 +2,7 @@ double casuale(void);
 void initrand(unsigned long s);
 void su2_rand(double *pp);
 #define PRINT_DETAILS_INSIDE_UPDATE
-
+#define ALIGN 128
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -99,7 +99,7 @@ int main(){
   //###############################################################################################  
 
 
-#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:2])  copyin(fermions_parameters[0:NDiffFlavs])
+#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:2])  copyin(fermions_parameters[0:NDiffFlavs])
   {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8]) create(gstout_conf_acc_arr[0:(8*STOUT_STEPS)]) create(glocal_staples[0:8]) create(gipdot[0:8]) 
