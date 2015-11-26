@@ -1,7 +1,7 @@
 #ifndef SU3_UTILITIES_H_
 #define SU3_UTILITIES_H_
 
-
+#include "../Include/common_defines.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/single_types.h"
 

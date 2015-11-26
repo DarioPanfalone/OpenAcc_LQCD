@@ -6,6 +6,7 @@
 #include <complex.h>
 #endif
 
+#include "./geometry.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>

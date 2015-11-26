@@ -15,6 +15,7 @@
 #ifndef FERMIONIC_UTILITIES_C_
 #define FERMIONIC_UTILITIES_C_
 
+#include "./geometry.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
 

@@ -1,6 +1,7 @@
 #ifndef FLOAT_DOUBLE_CONV_H
 #define FLOAT_DOUBLE_CONV_H
 
+#include "./geometry.h"
 #include "../OpenAcc/struct_c_def.h"
 
 // if using GCC, there are some problems with __restrict.

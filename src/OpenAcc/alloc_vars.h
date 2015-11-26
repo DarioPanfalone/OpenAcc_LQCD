@@ -1,6 +1,7 @@
 #ifndef ALLOC_VARS_H_
 #define ALLOC_VARS_H_
 
+#include "../Include/common_defines.h"
 #include "./struct_c_def.h"
 
 // used in the dynamical allocation of structures

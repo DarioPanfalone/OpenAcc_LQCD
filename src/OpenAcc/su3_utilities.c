@@ -1,6 +1,8 @@
 #ifndef SU3_UTILITIES_C_
 #define SU3_UTILITIES_C_
 
+#include "../Include/common_defines.h"
+#include "./geometry.h"
 #ifdef __GNUC__
  #include <math.h>
 #else // assuming PGI is used to compile on accelerators

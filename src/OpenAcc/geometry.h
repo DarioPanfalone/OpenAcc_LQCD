@@ -1,7 +1,6 @@
 #ifndef GEOMETRY_H_
 #define GEOMETRY_H_
 
-#include "../Include/common_defines.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -12,7 +11,7 @@
 #define nx 4 
 #define ny 4 
 #define nz 4 
-#define nt 4 
+#define nt 6
 
 
 #define sizehh nx*ny*nz*nt/2 
