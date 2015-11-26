@@ -85,7 +85,7 @@ class file_node:
             stderr.write("Filename " + self.name + " not valid.\n")
             return ''
 
-        for dependence in self.all_dependences:
+        for dependence in self.direct_dependences:
             makestring += ' ' + dependence
         makestring += '\n\t'
         if '.h' in self.name:
