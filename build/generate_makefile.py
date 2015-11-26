@@ -110,7 +110,7 @@ if __name__ == '__main__':
 #        stderr.write(filename + '\n')
         makestring = node.generate_make_string()
         stdout.write(makestring)
-    mainlinking_string += '\n\t$(COMPILER) -o main $(LINKER_FLAGS) *.o\n'
+    mainlinking_string += '\n\t$(COMPILER) -o main $(LINKER_FLAGS) *.o\n\tif ! [ -d run ] ; then mkdir run; fi ; cp main run/\n '
     stdout.write(mainlinking_string)
     makeclean_string='clean:\n\trm -f *.o main\n'
     stdout.write(makeclean_string)

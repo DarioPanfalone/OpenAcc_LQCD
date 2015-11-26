@@ -11,7 +11,7 @@
 #define nx 4 
 #define ny 4 
 #define nz 4 
-#define nt 6
+#define nt 4
 
 
 #define sizehh nx*ny*nz*nt/2 
