@@ -7,9 +7,12 @@
  #include <stdlib.h>
 #endif
 
-#define ALIGN 128
+#ifndef FERMION_PARAMETERS_C_
+#define EXT_TO_FERMION_PARAMETERS extern
+#else
+#define EXT_TO_FERMION_PARAMETERS 
+#endif
 
-//FERMION PARAMETERS
 typedef struct ferm_param_t{
   double ferm_charge;
   double ferm_mass;
@@ -25,11 +28,15 @@ typedef struct ferm_param_t{
   RationalApprox approx_li;        // last inv
 } ferm_param;
 
+EXT_TO_FERMION_PARAMETERS int NDiffFlavs;
+EXT_TO_FERMION_PARAMETERS int NPS_tot;
+EXT_TO_FERMION_PARAMETERS int max_ps;
+EXT_TO_FERMION_PARAMETERS ferm_param *fermions_parameters;
 
-int NDiffFlavs;
-int NPS_tot;
-int max_ps;
-ferm_param *fermions_parameters;
+
+
+
+//FERMION PARAMETERS
 
 #define  APPROX_METRO 19
 #define  APPROX_MD 9
