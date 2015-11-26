@@ -1,6 +1,7 @@
 #ifndef FERMIONIC_UTILITIES_H_
 #define FERMIONIC_UTILITIES_H_
 
+#include "./geometry.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./struct_c_def.h"
 

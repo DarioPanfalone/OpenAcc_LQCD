@@ -1,6 +1,7 @@
 #ifndef FERMION_FORCE_C
 #define FERMION_FORCE_C
 
+#include "../Include/common_defines.h"
 #include "./stouting.h"
 #include "./struct_c_def.h"
 #include "./inverter_multishift_full.h"

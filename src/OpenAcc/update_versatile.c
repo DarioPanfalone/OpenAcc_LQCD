@@ -3,6 +3,7 @@
 #ifndef UPDATE_VERSATILE_C_
 #define UPDATE_VERSATILE_C_
 
+#include "../Include/common_defines.h"
 #include "./update_versatile.h"
 #include "./random_assignement.h"
 #include "./find_min_max.h"

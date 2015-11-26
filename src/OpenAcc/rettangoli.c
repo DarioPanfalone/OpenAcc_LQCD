@@ -1,6 +1,7 @@
 #ifndef RETTANGOLI_C
 #define RETTANGOLI_C
 
+#include "./geometry.h"
 #include "./struct_c_def.h"
 #include "./single_types.h"
 #include "./rettangoli.h"

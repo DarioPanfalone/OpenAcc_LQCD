@@ -1,6 +1,7 @@
 #ifndef STOUTING_C
 #define STOUTING_C
 
+#include "./geometry.h"
 #include "./cayley_hamilton.h"
 #include "./struct_c_def.h"
 #include "./su3_utilities.h"
