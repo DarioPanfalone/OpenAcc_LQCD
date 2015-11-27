@@ -13,7 +13,7 @@ GNUcls = 'COMPILER=gcc\n\
 COMPILER_FLAGS=-O3 -std=c99\n\
 LINKER_FLAGS=-lm\n' 
         
-compiler_linker_settings = GNUcls
+compiler_linker_settings = PGIcls
 
 
 
@@ -137,10 +137,10 @@ def generate_makefile(targv):
         maino_name = path.basename(main_file)[:-2] + '.o'
         onefilecomp_string += '\t$(COMPILER) $(LINKER_FLAGS) -o '+\
                 'main_onefilecomp ' + maino_name + ' random.o \n'
-        onefilecomp_string += '\tmv main_onefilecomp run/\n'
+        onefilecomp_string += '\tcp main_onefilecomp run/\n'
         res += onefilecomp_string
 
-    makeclean_string='clean:\n\trm -f *.o main\n'
+    makeclean_string='clean:\n\trm -f *.o main main_onefilecomp\n'
     res += makeclean_string
     
     return res 

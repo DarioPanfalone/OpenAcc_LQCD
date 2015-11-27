@@ -1,6 +1,7 @@
 #ifndef FERMION_MATRIX_C
 #define FERMION_MATRIX_C
 
+#include "../Include/common_defines.h"
 #include "./geometry.h"
 #include "./struct_c_def.h"
 #ifndef __GNUC__
