@@ -18,19 +18,19 @@ void init_ferm_params(){
   if(allocation_check != 0)  printf("Errore nella allocazione di fermions_parameters \n");
 
   fermions_parameters[0].ferm_charge       = -1.0;   // up    charge
-  fermions_parameters[0].ferm_mass         = 0.00362345;    //0.075;  // up    mass
+  fermions_parameters[0].ferm_mass         = 0.0011723;    //0.075;  // up    mass
   fermions_parameters[0].ferm_im_chem_pot  = 0.0;    // up    chem pot
   fermions_parameters[0].degeneracy        = 1;      // up    degeneracy
   fermions_parameters[0].number_of_ps      = 1;      // up    number of pseudo fermions
 
   fermions_parameters[1].ferm_charge       = 2.0;    // down  charge
-  fermions_parameters[1].ferm_mass         = 0.00362345;    //0.075;  // down  mass
+  fermions_parameters[1].ferm_mass         = 0.0011723;    //0.075;  // down  mass
   fermions_parameters[1].ferm_im_chem_pot  = 0.0;    // down  chem pot
   fermions_parameters[1].degeneracy        = 1;      // down  degeneracy
   fermions_parameters[1].number_of_ps      = 1;      // down  number of pseudo fermions
 
   fermions_parameters[2].ferm_charge       = -1.0;    // strange  charge
-  fermions_parameters[2].ferm_mass         = 0.102;    //0.075;  // strange  mass
+  fermions_parameters[2].ferm_mass         = 0.033;    //0.075;  // strange  mass
   fermions_parameters[2].ferm_im_chem_pot  = 0.0;    // strange  chem pot
   fermions_parameters[2].degeneracy        = 1;      // strange  degeneracy
   fermions_parameters[2].number_of_ps      = 1;      // strange  number of pseudo fermions
@@ -55,6 +55,9 @@ void init_ferm_params(){
 
 
   
+
+  
+
   for(int i=0;i<NDiffFlavs;i++){
     fermions_parameters[i].approx_fi_mother.exponent_num =  +fermions_parameters[i].degeneracy;
     fermions_parameters[i].approx_md_mother.exponent_num =  -fermions_parameters[i].degeneracy;
@@ -105,9 +108,6 @@ void init_ferm_params(){
 
 
   }
-
-  
-
 }
 
 #endif

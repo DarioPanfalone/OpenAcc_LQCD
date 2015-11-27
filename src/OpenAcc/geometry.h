@@ -8,10 +8,10 @@
 #endif
 
 // lattice dimensions
-#define nx 4 
-#define ny 4 
-#define nz 4 
-#define nt 4
+#define nx 32 
+#define ny 32 
+#define nz 32 
+#define nt 8
 
 
 #define sizehh nx*ny*nz*nt/2 
