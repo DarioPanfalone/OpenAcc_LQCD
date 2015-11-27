@@ -12,6 +12,11 @@ void su2_rand(double *pp);
 #ifndef __GNUC__
  #include "openacc.h"
 #endif
+
+#ifdef ONE_FILE_COMPILATION
+ #include "../Include/all_include.h"
+#endif
+
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../RationalApprox/rationalapprox.h"
 #include "./struct_c_def.h"

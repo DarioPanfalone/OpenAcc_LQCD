@@ -6,7 +6,7 @@
 
 // used in the dynamical allocation of structures
 
-#ifndef ALLOC_VARS_C_ 
+#if !defined(ALLOC_VARS_C_) && !defined(ONE_FILE_COMPILATION)
 #define EXT_TO_ALLOC_VARS extern
 #else
 #define EXT_TO_ALLOC_VARS 

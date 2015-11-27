@@ -11,7 +11,7 @@
 #include "./fermion_matrix.h"
 
 
-#ifdef PHASE_MAT_VEC_MULT
+#ifdef PHASE_MAT_VEC_MULT // there is a d_complex phase in the prototype
 #pragma acc routine seq
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
                                 const int idx_mat,
@@ -24,7 +24,7 @@ static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
   d_complex vec0 = (in_vect->c0[idx_vect])*phase;
   d_complex vec1 = (in_vect->c1[idx_vect])*phase;
   d_complex vec2 = (in_vect->c2[idx_vect])*phase;
-#else
+#else // .. not
 #pragma acc routine seq
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
                                 const int idx_mat,
@@ -68,13 +68,14 @@ static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
   return out_vect;
 
   // just to close the same amount of {
-#ifdef PHASE_MAT_VEC_MULT
+#ifdef PHASE_MAT_VEC_MULT // it seems stupid, but this is the only way not
+                          // to have a syntax error by text editors
 }
 #else
 }
 #endif
 
-#ifdef PHASE_MAT_VEC_MULT
+#ifdef PHASE_MAT_VEC_MULT // a dcomplex_phase in the prototype
 #pragma acc routine seq
 static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
                                     const int idx_mat,
@@ -88,7 +89,7 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
   d_complex vec1 = in_vect->c1[idx_vect]*phase;
   d_complex vec2 = in_vect->c2[idx_vect]*phase;
 
-#else
+#else // ... not
 #pragma acc routine seq
 static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
                                     const int idx_mat,
@@ -131,7 +132,7 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
   return out_vect;
 
   // just to close the same amount of {
-#ifdef PHASE_MAT_VEC_MULT
+#ifdef PHASE_MAT_VEC_MULT // seems stupid but see the comment above
 }
 #else
 }
@@ -165,7 +166,7 @@ static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in,ferm_param *pars,double_soa * backfield) {
   SETINUSE(out);
   int hx, y, z, t;
-#ifdef BACKFIELD
+#ifdef BACKFIELD // the backfield must be on the device
 #pragma acc kernels present(u) present(out) present(in) present(pars) present(backfield)
 #else
 #pragma acc kernels present(u) present(out) present(in) present(pars)
@@ -336,7 +337,7 @@ void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __
   SETINUSE(out);
   int hx, y, z, t;
 
-#ifdef BACKFIELD
+#ifdef BACKFIELD // the backfled must be on the device
 #pragma acc kernels present(u) present(out) present(in) present(pars) present(backfield)
 #else
 #pragma acc kernels present(u) present(out) present(in) present(pars)

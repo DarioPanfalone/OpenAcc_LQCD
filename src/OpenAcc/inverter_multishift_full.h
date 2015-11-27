@@ -1,5 +1,5 @@
-#ifndef INVERTER_SHIFT_MULTI_FULL_C_
-#define INVERTER_SHIFT_MULTI_FULL_C_
+#ifndef INVERTER_SHIFT_MULTI_FULL_H_
+#define INVERTER_SHIFT_MULTI_FULL_H_
 
 #include "./struct_c_def.h"
 #include "../RationalApprox/rationalapprox.h"
