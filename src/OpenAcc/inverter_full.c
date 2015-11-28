@@ -9,7 +9,7 @@
 #ifndef __GNUC__
  #include "openacc.h"
 #endif
-
+#include "./inverter_full.h"
 
 //#define DEBUG_INVERTER_FULL_OPENACC
 

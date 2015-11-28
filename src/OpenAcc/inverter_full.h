@@ -10,6 +10,8 @@
 #endif
 
 
+#define max_cg 10000
+
 #define DEBUG_INVERTER_FULL_OPENACC
 
 

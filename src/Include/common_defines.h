@@ -57,19 +57,6 @@
   // 3.7  //5.35
 
 
-#define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
-int conf_id_iter;
-#define ITERATIONS 1500 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-#define therm_ITERATIONS 30 // the first <therm_ITERATIONS> of the history will be thermalization updates
-
-#define save_conf_every 10
-
-#define max_cg 10000
-#define no_md 8 // number of MD steps
-#define gauge_scale 4  // Update fermions every gauge_scale gauge updates
-
-#define residue_metro 1.0e-8 //-8    // stopping residual for CG
-#define  residue_md 1.0e-6 //-5    // stopping residual for CG
 
 #endif
 

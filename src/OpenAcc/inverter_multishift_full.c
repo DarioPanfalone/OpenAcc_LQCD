@@ -5,6 +5,7 @@
 #include "./struct_c_def.h"
 #include "./fermion_matrix.h"
 #include "./inverter_multishift_full.h"
+#include "./inverter_full.h"
 
 
 //#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
