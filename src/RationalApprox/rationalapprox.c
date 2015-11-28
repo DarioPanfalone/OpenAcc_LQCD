@@ -1,6 +1,10 @@
 #ifndef RATIONAL_APPROX_C_
 #define RATIONAL_APPROX_C_
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
 #include "./rationalapprox.h"
 
 
@@ -39,6 +43,15 @@ void rationalapprox_read(RationalApprox* rational_approx)
 
     char * nomefile = rational_approx_filename(rational_approx->approx_order,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
 
+    rationalapprox_read_custom_nomefile(rational_approx,nomefile);
+
+}
+
+
+void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* nomefile)
+{
+
+    // CALCULATION OF COEFFICIENTS FOR FIRST_INV_APPROX_NORM_COEFF
     FILE *input = fopen(nomefile, "rt");
     printf("%s\n", nomefile );
     if (input == NULL) {
@@ -121,8 +134,42 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
 
    out->lambda_min  = in->lambda_min * max ;
    out->lambda_max  = max ;
+   //pray
+   if(out->lambda_min > minmax[0]){
+       printf("Warning: mother rational approx does not cover the range!\n");
+       printf("out->lambda_min: %f , minmax[0]: %f\n", out->lambda_min, minmax[0] );
+   }
 
 }
+
+
+void renormalize_rational_approximation(RationalApprox *in, RationalApprox *out){
+   double power = (double) in->exponent_num/in->exponent_den;
+
+   
+
+   out->exponent_num        = in->exponent_num       ;
+   out->exponent_den        = in->exponent_den       ;
+   out->approx_order        = in->approx_order       ;
+   out->gmp_remez_precision = in->gmp_remez_precision;              
+   out->error               = in->error              ;
+   
+   // HERE THE ASSUMPTION IS THAT in->lambda_max  = 1
+   
+   double rescale_ratio =  1/in->lambda_max;
+   double epsilon=pow(rescale_ratio, power);  
+   out->RA_a0               = in->RA_a0       *     epsilon ;
+   for(int order = 0; order < in->approx_order; order ++){
+   out->RA_a[order] = in->RA_a[order]*rescale_ratio * epsilon;
+   out->RA_b[order] = in->RA_b[order]*rescale_ratio ;
+   }
+
+   out->lambda_min  = in->lambda_min * rescale_ratio ;
+   out->lambda_max  = 1 ;
+
+}
+
+
 
 
 #endif
