@@ -1,6 +1,10 @@
 #ifndef RATIONAL_APPROX_C_
 #define RATIONAL_APPROX_C_
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
 #include "./rationalapprox.h"
 
 
@@ -39,6 +43,15 @@ void rationalapprox_read(RationalApprox* rational_approx)
 
     char * nomefile = rational_approx_filename(rational_approx->approx_order,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
 
+    rationalapprox_read_custom_nomefile(rational_approx,nomefile);
+
+}
+
+
+void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* nomefile)
+{
+
+    // CALCULATION OF COEFFICIENTS FOR FIRST_INV_APPROX_NORM_COEFF
     FILE *input = fopen(nomefile, "rt");
     printf("%s\n", nomefile );
     if (input == NULL) {
