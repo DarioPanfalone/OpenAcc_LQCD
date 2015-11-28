@@ -137,7 +137,7 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    //pray
    if(out->lambda_min > minmax[0]){
        printf("Warning: mother rational approx does not cover the range!\n");
-       printf("out->lambda_min: %f , minmax[0]: %f\n", out->lambda_min, minmax[0] );
+       printf("out->lambda_min: %.18lf , minmax[0]: %.18lf\n", out->lambda_min, minmax[0] );
    }
 
 }
@@ -154,7 +154,7 @@ void renormalize_rational_approximation(RationalApprox *in, RationalApprox *out)
    out->gmp_remez_precision = in->gmp_remez_precision;              
    out->error               = in->error              ;
    
-   // HERE THE ASSUMPTION IS THAT in->lambda_max  = 1
+   // HERE THE ASSUMPTION IS THAT out->lambda_max  = 1
    
    double rescale_ratio =  1/in->lambda_max;
    double epsilon=pow(rescale_ratio, power);  

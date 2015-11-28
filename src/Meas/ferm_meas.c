@@ -6,8 +6,8 @@
 
 #define ALIGN 128
 
-
-
+#include <stdio.h>
+#include <stdlib.h>
 #include "../Include/common_defines.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/inverter_full.h"
