@@ -1,11 +1,6 @@
 #ifndef RATIONAL_APPROX_H_
 #define RATIONAL_APPROX_H_
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
-
 #define MAX_APPROX_ORDER 19
 
 
@@ -28,6 +23,7 @@ typedef struct RationalApprox_t{
 char* rational_approx_filename(int approx_order, int exponent_num, int exponent_den, double lambda_min);
 
 void rationalapprox_read(RationalApprox* rational_approx);
+void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* nomefile);
 
 
 void rationalapprox_save(const char* nomefile, RationalApprox* rational_approx);
