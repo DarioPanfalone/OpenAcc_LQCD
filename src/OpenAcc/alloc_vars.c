@@ -2,6 +2,8 @@
 #define ALLOC_VARS_C_
 
 #include <stdio.h>
+#include <stdlib.h>
+#include "./struct_c_def.h"
 #include "./alloc_vars.h"
 #include "../Include/fermion_parameters.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
