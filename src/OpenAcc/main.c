@@ -118,6 +118,11 @@ int main(){
 	int accettate_therm_old=0;
 	int accettate_metro_old=0;
 	int id_iter_offset=conf_id_iter;
+    plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
+    printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+
 	//################### THERMALIZATION & METRO    ----   UPDATES ####################//
 	for(int id_iter=id_iter_offset;id_iter<(ITERATIONS+id_iter_offset);id_iter++){
 	  accettate_therm_old = accettate_therm;

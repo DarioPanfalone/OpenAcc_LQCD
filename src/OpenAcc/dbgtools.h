@@ -98,19 +98,19 @@ void read_su3_soa(su3_soa * conf, const char* nomefile){
     for(int i = 0 ; i < sizeh ; i++){
       double re,im;
       //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r0.c0[i] = re + im * I;
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r0.c1[i] = re + im * I;
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r0.c2[i] = re + im * I;
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r1.c0[i] = re + im * I;
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r1.c1[i] = re + im * I;
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r1.c2[i] = re + im * I;
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r2.c0[i] = re + im * I;
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r2.c1[i] = re + im * I;
-      fscanf(fp, "%lf\t%lf\n",&re,&im);conf[q].r2.c2[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r0.c0[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r0.c1[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r0.c2[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r1.c0[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r1.c1[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r1.c2[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r2.c0[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r2.c1[i] = re + im * I;
+      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r2.c2[i] = re + im * I;
       
     }
   fclose(fp);
-  
+      
 }
 
 void print_tamat_soa(tamat_soa * const ipdot, const char* nomefile){

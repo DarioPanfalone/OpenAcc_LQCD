@@ -1,7 +1,7 @@
 #ifndef RATIONAL_APPROX_H_
 #define RATIONAL_APPROX_H_
 
-#define MAX_APPROX_ORDER 19
+#define MAX_APPROX_ORDER 18
 
 
 typedef struct RationalApprox_t{

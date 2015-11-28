@@ -60,9 +60,26 @@ void init_ferm_params(){
   printf("max_ps = %d \n",max_ps);
 
 
-  
+  up->approx_fi_mother.approx_order =  17;
+  up->approx_md_mother.approx_order =  14;
+  up->approx_li_mother.approx_order =  18;
+  up->approx_fi_mother.lambda_min =  2.3273336186266341e-07;
+  up->approx_md_mother.lambda_min =  2.3273336186266341e-07;
+  up->approx_li_mother.lambda_min =  2.3273336186266341e-07;
 
-  
+  down->approx_fi_mother.approx_order =  17;
+  down->approx_md_mother.approx_order =  14;
+  down->approx_li_mother.approx_order =  18;
+  down->approx_fi_mother.lambda_min =  2.3273336186266341e-07;
+  down->approx_md_mother.lambda_min =  2.3273336186266341e-07;
+  down->approx_li_mother.lambda_min =  2.3273336186266341e-07;
+
+  strange->approx_fi_mother.approx_order =  11;
+  strange->approx_md_mother.approx_order =  9;
+  strange->approx_li_mother.approx_order =  11;
+  strange->approx_fi_mother.lambda_min = 1.8449345827782691e-04; 
+  strange->approx_md_mother.lambda_min = 1.8449345827782691e-04; 
+  strange->approx_li_mother.lambda_min = 1.8449345827782691e-04; 
 
   for(int i=0;i<NDiffFlavs;i++){
     ferm_param *quark = &fermions_parameters[i];
@@ -73,14 +90,6 @@ void init_ferm_params(){
     quark->approx_fi_mother.exponent_den =   quark->number_of_ps*8;
     quark->approx_md_mother.exponent_den =   quark->number_of_ps*4;
     quark->approx_li_mother.exponent_den =   quark->number_of_ps*4;
-
-    quark->approx_fi_mother.approx_order =  APPROX_METRO;
-    quark->approx_md_mother.approx_order =  APPROX_MD;
-    quark->approx_li_mother.approx_order =  APPROX_METRO;
-
-    quark->approx_fi_mother.lambda_min =  LAMBDA_MIN_METRO;
-    quark->approx_md_mother.lambda_min =  LAMBDA_MIN_MD;
-    quark->approx_li_mother.lambda_min =  LAMBDA_MIN_METRO;
 
     quark->approx_fi_mother.lambda_max =  1.0;
     quark->approx_md_mother.lambda_max =  1.0;

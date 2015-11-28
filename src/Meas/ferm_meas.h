@@ -3,6 +3,7 @@
 #ifndef FERM_MEAS_H 
 #define FERM_MEAS_H
 
+#include <stdio.h>
 #include "../OpenAcc/struct_c_def.h"
 void eo_inversion(su3_soa *tconf_acc,
 		  double_soa * tbackfield,

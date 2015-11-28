@@ -15,14 +15,13 @@
 #include "./inverter_multishift_full.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
-
-
-#ifdef __GNUC__
 #include "sys/time.h"
-#endif
 
 extern double casuale();
 
+
+
+#define PRINT_DETAILS_INSIDE_UPDATE
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro){
