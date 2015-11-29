@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include "../Include/common_defines.h"
 #include "./struct_c_def.h"
+#include "./single_types.h"
 
 void print_vec3_soa(vec3_soa * const fermion, const char* nomefile){
 
@@ -94,21 +95,26 @@ void read_su3_soa(su3_soa * conf, const char* nomefile){
     abort();
   }
 
+  double max_error = 0;
   for(int q = 0 ; q < 8 ; q++)
     for(int i = 0 ; i < sizeh ; i++){
       double re,im;
       //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r0.c0[i] = re + im * I;
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r0.c1[i] = re + im * I;
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r0.c2[i] = re + im * I;
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r1.c0[i] = re + im * I;
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r1.c1[i] = re + im * I;
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r1.c2[i] = re + im * I;
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r2.c0[i] = re + im * I;
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r2.c1[i] = re + im * I;
-      fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r2.c2[i] = re + im * I;
+      single_su3 m;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[0][0] =conf[q].r0.c0[i] =re+im*I;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[0][1] =conf[q].r0.c1[i] =re+im*I;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[0][2] =conf[q].r0.c2[i] =re+im*I;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[1][0] =conf[q].r1.c0[i] =re+im*I;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[1][1] =conf[q].r1.c1[i] =re+im*I;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[1][2] =conf[q].r1.c2[i] =re+im*I;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[2][0] =conf[q].r2.c0[i] =re+im*I;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[2][1] =conf[q].r2.c1[i] =re+im*I;
+      fscanf(fp, "%lf %lf\n",&re,&im); m.comp[2][2] =conf[q].r2.c2[i] =re+im*I;
+      double error = 1-fabs(detSu3(&m));
+      if (error>max_error) max_error = error;
       
     }
+  printf("Max deviation from unitarity - 1-|detM|: %e (Wrong,but staggered phases are here).\n", max_error);
   fclose(fp);
       
 }

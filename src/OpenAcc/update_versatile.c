@@ -15,7 +15,6 @@
 #include "./inverter_multishift_full.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
-#include "sys/time.h"
 
 extern double casuale();
 

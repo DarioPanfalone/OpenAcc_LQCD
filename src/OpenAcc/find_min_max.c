@@ -30,6 +30,7 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
   double temp;
   // starting gauss vector p   (deve arrivargli gia' gaussiano)
   norm=sqrt(l2norm2_global(loc_p));
+  printf("Norm:%lf\n",norm  );
   loop_count=0;
   // loop start
   do{
@@ -49,6 +50,9 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       acc_Deo(u,loc_p,loc_h,pars,backfield);
       SETFREE(loc_h);
 
+//#pragma acc update host(loc_p[0:1])
+//      printf("%.18lf %.18lf\n",creal(loc_p->c0[0]),cimag(loc_p->c0[0]));
+
 
 
       // p=(M^dag M)r
@@ -56,11 +60,12 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       combine_in1xferm_mass_minus_in2(loc_r,pars->ferm_mass*pars->ferm_mass,loc_p);
       SETFREE(loc_r);
 
+
       norm=sqrt(l2norm2_global(loc_p));
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
       loop_count++;
-      if(loop_count %100 == 0)   printf("        iterations of max computat  = %d, norm = %f\n",loop_count, norm);
+      if(loop_count %10 == 0)   printf("        iterations of max computat  = %d, norm = %lf, old_norm = %lf\n",loop_count, norm, old_norm);
   } while(old_norm>1.0e-5);    // loop end
   double max=norm;
   return max;

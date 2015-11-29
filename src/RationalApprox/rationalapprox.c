@@ -1,10 +1,6 @@
 #ifndef RATIONAL_APPROX_C_
 #define RATIONAL_APPROX_C_
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
 #include "./rationalapprox.h"
 
 
@@ -77,7 +73,7 @@ void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* 
     printf("RA_a0 = %18.16e\n", rational_approx->RA_a0);
     for(int i = 0; i < rational_approx->approx_order; i++) 
     {
-//      printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
+      printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
     } 
 }
 
@@ -123,6 +119,8 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    
    double min =  minmax[0];
    double max =  minmax[1];
+   printf("Rescaling rational approx for max: %f , min: %f\n", max, min);
+
    min*=0.95;
    max*=1.05;
    double epsilon=pow(max, power);  
@@ -136,6 +134,7 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    out->lambda_max  = max ;
    //pray
    if(out->lambda_min > minmax[0]){
+
        printf("Warning: mother rational approx does not cover the range!\n");
        printf("out->lambda_min: %.18lf , minmax[0]: %.18lf\n", out->lambda_min, minmax[0] );
    }

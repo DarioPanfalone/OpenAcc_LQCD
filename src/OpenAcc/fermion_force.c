@@ -11,7 +11,6 @@
 #include "../Include/fermion_parameters.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./su3_utilities.h"
-#include <sys/time.h>
 
 #ifndef __GNUC__
  #define TIMING_FERMION_FORCE
