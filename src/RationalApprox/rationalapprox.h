@@ -1,6 +1,10 @@
 #ifndef RATIONAL_APPROX_H_
 #define RATIONAL_APPROX_H_
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
 #define MAX_APPROX_ORDER 19
 
 

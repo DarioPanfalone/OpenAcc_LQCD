@@ -1,10 +1,6 @@
 #ifndef RATIONAL_APPROX_C_
 #define RATIONAL_APPROX_C_
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <math.h>
 #include "./rationalapprox.h"
 
 
@@ -137,7 +133,7 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    //pray
    if(out->lambda_min > minmax[0]){
        printf("Warning: mother rational approx does not cover the range!\n");
-       printf("out->lambda_min: %f , minmax[0]: %f\n", out->lambda_min, minmax[0] );
+       printf("out->lambda_min: %e , minmax[0]: %e\n", out->lambda_min, minmax[0] );
    }
 
 }

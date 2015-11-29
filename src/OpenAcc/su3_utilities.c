@@ -830,9 +830,6 @@ void mom_exp_times_conf_soloopenacc(
 }
 
 
-
-
-
 double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
 
   double tempo=0.0;
@@ -851,6 +848,38 @@ double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __res
   return tempo;
 
   }
+
+
+void check_unitarity( __restrict su3_soa * const u, double * max_unitarity_deviation){
+
+
+  // removing stag phases
+  mult_conf_times_stag_phases(u);
+
+
+    double r = 0;
+
+#pragma acc kernels present(u)
+#pragma acc loop reduction(+:r)
+  for(int dir = 0; dir < 8 ; dir++){
+  for(int idx = 0; idx < sizeh ; idx++){
+     single_su3 m;
+     single_su3_from_su3_soa(&u[dir],idx,&m);
+     rebuild3row(&m);
+
+     d_complex err = 1 - detSu3(&m);
+     r += creal(err * conj(err));
+
+    }
+  }
+  //adding them again
+  mult_conf_times_stag_phases(u);
+
+  return r;
+
+}
+
+
 
 
 

@@ -12,6 +12,9 @@
 #include "./fermion_matrix.h"
 
 
+
+
+
 #ifdef PHASE_MAT_VEC_MULT // there is a d_complex phase in the prototype
 #pragma acc routine seq
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,

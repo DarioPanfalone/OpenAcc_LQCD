@@ -134,6 +134,10 @@ int main(){
 	int id_iter_offset=conf_id_iter;
 	//################### THERMALIZATION & METRO    ----   UPDATES ####################//
 	for(int id_iter=id_iter_offset;id_iter<(ITERATIONS+id_iter_offset);id_iter++){
+      double total_unitarity_deviation;
+
+      check_unitarity(conf_acc,&total_unitarity_deviation);
+      printf("\tTotal_unitarity_deviation on device: %e\n", total_unitarity_deviation);
 	  accettate_therm_old = accettate_therm;
 	  accettate_metro_old = accettate_metro;
 	  conf_id_iter++;

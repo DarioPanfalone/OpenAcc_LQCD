@@ -12,7 +12,7 @@
 #include "./find_min_max.h"
 
 
-//#define PRINT_EIGENVALUES
+#define PRINT_EIGENVALUES
 
 
 // find the maximum eigenvalue of the fermion matrix
