@@ -42,7 +42,7 @@ void read_vec3_soa(vec3_soa * fermion, const char* nomefile){
 
 }
 
-void print_su3_soa(su3_soa * const conf, const char* nomefile){
+void print_su3_soa(su3_soa * const conf, const char* nomefile,int conf_id_iter){
 
     FILE *fp;
     fp = fopen(nomefile,"w");
@@ -66,7 +66,7 @@ void print_1su3_soa(su3_soa * const conf, const char* nomefile){
 
     FILE *fp;
     fp = fopen(nomefile,"w");
-    fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
+    fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt);
     for(int q = 0 ; q < 1 ; q++){ // q = 0 !!!!!
         for(int i = 0 ; i < sizeh ; i++){
             fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c0[i]),cimag(conf[q].r0.c0[i]));
@@ -83,13 +83,13 @@ void print_1su3_soa(su3_soa * const conf, const char* nomefile){
     fclose(fp);
 }
 
-void read_su3_soa(su3_soa * conf, const char* nomefile){
+void read_su3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter ){
 
   FILE *fp;
   fp = fopen(nomefile,"r");
 
   int nxt,nyt,nzt,ntt;
-  fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,&conf_id_iter);
+  fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter);
   if((nx!=nxt)||(ny!=nyt)||(nz!=nzt)||(nz!=nzt)){
     printf(" Errore: DIMENSIONI DELLA CONFIGURAZIONE LETTA DIVERSE DA QUELLE ATTESE\n");
     abort();

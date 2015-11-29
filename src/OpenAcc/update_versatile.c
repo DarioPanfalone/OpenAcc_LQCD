@@ -16,11 +16,15 @@
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
 
-extern double casuale();
-
 
 
 #define PRINT_DETAILS_INSIDE_UPDATE
+
+#ifdef __GNUC__
+#include "sys/time.h"
+#endif
+
+extern double casuale();
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro){
@@ -52,7 +56,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
   double dt_postker_to_posttrans;
 
   int mu;
-  double minmaxeig[2]; 
+  double **minmaxeig; 
+  minmaxeig = (double**)malloc(NDiffFlavs*sizeof(double*));
+  for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+      minmaxeig[iflav] = (double*) malloc(2*sizeof(double));
 
   double p1;
   double p2;
@@ -127,13 +134,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
       //printf("    before min and max eig comp : OK \n");
       SETREQUESTED(kloc_r);
       SETREQUESTED(kloc_h);
-      find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
+      find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig[iflav]);
 #ifdef PRINT_DETAILS_INSIDE_UPDATE
       printf("    find min and max eig : OK \n");
 #endif
       RationalApprox *approx_fi = &(fermions_parameters[iflav].approx_fi);
       RationalApprox *approx_fi_mother = &(fermions_parameters[iflav].approx_fi_mother);
-      rescale_rational_approximation(approx_fi_mother,approx_fi,minmaxeig);
+      rescale_rational_approximation(approx_fi_mother,approx_fi,minmaxeig[iflav]);
 #ifdef PRINT_DETAILS_INSIDE_UPDATE
       printf("    rat approx rescaled : OK \n\n");
 #endif
@@ -184,14 +191,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE MD
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       // recupero gli autovalori già calcolati che sono salvati in approx_fi
-      minmaxeig[0] = (fermions_parameters[iflav].approx_fi.lambda_min);
-      minmaxeig[1] = (fermions_parameters[iflav].approx_fi.lambda_max);
-      minmaxeig[0] = minmaxeig[0] / minmaxeig[1];
-      minmaxeig[0] = minmaxeig[0] / 0.95;
-      minmaxeig[1] = minmaxeig[1] / 1.05;
       RationalApprox *approx_md = &(fermions_parameters[iflav].approx_md);
       RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
-      rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
+      rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig[iflav]);
 #pragma acc update device(approx_md[0:1])
     }//end for iflav
     
@@ -228,11 +230,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
     // USING STOUTED CONF
-	find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
+	find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig[iflav]);
 	//#pragma acc update device(minmaxeig[0:2])
 	RationalApprox *approx_li = &(fermions_parameters[iflav].approx_li);
 	RationalApprox *approx_li_mother = &(fermions_parameters[iflav].approx_li_mother);
-	rescale_rational_approximation(approx_li_mother,approx_li,minmaxeig);
+	rescale_rational_approximation(approx_li_mother,approx_li,minmaxeig[iflav]);
 #pragma acc update device(approx_li[0:1])
       }
 

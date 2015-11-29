@@ -17,7 +17,6 @@
 #endif
 
 
-
 void acc_Deo( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in,__restrict ferm_param *pars,__restrict double_soa * backfield);
 void acc_Doe( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in,__restrict ferm_param *pars,__restrict double_soa * backfield); 
 

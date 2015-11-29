@@ -136,7 +136,7 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    if(out->lambda_min > minmax[0]){
 
        printf("Warning: mother rational approx does not cover the range!\n");
-       printf("out->lambda_min: %.18lf , minmax[0]: %.18lf\n", out->lambda_min, minmax[0] );
+       printf("out->lambda_min: %e , minmax[0]: %e\n", out->lambda_min, minmax[0] );
    }
 
 }

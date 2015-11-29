@@ -45,6 +45,20 @@ const char *nome_file_gauge_output ="gauge_meas.dat";
 const char *nome_file_ferm_output  ="ferm_meas.dat";
 
 
+#define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
+int conf_id_iter;
+#define ITERATIONS 1500 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+#define therm_ITERATIONS 30 // the first <therm_ITERATIONS> of the history will be thermalization updates
+
+#define save_conf_every 10
+
+
+#define residue_metro 1.0e-8 //-8    // stopping residual for CG
+#define  residue_md 1.0e-6 //-5    // stopping residual for CG
+
+
+
+
 
 
 int main(){
@@ -98,7 +112,7 @@ int main(){
   }
  // start from saved conf
   if(start_opt==1){
-    read_su3_soa(conf_acc,"stored_config"); // READS ALSO THE conf_id_iter
+    read_su3_soa(conf_acc,"stored_config",&conf_id_iter); // READS ALSO THE conf_id_iter
     printf("Stored Gauge Conf Read : OK \n");
   }
   //###############################################################################################  
@@ -125,6 +139,10 @@ int main(){
 
 	//################### THERMALIZATION & METRO    ----   UPDATES ####################//
 	for(int id_iter=id_iter_offset;id_iter<(ITERATIONS+id_iter_offset);id_iter++){
+      double total_unitarity_deviation;
+
+      check_unitarity(conf_acc,&total_unitarity_deviation);
+      printf("\tTotal_unitarity_deviation on device: %e\n", total_unitarity_deviation);
 	  accettate_therm_old = accettate_therm;
 	  accettate_metro_old = accettate_metro;
 	  conf_id_iter++;
@@ -181,14 +199,14 @@ int main(){
 	  //-------------------------------------------------//
 	  
 	  //--------- SALVA LA CONF SU FILE ------------------//
-	  if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config");
+	  if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config",conf_id_iter);
 	  //-------------------------------------------------//
 	  
 	}// id_iter loop ends here
 	
 		
 	//--------- SALVA LA CONF SU FILE ------------------//
-	print_su3_soa(conf_acc,"stored_config");
+	print_su3_soa(conf_acc,"stored_config", conf_id_iter);
 	//-------------------------------------------------//
 
 

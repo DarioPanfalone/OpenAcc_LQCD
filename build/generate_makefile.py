@@ -30,6 +30,7 @@ from sys import exit,argv,stderr,stdout
 def header_scanner(filename):
     f = open(filename)
     filesfound = []
+    standards = []
     for line in f.readlines():
         if 'main(' in line and ')' in line:
             main_files.append(filename)
@@ -46,13 +47,13 @@ def header_scanner(filename):
                     filesfound.append(filefound)
 #                    stderr.write(filefound+\
 #                            ' is in the package, adding it.\n')
-#                else:
-#                    stderr.write(filefound +\
-#                            ' is not in this package, not adding it.\n')
+                else:
+#                   stderr.write(filefound +' is not in this package, not adding it.\n')
+                    standards.append(filefound) # libraries like stdio.h
             else:
                 stderr.write( "#include line incorrect:" + filename + ' ' + line + '\n')
 
-    return filesfound
+    return filesfound,standards
 
 class file_node:
     def get_all_dependences_raw(self):
@@ -62,17 +63,27 @@ class file_node:
             if son_dependences is not None:
                 res = res + son_dependences
         return res
+    def get_all_standard_dependences_raw(self):
+        res = self.direct_standard_dependences
+        for son in self.sons:
+            son_dependences = son.get_all_standard_dependences_raw()
+            if son_dependences is not None:
+                res = res + son_dependences
+        return res
 
     def __init__(self,filename,tancestors):
         self.ancestors = tancestors
+        self.direct_standard_dependences = [] #libraries like stdio.h
         self.direct_dependences_relative = []
         self.direct_dependences = []
         self.all_dependences = []
+        self.all_standard_dependences = []
         self.sons = []
         self.sons_dict = dict()
         self.name = path.abspath(filename)
 #        stderr.write("Scanning " + filename + "...\n" )
-        self.direct_dependences_relative = header_scanner(filename)
+        self.direct_dependences_relative, self.direct_standard_dependences\
+                = header_scanner(filename)
         for dependence in self.direct_dependences_relative:
             dependencem = path.abspath(path.dirname(self.name)+ '/'+dependence)
             if dependencem not in self.direct_dependences and\
@@ -82,6 +93,12 @@ class file_node:
                 self.sons.append(son)
                 self.sons_dict[dependencem] = son
         self.all_dependences_raw = self.get_all_dependences_raw();
+        self.all_standard_dependences_raw = \
+                self.get_all_standard_dependences_raw();
+        if self.all_standard_dependences_raw is not None:
+            for dependence in self.all_standard_dependences_raw:
+                if dependence not in self.all_standard_dependences:
+                    self.all_standard_dependences.append(dependence)
         if self.all_dependences_raw is not None:
             for dependence in self.all_dependences_raw:
                 if dependence not in self.all_dependences:
