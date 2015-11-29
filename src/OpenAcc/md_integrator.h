@@ -14,8 +14,8 @@
 #define EXT_TO_MD_INTEGRATOR 
 #endif
 
-#define no_md 8 // number of MD steps
-#define gauge_scale 4  // Update fermions every gauge_scale gauge updates
+#define no_md 11 // number of MD steps
+#define gauge_scale 5  // Update fermions every gauge_scale gauge updates
 
 
 EXT_TO_MD_INTEGRATOR int no_md_acc,gauge_scale_acc;

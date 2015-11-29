@@ -8,7 +8,7 @@
 #include "./inverter_full.h"
 
 
-//#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
+#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
 int multishift_invert(__restrict su3_soa * const u,
 		      __restrict ferm_param * pars,
@@ -165,20 +165,23 @@ int multishift_invert(__restrict su3_soa * const u,
     
 
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC))
-  printf("Terminated multishift_invert ( target res = %f ) \n ", residuo);
+  printf("Terminated multishift_invert ( target res = %1.1e ) ", residuo);
   int i;
       printf("\t CG count = %i \n",cg);
   // test 
 
 
-    printf("\t\tnshift\tres/stop_res\tstop_res\tshift\n");
+    for(iter=0; iter<approx->approx_order; iter++)printf("\t%d",iter);
+    printf("\n");
+
     for(iter=0; iter<approx->approx_order; iter++){
       assign_in_to_out(&out[iter],loc_p);
       fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,backfield,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
       double  giustoono=l2norm2_global(loc_h);
-      printf("\t\t%i\t%e\t%1.1e\t\t%e\n",iter,sqrt(giustoono)/residuo,residuo,approx->RA_b[iter]);
+      printf("\t%1.1e",sqrt(giustoono)/residuo);
     }
+    printf("\n");
 #endif
     SETFREE(loc_r);
     SETFREE(loc_h);
