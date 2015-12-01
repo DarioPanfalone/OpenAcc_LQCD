@@ -21,7 +21,7 @@ void su2_rand(double *pp);
 #include "../RationalApprox/rationalapprox.h"
 #include "./struct_c_def.h"
 #include "./alloc_vars.h"
-#include "./dbgtools.h"
+#include "./io.h"
 #include "./fermionic_utilities.h"
 #include "./single_types.h"
 #include "./su3_utilities.h"
@@ -112,7 +112,7 @@ int main(){
   }
  // start from saved conf
   if(start_opt==1){
-    read_su3_soa(conf_acc,"stored_config",&conf_id_iter); // READS ALSO THE conf_id_iter
+    read_su3_soa_ASCII(conf_acc,"stored_config",&conf_id_iter); // READS ALSO THE conf_id_iter
     printf("Stored Gauge Conf Read : OK \n");
   }
   //###############################################################################################  
@@ -194,14 +194,14 @@ int main(){
 	  //-------------------------------------------------//
 	  
 	  //--------- SALVA LA CONF SU FILE ------------------//
-	  if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config",conf_id_iter);
+	  if(conf_id_iter%save_conf_every==0)	print_su3_soa_ASCII(conf_acc,"stored_config",conf_id_iter);
 	  //-------------------------------------------------//
 	  
 	}// id_iter loop ends here
 	
 		
 	//--------- SALVA LA CONF SU FILE ------------------//
-	print_su3_soa(conf_acc,"stored_config", conf_id_iter);
+	print_su3_soa_ASCII(conf_acc,"stored_config", conf_id_iter);
 	//-------------------------------------------------//
 
 

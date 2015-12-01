@@ -6,13 +6,6 @@
  #define __USE_XOPEN2K
  #include <stdlib.h>
 #endif
-
-#ifndef FERMION_PARAMETERS_C_
-#define EXT_TO_FERMION_PARAMETERS extern
-#else
-#define EXT_TO_FERMION_PARAMETERS 
-#endif
-
 typedef struct ferm_param_t{
   double ferm_charge;
   double ferm_mass;
@@ -28,10 +21,10 @@ typedef struct ferm_param_t{
   RationalApprox approx_li;        // last inv
 } ferm_param;
 
-EXT_TO_FERMION_PARAMETERS int NDiffFlavs;
-EXT_TO_FERMION_PARAMETERS int NPS_tot;
-EXT_TO_FERMION_PARAMETERS int max_ps;
-EXT_TO_FERMION_PARAMETERS ferm_param *fermions_parameters;
+extern int NDiffFlavs;
+extern int NPS_tot;
+extern int max_ps;
+extern ferm_param *fermions_parameters;
 
 
 
