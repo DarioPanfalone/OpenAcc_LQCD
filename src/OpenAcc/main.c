@@ -50,7 +50,7 @@ int conf_id_iter;
 #define ITERATIONS 2 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
 #define therm_ITERATIONS 0 // the first <therm_ITERATIONS> of the history will be thermalization updates
 
-#define save_conf_every 10
+#define save_conf_every 10000
 
 
 #define residue_metro 1.0e-8 //-8    // stopping residual for CG
@@ -200,7 +200,7 @@ int main(){
 	
 		
 	//--------- SALVA LA CONF SU FILE ------------------//
-	print_su3_soa_ASCII(conf_acc,"stored_config", conf_id_iter);
+	//print_su3_soa_ASCII(conf_acc,"stored_config", conf_id_iter);
 	//-------------------------------------------------//
 
 
