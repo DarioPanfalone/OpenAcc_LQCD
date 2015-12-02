@@ -106,8 +106,7 @@ int main(){
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
   if(start_opt==0){ 
-    generate_Conf_cold(conf_acc,0.1);
-    printf("Cold Gauge Conf Generated : OK \n");
+    generate_Conf_cold(conf_acc,0.5);    printf("Cold Gauge Conf Generated : OK \n");
     conf_id_iter=0;
   }
  // start from saved conf

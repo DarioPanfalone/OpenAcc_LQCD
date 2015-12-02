@@ -13,7 +13,7 @@ GNUcls = 'COMPILER=gcc\n\
 COMPILER_FLAGS=-O3 -std=c99\n\
 LINKER_FLAGS=-lm\n' 
         
-compiler_linker_settings = GNUcls
+compiler_linker_settings = PGIcls
 
 
 

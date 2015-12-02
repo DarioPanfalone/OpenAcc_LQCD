@@ -43,8 +43,8 @@ d_complex ieps_acc,iepsh_acc;
 
 void initialize_md_global_variables(void )
 {
-  gauge_scale = 5;
-  no_md = 11;
+  gauge_scale = 6;
+  no_md = 12;
 
   epsilon_acc = 1.0/((double)(no_md));
   ieps_acc  = 0.0 + (epsilon_acc) * 1.0I;
