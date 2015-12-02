@@ -5,6 +5,11 @@
 
 #define ALIGN 128
 
+int NDiffFlavs;
+int NPS_tot;
+int max_ps;
+ferm_param *fermions_parameters;
+
 void init_ferm_params(){
 
 

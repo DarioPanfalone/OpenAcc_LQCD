@@ -37,7 +37,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
   printf("UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: OK \n");
   // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
   const double lambda=0.1931833275037836; // Omelyan Et Al.
-  const double gs=0.5/(double) gauge_scale_acc;
+  const double gs=0.5/(double) gauge_scale;
   double delta[7];
   delta[0]= -cimag(ieps_acc) * lambda;
   delta[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);

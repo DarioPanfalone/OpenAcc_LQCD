@@ -34,12 +34,19 @@
 #include "../Include/common_defines.h"
 #include "../Include/fermion_parameters.h"
 
+int no_md;// number of MD steps
+int gauge_scale;   // Update fermions every gauge_scale gauge updates
+
+int no_md_acc,gauge_scale_acc;
+double epsilon_acc;
+d_complex ieps_acc,iepsh_acc;
 
 void initialize_md_global_variables(void )
 {
-  no_md_acc = no_md ;
-  gauge_scale_acc = gauge_scale;
-  epsilon_acc = 1.0/((double)(no_md_acc));
+  gauge_scale = 5;
+  no_md = 11;
+
+  epsilon_acc = 1.0/((double)(no_md));
   ieps_acc  = 0.0 + (epsilon_acc) * 1.0I;
   iepsh_acc = 0.0 + (epsilon_acc) * 0.5 * 1.0I;
 }
