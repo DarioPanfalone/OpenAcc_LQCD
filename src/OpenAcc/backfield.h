@@ -3,14 +3,15 @@
 
 #include "./struct_c_def.h"
 
-
 // quanti di campo esterno
-#define  bx_quantum 0.0
-#define  ex_quantum 0.0
-#define  by_quantum 0.0
-#define  ey_quantum 0.0
-#define  bz_quantum 0.0
-#define  ez_quantum 0.0
+extern double  bx_quantum;
+extern double  ex_quantum;
+extern double  by_quantum;
+extern double  ey_quantum;
+extern double  bz_quantum;
+extern double  ez_quantum;
+
+void set_field_quanta();
 
 void init_backfield(double_soa * tu1_back_field_phases);
 
