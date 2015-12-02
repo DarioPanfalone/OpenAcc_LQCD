@@ -15,7 +15,8 @@
 #endif
 
 
-void check_unitarity( __restrict su3_soa * const u, double * max_unitarity_deviation);
+void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarity_deviation, double * avg_unitarity_deviation);
+void check_unitarity_host( __restrict su3_soa * const u, double * max_unitarity_deviation, double * avg_unitarity_deviation);
 
 double calc_momenta_action( const __restrict thmat_soa * const mom,
 			    double_soa * tr_local, const int mu);
