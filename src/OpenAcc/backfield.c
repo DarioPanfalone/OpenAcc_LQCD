@@ -7,10 +7,35 @@
 #ifndef __GNUC__
  #include <accelmath.h>
 #endif
+#include "./struct_c_def.h"
+
+
+double  bx_quantum;
+double  ex_quantum;
+double  by_quantum;
+double  ey_quantum;
+double  bz_quantum;
+double  ez_quantum;
+
+
+
+void set_field_quanta(){
+    bx_quantum = 0;
+    ex_quantum = 0;
+    by_quantum = 0;
+    ey_quantum = 0;
+    bz_quantum = 0;
+    ez_quantum = 0;
+}
 
 void init_backfield(double_soa * tu1_back_field_phases){
+  
+  set_field_quanta();
+
+
   int X,T,Z,Y;
   double  arg;
+
 
   int x, y, z, t, parity,idxh;
     for(t=0; t < nt; t++){

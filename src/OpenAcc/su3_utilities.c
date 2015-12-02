@@ -875,7 +875,7 @@ void check_unitarity( __restrict su3_soa * const u, double * max_unitarity_devia
   //adding them again
   mult_conf_times_stag_phases(u);
 
-  return r;
+  *max_unitarity_deviation = r;
 
 }
 
