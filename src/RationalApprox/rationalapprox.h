@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-
 #define MAX_APPROX_ORDER 18
 
 

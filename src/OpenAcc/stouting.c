@@ -16,10 +16,10 @@
 #ifdef STOUT_FERMIONS
 void stout_wrapper(__restrict su3_soa * tconf_acc,__restrict su3_soa * tstout_conf_acc_arr){
 
-
+  printf("Stouting gauge conf %d times.\n", STOUT_STEPS);
   for(int mu = 0; mu < 8*STOUT_STEPS; mu ++) SETREQUESTED((&tstout_conf_acc_arr[mu]));
-    stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, glocal_staples, gipdot );
-    for(int stoutlevel=1;stoutlevel < STOUT_STEPS; stoutlevel++)
+  stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, glocal_staples, gipdot );
+  for(int stoutlevel=1;stoutlevel < STOUT_STEPS; stoutlevel++)
         stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),&(tstout_conf_acc_arr[8*stoutlevel]),auxbis_conf_acc, glocal_staples,  gipdot );
 
 }

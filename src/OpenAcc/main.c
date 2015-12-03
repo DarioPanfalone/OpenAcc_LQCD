@@ -46,12 +46,12 @@ const char *nome_file_gauge_output ="gauge_meas.dat";
 const char *nome_file_ferm_output  ="ferm_meas.dat";
 
 
-#define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
+#define  start_opt 1 // 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-#define ITERATIONS 1500 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
-#define therm_ITERATIONS 30 // the first <therm_ITERATIONS> of the history will be thermalization updates
+#define ITERATIONS 2 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+#define therm_ITERATIONS 0 // the first <therm_ITERATIONS> of the history will be thermalization updates
 
-#define save_conf_every 10
+#define save_conf_every 10000
 
 
 #define residue_metro 1.0e-8 //-8    // stopping residual for CG
@@ -107,8 +107,7 @@ int main(){
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
   if(start_opt==0){ 
-    generate_Conf_cold(conf_acc,0.1);
-    printf("Cold Gauge Conf Generated : OK \n");
+    generate_Conf_cold(conf_acc,0.5);    printf("Cold Gauge Conf Generated : OK \n");
     conf_id_iter=0;
   }
  // start from saved conf
@@ -213,7 +212,7 @@ int main(){
 	
 		
 	//--------- SALVA LA CONF SU FILE ------------------//
-	print_su3_soa_ASCII(conf_acc,"stored_config", conf_id_iter);
+	//print_su3_soa_ASCII(conf_acc,"stored_config", conf_id_iter);
 	//-------------------------------------------------//
 
 

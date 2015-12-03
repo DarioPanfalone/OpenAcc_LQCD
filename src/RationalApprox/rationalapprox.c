@@ -32,6 +32,13 @@ char* rational_approx_filename(int approx_order, int exponent_num, int exponent_
 }
 
 
+inline void checkreads(int reads,int should_be, char * comment){
+
+    if(reads != should_be) printf("Incorrect number of reads %d vs %d, %s\n", reads,should_be,comment);
+
+
+}
+
 void rationalapprox_read(RationalApprox* rational_approx)
 {
 
@@ -55,18 +62,27 @@ void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* 
         exit(-1);
     }
 
+    int reads;
     // The partial fraction expansion takes the form 
     // r(x) = norm + sum_{k=1}^{n} res[k] / (x + pole[k])
-    fscanf(input,"\nApproximation to f(x) = (x)^(%i/%i)\n", &(rational_approx->exponent_num), &(rational_approx->exponent_den));
-    fscanf(input,"Order: %i\n", &(rational_approx->approx_order));
-    fscanf(input,"Lambda Min: %lf\n", &(rational_approx->lambda_min));
-    fscanf(input,"Lambda Max: %lf\n", &(rational_approx->lambda_max));
-    fscanf(input,"GMP Remez Precision: %i\n", &(rational_approx->gmp_remez_precision));
-    fscanf(input,"Error: %lf\n", &(rational_approx->error));
-    fscanf(input, "RA_a0 = %lf\n",&(rational_approx->RA_a0));
+    reads = fscanf(input,"\nApproximation to f(x) = (x)^(%i/%i)\n", &(rational_approx->exponent_num), &(rational_approx->exponent_den));
+    checkreads(reads,2,nomefile);
+    reads = fscanf(input,"Order: %i\n", &(rational_approx->approx_order));
+    checkreads(reads,1,nomefile);
+    reads = fscanf(input,"Lambda Min: %lf\n", &(rational_approx->lambda_min));
+    checkreads(reads,1,nomefile);
+    reads = fscanf(input,"Lambda Max: %lf\n", &(rational_approx->lambda_max));
+    checkreads(reads,1,nomefile);
+    reads = fscanf(input,"GMP Remez Precision: %i\n", &(rational_approx->gmp_remez_precision));
+    checkreads(reads,1,nomefile);
+    reads = fscanf(input,"Error: %lf\n", &(rational_approx->error));
+    checkreads(reads,1,nomefile);
+    reads = fscanf(input, "RA_a0 = %lf\n",&(rational_approx->RA_a0));
+    checkreads(reads,1,nomefile);
     for(int i = 0; i < rational_approx->approx_order; i++)
     {
-        fscanf(input, "RA_a[%i] = %lf, RA_b[%i] = %lf\n", &i, &(rational_approx->RA_a[i]), &i, &(rational_approx->RA_b[i]));
+        reads = fscanf(input, "RA_a[%i] = %lf, RA_b[%i] = %lf\n", &i, &(rational_approx->RA_a[i]), &i, &(rational_approx->RA_b[i]));
+        checkreads(reads,4,nomefile);
     }
     fclose(input);
 

@@ -1,0 +1,111 @@
+L 32 /* or 16^3x32, or even 16^4 */
+T 08
+
+NValenceTheories       0               /* allow to specify additional theory used only for measures */
+
+/* ///////////// Simulated theory //////////// */
+
+GaugeAction            tlSym           /* either Wilson or tlSym */
+Beta                   3.938           /* coupling */
+
+TopoPotential          0
+
+NDiffFlavs             3               /* number of different flavors */
+
+/* up quark */
+Degeneracy             1
+Mass                   0.0011723 /*at physical point ms/ml=~28.15 according to crucs */
+RePotCh                0        /* actually I (ETM) suggest ms/ml~27... do what you want! */
+ImPotCh                0
+ElecCharge             2
+
+/* down quark */
+Degeneracy             1
+Mass                   0.0011723
+RePotCh                0
+ImPotCh                0
+ElecCharge             -1
+
+/* strange quark, to be tuned as in tab I of 1007.2580 */
+Degeneracy             1
+Mass                   0.033
+RePotCh                0
+ImPotCh                0
+ElecCharge             -1
+
+StoutingNLevel         2               /* number of stouting level*/
+IsotropicStouting      1               /* do not modify, only isotropic stouting available */
+StoutRho               0.15            /* strength of the stouting */
+
+PutBkgrdEMField        1               /* Ex, Ey, Ez and Bx, By Bz are asked only if this is 1  */
+Ex 0  Ey 0  Ez 0
+Bx 0  By 0  Bz 0
+
+MeasurePseudoCorr      0               /* Goldstone pion correlator measure (following question only if 1 chosen) */
+/*
+PseudoCorrPath	       pseudo_corr
+PseudoCorrInvResidue   1.e-12
+PseudoCorrNHits        1
+*/
+
+MeasureNucleonCorr 0
+
+MeasureFermionicPutpourri      0
+
+MeasureQuarkRendens 0
+
+MeasureSpinpol 0 
+
+MeasureMagnetization    0              /* magnetization (following question only if 1 chosen) */
+
+/* ////// Gauge and Topo Measures //////// */
+
+MeasureGaugeObs        1               /* measure or not gauge obs */
+Path           gauge_obs       /* output file for gauge obs */
+
+MeasurePolyCorrs 10000
+Path Luppoli
+UseHYPorAPE            0
+HYPTempAlpha0          1
+HYPTempAlpha1          1
+HYPTempAlpha2          0.5
+Dir 0
+
+NTopMeas 0
+
+MeasureAllRect         10000 /* number of traj between each potential is measure */
+Path                   rects
+UseHYPorAPE            0
+HYPTempAlpha0          1
+HYPTempAlpha1          1
+HYPTempAlpha2          0.5
+APESpatAlpha           0.25
+APESpatNlevels         1 24 /* according to BigFra is the best */
+Tint                   1 8
+Dint                   1 24
+
+MeasureWatusso 0
+
+
+/* /////////////// HMC parameters //////////// */
+
+NTrajTot               7002            /* number of traj per run */
+Walltime               1650
+
+Seed                   41335           /* used to init generator, only for 1st traj */
+
+SkipMTestNTraj         30              /* skip the Metropolis test for the first trajectory */
+HmcTrajLength          1               /* traj length in unit of MD time */
+NmdSteps               11              /* number of steps */
+NGaugeSubSteps         5               /* multiStep not yet implemented, so keep 1 */
+MdResidue              1.e-12          /* residue (squared) for MD inversions */
+PfActionResidue        1.e-16          /* residues for the fixed point evaluation */
+NPseudoFermions        1 1 1 
+
+ConfPath               conf            /* file where to store running conf */
+StoreConfPath          stored_conf     /* a 5 digit number id will be appended to this string */
+StoreConfEach          30              /* also 0 should work to avoid storing */
+StoreRunningTempConf   1               /* if you put 1, it will store conf at each traj */
+StartConfCond          COLD            /* HOT or COLD (used only if no conf present at ConfPath) */
+
+
