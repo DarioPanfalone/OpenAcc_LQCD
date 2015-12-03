@@ -1,10 +1,7 @@
 #ifndef DBGTOOLS_OPENACC_
 #define DBGTOOLS_OPENACC_
 
-#ifndef COMPLEX_C_
-#define COMPLEX_C_
 #include <complex.h>
-#endif
 
 #include "./geometry.h"
 #include <stdlib.h>

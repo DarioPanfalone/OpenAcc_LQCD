@@ -10,7 +10,7 @@
 
 //using namespace std;
 
-const int gmp_remez_precision=100; // The precision that gmp uses
+const int gmp_remez_precision=256; // The precision that gmp uses
 
 //Rational approximations for Metropolis
 const double lambda_min=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]

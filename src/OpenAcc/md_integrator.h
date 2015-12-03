@@ -8,23 +8,15 @@
  #define __restrict
 #endif
 
-#ifndef MD_INTEGRATOR_C 
-#define EXT_TO_MD_INTEGRATOR extern
-#else
-#define EXT_TO_MD_INTEGRATOR 
-#endif
-
-#define no_md 8 // number of MD steps
-#define gauge_scale 4  // Update fermions every gauge_scale gauge updates
+extern int no_md;// number of MD steps
+extern int gauge_scale;   // Update fermions every gauge_scale gauge updates
 
 
-EXT_TO_MD_INTEGRATOR int no_md_acc,gauge_scale_acc;
-EXT_TO_MD_INTEGRATOR double epsilon_acc;
-EXT_TO_MD_INTEGRATOR d_complex ieps_acc,iepsh_acc;
+extern int no_md_acc,gauge_scale_acc;
+extern double epsilon_acc;
+extern d_complex ieps_acc,iepsh_acc;
 
 void initialize_md_global_variables(void );
-
-
 
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta,double * delta);
 

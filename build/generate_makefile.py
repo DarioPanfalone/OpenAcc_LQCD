@@ -13,7 +13,7 @@ GNUcls = 'COMPILER=gcc\n\
 COMPILER_FLAGS=-O3 -std=c99\n\
 LINKER_FLAGS=-lm\n' 
         
-compiler_linker_settings = PGIcls
+compiler_linker_settings = GNUcls
 
 
 
@@ -144,7 +144,7 @@ def generate_makefile(targv):
 #        stderr.write(filename + '\n')
         makestring = node.generate_make_string()
         res += makestring
-    mainlinking_string += '\n\t$(COMPILER) -o main $(LINKER_FLAGS) *.o\n\tif ! [ -d run ] ; then mkdir run; fi ; cp main run/\n'
+    mainlinking_string += '\n\t$(COMPILER) -o main *.o $(LINKER_FLAGS) \n\tif ! [ -d run ] ; then mkdir run; fi ; cp main run/\n'
     res += mainlinking_string
     
     for main_file in main_files:
@@ -152,8 +152,8 @@ def generate_makefile(targv):
         onefilecomp_string += '\t$(COMPILER) $(COMPILER_FLAGS) -c '+\
                 '-DONE_FILE_COMPILATION ' + main_file + ' \n'
         maino_name = path.basename(main_file)[:-2] + '.o'
-        onefilecomp_string += '\t$(COMPILER) $(LINKER_FLAGS) -o '+\
-                'main_onefilecomp ' + maino_name + ' random.o \n'
+        onefilecomp_string += '\t$(COMPILER) -o '+\
+                'main_onefilecomp ' + maino_name + ' random.o $(LINKER_FLAGS)\n'
         onefilecomp_string += '\tcp main_onefilecomp run/\n'
         res += onefilecomp_string
 

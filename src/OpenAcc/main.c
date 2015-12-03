@@ -21,7 +21,7 @@ void su2_rand(double *pp);
 #include "../RationalApprox/rationalapprox.h"
 #include "./struct_c_def.h"
 #include "./alloc_vars.h"
-#include "./dbgtools.h"
+#include "./io.h"
 #include "./fermionic_utilities.h"
 #include "./single_types.h"
 #include "./su3_utilities.h"
@@ -112,10 +112,16 @@ int main(){
   }
  // start from saved conf
   if(start_opt==1){
-    read_su3_soa(conf_acc,"stored_config",&conf_id_iter); // READS ALSO THE conf_id_iter
+    read_su3_soa_ASCII(conf_acc,"stored_config",&conf_id_iter); // READS ALSO THE conf_id_iter
     printf("Stored Gauge Conf Read : OK \n");
   }
   //###############################################################################################  
+
+  double max_unitarity_deviation,avg_unitarity_deviation;
+  check_unitarity_host(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
+  printf("\tAvg_unitarity_deviation on host: %e\n", avg_unitarity_deviation);
+  printf("\tMax_unitarity_deviation on host: %e\n", max_unitarity_deviation);
+
 
 
 #pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:2])  copyin(fermions_parameters[0:NDiffFlavs])
@@ -139,10 +145,10 @@ int main(){
 
 	//################### THERMALIZATION & METRO    ----   UPDATES ####################//
 	for(int id_iter=id_iter_offset;id_iter<(ITERATIONS+id_iter_offset);id_iter++){
-      double total_unitarity_deviation;
 
-      check_unitarity(conf_acc,&total_unitarity_deviation);
-      printf("\tTotal_unitarity_deviation on device: %e\n", total_unitarity_deviation);
+      check_unitarity_device(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
+      printf("\tAvg_unitarity_deviation on device: %e\n", avg_unitarity_deviation);
+      printf("\tMax_unitarity_deviation on device: %e\n", max_unitarity_deviation);
 	  accettate_therm_old = accettate_therm;
 	  accettate_metro_old = accettate_metro;
 	  conf_id_iter++;
@@ -199,14 +205,14 @@ int main(){
 	  //-------------------------------------------------//
 	  
 	  //--------- SALVA LA CONF SU FILE ------------------//
-	  if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config",conf_id_iter);
+	  if(conf_id_iter%save_conf_every==0)	print_su3_soa_ASCII(conf_acc,"stored_config",conf_id_iter);
 	  //-------------------------------------------------//
 	  
 	}// id_iter loop ends here
 	
 		
 	//--------- SALVA LA CONF SU FILE ------------------//
-	print_su3_soa(conf_acc,"stored_config", conf_id_iter);
+	print_su3_soa_ASCII(conf_acc,"stored_config", conf_id_iter);
 	//-------------------------------------------------//
 
 

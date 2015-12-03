@@ -850,7 +850,7 @@ double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __res
   }
 
 
-void check_unitarity( __restrict su3_soa * const u, double * max_unitarity_deviation){
+void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
 
 
   // removing stag phases
@@ -858,9 +858,10 @@ void check_unitarity( __restrict su3_soa * const u, double * max_unitarity_devia
 
 
     double r = 0;
+    double rmax = 0;
 
 #pragma acc kernels present(u)
-#pragma acc loop reduction(+:r)
+#pragma acc loop reduction(+:r) 
   for(int dir = 0; dir < 8 ; dir++){
   for(int idx = 0; idx < sizeh ; idx++){
      single_su3 m;
@@ -869,13 +870,46 @@ void check_unitarity( __restrict su3_soa * const u, double * max_unitarity_devia
 
      d_complex err = 1 - detSu3(&m);
      r += creal(err * conj(err));
+     rmax = fmax(rmax,creal(err * conj(err)));
 
     }
   }
   //adding them again
   mult_conf_times_stag_phases(u);
 
-  return r;
+  *avg_unitarity_deviation = r/(sizeh*8);
+  *max_unitarity_deviation = rmax;
+
+
+}
+void check_unitarity_host( __restrict su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
+
+
+  // removing stag phases
+  mult_conf_times_stag_phases(u);
+
+
+    double r = 0;
+    double rmax = 0;
+
+  for(int dir = 0; dir < 8 ; dir++){
+  for(int idx = 0; idx < sizeh ; idx++){
+     single_su3 m;
+     single_su3_from_su3_soa(&u[dir],idx,&m);
+     rebuild3row(&m);
+
+     d_complex err = 1 - detSu3(&m);
+     r += creal(err * conj(err));
+     rmax = fmax(rmax,creal(err * conj(err)));
+
+    }
+  }
+  //adding them again
+  mult_conf_times_stag_phases(u);
+
+  *avg_unitarity_deviation = r/(sizeh*8);
+  *max_unitarity_deviation = rmax;
+
 
 }
 

@@ -11,6 +11,47 @@
 
 #define ALIGN 128
 
+su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
+su3_soa  * aux_conf_acc; // auxiliary 
+su3_soa  * auxbis_conf_acc; // auxiliary 
+double_soa * u1_back_field_phases; // BACKRGROUND EM FIELD
+thmat_soa * momenta;// GAUGE FIELD EVOLUTION
+tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
+su3_soa * gconf_as_fermionmatrix; // conf to use in either cases in fermion related computation (with or without stouting)
+
+// STOUTING 
+#ifdef STOUT_FERMIONS
+su3_soa * gstout_conf_acc; // max stouted conf, just pointer
+su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth
+su3_soa * glocal_staples;
+tamat_soa * gipdot;
+tamat_soa * aux_ta; // aggiunta per il calcolo della forza stoutata
+thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
+#endif
+
+// FERMIONS
+
+vec3_soa * ferm_chi_acc; // questo e' il chi [NPS_tot]
+vec3_soa * ferm_phi_acc; // questo e' il phi [NPS_tot]
+vec3_soa * ferm_out_acc; // questo e' uno ausiliario [NPS_tot]
+vec3_soa * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps*MAX_APPROX_ORDER]
+vec3_soa * kloc_r;  // vettore ausiliario
+vec3_soa * kloc_h;  // vettore ausiliario
+vec3_soa * kloc_s;  // vettore ausiliario
+vec3_soa * kloc_p;  // vettore ausiliario
+vec3_soa * k_p_shiftferm; // ausiliario [max_nshift=MAX_APPROX_ORDER]
+
+
+// LOCAL SUMS
+dcomplex_soa * local_sums;
+double_soa * d_local_sums;
+
+
+
+
+
+
+
 void mem_alloc()
 {
   printf("Allocating resources for NPS_tot=%d pseudofermions in total, with MAX_APPROX_ORDER=%d\n", NPS_tot, MAX_APPROX_ORDER);
