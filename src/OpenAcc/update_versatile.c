@@ -12,6 +12,7 @@
 #include "./stouting.h"
 #include "./md_integrator.h"
 #include "./su3_utilities.h"
+#include "./su3_measurements.h"
 #include "./inverter_multishift_full.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"

@@ -25,6 +25,7 @@ void su2_rand(double *pp);
 #include "./fermionic_utilities.h"
 #include "./single_types.h"
 #include "./su3_utilities.h"
+#include "./su3_measurements.h"
 #include "./random_assignement.h"
 #include "./fermion_matrix.h"
 #include "./inverter_full.h"
@@ -146,9 +147,9 @@ int main(){
 	//################### THERMALIZATION & METRO    ----   UPDATES ####################//
 	for(int id_iter=id_iter_offset;id_iter<(ITERATIONS+id_iter_offset);id_iter++){
 
-      check_unitarity_device(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
-      printf("\tAvg_unitarity_deviation on device: %e\n", avg_unitarity_deviation);
-      printf("\tMax_unitarity_deviation on device: %e\n", max_unitarity_deviation);
+        check_unitarity_device(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
+        printf("\tAvg_unitarity_deviation on device: %e\n", avg_unitarity_deviation);
+     printf("\tMax_unitarity_deviation on device: %e\n", max_unitarity_deviation);
 	  accettate_therm_old = accettate_therm;
 	  accettate_metro_old = accettate_metro;
 	  conf_id_iter++;

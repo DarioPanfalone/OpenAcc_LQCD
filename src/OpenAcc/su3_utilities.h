@@ -15,12 +15,6 @@
 #endif
 
 
-void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarity_deviation, double * avg_unitarity_deviation);
-void check_unitarity_host( __restrict su3_soa * const u, double * max_unitarity_deviation, double * avg_unitarity_deviation);
-
-double calc_momenta_action( const __restrict thmat_soa * const mom,
-			    double_soa * tr_local, const int mu);
-
 // multiply the whole configuration for the staggered phases field
 // (only the first two lines)
 void mult_conf_times_stag_phases( __restrict su3_soa * const u);
@@ -32,9 +26,6 @@ void mult_gl3_soa_times_stag_phases( __restrict su3_soa * const u);
 // multiply the whole configuration for the staggered phases field
 void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u);
 
-// reunitarize the conf by brute force
-void unitarize_conf( __restrict su3_soa * const u);
-
 
 // routine for the computation of the average of the plaquettes computed on the plane mu-nu
 // 1) all the plaquettes on the plane mu-nu are computed and saved locally
@@ -45,8 +36,6 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(
         dcomplex_soa * const tr_local_plaqs,
         const int mu,  const int nu);
 
-double calc_momenta_action( const __restrict thmat_soa * const mom,
-double_soa * tr_local,const int mu);
 
 
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix);
@@ -93,13 +82,8 @@ void mom_exp_times_conf_soloopenacc(
  thmat_soa * const tmomenta, // e' costante e qui dentro non viene modificata
  double * tdelta,  int id_delta);
 
-double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs);
-
-
-
-
-
-
+// reunitarize the conf by brute force
+void unitarize_conf( __restrict su3_soa * const u);
 
 
 
