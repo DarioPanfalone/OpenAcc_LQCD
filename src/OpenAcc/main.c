@@ -48,7 +48,7 @@ const char *nome_file_ferm_output  ="ferm_meas.dat";
 
 #define  start_opt 1 // 0 --> COLD START; 1 --> START FROM SAVED CONF
 int conf_id_iter;
-#define ITERATIONS 2 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
+#define ITERATIONS 1 // the code will generate new <ITERATIONS> confs, from <conf_id_iter+1> to <conf_id_iter+ITERATIONS>
 #define therm_ITERATIONS 0 // the first <therm_ITERATIONS> of the history will be thermalization updates
 
 #define save_conf_every 10000
@@ -57,14 +57,14 @@ int conf_id_iter;
 #define residue_metro 1.0e-8 //-8    // stopping residual for CG
 #define  residue_md 1.0e-6 //-5    // stopping residual for CG
 
-
+int verbosity_lv = 5;// 5 should print everything.
 
 
 
 
 int main(){
 
-  initrand(111);
+  initrand(42);
   fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
   su3_soa  * conf_acc;

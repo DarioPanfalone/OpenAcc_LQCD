@@ -86,11 +86,12 @@ void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* 
     }
     fclose(input);
 
+    if (verbosity_lv > 2){
     printf("RA_a0 = %18.16e\n", rational_approx->RA_a0);
     for(int i = 0; i < rational_approx->approx_order; i++) 
-    {
-      printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
-    } 
+          printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
+     
+    }
 }
 
 void rationalapprox_save(const char* nomefile, RationalApprox* rational_approx){
@@ -138,7 +139,7 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    printf("Rescaling rational approx for max: %f , min: %f\n", max, min);
 
    min*=0.95;
-   max*=1.05;
+   max*=1.10;// NISSA uses 1.1
    double epsilon=pow(max, power);  
    out->RA_a0               = in->RA_a0       *     epsilon ;
    for(int order = 0; order < in->approx_order; order ++){
@@ -184,6 +185,17 @@ void renormalize_rational_approximation(RationalApprox *in, RationalApprox *out)
 
 }
 
+double rational_approx_evaluate(RationalApprox* ra, double x){
+
+    if (x < ra->lambda_min || x > ra->lambda_max )
+        printf("x out of range! Range is %e - %e\n", ra->lambda_min, ra->lambda_max);
+    double res = ra->RA_a0;
+    for(int i =0; i<ra->approx_order;i++)
+        res += ra->RA_a[i]/(x+ra->RA_b[i]);
+
+    return res;
+
+}
 
 
 

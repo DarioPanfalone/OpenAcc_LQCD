@@ -38,6 +38,8 @@ void stout_isotropic(
     SETREQUESTED(auxiliary);
     SETREQUESTED(tipdot);
 
+if(verbosity_lv > 1) printf("Isotropic stouting...\n");
+
 
   set_su3_soa_to_zero(local_staples);
 

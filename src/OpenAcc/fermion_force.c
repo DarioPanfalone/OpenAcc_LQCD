@@ -24,7 +24,6 @@
 
 
 
-//#define STAMPA_UN_CASINO_DI_ROBA
 
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
 							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
@@ -36,9 +35,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
 
-  //  printf("\n\n\nINSIDE SIGMA_PRIME --> SIGMA \n\n");
-  {// printing stuff
-#ifdef STAMPA_UN_CASINO_DI_ROBA
+  if(verbosity_lv > 2) printf("\t\tSIGMA_PRIME --> SIGMA\n");
+  if(verbosity_lv > 5){// printing stuff
 #pragma acc update host(Sigma[0:8])
   printf("-------------Sigma[old]------------------\n");                                                                                             
   printf("Sigma[old]00 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c0[0]),cimag(Sigma[0].r0.c0[0]));                                               
@@ -50,24 +48,22 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Sigma[old]20 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c0[0]),cimag(Sigma[0].r2.c0[0]));                                               
   printf("Sigma[old]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
   printf("Sigma[old]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
-#endif
  }
 
   SETREQUESTED(TMP);
   set_su3_soa_to_zero(TMP);
 
   mult_conf_times_stag_phases(U);
-  //  printf("         Removed stag phases  \n");
+   if(verbosity_lv > 5)printf("         Removed stag phases  \n");
   calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
-  //  printf("         computed staples  \n");
+   if(verbosity_lv > 5)printf("         computed staples  \n");
 
 
   RHO_times_conf_times_staples_ta_part(U,TMP,QA);
   // check: TMP = local staples.
   SETFREE(TMP);
-  //  printf("         computed Q  \n");
-  {// printing stuff
-#ifdef STAMPA_UN_CASINO_DI_ROBA
+   if(verbosity_lv > 5) printf("         computed Q  \n");
+ if(verbosity_lv > 5) {// printing stuff
 #pragma acc update host(QA[0:8])
   printf("-------------Q------------------\n");
   printf("Q00 = %.18lf\n",QA[0].rc00[0]);
@@ -75,14 +71,12 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Q01 = %.18lf + (%.18lf)*I\n",creal(QA[0].c01[0]),cimag(QA[0].c01[0]));
   printf("Q02 = %.18lf + (%.18lf)*I\n",creal(QA[0].c02[0]),cimag(QA[0].c02[0]));
   printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
-#endif
   }
   SETREQUESTED(Lambda);
   compute_lambda(Lambda,Sigma,U,QA,TMP);
-  //  printf("         computed Lambda  \n");
+ if(verbosity_lv > 5)   printf("         computed Lambda  \n");
 
-  {// printing stuff
-#ifdef STAMPA_UN_CASINO_DI_ROBA
+ if(verbosity_lv > 5) {// printing stuff
 #pragma acc update host(Lambda[0:8])
   printf("-------------LAMBDA------------------\n");
   printf("Lambda00 = %.18lf\n",Lambda[0].rc00[0]);
@@ -90,14 +84,12 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Lambda01 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c01[0]),cimag(Lambda[0].c01[0]));
   printf("Lambda02 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c02[0]),cimag(Lambda[0].c02[0]));
   printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
-#endif
   }
   SETREQUESTED(Sigma);
   compute_sigma(Lambda,U,Sigma,QA,TMP);
-  //  printf("         computed Sigma  \n");
+ if(verbosity_lv > 5)   printf("         computed Sigma  \n");
 
-  {// printing stuff
-#ifdef STAMPA_UN_CASINO_DI_ROBA
+ if(verbosity_lv > 5) {// printing stuff
 #pragma acc update host(Sigma[0:8])
   printf("-------------Sigma[new]------------------\n");                                                                                             
   printf("Sigma[new]00 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c0[0]),cimag(Sigma[0].r0.c0[0]));                                               
@@ -109,12 +101,11 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   printf("Sigma[new]20 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c0[0]),cimag(Sigma[0].r2.c0[0]));                                               
   printf("Sigma[new]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
   printf("Sigma[new]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
-#endif
   }
 
   SETFREE(Lambda);
   mult_conf_times_stag_phases(U);
-  //  printf("         Restored stag phases  \n");
+ if(verbosity_lv > 5)   printf("         Restored stag phases  \n");
   
   
 }
@@ -123,96 +114,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
 
-/*
-void DEOTT_compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
-								 __restrict thmat_soa  * Lambda, // la var globale e' aux_th
-								 __restrict tamat_soa  * QA, // la var globale e' aux_ta
-								 __restrict su3_soa    * const U, // la var globale e' .... per adesso conf_acc
-								 __restrict su3_soa    * const TMP// la var globale e' aux_conf_acc //PARCHEGGIO??
-								 ){
-
-
-  printf("\n\n\n=== DEOTT === \nINSIDE SIGMA_PRIME --> SIGMA \n\n");
-  {// print stuff
-#ifdef STAMPA_UN_CASINO_DI_ROBA
-#pragma acc update host(Sigma[0:8])
-  printf("-------------=== DEOTT === Sigma[old]------------------\n");                                                                                             
-  printf("Sigma[old]00 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c0[0]),cimag(Sigma[0].r0.c0[0]));                                               
-  printf("Sigma[old]01 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c1[0]),cimag(Sigma[0].r0.c1[0]));                                               
-  printf("Sigma[old]02 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c2[0]),cimag(Sigma[0].r0.c2[0]));                                               
-  printf("Sigma[old]10 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c0[0]),cimag(Sigma[0].r1.c0[0]));                                               
-  printf("Sigma[old]11 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c1[0]),cimag(Sigma[0].r1.c1[0]));                                               
-  printf("Sigma[old]12 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c2[0]),cimag(Sigma[0].r1.c2[0]));                                               
-  printf("Sigma[old]20 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c0[0]),cimag(Sigma[0].r2.c0[0]));                                               
-  printf("Sigma[old]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
-  printf("Sigma[old]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
-#endif
- }
-
-  SETREQUESTED(TMP);
-  set_su3_soa_to_zero(TMP);
-  mult_conf_times_stag_phases(U);
-  printf("         Removed stag phases  \n");
-  calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
-  printf("         computed staples  \n");
-
-  RHO_times_conf_times_staples_ta_part(U,TMP,QA);
-  SETFREE(TMP);
-  printf("         computed Q  \n");
-  { // print stuff
-#ifdef STAMPA_UN_CASINO_DI_ROBA
-#pragma acc update host(QA[0:8])
-  printf("-------------=== DEOTT === Q------------------\n");
-  printf("Q00 = %.18lf\n",QA[0].rc00[0]);
-  printf("Q00 = %.18lf\n",QA[0].rc11[0]);
-  printf("Q01 = %.18lf + (%.18lf)*I\n",creal(QA[0].c01[0]),cimag(QA[0].c01[0]));
-  printf("Q02 = %.18lf + (%.18lf)*I\n",creal(QA[0].c02[0]),cimag(QA[0].c02[0]));
-  printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
-#endif
-  }
-  SETREQUESTED(Lambda);
-  DEOTT_compute_lambda(Lambda,Sigma,U,QA,TMP);
-  printf("         computed Lambda  \n");
-
-  { // print stuff
-#ifdef STAMPA_UN_CASINO_DI_ROBA
-#pragma acc update host(Lambda[0:8])
-  printf("------------- === DEOTT === LAMBDA------------------\n");
-  printf("Lambda00 = %.18lf\n",Lambda[0].rc00[0]);
-  printf("Lambda00 = %.18lf\n",Lambda[0].rc11[0]);
-  printf("Lambda01 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c01[0]),cimag(Lambda[0].c01[0]));
-  printf("Lambda02 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c02[0]),cimag(Lambda[0].c02[0]));
-  printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
-#endif
-  }
-  SETREQUESTED(Sigma);
-  DEOTT_compute_sigma(Lambda,U,Sigma,QA,TMP);
-  printf("         computed Sigma  \n");
-
-  { // print stuff
-#ifdef STAMPA_UN_CASINO_DI_ROBA
-#pragma acc update host(Sigma[0:8])
-  printf("------------- === DEOTT === Sigma[new]------------------\n");                                                                                             
-  printf("Sigma[new]00 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c0[0]),cimag(Sigma[0].r0.c0[0]));                                               
-  printf("Sigma[new]01 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c1[0]),cimag(Sigma[0].r0.c1[0]));                                               
-  printf("Sigma[new]02 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r0.c2[0]),cimag(Sigma[0].r0.c2[0]));                                               
-  printf("Sigma[new]10 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c0[0]),cimag(Sigma[0].r1.c0[0]));                                               
-  printf("Sigma[new]11 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c1[0]),cimag(Sigma[0].r1.c1[0]));                                               
-  printf("Sigma[new]12 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r1.c2[0]),cimag(Sigma[0].r1.c2[0]));                                               
-  printf("Sigma[new]20 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c0[0]),cimag(Sigma[0].r2.c0[0]));                                               
-  printf("Sigma[new]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
-  printf("Sigma[new]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
-#endif
-  }
-
-  
-  SETFREE(Lambda);
-  mult_conf_times_stag_phases(U);
-  printf("         Restored stag phases  \n");
-  
-  
-}
-*/
 
 
 //STANDARD VERSION OF THE FERMIONIC FORCE
@@ -236,10 +137,9 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			       __restrict vec3_soa * tk_p_shiftferm//parking variable [max_approx_order]           
 			       ){
 
-  //  printf("############################################ \n");
-  //  printf("#### Inside fermion force soloopenacc ###### \n");
-  //  printf("############################################ \n");
-
+  if(verbosity_lv > 2){
+    printf("\tInside fermion force soloopenacc\n");
+  }
 
 #ifdef TIMING_FERMION_FORCE
   struct timeval t1,t2;
@@ -291,11 +191,11 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   mult_gl3_soa_times_stag_phases(gl3_aux);
 
   for(int stout_level = STOUT_STEPS ; stout_level > 1 ; stout_level--){
-   // printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl %d to lvl %d] <<<<<<<<<<<<<<<<<<<<<<<<<\n",stout_level,stout_level-1);
+    if(verbosity_lv > 2) printf("\t\tSigma' to Sigma [lvl %d to lvl %d]\n",stout_level,stout_level-1);
     conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
     compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, taux_conf_acc );
   }
-//  printf(">>>>>>>>>>>>>>  Sigma' to Sigma [lvl 1 to lvl 0] <<<<<<<<<<<<<<<<<<<<<<<<<\n");
+   if(verbosity_lv > 2)  printf("\t\tSigma' to Sigma [lvl 1 to lvl 0]\n");
   compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, taux_conf_acc );
 
   mult_gl3_soa_times_stag_phases(gl3_aux);
@@ -320,13 +220,11 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 #ifdef TIMING_FERMION_FORCE
     gettimeofday ( &t2, NULL );
     double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
-    printf("FULL FERMION FORCE COMPUTATION                  PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+    printf("\t\tFULL FERMION FORCE COMPUTATION  PreKer->PostKer :%f sec  \n",dt_preker_to_postker);
 #endif
-
-    //  printf("########################################### \n");
-    //  printf("#### Completed fermion force openacc ###### \n");
-    //  printf("########################################### \n");
-
+ if(verbosity_lv > 2){
+     printf("\t\tCompleted fermion force openacc\n");
+ }
 }
 
 

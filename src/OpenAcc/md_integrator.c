@@ -43,8 +43,8 @@ d_complex ieps_acc,iepsh_acc;
 
 void initialize_md_global_variables(void )
 {
-  gauge_scale = 7;
-  no_md = 13;
+  gauge_scale = 10;
+  no_md = 11;
 
   epsilon_acc = 1.0/((double)(no_md));
   ieps_acc  = 0.0 + (epsilon_acc) * 1.0I;
@@ -63,6 +63,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
  mom_sum_mult(tmomenta,tipdot,delta,3);
  for(md=1; md<gauge_scale; md++){
+   if(verbosity_lv > 2) printf("Gauge step %d of %d...\n",md,gauge_scale);
    // Step for the Q
    // Q' = exp[dt/2 *i P] Q
    // delta[4]=cimag(iepsh_acc)*scale;
@@ -148,7 +149,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   mom_sum_mult(tmomenta,tipdot_acc,delta,0);
   
   for(md=1; md<no_md; md++){
-      printf("Doing Molecular Dynamic step %d of %d...\n", md, no_md);
+      printf("\n\n\t\tRUNNING MD STEP %d OF %d...\n", md, no_md);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
     multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);

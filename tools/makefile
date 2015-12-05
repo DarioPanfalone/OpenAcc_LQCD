@@ -19,6 +19,12 @@ rgen: rationalapprox_calc.o rationalapprox.o alg_remez.o
 	g++ -o rgen rationalapprox_calc.o rationalapprox.o alg_remez.o -lgmp -lmpfr
 
 
+eval_ratapprox.o: ../src/RationalApprox/rationalapprox.h eval_ratapprox.c
+	g++ -c eval_ratapprox.c
+
+eval_ratapprox: eval_ratapprox.o rationalapprox.o
+	g++ -o eval_ratapprox eval_ratapprox.o rationalapprox.o -lm
+
 
 clean: 
 	rm -rf normalize_ratapprox.o rationalapprox.o ratnormalizer rgen alg_remez.o rationalapprox_calc.o

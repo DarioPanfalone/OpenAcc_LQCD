@@ -1,7 +1,6 @@
 #ifndef COMMON_DEFINES_H_
 #define COMMON_DEFINES_H_
 
-//#include "../Include/fermion_parameters.h"
 
 //#define BACKFIELD
 //#define IMCHEMPOT
@@ -56,6 +55,7 @@
 #define beta 3.55
   // 3.7  //5.35
 
+extern int verbosity_lv;
 
 #endif
 

@@ -7,6 +7,7 @@
 #include <math.h>
 #define MAX_APPROX_ORDER 18
 
+extern int verbosity_lv;
 
 typedef struct RationalApprox_t{
     int exponent_num;
@@ -42,5 +43,6 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
 void renormalize_rational_approximation(RationalApprox *in, RationalApprox *out);
 
 
+double rational_approx_evaluate(RationalApprox* ra, double x);
 
 #endif

@@ -67,6 +67,7 @@ int multishift_invert(__restrict su3_soa * const u,
     assign_in_to_out(in,loc_r);
     assign_in_to_out(loc_r,loc_p);
     delta=l2norm2_global(loc_r);
+    double source_norm = delta;
     //printf("delta    %.18lf\n",delta);
     omega=1.0;
 
@@ -91,7 +92,11 @@ int multishift_invert(__restrict su3_soa * const u,
         maxiter = iter+1;
       }
     }
-  
+    if (verbosity_lv > 3){
+      printf("STARTING CG-M:\nCG\tR");
+      for(iter=0; iter<(approx->approx_order); iter++)
+          printf("\t%d",iter); printf("\n");
+    } 
     do {      // loop over cg iterations
       cg++;
 
@@ -143,6 +148,7 @@ int multishift_invert(__restrict su3_soa * const u,
 //multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(vec3_soa *in1, int maxiter,int *flag,double *gammas,vec3_soa *in2,double *zeta_iii )
       multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(shiftferm,maxiter,flag,gammas,loc_r,zeta_iii);
 
+      maxiter = 0;
       for(iter=0; iter<(approx->approx_order); iter++){
           if(flag[iter]==1){
               fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
@@ -153,9 +159,19 @@ int multishift_invert(__restrict su3_soa * const u,
           }
       }
       delta=lambda;
-//      printf("Iteration: %i    --> residue = %e   (target = %e) \n", cg, sqrt(lambda), residuo);
 
-    } while(sqrt(lambda)>residuo && cg<max_cg); // end of cg iterations 
+
+      if (verbosity_lv > 3 && cg%10==0){
+
+      printf("%d\t%1.1e",cg, sqrt(lambda));
+      for(iter=0; iter<(approx->approx_order); iter++){
+          if(flag[iter]==0) printf("\t-");
+          else printf("\t%1.1e", sqrt(delta*zeta_i[iter]*zeta_i[iter]) );
+      }
+      printf("\n");
+      
+      }
+    } while(maxiter>0 && cg<max_cg); // end of cg iterations 
 
     if(cg==max_cg)
       {
@@ -164,13 +180,10 @@ int multishift_invert(__restrict su3_soa * const u,
 //      printf("\t CG count = %i \n",cg);
     
 
-#if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC))
-  printf("Terminated multishift_invert ( target res = %1.1e ) ", residuo);
-  int i;
-      printf("\t CG count = %i \n",cg);
+  printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
   // test 
 
-
+  if(verbosity_lv > 2){
     for(iter=0; iter<approx->approx_order; iter++)printf("\t%d",iter);
     printf("\n");
 
@@ -182,7 +195,7 @@ int multishift_invert(__restrict su3_soa * const u,
       printf("\t%1.1e",sqrt(giustoono)/residuo);
     }
     printf("\n");
-#endif
+  }
     SETFREE(loc_r);
     SETFREE(loc_h);
     SETFREE(loc_s);
