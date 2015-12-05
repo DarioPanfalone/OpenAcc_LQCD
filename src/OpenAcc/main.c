@@ -54,8 +54,8 @@ int conf_id_iter;
 #define save_conf_every 10000
 
 
-#define residue_metro 1.0e-8 //-8    // stopping residual for CG
-#define  residue_md 1.0e-6 //-5    // stopping residual for CG
+#define residue_metro 1.0e-6 //-8    // stopping residual for CG
+#define  residue_md 1.0e-4 //-5    // stopping residual for CG
 
 int verbosity_lv = 5;// 5 should print everything.
 
@@ -80,8 +80,6 @@ int main(){
 
   mem_alloc();
   printf("Allocazione della memoria : OK \n");
-  initialize_md_global_variables();
-  printf("init vars : OK \n");
   compute_nnp_and_nnm_openacc();
   printf("nn computation : OK \n");
 #ifdef BACKFIELD
@@ -89,6 +87,9 @@ int main(){
   print_double_soa(u1_back_field_phases,"backfield");
   printf("u1_backfield initialization : OK \n");
 #endif
+  initialize_md_global_variables();
+  printf("init md vars : OK \n");
+
 
 #ifndef __GNUC__
   //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
@@ -124,10 +125,21 @@ int main(){
 
 
 
-#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:2])  copyin(fermions_parameters[0:NDiffFlavs])
+#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) \
+  create(ipdot_acc[0:8]) create(aux_conf_acc[0:8])\
+  create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot])\
+  create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot])\
+  create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER])\
+  create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])\
+  create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER])\
+  create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc)\
+  create(local_sums[0:2]) create(d_local_sums[0:2])\
+  copyin(fermions_parameters[0:NDiffFlavs]) copyin(deltas_Omelyan[0:7])
   {
 #ifdef STOUT_FERMIONS
-#pragma acc data create(aux_th[0:8]) create(aux_ta[0:8]) create(gstout_conf_acc_arr[0:(8*STOUT_STEPS)]) create(glocal_staples[0:8]) create(gipdot[0:8]) 
+#pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
+      create(gstout_conf_acc_arr[0:(8*STOUT_STEPS)])\
+      create(glocal_staples[0:8]) create(gipdot[0:8]) 
       {
 #endif
 	

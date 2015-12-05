@@ -45,7 +45,7 @@ double deltas_Omelyan[7];
 
 void initialize_md_global_variables(void )
 {
-  gauge_scale = 10;
+  gauge_scale = 5;
   no_md = 11;
 
   epsilon_acc = 1.0/((double)(no_md));

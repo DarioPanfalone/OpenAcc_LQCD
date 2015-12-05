@@ -10,7 +10,7 @@
 
 extern int no_md;// number of MD steps
 extern int gauge_scale;   // Update fermions every gauge_scale gauge updates
-
+extern double deltas_Omelyan[7];
 
 extern int no_md_acc,gauge_scale_acc;
 extern double epsilon_acc;
