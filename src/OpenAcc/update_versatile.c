@@ -34,22 +34,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
 #endif
 
-
-
   
   printf("UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: OK \n");
   // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
-  const double lambda=0.1931833275037836; // Omelyan Et Al.
-  const double gs=0.5/(double) gauge_scale;
-  double delta[7];
-  delta[0]= -cimag(ieps_acc) * lambda;
-  delta[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
-  delta[2]= -cimag(ieps_acc) * 2.0*lambda;
-  delta[3]= -cimag(ieps_acc) * gs*lambda * beta_by_three;
-  delta[4]=  cimag(iepsh_acc)* gs;
-  delta[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*beta_by_three;
-  delta[6]= -cimag(ieps_acc) * gs*2.0*lambda*beta_by_three;
-
   int iterazioni = id_iter+1;
   double dt_tot;
   double dt_pretrans_to_preker;
@@ -80,7 +67,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
   }
 
-#pragma acc data copyin(delta[0:7])
+//#pragma acc data copyin(delta[0:7]) // should not be needed?
   {
   
     gettimeofday ( &t1, NULL );
@@ -206,7 +193,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #endif
 			      u1_back_field_phases,aux_conf_acc,fermions_parameters,NDiffFlavs,
 			      ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-			      k_p_shiftferm,momenta,local_sums,delta,res_md);
+			      k_p_shiftferm,momenta,local_sums,res_md);
     
 #ifdef PRINT_DETAILS_INSIDE_UPDATE
     printf(" Molecular Dynamics Completed : OK \n");

@@ -40,6 +40,8 @@ int gauge_scale;   // Update fermions every gauge_scale gauge updates
 int no_md_acc,gauge_scale_acc;
 double epsilon_acc;
 d_complex ieps_acc,iepsh_acc;
+double deltas_Omelyan[7];
+
 
 void initialize_md_global_variables(void )
 {
@@ -49,60 +51,72 @@ void initialize_md_global_variables(void )
   epsilon_acc = 1.0/((double)(no_md));
   ieps_acc  = 0.0 + (epsilon_acc) * 1.0I;
   iepsh_acc = 0.0 + (epsilon_acc) * 0.5 * 1.0I;
+
+  const double lambda=0.1931833275037836; // Omelyan Et Al.
+  const double gs=0.5/(double) gauge_scale;
+
+  deltas_Omelyan[0]= -cimag(ieps_acc) * lambda;
+  deltas_Omelyan[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
+  deltas_Omelyan[2]= -cimag(ieps_acc) * 2.0*lambda;
+  deltas_Omelyan[3]= -cimag(ieps_acc) * gs*lambda * beta_by_three;
+  deltas_Omelyan[4]=  cimag(iepsh_acc)* gs;
+  deltas_Omelyan[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*beta_by_three;
+  deltas_Omelyan[6]= -cimag(ieps_acc) * gs*2.0*lambda*beta_by_three;
+
 }
 
-void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta,double * delta)
+void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
  {
  int md;
  // Step for the P
  // P' = P - l*dt*dS/dq
- // delta[3]=-cimag(ieps_acc)*scale*lambda;
+ // deltas_Omelyan[3]=-cimag(ieps_acc)*scale*lambda;
 
  mult_conf_times_stag_phases(tconf_acc);
 
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
- mom_sum_mult(tmomenta,tipdot,delta,3);
+ mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
  for(md=1; md<gauge_scale; md++){
    if(verbosity_lv > 2) printf("Gauge step %d of %d...\n",md,gauge_scale);
    // Step for the Q
    // Q' = exp[dt/2 *i P] Q
-   // delta[4]=cimag(iepsh_acc)*scale;
-   mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,delta,4);
+   // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
+   mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
    // Step for the P
    // P' = P - (1-2l)*dt*dS/dq
-   // delta[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
+   // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
    calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
-   mom_sum_mult(tmomenta,tipdot,delta,5);
+   mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,5);
    // Step for the Q
    // Q' = exp[dt/2 *i P] Q
-   // delta[4]=cimag(iepsh_acc)*scale;
-   mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,delta,4);
+   // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
+   mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
    // Step for the P
    // P' = P - 2l*dt*dS/dq
-   // delta[6]=-cimag(ieps_acc)*2.0*lambda*scale;
+   // deltas_Omelyan[6]=-cimag(ieps_acc)*2.0*lambda*scale;
    calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
-   mom_sum_mult(tmomenta,tipdot,delta,6);
+   mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,6);
  }
  
  // Step for the Q
  // Q' = exp[dt/2 *i P] Q
- // delta[4]=cimag(iepsh_acc)*scale;
- mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,delta,4);
+ // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
+ mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
  // Step for the P
  // P' = P - (1-2l)*dt*dS/dq
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
  // calc_ipdot_gauge();
- // delta[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
- mom_sum_mult(tmomenta,tipdot,delta,5);
+ // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
+ mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,5);
  // Step for the Q
  // Q' = exp[dt/2 *i P] Q
- // delta[4]=cimag(iepsh_acc)*scale;
- mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,delta,4);
+ // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
+ mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
  // Step for the P
  // P' = P - l*dt*dS/dq
- // delta[3]=-cimag(ieps_acc)*lambda*scale;
+ // deltas_Omelyan[3]=-cimag(ieps_acc)*lambda*scale;
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
- mom_sum_mult(tmomenta,tipdot,delta,3);
+ mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
 
 
  mult_conf_times_stag_phases(tconf_acc);
@@ -127,7 +141,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				vec3_soa * tk_p_shiftferm, // parking, [max_nshift]
 				thmat_soa * tmomenta,
 				dcomplex_soa * local_sums,
-				double * delta,
 				double res)
 {
 
@@ -136,7 +149,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
   
   // Step for the P
   // P' = P - l*dt*dS/dq
-  //    delta[0]=-cimag(ieps_acc)*lambda;
+  //    deltas_Omelyan[0]=-cimag(ieps_acc)*lambda;
   //  DEOTT_fermion_force_soloopenacc(tconf_acc, 
   fermion_force_soloopenacc(tconf_acc, 
 #ifdef STOUT_FERMIONS
@@ -146,16 +159,16 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
           ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
 	  tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
 
-  mom_sum_mult(tmomenta,tipdot_acc,delta,0);
+  mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
   
   for(md=1; md<no_md; md++){
       printf("\n\n\t\tRUNNING MD STEP %d OF %d...\n", md, no_md);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
-    multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);
+    multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
-    // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
+    // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
     //    DEOTT_fermion_force_soloopenacc(tconf_acc, 
     fermion_force_soloopenacc(tconf_acc, 
 #ifdef STOUT_FERMIONS
@@ -164,47 +177,47 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
           backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs,
           ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc,
           tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-    mom_sum_mult(tmomenta,tipdot_acc,delta,1);
+    mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,1);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
-    multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);
+    multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
     // Step for the P
     // P' = P - 2l*dt*dS/dq
-    // delta[2]=-cimag(ieps_acc)*(2.0*lambda);
+    // deltas_Omelyan[2]=-cimag(ieps_acc)*(2.0*lambda);
     //    DEOTT_fermion_force_soloopenacc(tconf_acc,
     fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
           backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-    mom_sum_mult(tmomenta,tipdot_acc,delta,2);
+    mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
   }  
   // Step for the Q
   // Q' = exp[dt/2 *i P] Q
-  multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);
+  multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
   // Step for the P
   // P' = P - (1-2l)*dt*dS/dq
-  // delta[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
+  // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
   //  DEOTT_fermion_force_soloopenacc(tconf_acc,
   fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
           backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-  mom_sum_mult(tmomenta,ipdot_acc,delta,1);
+  mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
   // Step for the Q
   // Q' = exp[dt/2 *i P] Q
-  multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta,delta);
+  multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
   // Step for the P
   // P' = P - l*dt*dS/dq
-  // delta[0]=-cimag(ieps_acc)*lambda;
+  // deltas_Omelyan[0]=-cimag(ieps_acc)*lambda;
   //DEOTT_fermion_force_soloopenacc(tconf_acc,
   fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
           backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-  mom_sum_mult(tmomenta,tipdot_acc,delta,0);
+  mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
     
 }// end multistep_2MN_SOLOOPENACC()
 
