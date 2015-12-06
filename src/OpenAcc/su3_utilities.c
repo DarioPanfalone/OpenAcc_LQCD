@@ -8,7 +8,8 @@
 #else // assuming PGI is used to compile on accelerators
  #include <accelmath.h>
 #endif
-#include "su3_utilities.h"
+#include "./su3_utilities.h"
+#include "./single_types.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 
 
