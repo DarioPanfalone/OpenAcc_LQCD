@@ -76,10 +76,26 @@
   
   make main
 
+  NOTICE:
+  You may need to do this on the right machine, with the right modules.
+  For example, on the Pisa localui3, you have to do
+
+  ../scripts/vai_su_cudawn?.sh    # choose 6 or 7
+  module load pgi                 # last version
+  module load cuda                # last version
+  export PGI_ACC_BUFFERSIZE= ???? #think
+  
+  where ???? stands of a reasonable number (for a 32^3x8 I use
+  3000000000, do your calculations for the lattice you intend to use).
+  A small buffer will make your program fail but a too big one will
+  make your program need too much memory, up to the point where... it
+  will fail.
+  
+
   FAQ
   Q: Why don't you just use autotools?
   A: Because I don't know how to use them! If you can do better, do
-     it.
+     it (please).
 
   2.1.2.2 RUN
   Go into ./run and launch ./main. Here, the program will need some
