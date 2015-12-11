@@ -1,0 +1,93 @@
+/////////////////////////////////////////////////////////////
+// This is a brief guide to this code, valid around commit //
+// e1ef9998912a8921637f2cb7d7889e478de56ebd.               //
+/////////////////////////////////////////////////////////////
+********
+*BASICS*
+********
+
+1 WHAT'S WHAT
+
++ src: the code.
++ tools: various utilities, for example to generate the rational
+  approximations and test them (at present the only thing, but this
+  folder could contain tools to convert configurations from a format to
+  another and things like that),
++ scripts: basically, collections of commands that you would kave to
+  type too many times.
++ saved_approxs: saved rational approximations, for your convenience.
++ build: the place where build happens. 
++ build/run: the place where your program should run. Try to put here
+  all the things your program needs (rational approximation files,
+  start configurations, files where data should be appended and so on.)
++ docs: where documentation should be.
+
+2 THINGS YOU MAY WANT TO DO
+
++ 2.1 Run a simulation
+ +2.1.1 Parameters or things you may want to modify
+  The first thing you may want to touch is the file 
+  src/OpenAcc/main.c. 
+  The parameters of the simulations are now written directly in the
+  code. Some could theoretically be read from file, some others are
+  far better to be known at compile time. Examples:
+  - Lattice dimensions and block dimensions: these are #defines and it 
+    is far better to write them in the code directly.
+  - fermion parameters:
+    They can be read from an input file. Their initialization is
+    performed in 
+     src/Include/fermion_parameters.c: void init_ferm_params()
+  - HMC parameters: initialization performed in 
+     src/OpenAcc/md_integrator.c: 
+           void initialize_md_global_variables()
+  - Inversion - multishift inversion parameters: now set in 
+     src/OpenAcc/main.c
+  - Background field: if active (#ifdef BACKFIELD) see
+     src/OpenAcc/backfield.c: void set_field_quanta()
+     src/OpenAcc/backfield.c: void init_backfield() 
+        // calculation of the real background phases
+  - random number generation: see 
+     src/Rand/random.c: void initrand()
+
+
+ +2.1.2 I just want to compile and run it!
+  To compile it, go in the build directory. There, if you already have
+  a makefile and all the things you need, use: 
+
+   make main
+   cd run
+   ./main
+
+  Otherwise...
+  2.1.2.1 COMPILATION
+  But if you don't have a makefile, or if you changed the dependence
+  structure in your code, you have to create a makefile first. NO
+  FEAR! The generate_makefile.py utility will do it for you.
+  First, you may want to modify generate_makefile.py so that the
+  string compiler_linker_setting at line 16 is the one you want.
+
+  COMMENT: this procedure could be streamlined and improved.
+
+  After that, invoke
+  
+  ../scripts/generate_makefile.sh
+
+  and a makefile will be generated. Then just type
+  
+  make main
+
+  FAQ
+  Q: Why don't you just use autotools?
+  A: Because I don't know how to use them! If you can do better, do
+     it.
+
+  2.1.2.2 RUN
+  Go into ./run and launch ./main. Here, the program will need some
+  files that you have to prepare in advance. Another section of this
+  guide will tell you what you usually need to prepare, of course if
+  you look into the initialization function listed above in 
+  section 2.1.1.
+  
+   
+
+  
