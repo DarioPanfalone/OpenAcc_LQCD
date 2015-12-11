@@ -90,4 +90,45 @@
   
    
 
+3 FILES YOU MAY NEED TO RUN THE PROGRAM
+  The kind of file needed are usually the rational approximations and
+  the starting gauge configuration file (unless you want to start from
+  a random configuration).
++3.1 Rational Approximation files
+  Rational approximations are used to approximate powers (like 1/4,
+  1/8) of the Dirac Operator.
+  You need 3 rational approximations files for each quark flavour in the
+  theory, one for the first inversion (to map the original
+  gaussianly generated pseudofermion to one generated according to the
+  right pdf), one used during the molecular dynamics evolution (with a
+lower order, so less precise, for speed), and a third one for the
+calculation of the final action for the metropolis test (more
+precise). It is common though that at least 2 flavour are degenerate
+in mass, and this allows you to use the same set of rational
+approximations. For example, for a Nf=2+1 simulation, you need a total
+of 6 rational approximations.
+  NOTICE: the name of the rational approximation file is related to
+its content, and can be generated using the function
+char* rational_approx_filename() in
+src/RationalApprox/rationalapprox.h.
+
+ +3.1.1 How to generate and check rational approximations.
+  Use the tools in tools/. A makefile should be there. 
+  +'rgen' (rationalapprox_calc.c) 
+   the tool for generating them, it takes some arguments and also may
+   need some time for high order approximations. Notice that it needs
+   arbitary precision libraries to be compiled.
+  +'ratnormalizer' (normalize_ratapprox.c) 
+   takes a rational approx and
+   rescales it so that the upper limit of the validity range is 1.
+  + 'eval_ratapprox' (eval_ratapprox.c)
+   Are you sure that your rational approx works? With this tool, you
+   can check! 'bc -l' is your friend too.
   
++3.2 Gauge configuration files
+  For the format of the gauge configuration files, look in 
+  src/OpenAcc/io.c: print_su3_soa() - read_su3_soa() or similar.
+  The read and/or write of the initial/final gauge configuration file
+  is usually done in /src/OpenAcc/main.c.
+
+
