@@ -1,5 +1,5 @@
-L 32 /* or 16^3x32, or even 16^4 */
-T 08
+L 4  /* or 16^3x32, or even 16^4 */
+T 4 
 
 NValenceTheories       0               /* allow to specify additional theory used only for measures */
 
@@ -73,31 +73,22 @@ Dir 0
 
 NTopMeas 0
 
-MeasureAllRect         10000 /* number of traj between each potential is measure */
-Path                   rects
-UseHYPorAPE            0
-HYPTempAlpha0          1
-HYPTempAlpha1          1
-HYPTempAlpha2          0.5
-APESpatAlpha           0.25
-APESpatNlevels         1 24 /* according to BigFra is the best */
-Tint                   1 8
-Dint                   1 24
+MeasureAllRect         0 /* number of traj between each potential is measure */
 
 MeasureWatusso 0
 
 
 /* /////////////// HMC parameters //////////// */
 
-NTrajTot               7002            /* number of traj per run */
-Walltime               1650
+NTrajTot               7000            /* number of traj per run */
+Walltime               100
 
 Seed                   41335           /* used to init generator, only for 1st traj */
 
 SkipMTestNTraj         30              /* skip the Metropolis test for the first trajectory */
 HmcTrajLength          1               /* traj length in unit of MD time */
-NmdSteps               11              /* number of steps */
-NGaugeSubSteps         5               /* multiStep not yet implemented, so keep 1 */
+NmdSteps               3              /* number of steps */
+NGaugeSubSteps         2               /* multiStep not yet implemented, so keep 1 */
 MdResidue              1.e-12          /* residue (squared) for MD inversions */
 PfActionResidue        1.e-16          /* residues for the fixed point evaluation */
 NPseudoFermions        1 1 1 
@@ -105,7 +96,7 @@ NPseudoFermions        1 1 1
 ConfPath               conf            /* file where to store running conf */
 StoreConfPath          stored_conf     /* a 5 digit number id will be appended to this string */
 StoreConfEach          30              /* also 0 should work to avoid storing */
-StoreRunningTempConf   1               /* if you put 1, it will store conf at each traj */
+StoreRunningTempConf   30               /* if you put 1, it will store conf at each traj */
 StartConfCond          COLD            /* HOT or COLD (used only if no conf present at ConfPath) */
 
 

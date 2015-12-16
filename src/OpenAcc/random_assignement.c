@@ -20,6 +20,7 @@ extern "C" {
 #include "./alloc_vars.h"
 #include "./random_assignement.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
+#include "./single_types.h"
 
 #define acc_twopi 2*3.14159265358979323846
 
@@ -83,152 +84,91 @@ void generate_vec3_soa_gauss(__restrict vec3_soa * const vect){
   }
 }
 
-void generate_Momenta_gauss_comp(__restrict thmat_soa * const mom){
-  int i,t;
-  double casuali[8], aux[2];
-  double uno_su_radice_di_tre = 1.0/sqrt(3.0);
-  for(t=0; t<sizeh; t++) {
 
-    for(i=0; i<4; i++)
-      {
-	two_double_gauss(aux);
-	casuali[2*i]   = aux[0];
-	casuali[2*i+1] = aux[1];
-      }
-    mom->rc00[t] =  casuali[2] + casuali[7] * uno_su_radice_di_tre;
-    mom->rc11[t] = -casuali[2] + casuali[7] * uno_su_radice_di_tre;
-    mom->c01[t]  =  casuali[0] - casuali[1] * I;
-    mom->c02[t]  =  casuali[3] - casuali[4] * I;
-    mom->c12[t]  =  casuali[5] - casuali[6] * I;
-  }  // t  
+inline double norm3(d_complex a,d_complex b, d_complex c){
+
+    double norm ;
+    norm  = creal(a)*creal(a) +  cimag(a)*cimag(a);
+    norm += creal(b)*creal(b) +  cimag(b)*cimag(b);
+    norm += creal(c)*creal(c) +  cimag(c)*cimag(c);
+     return norm;
 
 }
 
-void generate_Conf_cold_comp(__restrict su3_soa * const conf,double factor){
-  d_complex mat00,mat01,mat02 ;
-  d_complex mat10,mat11,mat12 ;
-  d_complex mat20,mat21,mat22 ;
-  double norm;
-  d_complex prod;
-  int t;
+void generate_random_su3(single_su3 * m, double f){
 
-  ///////////////////////////////////////////////////////////
-  // LOGICAL STEPS FOR THE GENERATION OF THE COLD CONF  /////
-  ///////////////////////////////////////////////////////////
-  // A) extract randomly the first row and normalize it
-  // B) extract randomly the second row, compute the scalar prod with the first
-  // C) subtract from the second row the projection of the first on the second
-  // D) normalize the second row
-  // E) compute the third row as the vector product of the first two
-  // F) add the identity to the resulting matrix (times a small number) and re-unitarize
-  // G) multiply for the staggered phase
-  /////////////////////////////////////////////////////////////
-  for(t=0; t<sizeh; t++) {
-    ///////////GENERATE RANDOM MATRIX //////////////////////////////////////////////////////
-    mat00 = 1.0-2.0*casuale()+I*(1.0-2.0*casuale());
-    mat01 = 1.0-2.0*casuale()+I*(1.0-2.0*casuale());
-    mat02 = 1.0-2.0*casuale()+I*(1.0-2.0*casuale());
-    mat10 = 1.0-2.0*casuale()+I*(1.0-2.0*casuale());
-    mat11 = 1.0-2.0*casuale()+I*(1.0-2.0*casuale());
-    mat12 = 1.0-2.0*casuale()+I*(1.0-2.0*casuale());
+//////////GENERATE RANDOM MATRIX ///////////////////////////
+// only first two rows
+   m->comp[0][0] =1+(1.0-2.0*casuale()+I*(1.0-2.0*casuale()))*f;
+   m->comp[0][1] =  (1.0-2.0*casuale()+I*(1.0-2.0*casuale()))*f;
+   m->comp[0][2] =  (1.0-2.0*casuale()+I*(1.0-2.0*casuale()))*f;
+   m->comp[1][0] =  (1.0-2.0*casuale()+I*(1.0-2.0*casuale()))*f;
+   m->comp[1][1] =1+(1.0-2.0*casuale()+I*(1.0-2.0*casuale()))*f;
+   m->comp[1][2] =  (1.0-2.0*casuale()+I*(1.0-2.0*casuale()))*f;
+
+////////// Unitarize it ///////////////////////////////////////////
+   double norm = norm3(m->comp[0][0],m->comp[0][1],m->comp[0][2]);
+   norm=1.0/sqrt(norm);
     
-    ////////// Unitarize it ////////////////////////////////////////////////////////////////
-    norm  = creal(mat00)*creal(mat00) +  cimag(mat00)*cimag(mat00);
-    norm += creal(mat01)*creal(mat01) +  cimag(mat01)*cimag(mat01);
-    norm += creal(mat02)*creal(mat02) +  cimag(mat02)*cimag(mat02);
+   m->comp[0][0] *= norm;
+   m->comp[0][1] *= norm;
+   m->comp[0][2] *= norm;
+    
+   d_complex prod  = conj(m->comp[0][0]) * m->comp[1][0] + conj(m->comp[0][1]) * m->comp[1][1] + conj(m->comp[0][2]) * m->comp[1][2];
+    
+    m->comp[1][0] -= prod * m->comp[0][0];
+    m->comp[1][1] -= prod * m->comp[0][1];
+    m->comp[1][2] -= prod * m->comp[0][2];
+    
+    norm = norm3(m->comp[1][0],m->comp[1][1],m->comp[1][2]);
     norm=1.0/sqrt(norm);
     
-    mat00 *= norm;
-    mat01 *= norm;
-    mat02 *= norm;
+
+
+    m->comp[1][0] *= norm;
+    m->comp[1][1] *= norm;
+    m->comp[1][2] *= norm;
     
-    prod  = conj(mat00) * mat10 + conj(mat01) * mat11 + conj(mat02) * mat12;
-    
-    mat10 -= prod * mat00;
-    mat11 -= prod * mat01;
-    mat12 -= prod * mat02;
-    
-    norm  = creal(mat10)*creal(mat10) +  cimag(mat10)*cimag(mat10);
-    norm += creal(mat11)*creal(mat11) +  cimag(mat11)*cimag(mat11);
-    norm += creal(mat12)*creal(mat12) +  cimag(mat12)*cimag(mat12);
-    norm=1.0/sqrt(norm);
-    
-    mat10 *= norm;
-    mat11 *= norm;
-    mat22 *= norm;
-    
-    mat20 = conj(mat01*mat12-mat02*mat11);
-    mat21 = conj(mat02*mat10-mat00*mat12);
-    mat22 = conj(mat00*mat11-mat01*mat10);
-    
-    ////////multiply the matrix times a factor and add the identity///////////////////////
-    mat00 = mat00 * factor + 1.0;
-    mat01 = mat01 * factor ;
-    mat02 = mat02 * factor ;
-    mat10 = mat10 * factor ;
-    mat11 = mat11 * factor + 1.0;
-    mat12 = mat12 * factor ;
-    mat20 = mat20 * factor ;
-    mat21 = mat21 * factor ;
-    mat22 = mat22 * factor + 1.0;
-    
-    /////////// re-unitarize the matrix //////////////////////////////////////////////////
-    norm  = creal(mat00)*creal(mat00) +  cimag(mat00)*cimag(mat00);
-    norm += creal(mat01)*creal(mat01) +  cimag(mat01)*cimag(mat01);
-    norm += creal(mat02)*creal(mat02) +  cimag(mat02)*cimag(mat02);
-    norm=1.0/sqrt(norm);
-    
-    mat00 *= norm;
-    mat01 *= norm;
-    mat02 *= norm;
-    
-    prod  = conj(mat00) * mat10 + conj(mat01) * mat11 + conj(mat02) * mat12;
-    
-    mat10 -= prod * mat00;
-    mat11 -= prod * mat01;
-    mat12 -= prod * mat02;
-    
-    norm  = creal(mat10)*creal(mat10) +  cimag(mat10)*cimag(mat10);
-    norm += creal(mat11)*creal(mat11) +  cimag(mat11)*cimag(mat11);
-    norm += creal(mat12)*creal(mat12) +  cimag(mat12)*cimag(mat12);
-    norm=1.0/sqrt(norm);
-    
-    mat10 *= norm;
-    mat11 *= norm;
-    mat22 *= norm;
-    
-    mat20 = conj(mat01*mat12-mat02*mat11);
-    mat21 = conj(mat02*mat10-mat00*mat12);
-    mat22 = conj(mat00*mat11-mat01*mat10);
-    
-    /////assign the result to the array  /////////////////////
-    conf->r0.c0[t] = mat00;
-    conf->r0.c1[t] = mat01;
-    conf->r0.c2[t] = mat02;
-    conf->r1.c0[t] = mat10;
-    conf->r1.c1[t] = mat11;
-    conf->r1.c2[t] = mat12;
-    conf->r2.c0[t] = mat20;
-    conf->r2.c1[t] = mat21;
-    conf->r2.c2[t] = mat22;
-  }
+
+    rebuild3row(m);
+
 }
 
 // iterations of random assignements over all the 8 components
-void generate_Momenta_gauss(__restrict thmat_soa * const mom){
-  SETINUSE(mom);
-  int mu;
-  for(mu=0; mu<8; mu++){
-    generate_Momenta_gauss_comp(&mom[mu]);
-  }
+void generate_Momenta_gauss(__restrict thmat_soa * const mom8){
+    SETINUSE(mom);
+    int mu;
+    for(mu=0; mu<8; mu++){
+        thmat_soa * mom = &mom8[mu];
+
+        int i,t;
+        double casuali[8], aux[2];
+        double uno_su_radice_di_tre = 1.0/sqrt(3.0);
+        for(t=0; t<sizeh; t++) {
+
+            for(i=0; i<4; i++)
+            {
+                two_double_gauss(aux);
+                casuali[2*i]   = aux[0];
+                casuali[2*i+1] = aux[1];
+            }
+            mom->rc00[t] =  casuali[2] + casuali[7] * uno_su_radice_di_tre;
+            mom->rc11[t] = -casuali[2] + casuali[7] * uno_su_radice_di_tre;
+            mom->c01[t]  =  casuali[0] - casuali[1] * I;
+            mom->c02[t]  =  casuali[3] - casuali[4] * I;
+            mom->c12[t]  =  casuali[5] - casuali[6] * I;
+        }  // t  
+    }
 }
 
 // iterations of random assignements over all the 8 components
 void generate_Conf_cold(__restrict su3_soa * const conf,double factor){
   SETINUSE(conf);
-  int mu;
-  for(mu=0; mu<8; mu++){
-    generate_Conf_cold_comp(&conf[mu],factor);
+  for(int mu=0; mu<8; mu++)
+      for(int idx=0;idx<sizeh;idx++){
+         single_su3 aux;
+         generate_random_su3(&aux,factor);
+         single_gl3_into_su3_soa(&conf[mu],idx,&aux);
   }
   mult_conf_times_stag_phases_nodev(conf);
 }

@@ -13,6 +13,11 @@ void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_
 
     FILE *fp;
     fp = fopen(nomefile,"w");
+    if(! fp ){
+        printf("ERROR, %s unreadable.\n",nomefile);
+        exit(1);
+    }
+
     fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
@@ -33,6 +38,8 @@ void read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter 
 
   FILE *fp;
   fp = fopen(nomefile,"r");
+
+
 
   int nxt,nyt,nzt,ntt;
   fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter);

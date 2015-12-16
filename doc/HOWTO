@@ -31,8 +31,16 @@
   The parameters of the simulations are now written directly in the
   code. Some could theoretically be read from file, some others are
   far better to be known at compile time. Examples:
+  - The starting mode: from a saved gauge configuration or from
+    scratch? See src/OpenAcc/main.c.
   - Lattice dimensions and block dimensions: these are #defines and it 
-    is far better to write them in the code directly.
+    is far better to write them in the code directly. The lattice
+    dimensions are called nx,ny,nz,nt ('grep' is your friend to find
+    them, since their position could vary in next development
+    iterations of the code), block dimensions are DIM_BLOCK_X,
+    DIM_BLOCK_Y,DIM_BLOCK_Z (now they don't, but in the future they
+    might depend on the specific kernel).
+
   - fermion parameters:
     They can be read from an input file. Their initialization is
     performed in 
