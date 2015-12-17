@@ -1,5 +1,5 @@
-L 4  /* or 16^3x32, or even 16^4 */
-T 4 
+L 8  /* or 16^3x32, or even 16^4 */
+T 8 
 
 NValenceTheories       0               /* allow to specify additional theory used only for measures */
 
@@ -81,14 +81,14 @@ MeasureWatusso 0
 /* /////////////// HMC parameters //////////// */
 
 NTrajTot               7000            /* number of traj per run */
-Walltime               100
+Walltime               10000
 
 Seed                   41335           /* used to init generator, only for 1st traj */
 
 SkipMTestNTraj         30              /* skip the Metropolis test for the first trajectory */
 HmcTrajLength          1               /* traj length in unit of MD time */
 NmdSteps               3              /* number of steps */
-NGaugeSubSteps         2               /* multiStep not yet implemented, so keep 1 */
+NGaugeSubSteps         3               /* multiStep not yet implemented, so keep 1 */
 MdResidue              1.e-12          /* residue (squared) for MD inversions */
 PfActionResidue        1.e-16          /* residues for the fixed point evaluation */
 NPseudoFermions        1 1 1 
@@ -96,7 +96,7 @@ NPseudoFermions        1 1 1
 ConfPath               conf            /* file where to store running conf */
 StoreConfPath          stored_conf     /* a 5 digit number id will be appended to this string */
 StoreConfEach          30              /* also 0 should work to avoid storing */
-StoreRunningTempConf   30               /* if you put 1, it will store conf at each traj */
+StoreRunningTempConf   10               /* if you put 1, it will store conf at each traj */
 StartConfCond          COLD            /* HOT or COLD (used only if no conf present at ConfPath) */
 
 

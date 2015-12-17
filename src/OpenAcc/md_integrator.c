@@ -48,7 +48,7 @@ double tgaugemom ; // DEBUG
 
 void initialize_md_global_variables(void )
 {
-  gauge_scale = 2;
+  gauge_scale = 3;
   no_md = 3;
 
   epsilon_acc = 1.0/((double)(no_md));
