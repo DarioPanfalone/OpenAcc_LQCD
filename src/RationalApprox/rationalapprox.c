@@ -4,7 +4,8 @@
 #include "./rationalapprox.h"
 #include <stdlib.h>
 
-char* rational_approx_filename(int approx_order, int exponent_num, int exponent_den, double lambda_min){
+char* rational_approx_filename_old(int approx_order, int exponent_num, int exponent_den, double lambda_min)
+{
 
   char Cn1[3];
   char Cy1[3];
@@ -31,13 +32,40 @@ char* rational_approx_filename(int approx_order, int exponent_num, int exponent_
 
 }
 
+char* rational_approx_filename(double error, int exponent_num, int exponent_den, double lambda_min)
+{
+
+  char mlogerr[5];
+  char Cy1[3];
+  char Cz1[3];
+  char mloglmin[5];
+
+  sprintf(mlogerr, "%1.1lf", -log(error)/log(10.0));  // error
+  sprintf(Cy1, "%d", exponent_num); // num
+  sprintf(Cz1, "%d", exponent_den); // den
+  sprintf(mloglmin, "%1.1f", -log(lambda_min)/log(10.0)); // lambda min
+
+  char * nomefile = (char*)malloc(50*sizeof(char));
+  strcpy(nomefile,"approx_");
+  strcat(nomefile,Cy1);
+  strcat(nomefile,"_over_");
+  strcat(nomefile,Cz1);
+  strcat(nomefile,"_mlogerr_");
+  strcat(nomefile,mlogerr);
+  strcat(nomefile,"_mloglm_");
+  strcat(nomefile,mloglmin);
+  strcat(nomefile,".REMEZ");
+
+  return nomefile;
+
+}
 
 void rationalapprox_read(RationalApprox* rational_approx)
 {
 
     // CALCULATION OF COEFFICIENTS FOR FIRST_INV_APPROX_NORM_COEFF
 
-    char * nomefile = rational_approx_filename(rational_approx->approx_order,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
+    char * nomefile = rational_approx_filename(rational_approx->error,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
 
     rationalapprox_read_custom_nomefile(rational_approx,nomefile);
 
@@ -53,7 +81,7 @@ void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* 
     if (input == NULL) {
         printf("Could not open file %s \n",nomefile );
         printf("You may want to generate a rational approximation using the tool \'rge\' (look in the tools directory). Please try\n");
-        print("./rgen %d %d %d %e\n", rational_approx->approx_order, rational_approx->exponent_num, rational_approx->exponent_den, rational_approx->lambda_min);
+        printf("./rgen %e %d %d %e\n", rational_approx->error, rational_approx->exponent_num, rational_approx->exponent_den, rational_approx->lambda_min);
         exit(1);
     }
 
@@ -137,7 +165,8 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
        printf("ERROR: mother rational approx does not cover the range!\n");
        printf("out->lambda_min: %e , minmax[0]: %e\n", out->lambda_min, minmax[0] );
 
-       printf("Consider ")
+       printf("Consider producing another rational approximation with \n");
+       printf("./rgen %e %d %d %e\n", in->error, in->exponent_num, in->exponent_den, min/max);
        exit(1);
    }
 

@@ -13,6 +13,9 @@
 #endif
 
 
+extern char gauge_outfilename[50];
+
+
 #pragma acc routine seq
 static inline void comp_U_U_Udag_Udag(__restrict su3_soa * const mat1, int idx_mat1,
 				      __restrict su3_soa * const mat2, int idx_mat2,

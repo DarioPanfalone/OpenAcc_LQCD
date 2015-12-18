@@ -24,8 +24,9 @@ typedef struct RationalApprox_t{
 
 
 
+char* rational_approx_filename(double error, int exponent_num, int exponent_den, double lambda_min);
 
-char* rational_approx_filename(int approx_order, int exponent_num, int exponent_den, double lambda_min);
+char* rational_approx_filename_old(int approx_order, int exponent_num, int exponent_den, double lambda_min);
 
 void rationalapprox_read(RationalApprox* rational_approx);
 void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* nomefile);

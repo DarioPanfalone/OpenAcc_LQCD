@@ -15,6 +15,10 @@
  #endif
 #endif
 
+
+
+char gauge_outfilename[50];
+
 void compute_local_topological_charge(  __restrict su3_soa * const u,
 					__restrict su3_soa * const quadri,
 					double_soa * const loc_q,

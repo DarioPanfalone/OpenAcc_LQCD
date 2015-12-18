@@ -10,6 +10,8 @@
 #include <openacc.h>
 #endif
 
+double beta;
+
 void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
 
 

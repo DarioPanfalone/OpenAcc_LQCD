@@ -5,6 +5,9 @@
 
 #include <stdio.h>
 #include "../OpenAcc/struct_c_def.h"
+
+extern char fermionic_outfilename[50];
+
 void eo_inversion(su3_soa *tconf_acc,
 		  double_soa * tbackfield,
 		  ferm_param * tfermions_parameters,

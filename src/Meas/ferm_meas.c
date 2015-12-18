@@ -22,6 +22,9 @@
 #include "../OpenAcc/stouting.h"
 #endif
 
+
+char fermionic_outfilename[50];
+
 // vedi tesi LS F.Negro per ragguagli (Appendici)
 void eo_inversion(su3_soa *tconf_acc,
 		  double_soa * tbackfield,

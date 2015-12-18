@@ -8,15 +8,20 @@
  #define __restrict
 #endif
 
-extern int no_md;// number of MD steps
-extern int gauge_scale;   // Update fermions every gauge_scale gauge updates
-extern double deltas_Omelyan[7];
+extern double deltas_Omelyan[7];// must be declared here to copy it in the device in the main
 
-extern int no_md_acc,gauge_scale_acc;
-extern double epsilon_acc;
-extern d_complex ieps_acc,iepsh_acc;
 
-void initialize_md_global_variables(void );
+typedef struct md_param_t{
+
+    int no_md;// number of MD steps
+    int gauge_scale;   // Update fermions every gauge_scale gauge updates
+    double t ;
+
+} md_param; 
+
+extern md_param md_parameters;
+
+void initialize_md_global_variables(md_param );
 
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta);
 

@@ -37,7 +37,6 @@
 
 #define ONE_BY_THREE   0.33333333333333333333333
 #define ONE_BY_SIX     0.16666666666666666666666
-#define beta_by_three  (beta*ONE_BY_THREE)
 
 
 #ifdef GAUGE_ACT_TLSM
@@ -52,8 +51,6 @@
 #define C_ONE          0.0
 #endif
 
-#define beta 3.55
-  // 3.7  //5.35
 
 extern int verbosity_lv;
 

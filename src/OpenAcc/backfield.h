@@ -4,16 +4,18 @@
 #include "./struct_c_def.h"
 
 // quanti di campo esterno
-extern double  bx_quantum;
-extern double  ex_quantum;
-extern double  by_quantum;
-extern double  ey_quantum;
-extern double  bz_quantum;
-extern double  ez_quantum;
 
-void set_field_quanta();
+typedef struct bf_param_t{
 
-void init_backfield(double_soa * tu1_back_field_phases);
+ double ex,ey,ez,bx,by,bz;
+ // maybe you want to add some other strange things, setting and so on
+
+} bf_param;
+
+extern bf_param backfield_parameters;
+
+
+void init_backfield(double_soa * tu1_back_field_phases, bf_param bfpars);
 
 
 #endif

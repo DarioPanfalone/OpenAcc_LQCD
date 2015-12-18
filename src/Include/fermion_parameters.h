@@ -35,7 +35,7 @@ extern ferm_param *fermions_parameters;
 //FERMION PARAMETERS
 
 
-void init_ferm_params();
+void init_ferm_params(ferm_param * fermion_settings);
 
 
 #endif
