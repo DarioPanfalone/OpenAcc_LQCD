@@ -7,11 +7,14 @@
  #include <stdlib.h>
 #endif
 typedef struct ferm_param_t{
-  double ferm_charge;
   double ferm_mass;
-  double ferm_im_chem_pot;
   int degeneracy;
   int number_of_ps;
+  char name[10];
+  // chem_pot or backfield related things
+  double ferm_charge;
+  double ferm_im_chem_pot;
+  // automatic from here on
   int index_of_the_first_ps;
   RationalApprox approx_fi_mother; // first inv   -> mother
   RationalApprox approx_md_mother; // md approx   -> mother
@@ -31,11 +34,6 @@ extern ferm_param *fermions_parameters;
 
 //FERMION PARAMETERS
 
-#define  APPROX_METRO 19
-#define  APPROX_MD 9
-#define LAMBDA_MIN_METRO 4.0e-7  // rational approx valid on [lambda_min_metro, 1.0]
-#define  LAMBDA_MIN_MD 4.0e-7  // rational approx valid on [lambda_min_metro, 1.0]
-#define  GMP_REMEZ_PRECISION 100  // The precision that gmp uses
 
 void init_ferm_params();
 

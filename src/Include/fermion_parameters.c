@@ -2,6 +2,8 @@
 #define FERMION_PARAMETERS_C_
 
 #include "./fermion_parameters.h"
+#include <string.h>
+
 
 #define ALIGN 128
 
@@ -22,29 +24,31 @@ void init_ferm_params(){
   allocation_check =  posix_memalign((void **)&fermions_parameters, ALIGN, NDiffFlavs*sizeof(ferm_param));   //  -->  4*size phases (as many as links)
   if(allocation_check != 0)  printf("Errore nella allocazione di fermions_parameters \n");
 
-
   ferm_param *up,*down,*strange;
   up = &fermions_parameters[0];
   down = &fermions_parameters[1];
   strange = &fermions_parameters[2];
 
-  up->ferm_charge            = -1.0;   // up    charge
-  up->ferm_mass              = 0.0011723;    //0.075;  // up    mass
-  up->ferm_im_chem_pot       = 0.0;    // up    chem pot
-  up->degeneracy             = 1;      // up    degeneracy
-  up->number_of_ps           = 1;      // up    number of pseudo fermions
-                                                                             
-  down->ferm_charge          = 2.0;    // down  charge
-  down->ferm_mass            = 0.0011723;    //0.075;  // down  mass
-  down->ferm_im_chem_pot     = 0.0;    // down  chem pot
-  down->degeneracy           = 1;      // down  degeneracy
-  down->number_of_ps         = 1;      // down  number of pseudo fermions
-                                                                             
+  up->ferm_charge       = -1.0;   // up    charge
+  up->ferm_mass         = 0.00362345;    //0.075;  // up    mass
+  up->ferm_im_chem_pot  = 0.0;    // up    chem pot
+  up->degeneracy        = 1;      // up    degeneracy
+  up->number_of_ps      = 1;      // up    number of pseudo fermions
+  strcpy(up->name,"up");
+
+  down->ferm_charge       = 2.0;    // down  charge
+  down->ferm_mass         = 0.00362345;    //0.075;  // down  mass
+  down->ferm_im_chem_pot  = 0.0;    // down  chem pot
+  down->degeneracy        = 1;      // down  degeneracy
+  down->number_of_ps      = 1;      // down  number of pseudo fermions
+  strcpy(up->name,"down");
+
   strange->ferm_charge       = -1.0;    // strange  charge
-  strange->ferm_mass         = 0.033;    //0.075;  // strange  mass
+  strange->ferm_mass         = 0.102;    //0.075;  // strange  mass
   strange->ferm_im_chem_pot  = 0.0;    // strange  chem pot
   strange->degeneracy        = 1;      // strange  degeneracy
   strange->number_of_ps      = 1;      // strange  number of pseudo fermions
+  strcpy(up->name,"strange");
 
   NPS_tot = 0;
   max_ps = up->number_of_ps;
@@ -65,27 +69,7 @@ void init_ferm_params(){
   printf("max_ps = %d \n",max_ps);
 
 
-  up->approx_fi_mother.approx_order =  17;
-  up->approx_md_mother.approx_order =  14;
-  up->approx_li_mother.approx_order =  18;
-  up->approx_fi_mother.lambda_min =  2.3273336186266341e-07;
-  up->approx_md_mother.lambda_min =  2.3273336186266341e-07;
-  up->approx_li_mother.lambda_min =  2.3273336186266341e-07;
-
-  down->approx_fi_mother.approx_order =  17;
-  down->approx_md_mother.approx_order =  14;
-  down->approx_li_mother.approx_order =  18;
-  down->approx_fi_mother.lambda_min =  2.3273336186266341e-07;
-  down->approx_md_mother.lambda_min =  2.3273336186266341e-07;
-  down->approx_li_mother.lambda_min =  2.3273336186266341e-07;
-
-  strange->approx_fi_mother.approx_order =  11;
-  strange->approx_md_mother.approx_order =  9;
-  strange->approx_li_mother.approx_order =  11;
-  strange->approx_fi_mother.lambda_min = 1.8449345827782691e-04; 
-  strange->approx_md_mother.lambda_min = 1.8449345827782691e-04; 
-  strange->approx_li_mother.lambda_min = 1.8449345827782691e-04; 
-
+  
   for(int i=0;i<NDiffFlavs;i++){
     ferm_param *quark = &fermions_parameters[i];
     quark->approx_fi_mother.exponent_num =  +quark->degeneracy;
@@ -96,9 +80,13 @@ void init_ferm_params(){
     quark->approx_md_mother.exponent_den =   quark->number_of_ps*4;
     quark->approx_li_mother.exponent_den =   quark->number_of_ps*4;
 
-    quark->approx_fi_mother.lambda_max =  1.0;
-    quark->approx_md_mother.lambda_max =  1.0;
-    quark->approx_li_mother.lambda_max =  1.0;
+    quark->approx_fi_mother.approx_order =  APPROX_METRO;
+    quark->approx_md_mother.approx_order =  APPROX_MD;
+    quark->approx_li_mother.approx_order =  APPROX_METRO;
+
+    quark->approx_fi_mother.lambda_min =  LAMBDA_MIN_METRO;
+    quark->approx_md_mother.lambda_min =  LAMBDA_MIN_MD;
+    quark->approx_li_mother.lambda_min =  LAMBDA_MIN_METRO;
 
     quark->approx_fi_mother.lambda_max =  1.0;
     quark->approx_md_mother.lambda_max =  1.0;
@@ -129,6 +117,9 @@ void init_ferm_params(){
 
 
   }
+
+  
+
 }
 
 #endif

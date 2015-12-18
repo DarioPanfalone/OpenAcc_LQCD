@@ -2,7 +2,7 @@
 #define RATIONAL_APPROX_C_
 
 #include "./rationalapprox.h"
-
+#include <stdlib.h>
 
 char* rational_approx_filename(int approx_order, int exponent_num, int exponent_den, double lambda_min){
 
@@ -32,13 +32,6 @@ char* rational_approx_filename(int approx_order, int exponent_num, int exponent_
 }
 
 
-inline void checkreads(int reads,int should_be, char * comment){
-
-    if(reads != should_be) printf("Incorrect number of reads %d vs %d, %s\n", reads,should_be,comment);
-
-
-}
-
 void rationalapprox_read(RationalApprox* rational_approx)
 {
 
@@ -59,39 +52,31 @@ void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* 
     printf("%s\n", nomefile );
     if (input == NULL) {
         printf("Could not open file %s \n",nomefile );
-        exit(-1);
+        printf("You may want to generate a rational approximation using the tool \'rge\' (look in the tools directory). Please try\n");
+        print("./rgen %d %d %d %e\n", rational_approx->approx_order, rational_approx->exponent_num, rational_approx->exponent_den, rational_approx->lambda_min);
+        exit(1);
     }
 
-    int reads;
     // The partial fraction expansion takes the form 
     // r(x) = norm + sum_{k=1}^{n} res[k] / (x + pole[k])
-    reads = fscanf(input,"\nApproximation to f(x) = (x)^(%i/%i)\n", &(rational_approx->exponent_num), &(rational_approx->exponent_den));
-    checkreads(reads,2,nomefile);
-    reads = fscanf(input,"Order: %i\n", &(rational_approx->approx_order));
-    checkreads(reads,1,nomefile);
-    reads = fscanf(input,"Lambda Min: %lf\n", &(rational_approx->lambda_min));
-    checkreads(reads,1,nomefile);
-    reads = fscanf(input,"Lambda Max: %lf\n", &(rational_approx->lambda_max));
-    checkreads(reads,1,nomefile);
-    reads = fscanf(input,"GMP Remez Precision: %i\n", &(rational_approx->gmp_remez_precision));
-    checkreads(reads,1,nomefile);
-    reads = fscanf(input,"Error: %lf\n", &(rational_approx->error));
-    checkreads(reads,1,nomefile);
-    reads = fscanf(input, "RA_a0 = %lf\n",&(rational_approx->RA_a0));
-    checkreads(reads,1,nomefile);
+    fscanf(input,"\nApproximation to f(x) = (x)^(%i/%i)\n", &(rational_approx->exponent_num), &(rational_approx->exponent_den));
+    fscanf(input,"Order: %i\n", &(rational_approx->approx_order));
+    fscanf(input,"Lambda Min: %lf\n", &(rational_approx->lambda_min));
+    fscanf(input,"Lambda Max: %lf\n", &(rational_approx->lambda_max));
+    fscanf(input,"GMP Remez Precision: %i\n", &(rational_approx->gmp_remez_precision));
+    fscanf(input,"Error: %lf\n", &(rational_approx->error));
+    fscanf(input, "RA_a0 = %lf\n",&(rational_approx->RA_a0));
     for(int i = 0; i < rational_approx->approx_order; i++)
     {
-        reads = fscanf(input, "RA_a[%i] = %lf, RA_b[%i] = %lf\n", &i, &(rational_approx->RA_a[i]), &i, &(rational_approx->RA_b[i]));
-        checkreads(reads,4,nomefile);
+        fscanf(input, "RA_a[%i] = %lf, RA_b[%i] = %lf\n", &i, &(rational_approx->RA_a[i]), &i, &(rational_approx->RA_b[i]));
     }
     fclose(input);
 
-    if (verbosity_lv > 2){
     printf("RA_a0 = %18.16e\n", rational_approx->RA_a0);
     for(int i = 0; i < rational_approx->approx_order; i++) 
-          printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
-     
-    }
+    {
+//      printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
+    } 
 }
 
 void rationalapprox_save(const char* nomefile, RationalApprox* rational_approx){
@@ -136,10 +121,8 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    
    double min =  minmax[0];
    double max =  minmax[1];
-   printf("Rescaling rational approx for max: %f , min: %f\n", max, min);
-
    min*=0.95;
-   max*=1.10;// NISSA uses 1.1
+   max*=1.05;
    double epsilon=pow(max, power);  
    out->RA_a0               = in->RA_a0       *     epsilon ;
    for(int order = 0; order < in->approx_order; order ++){
@@ -151,9 +134,11 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    out->lambda_max  = max ;
    //pray
    if(out->lambda_min > minmax[0]){
-
-       printf("Warning: mother rational approx does not cover the range!\n");
+       printf("ERROR: mother rational approx does not cover the range!\n");
        printf("out->lambda_min: %e , minmax[0]: %e\n", out->lambda_min, minmax[0] );
+
+       printf("Consider ")
+       exit(1);
    }
 
 }
@@ -170,7 +155,7 @@ void renormalize_rational_approximation(RationalApprox *in, RationalApprox *out)
    out->gmp_remez_precision = in->gmp_remez_precision;              
    out->error               = in->error              ;
    
-   // HERE THE ASSUMPTION IS THAT out->lambda_max  = 1
+   // HERE THE ASSUMPTION IS THAT in->lambda_max  = 1
    
    double rescale_ratio =  1/in->lambda_max;
    double epsilon=pow(rescale_ratio, power);  
@@ -185,17 +170,6 @@ void renormalize_rational_approximation(RationalApprox *in, RationalApprox *out)
 
 }
 
-double rational_approx_evaluate(RationalApprox* ra, double x){
-
-    if (x < ra->lambda_min || x > ra->lambda_max )
-        printf("x out of range! Range is %e - %e\n", ra->lambda_min, ra->lambda_max);
-    double res = ra->RA_a0;
-    for(int i =0; i<ra->approx_order;i++)
-        res += ra->RA_a[i]/(x+ra->RA_b[i]);
-
-    return res;
-
-}
 
 
 
