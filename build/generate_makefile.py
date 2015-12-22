@@ -12,11 +12,8 @@ LINKER_FLAGS=-O0 \n'
 GNUcls = 'COMPILER=gcc\n\
 COMPILER_FLAGS=-O3 -std=c99\n\
 LINKER_FLAGS=-lm\n' 
-        
-compiler_linker_settings = GNUcls
 
-
-
+compiler_linker_settings = ''
 
 main_files = [] # file containing main()
 
@@ -163,6 +160,34 @@ def generate_makefile(targv):
     return res 
 
 if __name__ == '__main__':
+
+    if 'PGISLOW' not in argv and 'GNU' not in argv and 'PGI' not in argv:
+        stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
+        exit(1)
+    
+    clsset = False
+    if 'PGISLOW' in argv : 
+        compiler_linker_settings = PGIclsSLOW;
+        argv.remove('PGISLOW')
+        clsset = True
+    if 'GNU' in argv :
+        if clsset :
+            stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
+            argv.remove('GNU')
+            exit(1)
+        else:
+            compiler_linker_settings = GNUcls;
+            argv.remove('GNU')
+            clsset = True
+    if 'PGI' in argv :
+        if clsset :
+            stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
+            argv.remove('PGI')
+            exit(1)
+        else:
+            compiler_linker_settings = PGIcls;
+            argv.remove('PGI')
+            clsset = True
 
     makefile = generate_makefile(argv)
     stdout.write(makefile)
