@@ -8,9 +8,9 @@
 #endif
 
 // lattice dimensions
-#define nx 8 
-#define ny 8 
-#define nz 8 
+#define nx 32 
+#define ny 32 
+#define nz 32 
 #define nt 8
 
 

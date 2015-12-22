@@ -74,8 +74,13 @@ int rationalapprox_read(RationalApprox* rational_approx)
         FILE * bash_repair_commands = fopen("genappfiles.sh","a");
 
         printf("You may want to generate a rational approximation file using the tool \'rgen\' (look in the tools directory). Please try\n");
-        printf("./rgen %e %d %d %e\n", rational_approx->error, rational_approx->exponent_num, rational_approx->exponent_den, rational_approx->lambda_min);
-        fprintf(bash_repair_commands,"./rgen %e %d %d %e\n", rational_approx->error, rational_approx->exponent_num, rational_approx->exponent_den, rational_approx->lambda_min);
+        printf("./rgen %e %d %d %e\n", rational_approx->error, 
+                rational_approx->exponent_num, rational_approx->exponent_den, 
+                rational_approx->lambda_min);
+        printf("(see and modify \"genappfiles.sh\", check for doublers)\n");
+        fprintf(bash_repair_commands,"./rgen %e %d %d %e &\n",
+                rational_approx->error, rational_approx->exponent_num,
+                rational_approx->exponent_den, rational_approx->lambda_min);
         fclose(bash_repair_commands);
         return 1;
     }

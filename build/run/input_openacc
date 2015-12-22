@@ -51,22 +51,23 @@ bz              0.0
 
 
 MDParameters
-NmdSteps	    5
-GaugeSubSteps	4
+NmdSteps	    11
+GaugeSubSteps	5
 TrajLength	    1.0
 
 
 MontecarloParameters
-Ntraj	                100
+Ntraj	                10
 ThermNtraj	            10
 SaveConfInterval	    20
 SaveRunningConfInterval	5
 residue_metro       	1e-8
 residue_md              1e-6
+ExpMaxEigenvalue        5      # approximate expected max eigenvalues
 StoreConfName       	conf_openacc
-SaveConfName            conf_run_openacc
+SaveConfName            stored_config
 Seed                    42
-VerbosityLv             3
+VerbosityLv             2
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt

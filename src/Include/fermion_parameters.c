@@ -88,15 +88,15 @@ int init_ferm_params(ferm_param *fermion_settings){
     quark->approx_md_mother.exponent_den =   quark->number_of_ps*4;
     quark->approx_li_mother.exponent_den =   quark->number_of_ps*4;
 
-    quark->approx_fi_mother.lambda_min = 0.1*quark->ferm_mass*quark->ferm_mass;
-    quark->approx_md_mother.lambda_min = 0.1*quark->ferm_mass*quark->ferm_mass;
-    quark->approx_li_mother.lambda_min = 0.1*quark->ferm_mass*quark->ferm_mass;
+    quark->approx_fi_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/mkwch_pars.expected_max_eigenvalue;
+    quark->approx_md_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/mkwch_pars.expected_max_eigenvalue;
+    quark->approx_li_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/mkwch_pars.expected_max_eigenvalue;
 
     quark->approx_fi_mother.lambda_max =  1.0;
     quark->approx_md_mother.lambda_max =  1.0;
     quark->approx_li_mother.lambda_max =  1.0;
 
-    quark->approx_fi_mother.error =  mkwch_pars.residue_metro;
+    quark->approx_fi_mother.error =  mkwch_pars.residue_md;
     quark->approx_md_mother.error =  mkwch_pars.residue_md;
     quark->approx_li_mother.error =  mkwch_pars.residue_metro;
 

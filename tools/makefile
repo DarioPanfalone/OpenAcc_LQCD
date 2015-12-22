@@ -10,13 +10,19 @@ ratnormalizer: normalize_ratapprox.o rationalapprox.o
 
 
 rationalapprox_calc.o: ../src/RationalApprox/rationalapprox.h  ../src/RationalApprox/rationalapprox_calc.cc ../src/RationalApprox/Remez/alg_remez.h ../src/RationalApprox/Remez/bigfloat.h
-	g++ -c ../src/RationalApprox/rationalapprox_calc.cc
+
+rationalapprox_calc_fixed_order.o: ../src/RationalApprox/rationalapprox.h  ../src/RationalApprox/rationalapprox_calc_fixed_order.cc ../src/RationalApprox/Remez/alg_remez.h ../src/RationalApprox/Remez/bigfloat.h
+	g++ -c ../src/RationalApprox/rationalapprox_calc_fixed_order.cc
 
 alg_remez.o: ../src/RationalApprox/Remez/alg_remez.cc ../src/RationalApprox/Remez/alg_remez.h ../src/RationalApprox/Remez/bigfloat.h
 	g++ -c ../src/RationalApprox/Remez/alg_remez.cc
 
 rgen: rationalapprox_calc.o rationalapprox.o alg_remez.o
 	g++ -o rgen rationalapprox_calc.o rationalapprox.o alg_remez.o -lgmp -lmpfr
+
+rgenfo: rationalapprox_calc_fixed_order.o rationalapprox.o alg_remez.o
+	g++ -o rgenfo rationalapprox_calc_fixed_order.o  rationalapprox.o alg_remez.o -lgmp -lmpfr
+
 
 
 eval_ratapprox.o: ../src/RationalApprox/rationalapprox.h eval_ratapprox.c

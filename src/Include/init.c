@@ -114,7 +114,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         int *taglines, int *tagtypes, int maxnres,
         char filelines[MAXLINES][MAXLINELENGTH], 
         int startline, int endline)
-    // returns number of groups found, writes arrays
+// returns number of groups found, writes arrays
 {   // scans for lines in the format
     // (stuff that will be ignored )NAME (stuff that will be ignored)
     // the arrays 'taglines' and 'types' and must be maxnres long
@@ -169,14 +169,11 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         int * rc = (int *) malloc(npars*sizeof(int));
         for(int i =0; i<npars; i++) rc[i] = 0;
 
-        int rc_all() {
-            int res = 1 ; for(int i =0; i<npars; i++) res = res && rc[i];
-            return res;
-        }
+        int res = 0 ;
 
         int iline = startline;
 
-        while(! rc_all() && iline < endline)
+        while(! res && iline < endline)
         {
             char * found_something;
             for(int i =0; i<npars; i++){
@@ -219,10 +216,12 @@ int scan_group_V(int ntagstofind, const char **strtofind,
                 };
             }
             iline++; 
+            res = 1;
+            for(int i =0; i<npars; i++) res = res && rc[i];
             }
 
 
-            if(! rc_all()){
+            if(! res){
                 printf("ERROR: not all parameters needed read!");
                 for(int i =0; i<npars; i++) 
                     if (rc[i]==0) printf("Parameter %s not set!\n",par_infos[i].name);
@@ -343,7 +342,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
     {
 
         // see /OpenAcc/md_integrator.h
-        const unsigned int  npar_mc =  10;
+        const unsigned int  npar_mc =  11;
         par_info mcp[npar_mc];
 
         char sntraj[] = "Ntraj" ;
@@ -356,6 +355,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         char ssave_conf_name[] = "SaveConfName";
         char sseed[] = "Seed";
         char sinput_vbl[] = "VerbosityLv";
+        char sexpected_max_eigenvalue[] = "ExpMaxEigenvalue";
 
         mcp[0]=(par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,sntraj          };
         mcp[1]=(par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,stherm_ntraj    };
@@ -368,6 +368,9 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         mcp[8]=(par_info){(void*) &(mcpar->seed   ),TYPE_INT,sseed};
 
         mcp[9]=(par_info){(void*) &(mcpar->input_vbl   ),TYPE_INT,sinput_vbl};
+        
+        mcp[10]=(par_info){(void*) &(mcpar->expected_max_eigenvalue),
+            TYPE_DOUBLE,sexpected_max_eigenvalue};
 
         // from then on, you should not have to modify anything.
 

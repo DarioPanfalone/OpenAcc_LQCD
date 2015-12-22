@@ -42,22 +42,25 @@ int main(int argc, char **argv){
         // r(x) = norm + sum_{k=1}^{n} res[k] / (x + pole[k])
 
 
-        printf("\nApproximation to f(x) = (x)^(%d/%d) on [%e, %e], order %d\n",
-                approx->exponent_num, approx->exponent_den,approx->lambda_min,
-                approx->lambda_max, approx->approx_order);
-        fflush(stdout);
+       fflush(stdout);
         // Instantiate the Remez class
         AlgRemez remez1(approx->lambda_min,approx->lambda_max,approx->gmp_remez_precision);
         // Generate the required approximation
         approx->error = remez1.generateApprox(approx->approx_order,approx->approx_order,abs(approx->exponent_num),abs(approx->exponent_den));
-        printf("With order %d, approximation error = %e\n",approx->approx_order, approx->error);
+         printf("\nf(x) = (x)^(%d/%d), approximation on [%e, %e], order %d, error = %e, ",
+                approx->exponent_num, approx->exponent_den,approx->lambda_min,
+                approx->lambda_max, approx->approx_order, approx->error);
 
         // Find the partial fraction expansion of the approximation 
         // to the function x^{y/z} (this only works currently for 
         // the special case that n = d)
 
-        if(approx->error > goal_error) approx->approx_order++;
+        if(approx->error > goal_error) {
+            printf(" not precise enough, increasing order.\n");
+            approx->approx_order++;
+        }
         else {
+            printf("OK!\n");
             if(approx->exponent_num*approx->exponent_den > 0)
                 remez1.getPFE(approx->RA_a,approx->RA_b,&(approx->RA_a0));
             else

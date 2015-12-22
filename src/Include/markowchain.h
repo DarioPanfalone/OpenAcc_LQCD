@@ -8,6 +8,7 @@ typedef struct mc_param_t{
     int saverunningconfinterval;
     double residue_metro;
     double residue_md;
+    double expected_max_eigenvalue; // verbosity level
     char store_conf_name[30];
     char save_conf_name[30];
     int seed;
