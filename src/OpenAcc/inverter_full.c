@@ -42,6 +42,7 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
 
   delta=l2norm2_global(loc_r);
 
+  double source_norm = delta;
   // loop over cg iterations
   cg=0;
   do {
@@ -66,17 +67,17 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
     // p=r+gammag*p
     combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
 
-  } while( (sqrt(lambda)>res) && cg<max_cg);
+  } while( (sqrt(lambda/source_norm)>res) && cg<max_cg);
 
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
-  printf("Terminated invert after   %d    iterations [", cg);
+  if(verbosity_lv > 1) printf("Terminated invert after   %d    iterations", cg);
   acc_Doe(u,loc_h,out,pars,backfield);
   acc_Deo(u,loc_s,loc_h,pars,backfield);
   double giustoono;
   combine_in1xferm_mass2_minus_in2_minus_in3(out,pars->ferm_mass*pars->ferm_mass,loc_s,in,loc_p);
   assign_in_to_out(loc_p,loc_h);
   giustoono = real_scal_prod_global(loc_h,loc_p);
-  printf(" res/stop_res=  %e , stop_res=%e ]\n\n",sqrt(giustoono)/res,res);
+  if(verbosity_lv > 1) printf("[res/stop_res=  %e , stop_res=%e ]\n",sqrt(giustoono)/res,res);
 #endif
   if(cg==max_cg)
     {

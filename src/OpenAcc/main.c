@@ -43,20 +43,17 @@ void su2_rand(double *pp);
 #include "./update_versatile.h"
 #include "./cooling.h"
 #include "./backfield.h"
-
-const char *nome_file_gauge_output ="gauge_meas.dat";
-const char *nome_file_ferm_output  ="ferm_meas.dat";
+#include "./action.h"
 
 
+//#define NORANDOM  // FOR debug, check also update_versatile.c 
+
+int conf_id_iter;
 int verbosity_lv = 5;// 5 should print everything.
-
-
-
 
 int main(int argc, char* argv[]){
 
 #define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
-    int conf_id_iter;
 
     printf("WELCOME! \n");
     su3_soa  * conf_acc;
@@ -70,8 +67,9 @@ int main(int argc, char* argv[]){
     //
 
     initrand((unsigned int) mkwch_pars.seed);
+    verbosity_lv = mkwch_pars.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
-    init_ferm_params(fermions_parameters);
+    if(init_ferm_params(fermions_parameters)) exit(1);
 
 
 
@@ -102,15 +100,23 @@ int main(int argc, char* argv[]){
 #endif
 
     //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
-    // cold start
-    if(start_opt==0){ 
-        generate_Conf_cold(conf_acc,0.5);    printf("Cold Gauge Conf Generated : OK \n");
-        conf_id_iter=0;
-    }
     // start from saved conf
-    if(start_opt==1){
-        read_su3_soa_ASCII(conf_acc,"stored_config",&conf_id_iter); // READS ALSO THE conf_id_iter
-        printf("Stored Gauge Conf Read : OK \n");
+#ifdef NORANDOM
+    if(!read_su3_soa_ASCII(conf_acc,"conf_norndtest",&conf_id_iter)) // READS ALSO THE conf_id_iter
+        printf("Stored Gauge Conf conf_norndtest Read : OK \n", mkwch_pars.save_conf_name);
+#else
+    if(!read_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name,&conf_id_iter)) // READS ALSO THE conf_id_iter
+        printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
+#endif
+    else{
+        // cold start
+#ifdef NORANDOM
+        printf("COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED \"conf_norndtest\" MUST BE PRESENT\n");
+        exit(1);
+#else
+        generate_Conf_cold(conf_acc,0.01);    printf("Cold Gauge Conf Generated : OK \n");
+#endif
+        conf_id_iter=0;
     }
     //###############################################################################################  
 
@@ -134,12 +140,12 @@ int main(int argc, char* argv[]){
     {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
-        create(gstout_conf_acc_arr[0:(8*STOUT_STEPS)])\
+        create(gstout_conf_acc_arr[0:(8*act_params.stout_steps)])\
         create(glocal_staples[0:8]) create(gipdot[0:8]) 
         {
 #endif
 
-            double plq,plqbis,rect,topoch;
+            double plq,rect,topoch;
 
             int accettate_therm=0;
             int accettate_metro=0;
@@ -155,13 +161,12 @@ int main(int argc, char* argv[]){
             for(int id_iter=id_iter_offset;id_iter<(mkwch_pars.ntraj+id_iter_offset);id_iter++){
 
                 check_unitarity_device(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
-                printf("\tAvg_unitarity_deviation on device: %e\n", avg_unitarity_deviation);
-                printf("\tMax_unitarity_deviation on device: %e\n", max_unitarity_deviation);
+                printf("\tAvg/Max unitarity deviation on device: %e / %e\n", avg_unitarity_deviation, max_unitarity_deviation);
                 accettate_therm_old = accettate_therm;
                 accettate_metro_old = accettate_metro;
                 conf_id_iter++;
                 printf("\n#################################################\n");
-                printf(  "            GENERATING CONF %d of %d\n",conf_id_iter,mkwch_pars.ntraj+id_iter_offset);
+                printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",conf_id_iter,mkwch_pars.ntraj+id_iter_offset,nx,ny,nz,nt,act_params.beta);
                 printf(  "#################################################\n\n");
                 //--------- CONF UPDATE ----------------//
                 if(id_iter<mkwch_pars.therm_ntraj){
@@ -175,8 +180,20 @@ int main(int argc, char* argv[]){
                 //---------------------------------------//
 
                 //--------- MISURA ROBA FERMIONICA ----------------//
-                FILE *foutfile = fopen(nome_file_ferm_output,"at");
-                if(!foutfile) foutfile = fopen(nome_file_ferm_output,"wt");
+                FILE *foutfile = fopen(fermionic_outfilename,"at");
+                if(!foutfile){
+                    foutfile = fopen(fermionic_outfilename,"wt");
+
+                    strcpy(fermionic_outfile_header,"#conf_id\t");
+                    for(int iflv=0;iflv<NDiffFlavs;iflv++){
+                        char strtocat[20];
+                        sprintf(strtocat, "Reff_%d\tImff_%d\t",iflv);
+                        strcat(fermionic_outfile_header,strtocat);
+                    }
+                    strcat(fermionic_outfile_header,"\n");
+                    fprintf(foutfile,"%s",fermionic_outfile_header);
+
+                }
                 if(foutfile){
                     fprintf(foutfile,"%d\t",conf_id_iter);
                     for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),mkwch_pars.residue_metro,foutfile);
@@ -188,22 +205,20 @@ int main(int argc, char* argv[]){
                 plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 
-                FILE *goutfile = fopen(nome_file_gauge_output,"at");
-                if(!goutfile) goutfile = fopen(nome_file_gauge_output,"wt");
+                FILE *goutfile = fopen(gauge_outfilename,"at");
+                if(!goutfile){
+                    goutfile = fopen(gauge_outfilename,"wt");
+                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\n");
+                    fprintf(goutfile,"%s",gauge_outfile_header);
+                }
                 if(goutfile){
                     if(id_iter<mkwch_pars.therm_ntraj){
-                        printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-                        printf("Therm_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
-                        printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
-
+                        printf("Therm_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
                         fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_therm-accettate_therm_old);
                         fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
 
                     }else{
-                        printf("Metro_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-                        printf("Metro_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
-                        printf("Metro_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
-
+                        printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
                         fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_metro-accettate_metro_old);
                         fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
 
@@ -213,14 +228,24 @@ int main(int argc, char* argv[]){
                 //-------------------------------------------------//
 
                 //--------- SALVA LA CONF SU FILE ------------------//
-                if(conf_id_iter%mkwch_pars.saveconfinterval==0)	print_su3_soa_ASCII(conf_acc,"stored_config",conf_id_iter);
+                if(conf_id_iter%mkwch_pars.saveconfinterval==0){
+                    char tempname[50];char serial[10];
+                    strcpy(tempname,mkwch_pars.store_conf_name);
+                    sprintf(serial,"%d",conf_id_iter);
+                    strcat(tempname,serial);
+
+
+
+                    print_su3_soa_ASCII(conf_acc,tempname,conf_id_iter);
+                }
                 //-------------------------------------------------//
 
             }// id_iter loop ends here
 
 
             //--------- SALVA LA CONF SU FILE ------------------//
-            //print_su3_soa_ASCII(conf_acc,"stored_config", conf_id_iter);
+
+            print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name, conf_id_iter);
             //-------------------------------------------------//
 
 

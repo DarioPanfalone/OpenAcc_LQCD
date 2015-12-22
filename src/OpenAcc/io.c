@@ -34,10 +34,16 @@ void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_
     }
     fclose(fp);
 }
-void read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter ){
+int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter ){
 
   FILE *fp;
   fp = fopen(nomefile,"r");
+  if(!fp){
+      printf("Gauge configuration file %s not readable.\n",nomefile);
+      *conf_id_iter = -1;
+      return 1;
+  }
+  else{
 
 
 
@@ -64,7 +70,8 @@ void read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter 
       
     }
   fclose(fp);
-  
+  return 0;
+  }
 }
 
 #endif

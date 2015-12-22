@@ -10,6 +10,8 @@
 
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
+extern int verbosity_lv;
+
 int multishift_invert(__restrict su3_soa * const u,
 		      __restrict ferm_param * pars,
 		      RationalApprox * approx,
@@ -151,7 +153,7 @@ int multishift_invert(__restrict su3_soa * const u,
       maxiter = 0;
       for(iter=0; iter<(approx->approx_order); iter++){
           if(flag[iter]==1){
-              fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]);
+              fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]/source_norm);
               if(fact<residuo) flag[iter]=0;
               else maxiter = iter+1;// modifying maxiter
               zeta_i[iter]=zeta_ii[iter];
@@ -180,7 +182,7 @@ int multishift_invert(__restrict su3_soa * const u,
 //      printf("\t CG count = %i \n",cg);
     
 
-  printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
+  if(verbosity_lv > 1) printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
   // test 
 
   if(verbosity_lv > 2){

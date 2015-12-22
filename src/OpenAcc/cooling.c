@@ -4,6 +4,7 @@
 #include "../Include/common_defines.h"
 #include "./struct_c_def.h"
 #include "../OpenAcc/su3_utilities.h"
+#include "../OpenAcc/plaquettes.h"
 #include "./cooling.h"
 #ifdef __GNUC__
  #include <math.h>

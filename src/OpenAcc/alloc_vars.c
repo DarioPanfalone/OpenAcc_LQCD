@@ -8,6 +8,7 @@
 #include "../Include/fermion_parameters.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../Include/fermion_parameters.h"
+#include "./action.h"
 
 #define ALIGN 128
 
@@ -83,8 +84,8 @@ void mem_alloc()
 
 #ifdef STOUT_FERMIONS
   // STOUTING
-  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, STOUT_STEPS*8*sizeof(su3_soa)); for(int mu=0;mu<8*STOUT_STEPS;mu++) SETFREE((&gstout_conf_acc_arr[mu]));
-  gstout_conf_acc = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
+  allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, act_params.stout_steps*8*sizeof(su3_soa)); for(int mu=0;mu<8*act_params.stout_steps;mu++) SETFREE((&gstout_conf_acc_arr[mu]));
+  gstout_conf_acc = &gstout_conf_acc_arr[8*(act_params.stout_steps-1)];
   if(allocation_check != 0)  printf("Errore nella allocazione di gstout_conf_acc_arr \n");
   allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&glocal_staples[mu]));
   if(allocation_check != 0)  printf("Errore nella allocazione di glocal_staples \n");

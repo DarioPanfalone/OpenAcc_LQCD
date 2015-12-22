@@ -10,14 +10,8 @@
 // in modo hard coded usa l'altra routine moltiplica link per fermione e basta.
 // Per farlo viene definita la variabile PHASE_MAT_VEC_MULT o meno.
 
-#ifdef BACKFIELD
+#if defined(BACKFIELD) || defined (IMCHEMPOT)
   #define PHASE_MAT_VEC_MULT 
-#endif
-
-#ifndef PHASE_MAT_VEC_MULT
-  #ifdef IMCHEMPOT
-    #define PHASE_MAT_VEC_MULT 
-  #endif
 #endif
 
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
@@ -53,6 +47,7 @@
 
 
 extern int verbosity_lv;
+
 
 #endif
 

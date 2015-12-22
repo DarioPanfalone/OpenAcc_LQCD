@@ -14,6 +14,7 @@
 
 
 extern char gauge_outfilename[50];
+extern char gauge_outfile_header[100];
 
 
 #pragma acc routine seq

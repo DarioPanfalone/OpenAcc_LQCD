@@ -12,8 +12,8 @@
 #include "./find_min_max.h"
 
 
-#define PRINT_EIGENVALUES
 
+extern int verbosity_lv;
 
 // find the maximum eigenvalue of the fermion matrix
 // use loc_h, loc_p, loc_r
@@ -30,7 +30,7 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
   double temp;
   // starting gauss vector p   (deve arrivargli gia' gaussiano)
   norm=sqrt(l2norm2_global(loc_p));
-  printf("Norm:%lf\n",norm  );
+  if(verbosity_lv>4) printf("(ker_find_max_eigenvalue_openacc) Norm:%lf\n",norm  );
   loop_count=0;
   // loop start
   do{
@@ -125,9 +125,7 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
   minmax[0] = pars->ferm_mass * pars->ferm_mass;
   minmax[1] = ker_find_max_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p1);
 
-#ifdef PRINT_EIGENVALUES
-  printf("    Computed the min and max eigs : [ min= %.18lf; max= %.18lf ]  \n",minmax[0],minmax[1]);
-#endif
+  if(verbosity_lv > 3) printf("    Computed the min and max eigs : [ min= %.18lf; max= %.18lf ]  \n",minmax[0],minmax[1]);
   //  ora il minimo e' messo a m*m, volendo lo si puo' calcolare con la routine seguente.
   //  minmax[0] = ker_find_min_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2
 

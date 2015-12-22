@@ -1,0 +1,80 @@
+# This is a configuration file. Use '#' to make your comments ignored 
+# by the parser.
+# Everything should be pretty self explanatory but if you have any questions 
+# or issues, contact michele.mesiti@gmail.com.
+
+
+
+ActionParameters
+Beta            3.938
+StoutSteps      2
+ 
+#up quark
+FlavourParameters   
+Mass	        0.00362345
+Degeneracy	    1
+PseudoFermions	1
+Name	        up
+Charge          2.0
+Mu	            0.0          # keep to zero unless 
+                             # IMCHEMPOT is defined
+
+#down quark
+FlavourParameters   
+Mass	        0.00362345
+Degeneracy	    1
+PseudoFermions	1
+Name	        down
+Charge          -1.0
+Mu	            0.0          # keep to zero unless 
+                             # IMCHEMPOT is defined
+
+
+#strange quark
+FlavourParameters   
+Mass	        0.102
+Degeneracy	    1
+PseudoFermions	1
+Name	        strange
+Charge          -1.0
+Mu	            0.0          # keep to zero unless 
+                             # IMCHEMPOT is defined
+
+
+BackgroundFieldParameters
+ex              0.0      #keep these to zero unless	
+ey              0.0	     # BACKFIELD is defined
+ez              0.0	
+bx              0.0	
+by              0.0	
+bz              0.0	
+
+
+MDParameters
+NmdSteps	    5
+GaugeSubSteps	4
+TrajLength	    1.0
+
+
+MontecarloParameters
+Ntraj	                100
+ThermNtraj	            10
+SaveConfInterval	    20
+SaveRunningConfInterval	5
+residue_metro       	1e-8
+residue_md              1e-6
+StoreConfName       	conf_openacc
+SaveConfName            conf_run_openacc
+Seed                    42
+VerbosityLv             3
+
+GaugeMeasuresSettings
+GaugeOutfilename	    gaugemeas_openacc.txt
+
+
+FermionMeasuresSettings
+FermionicOutfilename    fermmeas_openacc.txt
+
+
+DeviceSettings
+device_choice           0

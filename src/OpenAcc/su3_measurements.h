@@ -4,8 +4,6 @@
 #include "../Include/common_defines.h"
 #include "../OpenAcc/struct_c_def.h"
 
-extern double beta;
-#define beta_by_three  (beta*ONE_BY_THREE)
 
 void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarity_deviation, double * avg_unitarity_deviation);
 void check_unitarity_host( __restrict su3_soa * const u, double * max_unitarity_deviation, double * avg_unitarity_deviation);

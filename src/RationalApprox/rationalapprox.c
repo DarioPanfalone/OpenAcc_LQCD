@@ -4,6 +4,7 @@
 #include "./rationalapprox.h"
 #include <stdlib.h>
 
+
 char* rational_approx_filename_old(int approx_order, int exponent_num, int exponent_den, double lambda_min)
 {
 
@@ -60,29 +61,38 @@ char* rational_approx_filename(double error, int exponent_num, int exponent_den,
 
 }
 
-void rationalapprox_read(RationalApprox* rational_approx)
+int rationalapprox_read(RationalApprox* rational_approx)
 {
 
     // CALCULATION OF COEFFICIENTS FOR FIRST_INV_APPROX_NORM_COEFF
 
     char * nomefile = rational_approx_filename(rational_approx->error,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
 
-    rationalapprox_read_custom_nomefile(rational_approx,nomefile);
+    int error = rationalapprox_read_custom_nomefile(rational_approx,nomefile);
+    if(error){
+
+        FILE * bash_repair_commands = fopen("genappfiles.sh","a");
+
+        printf("You may want to generate a rational approximation file using the tool \'rgen\' (look in the tools directory). Please try\n");
+        printf("./rgen %e %d %d %e\n", rational_approx->error, rational_approx->exponent_num, rational_approx->exponent_den, rational_approx->lambda_min);
+        fprintf(bash_repair_commands,"./rgen %e %d %d %e\n", rational_approx->error, rational_approx->exponent_num, rational_approx->exponent_den, rational_approx->lambda_min);
+        fclose(bash_repair_commands);
+        return 1;
+    }
+    else return 0;
 
 }
 
 
-void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* nomefile)
+int rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* nomefile)
 {
 
     // CALCULATION OF COEFFICIENTS FOR FIRST_INV_APPROX_NORM_COEFF
     FILE *input = fopen(nomefile, "rt");
     printf("%s\n", nomefile );
     if (input == NULL) {
-        printf("Could not open file %s \n",nomefile );
-        printf("You may want to generate a rational approximation using the tool \'rge\' (look in the tools directory). Please try\n");
-        printf("./rgen %e %d %d %e\n", rational_approx->error, rational_approx->exponent_num, rational_approx->exponent_den, rational_approx->lambda_min);
-        exit(1);
+        printf("Rational Approximation File %s not found!\n", nomefile);
+        return 1;
     }
 
     // The partial fraction expansion takes the form 
@@ -104,7 +114,8 @@ void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* 
     for(int i = 0; i < rational_approx->approx_order; i++) 
     {
 //      printf("RA_a[%d] = %18.16e, RA_b[%d] = %18.16e\n", i, rational_approx->RA_a[i], i, rational_approx->RA_b[i]);
-    } 
+    }
+   return 0; 
 }
 
 void rationalapprox_save(const char* nomefile, RationalApprox* rational_approx){

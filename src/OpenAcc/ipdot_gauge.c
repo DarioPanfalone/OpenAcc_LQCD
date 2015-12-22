@@ -3,6 +3,7 @@
 
 #include "struct_c_def.h"
 #include "./su3_utilities.h"
+#include "./plaquettes.h"
 #include "./rettangoli.h"
 #include "./ipdot_gauge.h"
 

@@ -16,15 +16,19 @@
 #include "./inverter_multishift_full.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
+#include "./action.h"
 
 
-
-#define PRINT_DETAILS_INSIDE_UPDATE
+//#define NORANDOM  // FOR debug, check also main.c 
+#ifdef NORANDOM
+#include "./dbgtools.h"
+#endif
 
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
 
+action_param act_params;
 extern double casuale();
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
@@ -61,9 +65,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
   if(metro==1){
     // store old conf   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
     set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
-    printf("Backup copy of the initial gauge conf : OK \n");
-#endif
+    if(verbosity_lv > 2) printf("Backup copy of the initial gauge conf : OK \n");
 
   }
 
@@ -73,10 +75,18 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     gettimeofday ( &t1, NULL );
 
     // ESTRAZIONI RANDOM
+#ifdef NORANDOM
+    printf("NORANDOM mode, loading momenta from memory.\n");
+    if(read_thmat_soa(momenta,"momenta_norndtest")){
+        printf("GENERATING MOMENTA FILE FOR YOUR CONVENIENCE, RE-RUN THIS TEST\n");
+        generate_Momenta_gauss(momenta);
+        print_thmat_soa(momenta,"momenta_norndtest");
+    }
+#else
     generate_Momenta_gauss(momenta);
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
-    printf("Momenta generated : OK \n");
 #endif
+
+    printf("Momenta generated/read : OK \n");
 
     //    read_thmat_soa(momenta,"momenta");
 #pragma acc update device(momenta[0:8])
@@ -84,10 +94,24 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
       int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
-	  printf("Ferm generation (flav=%d,ps=%d,ps_index=%d) : OK \n",iflav,ips,ps_index);
-#endif
+	 
+#ifdef NORANDOM
+      char psferm_filename[20];
+
+      char ps_index_str[5];
+      sprintf(ps_index_str,"%d",ps_index);
+      strcpy(psferm_filename,"fermion_norndtest");
+      strcat(psferm_filename,ps_index_str);
+      if(read_vec3_soa(&ferm_phi_acc[ps_index],psferm_filename)){
+          printf("GENERATING FERMION FILE FOR YOUR CONVENIENCE, RE-RUN THIS TEST\n");
+	      generate_vec3_soa_gauss(&ferm_phi_acc[ps_index]);
+          print_vec3_soa(&ferm_phi_acc[ps_index],psferm_filename);
+
+      }
+#else
+      if(verbosity_lv > 3 )printf("Ferm generation (flav=%d,ps=%d,ps_index=%d) : OK \n",iflav,ips,ps_index);
 	  generate_vec3_soa_gauss(&ferm_phi_acc[ps_index]);
+#endif
       }
     }// end for iflav
 #pragma acc update device(ferm_phi_acc[0:NPS_tot])
@@ -96,7 +120,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // USO DELLA VERSIONE STOUTATA GIA' PER LO STIRACCHIAMENTO
     // STOUTING...(ALREADY ON DEVICE)
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
-    gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
+    gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
 #else
     gconf_as_fermionmatrix = tconf_acc;
 #endif
@@ -106,15 +130,26 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
-      printf("Rat approx rescale (flav=%d) : OK \n",iflav);
-#endif
+       if(verbosity_lv > 2 ) printf("Rat approx rescale (flav=%d)\n",iflav);
 
-      // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
       SETREQUESTED(kloc_p);
-      generate_vec3_soa_gauss(kloc_p);
       SETREQUESTED(kloc_s);
+#ifdef NORANDOM
+      if(read_vec3_soa(kloc_p,"kloc_p_norndtest")){
+          generate_vec3_soa_gauss(kloc_p);
+          print_vec3_soa(kloc_p,"kloc_p_norndtest");
+          printf("GENERATED kloc_p_norndtest FOR NORANDOM TEST, RE-RUN THIS TEST\n");
+      }
+      if(read_vec3_soa(kloc_s,"kloc_s_norndtest")){
+          generate_vec3_soa_gauss(kloc_s);
+          print_vec3_soa(kloc_s,"kloc_s_norndtest");
+          printf("GENERATED kloc_s_norndtest FOR NORANDOM TEST, RE-RUN THIS TEST\n");
+      }
+#else
+      // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
+      generate_vec3_soa_gauss(kloc_p);
       generate_vec3_soa_gauss(kloc_s);
+#endif
       // update the fermion kloc_p copying it from the host to the device
 #pragma acc update device(kloc_p[0:1])
 #pragma acc update device(kloc_s[0:1])
@@ -123,15 +158,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
       SETREQUESTED(kloc_r);
       SETREQUESTED(kloc_h);
       find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,u1_back_field_phases,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig[iflav]);
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
-      printf("    find min and max eig : OK \n");
-#endif
+      if(verbosity_lv > 3 ) printf("    find min and max eig : OK \n");
       RationalApprox *approx_fi = &(fermions_parameters[iflav].approx_fi);
       RationalApprox *approx_fi_mother = &(fermions_parameters[iflav].approx_fi_mother);
       rescale_rational_approximation(approx_fi_mother,approx_fi,minmaxeig[iflav]);
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
-      printf("    rat approx rescaled : OK \n\n");
-#endif
+      if(verbosity_lv > 4 ) printf("    rat approx rescaled : OK \n\n");
 
 #pragma acc update device(approx_fi[0:1])
     }//end for iflav
@@ -139,10 +170,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     if(metro==1){
       /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
       if(GAUGE_ACTION == 0)// Standard gauge action 
-	action_in = beta_by_three*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+	action_in = BETA_BY_THREE*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
       if(GAUGE_ACTION == 1){ //Tlsym gauge action
-	action_in = C_ZERO * beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
-	action_in += C_ONE * beta_by_three * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+	action_in = C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+	action_in += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
       }
       action_mom_in = 0.0;
       for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
@@ -156,9 +187,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
       }// end for iflav
       ///////////////////////////////////////////////////////////////////////////////////////
     }
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
     printf(" Initial Action Computed : OK \n");
-#endif
 
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
 
@@ -172,9 +201,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 	
       }
     }// end for iflav
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
-    printf(" Computed the fermion CHI : OK \n");
-#endif
+    if(verbosity_lv > 3) printf(" Computed the fermion CHI : OK \n");
     
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE MD
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -195,15 +222,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 			      ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
 			      k_p_shiftferm,momenta,local_sums,res_md);
     
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
-    printf(" Molecular Dynamics Completed : OK \n");
-#endif
+    if(verbosity_lv > 1) printf(" Molecular Dynamics Completed \n");
 
 
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
-    gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
+    gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
 #else
     gconf_as_fermionmatrix = tconf_acc;
 #endif
@@ -238,16 +263,14 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
 	}
       }
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
       printf(" Final Action Computed : OK \n");
-#endif
       
       ///////////////   FINAL ACTION COMPUTATION  ////////////////////////////////////////////
       if(GAUGE_ACTION == 0) // Standard gauge action
-      action_fin = beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+      action_fin = BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
       if(GAUGE_ACTION == 1){ // Tlsym gauge action
-      action_fin = C_ZERO * beta_by_three * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
-      action_fin += C_ONE * beta_by_three * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+      action_fin = C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+      action_fin += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
       }
 
       action_mom_fin = 0.0;
@@ -266,20 +289,30 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
       // delta_S = action_new - action_old
       delta_S  = - (-action_in+action_mom_in+action_ferm_in) + (-action_fin+action_mom_fin+action_ferm_fin);
-#ifdef PRINT_DETAILS_INSIDE_UPDATE
+      if(verbosity_lv > 2){
       printf("iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,-action_in,-action_fin);
       printf("iterazione %i:  Momen_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,action_mom_in,action_mom_fin);
       printf("iterazione %i:  Fermi_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,action_ferm_in,action_ferm_fin);
+      }
+      printf("iterazione %i:  DELTA_ACTION = %.18lf, ",iterazioni,delta_S);
+     
+
+
+#ifdef NORANDOM      
+      printf("Always accept in NORANDOM MODE!!!\n");
 #endif
-      printf("iterazione %i:  DELTA_ACTION               = %.18lf\n",iterazioni,delta_S);
-      
+
       if(delta_S<0){
 	accettata=1;
       }
       else
 	{
 	  p1=exp(-delta_S);
+#ifdef NORANDOM      
+      p2=0;
+#else
 	  p2=casuale();
+#endif
 	  if(p2<p1)
 	    {
 	      accettata=1;
@@ -321,16 +354,16 @@ gettimeofday ( &t3, NULL );
   dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
 
   if(metro==0){
-    printf("   FULL UPDATE COMPUTATION TIME NOMETRO            Tot time          : %f sec  \n",dt_tot);
-    printf("                                                   PreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
-    printf("                                                   PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
-    printf("                                                   PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
+    printf("   FULL UPDATE COMPUTATION TIME NOMETRO - Tot time : %f sec \n",dt_tot);
+    printf("\t\tPreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
+    printf("\t\tPreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+    printf("\t\tPostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
   }
   if(metro==1){
-    printf("   FULL UPDATE COMPUTATION TIME SIMETRO            Tot time          : %f sec  \n",dt_tot);
-    printf("                                                   PreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
-    printf("                                                   PreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
-    printf("                                                   PostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
+    printf("   FULL UPDATE COMPUTATION TIME SIMETRO - Tot time : %f sec  \n",dt_tot);
+    printf("\t\tPreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
+    printf("\t\tPreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+    printf("\t\tPostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
   }
 
   return acc;

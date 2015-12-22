@@ -5,21 +5,25 @@
 #include "./cayley_hamilton.h"
 #include "./struct_c_def.h"
 #include "./su3_utilities.h"
+#include "./plaquettes.h"
 #include "./alloc_vars.h"
 #include "./stouting.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 
 #include "./single_types.h"
+#include "./action.h"
 
+
+extern int verbosity_lv;
 
 
 #ifdef STOUT_FERMIONS
 void stout_wrapper(__restrict su3_soa * tconf_acc,__restrict su3_soa * tstout_conf_acc_arr){
 
-  printf("Stouting gauge conf %d times.\n", STOUT_STEPS);
-  for(int mu = 0; mu < 8*STOUT_STEPS; mu ++) SETREQUESTED((&tstout_conf_acc_arr[mu]));
+  if(verbosity_lv > 1) printf("Stouting gauge conf %d times.\n", act_params.stout_steps);
+  for(int mu = 0; mu < 8*act_params.stout_steps; mu ++) SETREQUESTED((&tstout_conf_acc_arr[mu]));
   stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, glocal_staples, gipdot );
-  for(int stoutlevel=1;stoutlevel < STOUT_STEPS; stoutlevel++)
+  for(int stoutlevel=1;stoutlevel < act_params.stout_steps; stoutlevel++)
         stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),&(tstout_conf_acc_arr[8*stoutlevel]),auxbis_conf_acc, glocal_staples,  gipdot );
 
 }

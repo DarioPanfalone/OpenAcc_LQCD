@@ -25,10 +25,17 @@ void print_vec3_soa(vec3_soa * const fermion, const char* nomefile){
 
 }
 
-void read_vec3_soa(vec3_soa * fermion, const char* nomefile){
+int read_vec3_soa(vec3_soa * fermion, const char* nomefile){
+
 
     FILE *fp;
     fp = fopen(nomefile,"r");
+    if(!fp){
+        printf("vec3_soa File %s not found.\n", nomefile );
+        return 1;
+    }
+    else{
+
     for(int i = 0 ; i < sizeh ; i++){
         double re,im;
         fscanf(fp, "%lf\t%lf\n",&re,&im);fermion->c0[i] = re + im * I;
@@ -36,6 +43,8 @@ void read_vec3_soa(vec3_soa * fermion, const char* nomefile){
         fscanf(fp, "%lf\t%lf\n",&re,&im);fermion->c2[i] = re + im * I;
     }
     fclose(fp);
+    return 0;
+    }
 
 }
 
@@ -131,10 +140,15 @@ void print_tamat_soa(tamat_soa * const ipdot, const char* nomefile){
     fclose(fp);
 }
 
-void read_tamat_soa(tamat_soa * ipdot, const char* nomefile){
+int read_tamat_soa(tamat_soa * ipdot, const char* nomefile){
 
     FILE *fp;
     fp = fopen(nomefile,"r");
+    if(!fp){
+        printf("Tamat_soa File %s not found.\n", nomefile );
+        return 1;
+    }
+    else{
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
             double re,im;
@@ -146,6 +160,8 @@ void read_tamat_soa(tamat_soa * ipdot, const char* nomefile){
         }
     }
     fclose(fp);
+    return 0;
+    }
 }
 
 
@@ -178,10 +194,15 @@ void print_1thmat_soa(thmat_soa * const ipdot, const char* nomefile){
     fclose(fp);
 }
 
-void read_thmat_soa(thmat_soa * ipdot, const char* nomefile){
+int read_thmat_soa(thmat_soa * ipdot, const char* nomefile){
 
     FILE *fp;
     fp = fopen(nomefile,"r");
+    if(!fp){
+        printf("Thmat_soa File %s not found.\n", nomefile );
+        return 1;
+    }
+    else{
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
             double re,im;
@@ -193,6 +214,8 @@ void read_thmat_soa(thmat_soa * ipdot, const char* nomefile){
         }
     }
     fclose(fp);
+    return 0;
+    }
 }
 
 

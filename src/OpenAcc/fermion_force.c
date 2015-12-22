@@ -11,6 +11,8 @@
 #include "../Include/fermion_parameters.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./su3_utilities.h"
+#include "./plaquettes.h"
+#include "./action.h"
 
 #ifndef __GNUC__
  #define TIMING_FERMION_FORCE
@@ -150,7 +152,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   // FERMION FORCE
 #ifdef STOUT_FERMIONS
   stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
-  conf_to_use =  &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
+  conf_to_use =  &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
   set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
 #else
   conf_to_use = tconf_acc;
@@ -190,7 +192,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 #ifdef STOUT_FERMIONS
   mult_gl3_soa_times_stag_phases(gl3_aux);
 
-  for(int stout_level = STOUT_STEPS ; stout_level > 1 ; stout_level--){
+  for(int stout_level = act_params.stout_steps ; stout_level > 1 ; stout_level--){
     if(verbosity_lv > 2) printf("\t\tSigma' to Sigma [lvl %d to lvl %d]\n",stout_level,stout_level-1);
     conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
     compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, taux_conf_acc );

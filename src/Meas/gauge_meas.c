@@ -18,6 +18,7 @@
 
 
 char gauge_outfilename[50];
+char gauge_outfile_header[100];
 
 void compute_local_topological_charge(  __restrict su3_soa * const u,
 					__restrict su3_soa * const quadri,

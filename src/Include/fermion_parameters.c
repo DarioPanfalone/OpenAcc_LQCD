@@ -13,7 +13,9 @@ int NPS_tot;
 int max_ps;
 ferm_param *fermions_parameters;
 
-void init_ferm_params(ferm_param *fermion_settings){
+int init_ferm_params(ferm_param *fermion_settings){
+
+    int errorstatus = 0;
 
 
 /*
@@ -51,8 +53,15 @@ void init_ferm_params(ferm_param *fermion_settings){
   strange->number_of_ps      = 1;      // strange  number of pseudo fermions
   strcpy(up->name,"strange");
 */
+  
+    
+    
+  printf("Initializing fermions...\n");
+    
   NPS_tot = 0;
   max_ps = 0;
+
+
   for(int i=0;i<NDiffFlavs;i++){
     // compute the total number of ps
     NPS_tot += fermion_settings[i].number_of_ps;
@@ -113,12 +122,13 @@ void init_ferm_params(ferm_param *fermion_settings){
         quark->approx_li_mother.gmp_remez_precision;
 
     // READ THE RAT APPROXS FROM THE FILES
-    rationalapprox_read(&(quark->approx_fi_mother));
-    rationalapprox_read(&(quark->approx_md_mother));
-    rationalapprox_read(&(quark->approx_li_mother));
-
+    errorstatus += rationalapprox_read(&(quark->approx_fi_mother));
+    errorstatus += rationalapprox_read(&(quark->approx_md_mother));
+    errorstatus += rationalapprox_read(&(quark->approx_li_mother));
 
   }
+
+  return errorstatus;
 
 }
 

@@ -21,9 +21,10 @@
 #ifdef STOUT_FERMIONS
 #include "../OpenAcc/stouting.h"
 #endif
-
+#include "../OpenAcc/action.h"
 
 char fermionic_outfilename[50];
+char fermionic_outfile_header[100];
 
 // vedi tesi LS F.Negro per ragguagli (Appendici)
 void eo_inversion(su3_soa *tconf_acc,
@@ -86,7 +87,7 @@ void perform_chiral_measures( su3_soa * tconf_acc,
 #ifdef STOUT_FERMIONS
     SETREQUESTED(gstout_conf_acc_arr);
     stout_wrapper(tconf_acc ,gstout_conf_acc_arr);
-    conf_to_use = &gstout_conf_acc_arr[8*(STOUT_STEPS-1)];
+    conf_to_use = &gstout_conf_acc_arr[8*(act_params.stout_steps-1)];
 #else
     conf_to_use = tconf_acc;
 #endif

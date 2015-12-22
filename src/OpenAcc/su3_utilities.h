@@ -27,15 +27,6 @@ void mult_gl3_soa_times_stag_phases( __restrict su3_soa * const u);
 void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u);
 
 
-// routine for the computation of the average of the plaquettes computed on the plane mu-nu
-// 1) all the plaquettes on the plane mu-nu are computed and saved locally
-// 2) finally the reduction of the traces is performed
-double calc_loc_plaquettes_removing_stag_phases_nnptrick(
-        __restrict su3_soa * const u,
-        __restrict su3_soa * const loc_plaq,
-        dcomplex_soa * const tr_local_plaqs,
-        const int mu,  const int nu);
-
 
 
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix);
@@ -44,20 +35,6 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix);
 void set_su3_soa_to_su3_soa( __restrict su3_soa * const matrix_in,
         __restrict su3_soa * const matrix_out);
 
-
-// routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
-void calc_loc_staples_removing_stag_phases_nnptrick( 
-        __restrict su3_soa * const u, __restrict su3_soa * const loc_stap,
-        const int mu,const int nu);
-
-void calc_loc_staples_removing_stag_phases_nnptrick_all(  
-        __restrict su3_soa * const u, __restrict su3_soa * const loc_stap );
-
-void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even( 
-        __restrict su3_soa * const u,  __restrict su3_soa * const loc_stap );
-
-void calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd(
-        __restrict su3_soa * const u,__restrict su3_soa * const loc_stap); 
 
 void conf_times_staples_ta_part(__restrict su3_soa * const u, // constant --> is not updated
 __restrict su3_soa * const loc_stap, // constant --> is not updated

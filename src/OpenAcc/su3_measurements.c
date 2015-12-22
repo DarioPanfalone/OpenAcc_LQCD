@@ -5,12 +5,12 @@
 #include "../OpenAcc/struct_c_def.h"
 #include "./su3_measurements.h"
 #include "./su3_utilities.h"
+#include "./plaquettes.h"
 #include "./single_types.h"
 #ifndef __GNUC__
 #include <openacc.h>
 #endif
 
-double beta;
 
 void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
 
@@ -19,7 +19,6 @@ void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarit
   mult_conf_times_stag_phases(u);
 
 
-    printf("HEE\n");
     double r = 0;
     double rmax = 0;
 

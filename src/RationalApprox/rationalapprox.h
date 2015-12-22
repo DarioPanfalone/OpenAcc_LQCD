@@ -9,6 +9,9 @@
 
 extern int verbosity_lv;
 
+
+
+
 typedef struct RationalApprox_t{
     int exponent_num;
     int exponent_den;
@@ -24,12 +27,14 @@ typedef struct RationalApprox_t{
 
 
 
+
 char* rational_approx_filename(double error, int exponent_num, int exponent_den, double lambda_min);
 
 char* rational_approx_filename_old(int approx_order, int exponent_num, int exponent_den, double lambda_min);
 
-void rationalapprox_read(RationalApprox* rational_approx);
-void rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* nomefile);
+
+int rationalapprox_read(RationalApprox* rational_approx);
+int rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* nomefile);
 
 
 void rationalapprox_save(const char* nomefile, RationalApprox* rational_approx);

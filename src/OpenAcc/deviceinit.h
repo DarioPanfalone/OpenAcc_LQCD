@@ -1,14 +1,14 @@
 #ifndef DEVICE_INIT_H_
 #define DEVICE_INIT_H_
 
-typedef struct tech_param_t{
+typedef struct device_param_t{
 
   int device_choice;
 
 
-} tech_param;
+} device_param;
 
-extern tech_param dev_settings;
+extern device_param dev_settings;
 
 
 

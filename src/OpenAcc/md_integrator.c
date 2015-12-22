@@ -34,6 +34,7 @@
 #include "./su3_measurements.h"
 #include "../Include/common_defines.h"
 #include "../Include/fermion_parameters.h"
+#include "./action.h"
 
 
 md_param md_parameters;
@@ -61,10 +62,10 @@ void initialize_md_global_variables(md_param md_params )
   deltas_Omelyan[0]= -cimag(ieps_acc) * lambda;
   deltas_Omelyan[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
   deltas_Omelyan[2]= -cimag(ieps_acc) * 2.0*lambda;
-  deltas_Omelyan[3]= -cimag(ieps_acc) * gs*lambda * beta_by_three;
+  deltas_Omelyan[3]= -cimag(ieps_acc) * gs*lambda * BETA_BY_THREE;
   deltas_Omelyan[4]=  cimag(iepsh_acc)* gs;
-  deltas_Omelyan[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*beta_by_three;
-  deltas_Omelyan[6]= -cimag(ieps_acc) * gs*2.0*lambda*beta_by_three;
+  deltas_Omelyan[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*BETA_BY_THREE;
+  deltas_Omelyan[6]= -cimag(ieps_acc) * gs*2.0*lambda*BETA_BY_THREE;
 
 }
 
@@ -195,6 +196,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
           backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
   }  
+
+  printf("\n\n\t\tRUNNING MD STEP %d OF %d...\n", md_parameters.no_md, md_parameters.no_md);
   // Step for the Q
   // Q' = exp[dt/2 *i P] Q
   multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
