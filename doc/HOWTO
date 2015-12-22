@@ -1,6 +1,8 @@
 /////////////////////////////////////////////////////////////
 // This is a brief guide to this code, valid around commit //
 // e1ef9998912a8921637f2cb7d7889e478de56ebd.               //
+// This guide was updated after                            //
+// fa60fb52b1ac9f8356b7529aa00cd54dca57fabb.               //
 /////////////////////////////////////////////////////////////
 ********
 *BASICS*
@@ -64,29 +66,32 @@
 
    make main
    cd run
-   ./main
+   ./main <your carefully crafted input file>
 
   Otherwise...
   2.1.2.1 COMPILATION
   But if you don't have a makefile, or if you changed the dependence
   structure in your code, you have to create a makefile first. NO
   FEAR! The generate_makefile.py utility will do it for you.
-  First, you may want to modify generate_makefile.py so that the
-  string compiler_linker_setting at line 16 is the one you want.
+  You can call a wrapper for this script in this way:
 
-  COMMENT: this procedure could be streamlined and improved.
+  [OPENACCREPO/build]~>../scripts/generate_makefile.sh 
+  Please specify one compiler: either PGISLOW, GNU or PGI
+ 
+  As you see, it will tell you to choose a compiler. Try, for example
 
-  After that, invoke
-  
-  ../scripts/generate_makefile.sh
+  [OPENACCREPO/build]~>../scripts/generate_makefile.sh GNU 
 
-  and a makefile will be generated. Then just type
+  and a makefile will be generated, using gcc and -O3 optimization
+  (for more informations, look into generate_makefile.py). Then just
+  type
   
   make main
 
   NOTICE:
   You may need to do this on the right machine, with the right modules.
-  For example, on the Pisa localui3, you have to do
+  For example, on the Pisa localui3, if you use the PGI compiler,
+  you have to execute
 
   ../scripts/vai_su_cudawn?.sh    # choose 6 or 7
   module load pgi                 # last version
@@ -98,7 +103,8 @@
   A small buffer will make your program fail but a too big one will
   make your program need too much memory, up to the point where... it
   will fail.
-  
+
+ 
 
   FAQ
   Q: Why don't you just use autotools?
@@ -106,18 +112,68 @@
      it (please).
 
   2.1.2.2 RUN
-  Go into ./run and launch ./main. Here, the program will need some
-  files that you have to prepare in advance. Another section of this
-  guide will tell you what you usually need to prepare, of course if
-  you look into the initialization function listed above in 
+  Go into ./run and launch ./main <input_file>. Here, the program will
+  need some  files that you have to prepare in advance. Another section
+  of this  guide will tell you what you usually need to prepare, of
+  course if  you look into the initialization function listed above in
   section 2.1.1.
   
-   
+  Launching "./main" without an input file won't be that useful,
+  except for the fact that an "input_template" will be generated.
+  In this repo is also included a "input_openacc" file that serves as
+  a better template.
+  You will also need to generate the "rational approximations". If the
+  program does not find them, it will tell you exactly what is needed, 
+  and generate a "genappfiles.sh" file which contains all the command
+  you need to run to generate them. BEWARE: some lines will be
+  duplicated, e.g. the ones regarding up and down flavours (if they
+  have the same mass).
+
 
 3 FILES YOU MAY NEED TO RUN THE PROGRAM
   The kind of file needed are usually the rational approximations and
   the starting gauge configuration file (unless you want to start from
   a random configuration).
+
++3.0 Input file
+  The format of the input file is pretty self explanatory. If you try
+  to run "./main" without arguments, it will produce a template, but
+  you can also look to "/buld/run/input_openacc" to take inspiration.
+ +3.0.1 Verbosity level
+  Don't forget to set the VerbosityLv variable to the desired result. 
+  The value of it is assigned to the 'verbosity_lv' global variable.
+  As a rule of thumb, '5' prints all, '1' prints nearly nothing. Note
+  that the behaviour of VerbosityLv is likely to change over time, no
+  policy is yet decided.
+
+  
+  REMARKS:
+  SEEMINGLY INSIGNIFICANT THINGS THAT YOU HAVE TO TAKE CARE OF:
+  A parameter named "ExpMaxEigenvalue" is expected, and is an estimate
+  of the maximum eigenvalue of the Dirac Operator. This will influence
+  the choice of the rational approximations you need.
+  Notice that the highest eigenvalue of the fermion matrix is
+  calculated during the update and printed out if the right verbosity
+  value is set.
+  Notice that the smaller StoutSteps is, the larger this number. 
+
+  
+  What you CAN'T set with the input file (now) and you have to
+  recompile*:
+  - The type of gauge action. [triggers some long recompilation]
+  - The stouting strength RHO 
+  - The lattice dimensions in /src/OpenAcc/geometry.h [this will
+    practically trigger a full recompilation].
+  Other things that need recompilation
+  - Switching on/off the ability to simulate external field
+  - Switching on/off the ability to simulate imaginary chemical
+    potentials
+  - Changes in the input file format
+
+  *it is not a problem if you use gcc or pgi to compile for cpus, but
+   compiling with pgi for gpus can require time, depending on the
+   version of the compiler.
+ 
 +3.1 Rational Approximation files
   Rational approximations are used to approximate powers (like 1/4,
   1/8) of the Dirac Operator.
@@ -125,23 +181,27 @@
   theory, one for the first inversion (to map the original
   gaussianly generated pseudofermion to one generated according to the
   right pdf), one used during the molecular dynamics evolution (with a
-lower order, so less precise, for speed), and a third one for the
-calculation of the final action for the metropolis test (more
-precise). It is common though that at least 2 flavour are degenerate
-in mass, and this allows you to use the same set of rational
-approximations. For example, for a Nf=2+1 simulation, you need a total
-of 6 rational approximations.
+  lower order, so less precise, for speed), and a third one for the
+  calculation of the final action for the metropolis test (more
+  precise). It is common though that at least 2 flavour are degenerate
+  in mass, and this allows you to use the same set of rational
+  approximations. For example, for a Nf=2+1 simulation, you need a total
+  of 6 rational approximations.
   NOTICE: the name of the rational approximation file is related to
-its content, and can be generated using the function
-char* rational_approx_filename() in
-src/RationalApprox/rationalapprox.h.
+  its content, and can be generated using the function
+  char* rational_approx_filename() in
+  src/RationalApprox/rationalapprox.h.
 
  +3.1.1 How to generate and check rational approximations.
   Use the tools in tools/. A makefile should be there. 
   +'rgen' (rationalapprox_calc.c) 
-   the tool for generating them, it takes some arguments and also may
-   need some time for high order approximations. Notice that it needs
-   arbitary precision libraries to be compiled.
+   the tool for generating them, it takes the tolerance (plus other
+   things) as input and will try to increase the number of poles until
+   the required level of acuracy is reached. It takes time to generate
+   high order approximations (~minutes). Notice that it needs arbitary
+   precision libraries to be compiled.
+  +'rgenfo' (rationalapprox_calc.c) 
+   Same as rgen, but the order of the approximation is fixed.
   +'ratnormalizer' (normalize_ratapprox.c) 
    takes a rational approx and
    rescales it so that the upper limit of the validity range is 1.
@@ -155,4 +215,8 @@ src/RationalApprox/rationalapprox.h.
   The read and/or write of the initial/final gauge configuration file
   is usually done in /src/OpenAcc/main.c.
 
+4 DEBUG TOOLS
+  4.1 NORANDOM Mode
+  If you need your run to be reproducible and want the rng not used,
+  use '#define NORANDOM' in 
 
