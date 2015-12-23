@@ -233,11 +233,14 @@ int main(int argc, char* argv[]){
                     strcpy(tempname,mkwch_pars.store_conf_name);
                     sprintf(serial,"%d",conf_id_iter);
                     strcat(tempname,serial);
-
-
-
+                    printf("Storing conf %s.\n", tempname);
                     print_su3_soa_ASCII(conf_acc,tempname,conf_id_iter);
                 }
+                if(conf_id_iter%mkwch_pars.saverunningconfinterval==0){
+                    printf("Saving conf %s.\n", mkwch_pars.save_conf_name);
+                    print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name, conf_id_iter);
+                }
+
                 //-------------------------------------------------//
 
             }// id_iter loop ends here
