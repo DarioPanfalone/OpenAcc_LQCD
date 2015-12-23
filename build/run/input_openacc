@@ -57,7 +57,7 @@ TrajLength	    1.0
 
 
 MontecarloParameters
-Ntraj	                10
+Ntraj	                300
 ThermNtraj	            10
 SaveConfInterval	    20
 SaveRunningConfInterval	5

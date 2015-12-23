@@ -4,7 +4,7 @@
 #include "./fermion_parameters.h"
 #include "./markowchain.h"
 #include <string.h>
-
+#include <math.h>
 
 #define ALIGN 128
 
@@ -96,9 +96,19 @@ int init_ferm_params(ferm_param *fermion_settings){
     quark->approx_md_mother.lambda_max =  1.0;
     quark->approx_li_mother.lambda_max =  1.0;
 
-    quark->approx_fi_mother.error =  mkwch_pars.residue_md;
-    quark->approx_md_mother.error =  mkwch_pars.residue_md;
-    quark->approx_li_mother.error =  mkwch_pars.residue_metro;
+    quark->approx_fi_mother.error =  mkwch_pars.residue_metro/
+        pow(mkwch_pars.expected_max_eigenvalue,
+                (double) quark->approx_fi_mother.exponent_num/
+                quark->approx_fi_mother.exponent_den );
+    quark->approx_md_mother.error =  mkwch_pars.residue_md/
+        pow(mkwch_pars.expected_max_eigenvalue,
+                (double) quark->approx_md_mother.exponent_num/
+                quark->approx_md_mother.exponent_den );
+        
+    quark->approx_li_mother.error =  mkwch_pars.residue_metro/
+        pow(mkwch_pars.expected_max_eigenvalue,
+                (double) quark->approx_li_mother.exponent_num/
+                quark->approx_li_mother.exponent_den );
 
     quark->approx_fi_mother.gmp_remez_precision = 100;
     quark->approx_md_mother.gmp_remez_precision = 100;
