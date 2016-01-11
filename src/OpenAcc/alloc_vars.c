@@ -16,6 +16,8 @@ su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the me
 su3_soa  * aux_conf_acc; // auxiliary 
 su3_soa  * auxbis_conf_acc; // auxiliary 
 double_soa * u1_back_field_phases; // BACKRGROUND EM FIELD
+double_soa * u1_back_phases; //Background,staggered,chempot phases
+                             // 8 for each flavour
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
 su3_soa * gconf_as_fermionmatrix; // conf to use in either cases in fermion related computation (with or without stouting)
@@ -64,6 +66,14 @@ void mem_alloc()
 #else
   u1_back_field_phases=NULL;
 #endif
+  allocation_check =  posix_memalign((void **)&u1_back_phases, ALIGN,
+         NDiffFlavs*8*sizeof(double_soa));   
+         //  --> NDiffFlavs*4*size phases (as many as links)
+  SETFREE(u1_back_phases);
+  if(allocation_check != 0)  printf("Errore nella allocazione di u1_back_field_phases \n");
+
+
+
 
   //the double bracket in the setfree macro MUST be there (because of operators precedence)
   allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_conf_acc[mu])); 
@@ -138,6 +148,7 @@ inline void mem_free()
 #ifdef BACKFIELD
   free(u1_back_field_phases);
 #endif
+  free(u1_back_phases);
   free(momenta);
   free(aux_conf_acc);
   free(auxbis_conf_acc);

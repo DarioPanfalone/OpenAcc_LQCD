@@ -2,58 +2,23 @@
 #define FERMION_PARAMETERS_C_
 
 #include "./fermion_parameters.h"
+#include "../OpenAcc/backfield.h"
+#include "../OpenAcc/alloc_vars.h"
 #include "./markowchain.h"
 #include <string.h>
 #include <math.h>
 
 #define ALIGN 128
 
-int NDiffFlavs;
+
+int NDiffFlavs;// set in init.c, from input file
 int NPS_tot;
 int max_ps;
-ferm_param *fermions_parameters;
+ferm_param *fermions_parameters;// set in init.c, from input file
 
 int init_ferm_params(ferm_param *fermion_settings){
 
     int errorstatus = 0;
-
-
-/*
-  NDiffFlavs = 3;  // the number of different quark flavours
-
-  int allocation_check; 
-
-  // al posto di 128 c'era ALIGN, solo che qui questa variabile non è ancora definita (viene fatto in struct_c_def)
-  allocation_check =  posix_memalign((void **)&fermion_settings, ALIGN, NDiffFlavs*sizeof(ferm_param));   //  -->  4*size phases (as many as links)
-  if(allocation_check != 0)  printf("Errore nella allocazione di fermion_settings \n");
-
-  ferm_param *up,*down,*strange;
-  up = &fermion_settings[0];
-  down = &fermion_settings[1];
-  strange = &fermion_settings[2];
-
-  up->ferm_charge       = -1.0;   // up    charge
-  up->ferm_mass         = 0.00362345;    //0.075;  // up    mass
-  up->ferm_im_chem_pot  = 0.0;    // up    chem pot
-  up->degeneracy        = 1;      // up    degeneracy
-  up->number_of_ps      = 1;      // up    number of pseudo fermions
-  strcpy(up->name,"up");
-
-  down->ferm_charge       = 2.0;    // down  charge
-  down->ferm_mass         = 0.00362345;    //0.075;  // down  mass
-  down->ferm_im_chem_pot  = 0.0;    // down  chem pot
-  down->degeneracy        = 1;      // down  degeneracy
-  down->number_of_ps      = 1;      // down  number of pseudo fermions
-  strcpy(up->name,"down");
-
-  strange->ferm_charge       = -1.0;    // strange  charge
-  strange->ferm_mass         = 0.102;    //0.075;  // strange  mass
-  strange->ferm_im_chem_pot  = 0.0;    // strange  chem pot
-  strange->degeneracy        = 1;      // strange  degeneracy
-  strange->number_of_ps      = 1;      // strange  number of pseudo fermions
-  strcpy(up->name,"strange");
-*/
-  
     
     
   printf("Initializing fermions...\n");
@@ -61,7 +26,7 @@ int init_ferm_params(ferm_param *fermion_settings){
   NPS_tot = 0;
   max_ps = 0;
 
-
+  // calculation of NPS_tot, max_ps,index_of_the_first_ps; 
   for(int i=0;i<NDiffFlavs;i++){
     // compute the total number of ps
     NPS_tot += fermion_settings[i].number_of_ps;
@@ -78,6 +43,7 @@ int init_ferm_params(ferm_param *fermion_settings){
   printf("NPS_tot = %d \n",NPS_tot);
   printf("max_ps = %d \n",max_ps);
 
+  // Rational Approximation related stuff
   for(int i=0;i<NDiffFlavs;i++){
     ferm_param *quark = &fermion_settings[i];
     quark->approx_fi_mother.exponent_num =  +quark->degeneracy;
@@ -141,5 +107,29 @@ int init_ferm_params(ferm_param *fermion_settings){
   return errorstatus;
 
 }
+
+
+void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
+{
+   
+
+  for(int i=0;i<NDiffFlavs;i++){
+
+      fpar[i].phases = &u1_back_phases[i*8];
+
+
+
+
+
+  
+  }
+ 
+
+
+
+
+
+}
+
 
 #endif

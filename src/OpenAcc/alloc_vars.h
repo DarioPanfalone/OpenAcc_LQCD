@@ -10,6 +10,8 @@ extern su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if
 extern su3_soa  * aux_conf_acc; // auxiliary 
 extern su3_soa  * auxbis_conf_acc; // auxiliary 
 extern double_soa * u1_back_field_phases; // BACKRGROUND EM FIELD
+extern double_soa * u1_back_phases; //Background,staggered,chempot phases
+                                    // 8 for each flavour
 extern thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 extern tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
 extern su3_soa * gconf_as_fermionmatrix; // conf to use in either cases in fermion related computation (with or without stouting)
