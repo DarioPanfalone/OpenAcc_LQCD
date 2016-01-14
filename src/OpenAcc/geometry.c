@@ -4,6 +4,7 @@
 #include "./geometry.h"
 
 
+geom_parameter geom_par;
 
 
 void compute_nnp_and_nnm_openacc(void){

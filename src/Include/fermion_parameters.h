@@ -15,7 +15,7 @@ typedef struct ferm_param_t{
   char name[10];
   // chem_pot or backfield related things
   double ferm_charge;
-  double m_chem_pot;
+  double ferm_im_chem_pot;
   // automatic from here on
   int index_of_the_first_ps;
   double_soa * phases; //this incorporates staggered phases,

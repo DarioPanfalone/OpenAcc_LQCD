@@ -28,7 +28,6 @@ char fermionic_outfile_header[100];
 
 // vedi tesi LS F.Negro per ragguagli (Appendici)
 void eo_inversion(su3_soa *tconf_acc,
-		  double_soa * tbackfield,
 		  ferm_param * tfermions_parameters,
                   double res,
 		  vec3_soa * in_e,     // z2 noise
@@ -46,12 +45,12 @@ void eo_inversion(su3_soa *tconf_acc,
 
 
 
-	    acc_Deo(tconf_acc, phi_e, in_o,tfermions_parameters,tbackfield);
+	    acc_Deo(tconf_acc, phi_e, in_o,tfermions_parameters->phases);
 	    combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
 	    ker_invert_openacc(tconf_acc,tbackfield,tfermions_parameters,
 				      out_e,phi_e,res,trialSolution,
 				      tloc_r,tloc_h,tloc_s,tloc_p);
-	    acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters,tbackfield);
+	    acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
 	    combine_in1_minus_in2_allxfact(in_o,phi_o,(double)1/tfermions_parameters->ferm_mass,out_o);
 
     

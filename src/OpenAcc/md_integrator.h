@@ -31,7 +31,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 su3_soa  * tstout_conf_acc_arr, // huge parking for stouting
                 su3_soa  * tauxbis_conf_acc, 
 #endif
-				double_soa * backfield,
 				su3_soa  * taux_conf_acc,
 				ferm_param * tfermions_parameters,// [nflavs]
 				int tNDiffFlavs,

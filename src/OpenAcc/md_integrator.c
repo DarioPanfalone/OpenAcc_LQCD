@@ -132,7 +132,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 su3_soa  * tstout_conf_acc_arr, // huge parking for stouting
                 su3_soa  * tauxbis_conf_acc, 
 #endif
-				double_soa * backfield,
 				su3_soa  * taux_conf_acc,
 				ferm_param * tfermions_parameters,// [nflavs]
 				int tNDiffFlavs,
@@ -159,7 +158,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
-          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, 
+          tipdot_acc, tfermions_parameters, tNDiffFlavs, 
           ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
 	  tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
 
@@ -178,7 +177,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
-          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs,
+          tipdot_acc, tfermions_parameters, tNDiffFlavs,
           ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc,
           tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,1);
@@ -193,7 +192,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
-          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+          tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
   }  
 
@@ -209,7 +208,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
-          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+          tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
   mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
   // Step for the Q
   // Q' = exp[dt/2 *i P] Q
@@ -222,7 +221,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #ifdef STOUT_FERMIONS
           tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
-          backfield, tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+          tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
   mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
 
 

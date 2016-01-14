@@ -15,7 +15,6 @@
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
 su3_soa  * auxbis_conf_acc; // auxiliary 
-double_soa * u1_back_field_phases; // BACKRGROUND EM FIELD
 double_soa * u1_back_phases; //Background,staggered,chempot phases
                              // 8 for each flavour
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
@@ -59,13 +58,6 @@ void mem_alloc()
 {
   printf("Allocating resources for NPS_tot=%d pseudofermions in total, with MAX_APPROX_ORDER=%d\n", NPS_tot, MAX_APPROX_ORDER);
   int allocation_check;  
-#ifdef BACKFIELD
-  allocation_check =  posix_memalign((void **)&u1_back_field_phases, ALIGN, 8*sizeof(double_soa));   //  -->  4*size phases (as many as links)
-  SETFREE(u1_back_field_phases);
-  if(allocation_check != 0)  printf("Errore nella allocazione di u1_back_field_phases \n");
-#else
-  u1_back_field_phases=NULL;
-#endif
   allocation_check =  posix_memalign((void **)&u1_back_phases, ALIGN,
          NDiffFlavs*8*sizeof(double_soa));   
          //  --> NDiffFlavs*4*size phases (as many as links)
@@ -145,9 +137,6 @@ void mem_alloc()
 
 inline void mem_free()
 {
-#ifdef BACKFIELD
-  free(u1_back_field_phases);
-#endif
   free(u1_back_phases);
   free(momenta);
   free(aux_conf_acc);

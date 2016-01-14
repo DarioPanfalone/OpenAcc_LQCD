@@ -6,6 +6,7 @@
 #include "./struct_c_def.h"
 #include "./inverter_multishift_full.h"
 #include "./alloc_vars.h"
+#include "./backfield.h"
 #include "./fermion_force.h"
 #include "./fermion_force_utilities.h"
 #include "../Include/fermion_parameters.h"
@@ -124,7 +125,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			       __restrict su3_soa * tstout_conf_acc_arr,// parking
 			       __restrict su3_soa * gl3_aux, // gl(3) parking
 #endif
-			       __restrict double_soa * backfield,
 			       __restrict tamat_soa  * tipdot_acc,
 			       __restrict ferm_param * tfermion_parameters,// [nflavs] 
 			       int tNDiffFlavs,
@@ -165,32 +165,35 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
     int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
     for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
       multishift_invert(conf_to_use, &tfermion_parameters[iflav], 
-			&(tfermion_parameters[iflav].approx_md),  backfield,
+			&(tfermion_parameters[iflav].approx_md), 
 			tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, 
 			tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
       
-      ker_openacc_compute_fermion_force(conf_to_use, backfield, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
+      ker_openacc_compute_fermion_force(conf_to_use, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
     }
     
 #ifdef STOUT_FERMIONS
 
  #if defined(IMCHEMPOT) || defined(BACKFIELD)
     // JUST MULTIPLY BY BACK FIELD AND/OR CHEMICAL POTENTIAL
-    multiply_backfield_times_force(&(tfermion_parameters[iflav]),backfield,taux_conf_acc,gl3_aux);
+    // the backfield here must not have phases added.    
+    mult_backfield_by_stag_phases(&(tfermion_parameters[iflav].phases));
+    multiply_backfield_times_force(&(tfermion_parameters[iflav]),taux_conf_acc,gl3_aux);
+    // remultiplying field by staggered phases.
+    mult_backfield_by_stag_phases(&(tfermion_parameters[iflav].phases));
  #else
     accumulate_gl3soa_into_gl3soa(taux_conf_acc,gl3_aux);
 
  #endif 
     
 #else
-    multiply_conf_times_force_and_take_ta_even(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
-    multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]),backfield, taux_conf_acc,tipdot_acc);
+    multiply_conf_times_force_and_take_ta_even(tconf_acc,&(tfermion_parameters[iflav]), taux_conf_acc,tipdot_acc);
+    multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]), taux_conf_acc,tipdot_acc);
 
 #endif
   }
 
 #ifdef STOUT_FERMIONS
-  mult_gl3_soa_times_stag_phases(gl3_aux);
 
   for(int stout_level = act_params.stout_steps ; stout_level > 1 ; stout_level--){
     if(verbosity_lv > 2) printf("\t\tSigma' to Sigma [lvl %d to lvl %d]\n",stout_level,stout_level-1);
@@ -200,7 +203,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
    if(verbosity_lv > 2)  printf("\t\tSigma' to Sigma [lvl 1 to lvl 0]\n");
   compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, taux_conf_acc );
 
-  mult_gl3_soa_times_stag_phases(gl3_aux);
 
   multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc, gl3_aux,tipdot_acc); // stag
   multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc, gl3_aux,tipdot_acc); // stag

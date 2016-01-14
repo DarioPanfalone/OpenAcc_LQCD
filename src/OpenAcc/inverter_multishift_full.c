@@ -15,7 +15,6 @@ extern int verbosity_lv;
 int multishift_invert(__restrict su3_soa * const u,
 		      __restrict ferm_param * pars,
 		      RationalApprox * approx,
-		      __restrict double_soa * backfield,
 		      __restrict vec3_soa * out, // multi-fermion [nshifts]
 		      __restrict vec3_soa * const in, // single ferm
 		      double residuo,
@@ -103,8 +102,8 @@ int multishift_invert(__restrict su3_soa * const u,
       cg++;
 
       // s=(M^dagM)p, alhpa=(p,s)=(p,Ap)
-//fermion_matrix_multiplication(su3_soa *u,vec3_soa *out,vec3_soa *in,vec3_soa *temp1, ferm_param *pars,double_soa * backfield)
-      fermion_matrix_multiplication(u,loc_s,loc_p,loc_h,pars,backfield);
+//fermion_matrix_multiplication(su3_soa *u,vec3_soa *out,vec3_soa *in,vec3_soa *temp1, ferm_param *pars)
+      fermion_matrix_multiplication(u,loc_s,loc_p,loc_h,pars);
       
       
       
@@ -191,7 +190,7 @@ int multishift_invert(__restrict su3_soa * const u,
 
     for(iter=0; iter<approx->approx_order; iter++){
       assign_in_to_out(&out[iter],loc_p);
-      fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,backfield,approx->RA_b[iter]);
+      fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
       double  giustoono=l2norm2_global(loc_h);
       printf("\t%1.1e",sqrt(giustoono)/residuo);

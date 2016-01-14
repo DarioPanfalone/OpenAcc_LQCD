@@ -26,6 +26,7 @@ typedef struct dcomplex_soa_t {
 typedef struct double_soa_t {
     int status;
     double d[sizeh];
+    int staggered_status; // 0 ok, 1 with staggered phases included.
 } double_soa;
 typedef struct vec3_t {
   d_complex c0;
@@ -33,7 +34,8 @@ typedef struct vec3_t {
   d_complex c2;
 } vec3;
 typedef struct su3_soa_t {
-  int status;  
+  int status;
+  int staggered_status; // 0 ok, 1 with staggered phases included.
   vec3_soa r0;
   vec3_soa r1;
   vec3_soa r2;

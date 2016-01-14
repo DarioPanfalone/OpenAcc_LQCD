@@ -8,26 +8,37 @@
 #endif
 
 // lattice dimensions
-#define nx 32 
-#define ny 32 
-#define nz 32 
-#define nt 8
+#define nd0 32 
+#define nd1 32 
+#define nd2 32 
+#define nd3 8
 
+#define nd0h (nd0 >> 1) // nx/2
+#define nd1h (nd1 >> 1)
+#define nd2h (nd2 >> 1)
+#define nd3h (nd3 >> 1)
 
-#define sizehh nx*ny*nz*nt/2 
+// for legacy - to remove after refactoring is complete
+#define nx nd0    
+#define ny nd1
+#define nz nd2
+#define nt nd3
 
-#define ANTIPERIODIC_T_BC  // else periodic time bc are taken
-
-
-#define vol1 nx
-#define vol2 (ny * vol1)
-#define vol3 (nz * vol2)
-#define vol4 (nt * vol3)
 #define nxh (nx >> 1) // nx/2
 #define nyh (ny >> 1)
 #define nzh (nz >> 1)
 #define nth (nt >> 1)
 
+
+
+#define sizehh nd0*nd1*nd2*nd3/2 
+
+#define ANTIPERIODIC_T_BC  // else periodic time bc are taken
+
+#define vol1 nd0
+#define vol2 (nd1 * vol1)
+#define vol3 (nd2 * vol2)
+#define vol4 (nd3 * vol3)
 #define size vol4
 #define size2 (2*size)
 #define size3 (3*size)
@@ -36,11 +47,26 @@
 
 
 #pragma acc routine seq
-static inline int snum_acc(int x, int y, int z, int t) {
+
+typedef struct geom_parameters_t{
+
+    int nx,ny,nz,nt;
+    // map of physical directions onto logical directions
+    int xmap,ymap,zmap,tmap;// tmap is the "antiperiodic direction" for 
+                            // fermions
+    
+
+} geom_parameters;
+
+extern geom_parameter geom_par;
+
+static inline int snum_acc(int d0, int d1, int d2, int d3) {
   int ris;
-  ris = x + (y*vol1) + (z*vol2) + (t*vol3);
+  ris = d0 + (d1*vol1) + (d2*vol2) + (d3*vol3);
   return ris/2;   // <---  /2 Pay attention to even/odd 
 }
+
+static inline int
 
 // TABLES FOR THE NEAREST NEIGHBOURS       
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            
@@ -50,6 +76,8 @@ static inline int snum_acc(int x, int y, int z, int t) {
 // temporarily defined and computed here (should be moved elsewhere!)      
 int nnp_openacc[sizeh][4][2];
 int nnm_openacc[sizeh][4][2];
+
+
 
 void compute_nnp_and_nnm_openacc(void);
 

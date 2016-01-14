@@ -32,7 +32,7 @@ int init_ferm_params(ferm_param *fermion_settings){
     NPS_tot += fermion_settings[i].number_of_ps;
     // compute the max number of ps among the various flavs
     if(fermion_settings[i].number_of_ps>=max_ps) max_ps = fermion_settings[i].number_of_ps;
-    // deterime the offset (where does the ps of the flavour i starts?)
+    // determine the offset (where does the ps of the flavour i starts?)
     if(i==0){
       fermion_settings[i].index_of_the_first_ps=0;
     }else{
@@ -111,24 +111,10 @@ int init_ferm_params(ferm_param *fermion_settings){
 
 void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 {
-   
-
   for(int i=0;i<NDiffFlavs;i++){
-
       fpar[i].phases = &u1_back_phases[i*8];
-
-
-
-
-
-  
+      init_fermion_backfield(bfpars,fpar[i]);
   }
- 
-
-
-
-
-
 }
 
 

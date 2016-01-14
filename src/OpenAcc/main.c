@@ -78,8 +78,9 @@ int main(int argc, char* argv[]){
     compute_nnp_and_nnm_openacc();
     printf("nn computation : OK \n");
 #ifdef BACKFIELD
-    init_backfield(u1_back_field_phases,backfield_parameters);
-    print_double_soa(u1_back_field_phases,"backfield");
+    init_all_u1_phases(backfield_parameters,fermion_parameters);
+
+    print_double_soa("backfield");
     printf("u1_backfield initialization : OK \n");
 #endif
     initialize_md_global_variables(md_parameters);
@@ -136,7 +137,8 @@ int main(int argc, char* argv[]){
     create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER])\
     create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc)\
     create(local_sums[0:2]) create(d_local_sums[0:2])\
-    copyin(fermions_parameters[0:NDiffFlavs]) copyin(deltas_Omelyan[0:7])
+    copyin(fermions_parameters[0:NDiffFlavs]) copyin(deltas_Omelyan[0:7]) \
+    copyin(u1_back_phases[0:8*NDiffFlavs])
     {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
