@@ -187,7 +187,7 @@ int main(int argc, char* argv[]){
                     strcpy(fermionic_outfile_header,"#conf_id\t");
                     for(int iflv=0;iflv<NDiffFlavs;iflv++){
                         char strtocat[20];
-                        sprintf(strtocat, "Reff_%d\tImff_%d\t",iflv);
+                        sprintf(strtocat, "Reff_%d\tImff_%d\t",iflv,iflv);
                         strcat(fermionic_outfile_header,strtocat);
                     }
                     strcat(fermionic_outfile_header,"\n");

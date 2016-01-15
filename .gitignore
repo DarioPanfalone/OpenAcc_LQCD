@@ -3,4 +3,4 @@
 *.ptx
 *.o
 *~
-.gitignore
+*.REMEZ
