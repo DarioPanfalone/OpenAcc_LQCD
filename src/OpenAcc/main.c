@@ -198,7 +198,7 @@ int main(int argc, char* argv[]){
                 }
                 if(foutfile){
                     fprintf(foutfile,"%d\t",conf_id_iter);
-                    for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),mkwch_pars.residue_metro,foutfile);
+                    for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,&(fermions_parameters[iflv]),mkwch_pars.residue_metro,foutfile);
                     fprintf(foutfile,"\n");
                 }
                 fclose(foutfile);

@@ -10,7 +10,6 @@ extern char fermionic_outfilename[50];
 extern char fermionic_outfile_header[100];
 
 void eo_inversion(su3_soa *tconf_acc,
-		  double_soa * tbackfield,
 		  ferm_param * tfermions_parameters,
                   double res,
 		  vec3_soa * in_e,     // z2 noise
@@ -29,7 +28,7 @@ d_complex chiral_condensate(vec3_soa * rnd_e, vec3_soa * rnd_o,
 	       vec3_soa * chi_e, vec3_soa * chi_o);
 
 
-void perform_chiral_measures( su3_soa * tconf_acc, double_soa * tbackfield,
+void perform_chiral_measures( su3_soa * tconf_acc,
 			      ferm_param * tfermions_parameters, double res,
 			      FILE *out_file);
 

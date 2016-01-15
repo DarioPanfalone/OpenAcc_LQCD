@@ -1,3 +1,4 @@
+#ifndef FIND_MIN_MAX_C_
 #define FIND_MIN_MAX_C_
 
 
@@ -86,7 +87,7 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
 //    acc_Deo(u,loc_p,loc_h,pars,backfield);
 //    // p=max r - (M^dag M)r 
 //    combine_add_factor_x_in2_to_in1(loc_p,loc_r,delta);
-    fermion_matrix_multiplication_shifted(u,loc_p,loc_r,loc_h,pars,delta-m2)
+    fermion_matrix_multiplication_shifted(u,loc_p,loc_r,loc_h,pars,delta-m2);
     norm=sqrt(l2norm2_global(loc_p));
     old_norm=fabs(old_norm-norm);
     old_norm/=norm;

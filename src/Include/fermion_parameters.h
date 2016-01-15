@@ -2,8 +2,8 @@
 #define FERMION_PARAMETERS_H
 
 #include "../RationalApprox/rationalapprox.h"
-#include "../OpenAcc/backfield.h"
 #include "../OpenAcc/struct_c_def.h"
+#include "../OpenAcc/backfield.h"
 #ifdef __GNUC__
  #define __USE_XOPEN2K
  #include <stdlib.h>
@@ -30,6 +30,8 @@ typedef struct ferm_param_t{
   RationalApprox approx_li;        // last inv
 } ferm_param;
 
+
+
 extern int NDiffFlavs;
 extern int NPS_tot;
 extern int max_ps;
@@ -46,6 +48,8 @@ int init_ferm_params(ferm_param * fermion_settings);
 // allocated )
 void init_all_u1_phases(bf_param bfpars, ferm_param *fpar);
 
+
+void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters);
 
 
 #endif

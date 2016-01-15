@@ -83,6 +83,33 @@ int check_parinfo_sequence(int npar, par_info * par_infos){
             if (strstr(par_infos[j].name,par_infos[i].name)) return 0;
 }
 
+void reorder_par_infos(int npar, par_info * par_infos ){
+    // this is necessary if a parameter name is contained in another
+    // parameter name, for example "Ntraj" is contained in "ThermNtraj".
+    // If this happens, if the parser looks first for "Ntraj", we'll have 
+    // 2 matches for "Ntraj" and 0 matches for "ThermNtraj" (see scan_group_NV()).
+    // We are safe instead if "ThermNtraj" comes first.
+    // So, if i<j and name[i] is contained in name[j], the two parameters
+    // are exchanged.
+
+    int allright = 0;
+    while(! allright && npar > 1){
+        for(int i = 0; i < npar; i++){
+            for(int j = i+1; j < npar; j++){
+                allright = 1;
+                if (strstr(par_infos[j].name,par_infos[i].name)){
+                    printf("Reordering %s and %s \n",par_infos[j].name,par_infos[i].name );
+                    par_info tmp = par_infos[i];
+                    par_infos[i] = par_infos[j];
+                    par_infos[j] = tmp;
+                    allright = 0;
+                    break;
+                }           
+            }
+            if(allright) break;
+        }
+    }
+}
 
 
 int scan_group_V(int ntagstofind, const char **strtofind, 
@@ -400,22 +427,6 @@ void read_device_setting(device_param *device_settings,char filelines[MAXLINES][
 
 }
 
-void read_device_setting(device_param *device_settings,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
-{
-
-    const unsigned int npar_device_settings = 1 ; 
-    par_info tp[npar_device_settings];
-
-    char sdevice_choice[] = "device_choice" ;
-
-    tp[0]=(par_info){(void*) &(device_settings->device_choice),TYPE_INT,sdevice_choice };
-
-
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_device_settings,tp, filelines, startline, endline);
-
-}
-
 void read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
@@ -423,20 +434,20 @@ void read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH]
     const unsigned int npar_geometry = 8;
     par_info gp[npar_geometry];
 
-    char snx[] = "nx" ;
-    char sny[] = "ny" ;
-    char snz[] = "nz" ;
-    char snt[] = "nt" ;
+    char sgnx[] = "nx" ;
+    char sgny[] = "ny" ;
+    char sgnz[] = "nz" ;
+    char sgnt[] = "nt" ;
     char sxmap[] = "xmap" ;
     char symap[] = "ymap" ;
     char szmap[] = "zmap" ;
     char stmap[] = "tmap" ;
 
 
-    gp[0]=(par_info){(void*) &(gpar->nx ),TYPE_INT, snx };
-    gp[1]=(par_info){(void*) &(gpar->ny ),TYPE_INT, sny };
-    gp[2]=(par_info){(void*) &(gpar->nz ),TYPE_INT, snz };
-    gp[3]=(par_info){(void*) &(gpar->nt ),TYPE_INT, snt };
+    gp[0]=(par_info){(void*) &(gpar->gnx ),TYPE_INT, sgnx };
+    gp[1]=(par_info){(void*) &(gpar->gny ),TYPE_INT, sgny };
+    gp[2]=(par_info){(void*) &(gpar->gnz ),TYPE_INT, sgnz };
+    gp[3]=(par_info){(void*) &(gpar->gnt ),TYPE_INT, sgnt };
     gp[4]=(par_info){(void*) &(gpar->xmap ),TYPE_INT, sxmap };
     gp[5]=(par_info){(void*) &(gpar->ymap ),TYPE_INT, symap };
     gp[6]=(par_info){(void*) &(gpar->zmap ),TYPE_INT, szmap };
@@ -560,6 +571,11 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 read_device_setting(&dev_settings,
                         filelines,startline,endline);
                 break; 
+            case PMG_GEOMETRY   : 
+                read_geometry(&geom_par, 
+                        filelines,startline,endline);
+                break; 
+
 
         }
     }

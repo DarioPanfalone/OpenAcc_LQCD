@@ -40,7 +40,6 @@ inline int KSphaseT(int x,int y,int z,int t){
  * 4. The chemical potential related phases that must be applied in the 
  *    "T" direction 
  ***********************************************************************/
-void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters);
 
 
 void mult_backfield_by_stag_phases(double_soa * phases);

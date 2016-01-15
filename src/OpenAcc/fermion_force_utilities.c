@@ -143,24 +143,24 @@ void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, //
           // dir  0  =  x even   --> eta = 1 , no multiplication needed
 	  arg = backfield[0].d[idxh];
           phase = cos(arg) + I * sin(arg);
-	  mat1_times_auxmat_into_tamat(&u[0],idxh,eta,&auxmat[0],idxh,&ipdot[0],idxh,phase);
+	  mat1_times_auxmat_into_tamat(&u[0],idxh,&auxmat[0],idxh,&ipdot[0],idxh,phase);
 
 
           // dir  2  =  y even
 	  arg = backfield[2].d[idxh];
           phase = cos(arg) + I * sin(arg);
-	  mat1_times_auxmat_into_tamat(&u[2],idxh,eta,&auxmat[2],idxh,&ipdot[2],idxh,phase);
+	  mat1_times_auxmat_into_tamat(&u[2],idxh,&auxmat[2],idxh,&ipdot[2],idxh,phase);
 
 
           // dir  4  =  z even
 	  arg = backfield[4].d[idxh];
           phase = cos(arg) + I * sin(arg);
-	  mat1_times_auxmat_into_tamat(&u[4],idxh,eta,&auxmat[4],idxh,&ipdot[4],idxh,phase);
+	  mat1_times_auxmat_into_tamat(&u[4],idxh,&auxmat[4],idxh,&ipdot[4],idxh,phase);
 
           // dir  6  =  t even
 	  arg = backfield[6].d[idxh];
           phase = cos(arg) + I * sin(arg);
-	  mat1_times_auxmat_into_tamat(&u[6],idxh,eta,&auxmat[6],idxh,&ipdot[6],idxh,phase);
+	  mat1_times_auxmat_into_tamat(&u[6],idxh,&auxmat[6],idxh,&ipdot[6],idxh,phase);
 
         }
       }
@@ -195,22 +195,22 @@ void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, /
           // dir  1  =  x odd    --> eta = 1 , no multiplication needed
           arg = backfield[1].d[idxh];
           phase = cos(arg) + I * sin(arg);
-          mat1_times_auxmat_into_tamat(&u[1],idxh,eta,&auxmat[1],idxh,&ipdot[1],idxh,phase);
+          mat1_times_auxmat_into_tamat(&u[1],idxh,&auxmat[1],idxh,&ipdot[1],idxh,phase);
 
           // dir  3  =  y odd
           arg = backfield[3].d[idxh];
           phase = cos(arg) + I * sin(arg);
-          mat1_times_auxmat_into_tamat(&u[3],idxh,eta,&auxmat[3],idxh,&ipdot[3],idxh,phase);
+          mat1_times_auxmat_into_tamat(&u[3],idxh,&auxmat[3],idxh,&ipdot[3],idxh,phase);
 
           // dir  5  =  z odd
           arg = backfield[5].d[idxh];
           phase = cos(arg) + I * sin(arg);
-          mat1_times_auxmat_into_tamat(&u[5],idxh,eta,&auxmat[5],idxh,&ipdot[5],idxh,phase);
+          mat1_times_auxmat_into_tamat(&u[5],idxh,&auxmat[5],idxh,&ipdot[5],idxh,phase);
 
           // dir  7  =  t odd
           arg = backfield[7].d[idxh];
           phase = cos(arg) + I * sin(arg);
-          mat1_times_auxmat_into_tamat(&u[7],idxh,eta,&auxmat[7],idxh,&ipdot[7],idxh,phase);
+          mat1_times_auxmat_into_tamat(&u[7],idxh,&auxmat[7],idxh,&ipdot[7],idxh,phase);
 
 
         } //hx
@@ -245,7 +245,7 @@ void multiply_conf_times_force_and_take_ta(  __restrict su3_soa * const u, // e'
           for(dir = 1; dir<8;dir+=2){
               arg = backfield[dir].d[idxh];
               phase = cos(arg) + I * sin(arg);
-              mat1_times_auxmat_into_tamat(&u[dir],idxh,eta,&auxmat[dir],idxh,&ipdot[dir],idxh,phase);
+              mat1_times_auxmat_into_tamat(&u[dir],idxh,&auxmat[dir],idxh,&ipdot[dir],idxh,phase);
           }
 
           //even sites
@@ -254,7 +254,7 @@ void multiply_conf_times_force_and_take_ta(  __restrict su3_soa * const u, // e'
           for(dir = 0; dir<8;dir+=2){
               arg = backfield[dir].d[idxh];
               phase = cos(arg) + I * sin(arg);
-              mat1_times_auxmat_into_tamat(&u[dir],idxh,eta,&auxmat[dir],idxh,&ipdot[dir],idxh,phase);
+              mat1_times_auxmat_into_tamat(&u[dir],idxh,&auxmat[dir],idxh,&ipdot[dir],idxh,phase);
           }
         } //hx
       } //y
@@ -279,28 +279,21 @@ SETINUSE(ipdot);
       for(y=0; y<ny; y++) {
 #pragma acc loop independent //vector(DIM_BLOCK_X)
           for(hx=0; hx < nxh; hx++) {
-              int x,eta;
+              int x;
 
               //even sites
               x = 2*hx + ((y+z+t) & 0x1);
               idxh = snum_acc(x,y,z,t);
 
               // dir  0  =  x even   --> eta = 1 , no multiplication needed
-              eta = 1;
-              mat1_times_auxmat_into_tamat_nophase(&u[0],idxh,eta,&auxmat[0],idxh,&ipdot[0],idxh); 
+              mat1_times_auxmat_into_tamat_nophase(&u[0],idxh,&auxmat[0],idxh,&ipdot[0],idxh); 
               // dir  2  =  y even
-              eta = 1 - ( 2*(x & 0x1) );
-              mat1_times_auxmat_into_tamat_nophase(&u[2],idxh,eta,&auxmat[2],idxh,&ipdot[2],idxh);
+              mat1_times_auxmat_into_tamat_nophase(&u[2],idxh,&auxmat[2],idxh,&ipdot[2],idxh);
               // dir  4  =  z even
-              eta = 1 - ( 2*((x+y) & 0x1) );
-              mat1_times_auxmat_into_tamat_nophase(&u[4],idxh,eta,&auxmat[4],idxh,&ipdot[4],idxh);
+              mat1_times_auxmat_into_tamat_nophase(&u[4],idxh,&auxmat[4],idxh,&ipdot[4],idxh);
 
               // dir  6  =  t even
-              eta = 1 - ( 2*((x+y+z) & 0x1) );
-#ifdef ANTIPERIODIC_T_BC
-              eta *= (1- 2*(int)(t/(nt-1)));
-#endif
-              mat1_times_auxmat_into_tamat_nophase(&u[6],idxh,eta,&auxmat[6],idxh,&ipdot[6],idxh);
+              mat1_times_auxmat_into_tamat_nophase(&u[6],idxh,&auxmat[6],idxh,&ipdot[6],idxh);
 
           } // hx
       } // y
@@ -323,28 +316,21 @@ void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * co
       for(y=0; y<ny; y++) {
 #pragma acc loop independent //vector(DIM_BLOCK_X)
         for(hx=0; hx < nxh; hx++) {
-          int x,eta;
+          int x;
           //odd sites
           x = 2*hx + ((y+z+t+1) & 0x1);
           idxh = snum_acc(x,y,z,t);
           // dir  1  =  x odd    --> eta = 1 , no multiplication needed
-          eta = 1;
-          mat1_times_auxmat_into_tamat_nophase(&u[1],idxh,eta,&auxmat[1],idxh,&ipdot[1],idxh);
+          mat1_times_auxmat_into_tamat_nophase(&u[1],idxh,&auxmat[1],idxh,&ipdot[1],idxh);
 
           // dir  3  =  y odd
-          eta = 1 - ( 2*(x & 0x1) );
-          mat1_times_auxmat_into_tamat_nophase(&u[3],idxh,eta,&auxmat[3],idxh,&ipdot[3],idxh);
+          mat1_times_auxmat_into_tamat_nophase(&u[3],idxh,&auxmat[3],idxh,&ipdot[3],idxh);
 
           // dir  5  =  z odd
-	  eta = 1 - ( 2*((x+y) & 0x1) );
-	  mat1_times_auxmat_into_tamat_nophase(&u[5],idxh,eta,&auxmat[5],idxh,&ipdot[5],idxh);
+          mat1_times_auxmat_into_tamat_nophase(&u[5],idxh,&auxmat[5],idxh,&ipdot[5],idxh);
 
           // dir  7  =  t odd
-          eta = 1 - ( 2*((x+y+z) & 0x1) );
-#ifdef ANTIPERIODIC_T_BC
-          eta *= (1- 2*(int)(t/(nt-1)));
-#endif
-          mat1_times_auxmat_into_tamat_nophase(&u[7],idxh,eta,&auxmat[7],idxh,&ipdot[7],idxh);
+          mat1_times_auxmat_into_tamat_nophase(&u[7],idxh,&auxmat[7],idxh,&ipdot[7],idxh);
 
         } //hx
       } //y

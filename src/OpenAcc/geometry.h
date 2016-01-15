@@ -50,7 +50,7 @@
 
 typedef struct geom_parameters_t{
 
-    int nx,ny,nz,nt;
+    int gnx,gny,gnz,gnt;
     // map of physical directions onto logical directions
     int xmap,ymap,zmap,tmap;// tmap is the "antiperiodic direction" for 
                             // fermions
@@ -58,15 +58,13 @@ typedef struct geom_parameters_t{
 
 } geom_parameters;
 
-extern geom_parameter geom_par;
+extern geom_parameters geom_par;
 
 static inline int snum_acc(int d0, int d1, int d2, int d3) {
   int ris;
   ris = d0 + (d1*vol1) + (d2*vol2) + (d3*vol3);
   return ris/2;   // <---  /2 Pay attention to even/odd 
 }
-
-static inline int
 
 // TABLES FOR THE NEAREST NEIGHBOURS       
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            

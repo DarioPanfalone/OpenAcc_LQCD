@@ -47,7 +47,7 @@ void eo_inversion(su3_soa *tconf_acc,
 
 	    acc_Deo(tconf_acc, phi_e, in_o,tfermions_parameters->phases);
 	    combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
-	    ker_invert_openacc(tconf_acc,tbackfield,tfermions_parameters,
+	    ker_invert_openacc(tconf_acc,tfermions_parameters,
 				      out_e,phi_e,res,trialSolution,
 				      tloc_r,tloc_h,tloc_s,tloc_p);
 	    acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
@@ -72,7 +72,6 @@ d_complex chiral_condensate(vec3_soa * rnd_e,
 
 
 void perform_chiral_measures( su3_soa * tconf_acc,
-			      double_soa * tbackfield,
 			      ferm_param * tfermions_parameters,
 			      double res,
 			      FILE *out_file){
@@ -116,7 +115,7 @@ void perform_chiral_measures( su3_soa * tconf_acc,
 #pragma acc data create(phi_e[0:1]) create(phi_o[0:1]) create(chi_e[0:1]) create(chi_o[0:1]) copyin(rnd_e[0:1]) copyin(rnd_o[0:1]) copyin(trial_sol[0:1])
   {
     // i fermioni ausiliari kloc_* sono quelli GLOBALI !!!
-    eo_inversion(conf_to_use,tbackfield,tfermions_parameters,res,rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+    eo_inversion(conf_to_use,tfermions_parameters,res,rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
     chircond = chiral_condensate(rnd_e,rnd_o,chi_e,chi_o);
     double factor = tfermions_parameters->degeneracy*0.25/size;
     fprintf(out_file,"%.16lf\t%.16lf\t",creal(chircond)*factor,cimag(chircond)*factor);
