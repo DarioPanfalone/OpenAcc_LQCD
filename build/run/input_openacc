@@ -80,3 +80,14 @@ FermionicOutfilename    fermmeas_openacc.txt
 
 DeviceSettings
 device_choice           0
+
+Geometry
+nx                      8	
+ny	                    8
+nz	                    8
+nt	                    8
+xmap	                0
+ymap	                1    
+zmap	                2    
+tmap	                3
+

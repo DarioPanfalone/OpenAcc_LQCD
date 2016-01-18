@@ -222,6 +222,8 @@ int read_thmat_soa(thmat_soa * ipdot, const char* nomefile){
 
 void print_double_soa(double_soa * const backfield, const char* nomefile){
 
+    printf("Printing backfield on file %s", nomefile);
+
     FILE *fp;
     fp = fopen(nomefile,"w");
     for(int q = 0 ; q < 8 ; q++){

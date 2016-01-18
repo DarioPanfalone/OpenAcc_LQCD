@@ -10,6 +10,7 @@
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/su3_measurements.h"
 #include "../OpenAcc/deviceinit.h"
+#include "../OpenAcc/geometry.h"
 #include "../RationalApprox/rationalapprox.h"
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
@@ -455,6 +456,21 @@ void read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH]
 
     // from then on, you should not have to modify anything.
     scan_group_NV(npar_geometry,gp, filelines, startline, endline);
+
+    if(startline<endline)
+    if(gpar->gnx != nx || gpar->gny != ny || gpar->gnz != nz || gpar->gnt != nt ){ 
+        printf("Error, input file lattice dimensions are not compatible\n");
+        printf("       with the lattice dimensions written in geometry.h.\n");
+        printf("       Either modify the input file, or recompile,\n");
+        printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
+                               gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
+        printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",nx,ny,nz,nt );
+        exit(1);
+
+    }
+
+
+
 }
 
 

@@ -8,7 +8,6 @@
 #include <string.h>
 #include <math.h>
 
-
 #define ALIGN 128
 #define acc_twopi 2*3.14159265358979323846
 
@@ -112,9 +111,15 @@ int init_ferm_params(ferm_param *fermion_settings){
 
 void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 {
+
+
   for(int i=0;i<NDiffFlavs;i++){
       fpar[i].phases = &u1_back_phases[i*8];
       init_fermion_backfield(bfpars,&(fpar[i]));
+      char tempname[50];                            // DEBUG
+      strcpy(tempname,"backfield_");                //
+      strcat(tempname,fpar->name);                  // 
+      print_double_soa(fpar[i].phases,tempname); //
   }
 }
 

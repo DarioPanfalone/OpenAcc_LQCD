@@ -46,6 +46,7 @@ void su2_rand(double *pp);
 #include "./action.h"
 
 
+
 //#define NORANDOM  // FOR debug, check also update_versatile.c 
 
 int conf_id_iter;
@@ -77,12 +78,12 @@ int main(int argc, char* argv[]){
     printf("Allocazione della memoria : OK \n");
     compute_nnp_and_nnm_openacc();
     printf("nn computation : OK \n");
-#ifdef BACKFIELD
-    init_all_u1_phases(backfield_parameters,fermion_parameters);
+    init_all_u1_phases(backfield_parameters,fermions_parameters);
 
-    print_double_soa("backfield");
+
+
     printf("u1_backfield initialization : OK \n");
-#endif
+    
     initialize_md_global_variables(md_parameters);
     printf("init md vars : OK \n");
 
