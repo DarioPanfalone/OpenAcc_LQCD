@@ -191,7 +191,7 @@ void mult_backfield_by_stag_phases(double_soa * phases){
 #include <stdio.h>
 void print_double_soa(double_soa * const backfield, const char* nomefile){
 
-    printf("Printing backfield on file %s", nomefile);
+    printf("Printing backfield on file %s\n", nomefile);
 
     FILE *fp;
     fp = fopen(nomefile,"w");

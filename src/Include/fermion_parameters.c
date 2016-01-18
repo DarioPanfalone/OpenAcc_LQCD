@@ -118,8 +118,8 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
       init_fermion_backfield(bfpars,&(fpar[i]));
       char tempname[50];                            // DEBUG
       strcpy(tempname,"backfield_");                //
-      strcat(tempname,fpar->name);                  // 
-      print_double_soa(fpar[i].phases,tempname); //
+      strcat(tempname,fpar[i].name);                // 
+      print_double_soa(fpar[i].phases,tempname);    //
   }
 }
 
@@ -141,11 +141,15 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
     double_soa * phases = fermion_parameters->phases;
 
     int x, y, z, t, parity;
-    int d[4], nd[4], idxh;
-    nd[0] = nd0;
-    nd[1] = nd1;
-    nd[2] = nd2;
-    nd[3] = nd3;
+    int d[4], idxh;
+
+    if(verbosity_lv > 2) { 
+        printf("Generating external field (containing staggered phases) ");
+        printf("for flavour %s\n",fermion_parameters->name);
+        printf("Direction mapping  x y z t: %d %d %d %d\n",
+                geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap);
+
+    }
 
     for(d[3]=0; d[3] < nd3; d[3]++){
         for(d[2]=0; d[2] < nd2; d[2]++){
@@ -159,9 +163,8 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     z = d[geom_par.zmap];
                     t = d[geom_par.tmap];
 
-                    if((x+y+z+t)%2==0) parity = 0; //pari
-                    else parity = 1; //dispari
-                
+
+                    parity = (x+y+z+t) %2 ; 
 
                     X = x + 1;
                     Y = y + 1;
@@ -187,6 +190,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
 
                     phases[parity].d[idxh]= acc_twopi*arg; 
 
+
                     ////////Y-oriented/////////
                     // Y even --> dir=2
                     // Y odd  --> dir=3
@@ -203,6 +207,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     while(arg < -0.5) arg += 1.0;
 
                     phases[2+parity].d[idxh]=acc_twopi*arg;
+
                     
                     ////////Z-oriented////////
                     // Z even --> dir=4
@@ -221,6 +226,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
 
                     phases[4+parity].d[idxh]=acc_twopi*arg;
 
+
                     ///////T-oriented////////
                     // T even --> dir=6
                     // T odd  --> dir=7
@@ -229,7 +235,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     arg -= (x+1)*ex_quantum/(nx*nt);
                    
                     arg *= ferm_charge;// only am phase so far
-                    if(KSphaseZ(x,y,z,t) == -1) arg += 0.5;
+                    if(KSphaseT(x,y,z,t) == -1) arg += 0.5;
                     arg += chpotphase; 
                     if(T == nt) arg += 0.5;// antiperiodic boundary conds
 

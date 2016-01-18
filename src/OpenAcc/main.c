@@ -116,7 +116,7 @@ int main(int argc, char* argv[]){
         printf("COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED \"conf_norndtest\" MUST BE PRESENT\n");
         exit(1);
 #else
-        generate_Conf_cold(conf_acc,0.01);    printf("Cold Gauge Conf Generated : OK \n");
+        generate_Conf_cold(conf_acc,0.00);    printf("Cold Gauge Conf Generated : OK \n");// DEBUG (eps = 0.00)
 #endif
         conf_id_iter=0;
     }

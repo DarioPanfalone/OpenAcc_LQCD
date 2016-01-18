@@ -45,10 +45,6 @@ inline int KSphaseT(int x,int y,int z,int t){
 void mult_backfield_by_stag_phases(double_soa * phases);
 
 
-
-
-
-
 // DEBUG
 void print_double_soa(double_soa * const backfield, const char* nomefile);
 

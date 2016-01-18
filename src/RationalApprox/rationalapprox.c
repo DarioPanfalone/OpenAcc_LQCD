@@ -78,6 +78,7 @@ int rationalapprox_read(RationalApprox* rational_approx)
                 rational_approx->exponent_num, rational_approx->exponent_den, 
                 rational_approx->lambda_min);
         printf("(see and modify \"genappfiles.sh\", check for doublers)\n");
+        printf("(Or give command \n bash <(sort genappfiles.sh | uniq)\n.");
         fprintf(bash_repair_commands,"./rgen %e %d %d %e &\n",
                 rational_approx->error, rational_approx->exponent_num,
                 rational_approx->exponent_den, rational_approx->lambda_min);
@@ -179,12 +180,24 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
    //pray
    if(out->lambda_min > minmax[0]){
        printf("ERROR: mother rational approx does not cover the range!\n");
+       printf("out->lambda_max: %e \n", out->lambda_max);
        printf("out->lambda_min: %e , minmax[0]: %e\n", out->lambda_min, minmax[0] );
+       printf("Consider modifying your input file, setting\n");
+       printf("ExpMaxEigenvalue         %f     # OR LARGER!!\n" , max*1.2 );
+       printf("Program will now terminate.\n");
 
-       printf("Consider producing another rational approximation with \n");
-       printf("./rgen %e %d %d %e\n", in->error, in->exponent_num, in->exponent_den, min/max);
+
        exit(1);
+   }else if(out->lambda_min< (0.3* minmax[0])){
+       printf("Warning, the range of your rational approximation is really large\n");
+       printf("out->lambda_min: %e , minmax[0]: %e\n", out->lambda_min, minmax[0] );
+    printf("You may consider reducing \'ExpMaxEigenvalue\' in the input file to %f.\n",
+            max*1.2 );
+
+
    }
+
+
 
 }
 
