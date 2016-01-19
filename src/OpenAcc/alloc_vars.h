@@ -6,13 +6,16 @@
 
 // used in the dynamical allocation of structures
 
-extern su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
+extern su3_soa  * conf_acc; // the gauge configuration.
+extern su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
+                                // if the metro test fails.
 extern su3_soa  * aux_conf_acc; // auxiliary 
 extern su3_soa  * auxbis_conf_acc; // auxiliary 
 extern double_soa * u1_back_field_phases; // BACKRGROUND EM FIELD
 extern thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 extern tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
-extern su3_soa * gconf_as_fermionmatrix; // conf to use in either cases in fermion related computation (with or without stouting)
+extern su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases 
+                      // in fermion related computation (with or without stouting)
 
 // STOUTING 
 #ifdef STOUT_FERMIONS

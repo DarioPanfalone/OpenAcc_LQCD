@@ -3,14 +3,14 @@
 
 #include <complex.h>
 
-#include "./geometry.h"
+#include "../OpenAcc/geometry.h"
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
 #include <sys/time.h>
 #include "../Include/common_defines.h"
-#include "./struct_c_def.h"
-#include "./single_types.h"
+#include "../OpenAcc/struct_c_def.h"
+#include "../OpenAcc/single_types.h"
 
 void print_vec3_soa(vec3_soa * const fermion, const char* nomefile){
 
@@ -72,7 +72,7 @@ void print_1su3_soa(su3_soa * const conf, const char* nomefile){
 
     FILE *fp;
     fp = fopen(nomefile,"w");
-    fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt);
+    fprintf(fp,"%d\t%d\t%d\t%d\t\n",nx,ny,nz,nt);
     for(int q = 0 ; q < 1 ; q++){ // q = 0 !!!!!
         for(int i = 0 ; i < sizeh ; i++){
             fprintf(fp, "%.18lf\t%.18lf\n",creal(conf[q].r0.c0[i]),cimag(conf[q].r0.c0[i]));

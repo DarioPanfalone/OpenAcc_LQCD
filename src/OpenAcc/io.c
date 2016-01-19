@@ -36,6 +36,7 @@ void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_
 }
 int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter ){
 
+
   FILE *fp;
   fp = fopen(nomefile,"r");
   if(!fp){
@@ -54,7 +55,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
     abort();
   }
 
-  for(int q = 0 ; q < 8 ; q++)
+  for(int q = 0 ; q < 8 ; q++){
     for(int i = 0 ; i < sizeh ; i++){
       double re,im;
       //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
@@ -69,6 +70,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
       fscanf(fp, "%lf %lf\n",&re,&im);conf[q].r2.c2[i] = re + im * I;
       
     }
+  }
   fclose(fp);
   return 0;
   }

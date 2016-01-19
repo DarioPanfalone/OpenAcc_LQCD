@@ -17,11 +17,12 @@
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
 #include "./action.h"
+#include "../Rand/random.h"
 
 
 //#define NORANDOM  // FOR debug, check also main.c 
 #ifdef NORANDOM
-#include "./dbgtools.h"
+#include "../DbgTools/dbgtools.h"
 #endif
 
 #ifdef __GNUC__
@@ -29,7 +30,6 @@
 #endif
 
 action_param act_params;
-extern double casuale();
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro){

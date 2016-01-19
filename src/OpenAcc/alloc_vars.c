@@ -12,13 +12,19 @@
 
 #define ALIGN 128
 
-su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered if the metro test fails.
+
+
+su3_soa  * conf_acc; // the gauge configuration.
+su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
+                         // if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
 su3_soa  * auxbis_conf_acc; // auxiliary 
 double_soa * u1_back_field_phases; // BACKRGROUND EM FIELD
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
-su3_soa * gconf_as_fermionmatrix; // conf to use in either cases in fermion related computation (with or without stouting)
+su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases 
+                      // in fermion related computation (with or without stouting)
+
 
 // STOUTING 
 #ifdef STOUT_FERMIONS
@@ -64,6 +70,13 @@ void mem_alloc()
 #else
   u1_back_field_phases=NULL;
 #endif
+
+  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
+  else printf("conf_acc allocated.\n");
+
+
+
 
   //the double bracket in the setfree macro MUST be there (because of operators precedence)
   allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_conf_acc[mu])); 
@@ -135,40 +148,41 @@ void mem_alloc()
 
 inline void mem_free()
 {
-#ifdef BACKFIELD
-  free(u1_back_field_phases);
-#endif
-  free(momenta);
-  free(aux_conf_acc);
-  free(auxbis_conf_acc);
+  printf("Dellocation.\n");
+#ifdef BACKFIELD                           
+  free(u1_back_field_phases);         printf("Free u1_back_field_phases\n");
+#endif  
+  free(momenta);                      printf("\nFreed momenta");
+  free(aux_conf_acc);                 printf("\nFreed aux_conf_acc");
+  free(auxbis_conf_acc);              printf("\nFreed auxbis_conf_acc");
+                                      
+                                      
+#ifdef STOUT_FERMIONS                 
+  free(gstout_conf_acc_arr);          printf("\nFreed gstout_conf_acc_arr");
+  free(glocal_staples);               printf("\nFreed glocal_staples");
+  free(gipdot);                       printf("\nFreed gipdot");
+  free(aux_ta);                       printf("\nFreed aux_ta");
+  free(aux_th);                       printf("\nFreed aux_th");
+#endif                                
+                                      
+                                      
+  free(conf_acc_bkp);                 printf("\nFreed conf_acc_bkp");        
+  free(ipdot_acc);                    printf("\nFreed ipdot_acc");           
 
-
-#ifdef STOUT_FERMIONS
-  free(gstout_conf_acc_arr);
-  free(glocal_staples);
-  free(gipdot);
-  free(aux_ta);
-  free(aux_th);
-#endif
-
-
-  free(conf_acc_bkp);
-  free(ipdot_acc);
-
-  free(ferm_chi_acc);
-  free(ferm_phi_acc);
-  free(ferm_out_acc);
-
-  free(ferm_shiftmulti_acc);
-
-  free(kloc_r);
-  free(kloc_s);
-  free(kloc_h);
-  free(kloc_p);
-  free(k_p_shiftferm);
-
-  free(local_sums);
-  free(d_local_sums);
+  free(ferm_chi_acc);                 printf("\nFreed ferm_chi_acc");        
+  free(ferm_phi_acc);                 printf("\nFreed ferm_phi_acc");        
+  free(ferm_out_acc);                 printf("\nFreed ferm_out_acc");        
+    
+  free(ferm_shiftmulti_acc);          printf("\nFreed ferm_shiftmulti_acc"); 
+                                
+  free(kloc_r);                       printf("\nFreed kloc_r");              
+  free(kloc_s);                       printf("\nFreed kloc_s");              
+  free(kloc_h);                       printf("\nFreed kloc_h");              
+  free(kloc_p);                       printf("\nFreed kloc_p");              
+  free(k_p_shiftferm);                printf("\nFreed k_p_shiftferm");       
+                                
+  free(local_sums);                   printf("\nFreed local_sums");          
+  free(d_local_sums);                 printf("\nFreed d_local_sums\n");
 }
 
 #endif

@@ -5,6 +5,7 @@
 #include "./markowchain.h"
 #include <string.h>
 #include <math.h>
+#include "../RationalApprox/rationalapprox.h"
 
 #define ALIGN 128
 
