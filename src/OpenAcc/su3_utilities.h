@@ -67,7 +67,8 @@ void unitarize_conf( __restrict su3_soa * const u);
 #pragma acc routine seq
 static inline void loc_unitarize_conf(__restrict su3_soa * const cnf,
 				      const int idx_cnf){
-  d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
+  d_complex A00,A01,A02,A10,A11,A12;
+  //d_complex A20,A21,A22;
   A00 = cnf->r0.c0[idx_cnf];
   A01 = cnf->r0.c1[idx_cnf];
   A02 = cnf->r0.c2[idx_cnf];
@@ -323,7 +324,7 @@ static inline void    conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_sta
   //Compute 3rd mat1 column from the first two
   d_complex mat1_02 = conj( ( mat1_10 * mat1_21 ) - ( mat1_20 * mat1_11) ) ;
   d_complex mat1_12 = conj( ( mat1_20 * mat1_01 ) - ( mat1_00 * mat1_21) ) ;
-  d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_10 * mat1_01) ) ;
+  //d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_10 * mat1_01) ) ;//not used
 
   // construct (into the variables mat2_ij) the hermitian conjugate of the mat2 matrix
   d_complex mat2_00 = conj( matmu2->r0.c0[idx_mat_mu2] ) ;

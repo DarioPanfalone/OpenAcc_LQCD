@@ -1,6 +1,10 @@
 #ifndef ALLOC_VARS_C_
 #define ALLOC_VARS_C_
 
+#ifdef __GNUC__
+#define _POSIX_C_SOURCE 200809L   // not to have warning on posix memalign
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "./struct_c_def.h"

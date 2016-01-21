@@ -51,8 +51,8 @@ bz              0.0
 
 
 MDParameters
-NmdSteps	    11
-GaugeSubSteps	5
+NmdSteps	    3
+GaugeSubSteps	3
 TrajLength	    1.0
 
 
@@ -65,9 +65,10 @@ residue_metro       	1e-8
 residue_md              1e-6
 ExpMaxEigenvalue        5      # approximate expected max eigenvalues
 StoreConfName       	conf_openacc
-SaveConfName            stored_config
+SaveConfName1            stored_config
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
+EpsGen                  0.1
 VerbosityLv             2
 
 GaugeMeasuresSettings
@@ -80,3 +81,13 @@ FermionicOutfilename    fermmeas_openacc.txt
 
 DeviceSettings
 device_choice           0
+
+Geometry
+nx                      8	
+ny                      8	
+nz                      8	
+nt                      8	
+xmap                    0                    
+ymap                    1
+zmap                    2 
+tmap                    3

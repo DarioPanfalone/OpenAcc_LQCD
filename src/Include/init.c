@@ -16,7 +16,7 @@
 #include "../Meas/gauge_meas.h"
 
 #include <stdio.h>
-#include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 
 #define MAXLINES 300
@@ -75,13 +75,6 @@ void erase_comments(char file_lines[MAXLINES][MAXLINELENGTH], int maxlines)
                 file_lines[i][j] = ' ';
         }
     }
-}
-
-int check_parinfo_sequence(int npar, par_info * par_infos){
-
-    for(int i = 0; i < npar; i++)
-        for(int j = i+1; j < npar; j++)
-            if (strstr(par_infos[j].name,par_infos[i].name)) return 0;
 }
 
 void reorder_par_infos(int npar, par_info * par_infos ){
@@ -187,7 +180,6 @@ void scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLIN
                     printf("  %s\r\t\t\t ",par_infos[i].name);
                     int reads = 0;
                     char parname[20];
-                    double tempdouble; int tempint ; char tempstr[20];
                     switch(par_infos[i].type){
                         case TYPE_INT: 
                             reads = sscanf(filelines[iline],

@@ -1,6 +1,7 @@
 #ifndef INCLUDE_ALL_H_
 #define INCLUDE_ALL_H_
 
+#include "../DbgTools/dbgtools.h"
 #include "../Include/common_defines.h"
 #include "../Include/fermion_parameters.c"
 #include "../Include/fermion_parameters.h"
@@ -15,7 +16,6 @@
 #include "../OpenAcc/cayley_hamilton.h"
 #include "../OpenAcc/cooling.c"
 #include "../OpenAcc/cooling.h"
-#include "../OpenAcc/dbgtools.h"
 #include "../OpenAcc/deviceinit.c"
 #include "../OpenAcc/deviceinit.h"
 #include "../OpenAcc/fermion_force.c"

@@ -73,18 +73,27 @@
   But if you don't have a makefile, or if you changed the dependence
   structure in your code, you have to create a makefile first. NO
   FEAR! The generate_makefile.py utility will do it for you.
-  You can call a wrapper for this script in this way:
 
-  [OPENACCREPO/build]~>../scripts/generate_makefile.sh 
+  The generate_makefile.py takes a number of arguments, namely 
+ 
+  - a list of files containing a main() function
+  - a compiler&linker flag option.
+  
+  For example:
+
+  [OPENACCREPO/build]~>./generate_makefile.py
   Please specify one compiler: either PGISLOW, GNU or PGI
  
   As you see, it will tell you to choose a compiler. Try, for example
 
-  [OPENACCREPO/build]~>../scripts/generate_makefile.sh GNU 
 
-  and a makefile will be generated, using gcc and -O3 optimization
-  (for more informations, look into generate_makefile.py). Then just
-  type
+  [OPENACCREPO/build]~>./generate_makefile.py GNU ../src/OpenAcc/main.c \
+                      ../src/DbgTools/deo_doe_test.c > makefile
+
+  and a makefile will be generaqted, using gcc and -O3 optimization
+  (for more informations, look into generate_makefile.py). 
+
+  Then just  type
   
   make main
 
@@ -105,7 +114,6 @@
   will fail.
 
  
-
   FAQ
   Q: Why don't you just use autotools?
   A: Because I don't know how to use them! If you can do better, do

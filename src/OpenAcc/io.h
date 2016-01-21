@@ -1,5 +1,5 @@
-#ifndef IO_C_
-#define IO_C_
+#ifndef IO_H_
+#define IO_H_
 
 #include "./struct_c_def.h"
 

@@ -2,10 +2,6 @@
 #define FERMION_PARAMETERS_H
 
 #include "../RationalApprox/rationalapprox.h"
-#ifdef __GNUC__
- #define __USE_XOPEN2K
- #include <stdlib.h>
-#endif
 typedef struct ferm_param_t{
   double ferm_mass;
   int degeneracy;

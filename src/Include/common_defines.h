@@ -49,5 +49,14 @@
 extern int verbosity_lv;
 
 
+// macro to check the outcome of 'fscanf', reporting the file and line where the problem
+// happened.
+ 
+#define CHECKREAD(expr,should_read) \
+{int read = expr ;if(read != should_read) { \
+        printf("%s:%d, Error, not read expected number of entries : %d read vs %d should_read\n.", __FILE__, __LINE__ , read,should_read);\
+        exit(1);}}\
+
+
 #endif
 
