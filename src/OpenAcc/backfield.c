@@ -11,6 +11,8 @@
 #include "../Include/fermion_parameters.h"
 #include "./geometry.h"
 
+
+
 bf_param backfield_parameters;
 
 
@@ -184,23 +186,6 @@ void mult_backfield_by_stag_phases(double_soa * phases){
             } // y loop
         } // z loop
     } // t loop
-}
-
-
-// DEBUG
-#include <stdio.h>
-void print_double_soa(double_soa * const backfield, const char* nomefile){
-
-    printf("Printing backfield on file %s\n", nomefile);
-
-    FILE *fp;
-    fp = fopen(nomefile,"w");
-    for(int q = 0 ; q < 8 ; q++){
-        for(int i = 0 ; i < sizeh ; i++){
-            fprintf(fp, "%.18lf\n",backfield[q].d[i]);
-        }
-    }
-    fclose(fp);
 }
 
 

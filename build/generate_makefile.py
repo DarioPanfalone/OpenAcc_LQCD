@@ -40,8 +40,6 @@ from sys import exit,argv,stderr,stdout
 
 # all nodes in the graph (all files)
 allnodesdict = dict() # abspath filename -> file_node
-allnodesnames = []   # necessary next to the dict()
-                     # to avoid infinite loops
 main_files = [] # file containing main()
 
 # The following function scans the file to find .h files that are 
@@ -89,40 +87,62 @@ def header_scanner(filename): # only headers!
     return filesfound,standards
 
 
+def fill_allnodesdict():
+    complete = False
+    while not complete:
+        complete = True
+        names_to_add = []
+        for filename in allnodesdict:
+            for dependence in allnodesdict[filename].direct_dependences:
+                if dependence not in allnodesdict:
+                    names_to_add.append(dependence)
+            for dependence in allnodesdict[filename].direct_dependences_c:
+                if dependence not in allnodesdict:
+                    names_to_add.append(dependence)
+        for name in names_to_add:
+            complete = False
+            allnodesdict[name] = file_node(name)
+
+def set_all_dependences():
+    for filename in allnodesdict:
+        allnodesdict[filename].get_all_dependences()
 
 class file_node:
-    def get_all_dependences_raw(self): # raw means with repetitions
+    # to use after fill_allnodesdict()
+    def get_all_dependences_raw(self,ancestors): # raw means with repetitions
                                        # only .h files
-        res = self.direct_dependences
-        for son in self.sons:
-            son_dependences = son.get_all_dependences_raw()
+        ancestors += [ self.name ]
+        res = list(self.direct_dependences)
+        for dep in self.direct_dependences:
+            son_dependences = allnodesdict[dep].get_all_dependences_raw(ancestors)
             if son_dependences is not None:
                 res = res + son_dependences
         return res
+    # to use after fill_allnodesdict()
     def get_all_dependences_c_raw(self, ancestors): # with repetitions
                                                     # all c files.
-        res = self.direct_dependences_c
+        res = list(self.direct_dependences_c)
         ancestors += [ self.name ]
         for dependence in self.direct_dependences_c:
             if dependence not in ancestors:
                 son = allnodesdict[dependence]
-                son.set_c_dependences(ancestors)
-                son_dependences_c = son.all_dependences_c
+                son_dependences_c = son.get_all_dependences_c_raw(ancestors)
                 if son_dependences_c is not None:
-                   res = res + son_dependences_c
+                    res = res + son_dependences_c
         return res
-    def get_all_standard_dependences_raw(self):  # with repetitions
+    # to use after fill_allnodesdict()
+    def get_all_standard_dependences_raw(self,ancestors):  # with repetitions
                                           # all 'standard library'
                                           # not included in the project
-        res = self.direct_standard_dependences
-        for son in self.sons:
-            son_dependences = son.get_all_standard_dependences_raw()
+        res = list(self.direct_standard_dependences)
+        ancestors += [ self.name ]
+        for dep in self.direct_dependences:
+            son_dependences = allnodesdict[dep].get_all_standard_dependences_raw(ancestors)
             if son_dependences is not None:
                 res = res + son_dependences
         return res
 
-    def __init__(self,filename,tancestors): # RECURSIVE
-        self.ancestors = tancestors
+    def __init__(self,filename):
         self.direct_standard_dependences = [] #libraries like stdio.h
         self.direct_dependences_relative = [] # relative path
         self.direct_dependences = []
@@ -131,8 +151,6 @@ class file_node:
         self.all_dependences = []
         self.all_dependences_c = []
         self.all_standard_dependences = []
-        self.sons = []
-        self.sons_dict = dict()
         self.name = path.abspath(filename)
         #stderr.write("Scanning " + filename + "...\n" )
         self.direct_dependences_relative, self.direct_standard_dependences\
@@ -140,37 +158,14 @@ class file_node:
         for dependence in self.direct_dependences_relative:
             # gets the absolute path for robustness
             dependencem = path.abspath(path.dirname(self.name)+ '/'+dependence)
-
-            if dependencem not in self.direct_dependences and\
-                    dependencem not in self.ancestors: 
-                self.direct_dependences.append(dependencem)
-                if dependencem not in allnodesnames: # creates new node
-                    # notice: 
-                    # 'if dependencem not in allnodesdict:'
-                    # would  start an infinite loop, because 
-                    # the ancestor nodes are not yet created
-                    # and added to the dictionary.
-                    allnodesnames.append(dependencem) # necessary to avoid 
-                                                      # infinite loops
-                    # recursion is here
-                    son = file_node(dependencem, self.ancestors + [ self.name ] )
-                    allnodesdict[dependencem] = son
-                else: # finds the already present node in the node list
-                    son = allnodesdict[dependencem]
-                self.sons.append(son)
-                self.sons_dict[dependencem] = son
-
+            self.direct_dependences.append(dependencem)
             dependencemc = dependencem[:-2] + '.c' 
             if path.exists(dependencemc):
                 self.direct_dependences_c.append(dependencemc)
-                if (dependencemc not in allnodesnames):
-                    allnodesnames.append(dependencemc)
-                    #stderr.write("Adding " + dependencemc + " to the node list\n")
-                    allnodesdict[dependencemc] = file_node(dependencemc, [])
 
-        self.all_dependences_raw = self.get_all_dependences_raw();
-        self.all_standard_dependences_raw = \
-                self.get_all_standard_dependences_raw();
+    def get_all_dependences(self):
+        self.all_dependences_raw = self.get_all_dependences_raw([]);
+        self.all_standard_dependences_raw = self.get_all_standard_dependences_raw([]);
         if self.all_standard_dependences_raw is not None:
             for dependence in self.all_standard_dependences_raw:
                 if dependence not in self.all_standard_dependences:
@@ -179,19 +174,20 @@ class file_node:
             for dependence in self.all_dependences_raw:
                 if dependence not in self.all_dependences:
                     self.all_dependences.append(dependence)
-
-    def set_c_dependences(self,ancestors):
-        self.all_dependences_c_raw = self.get_all_dependences_c_raw(ancestors)
+        self.all_dependences_c_raw = self.get_all_dependences_c_raw([])
         if self.all_dependences_c_raw is not None:
             for dependence in self.all_dependences_c_raw:
                 if dependence not in self.all_dependences_c:
                     self.all_dependences_c.append(dependence)
 
+
     def showtree(self,n): # debugging/visualizing
         prestring = ' ' * n
-        for son,dependence in zip(self.sons,self.direct_dependences):
+        for dependence in self.direct_dependences:
+            son = allnodesdict[dependence]
             print(prestring+dependence)
             son.showtree(n+1)
+
     def generate_make_string(self):
         makestring = ''
         if '.h' in self.name:
@@ -214,6 +210,7 @@ class file_node:
             stderr.write("Filename " + self.name + " not valid.\n")
             return ''
         return makestring
+
     def generate_linker_string(self):
         linkstring = ''
         allobjects = ''
@@ -238,8 +235,11 @@ def generate_makefile_from_main(inputfiles):
     
     for filename in inputfiles: 
         filenamem = path.abspath(filename)
-        allnodesdict[filenamem] = file_node(filenamem,[])
-        allnodesdict[filenamem].set_c_dependences([])
+        allnodesdict[filenamem] = file_node(filenamem,)
+
+    fill_allnodesdict()
+    set_all_dependences()
+
 
     for filename in allnodesdict :
         if '.c' in filename:
@@ -263,37 +263,6 @@ def generate_makefile_from_main(inputfiles):
 
     return res
 
-
-
-def generate_makefile(targv):
-    res = ''
-    res += compiler_linker_settings + '\n'
-
-    mainlinking_string = "main : " 
-    for filename in targv[1:]:
-        if '.c' in filename:
-            mainlinking_string += ' ' + path.basename(filename)[:-2] + '.o'
-        node = file_node(filename,[])
-#        stderr.write(filename + '\n')
-        makestring = node.generate_make_string()
-        res += makestring
-    mainlinking_string += '\n\t$(COMPILER) -o main *.o $(LINKER_FLAGS) \n\tif ! [ -d run ] ; then mkdir run; fi ; cp main run/\n'
-    res += mainlinking_string
-    
-    for main_file in main_files:
-        onefilecomp_string  = 'main_onefilecomp: random.o\n'
-        onefilecomp_string += '\t$(COMPILER) $(COMPILER_FLAGS) -c '+\
-                '-DONE_FILE_COMPILATION ' + main_file + ' \n'
-        maino_name = path.basename(main_file)[:-2] + '.o'
-        onefilecomp_string += '\t$(COMPILER) -o '+\
-                'main_onefilecomp ' + maino_name + ' random.o $(LINKER_FLAGS)\n'
-        onefilecomp_string += '\tcp main_onefilecomp run/\n'
-        res += onefilecomp_string
-
-    makeclean_string='clean:\n\trm -f *.o main main_onefilecomp\n'
-    res += makeclean_string
-    
-    return res 
 
 if __name__ == '__main__':
 
