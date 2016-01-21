@@ -8,6 +8,8 @@
 #include <string.h>
 #include <math.h>
 #include "../RationalApprox/rationalapprox.h"
+#include "../DbgTools/dbgtools.h"
+
 
 #define ALIGN 128
 #define acc_twopi 2*3.14159265358979323846

@@ -115,156 +115,7 @@ void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, 
 
 
 
-void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
-						 __restrict double_soa * const backfield,
-						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
-						__restrict tamat_soa * const ipdot){
 
-  SETINUSE(ipdot);
-  int hx,y,z,t,idxh;
-#pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars) present(backfield)
-#pragma acc loop independent //gang(nt)
-  for(t=0; t<nt; t++) {
-#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(z=0; z<nz; z++) {
-#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(y=0; y<ny; y++) {
-#pragma acc loop independent //vector(DIM_BLOCK_X)
-        for(hx=0; hx < nxh; hx++) {
-          int x;
-
-          double arg;
-          d_complex phase;
-
-          //even sites
-          x = 2*hx + ((y+z+t) & 0x1);
-          idxh = snum_acc(x,y,z,t);
-
-          // dir  0  =  x even   --> eta = 1 , no multiplication needed
-	  arg = backfield[0].d[idxh];
-          phase = cos(arg) + I * sin(arg);
-	  mat1_times_auxmat_into_tamat(&u[0],idxh,&auxmat[0],idxh,&ipdot[0],idxh,phase);
-
-
-          // dir  2  =  y even
-	  arg = backfield[2].d[idxh];
-          phase = cos(arg) + I * sin(arg);
-	  mat1_times_auxmat_into_tamat(&u[2],idxh,&auxmat[2],idxh,&ipdot[2],idxh,phase);
-
-
-          // dir  4  =  z even
-	  arg = backfield[4].d[idxh];
-          phase = cos(arg) + I * sin(arg);
-	  mat1_times_auxmat_into_tamat(&u[4],idxh,&auxmat[4],idxh,&ipdot[4],idxh,phase);
-
-          // dir  6  =  t even
-	  arg = backfield[6].d[idxh];
-          phase = cos(arg) + I * sin(arg);
-	  mat1_times_auxmat_into_tamat(&u[6],idxh,&auxmat[6],idxh,&ipdot[6],idxh,phase);
-
-        }
-      }
-    }
-  }
-}
-
-
-
-void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, // e' costante e non viene modificata
-						 __restrict double_soa * const backfield,
-					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
-					         __restrict tamat_soa * const ipdot){ 
-    SETINUSE(ipdot);
-  int hx,y,z,t,idxh;
-#pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars) present(backfield)
-#pragma acc loop independent //gang(nt)
-  for(t=0; t<nt; t++) {
-#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(z=0; z<nz; z++) {
-#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(y=0; y<ny; y++) {
-#pragma acc loop independent //vector(DIM_BLOCK_X)
-        for(hx=0; hx < nxh; hx++) {
-          int x;
-	  double arg;
-	  d_complex phase;
-
-          //odd sites
-          x = 2*hx + ((y+z+t+1) & 0x1);
-          idxh = snum_acc(x,y,z,t);
-          // dir  1  =  x odd    --> eta = 1 , no multiplication needed
-          arg = backfield[1].d[idxh];
-          phase = cos(arg) + I * sin(arg);
-          mat1_times_auxmat_into_tamat(&u[1],idxh,&auxmat[1],idxh,&ipdot[1],idxh,phase);
-
-          // dir  3  =  y odd
-          arg = backfield[3].d[idxh];
-          phase = cos(arg) + I * sin(arg);
-          mat1_times_auxmat_into_tamat(&u[3],idxh,&auxmat[3],idxh,&ipdot[3],idxh,phase);
-
-          // dir  5  =  z odd
-          arg = backfield[5].d[idxh];
-          phase = cos(arg) + I * sin(arg);
-          mat1_times_auxmat_into_tamat(&u[5],idxh,&auxmat[5],idxh,&ipdot[5],idxh,phase);
-
-          // dir  7  =  t odd
-          arg = backfield[7].d[idxh];
-          phase = cos(arg) + I * sin(arg);
-          mat1_times_auxmat_into_tamat(&u[7],idxh,&auxmat[7],idxh,&ipdot[7],idxh,phase);
-
-
-        } //hx
-      } //y
-    } // z
-  } // t
-} // end  multiply_conf_times_force_and_take_ta_odd()
-
-
-void multiply_conf_times_force_and_take_ta(  __restrict su3_soa * const u, // e' costante e non viene modificata
-						 __restrict double_soa * const backfield,
-					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
-					         __restrict tamat_soa * const ipdot){ 
-    SETINUSE(ipdot);
-  int hx,y,z,t,idxh;
-#pragma acc kernels present(u) present(auxmat) present(ipdot) present(tpars) present(backfield)
-#pragma acc loop independent //gang(nt)
-  for(t=0; t<nt; t++) {
-#pragma acc loop independent //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(z=0; z<nz; z++) {
-#pragma acc loop independent //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(y=0; y<ny; y++) {
-#pragma acc loop independent //vector(DIM_BLOCK_X)
-        for(hx=0; hx < nxh; hx++) {
-          int x,dir;
-	  double arg;
-	  d_complex phase;
-
-          //odd sites
-          x = 2*hx + ((y+z+t+1) & 0x1);
-          idxh = snum_acc(x,y,z,t);
-          for(dir = 1; dir<8;dir+=2){
-              arg = backfield[dir].d[idxh];
-              phase = cos(arg) + I * sin(arg);
-              mat1_times_auxmat_into_tamat(&u[dir],idxh,&auxmat[dir],idxh,&ipdot[dir],idxh,phase);
-          }
-
-          //even sites
-          x = 2*hx + ((y+z+t) & 0x1);
-          idxh = snum_acc(x,y,z,t);
-          for(dir = 0; dir<8;dir+=2){
-              arg = backfield[dir].d[idxh];
-              phase = cos(arg) + I * sin(arg);
-              mat1_times_auxmat_into_tamat(&u[dir],idxh,&auxmat[dir],idxh,&ipdot[dir],idxh,phase);
-          }
-        } //hx
-      } //y
-    } // z
-  } // t
-} // end  multiply_conf_times_force_and_take_ta_odd()
-
-
-
-#ifdef STOUT_FERMIONS
 void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
 							__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante; non viene modificata
 							__restrict tamat_soa * const ipdot){
@@ -337,10 +188,24 @@ void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * co
     } // z
   } // t
 } // end  multiply_conf_times_force_and_take_ta_odd()
-#endif //ifdef STOUT_FERMIONS
 
 
-#if defined(IMCHEMPOT) || defined(BACKFIELD)
+void multiply_conf_times_force_and_take_ta_nophase(  __restrict su3_soa * const u, // e' costante e non viene modificata
+							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
+							 __restrict tamat_soa * const ipdot){
+    SETINUSE(ipdot);
+  int hx,y,z,t,idxh;
+#pragma acc kernels present(u) present(auxmat) present(ipdot)
+#pragma acc loop independent
+        for(idxh=0; idxh < sizeh*8; idxh++)
+          mat1_times_auxmat_into_tamat_nophase(&u[idxh/sizeh],idxh,
+                  &auxmat[idxh/sizeh],idxh,&ipdot[idxh/sizeh],idxh);
+
+}
+
+
+
+
 void multiply_backfield_times_force(__restrict ferm_param * const tpars,
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot){
@@ -356,14 +221,13 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
 #pragma acc loop independent
     for( idxh = 0 ; idxh < sizeh; idxh++){
       
-      arg = backfield[dirindex].d[idxh];
+      arg = phases[dirindex].d[idxh];
       phase = cos(arg) + I * sin(arg);
       phase_times_auxmat_into_auxmat(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh,phase);
     }
   }
 } // end multiply_backfield_times_force()
 
-#else 
 void accumulate_gl3soa_into_gl3soa(
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot){
@@ -382,7 +246,6 @@ void accumulate_gl3soa_into_gl3soa(
     }
 }
 
-#endif
 
 void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
 					__restrict su3_soa * const aux_u,

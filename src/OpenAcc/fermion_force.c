@@ -172,25 +172,10 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
       ker_openacc_compute_fermion_force(conf_to_use, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
     }
     
-#ifdef STOUT_FERMIONS
-
- #if defined(IMCHEMPOT) || defined(BACKFIELD)
-    // JUST MULTIPLY BY BACK FIELD AND/OR CHEMICAL POTENTIAL
-    // the backfield here must not have phases added.    
-    mult_backfield_by_stag_phases(&(tfermion_parameters[iflav].phases));
+    // JUST MULTIPLY BY STAGGERED PHASES,
+    // BACK FIELD AND/OR CHEMICAL POTENTIAL 
     multiply_backfield_times_force(&(tfermion_parameters[iflav]),taux_conf_acc,gl3_aux);
-    // remultiplying field by staggered phases.
-    mult_backfield_by_stag_phases(&(tfermion_parameters[iflav].phases));
- #else
-    accumulate_gl3soa_into_gl3soa(taux_conf_acc,gl3_aux);
-
- #endif 
     
-#else
-    multiply_conf_times_force_and_take_ta_even(tconf_acc,&(tfermion_parameters[iflav]), taux_conf_acc,tipdot_acc);
-    multiply_conf_times_force_and_take_ta_odd(tconf_acc,&(tfermion_parameters[iflav]), taux_conf_acc,tipdot_acc);
-
-#endif
   }
 
 #ifdef STOUT_FERMIONS
@@ -203,10 +188,9 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
    if(verbosity_lv > 2)  printf("\t\tSigma' to Sigma [lvl 1 to lvl 0]\n");
   compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, taux_conf_acc );
 
-
-  multiply_conf_times_force_and_take_ta_even_nophase(tconf_acc, gl3_aux,tipdot_acc); // stag
-  multiply_conf_times_force_and_take_ta_odd_nophase(tconf_acc, gl3_aux,tipdot_acc); // stag
 #endif
+
+  multiply_conf_times_force_and_take_ta_nophase(tconf_acc, gl3_aux,tipdot_acc);
 
 
 #pragma acc update host(tipdot_acc[0:8])

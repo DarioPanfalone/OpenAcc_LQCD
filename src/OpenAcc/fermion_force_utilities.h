@@ -224,20 +224,6 @@ void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, 
 
 
 
-void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
-						 __restrict double_soa * const backfield,
-						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
-						__restrict tamat_soa * const ipdot);
-
-
-
-void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, // e' costante e non viene modificata
-						 __restrict double_soa * const backfield,
-					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
-					         __restrict tamat_soa * const ipdot);
-
-
-#ifdef STOUT_FERMIONS
 void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
 							__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante; non viene modificata
 							__restrict tamat_soa * const ipdot);
@@ -247,26 +233,21 @@ void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * co
 							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
 							 __restrict tamat_soa * const ipdot);
 
-
-void multiply_conf_times_force_and_take_ta(  __restrict su3_soa * const u, // e' costante e non viene modificata
-						 __restrict double_soa * const backfield,
-					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
-					         __restrict tamat_soa * const ipdot);
-
-#endif //ifdef STOUT_FERMIONS
+void multiply_conf_times_force_and_take_ta_nophase(  __restrict su3_soa * const u, // e' costante e non viene modificata
+							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
+							 __restrict tamat_soa * const ipdot);
 
 
-#if defined(IMCHEMPOT) || defined(BACKFIELD)
+
 void multiply_backfield_times_force(__restrict ferm_param * const tpars,
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
-        __restrict su3_soa * const pseudo_ipdot)i;
+        __restrict su3_soa * const pseudo_ipdot);
 
-#else 
+
 void accumulate_gl3soa_into_gl3soa(
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot);
 
-#endif
 
 void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
 					__restrict su3_soa * const aux_u,
