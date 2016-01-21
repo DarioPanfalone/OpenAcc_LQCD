@@ -16,7 +16,7 @@
 #include "../Meas/gauge_meas.h"
 
 #include <stdio.h>
-#include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 
 #define MAXLINES 300
@@ -75,13 +75,6 @@ void erase_comments(char file_lines[MAXLINES][MAXLINELENGTH], int maxlines)
                 file_lines[i][j] = ' ';
         }
     }
-}
-
-int check_parinfo_sequence(int npar, par_info * par_infos){
-
-    for(int i = 0; i < npar; i++)
-        for(int j = i+1; j < npar; j++)
-            if (strstr(par_infos[j].name,par_infos[i].name)) return 0;
 }
 
 void reorder_par_infos(int npar, par_info * par_infos ){
@@ -187,7 +180,6 @@ void scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLIN
                     printf("  %s\r\t\t\t ",par_infos[i].name);
                     int reads = 0;
                     char parname[20];
-                    double tempdouble; int tempint ; char tempstr[20];
                     switch(par_infos[i].type){
                         case TYPE_INT: 
                             reads = sscanf(filelines[iline],
@@ -346,7 +338,7 @@ void read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int s
 {
 
     // see /OpenAcc/md_integrator.h
-    const unsigned int  npar_mc =  11;
+    const unsigned int  npar_mc =  12;
     par_info mcp[npar_mc];
 
     char sntraj[] = "Ntraj" ;
@@ -358,6 +350,7 @@ void read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int s
     char sstore_conf_name[] = "StoreConfName";
     char ssave_conf_name[] = "SaveConfName";
     char sseed[] = "Seed";
+    char seps_gen[] = "EpsGen";
     char sinput_vbl[] = "VerbosityLv";
     char sexpected_max_eigenvalue[] = "ExpMaxEigenvalue";
 
@@ -370,10 +363,9 @@ void read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int s
     mcp[6]=(par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,sstore_conf_name};
     mcp[7]=(par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,ssave_conf_name};
     mcp[8]=(par_info){(void*) &(mcpar->seed   ),TYPE_INT,sseed};
-
-    mcp[9]=(par_info){(void*) &(mcpar->input_vbl   ),TYPE_INT,sinput_vbl};
-
-    mcp[10]=(par_info){(void*) &(mcpar->expected_max_eigenvalue),
+    mcp[9]=(par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,seps_gen};
+    mcp[10]=(par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,sinput_vbl};
+    mcp[11]=(par_info){(void*) &(mcpar->expected_max_eigenvalue),
         TYPE_DOUBLE,sexpected_max_eigenvalue};
 
     // from then on, you should not have to modify anything.

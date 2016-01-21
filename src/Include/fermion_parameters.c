@@ -7,6 +7,7 @@
 #include "./markowchain.h"
 #include <string.h>
 #include <math.h>
+#include "../RationalApprox/rationalapprox.h"
 
 #define ALIGN 128
 #define acc_twopi 2*3.14159265358979323846

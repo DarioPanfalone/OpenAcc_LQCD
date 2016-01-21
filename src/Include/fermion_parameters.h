@@ -4,10 +4,7 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/backfield.h"
-#ifdef __GNUC__
- #define __USE_XOPEN2K
- #include <stdlib.h>
-#endif
+
 typedef struct ferm_param_t{
   double ferm_mass;
   int degeneracy;

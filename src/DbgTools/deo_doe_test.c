@@ -1,45 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef __GNUC__
 #include "openacc.h"
+#endif
+
 #include "../Include/common_defines.h"
-#include "../OpenAcc/fermion_matrix.c"
-#include "../OpenAcc/alloc_vars.c"
-#include "../OpenAcc/random_assignement.c"
-#include "../OpenAcc/dbgtools.c"
+#include "../Include/fermion_parameters.h"
+#include "../OpenAcc/fermion_matrix.h"
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/io.h"
+#include "../OpenAcc/random_assignement.h"
+#include "../Rand/random.h"
+#include "./dbgtools.h"
+#include "../OpenAcc/action.h"
 
 //double casuale(void);
 
 
+int id_iter;
+
 int main(){
+
+  const char confname[] = "test_conf";
+  const char fermionname[] = "test_fermion";
+  const char fermionname2[] = "test_fermion_result";
+
+  act_params.stout_steps = 0;
+  NPS_tot = 1;
 
 
   initrand(111);
   fflush(stdout);
-  printf("INIZIO DEL PROGRAMMA \n");
-  su3_soa  * conf_acc;
-  int  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
-  if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
-  conf_acc->status = IN_USE;
-  printf("Allocazione della configurazione : OK \n");
+  printf("DEODOE test\n");
 
   // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
-  init_ferm_params();
-
-
 
   mem_alloc();
   printf("Allocazione della memoria : OK \n");
-  initialize_global_variables();
-  printf("init vars : OK \n");
-  compute_nnp_and_nnm_openacc();
-  printf("nn computation : OK \n");
 #ifdef BACKFIELD
   init_backfield();
   print_double_soa(u1_back_field_phases,"backfield");
   printf("u1_backfield initialization : OK \n");
 #endif
 
+#ifndef __GNUC__
   //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
   // NVIDIA GPUs
   acc_device_t my_device_type = acc_device_nvidia;
@@ -51,37 +56,53 @@ int main(){
   int dev_index = 0;
   SELECT_INIT_ACC_DEVICE(my_device_type, dev_index);
   printf("Device Selected : OK \n");
-
+#endif
 
   // init conf
   //generate_Conf_cold(conf_acc,0.05);
   //print_su3_soa(conf_acc, "conf_acc");
   //printf("Cold Gauge Conf Generated : OK \n");
-  read_su3_soa(conf_acc,"indaddr_conf_acc");
-  printf("Cold Gauge Conf READ : OK \n");
-
-  conf_id_iter=0;
+  if(!read_su3_soa_ASCII(conf_acc,confname, &id_iter)){
+        printf("Cold Gauge Conf READ : OK \n");
+  }else{
+        id_iter = 0;
+        printf("Cold Gauge Conf READ : FAIL, generating\n");
+        generate_Conf_cold(conf_acc,0.1); 
+        printf("Cold Gauge Conf GENERATED: OK \n");
+        printf("Writing file %s.\n", confname);
+        print_su3_soa_ASCII(conf_acc,confname, id_iter);
+  }
 
 
   // init fermion
   //generate_vec3_soa_gauss(ferm_chi_acc);
   //print_vec3_soa(ferm_chi_acc,"ferm_chi_acc");
-  read_vec3_soa(ferm_chi_acc,"indaddr_ferm_chi_acc" );
+  if(!read_vec3_soa(ferm_chi_acc,fermionname )){
+        printf("Fermion READ : OK \n");
+  }else{
+        printf("Fermion READ : FAIL, generating\n");
+        generate_vec3_soa_gauss(ferm_chi_acc);
+        printf("Fermion GENERATED : OK\n");
+        printf("Writing file %s.\n", fermionname);
+        print_vec3_soa(ferm_chi_acc,fermionname);
+  }
+
 
 #pragma acc data   copy(conf_acc[0:8]) copy(ferm_chi_acc) copyout(ferm_phi_acc)
   {
   acc_Doe(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters,u1_back_field_phases ) ;
 
 
-  print_vec3_soa(ferm_phi_acc,"ferm_phi_acc");
+  print_vec3_soa(ferm_phi_acc,fermionname2);
   }
 
+#ifndef __GNUC__
   SHUTDOWN_ACC_DEVICE(my_device_type);
+#endif
+
   mem_free();
 
   return 0; 
-
-
 
 
 }

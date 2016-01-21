@@ -17,8 +17,8 @@ const double lambda_min=4.0e-7;  // rational approx valid on [lambda_min_metro, 
 const double residue=1.0e-8;    // stopping residual for CG
 
 int main(int argc, char **argv){
-    if(argc!=5){
-        printf("Use as arguments:    tolerance exponent_num exponent_den lambda_min\n");
+    if(argc!=5  && argc != 6){
+        printf("Use as arguments:    tolerance exponent_num exponent_den lambda_min (optional: min approx order)\n");
         return 0;
     }
 
@@ -26,7 +26,10 @@ int main(int argc, char **argv){
 
     double goal_error = atof(argv[1]);
     approx->error = 1;
-    approx->approx_order = 7;
+
+    if(argc == 6 ) approx->approx_order = atoi(argv[5]);
+    else approx->approx_order = 7;
+
     while(approx->error > goal_error){
         approx->exponent_num = atoi(argv[2]);
         approx->exponent_den = atoi(argv[3]);

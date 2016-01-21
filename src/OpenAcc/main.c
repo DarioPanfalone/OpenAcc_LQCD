@@ -1,6 +1,3 @@
-double casuale(void);
-void initrand(unsigned long s);
-void su2_rand(double *pp);
 #define PRINT_DETAILS_INSIDE_UPDATE
 #define ALIGN 128
 
@@ -44,6 +41,7 @@ void su2_rand(double *pp);
 #include "./cooling.h"
 #include "./backfield.h"
 #include "./action.h"
+#include "../Rand/random.h"
 
 
 
@@ -57,12 +55,6 @@ int main(int argc, char* argv[]){
 #define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
 
     printf("WELCOME! \n");
-    su3_soa  * conf_acc;
-    int  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
-    if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
-    conf_acc->status = IN_USE;
-    printf("Allocazione della configurazione : OK \n");
-
     // READ input file.
     set_global_vars_and_fermions_from_input_file(argv[1]);
     //
@@ -103,12 +95,14 @@ int main(int argc, char* argv[]){
 
     //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
     // start from saved conf
+    
+
 #ifdef NORANDOM
     if(!read_su3_soa_ASCII(conf_acc,"conf_norndtest",&conf_id_iter)) // READS ALSO THE conf_id_iter
         printf("Stored Gauge Conf conf_norndtest Read : OK \n", mkwch_pars.save_conf_name);
 #else
     if(!read_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name,&conf_id_iter)) // READS ALSO THE conf_id_iter
-        printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
+       printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
 #endif
     else{
         // cold start
@@ -116,7 +110,7 @@ int main(int argc, char* argv[]){
         printf("COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED \"conf_norndtest\" MUST BE PRESENT\n");
         exit(1);
 #else
-        generate_Conf_cold(conf_acc,0.00);    printf("Cold Gauge Conf Generated : OK \n");// DEBUG (eps = 0.00)
+        generate_Conf_cold(conf_acc,mkwch_pars.eps_gen);    printf("Cold Gauge Conf Generated : OK \n");
 #endif
         conf_id_iter=0;
     }

@@ -6,6 +6,13 @@
 
 #define ALIGN 128
 
+#ifdef __GNUC__
+#define _POSIX_C_SOURCE 200809L   // not to have warning on posix memalign
+#endif
+
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "../OpenAcc/struct_c_def.h"

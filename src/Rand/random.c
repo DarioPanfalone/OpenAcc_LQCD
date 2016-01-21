@@ -3,8 +3,10 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include "sys/time.h"
+#include <time.h>
 #include"./RANDOM/dSFMT.c"
+#include"./random.h"
+
 dsfmt_t dsfmt;
 
 // random number generator in (0,1)
@@ -51,7 +53,6 @@ void su2_rand(double *pp)
   pp[2]/=p;
   pp[3]/=p;
   }
-
 
 
 #endif

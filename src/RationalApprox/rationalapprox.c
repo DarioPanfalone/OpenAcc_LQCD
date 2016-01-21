@@ -2,7 +2,9 @@
 #define RATIONAL_APPROX_C_
 
 #include "./rationalapprox.h"
+#include "../Include/common_defines.h"
 #include <stdlib.h>
+
 
 
 char* rational_approx_filename_old(int approx_order, int exponent_num, int exponent_den, double lambda_min)
@@ -103,16 +105,16 @@ int rationalapprox_read_custom_nomefile(RationalApprox* rational_approx, char* n
 
     // The partial fraction expansion takes the form 
     // r(x) = norm + sum_{k=1}^{n} res[k] / (x + pole[k])
-    fscanf(input,"\nApproximation to f(x) = (x)^(%i/%i)\n", &(rational_approx->exponent_num), &(rational_approx->exponent_den));
-    fscanf(input,"Order: %i\n", &(rational_approx->approx_order));
-    fscanf(input,"Lambda Min: %lf\n", &(rational_approx->lambda_min));
-    fscanf(input,"Lambda Max: %lf\n", &(rational_approx->lambda_max));
-    fscanf(input,"GMP Remez Precision: %i\n", &(rational_approx->gmp_remez_precision));
-    fscanf(input,"Error: %lf\n", &(rational_approx->error));
-    fscanf(input, "RA_a0 = %lf\n",&(rational_approx->RA_a0));
+    CHECKREAD(fscanf(input,"\nApproximation to f(x) = (x)^(%i/%i)\n", &(rational_approx->exponent_num), &(rational_approx->exponent_den)),2) ;
+    CHECKREAD(fscanf(input,"Order: %i\n", &(rational_approx->approx_order)),1);
+    CHECKREAD(fscanf(input,"Lambda Min: %lf\n", &(rational_approx->lambda_min)),1);
+    CHECKREAD(fscanf(input,"Lambda Max: %lf\n", &(rational_approx->lambda_max)),1);
+    CHECKREAD(fscanf(input,"GMP Remez Precision: %i\n", &(rational_approx->gmp_remez_precision)),1);
+    CHECKREAD(fscanf(input,"Error: %lf\n", &(rational_approx->error)),1);
+    CHECKREAD(fscanf(input, "RA_a0 = %lf\n",&(rational_approx->RA_a0)),1);
     for(int i = 0; i < rational_approx->approx_order; i++)
     {
-        fscanf(input, "RA_a[%i] = %lf, RA_b[%i] = %lf\n", &i, &(rational_approx->RA_a[i]), &i, &(rational_approx->RA_b[i]));
+        CHECKREAD(fscanf(input, "RA_a[%i] = %lf, RA_b[%i] = %lf\n", &i, &(rational_approx->RA_a[i]), &i, &(rational_approx->RA_b[i])),4);
     }
     fclose(input);
 

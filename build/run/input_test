@@ -6,37 +6,16 @@
 
 
 ActionParameters
-Beta            3.938
+Beta            3.55
 StoutSteps      2
  
 #up quark
 FlavourParameters   
-Mass	        0.00362345
+Mass	        1 
 Degeneracy	    1
 PseudoFermions	1
-Name	        up
-Charge          2.0
-Mu	            0.0          # keep to zero unless 
-                             # IMCHEMPOT is defined
-
-#down quark
-FlavourParameters   
-Mass	        0.00362345
-Degeneracy	    1
-PseudoFermions	1
-Name	        down
-Charge          -1.0
-Mu	            0.0          # keep to zero unless 
-                             # IMCHEMPOT is defined
-
-
-#strange quark
-FlavourParameters   
-Mass	        0.102
-Degeneracy	    1
-PseudoFermions	1
-Name	        strange
-Charge          -1.0
+Name	        pippo
+Charge          0.0
 Mu	            0.0          # keep to zero unless 
                              # IMCHEMPOT is defined
 
@@ -57,18 +36,18 @@ TrajLength	    1.0
 
 
 MontecarloParameters
-Ntraj	                300
-ThermNtraj	            10
-SaveConfInterval	    20
+Ntraj	                100
+ThermNtraj	            20
+SaveConfInterval	    2
 SaveRunningConfInterval	5
 residue_metro       	1e-8
 residue_md              1e-6
-ExpMaxEigenvalue        5      # approximate expected max eigenvalues
+ExpMaxEigenvalue        6.5      # approximate expected max eigenvalues
 StoreConfName       	test_config_store
 SaveConfName            test_config
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
-EpsGen                  0.1
+EpsGen                  0.1    #stddev in the generation of a new configuration
 VerbosityLv             5
 
 GaugeMeasuresSettings
@@ -83,10 +62,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      4	
-ny	                    4
-nz	                    4
-nt	                    4
+nx                      8 
+ny	                    8
+nz	                    8
+nt	                    8
 xmap	                0
 ymap	                1    
 zmap	                2    
