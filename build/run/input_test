@@ -47,7 +47,7 @@ StoreConfName       	test_config_store
 SaveConfName            test_config
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
-EpsGen                  0.1    #stddev in the generation of a new configuration
+EpsGen                  0.0    #stddev in the generation of a new configuration
 VerbosityLv             5
 
 GaugeMeasuresSettings
@@ -62,10 +62,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      8 
-ny	                    8
-nz	                    8
-nt	                    8
+nx                      4 
+ny	                    4
+nz	                    4
+nt	                    4
 xmap	                0
 ymap	                1    
 zmap	                2    
