@@ -61,6 +61,7 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
 				    d_complex phase) {
   vec3 out_vect;
   
+  
   d_complex vec0 = in_vect->c0[idx_vect]*phase;
   d_complex vec1 = in_vect->c1[idx_vect]*phase;
   d_complex vec2 = in_vect->c2[idx_vect]*phase;

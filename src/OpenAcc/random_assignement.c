@@ -170,7 +170,6 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor){
          generate_random_su3(&aux,factor);
          single_gl3_into_su3_soa(&conf[mu],idx,&aux);
   }
-  mult_conf_times_stag_phases_nodev(conf);
 }
 
 
