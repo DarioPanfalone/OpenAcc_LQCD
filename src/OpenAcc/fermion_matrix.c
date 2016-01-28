@@ -62,9 +62,9 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
   vec3 out_vect;
   
   
-  d_complex vec0 = in_vect->c0[idx_vect]*phase;
-  d_complex vec1 = in_vect->c1[idx_vect]*phase;
-  d_complex vec2 = in_vect->c2[idx_vect]*phase;
+  d_complex vec0 = in_vect->c0[idx_vect]*conj(phase);
+  d_complex vec1 = in_vect->c1[idx_vect]*conj(phase);
+  d_complex vec2 = in_vect->c2[idx_vect]*conj(phase);
 
 
   d_complex mat00 = matrix->r0.c0[idx_mat];
@@ -93,6 +93,88 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
 
 }
 
+#pragma acc routine seq
+static inline vec3 mat_vec_mul_arg( __restrict su3_soa * const matrix,
+                                const int idx_mat,
+                                __restrict vec3_soa * const in_vect,
+                                const int idx_vect,
+				                __restrict double_soa * arrarg){
+  vec3 out_vect;
+  double arg = arrarg->d[idx_mat];
+  d_complex phase = cos(arg) + I * sin(arg);
+
+
+  d_complex vec0 = (in_vect->c0[idx_vect])*phase;
+  d_complex vec1 = (in_vect->c1[idx_vect])*phase;
+  d_complex vec2 = (in_vect->c2[idx_vect])*phase;
+
+  d_complex mat00 = matrix->r0.c0[idx_mat];
+  d_complex mat01 = matrix->r0.c1[idx_mat];
+  d_complex mat02 = matrix->r0.c2[idx_mat];
+
+  d_complex mat10 = matrix->r1.c0[idx_mat];
+  d_complex mat11 = matrix->r1.c1[idx_mat];
+  d_complex mat12 = matrix->r1.c2[idx_mat];
+
+  // Load 3rd matrix row from global memory
+  //  d_complex mat20 = matrix->r2.c0[idx_mat];
+  //  d_complex mat21 = matrix->r2.c1[idx_mat];
+  //  d_complex mat22 = matrix->r2.c2[idx_mat];
+
+  //Compute 3rd matrix row from the first two  
+  d_complex mat20 = conj( ( mat01 * mat12 ) - ( mat02 * mat11) ) ;
+  d_complex mat21 = conj( ( mat02 * mat10 ) - ( mat00 * mat12) ) ;
+  d_complex mat22 = conj( ( mat00 * mat11 ) - ( mat01 * mat10) ) ;
+
+  out_vect.c0 = ( mat00 * vec0 ) + ( mat01 * vec1 ) + ( mat02 * vec2 );
+  out_vect.c1 = ( mat10 * vec0 ) + ( mat11 * vec1 ) + ( mat12 * vec2 );
+  out_vect.c2 = ( mat20 * vec0 ) + ( mat21 * vec1 ) + ( mat22 * vec2 );
+
+  return out_vect;
+
+}
+
+#pragma acc routine seq
+static inline vec3 conjmat_vec_mul_arg( __restrict su3_soa * const matrix,
+                                    const int idx_mat,
+                                    __restrict vec3_soa * const in_vect,
+                                    const int idx_vect,
+				                    __restrict double_soa* arrarg  ) {
+  vec3 out_vect;
+  double arg = arrarg->d[idx_mat];
+  d_complex phase = cos(arg) + I * sin(arg);
+ 
+  
+  d_complex vec0 = in_vect->c0[idx_vect]*conj(phase);
+  d_complex vec1 = in_vect->c1[idx_vect]*conj(phase);
+  d_complex vec2 = in_vect->c2[idx_vect]*conj(phase);
+
+
+  d_complex mat00 = matrix->r0.c0[idx_mat];
+  d_complex mat01 = matrix->r0.c1[idx_mat];
+  d_complex mat02 = matrix->r0.c2[idx_mat];
+
+  d_complex mat10 = matrix->r1.c0[idx_mat];
+  d_complex mat11 = matrix->r1.c1[idx_mat];
+  d_complex mat12 = matrix->r1.c2[idx_mat];
+
+  // Load 3rd matrix row from global memory
+  //  d_complex mat20 = matrix->r2.c0[idx_mat];
+  //  d_complex mat21 = matrix->r2.c1[idx_mat];
+  //  d_complex mat22 = matrix->r2.c2[idx_mat];
+
+  //Compute 3rd matrix row from the first two  
+  d_complex mat20 = conj( ( mat01 * mat12 ) - ( mat02 * mat11) );
+  d_complex mat21 = conj( ( mat02 * mat10 ) - ( mat00 * mat12) );
+  d_complex mat22 = conj( ( mat00 * mat11 ) - ( mat01 * mat10) );
+  
+  out_vect.c0 = ( conj(mat00) * vec0 ) + ( conj(mat10) * vec1 ) + ( conj(mat20) * vec2 );
+  out_vect.c1 = ( conj(mat01) * vec0 ) + ( conj(mat11) * vec1 ) + ( conj(mat21) * vec2 );
+  out_vect.c2 = ( conj(mat02) * vec0 ) + ( conj(mat12) * vec1 ) + ( conj(mat22) * vec2 );
+
+  return out_vect;
+
+}
 
 
 #pragma acc routine seq
@@ -132,11 +214,12 @@ void acc_Deo( __restrict su3_soa * const u,
 #pragma acc loop independent vector(DIM_BLOCK_X)
 	for(hx=0; hx < nxh; hx++) {
 	  
-	  int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir;
+	  int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
 	  vec3 aux=(vec3) {0,0,0};
-      double arg;
-	  d_complex phase;
-	  
+      int idxhm[4];
+      int idxhp[4];
+
+
 	  x = 2*hx + ((y+z+t) & 0x1);
 	  
 	  
@@ -157,61 +240,36 @@ void acc_Deo( __restrict su3_soa * const u,
 	  zp *= (((zp-nz) >> 31) & 0x1);
 	  tp = t + 1;
 	  tp *= (((tp-nt) >> 31) & 0x1);
-	 
-	  matdir = 1;idxh = snum_acc(xm,y,z,t);
-	  arg = backfield[matdir].d[idxh];
-	  phase = cos(arg) - I * sin(arg);
-	  aux = subResult(aux,
-              conjmat_vec_mul( &u[matdir],idxh, in,idxh , phase));
-	  
-	  matdir = 3; idxh = snum_acc(x,ym,z,t);
-	  arg = backfield[matdir].d[idxh];
-	  phase = cos(arg) - I * sin(arg);
-	  aux = subResult(aux, 
-              conjmat_vec_mul( &u[matdir],idxh, in,idxh , phase));
-	  
-	  matdir = 5; idxh = snum_acc(x,y,zm,t);
-	  arg = backfield[matdir].d[idxh];
-	  phase = cos(arg) - I * sin(arg);
-	  aux = subResult(aux,
-              conjmat_vec_mul( &u[matdir],idxh, in,idxh , phase));
-	  
-	  matdir = 7; idxh = snum_acc(x,y,z,tm);
-	  arg   += backfield[matdir].d[idxh];
-	  phase  = cos(arg) - I * sin(arg);
-	  aux = subResult(aux,
-              conjmat_vec_mul( &u[matdir],idxh, in,idxh , phase));
 	
+      idxhm[0] = snum_acc(xm,y,z,t);
+      idxhm[1] = snum_acc(x,ym,z,t);
+      idxhm[2] = snum_acc(x,y,zm,t);
+      idxhm[3] = snum_acc(x,y,z,tm);
+
+      idxhp[0] = snum_acc(xp,y,z,t);
+      idxhp[1] = snum_acc(x,yp,z,t);
+      idxhp[2] = snum_acc(x,y,zp,t);
+      idxhp[3] = snum_acc(x,y,z,tp);
+
+      for(dirindex=0;dirindex<4;dirindex++) {   
+          matdir = 2*dirindex+1;
+          aux = subResult(aux,
+                  conjmat_vec_mul_arg( &u[matdir],idxhm[dirindex],
+                      in,idxhm[dirindex],&backfield[matdir]));
+      }                                
+
+
 
 
 	  //////////////////////////////////////////////////////////////////////////////////////////////
 	  idxh = snum_acc(x,y,z,t);
 
-	  matdir = 0;
-      arg = backfield[matdir].d[idxh];
-	  phase = cos(arg) + I * sin(arg);
+      for(dirindex=0;dirindex<4;dirindex++) {   
+	  matdir = 2*dirindex;
       aux   = sumResult(aux,
-            mat_vec_mul(&u[matdir],idxh,in,snum_acc(xp,y,z,t),phase));
-	  
-	  matdir = 2;
-	  arg = backfield[matdir].d[idxh];
-	  phase = cos(arg) + I * sin(arg);
-	  aux = sumResult(aux,
-            mat_vec_mul(&u[matdir],idxh,in,snum_acc(x,yp,z,t),phase));
-	  
-	  
-	  matdir = 4;
-	  arg = backfield[matdir].d[idxh];
-	  phase = cos(arg) + I * sin(arg);
-	  aux = sumResult(aux,
-            mat_vec_mul(&u[matdir],idxh,in,snum_acc(x,y,zp,t),phase));
-	  
-	  matdir = 6;
-      arg   = backfield[matdir].d[idxh];
-	  phase  = cos(arg) + I * sin(arg);
-	  aux = sumResult(aux,
-            mat_vec_mul(&u[matdir],idxh,in,snum_acc(x,y,z,tp),phase));
-	  
+            mat_vec_mul_arg(&u[matdir],idxh,
+                in,idxhp[dirindex],&backfield[matdir]));
+      }	  
   
 	  //////////////////////////////////////////////////////////////////////////////////////////////     
 	  
@@ -241,10 +299,11 @@ void acc_Doe( __restrict su3_soa * const u,
 #pragma acc loop independent vector(DIM_BLOCK_X)
     for(hx=0; hx < nxh; hx++) {
 
-        int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir;
+        int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
         vec3 aux=(vec3) {0,0,0};
-        double arg;
-        d_complex phase;
+        int idxhm[4];
+        int idxhp[4];
+
         x = 2*hx + ((y+z+t+1) & 0x1);
 
 
@@ -267,57 +326,34 @@ void acc_Doe( __restrict su3_soa * const u,
         tp = t + 1;
         tp *= (((tp-nt) >> 31) & 0x1);
 
-        matdir = 0; idxh =snum_acc(xm,y,z,t);
-        arg = backfield[matdir].d[idxh];
-        phase = cos(arg) - I * sin(arg);
-        aux = subResult(aux,
-                conjmat_vec_mul(&u[matdir],idxh,in,idxh,phase));
+        idxhm[0] = snum_acc(xm,y,z,t);
+        idxhm[1] = snum_acc(x,ym,z,t);
+        idxhm[2] = snum_acc(x,y,zm,t);
+        idxhm[3] = snum_acc(x,y,z,tm);
 
-        matdir = 2;idxh=snum_acc(x,ym,z,t);
-        arg = backfield[matdir].d[idxh];
-        phase = cos(arg) - I * sin(arg);
-        aux = subResult(aux,
-                conjmat_vec_mul(&u[matdir],idxh,in,idxh,phase));
+        idxhp[0] = snum_acc(xp,y,z,t);
+        idxhp[1] = snum_acc(x,yp,z,t);
+        idxhp[2] = snum_acc(x,y,zp,t);
+        idxhp[3] = snum_acc(x,y,z,tp);
 
-        matdir = 4;idxh=snum_acc(x,y,zm,t);
-        arg = backfield[matdir].d[idxh];
-        phase = cos(arg) - I * sin(arg);
-        aux = subResult(aux,
-                conjmat_vec_mul(&u[matdir],idxh,in,idxh,phase));
-
-        matdir = 6;idxh=snum_acc(x,y,z,tm);
-        arg = backfield[matdir].d[idxh];
-        phase = cos(arg) - I * sin(arg);
-        aux = subResult(aux,
-                conjmat_vec_mul(&u[matdir],idxh,in,idxh,phase));
+        for(dirindex=0;dirindex<4;dirindex++) {   
+            matdir = 2*dirindex;
+            aux = subResult(aux,
+                    conjmat_vec_mul_arg( &u[matdir],idxhm[dirindex],
+                        in,idxhm[dirindex],&backfield[matdir]));
+        }                                
  
         //////////////////////////////////////////////////////////////////////////////////////////////
 
         idxh = snum_acc(x,y,z,t);
 
-        matdir = 1;
-        arg = backfield[matdir].d[idxh];
-        phase = cos(arg) + I * sin(arg);
-        aux = sumResult(aux,
-            mat_vec_mul(&u[matdir],idxh,in,snum_acc(xp,y,z,t),phase));
+        for(dirindex=0;dirindex<4;dirindex++) {   
+            matdir = 2*dirindex+1;
+            aux   = sumResult(aux,
+                    mat_vec_mul_arg(&u[matdir],idxh,
+                        in,idxhp[dirindex],&backfield[matdir]));
+        }	  
 
-        matdir = 3;
-        arg = backfield[matdir].d[idxh];
-        phase = cos(arg) + I * sin(arg);
-        aux = sumResult(aux,
-            mat_vec_mul(&u[matdir],idxh,in,snum_acc(x,yp,z,t),phase));
-
-        matdir = 5;
-        arg = backfield[matdir].d[idxh];
-        phase = cos(arg) + I * sin(arg);
-        aux = sumResult(aux,
-            mat_vec_mul(&u[matdir],idxh,in,snum_acc(x,y,zp,t),phase));
-
-        matdir = 7;
-        arg = backfield[matdir].d[idxh];
-        phase = cos(arg) + I * sin(arg);
-        aux = sumResult(aux,
-            mat_vec_mul(&u[matdir],idxh,in,snum_acc(x,y,z,tp),phase));
 
         //////////////////////////////////////////////////////////////////////////////////////////////
 
