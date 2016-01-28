@@ -27,7 +27,8 @@ int main(int argc, char* argv[]){
 
     const char confname[] = "test_conf";
     const char fermionname[] = "test_fermion";
-    const char fermionname2[] = "test_fermion_result";
+    const char fermionname_doe[] = "test_fermion_result_doe";
+    const char fermionname_deo[] = "test_fermion_result_deo";
 
     act_params.stout_steps = 0;
     NPS_tot = 1;
@@ -104,11 +105,17 @@ this is a deo-doe test.\n");
 
 #pragma acc data   copy(conf_acc[0:8]) copy(ferm_chi_acc) copyout(ferm_phi_acc) 
     {
-        printf("Multiplication...");
+        printf("Multiplication by Doe...");
         acc_Doe(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases) ;
+        printf("Writing file %s.\n", fermionname_doe);
+        print_vec3_soa(ferm_phi_acc,fermionname_doe);
 
-        printf("Writing file %s.\n", fermionname2);
-        print_vec3_soa(ferm_phi_acc,fermionname2);
+        printf("Multiplication by Deo...");
+        acc_Deo(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases) ;
+        printf("Writing file %s.\n", fermionname_deo);
+        print_vec3_soa(ferm_phi_acc,fermionname_deo);
+
+
     }
 
 #ifndef __GNUC__
