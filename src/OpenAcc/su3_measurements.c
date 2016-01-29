@@ -16,7 +16,6 @@ void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarit
 
 
   // removing stag phases
-  mult_conf_times_stag_phases(u);
 
 
     double r = 0;
@@ -37,7 +36,6 @@ void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarit
     }
   }
   //adding them again
-  mult_conf_times_stag_phases(u);
 
   *avg_unitarity_deviation = r/(sizeh*8);
   *max_unitarity_deviation = rmax;
@@ -48,7 +46,6 @@ void check_unitarity_host( __restrict su3_soa * const u, double * max_unitarity_
 
 
   // removing stag phases
-  mult_conf_times_stag_phases_nodev(u);
 
 
     double r = 0;
@@ -67,7 +64,6 @@ void check_unitarity_host( __restrict su3_soa * const u, double * max_unitarity_
     }
   }
   //adding them again
-  mult_conf_times_stag_phases_nodev(u);
 
   *avg_unitarity_deviation = r/(sizeh*8);
   *max_unitarity_deviation = rmax;
@@ -104,8 +100,6 @@ double calc_momenta_action( const __restrict thmat_soa * const mom,
 double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
 
   double tempo=0.0;
-  // tolgo le fasi staggered
-  mult_conf_times_stag_phases(tconf_acc);
   // calcolo il valore della plaquette sommata su tutti i siti a fissato piano mu-nu (6 possibili piani)
   for(int mu=0;mu<3;mu++){
     for(int nu=mu+1;nu<4;nu++){
@@ -113,8 +107,6 @@ double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __res
       tempo  += calc_loc_plaquettes_removing_stag_phases_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
     }
   }
-  // rimetto le fasi staggered
-  mult_conf_times_stag_phases(tconf_acc);
 
   return tempo;
 

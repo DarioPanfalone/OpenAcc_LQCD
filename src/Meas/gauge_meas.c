@@ -158,7 +158,6 @@ double compute_topological_charge(__restrict su3_soa * const u,
 				  double_soa * const loc_q){  
 
   set_su3_soa_to_zero(quadri); // forse non serve a una mazza
-  mult_conf_times_stag_phases(u);
 
   double temp_ch =0.0;
   compute_local_topological_charge(u,quadri,loc_q,0,1);// (x,y) - (z,t)
@@ -168,7 +167,6 @@ double compute_topological_charge(__restrict su3_soa * const u,
   compute_local_topological_charge(u,quadri,loc_q,0,3);// (x,t) - (y,z)
   temp_ch += reduce_loc_top_charge(loc_q);
 
-  mult_conf_times_stag_phases(u);
 
   return  temp_ch;
 }

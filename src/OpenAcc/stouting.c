@@ -47,7 +47,6 @@ if(verbosity_lv > 1) printf("Isotropic stouting...\n");
 
   set_su3_soa_to_zero(local_staples);
 
-  mult_conf_times_stag_phases(u);
 
   calc_loc_staples_removing_stag_phases_nnptrick_all(u,local_staples);
 
@@ -58,9 +57,6 @@ if(verbosity_lv > 1) printf("Isotropic stouting...\n");
   exp_minus_QA_times_conf(u,tipdot,uprime,auxiliary);
   SETFREE(tipdot);
 
-
-  mult_conf_times_stag_phases(u);
-  mult_conf_times_stag_phases(uprime);
 
 }
 

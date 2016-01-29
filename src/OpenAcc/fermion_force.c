@@ -56,7 +56,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   SETREQUESTED(TMP);
   set_su3_soa_to_zero(TMP);
 
-  mult_conf_times_stag_phases(U);
    if(verbosity_lv > 5)printf("         Removed stag phases  \n");
   calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
    if(verbosity_lv > 5)printf("         computed staples  \n");
@@ -107,7 +106,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
   }
 
   SETFREE(Lambda);
-  mult_conf_times_stag_phases(U);
  if(verbosity_lv > 5)   printf("         Restored stag phases  \n");
   
   

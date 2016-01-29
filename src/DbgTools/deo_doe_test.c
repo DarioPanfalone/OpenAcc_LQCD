@@ -29,6 +29,7 @@ int main(int argc, char* argv[]){
     const char fermionname[] = "test_fermion";
     const char fermionname_doe[] = "test_fermion_result_doe";
     const char fermionname_deo[] = "test_fermion_result_deo";
+    const char fermionname_fulldirac[] = "test_fermion_result_fulldirac";
 
     act_params.stout_steps = 0;
     NPS_tot = 1;
@@ -114,6 +115,12 @@ this is a deo-doe test.\n");
         acc_Deo(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases) ;
         printf("Writing file %s.\n", fermionname_deo);
         print_vec3_soa(ferm_phi_acc,fermionname_deo);
+        
+        printf("Multiplication by M^\\dagM+m^2...");
+        fermion_matrix_multiplication(conf_acc, ferm_phi_acc, ferm_chi_acc, kloc_s, &fermions_parameters[0]) ;
+        printf("Writing file %s.\n", fermionname_fulldirac);
+        print_vec3_soa(ferm_phi_acc,fermionname_fulldirac);
+
 
 
     }

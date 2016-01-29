@@ -36,7 +36,7 @@ TrajLength	    1.0
 
 
 MontecarloParameters
-Ntraj	                100
+Ntraj	                1
 ThermNtraj	            20
 SaveConfInterval	    2
 SaveRunningConfInterval	5
@@ -47,7 +47,7 @@ StoreConfName       	test_config_store
 SaveConfName            test_config
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
-EpsGen                  0.1    #stddev in the generation of a new configuration
+EpsGen                  0.0    #stddev in the generation of a new configuration
 VerbosityLv             5
 
 GaugeMeasuresSettings

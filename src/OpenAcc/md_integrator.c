@@ -76,7 +76,6 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  // P' = P - l*dt*dS/dq
  // deltas_Omelyan[3]=-cimag(ieps_acc)*scale*lambda;
 
- mult_conf_times_stag_phases(tconf_acc);
 
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
  mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
@@ -123,7 +122,6 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
  calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
  mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
 
- mult_conf_times_stag_phases(tconf_acc);
  
  }
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,

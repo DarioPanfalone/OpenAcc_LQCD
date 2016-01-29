@@ -1024,7 +1024,6 @@ double  calc_rettangolo_soloopenacc( __restrict  su3_soa * const tconf_acc, __re
 
   double tempo=0.0;
   // tolgo le fasi staggered
-  mult_conf_times_stag_phases(tconf_acc);
   // calcolo il valore della plaquette sommata su tutti i siti a fissato piano mu-nu (6 possibili piani)
   for(int mu=0;mu<3;mu++){
     for(int nu=mu+1;nu<4;nu++){
@@ -1034,7 +1033,6 @@ double  calc_rettangolo_soloopenacc( __restrict  su3_soa * const tconf_acc, __re
     }
   }
   // rimetto le fasi staggered
-  mult_conf_times_stag_phases(tconf_acc);
 
   return tempo;
 

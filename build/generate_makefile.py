@@ -114,9 +114,11 @@ class file_node:
         ancestors += [ self.name ]
         res = list(self.direct_dependences)
         for dep in self.direct_dependences:
-            son_dependences = allnodesdict[dep].get_all_dependences_raw(ancestors)
-            if son_dependences is not None:
-                res = res + son_dependences
+            if dep not in ancestors:
+                son = allnodesdict[dep]
+                son_dependences = son.get_all_dependences_raw(ancestors)
+                if son_dependences is not None:
+                    res = res + son_dependences
         return res
     # to use after fill_allnodesdict()
     def get_all_dependences_c_raw(self, ancestors): # with repetitions
@@ -166,6 +168,7 @@ class file_node:
     def get_all_dependences(self):
         self.all_dependences_raw = self.get_all_dependences_raw([]);
         self.all_standard_dependences_raw = self.get_all_standard_dependences_raw([]);
+        self.all_dependences_c_raw = self.get_all_dependences_c_raw([])
         if self.all_standard_dependences_raw is not None:
             for dependence in self.all_standard_dependences_raw:
                 if dependence not in self.all_standard_dependences:
@@ -174,7 +177,6 @@ class file_node:
             for dependence in self.all_dependences_raw:
                 if dependence not in self.all_dependences:
                     self.all_dependences.append(dependence)
-        self.all_dependences_c_raw = self.get_all_dependences_c_raw([])
         if self.all_dependences_c_raw is not None:
             for dependence in self.all_dependences_c_raw:
                 if dependence not in self.all_dependences_c:
@@ -187,6 +189,14 @@ class file_node:
             son = allnodesdict[dependence]
             print(prestring+dependence)
             son.showtree(n+1)
+    def showtree_c(self,n,ancestors): # debugging/visualizing
+        prestring = ' ' * n
+        for dependence in self.direct_dependences_c:
+            if dependence not in ancestors:
+                son = allnodesdict[dependence]
+                print(prestring+dependence)
+                son.showtree_c(n+1,ancestors + [ dependence ])
+
 
     def generate_make_string(self):
         makestring = ''

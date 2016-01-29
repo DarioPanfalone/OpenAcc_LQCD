@@ -12,7 +12,7 @@
 #include "./single_types.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 
-
+/*
 // multiply the whole configuration for the staggered phases field
 // (only the first two lines)
 void mult_conf_times_stag_phases( __restrict su3_soa * const u){
@@ -174,6 +174,9 @@ void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u){
   }
 
 }
+*/
+
+
 // reunitarize the conf by brute force
 void unitarize_conf( __restrict su3_soa * const u){
   int idxh, dirindex;

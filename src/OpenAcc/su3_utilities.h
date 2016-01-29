@@ -17,14 +17,14 @@
 
 // multiply the whole configuration for the staggered phases field
 // (only the first two lines)
-void mult_conf_times_stag_phases( __restrict su3_soa * const u);
+//void mult_conf_times_stag_phases( __restrict su3_soa * const u);
 
 // multiply the whole configuration for the staggered phases field
 // (all three lines)
-void mult_gl3_soa_times_stag_phases( __restrict su3_soa * const u);
+//void mult_gl3_soa_times_stag_phases( __restrict su3_soa * const u);
 
 // multiply the whole configuration for the staggered phases field
-void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u);
+//void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u);
 
 
 
