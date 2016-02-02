@@ -164,11 +164,13 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom8){
 // iterations of random assignements over all the 8 components
 void generate_Conf_cold(__restrict su3_soa * const conf,double factor){
   SETINUSE(conf);
+   printf("\t Generating random cold configuration with eps = %f .\n", factor);
   for(int mu=0; mu<8; mu++)
       for(int idx=0;idx<sizeh;idx++){
          single_su3 aux;
          generate_random_su3(&aux,factor);
          single_gl3_into_su3_soa(&conf[mu],idx,&aux);
+
   }
 }
 

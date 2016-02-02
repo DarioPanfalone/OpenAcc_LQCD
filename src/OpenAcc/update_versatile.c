@@ -37,6 +37,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef STOUT_FERMIONS        
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
 #endif
+#ifdef NORANDOM
+    printf("WELCOME! NORANDOM MODE. (UPDATE_SOLOACC_UNOSTEP_VERSATILE())\n");
+#endif
+
 
   
   printf("UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: OK \n");
@@ -68,7 +72,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     if(verbosity_lv > 2) printf("Backup copy of the initial gauge conf : OK \n");
 
   }
-
 //#pragma acc data copyin(delta[0:7]) // should not be needed?
   {
   
@@ -124,7 +127,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #else
     gconf_as_fermionmatrix = tconf_acc;
 #endif
-
 
 
 

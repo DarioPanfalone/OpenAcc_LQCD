@@ -54,6 +54,11 @@ int main(int argc, char* argv[]){
 
 #define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
 
+
+#ifdef NORANDOM
+    printf("WELCOME! NORANDOM MODE. (main()) \n" );
+#endif
+
     printf("WELCOME! \n");
     // READ input file.
     set_global_vars_and_fermions_from_input_file(argv[1]);
@@ -116,6 +121,8 @@ int main(int argc, char* argv[]){
     }
     //###############################################################################################  
 
+
+
     double max_unitarity_deviation,avg_unitarity_deviation;
     check_unitarity_host(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
     printf("\tAvg_unitarity_deviation on host: %e\n", avg_unitarity_deviation);
@@ -154,7 +161,8 @@ int main(int argc, char* argv[]){
             printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
             printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
 
-            //################### THERMALIZATION & METRO    ----   UPDATES ####################//
+            // THERMALIZATION & METRO    ----   UPDATES //
+    
             for(int id_iter=id_iter_offset;id_iter<(mkwch_pars.ntraj+id_iter_offset);id_iter++){
 
                 check_unitarity_device(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
@@ -168,10 +176,10 @@ int main(int argc, char* argv[]){
                 //--------- CONF UPDATE ----------------//
                 if(id_iter<mkwch_pars.therm_ntraj){
                     accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                            mkwch_pars.residue_metro,mkwch_pars.residue_md,id_iter-id_iter_offset,
+                          mkwch_pars.residue_metro,mkwch_pars.residue_md,id_iter-id_iter_offset,
                             accettate_therm,0);
                 }else{
-                    accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,mkwch_pars.residue_metro,mkwch_pars.residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+                   accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,mkwch_pars.residue_metro,mkwch_pars.residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
                 }
 #pragma acc update host(conf_acc[0:8])
                 //---------------------------------------//
@@ -184,7 +192,7 @@ int main(int argc, char* argv[]){
                     strcpy(fermionic_outfile_header,"#conf_id\t");
                     for(int iflv=0;iflv<NDiffFlavs;iflv++){
                         char strtocat[20];
-                        sprintf(strtocat, "Reff_%d\tImff_%d\t",iflv);
+                        sprintf(strtocat, "Reff_%d\tImff_%d\t",iflv, iflv);
                         strcat(fermionic_outfile_header,strtocat);
                     }
                     strcat(fermionic_outfile_header,"\n");
@@ -253,15 +261,15 @@ int main(int argc, char* argv[]){
             topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
             printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/size/6.0/3.0,topoch);
 
-            /*
-               for(int icool=0;icool<5000;icool++){
-               cool_conf(conf_acc,aux_conf_acc);
-               plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-               topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
-               printf("COOL %d  Placchetta= %.18lf  TopCh= %.18lf \n",icool+1,plq/size/6.0/3.0,topoch);
-               }
-               */
-
+//
+//               for(int icool=0;icool<5000;icool++){
+//               cool_conf(conf_acc,aux_conf_acc);
+//               plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+//               topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
+//               printf("COOL %d  Placchetta= %.18lf  TopCh= %.18lf \n",icool+1,plq/size/6.0/3.0,topoch);
+//               }
+//               
+//
 
 #ifdef STOUT_FERMIONS
         } // end pragma acc data (le cose del caso stout)
@@ -278,7 +286,6 @@ int main(int argc, char* argv[]){
     /////////////////////////////////////////////////////////////////////////////////////////////////
 #endif
 
-    free(conf_acc);
     mem_free();
 
     return 0;

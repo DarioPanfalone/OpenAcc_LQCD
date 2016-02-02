@@ -157,7 +157,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 #endif
   
   set_tamat_soa_to_zero(tipdot_acc);
-  
+
   for(int iflav = 0; iflav < tNDiffFlavs; iflav++) {
     set_su3_soa_to_zero(taux_conf_acc);
     int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
@@ -175,7 +175,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
     multiply_backfield_times_force(&(tfermion_parameters[iflav]),taux_conf_acc,gl3_aux);
     
   }
-
 #ifdef STOUT_FERMIONS
 
   for(int stout_level = act_params.stout_steps ; stout_level > 1 ; stout_level--){

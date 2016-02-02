@@ -145,7 +145,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				double res)
 {
 
- 
+  
   int md;
  
   // Step for the P

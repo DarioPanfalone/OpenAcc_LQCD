@@ -24,15 +24,16 @@ void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_
     fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r0.c0[i]),cimag(conf[q].r0.c0[i])); 
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r0.c1[i]),cimag(conf[q].r0.c1[i])); 
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r0.c2[i]),cimag(conf[q].r0.c2[i])); 
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r1.c0[i]),cimag(conf[q].r1.c0[i])); 
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r1.c1[i]),cimag(conf[q].r1.c1[i])); 
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r1.c2[i]),cimag(conf[q].r1.c2[i])); 
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r2.c0[i]),cimag(conf[q].r2.c0[i])); 
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r2.c1[i]),cimag(conf[q].r2.c1[i])); 
-            fprintf(fp, "%.18lf %.18lf\n",creal(conf[q].r2.c2[i]),cimag(conf[q].r2.c2[i])); 
+            // rebuilding the 3rd row
+            single_su3 aux;
+            single_su3_from_su3_soa(&conf[q],i,&aux);
+            rebuild3row(&aux);
+
+
+            for(int r=0; r < 3 ; r++)
+                for(int c=0; c < 3 ; c++) 
+                    fprintf(fp, "%.18lf %.18lf\n",
+                            creal(aux.comp[r][c]),cimag(aux.comp[r][c])); 
         }
     }
     fclose(fp);
@@ -52,6 +53,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
 
 
   int nxt,nyt,nzt,ntt;
+  int minus_det_count = 0;
   CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),5);
   if((nx!=nxt)||(ny!=nyt)||(nz!=nzt)||(nz!=nzt)){
     printf(" Errore: DIMENSIONI DELLA CONFIGURAZIONE LETTA DIVERSE DA QUELLE ATTESE\n");
@@ -73,8 +75,9 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
       CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
       CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
       det = detSu3(&m);
-      if((float)det==(float)-1){
-          printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
+      if(abs(1+det) < 0.005 ){
+        if(verbosity_lv > 4)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
+        minus_det_count ++;
         conf[q].r0.c0[i] = -conf[q].r0.c0[i];
         conf[q].r0.c1[i] = -conf[q].r0.c1[i];
         conf[q].r0.c2[i] = -conf[q].r0.c2[i];
@@ -85,7 +88,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         conf[q].r2.c1[i] = -conf[q].r2.c1[i];
         conf[q].r2.c2[i] = -conf[q].r2.c2[i];
 
-      }else if ((float)det!=(float)1) printf("Matrice non unitaria, determinante %.18lf\n",det);
+      }else if (abs(abs(det)-1) 1) printf("Matrice non unitaria, determinante %.18lf\n",det);
       
     }
   }
