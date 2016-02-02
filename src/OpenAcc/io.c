@@ -75,7 +75,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
       CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
       CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
       det = detSu3(&m);
-      if(abs(1+det) < 0.005 ){
+      if(abs(1+det) < 0.005 ){ // DEBUG, the limit should be FAR stricter.
         if(verbosity_lv > 4)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
         minus_det_count ++;
         conf[q].r0.c0[i] = -conf[q].r0.c0[i];
@@ -88,9 +88,24 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         conf[q].r2.c1[i] = -conf[q].r2.c1[i];
         conf[q].r2.c2[i] = -conf[q].r2.c2[i];
 
-      }else if (abs(abs(det)-1) 1) printf("Matrice non unitaria, determinante %.18lf\n",det);
+      }else if (abs(abs(det)-1)>0.005 )  // DEBUG, SAME HERE
+          printf("Non unitary matrix read, Det M =  %.18lf\n",det);
       
     }
+  }
+
+  if(minus_det_count !=0 ) {
+      printf("Conf read has some matrices with determinant = -1.\n");
+      printf("This might be due to the configuration being saved\n");
+      printf("is multiplied by the staggered phase.\n");
+      printf("In such case, we would expect %d matrices to have determinant = -1\n",
+             nx*ny*nz*nt*3/2 );
+      printf("The count of matrices with determinant = -1 is %d. \n", minus_det_count);
+      
+
+
+
+
   }
   fclose(fp);
   return 0;
