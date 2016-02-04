@@ -12,7 +12,11 @@
 #include "./fermion_matrix.h"
 
 
+typedef struct four_ints_t {
+   
+    int x,y,z,t;
 
+} four_ints;
 
 
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
@@ -211,9 +215,10 @@ void acc_Deo( __restrict su3_soa * const u,
 	  int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
 	  vec3 aux=(vec3) {0,0,0};
 
-      int idxhm[4];
-      int idxhp[4];
-
+      four_ints idxhm_s;
+      four_ints idxhp_s;
+      int*  idxhm = (int *) &idxhm_s;
+      int*  idxhp = (int *) &idxhp_s;
 
 
 	  x = 2*hx + ((y+z+t) & 0x1);
@@ -284,8 +289,6 @@ void acc_Doe( __restrict su3_soa * const u,
 
   SETINUSE(out);
   int hx, y, z, t;
-  int idxhm[4];
-  int idxhp[4];
 
 #pragma acc data create(idxhm) create(idxhp)
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
@@ -300,6 +303,12 @@ void acc_Doe( __restrict su3_soa * const u,
 
         int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
         vec3 aux=(vec3) {0,0,0};
+
+        four_ints idxhm_s;
+        four_ints idxhp_s;
+        int*  idxhm = (int *) &idxhm_s;
+        int*  idxhp = (int *) &idxhp_s;
+
 
 
 
