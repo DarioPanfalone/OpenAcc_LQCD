@@ -303,7 +303,6 @@ void acc_Doe( __restrict su3_soa * const u,
   SETINUSE(out);
   int hx, y, z, t;
 
-#pragma acc data create(idxhm) create(idxhp)
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
