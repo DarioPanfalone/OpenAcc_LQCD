@@ -15,7 +15,6 @@
 
 
 
-#pragma acc routine seq
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
                                 const int idx_mat,
                                 __restrict vec3_soa * const in_vect,
@@ -53,7 +52,6 @@ static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
 
 }
 
-#pragma acc routine seq
 static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
                                     const int idx_mat,
                                     __restrict vec3_soa * const in_vect,
@@ -93,7 +91,6 @@ static inline vec3 conjmat_vec_mul( __restrict su3_soa * const matrix,
 
 }
 
-#pragma acc routine seq
 static inline vec3 mat_vec_mul_arg( __restrict su3_soa * const matrix,
                                 const int idx_mat,
                                 __restrict vec3_soa * const in_vect,
@@ -102,7 +99,6 @@ static inline vec3 mat_vec_mul_arg( __restrict su3_soa * const matrix,
   vec3 out_vect;
   double arg = arrarg->d[idx_mat];
   d_complex phase = cos(arg) + I * sin(arg);
-
 
   d_complex vec0 = (in_vect->c0[idx_vect])*phase;
   d_complex vec1 = (in_vect->c1[idx_vect])*phase;
@@ -134,7 +130,6 @@ static inline vec3 mat_vec_mul_arg( __restrict su3_soa * const matrix,
 
 }
 
-#pragma acc routine seq
 static inline vec3 conjmat_vec_mul_arg( __restrict su3_soa * const matrix,
                                     const int idx_mat,
                                     __restrict vec3_soa * const in_vect,
@@ -143,8 +138,8 @@ static inline vec3 conjmat_vec_mul_arg( __restrict su3_soa * const matrix,
   vec3 out_vect;
   double arg = arrarg->d[idx_mat];
   d_complex phase = cos(arg) + I * sin(arg);
- 
-  
+
+
   d_complex vec0 = in_vect->c0[idx_vect]*conj(phase);
   d_complex vec1 = in_vect->c1[idx_vect]*conj(phase);
   d_complex vec2 = in_vect->c2[idx_vect]*conj(phase);
@@ -177,7 +172,6 @@ static inline vec3 conjmat_vec_mul_arg( __restrict su3_soa * const matrix,
 }
 
 
-#pragma acc routine seq
 static inline vec3 sumResult ( vec3 aux, vec3 aux_tmp) {
 
   aux.c0 += aux_tmp.c0;
@@ -188,7 +182,6 @@ static inline vec3 sumResult ( vec3 aux, vec3 aux_tmp) {
 
 }
 
-#pragma acc routine seq
 static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 
   aux.c0 -= aux_tmp.c0;
@@ -204,20 +197,23 @@ void acc_Deo( __restrict su3_soa * const u,
         __restrict vec3_soa * const in,double_soa * backfield) {
   SETINUSE(out);
   int hx, y, z, t;
-#pragma acc kernels present(u) present(out) present(in) present(pars) present(backfield)
+
+#pragma acc kernels present(u) present(out) present(in) present(backfield)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(z=0; z<nz; z++) {
 #pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
       for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
+#pragma acc loop independent vector(DIM_BLOCK_X) 
 	for(hx=0; hx < nxh; hx++) {
 	  
 	  int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
 	  vec3 aux=(vec3) {0,0,0};
+
       int idxhm[4];
       int idxhp[4];
+
 
 
 	  x = 2*hx + ((y+z+t) & 0x1);
@@ -255,7 +251,7 @@ void acc_Deo( __restrict su3_soa * const u,
           matdir = 2*dirindex+1;
           aux = subResult(aux,
                   conjmat_vec_mul_arg( &u[matdir],idxhm[dirindex],
-                      in,idxhm[dirindex],&backfield[matdir]));
+                      in,idxhm[dirindex],&backfield[matdir]));  
       }                                
 
 
@@ -268,7 +264,7 @@ void acc_Deo( __restrict su3_soa * const u,
 	  matdir = 2*dirindex;
       aux   = sumResult(aux,
             mat_vec_mul_arg(&u[matdir],idxh,
-                in,idxhp[dirindex],&backfield[matdir]));
+                in,idxhp[dirindex],&backfield[matdir])); 
       }	  
   
 	  //////////////////////////////////////////////////////////////////////////////////////////////     
@@ -288,8 +284,11 @@ void acc_Doe( __restrict su3_soa * const u,
 
   SETINUSE(out);
   int hx, y, z, t;
+  int idxhm[4];
+  int idxhp[4];
 
-#pragma acc kernels present(u) present(out) present(in) present(pars) present(backfield)
+#pragma acc data create(idxhm) create(idxhp)
+#pragma acc kernels present(u) present(out) present(in) present(backfield)
 #pragma acc loop independent gang(nt)
   for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -301,11 +300,11 @@ void acc_Doe( __restrict su3_soa * const u,
 
         int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
         vec3 aux=(vec3) {0,0,0};
-        int idxhm[4];
-        int idxhp[4];
+
+
+
 
         x = 2*hx + ((y+z+t+1) & 0x1);
-
 
 
         xm = x - 1;

@@ -130,7 +130,7 @@ int main(int argc, char* argv[]){
 
 
 
-#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) \
+#pragma acc data   copy(conf_acc[0:8]) \
     create(ipdot_acc[0:8]) create(aux_conf_acc[0:8])\
     create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot])\
     create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot])\

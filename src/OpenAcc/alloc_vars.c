@@ -159,9 +159,9 @@ inline void mem_free()
 
 #define FREECHECK(var) if(verbosity_lv >2) \
     printf("\tFreed %s, %p ...", #var,var);\
-    free(var);  printf(" done.\n");
+    free(var); if(verbosity_lv > 2)  printf(" done.\n");
 
-  printf("Daellocation.\n");
+  printf("Deallocation.\n");
 
   FREECHECK(conf_acc);
   FREECHECK(u1_back_phases);        

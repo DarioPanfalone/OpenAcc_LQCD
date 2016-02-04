@@ -104,25 +104,39 @@ this is a deo-doe test.\n");
     }
 
 
-#pragma acc data   copy(conf_acc[0:8]) copy(ferm_chi_acc) copyout(ferm_phi_acc) 
+
+    ferm_phi_acc->c0[0] = 5;
+//#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
+    create(ferm_phi_acc[0:1])  copyin(u1_back_phases[0:8*NDiffFlavs]) \
+    create(kloc_s[0:1])
+#pragma acc data  copy(conf_acc[0:8]) copy(ferm_chi_acc[0:1])\
+    copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
+    copy(kloc_s[0:1])
     {
+        assign_in_to_out(&(conf_acc->r0),ferm_phi_acc);
+#pragma acc update host(ferm_phi_acc[0:1])
+        print_vec3_soa(ferm_phi_acc,"test_fermion_copy");
+
+
+
         printf("Multiplication by Doe...");
-        acc_Doe(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases) ;
+        acc_Doe(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases);
         printf("Writing file %s.\n", fermionname_doe);
+
+#pragma acc update host(ferm_phi_acc[0:1])
         print_vec3_soa(ferm_phi_acc,fermionname_doe);
 
         printf("Multiplication by Deo...");
         acc_Deo(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases) ;
         printf("Writing file %s.\n", fermionname_deo);
+#pragma acc update host(ferm_phi_acc[0:1])
         print_vec3_soa(ferm_phi_acc,fermionname_deo);
         
         printf("Multiplication by M^\\dagM+m^2...");
         fermion_matrix_multiplication(conf_acc, ferm_phi_acc, ferm_chi_acc, kloc_s, &fermions_parameters[0]) ;
         printf("Writing file %s.\n", fermionname_fulldirac);
+#pragma acc update host(ferm_phi_acc[0:1])
         print_vec3_soa(ferm_phi_acc,fermionname_fulldirac);
-
-
-
     }
 
 #ifndef __GNUC__

@@ -9,7 +9,7 @@
 #include "./struct_c_def.h"
 #include "../Include/common_defines.h"
 #include "./single_types.h"
-
+#include <math.h>
 
 
 void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_iter){
@@ -75,7 +75,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
       CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
       CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
       det = detSu3(&m);
-      if(abs(1+det) < 0.005 ){ // DEBUG, the limit should be FAR stricter.
+      if(fabs(1+det) < 0.005 ){ // DEBUG, the limit should be FAR stricter.
         if(verbosity_lv > 4)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
         minus_det_count ++;
         conf[q].r0.c0[i] = -conf[q].r0.c0[i];
@@ -88,8 +88,13 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         conf[q].r2.c1[i] = -conf[q].r2.c1[i];
         conf[q].r2.c2[i] = -conf[q].r2.c2[i];
 
-      }else if (abs(abs(det)-1)>0.005 )  // DEBUG, SAME HERE
+      }else if (fabs(fabs(det)-1.0)>0.005 ){  // DEBUG, SAME HERE
           printf("Non unitary matrix read, Det M =  %.18lf\n",det);
+          double pippo =  fabs(det)-1.0;
+          printf("Diff %f,    ", pippo);
+          pippo = fabs(pippo);
+          printf("Diff %f\n", pippo);
+      }
       
     }
   }

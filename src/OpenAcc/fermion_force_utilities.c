@@ -191,18 +191,19 @@ void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * co
 
 
 void multiply_conf_times_force_and_take_ta_nophase(  __restrict su3_soa * const u, // e' costante e non viene modificata
-							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
-							 __restrict tamat_soa * const ipdot){
+        __restrict su3_soa * const auxmat, // e' costante e non viene modificata
+        __restrict tamat_soa * const ipdot){
     SETINUSE(ipdot);
-  int hx,y,z,t,idxh,dir;
+    int hx,y,z,t,idxh,dir;
 #pragma acc kernels present(u) present(auxmat) present(ipdot)
 #pragma acc loop independent
-      for(dir=0; dir < 8; dir++)
+    for(dir=0; dir < 8; dir++){
 #pragma acc loop independent
-        for(idxh=0; idxh < sizeh; idxh++)
-          mat1_times_auxmat_into_tamat_nophase(&u[dir],idxh,
-                     &auxmat[dir],idxh,&ipdot[dir],idxh);
-
+        for(idxh=0; idxh < sizeh; idxh++){
+            mat1_times_auxmat_into_tamat_nophase(&u[dir],idxh,
+                    &auxmat[dir],idxh,&ipdot[dir],idxh);
+        }
+    }
 }
 
 
