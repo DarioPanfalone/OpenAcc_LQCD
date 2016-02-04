@@ -12,11 +12,6 @@
 #include "./fermion_matrix.h"
 
 
-typedef struct four_ints_t {
-   
-    int x,y,z,t;
-
-} four_ints;
 
 
 static inline vec3 mat_vec_mul( __restrict su3_soa * const matrix,
@@ -215,10 +210,10 @@ void acc_Deo( __restrict su3_soa * const u,
 	  int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
 	  vec3 aux=(vec3) {0,0,0};
 
-      four_ints idxhm_s;
-      four_ints idxhp_s;
-      int*  idxhm = (int *) &idxhm_s;
-      int*  idxhp = (int *) &idxhp_s;
+//      four_ints idxhm_s;
+//      four_ints idxhp_s;
+//      int*  idxhm = (int *) &idxhm_s;
+//      int*  idxhp = (int *) &idxhp_s;
 
 
 	  x = 2*hx + ((y+z+t) & 0x1);
@@ -242,35 +237,53 @@ void acc_Deo( __restrict su3_soa * const u,
 	  tp = t + 1;
 	  tp *= (((tp-nt) >> 31) & 0x1);
 	
-      idxhm[0] = snum_acc(xm,y,z,t);
-      idxhm[1] = snum_acc(x,ym,z,t);
-      idxhm[2] = snum_acc(x,y,zm,t);
-      idxhm[3] = snum_acc(x,y,z,tm);
+//      idxhm[0] = snum_acc(xm,y,z,t);
+//      idxhm[1] = snum_acc(x,ym,z,t);
+//      idxhm[2] = snum_acc(x,y,zm,t);
+//      idxhm[3] = snum_acc(x,y,z,tm);
+//
+//      idxhp[0] = snum_acc(xp,y,z,t);
+//      idxhp[1] = snum_acc(x,yp,z,t);
+//      idxhp[2] = snum_acc(x,y,zp,t);
+//      idxhp[3] = snum_acc(x,y,z,tp);
 
-      idxhp[0] = snum_acc(xp,y,z,t);
-      idxhp[1] = snum_acc(x,yp,z,t);
-      idxhp[2] = snum_acc(x,y,zp,t);
-      idxhp[3] = snum_acc(x,y,z,tp);
+#define SUB_RESULT_DEO(matdir, indexm) \
+          aux = subResult(aux,conjmat_vec_mul_arg( &u[matdir],indexm,\
+                      in,indexm,&backfield[matdir]));  
 
-      for(dirindex=0;dirindex<4;dirindex++) {   
-          matdir = 2*dirindex+1;
-          aux = subResult(aux,
-                  conjmat_vec_mul_arg( &u[matdir],idxhm[dirindex],
-                      in,idxhm[dirindex],&backfield[matdir]));  
-      }                                
+      SUB_RESULT_DEO(1, snum_acc(xm,y,z,t) )
+      SUB_RESULT_DEO(3, snum_acc(x,ym,z,t) )
+      SUB_RESULT_DEO(5, snum_acc(x,y,zm,t) )
+      SUB_RESULT_DEO(7, snum_acc(x,y,z,tm) )
+#undef SUB_RESULT_DEO
 
-
+//      for(dirindex=0;dirindex<4;dirindex++) {   
+//          matdir = 2*dirindex+1;
+//          aux = subResult(aux,
+//                  conjmat_vec_mul_arg( &u[matdir],idxhm[dirindex],
+//                      in,idxhm[dirindex],&backfield[matdir]));  
+//      }                                
 
 
 	  //////////////////////////////////////////////////////////////////////////////////////////////
 	  idxh = snum_acc(x,y,z,t);
 
-      for(dirindex=0;dirindex<4;dirindex++) {   
-	  matdir = 2*dirindex;
-      aux   = sumResult(aux,
-            mat_vec_mul_arg(&u[matdir],idxh,
-                in,idxhp[dirindex],&backfield[matdir])); 
-      }	  
+#define SUM_RESULT_DEO(matdir, indexp) \
+      aux   = sumResult(aux, mat_vec_mul_arg(&u[matdir],idxh,\
+                in,indexp,&backfield[matdir])); 
+
+      SUM_RESULT_DEO(0, snum_acc(xp,y,z,t) )
+      SUM_RESULT_DEO(2, snum_acc(x,yp,z,t) )
+      SUM_RESULT_DEO(4, snum_acc(x,y,zp,t) )
+      SUM_RESULT_DEO(6, snum_acc(x,y,z,tp) )
+#undef SUM_RESULT_DEO
+
+//      for(dirindex=0;dirindex<4;dirindex++) {   
+//	  matdir = 2*dirindex;
+//      aux   = sumResult(aux,
+//            mat_vec_mul_arg(&u[matdir],idxh,
+//                in,idxhp[dirindex],&backfield[matdir])); 
+//      }	  
   
 	  //////////////////////////////////////////////////////////////////////////////////////////////     
 	  
@@ -304,17 +317,12 @@ void acc_Doe( __restrict su3_soa * const u,
         int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
         vec3 aux=(vec3) {0,0,0};
 
-        four_ints idxhm_s;
-        four_ints idxhp_s;
-        int*  idxhm = (int *) &idxhm_s;
-        int*  idxhp = (int *) &idxhp_s;
-
-
-
-
+//        four_ints idxhm_s;
+//        four_ints idxhp_s;
+//        int*  idxhm = (int *) &idxhm_s;
+//        int*  idxhp = (int *) &idxhp_s;
 
         x = 2*hx + ((y+z+t+1) & 0x1);
-
 
         xm = x - 1;
         xm = xm + (((xm >> 31) & 0x1) * nx);
@@ -334,33 +342,56 @@ void acc_Doe( __restrict su3_soa * const u,
         tp = t + 1;
         tp *= (((tp-nt) >> 31) & 0x1);
 
-        idxhm[0] = snum_acc(xm,y,z,t);
-        idxhm[1] = snum_acc(x,ym,z,t);
-        idxhm[2] = snum_acc(x,y,zm,t);
-        idxhm[3] = snum_acc(x,y,z,tm);
+//        idxhm[0] = snum_acc(xm,y,z,t);
+//        idxhm[1] = snum_acc(x,ym,z,t);
+//        idxhm[2] = snum_acc(x,y,zm,t);
+//        idxhm[3] = snum_acc(x,y,z,tm);
+//
+//        idxhp[0] = snum_acc(xp,y,z,t);
+//        idxhp[1] = snum_acc(x,yp,z,t);
+//        idxhp[2] = snum_acc(x,y,zp,t);
+//        idxhp[3] = snum_acc(x,y,z,tp);
 
-        idxhp[0] = snum_acc(xp,y,z,t);
-        idxhp[1] = snum_acc(x,yp,z,t);
-        idxhp[2] = snum_acc(x,y,zp,t);
-        idxhp[3] = snum_acc(x,y,z,tp);
+#define SUB_RESULT_DOE(matdir,index)\
+            aux = subResult(aux, conjmat_vec_mul_arg( &u[matdir],index,\
+                        in,index,&backfield[matdir]));
 
-        for(dirindex=0;dirindex<4;dirindex++) {   
-            matdir = 2*dirindex;
-            aux = subResult(aux,
-                    conjmat_vec_mul_arg( &u[matdir],idxhm[dirindex],
-                        in,idxhm[dirindex],&backfield[matdir]));
-        }                                
+        SUB_RESULT_DOE(0,snum_acc(xm,y,z,t))
+        SUB_RESULT_DOE(2,snum_acc(x,ym,z,t))
+        SUB_RESULT_DOE(4,snum_acc(x,y,zm,t))
+        SUB_RESULT_DOE(6,snum_acc(x,y,z,tm))
+#undef SUB_RESULT_DOE        
+
+
+
+//        for(dirindex=0;dirindex<4;dirindex++) {   
+//            matdir = 2*dirindex;
+//            aux = subResult(aux,
+//                    conjmat_vec_mul_arg( &u[matdir],idxhm[dirindex],
+//                        in,idxhm[dirindex],&backfield[matdir]));
+//        }                                
  
         //////////////////////////////////////////////////////////////////////////////////////////////
 
         idxh = snum_acc(x,y,z,t);
 
-        for(dirindex=0;dirindex<4;dirindex++) {   
-            matdir = 2*dirindex+1;
-            aux   = sumResult(aux,
-                    mat_vec_mul_arg(&u[matdir],idxh,
-                        in,idxhp[dirindex],&backfield[matdir]));
-        }	  
+#define SUM_RESULT_DOE(matdir,index)\
+            aux   = sumResult(aux, mat_vec_mul_arg(&u[matdir],idxh,\
+                        in,index,&backfield[matdir]));
+
+        SUM_RESULT_DOE(1,snum_acc(xp,y,z,t))
+        SUM_RESULT_DOE(3,snum_acc(x,yp,z,t))
+        SUM_RESULT_DOE(5,snum_acc(x,y,zp,t))
+        SUM_RESULT_DOE(7,snum_acc(x,y,z,tp))
+#undef SUM_RESULT_DOE
+
+
+//        for(dirindex=0;dirindex<4;dirindex++) {
+//            matdir = 2*dirindex+1;
+//            aux   = sumResult(aux,
+//                    mat_vec_mul_arg(&u[matdir],idxh,
+//                        in,idxhp[dirindex],&backfield[matdir]));
+//        }	  
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////
