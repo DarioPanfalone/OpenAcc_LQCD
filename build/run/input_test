@@ -11,7 +11,7 @@ StoutSteps      2
  
 #up quark
 FlavourParameters   
-Mass	        1 
+Mass	        10 
 Degeneracy	    1
 PseudoFermions	1
 Name	        pippo
@@ -48,7 +48,7 @@ SaveConfName            test_config
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
 EpsGen                  0.1    #stddev in the generation of a new configuration
-VerbosityLv             1
+VerbosityLv             5
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt
@@ -62,7 +62,7 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      16
+nx                      8 
 ny	                    8
 nz	                    8
 nt	                    8

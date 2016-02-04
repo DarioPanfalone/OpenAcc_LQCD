@@ -51,8 +51,8 @@ bz              0.0
 
 
 MDParameters
-NmdSteps	    3
-GaugeSubSteps	3
+NmdSteps	    11
+GaugeSubSteps	5
 TrajLength	    1.0
 
 
@@ -83,10 +83,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      4	
-ny	                    4
-nz	                    4
-nt	                    4
+nx                      8	
+ny	                    8
+nz	                    8
+nt	                    8
 xmap	                0
 ymap	                1    
 zmap	                2    
