@@ -30,9 +30,9 @@ bz              0.0
 
 
 MDParameters
-NmdSteps	    3
-GaugeSubSteps	4
-TrajLength	    1
+NmdSteps	    2
+GaugeSubSteps   4	
+TrajLength	    1 
 
 
 MontecarloParameters
@@ -42,7 +42,7 @@ SaveConfInterval	    20
 SaveRunningConfInterval	1
 residue_metro       	1e-8
 residue_md              1e-6
-ExpMaxEigenvalue        6.5      # approximate expected max eigenvalues
+ExpMaxEigenvalue        12602.6     # approximate expected max eigenvalues
 StoreConfName       	test_config_store
 SaveConfName            test_config
 Seed                    42 # if you set it to zero, time() will be used.
@@ -62,10 +62,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      4 
-ny	                    4
-nz	                    4
-nt	                    4
+nx                      8  
+ny	                    8 
+nz	                    8
+nt	                    8
 xmap	                0
 ymap	                1    
 zmap	                2    

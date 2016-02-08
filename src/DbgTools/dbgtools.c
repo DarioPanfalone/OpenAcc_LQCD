@@ -41,6 +41,8 @@ int read_vec3_soa(vec3_soa * fermion, const char* nomefile)
         return 1;
     }
     else{
+        if(verbosity_lv > 2) 
+            printf("Reading vec3_soa %s\n", nomefile );
 
     for(int i = 0 ; i < sizeh ; i++){
         double re,im;
@@ -102,6 +104,12 @@ void read_su3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter )
 
   FILE *fp;
   fp = fopen(nomefile,"r");
+    if(!fp){
+        printf("Erorr, su3_soa file %s not found.\n", nomefile );
+        return 1;
+    }else if(verbosity_lv > 2) 
+        printf("Reading su3_soa %s\n", nomefile );
+
 
   int nxt,nyt,nzt,ntt;
   CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),6);
@@ -109,6 +117,8 @@ void read_su3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter )
     printf(" Errore: DIMENSIONI DELLA CONFIGURAZIONE LETTA DIVERSE DA QUELLE ATTESE\n");
     abort();
   }
+
+
 
   double max_error = 0;
   for(int q = 0 ; q < 8 ; q++)
