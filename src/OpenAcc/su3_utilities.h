@@ -567,6 +567,20 @@ static inline double half_tr_thmat_squared( const __restrict thmat_soa * const m
 }
 
 #pragma acc routine seq
+static inline double half_tr_tamat_squared( const __restrict tamat_soa * const mom,
+					    int idx_mom){
+  d_complex  C = mom->c01[idx_mom];
+  d_complex  D = mom->c02[idx_mom];
+  d_complex  E = mom->c12[idx_mom];
+  double    A = mom->rc00[idx_mom];
+  double    B = mom->rc11[idx_mom];
+  return A*A + B*B + A*B + creal(C)*creal(C) + cimag(C)*cimag(C) + creal(D)*creal(D) + cimag(D)*cimag(D) + creal(E)*creal(E) + cimag(E)*cimag(E);
+  
+}
+
+
+
+#pragma acc routine seq
 static inline void assign_zero_to_su3_soa_component(__restrict su3_soa * const matrix_comp,
 						    int idx){
   matrix_comp->r0.c0[idx]=0.0+I*0.0;

@@ -1,15 +1,7 @@
-Next plan is to rewrite how staggered phases must be handled.
 
-The external field will always be present, and it will incorporate
-staggered phases, the external abelian field and the chemical
-potential. A backfield must be defined for each fermion flavour.
-
-The "BACKFIELD" and "IMCHEMPOT" defines must go away; the logic
-involved will always be on, because the external field will always be
-present.
+- Check function 
+su3_measurements.c:calc_momenta_action()
+Is it really necessary to use two cycles?
 
 
-Step zero: individuating where the links are multiplied by the
-staggered phases and where they are not.
-
-
+ 

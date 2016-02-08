@@ -11,7 +11,7 @@ StoutSteps      2
  
 #up quark
 FlavourParameters   
-Mass	        1 
+Mass	        0.01 
 Degeneracy	    1
 PseudoFermions	1
 Name	        pippo
@@ -36,7 +36,7 @@ TrajLength	    1
 
 
 MontecarloParameters
-Ntraj	                100
+Ntraj	                1
 ThermNtraj	            20
 SaveConfInterval	    20
 SaveRunningConfInterval	1
@@ -48,7 +48,7 @@ SaveConfName            test_config
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
 EpsGen                  0.1    #stddev in the generation of a new configuration
-VerbosityLv             1
+VerbosityLv             5
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt

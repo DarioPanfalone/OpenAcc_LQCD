@@ -190,9 +190,9 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
   multiply_conf_times_force_and_take_ta_nophase(tconf_acc, gl3_aux,tipdot_acc);
 
 
-#pragma acc update host(tipdot_acc[0:8])
 
   /*
+#pragma acc update host(tipdot_acc[0:8])
   printf("-------------FFORCE------------------\n");
        printf("F00 = %.18lf\n",tipdot_acc[0].rc00[0]);
        printf("F11 = %.18lf\n",tipdot_acc[0].rc11[0]);
