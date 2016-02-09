@@ -11,28 +11,37 @@
 
 void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix)
 {
-  int hx, y, z, t;
-  int mu;
-  SETINUSE(matrix);
+    //int hx, y, z, t;
+    int mu, idxh;
+    //SETINUSE(matrix);
+    //#pragma acc kernels present(matrix)
+    //#pragma acc loop independent gang(nt)
+    //  for(t=0; t<nt; t++) {
+    //#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    //    for(z=0; z<nz; z++) {
+    //#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+    //      for(y=0; y<ny; y++) {
+    //#pragma acc loop independent vector(DIM_BLOCK_X)
+    //	for(hx=0; hx < nxh; hx++) {
+    //	  int x,idxh;
+    //	  x = 2*hx + ((y+z+t) & 0x1);
+    //	  idxh = snum_acc(x,y,z,t);
+    //	  for(mu=0; mu<8; mu++) {
+    //	    assign_zero_to_tamat_soa_component(&matrix[mu],idxh);
+    //	  }
+    //	}  // x
+    //      }  // y
+    //    }  // z
+    //  }  // t
+
+    for(mu=0; mu<8; mu++) {
 #pragma acc kernels present(matrix)
 #pragma acc loop independent gang(nt)
-  for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
-	for(hx=0; hx < nxh; hx++) {
-	  int x,idxh;
-	  x = 2*hx + ((y+z+t) & 0x1);
-	  idxh = snum_acc(x,y,z,t);
-	  for(mu=0; mu<8; mu++) {
-	    assign_zero_to_tamat_soa_component(&matrix[mu],idxh);
-	  }
-	}  // x
-      }  // y
-    }  // z
-  }  // t
+        for(idxh=0; idxh<sizeh; idxh++) {
+            assign_zero_to_tamat_soa_component(&matrix[mu],idxh);
+
+        }
+    }
 }
 
 
@@ -214,22 +223,27 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
         __restrict su3_soa * const pseudo_ipdot){
     SETINUSE(pseudo_ipdot);
 
-  double arg;
-  d_complex phase;
-  int idxh;
-  double_soa * phases = tpars->phases;
-#pragma acc data present(phases) present(auxmat) present(pseudo_ipdot)
+  int idxh,dirindex;
+  double_soa * args = tpars->phases;
+#pragma acc kernels present(args) present(auxmat) present(pseudo_ipdot) 
 #pragma acc loop independent
-  for(int dirindex = 0 ; dirindex < 8 ; dirindex++){
+  for(dirindex = 0 ; dirindex < 8 ; dirindex++){
 #pragma acc loop independent
     for( idxh = 0 ; idxh < sizeh; idxh++){
       
-      arg = phases[dirindex].d[idxh];
-      phase = cos(arg) + I * sin(arg);
+        double arg;                 
+        d_complex phase;            
+      arg = args[dirindex].d[idxh]; 
+      phase = cos(arg) + I * sin(arg);                      
       phase_times_auxmat_into_auxmat(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh,phase);
     }
   }
-} // end multiply_backfield_times_force()
+
+
+
+
+} 
+// end multiply_backfield_times_force()
 
 void accumulate_gl3soa_into_gl3soa(
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
@@ -264,6 +278,8 @@ void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' cost
     assign_in_to_out(&in_shiftmulti[iter],loc_s);
     acc_Doe(u,loc_h,loc_s,tpars->phases);
     direct_product_of_fermions_into_auxmat(loc_s,loc_h,aux_u,&(tpars->approx_md),iter);
+
+
   }
 }
 

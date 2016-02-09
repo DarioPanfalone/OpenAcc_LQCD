@@ -164,15 +164,15 @@ static inline  void phase_times_auxmat_into_auxmat(
                            d_complex phase
                            ){
 
-    pseudo_ipdot->r0.c0[idx] += phase * auxmat->r0.c0[idx];
-    pseudo_ipdot->r0.c1[idx] += phase * auxmat->r0.c1[idx];
-    pseudo_ipdot->r0.c2[idx] += phase * auxmat->r0.c2[idx];
-    pseudo_ipdot->r1.c0[idx] += phase * auxmat->r1.c0[idx];
-    pseudo_ipdot->r1.c1[idx] += phase * auxmat->r1.c1[idx];
-    pseudo_ipdot->r1.c2[idx] += phase * auxmat->r1.c2[idx];
-    pseudo_ipdot->r2.c0[idx] += phase * auxmat->r2.c0[idx];
-    pseudo_ipdot->r2.c1[idx] += phase * auxmat->r2.c1[idx];
-    pseudo_ipdot->r2.c2[idx] += phase * auxmat->r2.c2[idx];
+    pseudo_ipdot->r0.c0[idx] += auxmat->r0.c0[idx]*phase ; 
+    pseudo_ipdot->r0.c1[idx] += auxmat->r0.c1[idx]*phase ; 
+    pseudo_ipdot->r0.c2[idx] += auxmat->r0.c2[idx]*phase ; 
+    pseudo_ipdot->r1.c0[idx] += auxmat->r1.c0[idx]*phase ; 
+    pseudo_ipdot->r1.c1[idx] += auxmat->r1.c1[idx]*phase ; 
+    pseudo_ipdot->r1.c2[idx] += auxmat->r1.c2[idx]*phase ; 
+    pseudo_ipdot->r2.c0[idx] += auxmat->r2.c0[idx]*phase ; 
+    pseudo_ipdot->r2.c1[idx] += auxmat->r2.c1[idx]*phase ; 
+    pseudo_ipdot->r2.c2[idx] += auxmat->r2.c2[idx]*phase ; 
 
 
 }
@@ -239,7 +239,7 @@ void multiply_conf_times_force_and_take_ta_nophase(  __restrict su3_soa * const 
 
 
 
-void multiply_backfield_times_force(__restrict ferm_param * const tpars,
+void multiply_backfield_times_force(__restrict ferm_param * const tpars, 
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot);
 

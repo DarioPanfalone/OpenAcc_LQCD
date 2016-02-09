@@ -273,6 +273,11 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
             tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
+    if(verbosity_lv > 3){
+        temp_force_norm= calc_force_norm(tipdot_acc);
+        printf("\t\tFermion Force Half Norm: %e\n", temp_force_norm);
+    } 
+
 
 
 }// end multistep_2MN_SOLOOPENACC()

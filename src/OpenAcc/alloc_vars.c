@@ -151,6 +151,8 @@ void mem_alloc()
   ALLOCCHECK(allocation_check, d_local_sums) ;
   allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa)); for(int mu=0;mu<2;mu++) SETFREE((&local_sums[mu]));
   ALLOCCHECK(allocation_check, local_sums) ;
+
+
 }
 
 inline void mem_free()

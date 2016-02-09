@@ -166,14 +166,16 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			&(tfermion_parameters[iflav].approx_md), 
 			tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, 
 			tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-      
+
       ker_openacc_compute_fermion_force(conf_to_use, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
+
     }
     
     // JUST MULTIPLY BY STAGGERED PHASES,
-    // BACK FIELD AND/OR CHEMICAL POTENTIAL 
+   // BACK FIELD AND/OR CHEMICAL POTENTIAL 
     multiply_backfield_times_force(&(tfermion_parameters[iflav]),taux_conf_acc,gl3_aux);
-    
+
+   
   }
 #ifdef STOUT_FERMIONS
 

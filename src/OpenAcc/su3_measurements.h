@@ -13,7 +13,7 @@ double calc_momenta_action( const __restrict thmat_soa * const mom,
 
 double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs);
 
-double calc_force_norm(const __restrict tamat_soa * tipdot );
+double calc_force_norm(const __restrict tamat_soa * tipdot);
 
 
 

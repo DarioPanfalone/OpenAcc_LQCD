@@ -115,21 +115,21 @@ double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __res
 
 
 
-double calc_force_norm(const __restrict tamat_soa * tipdot ){
+double calc_force_norm(const __restrict tamat_soa * tipdot){
 
     int t,mu;
     double result=0.0;
 
-    for(mu = 0; mu < 8; mu++) {
-#pragma acc kernels present(mom) present(tr_local)
+
+#pragma acc kernels present(tipdot)
 #pragma acc loop reduction(+:result)
         for(t=0; t<sizeh; t++) {
-            result += half_tr_tamat_squared(&tipdot[mu],t);
+            result += half_tr_tamat_squared(&tipdot[0],t);
         }  
-    }
+
+
 
     return sqrt(result);
-
 
 };
 
