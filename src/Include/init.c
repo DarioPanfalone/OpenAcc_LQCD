@@ -253,16 +253,6 @@ void read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH]
     // from then on, you should not have to modify anything.
     scan_group_NV(npar_fermions,fp, filelines, startline, endline);
 
-#ifndef IMCHEMPOT
-    if(flpar)
-        if(flpar->ferm_im_chem_pot != 0) {
-            printf("ERROR! Found a nonzero chemical potential for quark %s!\n", flpar->name);
-            printf("ERROR! This program was not compiled with \'IMCHEMPOT\'.\n");
-            printf("ERROR! This program cannot perform simulations at nonzero \n");
-            printf("       chemical potential. \n");
-            exit(1);
-        }
-#endif
 }
 
 void read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
@@ -304,15 +294,6 @@ void read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH]
     // from then on, you should not have to modify anything.
     scan_group_NV(npar_background,bfp, filelines, startline, endline);
 
-#ifndef BACKFIELD
-    if(bfpar->ex || bfpar->ey || bfpar->ez || bfpar->bx || bfpar->by || bfpar->bz ){
-        printf("ERROR! Found nonzero field value, please check.\n");
-        printf("ERROR! \'BACKFIELD\' not defined at compile time.\n");
-        printf("ERROR! This program DOES NOT run simulation with a\n");
-        printf("       background field.\n");
-        exit(1);
-    }
-#endif
 }
 void read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
