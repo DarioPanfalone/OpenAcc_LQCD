@@ -1,0 +1,179 @@
+\documentclass[a4paper,10pt]{article}
+%\documentclass[a4paper,10pt]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+
+\title{Measure of the chiral condensate}
+\author{M. Mesiti}
+\date{}
+
+
+\begin{document}
+\maketitle
+
+The chiral condensate for a given quark is defined as 
+\begin{equation}
+ \langle \bar{\psi}_q \psi_q \rangle = \frac{\partial}{\partial m_q} \log Z
+\end{equation}
+[...]\\
+On the lattice, it is calculated through noisy estimators. 
+\begin{equation}
+ \langle \bar{\psi}_q \psi_q \rangle  = \textrm{Tr} M^{-1} = \langle \phi 
+M_q^{-1} \phi \rangle_{noise} \ , 
+\end{equation}
+where $M_q$ is the Dirac matrix associated to the 
+quark $q$ (thus including the $SU(3)$ gauge links, which are the same for all 
+quarks, and the optional $U(1)$ phase field, which may include electromagnetic 
+fields and \emph{imaginary} chemical potentials), and $\langle \ldots 
+\rangle_{noise}$ means an average on the noise vectors $\phi$. As a necessary 
+and sufficient condition for the last equality to hold, the scalar product 
+between two different noise vectors $\phi_i$ must satisfy
+\begin{equation}
+ \langle \phi_i \phi_j \rangle_{noise} = \delta_{ij}
+\end{equation}
+Given a $Z_2$ noise vector\footnote{It may also be 
+gaussian, but it 
+seems that $Z_2$ works best.} $\phi$, an estimate of the chiral condensate will 
+be
+\begin{equation}
+ \langle \bar{\psi}_q \psi_q \rangle  = \phi M_q^{-1} \phi \ .
+\end{equation}
+
+The issue here is to estimate
+\begin{equation}
+ \label{problem}
+ \chi = M_q^{-1} \phi \ . 
+\end{equation}
+Notice that the algorithm used in the code to invert a 
+matrix (the \emph{conjugate gradient} method) requires the matrix to be 
+\emph{Hermitean}. $M_q$ is not, but $M_q^\dagger M_q$ is. Then, the trick will 
+be to calculate 
+\begin{equation}
+\label{trick}
+ \chi = \left( M_q^\dagger M_q \right)^{-1} M^\dagger \phi \ . 
+\end{equation}
+In order to be more concrete, let's say a bit more about the structure of the 
+Dirac matrix (let's forget for the sake of my fingers the subscript $q$, we're 
+concerned by only a quark species at the time anyway). In the staggered 
+formulation (see, for example, Rothe's textbook)
+\begin{equation}
+\label{dirac_matrix_u}
+ M_{i,j} = \sum_{\mu = 1}^4 \left[ U_\mu(i) \delta_{i+\hat{\mu},j}- 
+U_\mu^\dagger (i-\hat{\mu}) \delta_{i-\hat{\mu},j} \right] + m\delta_{i,j}
+\end{equation}
+where $U_\mu$ contains also \emph{all} the $U(1)$ phases you can think of 
+(the staggered phases $\eta_\mu$, the imaginary chemical potentials and the 
+electromagnetic fields), while $i$ and $j$ are indices for the lattice sites. 
+It is very apparent that the first term only connects \emph{even} sites to 
+\emph{odd} sites. Symbolically, we can write
+\[ M = \left( \begin{array}{cc}
+M_{ee} & M_{eo} \\
+M_{oe} & M_{oo} 
+\end{array}
+\right) =
+\left( \begin{array}{cc}
+m & D_{eo} \\
+D_{oe} & m 
+\end{array}
+\right) \ ,
+\]
+where the gauge links and $U(1)$ phases are contained in the $D_{eo}$ and 
+$D_{oe}$ submatrices. Notice that the matrix  
+\[ D = \left( \begin{array}{cc}
+0 & D_{eo} \\
+D_{oe} & 0 
+\end{array}
+\right)
+\]
+is anti Hermitian\footnote{There are two ways to see this: the clever one is to 
+notice that $D$ is the lattice discretization of a derivative, and as such must 
+be antihermitian. The \emph{poor man} way to see this (or the \emph{pedantic 
+man} way to check it) is to use Eq.(\ref{dirac_matrix_u}), noticing that 
+\begin{equation}
+ \left(D_{eo}\right)_{ij} = - \left(D_{oe}\right)_{ji}^\dagger \ , 
+\end{equation}
+as it must be.
+}. This means that 
+\[ M^\dagger M = \left( 
+\begin{array}{cc}
+m^2 - D_{eo} D_{oe} & 0 \\
+0 &   m^2 - D_{oe} D_{eo}
+\end{array} 
+\right) \ . \]
+Notice that the submatrices $m^2 - D_{eo} D_{oe}$ and $m^2 - D_{oe} D_{eo}$ are 
+Hermitean. So our ploy shown in Eq.(\ref{trick}) turns into
+\[ \left( \begin{array}{c}
+\chi_e \\
+\chi_o
+\end{array} \right)
+= \left( 
+\begin{array}{cc}
+\left[m^2 - D_{eo} D_{oe}\right]^{-1} & 0 \\
+0 &   \left[m^2 - D_{oe} D_{eo} \right]^{-1}
+\end{array}  
+\right) \left( 
+\begin{array}{cc}
+m   &  -D_{eo} \\
+-D_{oe}   & m
+\end{array}\right)
+\left(
+\begin{array}{c}
+\phi_e \\
+\phi_o
+\end{array}
+\right) \ ,
+\] 
+from which we read
+\begin{equation}
+\chi_e = \left[m^2 - D_{eo} D_{oe}\right]^{-1} \left( m \phi_e - D_{eo} 
+\phi_o\right)
+\end{equation}
+and a similar equation for $\chi_o$. From this reasoning it may look like we 
+need to perform two inversions, one to obtain $\chi_e$ and another to obtain 
+$\chi_o$. We can avoid the second inversion by making use of the original 
+statement of the problem, (Eq.~\ref{problem}), which implies $\phi = M \chi$:
+\[
+\left( \begin{array}{c}
+\phi_e \\
+\phi_o
+\end{array}
+\right)  =   \left( \begin{array}{cc}
+m & D_{eo} \\
+D_{oe} & m 
+\end{array}
+\right) \left( 
+\begin{array}{c}
+ \chi_e \\
+ \chi_o
+\end{array}
+ \right) \ . 
+\]
+This tells us that $\phi_o = D_{oe} \chi_e + m \chi_o$, which implies
+\[
+ \chi_o = \frac{1}{m} \left( \phi_o - D_{oe} \chi_e \right) \ . 
+\]
+Once $\chi_e$ and $\chi_o$ are calculated, our estimate of the chiral 
+condensate (for a given quark) will be
+\begin{equation}
+\langle \bar{\psi} \psi \rangle = \phi_e\chi_e + \phi_o \chi_o  
+\end{equation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
