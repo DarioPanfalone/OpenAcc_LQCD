@@ -76,7 +76,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
       CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
       det = detSu3(&m);
       if(fabs(1+det) < 0.005 ){ // DEBUG, the limit should be FAR stricter.
-        if(verbosity_lv > 4)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
+        if(verbosity_lv > 5)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
         minus_det_count ++;
         conf[q].r0.c0[i] = -conf[q].r0.c0[i];
         conf[q].r0.c1[i] = -conf[q].r0.c1[i];

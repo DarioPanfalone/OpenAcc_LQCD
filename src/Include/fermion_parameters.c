@@ -239,7 +239,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                    
                     arg *= ferm_charge;// only am phase so far
                     if(KSphaseT(x,y,z,t) == -1) arg += 0.5;
-                    arg += chpotphase; 
+                    arg += chpotphase*0.5; // it must be multiplied by pi, not 2pi
                     if(T == nt) arg += 0.5;// antiperiodic boundary conds
                                            // notice T = t+1 !!
 

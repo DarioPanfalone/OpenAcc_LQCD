@@ -370,15 +370,17 @@ void read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGT
     scan_group_NV(npar_gaugemeas,gmp, filelines, startline, endline);
 
 }
-void read_fermmeas_info(char * outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+void read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
-    const unsigned int npar_fermmeas = 1 ; 
+    const unsigned int npar_fermmeas = 2 ; 
     par_info fmp[npar_fermmeas];
 
     char soutfilename[] = "FermionicOutfilename" ;
+    char sch_cond_copies[] = "ChiralCondCopies"; 
 
-    fmp[0]=(par_info){(void*) outfilename ,TYPE_STR,soutfilename };
+    fmp[0]=(par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,soutfilename };
+    fmp[1]=(par_info){(void*) &(fmpars->ch_cond_copies),TYPE_INT,sch_cond_copies};
 
 
     // from then on, you should not have to modify anything.
@@ -481,9 +483,6 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         //for(int dbgline = 0 ; dbgline < lines_read; dbgline++) // DBG
         //  printf("%d %s",dbgline, filelines[dbgline]);
 
-
-
-
         //scanning for macro parameter families
 
         found_tags = scan_group_V(NPMGTYPES,par_macro_groups_name,
@@ -553,7 +552,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                         filelines,startline,endline);
                 break; 
             case PMG_FMEAS     : 
-                read_fermmeas_info(fermionic_outfilename,
+                read_fermmeas_info(&fm_par,
                         filelines,startline,endline);
                 break; 
             case PMG_DEVICE     : 

@@ -161,6 +161,34 @@ int main(int argc, char* argv[]){
             printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
             printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
 
+            if(mkwch_pars.ntraj==0){ // MEASURES ONLY
+
+                printf("\n#################################################\n");
+                printf("\tMEASUREMENTS ONLY ON FILE %s\n", mkwch_pars.save_conf_name);
+                printf("\n#################################################\n");
+
+                //--------- MISURA ROBA FERMIONICA ----------------//
+                //
+             printf("Fermion Measurements: see file %s\n",fm_par.fermionic_outfilename);
+             perform_chiral_measures(conf_acc,fermions_parameters,
+                        &fm_par, mkwch_pars.residue_metro, id_iter_offset) ;
+
+
+                //-------------------------------------------------// 
+                //--------- MISURA ROBA DI GAUGE ------------------//
+                printf("Misure di Gauge:\n");
+                plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+                rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+
+                 printf("Plaquette: %lf\n", plq/size/3.0/6.0);
+                 printf("Rectangle: %lf\n", rect/size/3.0/6.0/2.0);
+
+
+            }else printf("Starting generation of Configurations.\n");
+
+            
+
+
             // THERMALIZATION & METRO    ----   UPDATES //
     
             for(int id_iter=id_iter_offset;id_iter<(mkwch_pars.ntraj+id_iter_offset);id_iter++){
@@ -185,26 +213,11 @@ int main(int argc, char* argv[]){
                 //---------------------------------------//
 
                 //--------- MISURA ROBA FERMIONICA ----------------//
-                FILE *foutfile = fopen(fermionic_outfilename,"at");
-                if(!foutfile){
-                    foutfile = fopen(fermionic_outfilename,"wt");
+                //
+                perform_chiral_measures(conf_acc,fermions_parameters,
+                        &fm_par, mkwch_pars.residue_metro,id_iter) ;
 
-                    strcpy(fermionic_outfile_header,"#conf_id\t");
-                    for(int iflv=0;iflv<NDiffFlavs;iflv++){
-                        char strtocat[20];
-                        sprintf(strtocat, "Reff_%d\tImff_%d\t",iflv, iflv);
-                        strcat(fermionic_outfile_header,strtocat);
-                    }
-                    strcat(fermionic_outfile_header,"\n");
-                    fprintf(foutfile,"%s",fermionic_outfile_header);
 
-                }
-                if(foutfile){
-                    fprintf(foutfile,"%d\t",conf_id_iter);
-                    for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,&(fermions_parameters[iflv]),mkwch_pars.residue_metro,foutfile);
-                    fprintf(foutfile,"\n");
-                }
-                fclose(foutfile);
                 //-------------------------------------------------// 
                 //--------- MISURA ROBA DI GAUGE ------------------//
                 plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);

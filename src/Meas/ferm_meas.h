@@ -6,8 +6,18 @@
 #include <stdio.h>
 #include "../OpenAcc/struct_c_def.h"
 
-extern char fermionic_outfilename[50];
-extern char fermionic_outfile_header[100];
+
+typedef struct ferm_meas_param_t{
+
+    char fermionic_outfilename[50];
+    char fermionic_outfile_header[1000];
+    int ch_cond_copies;
+} ferm_meas_params;
+
+extern ferm_meas_params fm_par;
+
+
+
 
 void eo_inversion(su3_soa *tconf_acc,
 		  ferm_param * tfermions_parameters,
@@ -28,9 +38,14 @@ d_complex chiral_condensate(vec3_soa * rnd_e, vec3_soa * rnd_o,
 	       vec3_soa * chi_e, vec3_soa * chi_o);
 
 
+
+void write_fermion_file_header(ferm_meas_params fmpar);
+
+
 void perform_chiral_measures( su3_soa * tconf_acc,
-			      ferm_param * tfermions_parameters, double res,
-			      FILE *out_file);
+			      ferm_param * tfermions_parameters, 
+                  ferm_meas_params * tfm_par,
+                  double res, int conf_id_iter);
 
 
 #endif

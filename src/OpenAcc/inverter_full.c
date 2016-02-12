@@ -43,6 +43,9 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
   double source_norm = delta;
   // loop over cg iterations
   cg=0;
+    if (verbosity_lv > 3)
+      printf("STARTING CG:\nCG\tR\n");
+
   do {
     cg++;    
     // s=(M^dag M)p    alpha=(p,s)
@@ -63,15 +66,28 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
     // p=r+gammag*p
     combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
 
+
+      if (verbosity_lv > 3 && cg%10==0){
+
+      printf("%d\t%1.1e\r",cg, sqrt(lambda));fflush(stdout);
+      
+      }
+
+
+
   } while( (sqrt(lambda/source_norm)>res) && cg<max_cg);
 
+
+  if (verbosity_lv > 3 ) printf("\n");
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
-  if(verbosity_lv > 1) printf("Terminated invert after   %d    iterations", cg);
 
   fermion_matrix_multiplication(u,loc_s,out,loc_h,pars);
   combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
   double  giustoono=l2norm2_global(loc_h);
-  if(verbosity_lv > 1) printf("[res/stop_res=  %e , stop_res=%e ]\n",sqrt(giustoono)/res,res);
+  if(verbosity_lv > 1){
+      printf("Terminated invert after   %d    iterations", cg);
+      printf("[res/stop_res=  %e , stop_res=%e ]\n",sqrt(giustoono)/res,res);
+  }
 #endif
   if(cg==max_cg)
     {
