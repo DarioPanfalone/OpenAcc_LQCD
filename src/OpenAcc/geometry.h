@@ -8,10 +8,10 @@
 #endif
 
 // lattice dimensions
-#define nd0  8
-#define nd1  8
-#define nd2  8
-#define nd3  8
+#define nd0 16 
+#define nd1 16  
+#define nd2 16  
+#define nd3 16  
 
 #define nd0h (nd0 >> 1) // nx/2
 #define nd1h (nd1 >> 1)
@@ -46,7 +46,6 @@
 #define no_links (4 * vol4)
 
 
-#pragma acc routine seq
 typedef struct geom_parameters_t{
 
     int gnx,gny,gnz,gnt;
@@ -59,6 +58,7 @@ typedef struct geom_parameters_t{
 
 extern geom_parameters geom_par;
 
+#pragma acc routine seq
 static inline int snum_acc(int d0, int d1, int d2, int d3) {
   int ris;
   ris = d0 + (d1*vol1) + (d2*vol2) + (d3*vol3);

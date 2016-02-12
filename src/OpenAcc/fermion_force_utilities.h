@@ -274,7 +274,7 @@ void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * co
 void multiply_backfield_times_force(__restrict ferm_param * const tpars,
         __restrict double_soa * const backfield,
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
-        __restrict su3_soa * const pseudo_ipdot)i;
+        __restrict su3_soa * const pseudo_ipdot);
 
 #else 
 void accumulate_gl3soa_into_gl3soa(
