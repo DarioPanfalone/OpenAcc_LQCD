@@ -11,8 +11,6 @@
 double polyakov_loop(	__restrict su3_soa * const u,
         __restrict su3_soa * const loopplk			)
 {	
-    // removing stag phases
-    mult_conf_times_stag_phases(u);
 
     //set to identity
 #pragma acc kernels present(loopplk)
@@ -83,9 +81,6 @@ double polyakov_loop(	__restrict su3_soa * const u,
 
     //  printf("\t Errore su unitarieta polyakov: %f\n",r);
 
-
-    // add stag phases
-    mult_conf_times_stag_phases(u);
 
     return res_L;
 }

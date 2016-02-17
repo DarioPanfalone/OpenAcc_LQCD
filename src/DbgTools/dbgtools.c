@@ -106,7 +106,7 @@ void read_su3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter )
   fp = fopen(nomefile,"r");
     if(!fp){
         printf("Erorr, su3_soa file %s not found.\n", nomefile );
-        return 1;
+        exit(1) ;
     }else if(verbosity_lv > 2) 
         printf("Reading su3_soa %s\n", nomefile );
 

@@ -56,16 +56,16 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
-
+FermionMeasCopies       1
 
 DeviceSettings
 device_choice           0
 
 Geometry
-nx                     16   
-ny	                   16  
-nz	                   16 
-nt	                   16  
+nx                      8  
+ny	                    8 
+nz	                    8
+nt	                    8 
 xmap	                0
 ymap	                1    
 zmap	                2    

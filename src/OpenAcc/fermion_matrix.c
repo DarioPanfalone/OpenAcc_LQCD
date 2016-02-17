@@ -419,9 +419,6 @@ void dM_dmu_oe( __restrict su3_soa * const u,
 #pragma acc loop independent vector(DIM_BLOCK_X)
                 for(hx=0; hx < nxh; hx++) {
 
-#ifdef IMCHEMPOT
-                    double imchempot = pars->ferm_im_chem_pot/((double)(nt));
-#endif
 
                     int x, tm, tp, idxh, matdir;
                     vec3 aux;
@@ -447,9 +444,9 @@ void dM_dmu_oe( __restrict su3_soa * const u,
 
                     /////////////////////////////////////////////////////////////////////     
 
-                    out->c0[idxh] = (aux.c0)*0.5/nt;
-                    out->c1[idxh] = (aux.c1)*0.5/nt;
-                    out->c2[idxh] = (aux.c2)*0.5/nt;
+                    out->c0[idxh] = (aux.c0)*0.5;
+                    out->c1[idxh] = (aux.c1)*0.5;
+                    out->c2[idxh] = (aux.c2)*0.5;
 
                 } // Loop over nxh
             } // Loop over ny
@@ -475,9 +472,6 @@ void dM_dmu_eo( __restrict su3_soa * const u,
 #pragma acc loop independent vector(DIM_BLOCK_X)
                 for(hx=0; hx < nxh; hx++) {
 
-#ifdef IMCHEMPOT
-                    double imchempot = pars->ferm_im_chem_pot/((double)(nt));
-#endif
                     int x, tm, tp, idxh;
                     vec3 aux;
                     double coef=(double)1.0/nt;
@@ -494,18 +488,18 @@ void dM_dmu_eo( __restrict su3_soa * const u,
                     tp *= (((tp-nt) >> 31) & 0x1);
 
                     //direzione tempo positiva, 6
-                    aux = mat_vec_mul_arg( &u[matdir], idxh, in, snum_acc(x,y,z,tp),
+                    aux = mat_vec_mul_arg( &u[6], idxh, in, snum_acc(x,y,z,tp),
                             &backfield[6]);
 
                     // direzione tempo negativa, 7
-                    aux = sumResult(aux, conjmat_vec_mul_arg( &u[matdir],
+                    aux = sumResult(aux, conjmat_vec_mul_arg( &u[7],
                                 snum_acc(x,y,z,tm),in,snum_acc(x,y,z,tm),&backfield[7]));
 
                     /////////////////////////////////////////////////////////////////////     
 
-                    out->c0[idxh] = (aux.c0)*0.5/nt;
-                    out->c1[idxh] = (aux.c1)*0.5/nt;
-                    out->c2[idxh] = (aux.c2)*0.5/nt;
+                    out->c0[idxh] = (aux.c0)*0.5;
+                    out->c1[idxh] = (aux.c1)*0.5;
+                    out->c2[idxh] = (aux.c2)*0.5;
 
                 } // Loop over nxh
             } // Loop over ny

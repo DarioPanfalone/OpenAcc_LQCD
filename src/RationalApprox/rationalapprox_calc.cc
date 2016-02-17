@@ -16,6 +16,8 @@ const int gmp_remez_precision=100; // The precision that gmp uses
 const double lambda_min=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double residue=1.0e-8;    // stopping residual for CG
 
+int verbosity_lv = 5 ; 
+
 int main(int argc, char **argv){
     if(argc!=5  && argc != 6){
         printf("Use as arguments:    tolerance exponent_num exponent_den lambda_min (optional: min approx order)\n");
@@ -50,7 +52,7 @@ int main(int argc, char **argv){
         AlgRemez remez1(approx->lambda_min,approx->lambda_max,approx->gmp_remez_precision);
         // Generate the required approximation
         approx->error = remez1.generateApprox(approx->approx_order,approx->approx_order,abs(approx->exponent_num),abs(approx->exponent_den));
-         printf("\nf(x) = (x)^(%d/%d), approximation on [%e, %e], order %d, error = %e, ",
+         fprintf(stdout,"\nf(x) = (x)^(%d/%d), approximation on [%e, %e], order %d, error = %e, ",
                 approx->exponent_num, approx->exponent_den,approx->lambda_min,
                 approx->lambda_max, approx->approx_order, approx->error);
 
@@ -59,7 +61,7 @@ int main(int argc, char **argv){
         // the special case that n = d)
 
         if(approx->error > goal_error) {
-            printf(" not precise enough, increasing order.\n");
+            fprintf(stdout," not precise enough, increasing order.\n");
             approx->approx_order++;
         }
         else {
@@ -71,7 +73,9 @@ int main(int argc, char **argv){
         }
     }
     char * nomefile = rational_approx_filename(goal_error, approx->exponent_num, approx->exponent_den, approx->lambda_min);
-
     rationalapprox_save(nomefile, approx);
+    fprintf(stderr,"\nNOTICE: Remez algorithm converged to the required precision.\n");
+    fprintf(stderr,"Written file %s .\n", nomefile);
+
 
 }

@@ -253,9 +253,6 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
     } // t loop
 
     int dir;
-    for(dir = 0; dir < 8; dir++)
-        phases[dir].staggered_status = 1;
-
     
 }
 #endif

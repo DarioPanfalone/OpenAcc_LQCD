@@ -139,7 +139,6 @@ void fermion_measures( su3_soa * tconf_acc,
     if(foutfile){
         fseek(foutfile, 0L, SEEK_END);
         fsize = ftell(foutfile);
-        ftell(foutfile);
         fseek(foutfile, 0L, SEEK_SET);
         fsize -= ftell(foutfile);
 
@@ -150,7 +149,7 @@ void fermion_measures( su3_soa * tconf_acc,
     fclose(foutfile);// found file size
 
     // cycle on copies
-    for(int icopy = 0; icopy < tfm_par->ch_cond_copies ; icopy++) {
+    for(int icopy = 0; icopy < tfm_par->meas_copies ; icopy++) {
         FILE *foutfile = fopen(tfm_par->fermionic_outfilename,"at");
         if(fsize == 0){
             set_fermion_file_header(tfm_par, tfermions_parameters);
@@ -170,14 +169,14 @@ void fermion_measures( su3_soa * tconf_acc,
         for(int iflv=0; iflv < NDiffFlavs ; iflv++){
 
             if(verbosity_lv > 1) printf("Performing %d of %d chiral measures for quark %s.\n",
-                    icopy+1,tfm_par->ch_cond_copies, tfermions_parameters[iflv].name);
+                    icopy+1,tfm_par->meas_copies, tfermions_parameters[iflv].name);
 
 
             generate_vec3_soa_z2noise(rnd_e);
             generate_vec3_soa_z2noise(rnd_o);
             generate_vec3_soa_gauss(trial_sol);
-            d_complex chircond = 0.0 + 0.0*I;
-            d_complex barnum = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
+            d_complex chircond_size = 0.0 + 0.0*I;
+            d_complex barnum_size = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
             double factor = tfermions_parameters[iflv].degeneracy*0.25/size;
 
 #pragma acc data create(phi_e[0:1]) create(phi_o[0:1])\
@@ -187,17 +186,19 @@ void fermion_measures( su3_soa * tconf_acc,
                 // i fermioni ausiliari kloc_* sono quelli GLOBALI !!!
                 eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
 
-                chircond = factor*(scal_prod_global(rnd_e,chi_e)+
+                chircond_size = (scal_prod_global(rnd_e,chi_e)+
                     scal_prod_global(rnd_o,chi_o));
 
-                dM_dmu_eo(conf_to_use,phi_e,chi_o,tfermions_parameters);
-                dM_dmu_oe(conf_to_use,phi_o,chi_e,tfermions_parameters);
+                dM_dmu_eo(conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
+                dM_dmu_oe(conf_to_use,phi_o,chi_e,tfermions_parameters[iflv].phases);
 
-                barnum = factor*(scal_prod_global(rnd_e,phi_e)+
+                barnum_size = (scal_prod_global(rnd_e,phi_e)+
                     scal_prod_global(rnd_o,phi_o));
 
-                fprintf(foutfile,"%.16lf\t%.16lf\t",creal(chircond),cimag(chircond));
-                fprintf(foutfile,"%.16lf\t%.16lf\t",creal(barnum),cimag(barnum));
+                fprintf(foutfile,"%.16lf\t%.16lf\t",
+                        creal(chircond_size*factor),cimag(chircond_size*factor));
+                fprintf(foutfile,"%.16lf\t%.16lf\t",
+                        creal(barnum_size*factor),cimag(barnum_size*factor));
             }
         }// end of cycle over flavours
 

@@ -377,10 +377,10 @@ void read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLI
     par_info fmp[npar_fermmeas];
 
     char soutfilename[] = "FermionicOutfilename" ;
-    char sch_cond_copies[] = "ChiralCondCopies"; 
+    char sferm_meas_copies[] = "FermionMeasCopies"; 
 
     fmp[0]=(par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,soutfilename };
-    fmp[1]=(par_info){(void*) &(fmpars->ch_cond_copies),TYPE_INT,sch_cond_copies};
+    fmp[1]=(par_info){(void*) &(fmpars->meas_copies),TYPE_INT,sferm_meas_copies};
 
 
     // from then on, you should not have to modify anything.
