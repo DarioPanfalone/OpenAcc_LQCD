@@ -42,7 +42,7 @@ d_complex chiral_condensate(vec3_soa * rnd_e, vec3_soa * rnd_o,
 void write_fermion_file_header(ferm_meas_params fmpar);
 
 
-void perform_chiral_measures( su3_soa * tconf_acc,
+void fermion_measures( su3_soa * tconf_acc,
 			      ferm_param * tfermions_parameters, 
                   ferm_meas_params * tfm_par,
                   double res, int conf_id_iter);

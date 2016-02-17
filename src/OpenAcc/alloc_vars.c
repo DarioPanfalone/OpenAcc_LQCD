@@ -153,6 +153,9 @@ void mem_alloc()
   ALLOCCHECK(allocation_check, local_sums) ;
 
 
+
+#undef ALLOCCHECK
+
 }
 
 inline void mem_free()

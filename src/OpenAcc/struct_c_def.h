@@ -26,7 +26,6 @@ typedef struct dcomplex_soa_t {
 typedef struct double_soa_t {
     int status;
     double d[sizeh];
-    int staggered_status; // 0 ok, 1 with staggered phases included.
 } double_soa;
 typedef struct vec3_t {
   d_complex c0;
@@ -35,7 +34,6 @@ typedef struct vec3_t {
 } vec3;
 typedef struct su3_soa_t {
   int status;
-  int staggered_status; // 0 ok, 1 with staggered phases included.
   vec3_soa r0;
   vec3_soa r1;
   vec3_soa r2;
@@ -56,6 +54,24 @@ typedef struct thmat_soa_t {
   double rc00[sizeh];   // Re(comp_00)
   double rc11[sizeh];   // Re(comp_11)
 } thmat_soa;
+
+// For Polyakov loop calculations
+typedef struct vec3_plk_t {
+	 int status;
+    d_complex c0[vol3];
+    d_complex c1[vol3];
+    d_complex c2[vol3];
+} vec3_plk;
+typedef struct su3_plk_t {
+  int status;  
+  vec3_plk r0;
+  vec3_plk r1;
+  vec3_plk r2;
+} su3_plk;
+typedef struct dcomplex_plk_t {
+    int status;
+    d_complex c[vol3];
+} dcomplex_plk;
 
 
 

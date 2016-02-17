@@ -64,7 +64,7 @@ void eo_inversion(su3_soa *tconf_acc,
 }// end eo_inversion
 
 
-d_complex chiral_condensate(vec3_soa * rnd_e,
+d_complex eo_scal_prod_global(vec3_soa * rnd_e,
         vec3_soa * rnd_o,
         vec3_soa * chi_e,
         vec3_soa * chi_o){
@@ -80,8 +80,9 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 
     strcpy(fmpar->fermionic_outfile_header,"#conf\ticopy\t");
     for(int iflv=0;iflv<NDiffFlavs;iflv++){
-            char strtocat[80];
+            char strtocat[120];
             sprintf(strtocat, "Reff_%-19sImff_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+            sprintf(strtocat, "ReN_%-19sImN_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
             strcat(fmpar->fermionic_outfile_header,strtocat);
     }
     strcat(fmpar->fermionic_outfile_header,"\n");
@@ -89,16 +90,16 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 }
 
 
-void perform_chiral_measures( su3_soa * tconf_acc,
+void fermion_measures( su3_soa * tconf_acc,
         ferm_param * tfermions_parameters,
         ferm_meas_params * tfm_par,
         double res,
         int conf_id_iter  ){
     vec3_soa * rnd_e,* rnd_o;
-    vec3_soa * chi_e,* chi_o;
-    vec3_soa * phi_e,* phi_o;
+    vec3_soa * chi_e,* chi_o;//results of eo_inversion
+    vec3_soa * phi_e,* phi_o; // parking variables for eo_inverter
+                              // also results of eo inversion multiplied by dM/dmu
     vec3_soa * trial_sol;
-
     su3_soa * conf_to_use;
 
 #ifdef STOUT_FERMIONS
@@ -110,23 +111,29 @@ void perform_chiral_measures( su3_soa * tconf_acc,
 #endif
 
     int allocation_check;
+#define ALLOCCHECK(control_int,var)  if(control_int != 0 ) \
+    printf("\tError in  allocation of %s . \n", #var);\
+    else if(verbosity_lv > 2) printf("\tAllocation of %s : OK , %p\n", #var, var );\
+
     allocation_check =  posix_memalign((void **)&rnd_e, ALIGN, sizeof(vec3_soa));
-    if(allocation_check != 0)  printf("Errore nella allocazione di rnd_e \n");
+    ALLOCCHECK(allocation_check,rnd_e);     
     allocation_check =  posix_memalign((void **)&rnd_o, ALIGN, sizeof(vec3_soa));
-    if(allocation_check != 0)  printf("Errore nella allocazione di rnd_o \n");
+    ALLOCCHECK(allocation_check,rnd_o);     
     allocation_check =  posix_memalign((void **)&phi_e, ALIGN, sizeof(vec3_soa));
-    if(allocation_check != 0)  printf("Errore nella allocazione di phi_e \n");
+    ALLOCCHECK(allocation_check,phi_e);     
     allocation_check =  posix_memalign((void **)&phi_o, ALIGN, sizeof(vec3_soa));
-    if(allocation_check != 0)  printf("Errore nella allocazione di phi_o \n");
+    ALLOCCHECK(allocation_check,phi_o);     
     allocation_check =  posix_memalign((void **)&chi_e, ALIGN, sizeof(vec3_soa));
-    if(allocation_check != 0)  printf("Errore nella allocazione di chi_e \n");
+    ALLOCCHECK(allocation_check,chi_e);     
     allocation_check =  posix_memalign((void **)&chi_o, ALIGN, sizeof(vec3_soa));
-    if(allocation_check != 0)  printf("Errore nella allocazione di chi_o \n");
+    ALLOCCHECK(allocation_check,chi_o);     
     allocation_check =  posix_memalign((void **)&trial_sol, ALIGN, sizeof(vec3_soa));
-    if(allocation_check != 0)  printf("Errore nella allocazione di trial_sol \n");
+    ALLOCCHECK(allocation_check,trial_sol);
+
+#undef ALLOCCHECK
 
     // FILE checks
-
+    // find the actual file size
     FILE *foutfile = fopen(tfm_par->fermionic_outfilename,"ab");
     int fsize;
     if(foutfile){
@@ -140,8 +147,9 @@ void perform_chiral_measures( su3_soa * tconf_acc,
         printf("File %s can't be opened for writing. Exiting.\n", fm_par.fermionic_outfilename);
         exit(1);
     }
-    fclose(foutfile);
+    fclose(foutfile);// found file size
 
+    // cycle on copies
     for(int icopy = 0; icopy < tfm_par->ch_cond_copies ; icopy++) {
         FILE *foutfile = fopen(tfm_par->fermionic_outfilename,"at");
         if(fsize == 0){
@@ -158,6 +166,7 @@ void perform_chiral_measures( su3_soa * tconf_acc,
 
         fprintf(foutfile,"%d\t%d\t",conf_id_iter,icopy);
 
+        // cycle on flavours
         for(int iflv=0; iflv < NDiffFlavs ; iflv++){
 
             if(verbosity_lv > 1) printf("Performing %d of %d chiral measures for quark %s.\n",
@@ -168,22 +177,33 @@ void perform_chiral_measures( su3_soa * tconf_acc,
             generate_vec3_soa_z2noise(rnd_o);
             generate_vec3_soa_gauss(trial_sol);
             d_complex chircond = 0.0 + 0.0*I;
+            d_complex barnum = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
+            double factor = tfermions_parameters[iflv].degeneracy*0.25/size;
 
-#pragma acc data create(phi_e[0:1]) create(phi_o[0:1]) create(chi_e[0:1]) create(chi_o[0:1]) copyin(rnd_e[0:1]) copyin(rnd_o[0:1]) copyin(trial_sol[0:1])
+#pragma acc data create(phi_e[0:1]) create(phi_o[0:1])\
+            create(chi_e[0:1]) create(chi_o[0:1])   \
+            copyin(rnd_e[0:1]) copyin(rnd_o[0:1]) copyin(trial_sol[0:1])
             {
                 // i fermioni ausiliari kloc_* sono quelli GLOBALI !!!
                 eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
-                chircond = chiral_condensate(rnd_e,rnd_o,chi_e,chi_o);
 
-                double factor = tfermions_parameters[iflv].degeneracy*0.25/size;
+                chircond = factor*(scal_prod_global(rnd_e,chi_e)+
+                    scal_prod_global(rnd_o,chi_o));
 
-                fprintf(foutfile,"%.16lf\t%.16lf\t",creal(chircond)*factor,cimag(chircond)*factor);
+                dM_dmu_eo(conf_to_use,phi_e,chi_o,tfermions_parameters);
+                dM_dmu_oe(conf_to_use,phi_o,chi_e,tfermions_parameters);
+
+                barnum = factor*(scal_prod_global(rnd_e,phi_e)+
+                    scal_prod_global(rnd_o,phi_o));
+
+                fprintf(foutfile,"%.16lf\t%.16lf\t",creal(chircond),cimag(chircond));
+                fprintf(foutfile,"%.16lf\t%.16lf\t",creal(barnum),cimag(barnum));
             }
-        }
+        }// end of cycle over flavours
 
         fprintf(foutfile,"\n");
         fclose(foutfile);
-    }
+    }// end of cycle over copies
 
     free(rnd_e);
     free(rnd_o);

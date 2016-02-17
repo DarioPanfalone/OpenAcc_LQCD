@@ -33,6 +33,7 @@
 #include "./rettangoli.h"
 #include "./ipdot_gauge.h"
 #include "../Meas/gauge_meas.h"
+#include "../Meas/polyakov.h"
 #include "../Meas/ferm_meas.h"
 #include "./stouting.h"
 #include "./fermion_force.h"
@@ -42,7 +43,6 @@
 #include "./backfield.h"
 #include "./action.h"
 #include "../Rand/random.h"
-
 
 
 //#define NORANDOM  // FOR debug, check also update_versatile.c 
@@ -64,6 +64,20 @@ int main(int argc, char* argv[]){
     set_global_vars_and_fermions_from_input_file(argv[1]);
     //
 
+
+#ifndef __GNUC__
+    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
+    // NVIDIA GPUs
+    acc_device_t my_device_type = acc_device_nvidia;
+    // AMD GPUs
+    // acc_device_t my_device_type = acc_device_radeon;
+    // Intel XeonPhi
+    //acc_device_t my_device_type = acc_device_xeonphi;
+    // Select device ID
+    SELECT_INIT_ACC_DEVICE(my_device_type, dev_settings.device_choice);
+    printf("Device Selected : OK \n");
+#endif
+
     initrand((unsigned int) mkwch_pars.seed);
     verbosity_lv = mkwch_pars.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
@@ -83,20 +97,6 @@ int main(int argc, char* argv[]){
     
     initialize_md_global_variables(md_parameters);
     printf("init md vars : OK \n");
-
-
-#ifndef __GNUC__
-    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
-    // NVIDIA GPUs
-    acc_device_t my_device_type = acc_device_nvidia;
-    // AMD GPUs
-    // acc_device_t my_device_type = acc_device_radeon;
-    // Intel XeonPhi
-    //acc_device_t my_device_type = acc_device_xeonphi;
-    // Select device ID
-    SELECT_INIT_ACC_DEVICE(my_device_type, dev_settings.device_choice);
-    printf("Device Selected : OK \n");
-#endif
 
     //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
     // start from saved conf
@@ -149,7 +149,7 @@ int main(int argc, char* argv[]){
         {
 #endif
 
-            double plq,rect,topoch;
+            double plq,rect,topoch,poly;
 
             int accettate_therm=0;
             int accettate_metro=0;
@@ -158,8 +158,12 @@ int main(int argc, char* argv[]){
             int id_iter_offset=conf_id_iter;
             plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-            printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+            poly =  polyakov_loop(conf_acc,aux_conf_acc);//misura polyakov loop
+            printf("Therm_iter %d Placchetta    = %.18lf \n",
+                    conf_id_iter,plq/size/6.0/3.0);
+            printf("Therm_iter %d Rettangolo    = %.18lf \n",
+                    conf_id_iter,rect/size/6.0/3.0/2.0);
+            printf("Therm_iter %d Polyakov Loop = %.18lf \n",conf_id_iter,poly);
 
             if(mkwch_pars.ntraj==0){ // MEASURES ONLY
 
@@ -170,7 +174,7 @@ int main(int argc, char* argv[]){
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
              printf("Fermion Measurements: see file %s\n",fm_par.fermionic_outfilename);
-             perform_chiral_measures(conf_acc,fermions_parameters,
+             fermion_measures(conf_acc,fermions_parameters,
                         &fm_par, mkwch_pars.residue_metro, id_iter_offset) ;
 
 
@@ -179,9 +183,11 @@ int main(int argc, char* argv[]){
                 printf("Misure di Gauge:\n");
                 plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+                poly =  polyakov_loop(conf_acc,aux_conf_acc);//misura polyakov loop
 
-                 printf("Plaquette: %lf\n", plq/size/3.0/6.0);
-                 printf("Rectangle: %lf\n", rect/size/3.0/6.0/2.0);
+                printf("Plaquette     : %.18lf\n" ,plq/size/3.0/6.0);
+                printf("Rectangle     : %.18lf\n" ,rect/size/3.0/6.0/2.0);
+                printf("Polyakov Loop : %.18lf \n",poly);
 
 
             }else printf("Starting generation of Configurations.\n");
@@ -214,14 +220,15 @@ int main(int argc, char* argv[]){
 
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
-                perform_chiral_measures(conf_acc,fermions_parameters,
+                fermion_measures(conf_acc,fermions_parameters,
                         &fm_par, mkwch_pars.residue_metro,id_iter) ;
 
 
                 //-------------------------------------------------// 
                 //--------- MISURA ROBA DI GAUGE ------------------//
-                plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+                plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+                poly =  polyakov_loop(conf_acc,aux_conf_acc);
 
                 FILE *goutfile = fopen(gauge_outfilename,"at");
                 if(!goutfile){
@@ -231,16 +238,19 @@ int main(int argc, char* argv[]){
                 }
                 if(goutfile){
                     if(id_iter<mkwch_pars.therm_ntraj){
-                        printf("Therm_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
-                        fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_therm-accettate_therm_old);
-                        fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
+                        printf("Therm_iter %d",conf_id_iter );
+                        printf("Placchetta= %.18lf    ", plq/size/6.0/3.0);
+                        printf("Rettangolo= %.18lf\n",rect/size/6.0/3.0/2.0);
+                    
 
-                    }else{
-                        printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
-                        fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_metro-accettate_metro_old);
-                        fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
+                    }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
 
-                    }
+
+                    fprintf(goutfile,"%d\t%d\t",conf_id_iter,
+                            accettate_therm-accettate_therm_old);
+                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\n",plq/size/6.0/3.0,
+                            rect/size/6.0/3.0/2.0, poly);
+                    
                 }
                 fclose(goutfile);
                 //-------------------------------------------------//
@@ -266,6 +276,7 @@ int main(int argc, char* argv[]){
 
             //--------- SALVA LA CONF SU FILE ------------------//
 
+            if(mkwch_pars.ntraj > 0) // MEASURES ONLY
             print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name, conf_id_iter);
             //-------------------------------------------------//
 
