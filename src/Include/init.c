@@ -193,7 +193,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                             reads = sscanf(filelines[iline],
                                     "%s %lf",parname,(double*) par_infos[i].par);
                             if(reads == 2)
-                                printf("%f\n", *((double*)par_infos[i].par));
+                                printf("%e\n", *((double*)par_infos[i].par));
                             break;
                         case TYPE_STR: 
                             reads = sscanf(filelines[iline],
@@ -276,7 +276,7 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
     if(startline<endline)
     if(act_par->stout_rho != RHO ){ 
         printf("Error, input file stout_rho != RHO \n");
-        printf("  Either modify the input file, or recompile,\n");
+        printf("  Either modify the input file, or recompile changing RHO\n");
         printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
         exit(1);
 
