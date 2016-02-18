@@ -533,13 +533,15 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         check *= tagcounts[igrouptype];
     if(!check){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-            if (!tagcounts[igrouptype]) printf("\"%s\" not found!\n",par_macro_groups_names[igrouptype]);
+            if (!tagcounts[igrouptype]) printf("\"%s\"  parameter group not found!\n",
+                    par_macro_groups_names[igrouptype]);
         exit(1);
     }
 
 
     int fermion_count = 0;
     // note 'check' is reused here
+    int totcheck = 0;
     for(int igroup  = 0 ; igroup < found_tags; igroup++){
         int startline = tagpositions[igroup];
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
@@ -585,10 +587,18 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         }
         if(check)
             printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
+        totcheck += check;
     }
 
     // check == 1 means at least a parameter was not found.
-    if(helpmode || check ) exit(1);
+    if(helpmode) exit(1);
+    if(totcheck!=0){
+    
+        printf("There are errors in some groups, exiting.\n")   ;
+        exit(1);
+
+    }
+
     
 }
 
