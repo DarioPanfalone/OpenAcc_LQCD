@@ -152,6 +152,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                     helpfile,"%s\t%s\n",
                     par_infos[ipar].name,
                     type_strings[par_infos[ipar].type]);
+        return 0;
     }
     else // 'normal mode'
     {   // scans lines in the form 
@@ -455,7 +456,7 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
         printf("       Either modify the input file, or recompile,\n");
         printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
                                gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
-        printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",nx,ny,nz,nt );
+        printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",nx,ny,nz,nt);
         exit(1);
 
     }
@@ -538,13 +539,13 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
 
     int fermion_count = 0;
+    // note 'check' is reused here
     for(int igroup  = 0 ; igroup < found_tags; igroup++){
         int startline = tagpositions[igroup];
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
         if(helpmode) fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
         else printf("Reading %s...\n", par_macro_groups_names[tagtypes[igroup]]);
-        int check;
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
                 check = read_action_info(&act_params,filelines,startline,endline);
@@ -582,13 +583,13 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 break; 
 
         }
-        if(check){
-            printf("Problem in group %s\n.", par_macro_groups_names[tagtypes[igroup]]);
-            exit(1);
-        }
+        if(check)
+            printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
     }
 
-    if(helpmode) exit(1);
+    // check == 1 means at least a parameter was not found.
+    if(helpmode || check ) exit(1);
+    
 }
 
 
