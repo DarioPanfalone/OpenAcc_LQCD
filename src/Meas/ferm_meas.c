@@ -186,19 +186,21 @@ void fermion_measures( su3_soa * tconf_acc,
                 // i fermioni ausiliari kloc_* sono quelli GLOBALI !!!
                 eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
 
-                chircond_size = (scal_prod_global(rnd_e,chi_e)+
-                    scal_prod_global(rnd_o,chi_o));
+                chircond_size = scal_prod_global(rnd_e,chi_e)+
+                    scal_prod_global(rnd_o,chi_o);
 
                 dM_dmu_eo(conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
                 dM_dmu_oe(conf_to_use,phi_o,chi_e,tfermions_parameters[iflv].phases);
 
-                barnum_size = (scal_prod_global(rnd_e,phi_e)+
-                    scal_prod_global(rnd_o,phi_o));
+                barnum_size = scal_prod_global(rnd_e,phi_e)+
+                    scal_prod_global(rnd_o,phi_o);
 
                 fprintf(foutfile,"%.16lf\t%.16lf\t",
                         creal(chircond_size*factor),cimag(chircond_size*factor));
                 fprintf(foutfile,"%.16lf\t%.16lf\t",
                         creal(barnum_size*factor),cimag(barnum_size*factor));
+
+
             }
         }// end of cycle over flavours
 

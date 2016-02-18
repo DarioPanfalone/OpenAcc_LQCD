@@ -8,10 +8,10 @@
 #endif
 
 // lattice dimensions
-#define nd0 8  
-#define nd1 8  
-#define nd2 8  
-#define nd3 8
+#define nd0 24  
+#define nd1 24  
+#define nd2 24  
+#define nd3 6  
  
 #define nd0h (nd0 >> 1) // nx/2
 #define nd1h (nd1 >> 1)

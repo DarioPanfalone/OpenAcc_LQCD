@@ -402,14 +402,14 @@ inline void fermion_matrix_multiplication_shifted( __restrict su3_soa * const u,
 
 
 
-void dM_dmu_oe( __restrict su3_soa * const u,
+void dM_dmu_eo( __restrict su3_soa * const u,
         vec3_soa * const out,
         vec3_soa * const in,
         double_soa * backfield)
 {
     int hx, y, z, t;
 
-#pragma acc kernels present(u) present(out) present(in) present(pars)
+#pragma acc kernels present(u) present(out) present(in) present(backfield)
 #pragma acc loop independent gang(nt)
     for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -420,7 +420,7 @@ void dM_dmu_oe( __restrict su3_soa * const u,
                 for(hx=0; hx < nxh; hx++) {
 
 
-                    int x, tm, tp, idxh, matdir;
+                    int x, tm, tp, idxh;
                     vec3 aux;
 
                     // (x+y+z+t) even
@@ -435,11 +435,11 @@ void dM_dmu_oe( __restrict su3_soa * const u,
                     tp *= (((tp-nt) >> 31) & 0x1);
 
                     //direzione tempo positiva, 6
-                    aux = mat_vec_mul_arg( &u[matdir], idxh, in, snum_acc(x,y,z,tp),
+                    aux = mat_vec_mul_arg( &u[6], idxh, in, snum_acc(x,y,z,tp),
                             &backfield[6] );
 
                     // direzione tempo negativa, 7 
-                    aux = sumResult(aux, conjmat_vec_mul_arg( &u[matdir],
+                    aux = sumResult(aux, conjmat_vec_mul_arg( &u[7],
                                 snum_acc(x,y,z,tm),in,snum_acc(x,y,z,tm),&backfield[7]));
 
                     /////////////////////////////////////////////////////////////////////     
@@ -454,7 +454,7 @@ void dM_dmu_oe( __restrict su3_soa * const u,
     } // Loop over nt
 }
 
-void dM_dmu_eo( __restrict su3_soa * const u,
+void dM_dmu_oe( __restrict su3_soa * const u,
         vec3_soa * const out,
         vec3_soa * const in,
         double_soa * backfield)
@@ -462,7 +462,7 @@ void dM_dmu_eo( __restrict su3_soa * const u,
 
     int hx, y, z, t;
 
-#pragma acc kernels present(u) present(out) present(in) present(pars)
+#pragma acc kernels present(u) present(out) present(in) present(backfield)
 #pragma acc loop independent gang(nt)
     for(t=0; t<nt; t++) {
 #pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -474,7 +474,6 @@ void dM_dmu_eo( __restrict su3_soa * const u,
 
                     int x, tm, tp, idxh;
                     vec3 aux;
-                    double coef=(double)1.0/nt;
 
                     // (x+y+z+t) odd
                     x = 2*hx + ((y+z+t+1) & 0x1);
@@ -487,13 +486,13 @@ void dM_dmu_eo( __restrict su3_soa * const u,
                     tp = t + 1;
                     tp *= (((tp-nt) >> 31) & 0x1);
 
-                    //direzione tempo positiva, 6
-                    aux = mat_vec_mul_arg( &u[6], idxh, in, snum_acc(x,y,z,tp),
-                            &backfield[6]);
+                    //direzione tempo negativa, 6
+                    aux = conjmat_vec_mul_arg( &u[6],snum_acc(x,y,z,tm), in,
+                            snum_acc(x,y,z,tm), &backfield[6]);
 
-                    // direzione tempo negativa, 7
-                    aux = sumResult(aux, conjmat_vec_mul_arg( &u[7],
-                                snum_acc(x,y,z,tm),in,snum_acc(x,y,z,tm),&backfield[7]));
+                    // direzione tempo positiva, 7
+                    aux = sumResult(aux, mat_vec_mul_arg( &u[7],idxh,
+                                in,snum_acc(x,y,z,tp),&backfield[7]));
 
                     /////////////////////////////////////////////////////////////////////     
 
