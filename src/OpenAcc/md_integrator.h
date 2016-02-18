@@ -16,6 +16,7 @@ typedef struct md_param_t{
     int no_md;// number of MD steps
     int gauge_scale;   // Update fermions every gauge_scale gauge updates
     double t ;
+    double residue_md;
 
 } md_param; 
 

@@ -5,6 +5,7 @@
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/alloc_vars.h"
 #include "./markowchain.h"
+#include "../OpenAcc/md_integrator.h"
 #include <string.h>
 #include <math.h>
 #include "../RationalApprox/rationalapprox.h"
@@ -69,7 +70,7 @@ int init_ferm_params(ferm_param *fermion_settings){
         pow(mkwch_pars.expected_max_eigenvalue,
                 (double) quark->approx_fi_mother.exponent_num/
                 quark->approx_fi_mother.exponent_den );
-    quark->approx_md_mother.error =  mkwch_pars.residue_md/
+    quark->approx_md_mother.error =  md_parameters.residue_md/
         pow(mkwch_pars.expected_max_eigenvalue,
                 (double) quark->approx_md_mother.exponent_num/
                 quark->approx_md_mother.exponent_den );

@@ -16,13 +16,13 @@ Degeneracy	    1
 PseudoFermions	1
 Name	        pippo
 Charge          0.0
-Mu	            0.0          # keep to zero unless 
-                             # IMCHEMPOT is defined
+Mu	            0.0          
+                             
 
 
 BackgroundFieldParameters
-ex              0.0      #keep these to zero unless	
-ey              0.0	     # BACKFIELD is defined
+ex              0.0      
+ey              0.0	     
 ez              0.0	
 bx              0.0	
 by              0.0	

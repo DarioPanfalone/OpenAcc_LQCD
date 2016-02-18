@@ -8,6 +8,7 @@
 ActionParameters
 Beta            3.938
 StoutSteps      2
+StoutRho        0.15
  
 #up quark
 FlavourParameters   
@@ -54,15 +55,15 @@ MDParameters
 NmdSteps	    11
 GaugeSubSteps	5
 TrajLength	    1.0
+residue_md              1e-6
 
 
 MontecarloParameters
 Ntraj	                300
 ThermNtraj	            10
-SaveConfInterval	    20
-SaveRunningConfInterval	5
+StoreConfInterval	    20
+SaveConfInterval	    5
 residue_metro       	1e-8
-residue_md              1e-6
 ExpMaxEigenvalue        5      # approximate expected max eigenvalues
 StoreConfName       	test_config_store
 SaveConfName            test_config
@@ -77,16 +78,16 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
-
+FermionMeasCopies       1
 
 DeviceSettings
 device_choice           0
 
 Geometry
-nx                      8	
-ny	                    8
-nz	                    8
-nt	                    8
+nx                      24	
+ny	                    24
+nz	                    24
+nt	                    6 
 xmap	                0
 ymap	                1    
 zmap	                2    

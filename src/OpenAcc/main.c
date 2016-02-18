@@ -210,10 +210,10 @@ int main(int argc, char* argv[]){
                 //--------- CONF UPDATE ----------------//
                 if(id_iter<mkwch_pars.therm_ntraj){
                     accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                          mkwch_pars.residue_metro,mkwch_pars.residue_md,id_iter-id_iter_offset,
+                          mkwch_pars.residue_metro,md_parameters.residue_md,id_iter-id_iter_offset,
                             accettate_therm,0);
                 }else{
-                   accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,mkwch_pars.residue_metro,mkwch_pars.residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+                   accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,mkwch_pars.residue_metro,md_parameters.residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
                 }
 #pragma acc update host(conf_acc[0:8])
                 //---------------------------------------//
@@ -256,7 +256,7 @@ int main(int argc, char* argv[]){
                 //-------------------------------------------------//
 
                 //--------- SALVA LA CONF SU FILE ------------------//
-                if(conf_id_iter%mkwch_pars.saveconfinterval==0){
+                if(conf_id_iter%mkwch_pars.storeconfinterval==0){
                     char tempname[50];char serial[10];
                     strcpy(tempname,mkwch_pars.store_conf_name);
                     sprintf(serial,"%d",conf_id_iter);
@@ -264,7 +264,7 @@ int main(int argc, char* argv[]){
                     printf("Storing conf %s.\n", tempname);
                     print_su3_soa_ASCII(conf_acc,tempname,conf_id_iter);
                 }
-                if(conf_id_iter%mkwch_pars.saverunningconfinterval==0){
+                if(conf_id_iter%mkwch_pars.saveconfinterval==0){
                     printf("Saving conf %s.\n", mkwch_pars.save_conf_name);
                     print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name, conf_id_iter);
                 }
