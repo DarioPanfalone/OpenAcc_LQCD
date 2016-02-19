@@ -3,26 +3,26 @@
 #include <inttypes.h>
 
 // ENDIANNESS SWAP
-void uint64swe(uint64_t  * stronzo){
+void uint64swe(uint64_t  * inttoswap){
 
-    char *p= (char*) stronzo; char t;
+    char *p= (char*) inttoswap; char t;
     t = p[7]; p[7] = p[0] ; p[0] = t;
     t = p[6]; p[6] = p[1] ; p[1] = t;
     t = p[5]; p[5] = p[2] ; p[2] = t;
     t = p[4]; p[4] = p[3] ; p[3] = t;
 
 }
-void uint32swe(uint32_t  * stronzo){
+void uint32swe(uint32_t  * inttoswap){
 
-    char *p= (char*) stronzo; char t;
+    char *p= (char*) inttoswap; char t;
     t = p[3]; p[3] = p[0] ; p[0] = t;
     t = p[2]; p[2] = p[1] ; p[1] = t;
 
 
 }
-void uint16swe(uint16_t  * stronzo){
+void uint16swe(uint16_t  * inttoswap){
 
-    char *p= (char*) stronzo; char t;
+    char *p= (char*) inttoswap; char t;
     t = p[1]; p[1] = p[0] ; p[0] = t;
 
 }
@@ -45,7 +45,6 @@ int main(){
     char header[len];
     fg = fopen("bioparco","r+");
     int allfound = 0;
-    int cunt = 0;
 
     while(fgets(header,len,fg)!= NULL && !allfound){
         char * strfnx = strstr(header,"<lx>");
@@ -62,7 +61,6 @@ int main(){
     }
 
     fseek(fg,0,SEEK_SET);
-    char data[50000];
 
 
     int i;

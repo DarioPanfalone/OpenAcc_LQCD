@@ -338,7 +338,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 {
 
     // see /OpenAcc/md_integrator.h
-    const unsigned int  npar_mc =  11;
+    const unsigned int  npar_mc =  12;
     par_info mcp[npar_mc];
 
     char sntraj[] = "Ntraj" ;
@@ -348,6 +348,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     char sresidue_metro[] = "residue_metro";
     char sstore_conf_name[] = "StoreConfName";
     char ssave_conf_name[] = "SaveConfName";
+    char suse_ildg[] = "UseILDG";
     char sseed[] = "Seed";
     char seps_gen[] = "EpsGen";
     char sinput_vbl[] = "VerbosityLv";
@@ -360,10 +361,11 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     mcp[4]=(par_info){(void*) &(mcpar->residue_metro    ),TYPE_DOUBLE,sresidue_metro};
     mcp[5]=(par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,sstore_conf_name};
     mcp[6]=(par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,ssave_conf_name};
-    mcp[7]=(par_info){(void*) &(mcpar->seed   ),TYPE_INT,sseed};
-    mcp[8]=(par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,seps_gen};
-    mcp[9]=(par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,sinput_vbl};
-    mcp[10]=(par_info){(void*) &(mcpar->expected_max_eigenvalue),
+    mcp[7]=(par_info){(void*) &(mcpar->use_ildg),TYPE_INT,suse_ildg};
+    mcp[8]=(par_info){(void*) &(mcpar->seed   ),TYPE_INT,sseed};
+    mcp[9]=(par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,seps_gen};
+    mcp[10]=(par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,sinput_vbl};
+    mcp[11]=(par_info){(void*) &(mcpar->expected_max_eigenvalue),
         TYPE_DOUBLE,sexpected_max_eigenvalue};
 
     // from here on, you should not have to modify anything.

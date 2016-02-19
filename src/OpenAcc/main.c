@@ -103,10 +103,10 @@ int main(int argc, char* argv[]){
     
 
 #ifdef NORANDOM
-    if(!read_su3_soa_ASCII(conf_acc,"conf_norndtest",&conf_id_iter)) // READS ALSO THE conf_id_iter
+    if(!read_conf(conf_acc,"conf_norndtest",&conf_id_iter),mkwch_pars.use_ildg) // READS ALSO THE conf_id_iter
         printf("Stored Gauge Conf conf_norndtest Read : OK \n", mkwch_pars.save_conf_name);
 #else
-    if(!read_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name,&conf_id_iter)) // READS ALSO THE conf_id_iter
+    if(!read_conf(conf_acc,mkwch_pars.save_conf_name,&conf_id_iter,mkwch_pars.use_ildg )) // READS ALSO THE conf_id_iter
        printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
 #endif
     else{
@@ -262,11 +262,12 @@ int main(int argc, char* argv[]){
                     sprintf(serial,"%d",conf_id_iter);
                     strcat(tempname,serial);
                     printf("Storing conf %s.\n", tempname);
-                    print_su3_soa_ASCII(conf_acc,tempname,conf_id_iter);
+                    save_conf(conf_acc,tempname,conf_id_iter,mkwch_pars.use_ildg);
                 }
                 if(conf_id_iter%mkwch_pars.saveconfinterval==0){
                     printf("Saving conf %s.\n", mkwch_pars.save_conf_name);
-                    print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name, conf_id_iter);
+                    save_conf(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
+                            mkwch_pars.use_ildg);
                 }
 
                 //-------------------------------------------------//
@@ -277,7 +278,8 @@ int main(int argc, char* argv[]){
             //--------- SALVA LA CONF SU FILE ------------------//
 
             if(mkwch_pars.ntraj > 0) // MEASURES ONLY
-            print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name, conf_id_iter);
+            save_conf(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
+                    mkwch_pars.use_ildg );
             //-------------------------------------------------//
 
 
