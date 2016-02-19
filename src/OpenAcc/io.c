@@ -117,4 +117,60 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
   }
 }
 
+void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
+        int conf_id_iter)
+{
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    if(! fp ){
+        printf("ERROR, %s unreadable.\n",nomefile);
+        exit(1);
+    }
+
+    printf("ILDG PRINT NOT IMPLEMENTED!\n");
+    exit(1);
+    return ;
+}
+int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_iter ){
+
+  FILE *fp;
+  fp = fopen(nomefile,"r");
+  if(!fp){
+      printf("Gauge configuration ILDG file %s not readable.\n",nomefile);
+      *conf_id_iter = -1;
+      return 1;
+  } 
+  // get to the payload, somehow
+
+  int x,y,z,t,dir;
+  for(t=0;t<nt;t++) for(z=0;z<nz;z++)
+      for(y=0;y<ny;y++) for(x=0;x<nx;x++)
+      {
+
+          int idxh = snum_acc(x,y,z,t);
+          int parity = (x+y+z+t)%2;
+
+          for(dir=0;dir<4;dir++){
+
+              single_su3 m;          
+              fread((void*)m.comp,sizeof(double),18,fp);
+
+              single_su3_into_su3_soa(&m,&conf[dir+parity],idxh);
+
+          }
+
+      }
+
+
+
+    printf("ILDG READ NOT IMPLEMENTED!\n");
+    exit(1);
+    return -1;
+    
+    
+}
+
+
+
+
 #endif
