@@ -8,7 +8,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include <sys/types.h>
-#include "endian.h"
 #define MAXILDGHEADERS 10
 
 
@@ -20,7 +19,7 @@
 #include "./struct_c_def.h"
 #include "../Include/common_defines.h"
 #include "./single_types.h"
-
+#include "../Include/init.h"
 
 
 void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_iter){
@@ -132,6 +131,16 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
 // STUFF FOR READING AND WRITING ILDG FILES
 
 // ENDIANNESS SWAP
+
+//check the endianness of the machine
+// ILDG data is written BIG endian, if the machine is little endian -> disagreement true
+
+int machine_is_little_endian()
+{
+    int little_endian=1;
+    return (int) (*(char*)(&little_endian));
+}
+
 void doubleswe(double  * doubletoswap){
 
     char *p= (char*) doubletoswap; char t[4];
@@ -186,9 +195,10 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
 
     int ildg_format_index =-1;   // where, in ildg_headers, is the ildg_format header
     int ildg_binary_data_index =-1;// where, in ildg_headers, is the ildg_binary_data header
+    // optionals
+    int MD_traj_index = -1;
+    int input_file_index = -1;// not used now 
 
-    // ILDG confs are BIG ENDIAN
-    int conf_machine_endianness_disagreement = (__BYTE_ORDER == __LITTLE_ENDIAN) ;
 
     fg = fopen(nomefile,"r+");
     if(!fg){
@@ -201,6 +211,7 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     fseek(fg,0,SEEK_SET);
     // Find all headers
     int i=0;
+    int  conf_machine_endianness_disagreement = machine_is_little_endian();
     while((ildg_format_index==-1 ||  ildg_binary_data_index==-1) && fg){
         reads = fread(&ildg_headers[i],sizeof(ILDG_header),1,fg);
         if(reads!= 1 ){
@@ -208,12 +219,11 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
             exit(1);
         }
 
-
-
-
         ildg_header_ends_positions[i] = ftello(fg);
         if(strcmp(ildg_headers[i].type,"ildg-format")==0) ildg_format_index = i;
         if(strcmp(ildg_headers[i].type,"ildg-binary-data")==0) ildg_binary_data_index = i;
+        if(strcmp(ildg_headers[i].type,"MD_traj")==0) MD_traj_index = i;
+        if(strcmp(ildg_headers[i].type,"input-file")==0) input_file_index = i;
 
         if(conf_machine_endianness_disagreement){
             uint32swe(&ildg_headers[i].magic_no);
@@ -232,9 +242,6 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
         }
 
 
-
-
-
         // padding to 8 bytes
         off_t missing_bytes = 
             (off_t)(ildg_headers[i].data_length%8==0?0:8-ildg_headers[i].data_length%8);
@@ -249,7 +256,7 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     }
 
 
-    // read ildg-format for 
+    // read ildg-format  
     char ildg_format_str[1000];
     if(verbosity_lv>2)
         printf("Reading ildg-format...\n");
@@ -283,6 +290,11 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     }
 
 
+    // read MD_traj
+    if(MD_traj_index != -1){
+        fseeko(fg,ildg_header_ends_positions[MD_traj_index],SEEK_SET);
+        fscanf(fg,"%d",conf_id_iter);
+    }else *conf_id_iter = 1;
 
     // read ildg-binary-data (su3 gauge conf)
     if(verbosity_lv>2)
@@ -335,7 +347,6 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
         int conf_id_iter)
 {
     printf("Writing ildg conf...\n");
-    int conf_machine_endianness_disagreement = (__BYTE_ORDER == __LITTLE_ENDIAN) ;
     int writes; FILE *fp;
     fp = fopen(nomefile,"w");
     if(! fp ){
@@ -343,6 +354,7 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
         exit(1);
     }
 
+    int  conf_machine_endianness_disagreement = machine_is_little_endian();
     char ildg_format_str[1000];  
 
     sprintf(ildg_format_str,
@@ -382,6 +394,39 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
     fwrite(pad,1,missing_bytes,fp);
 
 
+    // writing trajectory number
+    char MD_traj_str[15];
+    sprintf(MD_traj_str,"%d",conf_id_iter);
+    len = strlen(MD_traj_str);
+    len64 = len;
+    if(verbosity_lv > 3) printf("Writing MD_traj, %" PRIu64 "\n", len64);
+    if(conf_machine_endianness_disagreement) uint64swe(&len64);
+    ILDG_header MD_traj_header = 
+        (ILDG_header){magic_number,version,mbme_flag,len64,"MD_traj"};
+    fwrite(&MD_traj_header,sizeof(ILDG_header),1,fp);
+    fwrite(MD_traj_str,1,len,fp);
+
+    // padding to 8 bytes
+    missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
+    fwrite(pad,1,missing_bytes,fp);
+
+    // writing input file in the conf
+    // the string 'input_file_str' should be initialized in ../Include/init.c
+    len = strlen(input_file_str);
+    len64 = len;
+    if(verbosity_lv > 3) printf("Writing input file into the conf: %" PRIu64 "\n", len64);
+    if(conf_machine_endianness_disagreement) uint64swe(&len64);
+    ILDG_header input_file_header = 
+        (ILDG_header){magic_number,version,mbme_flag,len64,"input-file"};
+    fwrite(&input_file_header,sizeof(ILDG_header),1,fp);
+    fwrite(input_file_str,1,len,fp);
+
+    // padding to 8 bytes
+    missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
+    fwrite(pad,1,missing_bytes,fp);
+
+
+    // writing ildg binary data, that is conf
     len = nd0*nd1*nd2*nd3*4*3*3*2*8;
     len64 = len;
     if(verbosity_lv > 3) printf("Writing ildg-binary-data, %" PRIu64 "\n", len64);
@@ -415,13 +460,13 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
 
                         writes =  fwrite((void*)&re,sizeof(double),1,fp);
                         if(writes!= 1){
-                           printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
-                        exit(1);
+                            printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
+                            exit(1);
                         }
                         writes =  fwrite((void*)&im,sizeof(double),1,fp);
                         if(writes!= 1){
-                           printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
-                        exit(1);
+                            printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
+                            exit(1);
                         }
 
                     }
@@ -438,7 +483,7 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
     fwrite(&ildg_binary_data_header,sizeof(ILDG_header),1,fp);
 
     fclose(fp);
-    
+
 
     return ;
 }

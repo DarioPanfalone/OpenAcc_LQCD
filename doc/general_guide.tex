@@ -362,14 +362,53 @@ modify its parser-wrapper and possibly the structure that should hold the value
 of that new parameter.
 
 \section{Configuration file reading}
+All this is performed in \verb|src/OpenAcc/io.c|.
 
 \subsection{ASCII Format}
-To write
+The ASCII format is really useful for checking and debugging, and at present is 
+the only one which is extensively tested. This format is fast to modif (of 
+course you need to modify both reading and writing functions), and being able 
+to edit the configuration files with a text editor might be useful.
+Unfortunately files tend to be files which are 3 times larger than binary 
+files, and for large lattices this might be a problem.
 
-\subsection{ILDG Binary format}
-To implement. A nice feature to have.
+\subsection{ILDG format (binary)}
+NOTE: CHECK IF IT WORKS WITH PGI \\
+By activating the correct flag in the input file, the ILDG format will be read 
+and written instead. The ILDG format is used for gauge configuration 
+storage which is a diffused standard (Google it). It is made up by LIME records 
+(google LIME, scidac, there is also a GitHub repo with documentation), which 
+are made up of a header and a body. Binary data in the header and the body are 
+assumed to be Big Endian. The header has a ``type'' string, which identifies the 
+kind of record.
+The standard ILDG format requires a \texttt{ildg-format} record, an 
+\texttt{ildg-binary-data} record, and a \texttt{ildg-data-lfn} record:
+\begin{itemize}
+\item The \texttt{ildg-format} record contains, most notably the dimensions of 
+the configuration, the precision and the kind of field (in ASCII);
+\item \texttt{ildg-binary-data} contains instead the values of the 
+configuration gauge links in binary format;
+\item The \texttt{ildg-data-lfn} is not actually used here.
+\end{itemize}
+Non standard records:
+\begin{itemize}
+\item \verb|MD_traj|: a number identifying the Montecarlo Trajectory, needed 
+to restart the simulation (ASCII format).
+\item \verb|input-file|: the entire input file with comments (ASCII format).
+\end{itemize}
+You can look into \verb|src/OpenAcc/io.c| or into a gauge configuration 
+file with a text editor for more info.
 
 
+
+
+
+\subsection{Configuration file format conversion}
+NOTE: CHECK IF IT WORKS WITH PGI \\
+A tool for file conversion is \verb|/src/DbgTools/ildgtest.c|. You can add it 
+to the list of arguments you pass to \verb|generate_makefile.py| in order to 
+build a makefile that will have, amongst other targets,\verb|ildgtest|.
+Modify the \verb|main()| to obtain your desired result.
   
   \input{FermionMeasures}
   

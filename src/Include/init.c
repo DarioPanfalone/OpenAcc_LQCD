@@ -22,6 +22,8 @@
 #define MAXLINES 300
 #define MAXLINELENGTH 500 // pretty long to accomodate all the comments
 
+char input_file_str[MAXLINES*MAXLINELENGTH];
+
 //types that can be found in an input file
 #define TYPE_INT 0
 #define TYPE_DOUBLE 1
@@ -62,6 +64,20 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
 
 
 FILE * helpfile;
+
+// just to save it in the conf
+int prepare_string_from_stringarray(char file_lines[MAXLINES][MAXLINELENGTH], 
+                                   int maxlines,
+                                   char* input_filename_to_write){
+
+    int iline;int totlen = 0;
+    for(iline = 0; iline < maxlines ; iline++){
+       strcat(input_filename_to_write,file_lines[iline]);
+       totlen += strlen(file_lines[iline]);
+    }
+    return totlen;
+
+}
 
 void erase_comments(char file_lines[MAXLINES][MAXLINELENGTH], int maxlines)
 {
@@ -495,6 +511,9 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         fclose(input);
 
         printf("lines read: %d\n", lines_read);
+
+        int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str);
+        printf("Written %d characters into input_file_str\n",totlen);
 
 
         // erasing comments 

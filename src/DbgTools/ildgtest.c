@@ -1,11 +1,13 @@
 #include "../Include/init.h"
 #include "../OpenAcc/io.h"
 #include "../Include/fermion_parameters.h"
-#include "../OpenAcc/alloc_vars.h"
 #include "../Include/markowchain.h"
 
 int conf_id_iter;
 int verbosity_lv;
+
+
+su3_soa  * conf_acc; // the gauge configuration.
 
 int main(int argc, char* argv[]){
 
@@ -17,25 +19,33 @@ int main(int argc, char* argv[]){
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     if(init_ferm_params(fermions_parameters)) exit(1);
 
+#define ALLOCCHECK(control_int,var)  if(control_int != 0 ) \
+    printf("\tError in  allocation of %s . \n", #var);\
+    else if(verbosity_lv > 2) printf("\tAllocation of %s : OK , %p\n", #var, var );\
 
-    mem_alloc();
+#define ALIGN 128
+    int allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+    ALLOCCHECK(allocation_check, conf_acc);
+
+
 
     printf("Reading ildg conf\n");
     if(read_su3_soa_ildg_binary(conf_acc,"confildgtest",&conf_id_iter))
         exit(1);
-    printf("Writing ASCII conf\n");
-    print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name,conf_id_iter); // READS ALSO THE conf_id_iter
+    printf("Writing ASCII conf, %d\n", conf_id_iter);
+    // READS ALSO THE conf_id_iter
+    print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name,conf_id_iter); 
 
+    /*
     printf("Writing ildg conf\n");
     print_su3_soa_ildg_binary(conf_acc,"morite_tutti",conf_id_iter);
+    */
 
-    mem_free();
+
+
+    free(conf_acc);
+
 
     return 0;
 
 }
-
-
-
-
-
