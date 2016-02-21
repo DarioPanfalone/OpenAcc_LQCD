@@ -66,8 +66,8 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         int minus_det_count = 0;
         CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),5);
         if((nx!=nxt)||(ny!=nyt)||(nz!=nzt)||(nz!=nzt)){
-            printf(" Errore: DIMENSIONI DELLA CONFIGURAZIONE LETTA DIVERSE DA QUELLE ATTESE\n");
-            abort();
+            printf("Error\n");
+            exit(1);
         }
 
         for(int q = 0 ; q < 8 ; q++){
@@ -286,6 +286,11 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
         printf("Error, %s:%d : lx,ly,lz or lt not found in \"ildg-format\"\n",
                 __FILE__,__LINE__);
         printf("Please check. Exiting now.\n");
+        exit(1);
+    }
+    // check lattice dimensions
+    if((nx!=nx_r)||(ny!=ny_r)||(nz!=nz_r)||(nz!=nz_r)){
+        printf("Error\n");
         exit(1);
     }
 
