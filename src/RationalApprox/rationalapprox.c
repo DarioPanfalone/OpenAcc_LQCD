@@ -71,6 +71,7 @@ int rationalapprox_read(RationalApprox* rational_approx)
     char * nomefile = rational_approx_filename(rational_approx->error,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
 
     int error = rationalapprox_read_custom_nomefile(rational_approx,nomefile);
+    free(nomefile);
     if(error){
 
         FILE * bash_repair_commands = fopen("genappfiles.sh","a");

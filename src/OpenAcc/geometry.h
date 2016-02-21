@@ -52,7 +52,13 @@ typedef struct geom_parameters_t{
     // map of physical directions onto logical directions
     int xmap,ymap,zmap,tmap;// tmap is the "antiperiodic direction" for 
                             // fermions
-    
+
+    // The following will be set by set_geom_glv()
+    int nd[4];
+    int vol3s[4];
+    int xyztmap[4];
+    int d0123map[4];
+
 
 } geom_parameters;
 
@@ -66,9 +72,6 @@ static inline int snum_acc(int d0, int d1, int d2, int d3) {
   return ris/2;   // <---  /2 Pay attention to even/odd 
 }
 
-extern int nd[4];
-extern int vol3s[4];
-
 // TABLES FOR THE NEAREST NEIGHBOURS       
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            
 //                            starting from the site "site_half" (from 0 to sizeh) of parity "par"         
@@ -79,7 +82,7 @@ int nnp_openacc[sizeh][4][2];
 int nnm_openacc[sizeh][4][2];
 
 
-
+void set_geom_glv(geom_parameters* gp);
 void compute_nnp_and_nnm_openacc(void);
 
 #endif

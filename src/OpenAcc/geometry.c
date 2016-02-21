@@ -6,9 +6,6 @@
 
 geom_parameters geom_par;
 
-int nd[4]={nd0,nd1,nd2,nd3};
-int vol3s[4]={vol4/nd0,vol4/nd1,vol4/nd2,vol4/nd3};
-
 void compute_nnp_and_nnm_openacc(void){
   int d0, d1, d2, d3,parity;
   for(d3=0; d3<nd3; d3++) {
@@ -53,6 +50,22 @@ void compute_nnp_and_nnm_openacc(void){
   }
 }
 
+void set_geom_glv(geom_parameters* gp){
+
+
+    gp->nd[0]= nd0; gp->nd[1] = nd1; gp->nd[2] = nd2; gp->nd[3] = nd3;
+
+    gp->vol3s[0] = vol4/nd0; gp->vol3s[1] = vol4/nd1;
+    gp->vol3s[2] = vol4/nd2; gp->vol3s[3] = vol4/nd3;
+
+    gp->xyztmap[0] = gp->xmap;  gp->xyztmap[1] = gp->ymap;
+    gp->xyztmap[2] = gp->zmap;  gp->xyztmap[3] = gp->tmap;
+
+    gp->d0123map[gp->xmap] = 0;   gp->d0123map[gp->ymap] = 1;
+    gp->d0123map[gp->zmap] = 2;   gp->d0123map[gp->tmap] = 3;
+
+
+}
 
 
 #endif

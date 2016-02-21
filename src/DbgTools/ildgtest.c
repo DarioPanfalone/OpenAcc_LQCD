@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
 
     /*
     printf("Writing ildg conf\n");
-    print_su3_soa_ildg_binary(conf_acc,"morite_tutti",conf_id_iter);
+    print_su3_soa_ildg_binary(conf_acc,"conf.out.ildg",conf_id_iter);
     */
 
 

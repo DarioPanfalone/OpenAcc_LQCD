@@ -31,14 +31,14 @@ bz              0.0
 
 
 MDParameters
-NmdSteps	    5
-GaugeSubSteps   3
-TrajLength	    1
+NmdSteps	    1
+GaugeSubSteps   1
+TrajLength	    0.05
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                500
+Ntraj	                0
 ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
@@ -50,7 +50,7 @@ UseILDG                 1
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
 EpsGen                  0.1    #stddev in the generation of a new configuration
-VerbosityLv             2
+VerbosityLv             0
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt
@@ -68,8 +68,7 @@ nx                      4
 ny	                    4 
 nz	                    4
 nt	                    4 
-xmap	                0
+xmap	                3
 ymap	                2    
-zmap	                3    
-tmap	                1
-
+zmap	                1    
+tmap	                0

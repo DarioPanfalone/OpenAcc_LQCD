@@ -145,7 +145,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         for(int itype =0; itype <ntagstofind; itype++){
             found_something = strstr(filelines[iline],strtofind[itype]);
             if(found_something){
-                printf("Found group %s on line %d\n",strtofind[itype], iline);
+                //printf("Found group %s on line %d\n",strtofind[itype], iline);
                 taglines[nres] = iline;
                 tagtypes[nres] = itype;
                 nres++;
@@ -234,14 +234,18 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
         }
 
 
+
         if(! res){
             printf("ERROR: not all parameters needed read!");
             for(int i =0; i<npars; i++) 
                 if (rc[i]==0) printf("Parameter %s not set!\n",par_infos[i].name);
+            free(rc);
             return 1;
         }
-        else return 0;
-
+        else{
+            free(rc);
+            return 0;
+        }
     }
 }
 
@@ -466,23 +470,25 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 
     int res = scan_group_NV(npar_geometry,gp, filelines, startline, endline);
 
+    set_geom_glv(gpar);
+
     if(startline<endline){
-    if(gpar->gnx != nd[gpar->xmap] || gpar->gny != nd[gpar->ymap] ||
-            gpar->gnz != nd[gpar->zmap] || gpar->gnt != nd[gpar->tmap] ){ 
+    if(gpar->gnx != gpar->nd[gpar->xmap] || gpar->gny != gpar->nd[gpar->ymap] ||
+            gpar->gnz != gpar->nd[gpar->zmap] || gpar->gnt != gpar->nd[gpar->tmap] ){ 
         printf("Error, input file lattice dimensions are not compatible\n");
         printf("       with the lattice dimensions written in geometry.h.\n");
         printf("       Either modify the input file, or recompile,\n");
         printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
                                gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
         printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",
-                nd[gpar->xmap],nd[gpar->ymap],
-                nd[gpar->zmap],nd[gpar->tmap]);
+                gpar->nd[gpar->xmap], gpar->nd[gpar->ymap],
+                gpar->nd[gpar->zmap], gpar->nd[gpar->tmap]);
         exit(1);
     }
     int maps[4] = {gpar->xmap,gpar->ymap,gpar->zmap,gpar->tmap};
     int stop = 0;
     int imap,jmap;
-    for(imap = 0 ; imap++ ; imap<3)for(jmap = imap+1 ; jmap++ ; jmap<4)
+    for(imap = 0 ; imap<3; imap++) for(jmap = imap+1 ; jmap<4; jmap++)
         stop = stop || (maps[imap] == maps[jmap]);
 
     if(stop){

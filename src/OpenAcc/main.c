@@ -150,7 +150,8 @@ int main(int argc, char* argv[]){
         {
 #endif
 
-            double plq,rect,topoch,poly;
+            double plq,rect,topoch;
+            d_complex poly;
 
             int accettate_therm=0;
             int accettate_metro=0;
@@ -159,12 +160,13 @@ int main(int argc, char* argv[]){
             int id_iter_offset=conf_id_iter;
             plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            poly =  polyakov_loop(conf_acc,aux_conf_acc);//misura polyakov loop
+            poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
             printf("Therm_iter %d Placchetta    = %.18lf \n",
                     conf_id_iter,plq/size/6.0/3.0);
             printf("Therm_iter %d Rettangolo    = %.18lf \n",
                     conf_id_iter,rect/size/6.0/3.0/2.0);
-            printf("Therm_iter %d Polyakov Loop = %.18lf \n",conf_id_iter,poly);
+            printf("Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",conf_id_iter,
+                    creal(poly),cimag(poly));
 
             if(mkwch_pars.ntraj==0){ // MEASURES ONLY
 
@@ -184,17 +186,14 @@ int main(int argc, char* argv[]){
                 printf("Misure di Gauge:\n");
                 plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-                poly =  polyakov_loop(conf_acc,aux_conf_acc);//misura polyakov loop
+                poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
 
                 printf("Plaquette     : %.18lf\n" ,plq/size/3.0/6.0);
                 printf("Rectangle     : %.18lf\n" ,rect/size/3.0/6.0/2.0);
-                printf("Polyakov Loop : %.18lf \n",poly);
+                printf("Polyakov Loop : (%.18lf,%.18lf) \n",creal(poly),cimag(poly));
 
 
             }else printf("Starting generation of Configurations.\n");
-
-            
-
 
             // THERMALIZATION & METRO    ----   UPDATES //
     
@@ -208,8 +207,8 @@ int main(int argc, char* argv[]){
                 printf("\n#################################################\n");
                 printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
                         conf_id_iter,mkwch_pars.ntraj+id_iter_offset,
-                        nd[geom_par.xmap],nd[geom_par.ymap],
-                        nd[geom_par.zmap],nd[geom_par.tmap],
+                        geom_par.gnx,geom_par.gny,
+                        geom_par.gnz,geom_par.gnt,
                         act_params.beta);
                 printf(  "#################################################\n\n");
                 //--------- CONF UPDATE ----------------//
@@ -233,12 +232,12 @@ int main(int argc, char* argv[]){
                 //--------- MISURA ROBA DI GAUGE ------------------//
                 plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-                poly =  polyakov_loop(conf_acc,aux_conf_acc);
+                poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
 
                 FILE *goutfile = fopen(gauge_outfilename,"at");
                 if(!goutfile){
                     goutfile = fopen(gauge_outfilename,"wt");
-                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\n");
+                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\n");
                     fprintf(goutfile,"%s",gauge_outfile_header);
                 }
                 if(goutfile){
@@ -253,8 +252,10 @@ int main(int argc, char* argv[]){
 
                     fprintf(goutfile,"%d\t%d\t",conf_id_iter,
                             accettate_therm-accettate_therm_old);
-                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\n",plq/size/6.0/3.0,
-                            rect/size/6.0/3.0/2.0, poly);
+                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
+                            plq/size/6.0/3.0,
+                            rect/size/6.0/3.0/2.0, 
+                            creal(poly), cimag(poly));
                     
                 }
                 fclose(goutfile);

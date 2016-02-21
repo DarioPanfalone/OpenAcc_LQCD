@@ -32,10 +32,10 @@ void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_
     }
 
 
-    int nx = nd[geom_par.xmap];
-    int ny = nd[geom_par.ymap];
-    int nz = nd[geom_par.zmap];
-    int nt = nd[geom_par.tmap];
+    int nx = geom_par.gnx;
+    int ny = geom_par.gny;
+    int nz = geom_par.gnz;
+    int nt = geom_par.gnt;
 
 
 
@@ -69,10 +69,11 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
     }
     else{
 
-        int nx = nd[geom_par.xmap];
-        int ny = nd[geom_par.ymap];
-        int nz = nd[geom_par.zmap];
-        int nt = nd[geom_par.tmap];
+        int nx = geom_par.gnx;
+        int ny = geom_par.gny;
+        int nz = geom_par.gnz;
+        int nt = geom_par.gnt;
+
 
 
 
@@ -203,13 +204,10 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     char header[1000];
     *conf_id_iter = 1000 ; // random number
 
-    int nx = nd[geom_par.xmap];
-    int ny = nd[geom_par.ymap];
-    int nz = nd[geom_par.zmap];
-    int nt = nd[geom_par.tmap];
-
-
-
+    int nx = geom_par.gnx;
+    int ny = geom_par.gny;
+    int nz = geom_par.gnz;
+    int nt = geom_par.gnt;
 
     ILDG_header ildg_headers[MAXILDGHEADERS]; // all ildg headers
     // note _FILE_OFFSET_BITS 64 
@@ -270,7 +268,7 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
             (off_t)(ildg_headers[i].data_length%8==0?0:8-ildg_headers[i].data_length%8);
         // note _FILE_OFFSET_BITS 64 
         off_t mod_data_length =  ildg_headers[i].data_length + missing_bytes ;
-        printf("%"PRIu64" vs %"PRIu64"\n", (uint64_t) mod_data_length, ildg_headers[i].data_length);
+//        printf("%"PRIu64" vs %"PRIu64"\n", (uint64_t) mod_data_length, ildg_headers[i].data_length);
 
         // going to the next record  
         fseeko(fg,mod_data_length,SEEK_CUR);
@@ -312,8 +310,9 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
         exit(1);
     }
     // check lattice dimensions
-    if((nx!=nx_r)||(ny!=ny_r)||(nz!=nz_r)||(nz!=nz_r)){
-        printf("Error\n");
+    if((geom_par.gnx!=nx_r)||(geom_par.gny!=ny_r)||
+            (geom_par.gnz!=nz_r)||(geom_par.gnt!=nt_r)){
+        printf("Error, Lattice dimensions not compatible with input file.\n");
         exit(1);
     }
 
@@ -332,11 +331,18 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
 
     fseeko(fg,ildg_header_ends_positions[ildg_binary_data_index],SEEK_SET);
     int x,y,z,t,dir;
+    set_geom_glv(&geom_par);// should be already done
     for(t=0;t<nt_r;t++) for(z=0;z<nz_r;z++)
         for(y=0;y<ny_r;y++) for(x=0;x<nx_r;x++)
         {
-            int idxh = snum_acc(x,y,z,t);
-            int parity = (x+y+z+t)%2;
+            // ILDG format on disk is not transposed,
+            //  but conf in machine memory could be.
+            int xs[4] = {x,y,z,t};
+            int d[4];
+            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
+
+            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
+            int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
 
             for(dir=0;dir<4;dir++){
 
@@ -346,7 +352,6 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
                     printf("Error in reading file: %s ,%d\n",__FILE__,__LINE__);
                     exit(1);
                 }
-
 
                 // check enddiannes
                 if(conf_machine_endianness_disagreement){
@@ -358,8 +363,9 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
                         doubleswe(&im);
                         m.comp[irow][icol] = re + im*I;
                     }
-                    single_su3_into_su3_soa(&conf[2*dir+parity],idxh,&m);
                 }
+                int dirmachine = geom_par.xyztmap[dir];
+                single_su3_into_su3_soa(&conf[2*dirmachine+parity],idxh,&m);
 
             }
 
@@ -382,10 +388,10 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
         exit(1);
     }
 
-    int nx = nd[geom_par.xmap];
-    int ny = nd[geom_par.ymap];
-    int nz = nd[geom_par.zmap];
-    int nt = nd[geom_par.tmap];
+    int nx = geom_par.gnx;
+    int ny = geom_par.gny;
+    int nz = geom_par.gnz;
+    int nt = geom_par.gnt;
 
 
 
@@ -474,39 +480,47 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
     fwrite(&ildg_binary_data_header,sizeof(ILDG_header),1,fp);
 
     int x,y,z,t,dir;
+    set_geom_glv(&geom_par);// should be already done
     for(t=0;t<nt;t++) for(z=0;z<nz;z++)
         for(y=0;y<ny;y++) for(x=0;x<nx;x++)
         {
-            int idxh = snum_acc(x,y,z,t);
-            int parity = (x+y+z+t)%2;
+
+            // ILDG format on disk is not transposed,
+            //  but conf in machine memory could be.
+            int xs[4] = {x,y,z,t};
+            int d[4];
+            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
+
+            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
+            int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
 
             for(dir=0;dir<4;dir++){
 
+                int dirmachine = geom_par.xyztmap[dir];
                 single_su3 m;          
-                single_su3_from_su3_soa(&conf[2*dir+parity],idxh,&m);
+                single_su3_from_su3_soa(&conf[2*dirmachine+parity],idxh,&m);
                 rebuild3row(&m);
 
                 // fix enddiannes
-                if(conf_machine_endianness_disagreement){
-                    int irow,icol;
-                    for(irow=0;irow<3;irow++) for(icol=0;icol<3;icol++){
-                        double re = creal(m.comp[irow][icol]);
-                        double im = cimag(m.comp[irow][icol]);
+                int irow,icol;
+                for(irow=0;irow<3;irow++) for(icol=0;icol<3;icol++){
+                    double re = creal(m.comp[irow][icol]);
+                    double im = cimag(m.comp[irow][icol]);
+                    if(conf_machine_endianness_disagreement){
                         doubleswe(&re);
                         doubleswe(&im);
-
-                        writes =  fwrite((void*)&re,sizeof(double),1,fp);
-                        if(writes!= 1){
-                            printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
-                            exit(1);
-                        }
-                        writes =  fwrite((void*)&im,sizeof(double),1,fp);
-                        if(writes!= 1){
-                            printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
-                            exit(1);
-                        }
-
                     }
+                    writes =  fwrite((void*)&re,sizeof(double),1,fp);
+                    if(writes!= 1){
+                        printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
+                        exit(1);
+                    }
+                    writes =  fwrite((void*)&im,sizeof(double),1,fp);
+                    if(writes!= 1){
+                        printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
+                        exit(1);
+                    }
+
                 }
             }
         }

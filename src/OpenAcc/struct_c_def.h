@@ -55,24 +55,6 @@ typedef struct thmat_soa_t {
   double rc11[sizeh];   // Re(comp_11)
 } thmat_soa;
 
-// For Polyakov loop calculations
-typedef struct vec3_plk_t {
-	 int status;
-    d_complex c0[vol3];
-    d_complex c1[vol3];
-    d_complex c2[vol3];
-} vec3_plk;
-typedef struct su3_plk_t {
-  int status;  
-  vec3_plk r0;
-  vec3_plk r1;
-  vec3_plk r2;
-} su3_plk;
-typedef struct dcomplex_plk_t {
-    int status;
-    d_complex c[vol3];
-} dcomplex_plk;
-
 
 #endif
 

@@ -140,8 +140,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
     int X,Y,Z,T;
     double  arg;
     double ferm_charge = fermion_parameters->ferm_charge;
-    double chpotphase = fermion_parameters->ferm_im_chem_pot/
-        nd[geom_par.tmap]; 
+    double chpotphase = fermion_parameters->ferm_im_chem_pot/geom_par.gnt; 
 
     double_soa * phases = fermion_parameters->phases;
 
@@ -163,10 +162,10 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
 
                     idxh = snum_acc(d[0],d[1],d[2],d[3]);
                    
-                    x = d[geom_par.xmap];int tnx = nd[geom_par.xmap];
-                    y = d[geom_par.ymap];int tny = nd[geom_par.ymap];
-                    z = d[geom_par.zmap];int tnz = nd[geom_par.zmap];
-                    t = d[geom_par.tmap];int tnt = nd[geom_par.tmap];
+                    x = d[geom_par.xmap];int tnx = geom_par.gnx;
+                    y = d[geom_par.ymap];int tny = geom_par.gny;
+                    z = d[geom_par.zmap];int tnz = geom_par.gnz;
+                    t = d[geom_par.tmap];int tnt = geom_par.gnt;
 
 
                     parity = (x+y+z+t) %2 ; 
