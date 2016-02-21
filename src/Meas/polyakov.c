@@ -5,13 +5,13 @@
 #include "./polyakov.h"
 #include "../OpenAcc/su3_measurements.h"
 
-#define dir_tempo 3
-#define dir_tempo_link 6
 
 double polyakov_loop(	__restrict su3_soa * const u,
         __restrict su3_soa * const loopplk			)
 {	
 
+    if(geom_par.tmap != 3)
+    printf("WARNING: tmap != 3 , this function won't work!\n");
     //set to identity
 #pragma acc kernels present(loopplk)
 #pragma acc loop independent gang  
@@ -28,58 +28,62 @@ double polyakov_loop(	__restrict su3_soa * const u,
             loopplk[j].r2.c1[i]=0;
             loopplk[j].r2.c2[i]=1;
         }}
-
-    d_complex plkv[vol3];
-    int x, y, z, t,h,idxh,id_zero,parity,parity_zero;
+    int size_plkv = vol3s[geom_par.tmap];
+    d_complex* plkv = (d_complex*) 
+        malloc(size_plkv*2*sizeof(double));
+    int d0, d1, d2, d3,h,idxh,id_zero,parity,parity_zero;
     double r = 0;
 #pragma acc kernels present(u) present(loopplk)
-#pragma acc loop independent gang //gang(nt)
-    for(t=0; t<nt; t++) {
-#pragma acc loop independent gang vector //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-        for(z=0; z<nz; z++) {
-#pragma acc loop independent gang vector //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-            for(y=0; y<ny; y++) {
+#pragma acc loop independent gang //gang(nd3)
+    for(d3=0; d3<nd3; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+            for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
-                for(x=0; x < nx; x++) {	     
-                    parity_zero = (x+y+z+0) % 2; 
-                    id_zero = snum_acc(x,y,z,0);  // first 			        
-                    parity = (x+y+z+t) % 2;
-                    idxh = snum_acc(x,y,z,t);  	
-                    mat1_times_mat2_into_mat1_absent_stag_phases(&loopplk[parity_zero],id_zero,&u[dir_tempo_link+parity],idxh);              // LOOP = LOOP * C
+                for(d0=0; d0 < nd0; d0++) {	     
+                    parity_zero = (d0+d1+d2+d3 - nd[geom_par.tmap]) % 2; 
+                    id_zero = snum_acc(d0,d1,d2,0);  // first //PROBLEM 
+                    parity = (d0+d1+d2+d3) % 2;
+                    idxh = snum_acc(d0,d1,d2,d3);  	
+                    mat1_times_mat2_into_mat1_absent_stag_phases(&loopplk[parity_zero],id_zero,&u[geom_par.tmap*2+parity],idxh);              // LOOP = LOOP * C
                 }}}}
 
 
-#pragma acc kernels present(u) present(loopplk) copyout(plkv)
+    int x,y,z;
+#pragma acc kernels present(u) present(loopplk) copyout(plkv[0:size_plkv])
 #pragma acc loop independent gang //reduction(+:r)
-    for(z=0; z<nz; z++) {
+    for(z=0; z<nd[geom_par.zmap]; z++) {
 #pragma acc loop independent gang vector 
-        for(y=0; y<ny; y++) {
+        for(y=0; y<nd[geom_par.ymap]; y++) {
 #pragma acc loop independent vector 
-            for(x=0; x < nx; x++) {
+            for(x=0; x < nd[geom_par.xmap]; x++) {
 
-                h=x+(y*vol1)+(z*vol2); 			
-                parity_zero = (x+y+z+0) % 2; 
-                id_zero = snum_acc(x,y,z,0);
+                h=x+(y*vol1)+(z*vol2); 			// PROBLEM
+                parity_zero = (d0+d1+d2+0) % 2; // PROBLEM
+                id_zero = snum_acc(d0,d1,d2,0); // PROBLEM
                 // calcolo traccia
                 plkv[h] = matrix_trace_absent_stag_phase(&loopplk[parity_zero],id_zero);    
                 //controllo unitarietà
                 /*   single_su3 m;
                      single_su3_from_su3_soa(&loopplk[parity_zero],id_zero,&m);
                      rebuild3row(&m);
-                     id_zero = snum_acc(x,y,z,0);                         
+                     id_zero = snum_acc(d0,d1,d2,0);                         
                      d_complex err = 1 - detSu3(&m);
                      r += creal(err * conj(err));*/	
-            }}}								  
+            }
+        }
+    }								  
 
 
     double res_L = 0.0;
-    for (t=0; t<vol3; t++){
-        res_L += creal(plkv[t]); //sum all polyakov loops			                  
+    for (d3=0; d3<vol3; d3++){
+        res_L += creal(plkv[d3]); //sum all polyakov loops			                  
     }
-    res_L=res_L/vol3;
+    res_L=res_L/vol3s[geom_par.tmap];
     res_L=res_L/3; //divide by 3 color
 
-    //  printf("\t Errore su unitarieta polyakov: %f\n",r);
+    //  printf("\d3 Errore su unitarieta polyakov: %f\n",r);
 
 
     return res_L;

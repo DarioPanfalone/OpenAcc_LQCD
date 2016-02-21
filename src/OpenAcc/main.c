@@ -139,7 +139,8 @@ int main(int argc, char* argv[]){
     create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER])\
     create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc)\
     create(local_sums[0:2]) create(d_local_sums[0:2])\
-    copyin(fermions_parameters[0:NDiffFlavs]) copyin(deltas_Omelyan[0:7]) \
+    copyin(fermions_parameters[0:NDiffFlavs])\
+    copyin(deltas_Omelyan[0:7]) copyin(nd[0:4]) \
     copyin(u1_back_phases[0:8*NDiffFlavs])
     {
 #ifdef STOUT_FERMIONS
@@ -205,7 +206,11 @@ int main(int argc, char* argv[]){
                 accettate_metro_old = accettate_metro;
                 conf_id_iter++;
                 printf("\n#################################################\n");
-                printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",conf_id_iter,mkwch_pars.ntraj+id_iter_offset,nx,ny,nz,nt,act_params.beta);
+                printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
+                        conf_id_iter,mkwch_pars.ntraj+id_iter_offset,
+                        nd[geom_par.xmap],nd[geom_par.ymap],
+                        nd[geom_par.zmap],nd[geom_par.tmap],
+                        act_params.beta);
                 printf(  "#################################################\n\n");
                 //--------- CONF UPDATE ----------------//
                 if(id_iter<mkwch_pars.therm_ntraj){

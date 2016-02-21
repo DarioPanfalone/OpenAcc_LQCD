@@ -195,50 +195,50 @@ void acc_Deo( __restrict su3_soa * const u,
         __restrict vec3_soa * const out, 
         __restrict vec3_soa * const in,double_soa * backfield) {
     SETINUSE(out);
-    int hx, y, z, t;
+    int hd0, d1, d2, d3;
 
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent gang(nt)
-    for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-        for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-            for(y=0; y<ny; y++) {
+#pragma acc loop independent gang(nd3)
+    for(d3=0; d3<nd3; d3++) {
+#pragma acc loop independent gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+            for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector(DIM_BLOCK_X) 
-                for(hx=0; hx < nxh; hx++) {
+                for(hd0=0; hd0 < nd0h; hd0++) {
 
-                    int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
+                    int d0, d0m, d1m, d2m, d3m, d0p, d1p, d2p, d3p, idxh, matdir,dirindex;
                     vec3 aux=(vec3) {0,0,0};
 
-                    // (x+y+z+t) even
-                    x = 2*hx + ((y+z+t) & 0x1);
+                    // (d0+d1+d2+d3) even
+                    d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
 
-                    xm = x - 1;
-                    xm = xm + (((xm >> 31) & 0x1) * nx);
-                    ym = y - 1;
-                    ym = ym + (((ym >> 31) & 0x1) * ny);
-                    zm = z - 1;
-                    zm = zm + (((zm >> 31) & 0x1) * nz);
-                    tm = t - 1;
-                    tm = tm + (((tm >> 31) & 0x1) * nt);
+                    d0m = d0 - 1;
+                    d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
+                    d1m = d1 - 1;
+                    d1m = d1m + (((d1m >> 31) & 0x1) * nd1);
+                    d2m = d2 - 1;
+                    d2m = d2m + (((d2m >> 31) & 0x1) * nd2);
+                    d3m = d3 - 1;
+                    d3m = d3m + (((d3m >> 31) & 0x1) * nd3);
 
-                    xp = x + 1;
-                    xp *= (((xp-nx) >> 31) & 0x1);
-                    yp = y + 1;
-                    yp *= (((yp-ny) >> 31) & 0x1);
-                    zp = z + 1;
-                    zp *= (((zp-nz) >> 31) & 0x1);
-                    tp = t + 1;
-                    tp *= (((tp-nt) >> 31) & 0x1);
+                    d0p = d0 + 1;
+                    d0p *= (((d0p-nd0) >> 31) & 0x1);
+                    d1p = d1 + 1;
+                    d1p *= (((d1p-nd1) >> 31) & 0x1);
+                    d2p = d2 + 1;
+                    d2p *= (((d2p-nd2) >> 31) & 0x1);
+                    d3p = d3 + 1;
+                    d3p *= (((d3p-nd3) >> 31) & 0x1);
 
 #define SUB_RESULT_DEO(matdir, indexm) \
                     aux = subResult(aux,conjmat_vec_mul_arg( &u[matdir],indexm,\
                                 in,indexm,&backfield[matdir]));  
 
-                    SUB_RESULT_DEO(1,snum_acc(xm,y,z,t));
-                    SUB_RESULT_DEO(3,snum_acc(x,ym,z,t));
-                    SUB_RESULT_DEO(5,snum_acc(x,y,zm,t));
-                    SUB_RESULT_DEO(7,snum_acc(x,y,z,tm));
+                    SUB_RESULT_DEO(1,snum_acc(d0m,d1,d2,d3));
+                    SUB_RESULT_DEO(3,snum_acc(d0,d1m,d2,d3));
+                    SUB_RESULT_DEO(5,snum_acc(d0,d1,d2m,d3));
+                    SUB_RESULT_DEO(7,snum_acc(d0,d1,d2,d3m));
 #undef SUB_RESULT_DEO
 
                     //      for(dirindex=0;dirindex<4;dirindex++) {   
@@ -250,16 +250,16 @@ void acc_Deo( __restrict su3_soa * const u,
 
 
                     //////////////////////////////////////////////////////////////
-                    idxh = snum_acc(x,y,z,t);
+                    idxh = snum_acc(d0,d1,d2,d3);
 
 #define SUM_RESULT_DEO(matdir, indexp) \
                     aux   = sumResult(aux, mat_vec_mul_arg(&u[matdir],idxh,\
                                 in,indexp,&backfield[matdir])); 
 
-                    SUM_RESULT_DEO(0,snum_acc(xp,y,z,t));
-                    SUM_RESULT_DEO(2,snum_acc(x,yp,z,t));
-                    SUM_RESULT_DEO(4,snum_acc(x,y,zp,t));
-                    SUM_RESULT_DEO(6,snum_acc(x,y,z,tp));
+                    SUM_RESULT_DEO(0,snum_acc(d0p,d1,d2,d3));
+                    SUM_RESULT_DEO(2,snum_acc(d0,d1p,d2,d3));
+                    SUM_RESULT_DEO(4,snum_acc(d0,d1,d2p,d3));
+                    SUM_RESULT_DEO(6,snum_acc(d0,d1,d2,d3p));
 #undef SUM_RESULT_DEO
 
                     //      for(dirindex=0;dirindex<4;dirindex++) {   
@@ -275,60 +275,60 @@ void acc_Deo( __restrict su3_soa * const u,
                     out->c1[idxh] = (aux.c1)*0.5;
                     out->c2[idxh] = (aux.c2)*0.5;
 
-                } // Loop over nxh
-            } // Loop over ny   
-        } // Loop over nz    
-    } // Loop over nt      
+                } // Loop over nd0h
+            } // Loop over nd1   
+        } // Loop over nd2    
+    } // Loop over nd3      
 }
 void acc_Doe( __restrict su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict vec3_soa * const in,double_soa * backfield) {
 
     SETINUSE(out);
-    int hx, y, z, t;
+    int d0h, d1, d2, d3;
 
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent gang(nt)
-    for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-        for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-            for(y=0; y<ny; y++) {
+#pragma acc loop independent gang(nd3)
+    for(d3=0; d3<nd3; d3++) {
+#pragma acc loop independent gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+            for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector(DIM_BLOCK_X)
-                for(hx=0; hx < nxh; hx++) {
+                for(d0h=0; d0h < nd0h; d0h++) {
 
-                    int x, xm, ym, zm, tm, xp, yp, zp, tp, idxh, matdir,dirindex;
+                    int d0, d0m, d1m, d2m, d3m, d0p, d1p, d2p, d3p, idxh, matdir,dirindex;
                     vec3 aux=(vec3) {0,0,0};
 
-                    // (x+y+z+t) odd
-                    x = 2*hx + ((y+z+t+1) & 0x1);
+                    // (d0+d1+d2+d3) odd
+                    d0 = 2*d0h + ((d1+d2+d3+1) & 0x1);
 
-                    xm = x - 1;
-                    xm = xm + (((xm >> 31) & 0x1) * nx);
-                    ym = y - 1;
-                    ym = ym + (((ym >> 31) & 0x1) * ny);
-                    zm = z - 1;
-                    zm = zm + (((zm >> 31) & 0x1) * nz);
-                    tm = t - 1;
-                    tm = tm + (((tm >> 31) & 0x1) * nt);
+                    d0m = d0 - 1;
+                    d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
+                    d1m = d1 - 1;
+                    d1m = d1m + (((d1m >> 31) & 0x1) * nd1);
+                    d2m = d2 - 1;
+                    d2m = d2m + (((d2m >> 31) & 0x1) * nd2);
+                    d3m = d3 - 1;
+                    d3m = d3m + (((d3m >> 31) & 0x1) * nd3);
 
-                    xp = x + 1;
-                    xp *= (((xp-nx) >> 31) & 0x1);
-                    yp = y + 1;
-                    yp *= (((yp-ny) >> 31) & 0x1);
-                    zp = z + 1;
-                    zp *= (((zp-nz) >> 31) & 0x1);
-                    tp = t + 1;
-                    tp *= (((tp-nt) >> 31) & 0x1);
+                    d0p = d0 + 1;
+                    d0p *= (((d0p-nd0) >> 31) & 0x1);
+                    d1p = d1 + 1;
+                    d1p *= (((d1p-nd1) >> 31) & 0x1);
+                    d2p = d2 + 1;
+                    d2p *= (((d2p-nd2) >> 31) & 0x1);
+                    d3p = d3 + 1;
+                    d3p *= (((d3p-nd3) >> 31) & 0x1);
 
 #define SUB_RESULT_DOE(matdir,index)\
                     aux = subResult(aux, conjmat_vec_mul_arg( &u[matdir],index,\
                                 in,index,&backfield[matdir]));
 
-                    SUB_RESULT_DOE(0,snum_acc(xm,y,z,t));
-                    SUB_RESULT_DOE(2,snum_acc(x,ym,z,t));
-                    SUB_RESULT_DOE(4,snum_acc(x,y,zm,t));
-                    SUB_RESULT_DOE(6,snum_acc(x,y,z,tm));
+                    SUB_RESULT_DOE(0,snum_acc(d0m,d1,d2,d3));
+                    SUB_RESULT_DOE(2,snum_acc(d0,d1m,d2,d3));
+                    SUB_RESULT_DOE(4,snum_acc(d0,d1,d2m,d3));
+                    SUB_RESULT_DOE(6,snum_acc(d0,d1,d2,d3m));
 #undef SUB_RESULT_DOE        
 
 
@@ -342,16 +342,16 @@ void acc_Doe( __restrict su3_soa * const u,
 
                     ///////////////////////////////////////////////////////////////////
 
-                    idxh = snum_acc(x,y,z,t);
+                    idxh = snum_acc(d0,d1,d2,d3);
 
 #define SUM_RESULT_DOE(matdir,index)\
                     aux   = sumResult(aux, mat_vec_mul_arg(&u[matdir],idxh,\
                                 in,index,&backfield[matdir]));
 
-                    SUM_RESULT_DOE(1,snum_acc(xp,y,z,t));
-                    SUM_RESULT_DOE(3,snum_acc(x,yp,z,t));
-                    SUM_RESULT_DOE(5,snum_acc(x,y,zp,t));
-                    SUM_RESULT_DOE(7,snum_acc(x,y,z,tp));
+                    SUM_RESULT_DOE(1,snum_acc(d0p,d1,d2,d3));
+                    SUM_RESULT_DOE(3,snum_acc(d0,d1p,d2,d3));
+                    SUM_RESULT_DOE(5,snum_acc(d0,d1,d2p,d3));
+                    SUM_RESULT_DOE(7,snum_acc(d0,d1,d2,d3p));
 #undef SUM_RESULT_DOE
 
 
@@ -369,12 +369,116 @@ void acc_Doe( __restrict su3_soa * const u,
                     out->c1[idxh] = aux.c1*0.5;
                     out->c2[idxh] = aux.c2*0.5;
 
-                } // Loop over nxh
-            } // Loop over ny
-        } // Loop over nz
-    } // Loop over nt
+                } // Loop over nd0h
+            } // Loop over nd1
+        } // Loop over nd2
+    } // Loop over nd3
 }
 
+
+void dM_dmu_eo( __restrict su3_soa * const u,
+        vec3_soa * const out,
+        vec3_soa * const in,
+        double_soa * backfield)
+{
+    int d0h, d1, d2, d3;
+
+#pragma acc kernels present(u) present(out) present(in) present(backfield)
+#pragma acc loop independent gang(nd3)
+    for(d3=0; d3<nd3; d3++) {
+#pragma acc loop independent gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+            for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector(DIM_BLOCK_X)
+                for(d0h=0; d0h < nd0h; d0h++) {
+
+
+                    int d0, d3m, d3p, idxh;
+                    vec3 aux;
+
+                    // (d0+d1+d2+d3) even
+                    d0 = 2*d0h + ((d1+d2+d3) & 0x1);
+
+                    idxh = snum_acc(d0,d1,d2,d3);
+
+                    d3m = d3 - 1;
+                    d3m = d3m + (((d3m >> 31) & 0x1) * nd3);
+
+                    d3p = d3 + 1;
+                    d3p *= (((d3p-nd3) >> 31) & 0x1);
+
+                    //direzione tempo positiva,
+                    aux = mat_vec_mul_arg( &u[geom_par.tmap*2], idxh, in, snum_acc(d0,d1,d2,d3p),
+                            &backfield[geom_par.tmap*2] );
+
+                    // direzione tempo negativa
+                    aux = sumResult(aux, conjmat_vec_mul_arg( &u[geom_par.tmap*2+1],
+                                snum_acc(d0,d1,d2,d3m),in,snum_acc(d0,d1,d2,d3m),&backfield[geom_par.tmap*2+1]));
+
+                    /////////////////////////////////////////////////////////////////////     
+
+                    out->c0[idxh] = (aux.c0)*0.5;
+                    out->c1[idxh] = (aux.c1)*0.5;
+                    out->c2[idxh] = (aux.c2)*0.5;
+
+                } // Loop over nd0h
+            } // Loop over nd1
+        } // Loop over nd2
+    } // Loop over nd3
+}
+
+void dM_dmu_oe( __restrict su3_soa * const u,
+        vec3_soa * const out,
+        vec3_soa * const in,
+        double_soa * backfield)
+{
+
+    int d0h, d1, d2, d3;
+
+#pragma acc kernels present(u) present(out) present(in) present(backfield)
+#pragma acc loop independent gang(nd3)
+    for(d3=0; d3<nd3; d3++) {
+#pragma acc loop independent gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+            for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector(DIM_BLOCK_X)
+                for(d0h=0; d0h < nd0h; d0h++) {
+
+                    int d0, d3m, d3p, idxh;
+                    vec3 aux;
+
+                    // (d0+d1+d2+d3) odd
+                    d0 = 2*d0h + ((d1+d2+d3+1) & 0x1);
+
+                    idxh = snum_acc(d0,d1,d2,d3);
+
+                    d3m = d3 - 1;
+                    d3m = d3m + (((d3m >> 31) & 0x1) * nd3);
+
+                    d3p = d3 + 1;
+                    d3p *= (((d3p-nd3) >> 31) & 0x1);
+
+                    //direzione tempo negativa
+                    aux = conjmat_vec_mul_arg( &u[geom_par.tmap*2],snum_acc(d0,d1,d2,d3m), in,
+                            snum_acc(d0,d1,d2,d3m), &backfield[geom_par.tmap*2]);
+
+                    // direzione tempo positiva
+                    aux = sumResult(aux, mat_vec_mul_arg( &u[geom_par.tmap*2+1],idxh,
+                                in,snum_acc(d0,d1,d2,d3p),&backfield[geom_par.tmap*2+1]));
+
+                    /////////////////////////////////////////////////////////////////////     
+
+                    out->c0[idxh] = (aux.c0)*0.5;
+                    out->c1[idxh] = (aux.c1)*0.5;
+                    out->c2[idxh] = (aux.c2)*0.5;
+
+                } // Loop over nd0h
+            } // Loop over nd1
+        } // Loop over nd2
+    } // Loop over nd3
+}
 
 
 inline void fermion_matrix_multiplication( __restrict su3_soa * const u, 
@@ -400,111 +504,6 @@ inline void fermion_matrix_multiplication_shifted( __restrict su3_soa * const u,
 
 }
 
-
-
-void dM_dmu_eo( __restrict su3_soa * const u,
-        vec3_soa * const out,
-        vec3_soa * const in,
-        double_soa * backfield)
-{
-    int hx, y, z, t;
-
-#pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent gang(nt)
-    for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-        for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-            for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
-                for(hx=0; hx < nxh; hx++) {
-
-
-                    int x, tm, tp, idxh;
-                    vec3 aux;
-
-                    // (x+y+z+t) even
-                    x = 2*hx + ((y+z+t) & 0x1);
-
-                    idxh = snum_acc(x,y,z,t);
-
-                    tm = t - 1;
-                    tm = tm + (((tm >> 31) & 0x1) * nt);
-
-                    tp = t + 1;
-                    tp *= (((tp-nt) >> 31) & 0x1);
-
-                    //direzione tempo positiva, 6
-                    aux = mat_vec_mul_arg( &u[6], idxh, in, snum_acc(x,y,z,tp),
-                            &backfield[6] );
-
-                    // direzione tempo negativa, 7 
-                    aux = sumResult(aux, conjmat_vec_mul_arg( &u[7],
-                                snum_acc(x,y,z,tm),in,snum_acc(x,y,z,tm),&backfield[7]));
-
-                    /////////////////////////////////////////////////////////////////////     
-
-                    out->c0[idxh] = (aux.c0)*0.5;
-                    out->c1[idxh] = (aux.c1)*0.5;
-                    out->c2[idxh] = (aux.c2)*0.5;
-
-                } // Loop over nxh
-            } // Loop over ny
-        } // Loop over nz
-    } // Loop over nt
-}
-
-void dM_dmu_oe( __restrict su3_soa * const u,
-        vec3_soa * const out,
-        vec3_soa * const in,
-        double_soa * backfield)
-{
-
-    int hx, y, z, t;
-
-#pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent gang(nt)
-    for(t=0; t<nt; t++) {
-#pragma acc loop independent gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-        for(z=0; z<nz; z++) {
-#pragma acc loop independent gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-            for(y=0; y<ny; y++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
-                for(hx=0; hx < nxh; hx++) {
-
-                    int x, tm, tp, idxh;
-                    vec3 aux;
-
-                    // (x+y+z+t) odd
-                    x = 2*hx + ((y+z+t+1) & 0x1);
-
-                    idxh = snum_acc(x,y,z,t);
-
-                    tm = t - 1;
-                    tm = tm + (((tm >> 31) & 0x1) * nt);
-
-                    tp = t + 1;
-                    tp *= (((tp-nt) >> 31) & 0x1);
-
-                    //direzione tempo negativa, 6
-                    aux = conjmat_vec_mul_arg( &u[6],snum_acc(x,y,z,tm), in,
-                            snum_acc(x,y,z,tm), &backfield[6]);
-
-                    // direzione tempo positiva, 7
-                    aux = sumResult(aux, mat_vec_mul_arg( &u[7],idxh,
-                                in,snum_acc(x,y,z,tp),&backfield[7]));
-
-                    /////////////////////////////////////////////////////////////////////     
-
-                    out->c0[idxh] = (aux.c0)*0.5;
-                    out->c1[idxh] = (aux.c1)*0.5;
-                    out->c2[idxh] = (aux.c2)*0.5;
-
-                } // Loop over nxh
-            } // Loop over ny
-        } // Loop over nz
-    } // Loop over nt
-}
 
 
 

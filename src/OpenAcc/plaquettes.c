@@ -15,23 +15,23 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
 							    const int mu,
 							    const int nu){
 
-  int x, y, z, t;
+  int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
-#pragma acc loop independent gang //gang(nt)
-  for(t=0; t<nt; t++) {
-#pragma acc loop independent gang vector //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(z=0; z<nz; z++) {
-#pragma acc loop independent gang vector //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(y=0; y<ny; y++) {
+#pragma acc loop independent gang //gang(nd3)
+  for(d3=0; d3<nd3; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
-	for(x=0; x < nx; x++) {
+	for(d0=0; d0 < nd0; d0++) {
 	  int idxh,idxpmu,idxpnu;
 	  int parity;
 	  int dir_muA,dir_nuB;
 	  int dir_muC,dir_nuD;
 
-	  idxh = snum_acc(x,y,z,t);  // r 
-	  parity = (x+y+z+t) % 2;
+	  idxh = snum_acc(d0,d1,d2,d3);  // r 
+	  parity = (d0+d1+d2+d3) % 2;
 
 	  dir_muA = 2*mu +  parity;
 	  dir_muC = 2*mu + !parity;
@@ -56,21 +56,21 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
 	  tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
 	  
 
-	}  // x
-      }  // y
-    }  // z
-  }  // t
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 
   double res_R_p = 0.0;
   double res_I_p = 0.0;
   double resR = 0.0;
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
-  for(t=0; t<sizeh; t++) {
-    res_R_p += creal(tr_local_plaqs[0].c[t]);
-    res_R_p += creal(tr_local_plaqs[1].c[t]);
-    res_I_p += cimag(tr_local_plaqs[0].c[t]);
-    res_I_p += cimag(tr_local_plaqs[1].c[t]);
+  for(d3=0; d3<sizeh; d3++) {
+    res_R_p += creal(tr_local_plaqs[0].c[d3]);
+    res_R_p += creal(tr_local_plaqs[1].c[d3]);
+    res_I_p += cimag(tr_local_plaqs[0].c[d3]);
+    res_I_p += cimag(tr_local_plaqs[1].c[d3]);
   }
 
   //  plaqs[0] = res_R_p;
@@ -93,16 +93,16 @@ void calc_loc_staples_removing_stag_phases_nnptrick(  __restrict su3_soa * const
   // +---> nu       
   //            r is idxh in the following      
 
-  int x, y, z, t;
+  int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang //gang(nt)
-  for(t=0; t<nt; t++) {
-#pragma acc loop independent gang vector //gang(nz/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(z=0; z<nz; z++) {
-#pragma acc loop independent gang vector //gang(ny/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(y=0; y<ny; y++) {
+#pragma acc loop independent gang //gang(nd3)
+  for(d3=0; d3<nd3; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
-	for(x=0; x < nx; x++) {
+	for(d0=0; d0 < nd0; d0++) {
 	  int idxh,idx_pmu,idx_pnu,idx_pmu_mnu,idx_mnu;
 	  int parity;
 	  int dir_link;
@@ -110,8 +110,8 @@ void calc_loc_staples_removing_stag_phases_nnptrick(  __restrict su3_soa * const
 	  int dir_mu_2R,dir_mu_2L;
 	  int dir_nu_3R,dir_nu_3L;
 
-	  idxh = snum_acc(x,y,z,t);  // r 
-	  parity = (x+y+z+t) % 2;
+	  idxh = snum_acc(d0,d1,d2,d3);  // r 
+	  parity = (d0+d1+d2+d3) % 2;
 
 
 
@@ -134,10 +134,10 @@ void calc_loc_staples_removing_stag_phases_nnptrick(  __restrict su3_soa * const
 	  //computation of the Left  part of the staple
 	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
 
-	}  // x
-      }  // y
-    }  // z
-  }  // t
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 
 }// closes routine
 void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
@@ -154,17 +154,17 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * c
   //            r is idxh in the following      
 
 
-  int x, y, z, t, mu, iter;
+  int d0, d1, d2, d3, mu, iter;
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
  #pragma acc loop independent gang 
-  for(t=0; t<nt; t++) {
+  for(d3=0; d3<nd3; d3++) {
 #pragma acc loop independent gang vector(4)
-    for(z=0; z<nz; z++) {
+    for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4) 
-      for(y=0; y<ny; y++) {
+      for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector(32) 
-	for(x=0; x < nx; x++) {
+	for(d0=0; d0 < nd0; d0++) {
 
      #pragma acc loop seq 
 	  for(mu=0; mu<4; mu++){
@@ -179,8 +179,8 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * c
 	      else { //error 
 	      }
 
-	      const int idxh = snum_acc(x,y,z,t);  // r 
-	      const int parity = (x+y+z+t) % 2;
+	      const int idxh = snum_acc(d0,d1,d2,d3);  // r 
+	      const int parity = (d0+d1+d2+d3) % 2;
 #pragma acc cache (nnp_openacc[idxh:8])
 
 	      const int dir_link = 2*mu + parity;
@@ -214,10 +214,10 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * c
 	    }  // mu
 	  }  // iter
 
-	}  // x
-      }  // y
-    }  // z
-  }  // t
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 
 }// closes routine
 void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even(  __restrict su3_soa * const u,
@@ -234,17 +234,17 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even(  __restrict s
   //            r is idxh in the following      
 
 
-  int hx, y, z, t, mu, iter;
+  int hd0, d1, d2, d3, mu, iter;
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
  #pragma acc loop independent gang 
-  for(t=0; t<nt; t++) {
+  for(d3=0; d3<nd3; d3++) {
 #pragma acc loop independent gang vector(4)
-    for(z=0; z<nz; z++) {
+    for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4) 
-      for(y=0; y<ny; y++) {
+      for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector(32) 
-	for(hx=0; hx < nxh; hx++) {
+	for(hd0=0; hd0 < nd0h; hd0++) {
 
      #pragma acc loop seq 
 	  for(mu=0; mu<4; mu++){
@@ -258,9 +258,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even(  __restrict s
 	      else if (mu==3) { nu = iter; }
 	      else { //error 
 	      }
-	      const int x = 2*hx + ((y+z+t) & 0x1); //           x = 2*hx + ((y+z+t+1) & 0x1); (for the odd case)
-	      const int idxh = snum_acc(x,y,z,t);  // r 
-	      const int parity = (x+y+z+t) % 2;
+	      const int d0 = 2*hd0 + ((d1+d2+d3) & 0x1); //           d0 = 2*hd0 + ((d1+d2+d3+1) & 0x1); (for the odd case)
+	      const int idxh = snum_acc(d0,d1,d2,d3);  // r 
+	      const int parity = (d0+d1+d2+d3) % 2;
 #pragma acc cache (nnp_openacc[idxh:8])
 
 	      const int dir_link = 2*mu + parity;
@@ -294,10 +294,10 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even(  __restrict s
 	    }  // mu
 	  }  // iter
 
-	}  // x
-      }  // y
-    }  // z
-  }  // t
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 
 }// closes routine
 void calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd(
@@ -314,17 +314,17 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd(
   //            r is idxh in the following      
 
 
-  int hx, y, z, t, mu, iter;
+  int hd0, d1, d2, d3, mu, iter;
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
  #pragma acc loop independent gang 
-  for(t=0; t<nt; t++) {
+  for(d3=0; d3<nd3; d3++) {
 #pragma acc loop independent gang vector(4)
-    for(z=0; z<nz; z++) {
+    for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4) 
-      for(y=0; y<ny; y++) {
+      for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector(32) 
-	for(hx=0; hx < nxh; hx++) {
+	for(hd0=0; hd0 < nd0h; hd0++) {
 
      #pragma acc loop seq 
 	  for(mu=0; mu<4; mu++){
@@ -338,9 +338,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd(
 	      else if (mu==3) { nu = iter; }
 	      else { //error 
 	      }
-	      const int x = 2*hx + ((y+z+t+1) & 0x1);
-	      const int idxh = snum_acc(x,y,z,t);  // r 
-	      const int parity = (x+y+z+t) % 2;
+	      const int d0 = 2*hd0 + ((d1+d2+d3+1) & 0x1);
+	      const int idxh = snum_acc(d0,d1,d2,d3);  // r 
+	      const int parity = (d0+d1+d2+d3) % 2;
 #pragma acc cache (nnp_openacc[idxh:8])
 
 	      const int dir_link = 2*mu + parity;
@@ -374,10 +374,10 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd(
 	    }  // mu
 	  }  // iter
 
-	}  // x
-      }  // y
-    }  // z
-  }  // t
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 
 }// closes routine
 

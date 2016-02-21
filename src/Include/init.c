@@ -464,18 +464,32 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
     gp[6]=(par_info){(void*) &(gpar->zmap ),TYPE_INT, szmap };
     gp[7]=(par_info){(void*) &(gpar->tmap ),TYPE_INT, stmap };
 
-    // from here on, you should not have to modify anything.
     int res = scan_group_NV(npar_geometry,gp, filelines, startline, endline);
 
-    if(startline<endline)
-    if(gpar->gnx != nx || gpar->gny != ny || gpar->gnz != nz || gpar->gnt != nt ){ 
+    if(startline<endline){
+    if(gpar->gnx != nd[gpar->xmap] || gpar->gny != nd[gpar->ymap] ||
+            gpar->gnz != nd[gpar->zmap] || gpar->gnt != nd[gpar->tmap] ){ 
         printf("Error, input file lattice dimensions are not compatible\n");
         printf("       with the lattice dimensions written in geometry.h.\n");
         printf("       Either modify the input file, or recompile,\n");
         printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
                                gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
-        printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",nx,ny,nz,nt);
+        printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",
+                nd[gpar->xmap],nd[gpar->ymap],
+                nd[gpar->zmap],nd[gpar->tmap]);
         exit(1);
+    }
+    int maps[4] = {gpar->xmap,gpar->ymap,gpar->zmap,gpar->tmap};
+    int stop = 0;
+    int imap,jmap;
+    for(imap = 0 ; imap++ ; imap<3)for(jmap = imap+1 ; jmap++ ; jmap<4)
+        stop = stop || (maps[imap] == maps[jmap]);
+
+    if(stop){
+        printf("ERROR: found two equal direction mappings (%s:%d)\n",
+                __FILE__,__LINE__);
+        exit(1);
+    }
 
     }
 

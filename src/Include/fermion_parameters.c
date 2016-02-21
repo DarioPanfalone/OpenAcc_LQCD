@@ -140,7 +140,8 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
     int X,Y,Z,T;
     double  arg;
     double ferm_charge = fermion_parameters->ferm_charge;
-    double chpotphase = fermion_parameters->ferm_im_chem_pot/nt; 
+    double chpotphase = fermion_parameters->ferm_im_chem_pot/
+        nd[geom_par.tmap]; 
 
     double_soa * phases = fermion_parameters->phases;
 
@@ -162,10 +163,10 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
 
                     idxh = snum_acc(d[0],d[1],d[2],d[3]);
                    
-                    x = d[geom_par.xmap];
-                    y = d[geom_par.ymap];
-                    z = d[geom_par.zmap];
-                    t = d[geom_par.tmap];
+                    x = d[geom_par.xmap];int tnx = nd[geom_par.xmap];
+                    y = d[geom_par.ymap];int tny = nd[geom_par.ymap];
+                    z = d[geom_par.zmap];int tnz = nd[geom_par.zmap];
+                    t = d[geom_par.tmap];int tnt = nd[geom_par.tmap];
 
 
                     parity = (x+y+z+t) %2 ; 
@@ -176,14 +177,13 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     T = t + 1;
 
                     ////////X-oriented////////
-                    // X even --> dir=0
-                    // X odd  --> dir=1
-                    if(X == nx){// x-oriented links on the boundary
-                        arg = (y+1)*nx*bz_quantum/(nx*ny);
-                        arg+= (t+1)*nx*ex_quantum/(nx*nt);
-                        arg-= (z+1)*by_quantum/(nz*nx);
+                    if(X == tnx){
+                        // x-oriented links on the boundary
+                        arg = (y+1)*tnx*bz_quantum/(tnx*tny);
+                        arg+= (t+1)*tnx*ex_quantum/(tnx*tnt);
+                        arg-= (z+1)*by_quantum/(tnz*tnx);
                     }
-                    else arg = -(z+1)*by_quantum/(nz*nx);
+                    else arg = -(z+1)*by_quantum/(tnz*tnx);
 
                     arg *= ferm_charge;// only em phase so far
                     if(KSphaseX(x,y,z,t) == -1) arg += 0.5;
@@ -192,62 +192,59 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     while(arg > 0.5) arg -= 1.0;
                     while(arg < -0.5) arg += 1.0;
 
-                    phases[parity].d[idxh]= acc_twopi*arg; 
+                    phases[geom_par.xmap*2+parity].d[idxh]= acc_twopi*arg; 
 
 
                     ////////Y-oriented/////////
-                    // Y even --> dir=2
-                    // Y odd  --> dir=3
-                    if(Y == ny){// y-oriented links on the boundary
-                        arg = (z+1)*ny*bx_quantum/(ny*nz);
-                        arg+= (t+1)*ny*ey_quantum/(ny*nt);
-                        arg-= (x+1)*bz_quantum/(nx*ny);
+                    if(Y == tny){
+                        // y-oriented links on the boundary
+                        arg = (z+1)*tny*bx_quantum/(tny*tnz);
+                        arg+= (t+1)*tny*ey_quantum/(tny*tnt);
+                        arg-= (x+1)*bz_quantum/(tnx*tny);
                     }
-                    else arg = -(x+1)*bz_quantum/(nx*ny);
+                    else arg = -(x+1)*bz_quantum/(tnx*tny);
 
                     arg *= ferm_charge;// only am phase so far
                     if(KSphaseY(x,y,z,t) == -1) arg += 0.5;
                     while(arg > 0.5) arg -= 1.0;
                     while(arg < -0.5) arg += 1.0;
 
-                    phases[2+parity].d[idxh]=acc_twopi*arg;
+                    phases[geom_par.ymap*2+parity].d[idxh]=acc_twopi*arg;
 
                     
                     ////////Z-oriented////////
-                    // Z even --> dir=4
-                    // Z odd  --> dir=5
-                    if(Z == nz){// z-oriented links on the boundary
-                        arg = (t+1)*nz*ez_quantum/(nz*nt);
-                        arg += (x+1)*nz*by_quantum/(nz*nx);
-                        arg -= (y+1)*bx_quantum/(ny*nz);
+                    if(Z == tnz){
+                        // z-oriented links on the boundary
+                        arg = (t+1)*tnz*ez_quantum/(tnz*tnt);
+                        arg += (x+1)*tnz*by_quantum/(tnz*tnx);
+                        arg -= (y+1)*bx_quantum/(tny*tnz);
                     }
-                    else arg = -(y+1)*bx_quantum/(ny*nz);
+                    else arg = -(y+1)*bx_quantum/(tny*tnz);
 
                     arg *= ferm_charge;// only am phase so far
                     if(KSphaseZ(x,y,z,t) == -1) arg += 0.5;
                     while(arg > 0.5) arg -= 1.0;
                     while(arg < -0.5) arg += 1.0;
 
-                    phases[4+parity].d[idxh]=acc_twopi*arg;
+                    phases[geom_par.zmap*2+parity].d[idxh]=acc_twopi*arg;
 
 
                     ///////T-oriented////////
-                    // T even --> dir=6
-                    // T odd  --> dir=7
-                    arg = -(z+1)*ez_quantum/(nz*nt);
-                    arg -= (y+1)*ey_quantum/(ny*nt);
-                    arg -= (x+1)*ex_quantum/(nx*nt);
+                    arg = -(z+1)*ez_quantum/(tnz*tnt);
+                    arg -= (y+1)*ey_quantum/(tny*tnt);
+                    arg -= (x+1)*ex_quantum/(tnx*tnt);
                    
                     arg *= ferm_charge;// only am phase so far
                     if(KSphaseT(x,y,z,t) == -1) arg += 0.5;
                     arg += chpotphase*0.5; // it must be multiplied by pi, not 2pi
-                    if(T == nt) arg += 0.5;// antiperiodic boundary conds
+                    if(T == tnt) arg += 0.5;
+                    // antiperiodic boundary conds
                                            // notice T = t+1 !!
 
                     while(arg > 0.5) arg -= 1.0;
                     while(arg < -0.5) arg += 1.0;
 
-                    phases[6+parity].d[idxh]=acc_twopi*arg;
+                    phases[geom_par.tmap*2+parity].d[idxh]=acc_twopi*arg;
                 } // x loop
             } // y loop
         } // z loop

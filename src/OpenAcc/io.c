@@ -31,6 +31,15 @@ void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_
         exit(1);
     }
 
+
+    int nx = nd[geom_par.xmap];
+    int ny = nd[geom_par.ymap];
+    int nz = nd[geom_par.zmap];
+    int nt = nd[geom_par.tmap];
+
+
+
+
     fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
@@ -59,6 +68,13 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         return 1;
     }
     else{
+
+        int nx = nd[geom_par.xmap];
+        int ny = nd[geom_par.ymap];
+        int nz = nd[geom_par.zmap];
+        int nt = nd[geom_par.tmap];
+
+
 
 
 
@@ -186,6 +202,13 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     FILE *fg;int reads;
     char header[1000];
     *conf_id_iter = 1000 ; // random number
+
+    int nx = nd[geom_par.xmap];
+    int ny = nd[geom_par.ymap];
+    int nz = nd[geom_par.zmap];
+    int nt = nd[geom_par.tmap];
+
+
 
 
     ILDG_header ildg_headers[MAXILDGHEADERS]; // all ildg headers
@@ -358,6 +381,15 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
         printf("ERROR, %s unreadable.\n",nomefile);
         exit(1);
     }
+
+    int nx = nd[geom_par.xmap];
+    int ny = nd[geom_par.ymap];
+    int nz = nd[geom_par.zmap];
+    int nt = nd[geom_par.tmap];
+
+
+
+
 
     int  conf_machine_endianness_disagreement = machine_is_little_endian();
     char ildg_format_str[1000];  

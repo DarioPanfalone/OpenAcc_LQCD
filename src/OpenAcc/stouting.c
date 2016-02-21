@@ -106,18 +106,18 @@ void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
    SETINUSE(exp_aux);
    SETINUSE(tu_out);
 
-  int x, y, z, t;
+  int d0, d1, d2, d3;
 #pragma acc kernels present(tu) present(QA) present(tu_out) present(exp_aux)
 #pragma acc loop independent gang
-  for(t=0; t<nt; t++) {
+  for(d3=0; d3<nd3; d3++) {
 #pragma acc loop independent gang vector
-    for(z=0; z<nz; z++) {
+    for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector
-      for(y=0; y<ny; y++) {
+      for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector
-        for(x=0; x < nx; x++) {
-	  const  int idxh   = snum_acc(x,y,z,t);  // r
-          const  int parity = (x+y+z+t) % 2;
+        for(d0=0; d0 < nd0; d0++) {
+	  const  int idxh   = snum_acc(d0,d1,d2,d3);  // r
+          const  int parity = (d0+d1+d2+d3) % 2;
           int dir_link;
           int mu;
 
@@ -129,10 +129,10 @@ void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
 	    conf_left_exp_multiply_to_su3_soa(&tu[dir_link],idxh,&exp_aux[dir_link],&tu_out[dir_link]);
           }
 
-        }  // x
-      }  // y
-    }  // z
-  }  // t
+        }  // d0
+      }  // d1
+    }  // d2
+  }  // d3
   SETFREE(exp_aux);
 
 }// closes routine
@@ -503,18 +503,18 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
   SETINUSE(L);
   SETINUSE(TMP);
 
-  int x, y, z, t;
+  int d0, d1, d2, d3;
 #pragma acc kernels present(L)  present(SP)  present(U)  present(QA)  present(TMP)
 #pragma acc loop independent gang
-  for(t=0; t<nt; t++) {
+  for(d3=0; d3<nd3; d3++) {
 #pragma acc loop independent gang vector
-    for(z=0; z<nz; z++) {
+    for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector
-      for(y=0; y<ny; y++) {
+      for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector
-        for(x=0; x < nx; x++) {
-          const  int idxh   = snum_acc(x,y,z,t);  // r
-          const  int parity = (x+y+z+t) % 2;
+        for(d0=0; d0 < nd0; d0++) {
+          const  int idxh   = snum_acc(d0,d1,d2,d3);  // r
+          const  int parity = (d0+d1+d2+d3) % 2;
           int dir_link;
           int mu;
 #pragma acc loop seq
@@ -522,10 +522,10 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
             dir_link = 2*mu + parity;
 	    compute_loc_Lambda(&L[dir_link],&SP[dir_link],&U[dir_link],&QA[dir_link],&TMP[dir_link],idxh);
           }
-        }  // x
-      }  // y
-    }  // z
-  }  // t
+        }  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }
 
 
@@ -1171,22 +1171,22 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
 		   ){
   SETINUSE(TMP) ;
   SETINUSE(S);
-  int x, y, z, t, mu, iter;
+  int d0, d1, d2, d3, mu, iter;
 
 #pragma acc kernels present(L) present(U) present(nnp_openacc) present(nnm_openacc) present(S) present(QA) present(TMP)
  #pragma acc loop independent gang
-  for(t=0; t<nt; t++) {
+  for(d3=0; d3<nd3; d3++) {
 #pragma acc loop independent gang vector(4)
-    for(z=0; z<nz; z++) {
+    for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4)
-      for(y=0; y<ny; y++) {
+      for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector(32)
-        for(x=0; x < nx; x++) {
+        for(d0=0; d0 < nd0; d0++) {
      #pragma acc loop seq
           for(mu=0; mu<4; mu++){
 
-	    const int indice = snum_acc(x,y,z,t); // anche questa e' calcolata pure dopo ...
-	    const int parita = (x+y+z+t) % 2;
+	    const int indice = snum_acc(d0,d1,d2,d3); // anche questa e' calcolata pure dopo ...
+	    const int parita = (d0+d1+d2+d3) % 2;
 	    const int dir_mu = 2*mu + parita; // definisco una variabile di tipo dirlink pure qui (ce ne e' anche una dentro il loop dopo)
 	    
 	    // in questa routine faccio RES = PEZZO1
@@ -1202,8 +1202,8 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
               else { //error
               }
 	      
-              const int idxh = snum_acc(x,y,z,t);  // r
-              const int parity = (x+y+z+t) % 2;
+              const int idxh = snum_acc(d0,d1,d2,d3);  // r
+              const int parity = (d0+d1+d2+d3) % 2;
 #pragma acc cache (nnp_openacc[idxh:8])
 
               const int dir_link = 2*mu + parity;
@@ -1220,14 +1220,14 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
 
               //  computation of the >>>Right<<< part of the staple with LAMBDAs
 	      //  su3
-	      //  A = U_nu(x+mu)
-	      //  B = dagger U_mu(x+nu)
-	      //  C = dagger U_nu(x)
+	      //  A = U_nu(d0+mu)
+	      //  B = dagger U_mu(d0+nu)
+	      //  C = dagger U_nu(d0)
 	      //  thmat
-	      //  D = LAMBDA_mu(x)
-	      //  E = LAMBDA_nu(x)
-	      //  F = LAMBDA_nu(x+mu)
-	      //  G = LAMBDA_mu(x+nu)
+	      //  D = LAMBDA_mu(d0)
+	      //  E = LAMBDA_nu(d0)
+	      //  F = LAMBDA_nu(d0+mu)
+	      //  G = LAMBDA_mu(d0+nu)
 	      //  iABCD and -iABCE
               RIGHT_iABC_times_DminusE_absent_stag_phases(&U[dir_nu_1R],       idx_pmu, // A
 							  &U[dir_mu_2R],       idx_pnu, // B
@@ -1253,14 +1253,14 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
 
               //  computation of the >>>Left<<< part of the staple with LAMBDAs
 	      //  su3
-	      //  A = dagger U_nu(x+mu-nu)
-	      //  B = dagger U_mu(x-nu)
-	      //  C = U_nu(x-nu)
+	      //  A = dagger U_nu(d0+mu-nu)
+	      //  B = dagger U_mu(d0-nu)
+	      //  C = U_nu(d0-nu)
 	      //  thmat
-	      //  D = LAMBDA_mu(x)
-	      //  E = LAMBDA_mu(x-nu)
-	      //  F = LAMBDA_nu(x+mu-nu)
-	      //  G = LAMBDA_nu(x-nu)
+	      //  D = LAMBDA_mu(d0)
+	      //  E = LAMBDA_mu(d0-nu)
+	      //  F = LAMBDA_nu(d0+mu-nu)
+	      //  G = LAMBDA_nu(d0-nu)
 	      //  iABGC and -iABEC
 	      LEFT_iAB_times_GminusE_times_C_absent_stag_phases(&U[dir_nu_1L],       idx_pmu_mnu, // A
 							   &U[dir_mu_2L],       idx_mnu,     // B
@@ -1287,10 +1287,10 @@ void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una
 
           } // mu
 
-        }  // x
-      }  // y
-    }  // z
-  }  // t
+        }  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 
   SETFREE(TMP);
 }// closes routine

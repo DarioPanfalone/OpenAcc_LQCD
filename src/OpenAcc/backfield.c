@@ -16,7 +16,7 @@
 bf_param backfield_parameters;
 
 
-
+/*
 void init_backfield(double_soa * tu1_back_field_phases,bf_param bf_pars ){
 
     double  ex_quantum = bf_pars.ex;
@@ -186,7 +186,8 @@ void mult_backfield_by_stag_phases(double_soa * phases){
             } // y loop
         } // z loop
     } // t loop
-}
+}*/
 
 
 #endif
+

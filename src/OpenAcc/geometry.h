@@ -8,10 +8,10 @@
 #endif
 
 // lattice dimensions
-#define nd0 24  
-#define nd1 24  
-#define nd2 24  
-#define nd3 6  
+#define nd0 4  
+#define nd1 4  
+#define nd2 4  
+#define nd3 4 
  
 #define nd0h (nd0 >> 1) // nx/2
 #define nd1h (nd1 >> 1)
@@ -19,15 +19,15 @@
 #define nd3h (nd3 >> 1)
 
 // for legacy - to remove after refactoring is complete
-#define nx nd0    
-#define ny nd1
-#define nz nd2
-#define nt nd3
-
-#define nxh (nx >> 1) // nx/2
-#define nyh (ny >> 1)
-#define nzh (nz >> 1)
-#define nth (nt >> 1)
+//#define nx nd0    
+//#define ny nd1
+//#define nz nd2
+//#define nt nd3
+//
+//#define nxh (nx >> 1) // nx/2
+//#define nyh (ny >> 1)
+//#define nzh (nz >> 1)
+//#define nth (nt >> 1)
 
 
 
@@ -65,6 +65,9 @@ static inline int snum_acc(int d0, int d1, int d2, int d3) {
   ris = d0 + (d1*vol1) + (d2*vol2) + (d3*vol3);
   return ris/2;   // <---  /2 Pay attention to even/odd 
 }
+
+extern int nd[4];
+extern int vol3s[4];
 
 // TABLES FOR THE NEAREST NEIGHBOURS       
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            
