@@ -373,7 +373,6 @@ Unfortunately files tend to be files which are 3 times larger than binary
 files, and for large lattices this might be a problem.
 
 \subsection{ILDG format (binary)}
-NOTE: CHECK IF IT WORKS WITH PGI \\
 By activating the correct flag in the input file, the ILDG format will be read 
 and written instead. The ILDG format is used for gauge configuration 
 storage which is a diffused standard (Google it). It is made up by LIME records 
@@ -399,12 +398,7 @@ to restart the simulation (ASCII format).
 You can look into \verb|src/OpenAcc/io.c| or into a gauge configuration 
 file with a text editor for more info.
 
-
-
-
-
 \subsection{Configuration file format conversion}
-NOTE: CHECK IF IT WORKS WITH PGI \\
 A tool for file conversion is \verb|/src/DbgTools/ildgtest.c|. You can add it 
 to the list of arguments you pass to \verb|generate_makefile.py| in order to 
 build a makefile that will have, amongst other targets,\verb|ildgtest|.
