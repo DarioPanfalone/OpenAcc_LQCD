@@ -265,7 +265,7 @@ int main(int argc, char* argv[]){
                 if(conf_id_iter%mkwch_pars.storeconfinterval==0){
                     char tempname[50];char serial[10];
                     strcpy(tempname,mkwch_pars.store_conf_name);
-                    sprintf(serial,"%d",conf_id_iter);
+                    sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
                     printf("Storing conf %s.\n", tempname);
                     save_conf(conf_acc,tempname,conf_id_iter,mkwch_pars.use_ildg);

@@ -38,7 +38,7 @@ residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                0
+Ntraj	                100
 ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
