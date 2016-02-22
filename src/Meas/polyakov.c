@@ -107,159 +107,6 @@ DEF_SU3_PLKN_TRACE(su3_plk2_trace,su3_plk2)
 DEF_SU3_PLKN_TRACE(su3_plk3_trace,su3_plk3)
 
 
-
-void polyakov_loop_all(	d_complex *res,  __restrict const su3_soa * const u)
-{	
-    su3_plk0 *loopplk0;
-    su3_plk1 *loopplk1;
-    su3_plk2 *loopplk2;
-    su3_plk3 *loopplk3;
-
-    int allocation_check;
-    allocation_check = posix_memalign((void **)&loopplk0, ALIGN, 2*sizeof(su3_plk0));
-    ALLOCCHECK(allocation_check,&loopplk0);
-    allocation_check = posix_memalign((void **)&loopplk1, ALIGN, 2*sizeof(su3_plk1));
-    ALLOCCHECK(allocation_check,&loopplk1);
-    allocation_check = posix_memalign((void **)&loopplk2, ALIGN, 2*sizeof(su3_plk2));
-    ALLOCCHECK(allocation_check,&loopplk2);
-    allocation_check = posix_memalign((void **)&loopplk3, ALIGN, 2*sizeof(su3_plk3));
-    ALLOCCHECK(allocation_check,&loopplk3);
-
-#pragma acc data\
-    create(loopplk0[0:2])\
-    create(loopplk1[0:2])\
-    create(loopplk2[0:2])\
-    create(loopplk3[0:2])
-    {
-#pragma acc kernels present(loopplk0) 
-#pragma acc loop independent
-        for(int i=0;i<vol30h;i++){
-            loopplk0[0].r0.c0[i] = 1;loopplk0[0].r0.c1[i] = 0;loopplk0[0].r0.c2[i] = 0;
-            loopplk0[0].r1.c0[i] = 0;loopplk0[0].r1.c1[i] = 1;loopplk0[0].r1.c2[i] = 0;
-
-            loopplk0[1].r0.c0[i] = 1;loopplk0[1].r0.c1[i] = 0;loopplk0[1].r0.c2[i] = 0;
-            loopplk0[1].r1.c0[i] = 0;loopplk0[1].r1.c1[i] = 1;loopplk0[1].r1.c2[i] = 0;
-        }
-#pragma acc kernels present(loopplk1) 
-#pragma acc loop independent
-        for(int i=0;i<vol31h;i++){
-            loopplk1[0].r0.c0[i] = 1;loopplk1[0].r0.c1[i] = 0;loopplk1[0].r0.c2[i] = 0;
-            loopplk1[0].r1.c0[i] = 0;loopplk1[0].r1.c1[i] = 1;loopplk1[0].r1.c2[i] = 0;
-
-            loopplk1[1].r0.c0[i] = 1;loopplk1[1].r0.c1[i] = 0;loopplk1[1].r0.c2[i] = 0;
-            loopplk1[1].r1.c0[i] = 0;loopplk1[1].r1.c1[i] = 1;loopplk1[1].r1.c2[i] = 0;
-        }
-#pragma acc kernels present(loopplk2) 
-#pragma acc loop independent
-        for(int i=0;i<vol32h;i++){
-            loopplk2[0].r0.c0[i] = 1;loopplk2[0].r0.c1[i] = 0;loopplk2[0].r0.c2[i] = 0;
-            loopplk2[0].r1.c0[i] = 0;loopplk2[0].r1.c1[i] = 1;loopplk2[0].r1.c2[i] = 0;
- 
-            loopplk2[1].r0.c0[i] = 1;loopplk2[1].r0.c1[i] = 0;loopplk2[1].r0.c2[i] = 0;
-            loopplk2[1].r1.c0[i] = 0;loopplk2[1].r1.c1[i] = 1;loopplk2[1].r1.c2[i] = 0;
-        }
-#pragma acc kernels present(loopplk3) 
-#pragma acc loop independent
-        for(int i=0;i<vol33h;i++){
-            loopplk3[0].r0.c0[i] = 1;loopplk3[0].r0.c1[i] = 0;loopplk3[0].r0.c2[i] = 0;
-            loopplk3[0].r1.c0[i] = 0;loopplk3[0].r1.c1[i] = 1;loopplk3[0].r1.c2[i] = 0;
-
-            loopplk3[1].r0.c0[i] = 1;loopplk3[1].r0.c1[i] = 0;loopplk3[1].r0.c2[i] = 0;
-            loopplk3[1].r1.c0[i] = 0;loopplk3[1].r1.c1[i] = 1;loopplk3[1].r1.c2[i] = 0;
-        }
-
-        int d0, d1, d2, d3,h,idxh,parity;
-        double r = 0;
-#pragma acc kernels present(u) present(loopplk)
-#pragma acc loop independent gang //gang(nd3)
-        for(d3=0; d3<nd3; d3++) {
-#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-            for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-                for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector //vector(DIM_BLOCK_X)
-                    for(d0=0; d0 < nd0; d0++) {	    
-
-                        int parity0 = ( 0+d1+d2+d3) % 2;int id0 = snum_acc( 0,d1,d2,d3);
-                        int parity1 = (d0+ 0+d2+d3) % 2;int id1 = snum_acc(d0, 0,d2,d3);
-                        int parity2 = (d0+d1+ 0+d3) % 2;int id2 = snum_acc(d0,d1, 0,d3);
-                        int parity3 = (d0+d1+d2+ 0) % 2;int id3 = snum_acc(d0,d1,d2, 0);
-
-                        parity = (d0+d1+d2+d3) % 2;
-                        idxh = snum_acc(d0,d1,d2,d3);  	
-                
-                        su3_plk0_su3_soa_multinplace(&loopplk0[parity0],id0,
-                                &u[0*2+parity],idxh);
-                        su3_plk1_su3_soa_multinplace(&loopplk1[parity1],id1,
-                                &u[1*2+parity],idxh);
-                        su3_plk2_su3_soa_multinplace(&loopplk2[parity2],id2,
-                                &u[2*2+parity],idxh);
-                        su3_plk3_su3_soa_multinplace(&loopplk3[parity3],id3,
-                                &u[3*2+parity],idxh);
-
-                    }//end d0
-                }//end d1
-            }//end d2
-        }//end d3
-
-
-        double rel,iml;
-        rel=0,iml=0;
-#pragma acc kernels present(loopplk0) 
-#pragma acc loop independent reduction(+:rel) reduction(+:iml)
-        for(int i=0;i<vol30h;i++){
-                d_complex r = su3_plk0_trace(&loopplk0[0],i);
-                r += su3_plk0_trace(&loopplk0[1],i);
-                rel += creal(r);
-                iml += cimag(r);
-            }
-        res[0] = (rel + iml * I)/(vol30h*2*3);
-
-        rel=0,iml=0;
-#pragma acc kernels present(loopplk1) 
-#pragma acc loop independent reduction(+:rel) reduction(+:iml)
-        for(int i=0;i<vol31h;i++){
-                d_complex r = su3_plk1_trace(&loopplk1[0],i);
-                r += su3_plk1_trace(&loopplk1[1],i);
-                rel += creal(r);
-                iml += cimag(r);
-            }
-        res[1] = (rel + iml * I)/(vol31h*2*3);
-
-        rel=0,iml=0;
-#pragma acc kernels present(loopplk2) 
-#pragma acc loop independent reduction(+:rel) reduction(+:iml)
-        for(int i=0;i<vol32h;i++){
-                d_complex r = su3_plk2_trace(&loopplk2[0],i);
-                r += su3_plk2_trace(&loopplk2[1],i);
-                rel += creal(r);
-                iml += cimag(r);
-            }
-        res[2] = (rel + iml * I)/(vol32h*2*3);
-
-        rel=0,iml=0;
-#pragma acc kernels present(loopplk3) 
-#pragma acc loop independent reduction(+:rel) reduction(+:iml)
-        for(int i=0;i<vol33h;i++){
-                d_complex r = su3_plk3_trace(&loopplk3[0],i);
-                r += su3_plk3_trace(&loopplk3[1],i);
-                rel += creal(r);
-                iml += cimag(r);
-            }
-        res[3] = (rel + iml * I)/(vol33h*2*3);
-
-    }
-
-    free(loopplk0);
-    free(loopplk1);
-    free(loopplk2);
-    free(loopplk3);
-
-}
-
-
-
-
 d_complex polyakov_loop0(__restrict const su3_soa * const u)
 {
     su3_plk0 *loopplk0;
@@ -342,9 +189,8 @@ d_complex polyakov_loop1(__restrict const su3_soa * const u)
             loopplk1[1].r1.c0[i] = 0;loopplk1[1].r1.c1[i] = 1;loopplk1[1].r1.c2[i] = 0;
         }
         int d0, d1, d2, d3,h,idxh,parity;
-        double r = 0;
 
-#pragma acc kernels present(u) present(loopplk3)
+#pragma acc kernels present(u) present(loopplk1)
 #pragma acc loop independent gang 
         for(d3=0; d3<nd3; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -393,6 +239,7 @@ d_complex polyakov_loop2(__restrict const su3_soa * const u)
     double rel,iml;
     int allocation_check = posix_memalign((void **)&loopplk2, ALIGN, 2*sizeof(su3_plk2));
     ALLOCCHECK(allocation_check,loopplk2);
+
 #pragma acc data  create(loopplk2[0:2])
     {
 #pragma acc kernels present(loopplk2) 
@@ -405,13 +252,12 @@ d_complex polyakov_loop2(__restrict const su3_soa * const u)
             loopplk2[1].r1.c0[i] = 0;loopplk2[1].r1.c1[i] = 1;loopplk2[1].r1.c2[i] = 0;
         }
         int d0, d1, d2, d3,h,idxh,parity;
-        double r = 0;
-#pragma acc kernels present(u) present(loopplk)
-#pragma acc loop independent gang //gang(nd3)
+#pragma acc kernels present(u) present(loopplk2)
+#pragma acc loop independent gang 
         for(d3=0; d3<nd3; d3++) {
-#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent gang vector
             for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent gang vector
                 for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
                     for(d0=0; d0 < nd0; d0++) {	    
@@ -430,7 +276,6 @@ d_complex polyakov_loop2(__restrict const su3_soa * const u)
             }//end d2
         }//end d3
 
-        double rel,iml;
         rel=0,iml=0;
 #pragma acc kernels present(loopplk2) 
 #pragma acc loop independent reduction(+:rel) reduction(+:iml)
@@ -468,7 +313,6 @@ d_complex polyakov_loop3(__restrict const su3_soa * const u)
             loopplk3[1].r1.c0[i] = 0;loopplk3[1].r1.c1[i] = 1;loopplk3[1].r1.c2[i] = 0;
         }
         int d0, d1, d2, d3,h,idxh,parity;
-        double r = 0;
 #pragma acc kernels present(u) present(loopplk3)
 #pragma acc loop independent gang
         for(d3=0; d3<nd3; d3++) {
@@ -479,7 +323,7 @@ d_complex polyakov_loop3(__restrict const su3_soa * const u)
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
                     for(d0=0; d0 < nd0; d0++) {	    
 
-                        int parity3 = (d0+d1+d2+d3) % 2;
+                        int parity3 = (d0+d1+d2+0) % 2;
                         int id3h = (d0+nd0*(d1+nd1*d2))/2;
 
                         parity = (d0+d1+d2+d3) % 2;

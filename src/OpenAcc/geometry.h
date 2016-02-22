@@ -8,28 +8,15 @@
 #endif
 
 // lattice dimensions
-#define nd0 4  
-#define nd1 4  
-#define nd2 4  
-#define nd3 4 
+#define nd0 24 
+#define nd1 24 
+#define nd2 24
+#define nd3 6
  
 #define nd0h (nd0 >> 1) // nx/2
 #define nd1h (nd1 >> 1)
 #define nd2h (nd2 >> 1)
 #define nd3h (nd3 >> 1)
-
-// for legacy - to remove after refactoring is complete
-//#define nx nd0    
-//#define ny nd1
-//#define nz nd2
-//#define nt nd3
-//
-//#define nxh (nx >> 1) // nx/2
-//#define nyh (ny >> 1)
-//#define nzh (nz >> 1)
-//#define nth (nt >> 1)
-
-
 
 #define sizehh nd0*nd1*nd2*nd3/2 
 
