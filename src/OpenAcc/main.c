@@ -140,7 +140,7 @@ int main(int argc, char* argv[]){
     create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc)\
     create(local_sums[0:2]) create(d_local_sums[0:2])\
     copyin(fermions_parameters[0:NDiffFlavs])\
-    copyin(deltas_Omelyan[0:7]) copyin(nd[0:4]) \
+    copyin(deltas_Omelyan[0:7]) \
     copyin(u1_back_phases[0:8*NDiffFlavs])
     {
 #ifdef STOUT_FERMIONS
