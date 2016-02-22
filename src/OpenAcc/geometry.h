@@ -7,12 +7,8 @@
  #define __restrict
 #endif
 
-// lattice dimensions
-#define nd0 24 
-#define nd1 24 
-#define nd2 24
-#define nd3 6
- 
+#include "../../build/lattice_dimensions.h"
+
 #define nd0h (nd0 >> 1) // nx/2
 #define nd1h (nd1 >> 1)
 #define nd2h (nd2 >> 1)

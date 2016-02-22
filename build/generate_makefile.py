@@ -279,7 +279,7 @@ if __name__ == '__main__':
     if 'PGISLOW' not in argv and 'GNU' not in argv and 'PGI' not in argv:
         stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
         exit(1)
-    
+
     clsset = False
     if 'PGISLOW' in argv : 
         compiler_linker_settings = PGIclsSLOW;
@@ -304,7 +304,26 @@ if __name__ == '__main__':
             argv.remove('PGI')
             clsset = True
 
+    if not path.exists("lattice_dimensions.h"):
+        stderr.write("generating lattice_dimensions.h\n")
+        f = open("lattice_dimensions.h", 'w')
+        ldim_string = '''
+// lattice dimensions
+#define nd0  4
+#define nd1  4
+#define nd2  4
+#define nd3  4
+'''
+        f.write(ldim_string)
+        f.close()
+
+
+
+
+
     makefile = generate_makefile_from_main(argv[1:])
+
     stdout.write(makefile)
+
 
 
