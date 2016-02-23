@@ -229,7 +229,7 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     } 
 
     int alldimfound = 0;
-    fseek(fg,0,SEEK_SET);
+    fseeko(fg,0,SEEK_SET);
     // Find all headers
     int i=0;
     int  conf_machine_endianness_disagreement = machine_is_little_endian();
@@ -320,7 +320,11 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     // read MD_traj
     if(MD_traj_index != -1){
         fseeko(fg,ildg_header_ends_positions[MD_traj_index],SEEK_SET);
-        fscanf(fg,"%d",conf_id_iter);
+        reads = fscanf(fg,"%d",conf_id_iter);
+        if(reads!= 1){
+            printf("Error in reading file: %s ,%d\n",__FILE__,__LINE__);
+            exit(1);
+        }
     }else *conf_id_iter = 1;
 
     // read ildg-binary-data (su3 gauge conf)
