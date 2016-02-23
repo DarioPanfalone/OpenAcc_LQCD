@@ -7,7 +7,7 @@
  #define __restrict
 #endif
 
-#include "../../build/lattice_dimensions.h"
+#include "../Mpi/geometry_multidev.h"
 
 #define nd0h (nd0 >> 1) // nx/2
 #define nd1h (nd1 >> 1)
@@ -42,7 +42,6 @@ typedef struct geom_parameters_t{
     int xyztmap[4];
     int d0123map[4];
 
-
 } geom_parameters;
 
 extern geom_parameters geom_par;
@@ -63,7 +62,6 @@ static inline int snum_acc(int d0, int d1, int d2, int d3) {
 // temporarily defined and computed here (should be moved elsewhere!)      
 int nnp_openacc[sizeh][4][2];
 int nnm_openacc[sizeh][4][2];
-
 
 void set_geom_glv(geom_parameters* gp);
 void compute_nnp_and_nnm_openacc(void);

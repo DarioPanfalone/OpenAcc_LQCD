@@ -329,23 +329,38 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
 
 
 
-    fseeko(fg,ildg_header_ends_positions[ildg_binary_data_index],SEEK_SET);
-    int x,y,z,t,dir;
+    off_t ibd_start = ildg_header_ends_positions[ildg_binary_data_index];
+    fseeko(fg,ibd_start,SEEK_SET);
+    int xl,yl,zl,tl,dir;//local coordinates
     set_geom_glv(&geom_par);// should be already done
-    for(t=0;t<nt_r;t++) for(z=0;z<nz_r;z++)
-        for(y=0;y<ny_r;y++) for(x=0;x<nx_r;x++)
+#ifdef MULTIDEV
+    set_geom_glv_multidev(&geom_par_multidev);// should be already done
+#endif
+    for(tl=0;tl<geom_par.nd[tmap];tl++)for(zl=0;zl<geom_par.nd[zmap];zl++)
+        for(yl=0;yl<geom_par.nd[ymap];yl++) 
+            for(xl=0;xl<geom_par.nd[xmap];xl++)
         {
             // ILDG format on disk is not transposed,
             //  but conf in machine memory could be.
-            int xs[4] = {x,y,z,t};
+            int xs[4] = {xl,yl,zl,tl};
             int d[4];
             for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
 
             int idxh = snum_acc(d[0],d[1],d[2],d[3]);
-            int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
+            int parity = (xl+yl+zl+tl)%2;// parity = (d0+d1+d2+d3)%2;
 
+            int x = xl,y = yl ,z = zl, t = tl;
+#ifdef MULTIDEV
+            x += geom_par_multidev.gl_loc_origin4int.x;
+            y += geom_par_multidev.gl_loc_origin4int.y;
+            z += geom_par_multidev.gl_loc_origin4int.z;
+            t += geom_par_multidev.gl_loc_origin4int.t;
+#endif
             for(dir=0;dir<4;dir++){
-
+                off_t mat_off_t = 
+                    dir+4*(x+nx_r*(y+ny_r*(z+nz_r*t)))*sizeof(double)*18;
+                fseeko(fg,ibd_start + mat_off_t);
+            
                 single_su3 m;          
                 reads = fread((void*)m.comp,sizeof(double),18,fg);
                 if(reads!= 18){
