@@ -346,6 +346,7 @@ gettimeofday ( &t3, NULL );
     }
   }
 
+
   if(metro==0){// accetta sempre in fase di termalizzazione
     acc++;
   }

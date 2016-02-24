@@ -82,6 +82,7 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
     for(int iflv=0;iflv<NDiffFlavs;iflv++){
             char strtocat[120];
             sprintf(strtocat, "Reff_%-19sImff_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+            strcat(fmpar->fermionic_outfile_header,strtocat);
             sprintf(strtocat, "ReN_%-19sImN_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
             strcat(fmpar->fermionic_outfile_header,strtocat);
     }
