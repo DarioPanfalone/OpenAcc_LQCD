@@ -20,6 +20,7 @@
 #include "../OpenAcc/alloc_vars.h"
 #include "../OpenAcc/random_assignement.h"
 #include "./ferm_meas.h"
+#include "./baryon_number_utilities.h"
 #include "../Include/fermion_parameters.h"
 #include "../OpenAcc/fermion_matrix.h"
 #include "../OpenAcc/fermionic_utilities.h"
@@ -29,7 +30,6 @@
 #include "../OpenAcc/stouting.h"
 #endif
 #include "../OpenAcc/action.h"
-
 
 ferm_meas_params  fm_par;
 
@@ -190,8 +190,8 @@ void fermion_measures( su3_soa * tconf_acc,
                 chircond_size = scal_prod_global(rnd_e,chi_e)+
                     scal_prod_global(rnd_o,chi_o);
 
-                dM_dmu_eo(conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
-                dM_dmu_oe(conf_to_use,phi_o,chi_e,tfermions_parameters[iflv].phases);
+                dM_dmu_eo[geom_par.tmap](conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
+                dM_dmu_oe[geom_par.tmap](conf_to_use,phi_o,chi_e,tfermions_parameters[iflv].phases);
 
                 barnum_size = scal_prod_global(rnd_e,phi_e)+
                     scal_prod_global(rnd_o,phi_o);
