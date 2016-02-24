@@ -1,7 +1,8 @@
 #!/bin/bash
 
+cd /home/users/mesiti/GPFS/OPENACC_TEST/24_06_24_24_0.24/run
+
 module load pgi/15.9 cuda/7.0
 export PGI_ACC_BUFFERSIZE=3000000000
 
-cd /home/users/mesiti/OPENACCREPO/build/
-make main && cd run && ./main input_test
+./main24062424_0.24 input > out_job

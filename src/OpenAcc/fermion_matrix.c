@@ -384,13 +384,13 @@ void dM_dmu_eo( __restrict su3_soa * const u,
     int d0h, d1, d2, d3;
 
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent gang(nd3)
+#pragma acc loop independent
     for(d3=0; d3<nd3; d3++) {
-#pragma acc loop independent gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
+#pragma acc loop independent
                 for(d0h=0; d0h < nd0h; d0h++) {
 
 
@@ -433,17 +433,16 @@ void dM_dmu_oe( __restrict su3_soa * const u,
         vec3_soa * const in,
         double_soa * backfield)
 {
-
     int d0h, d1, d2, d3;
 
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent gang(nd3)
+#pragma acc loop independent
     for(d3=0; d3<nd3; d3++) {
-#pragma acc loop independent gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector(DIM_BLOCK_X)
+#pragma acc loop independent
                 for(d0h=0; d0h < nd0h; d0h++) {
 
                     int d0, d3m, d3p, idxh;
@@ -467,6 +466,7 @@ void dM_dmu_oe( __restrict su3_soa * const u,
                     // direzione tempo positiva
                     aux = sumResult(aux, mat_vec_mul_arg( &u[geom_par.tmap*2+1],idxh,
                                 in,snum_acc(d0,d1,d2,d3p),&backfield[geom_par.tmap*2+1]));
+
 
                     /////////////////////////////////////////////////////////////////////     
 
