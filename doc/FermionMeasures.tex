@@ -150,3 +150,90 @@ condensate (for a given quark) will be
 \end{equation}
 
 
+\section{Nonzero chemical potential on the lattice and the quark number}
+
+Let's for the sake of simplicity limit the present discussion to one quark only. In the 
+continuum, in the Euclidean, in the presence of a nonzero chemical potential, we have 
+\begin{equation}
+ Z = \int DA^E D\bar{\psi}D \psi \exp{\left\{-S_g^E(A^E) - \bar{\psi}\left[ 
+\gamma_\nu^E \left( \partial_\nu - i A_\nu^E \right) + m \right]\psi + \mu \bar{\psi} 
+\gamma_4 \psi \right\} }.
+\end{equation}
+This is equivalent to substitute the usual dirac operator with [CONTROLLARE SEGNO DI MU]
+\begin{equation}
+ M(\mu) = \left[ \gamma_\nu^E \left( \partial_\nu - i A_\nu^E \right) - \mu \gamma_4 
++ m \right]
+\end{equation}
+Two remarks are in order: 
+\begin{enumerate}
+ \item The usual Hybrid Montecarlo algorithm relies on the Euclidean action $S^E$ being 
+real. The gauge Euclidean action $S_g^E$ being real, this requires the determinant of 
+the fermion matrix $M(\mu)$ to be real. A sufficient condition for this, is the 
+$\gamma_5$-hermiticity condition\footnote{Of course this relies on the property 
+\begin{equation}
+ Det(M) = Det(\gamma^5 M \gamma^5) . \nonumber
+\end{equation}
+}, 
+$\gamma_5 M \gamma_5 = M$, which is only true if $\mu$ if zero or \emph{pure 
+imaginary}, that is $\mu = i \mu_I$.
+ \item The term containing $\mu$ can be reabsorbed in $A_4^E$, once on replaces $A_4^E$ 
+with
+\begin{equation}
+ A_4^E = A_4^E - i \mu \mathbb{1} =  A_4^E + \mu_I \mathbb{1} \ . 
+\end{equation}
+This means that, if we take $\mu$ pure imaginary, we can interpret it as an additional 
+$U(1)$ phase in the Fermion Matrix\footnote{
+A little discussion here is in order. The first idea one can have for introducing a 
+nonzero chemical potential on the lattice, is to ``naively'' discretize the term
+$\bar{\psi}\gamma_4\psi$. Unfortunately, this recipe produces (additional) divergencies 
+that cannot be ``renormalized away''}. 
+\end{enumerate}
+With these observations, the $(i,j)$ element of the $\mu$-dependent staggered Dirac 
+operator might be written as 
+\begin{equation}
+\label{Mmu}
+ M_{i,j} = \frac{1}{2a} \sum_\nu \eta_\nu(i) \left[ e^{\mu  a  \delta_{\nu,4}} U_\nu(i) 
+\delta_{i+\hat{\nu},j} - 
+e^{- \mu a \delta_{\nu,4}} U^\dagger_\nu(j)\delta_{i-\hat{\nu},j} \right]
+\end{equation}
+where $i$ and $j$ label the lattice sites, $\eta_\nu(i)$ are the staggered phases, and 
+$U_\nu(i)$ are the $SU(3)$ gauge links.  Notice that, since in our case $\mu = i 
+\mu_I$, 
+\begin{equation}
+ M_{i,j} = \frac{1}{2a} \sum_\nu \eta_\nu(i) \left[ e^{ i \mu a \delta_{\nu,4}} 
+U_\nu(i) \delta_{i+\hat{\nu},j} - 
+e^{- i \mu a \delta_{\nu,4} } U^\dagger_\nu(j)\delta_{i-\hat{\nu},j} \right]
+\end{equation}
+
+
+
+The quark number observable $n_q$ on the lattice can be written as 
+\begin{equation}
+ n_q = \frac{\partial}{\partial \mu} \log Z = Z^{-1} \int DU e^{-S_g^E} 
+\frac{\partial \det M(\mu)}{\partial \mu}.
+\end{equation}
+Noticing that $\det M(\mu) = \prod_i \lambda_i$, we have\footnote{It is also possible 
+to use the classical trick $\det M = e^{\mbox{ Tr} \log M}$ with the same effect.}
+\begin{equation}
+ \frac{\partial \det M (\mu)}{\partial \mu} = \sum_i\frac{\partial 
+\lambda_i}{\partial \mu } \frac{1}{\lambda_i} \prod_j \lambda_j  = \mbox{ Tr } \left( 
+\frac{\partial M}{\partial \mu}M^{-1}\right) \det M \ .
+\end{equation}
+Notice that $\partial M / \partial \mu$, from Eq.(\ref{Mmu}), is
+\[
+  \frac{\partial M_{i,j}}{\partial \mu} = \frac{1}{2}\eta_4(i) \left[ e^{\mu a } 
+U_4(i) \delta_{i+\hat{4},j} + 
+e^{- \mu a} U^\dagger_4(j)\delta_{i-\hat{4},j} \right] =
+\]
+\[
+= \frac{1}{2} \eta_4(i) \left[ e^{\mu a } 
+U_4(i) \delta_{i+\hat{4},j} + 
+e^{- \mu a} U^\dagger_4(j)\delta_{i-\hat{4},j} \right] \ . 
+\]
+Notice that $\mu a = \frac{\mu}{n_t T}$.
+
+
+
+ 
+
+
