@@ -24,6 +24,9 @@ double_soa * u1_back_phases; //Background,staggered,chempot phases
                              // 8 for each flavour
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
+tamat_soa * ipdot_g_old;// for HMC diagnostics
+tamat_soa * ipdot_f_old;// for HMC diagnostics
+
 su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases 
                       // in fermion related computation (with or without stouting)
 
@@ -99,6 +102,10 @@ void mem_alloc()
   ALLOCCHECK(allocation_check, momenta ) ;
   allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_acc[mu])); 
   ALLOCCHECK(allocation_check, ipdot_acc) ;
+  allocation_check =  posix_memalign((void **)&ipdot_g_old, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_g_old[mu])); 
+  ALLOCCHECK(allocation_check, ipdot_g_old) ;
+  allocation_check =  posix_memalign((void **)&ipdot_f_old, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_f_old[mu])); 
+  ALLOCCHECK(allocation_check, ipdot_f_old) ;
 
   
 
@@ -185,6 +192,8 @@ inline void mem_free()
                                     
   FREECHECK(conf_acc_bkp);          
   FREECHECK(ipdot_acc);           
+  FREECHECK(ipdot_g_old);           
+  FREECHECK(ipdot_f_old);           
 
   FREECHECK(ferm_chi_acc);          
   FREECHECK(ferm_phi_acc);          

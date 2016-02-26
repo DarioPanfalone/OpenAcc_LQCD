@@ -7,11 +7,14 @@
 #include "./plaquettes.h"
 #include "./rettangoli.h"
 #include "./ipdot_gauge.h"
+#include "../Include/markowchain.h"
 
 #include "sys/time.h"
 //#define TIMING_STAPLES
 
 extern int verbosity_lv;
+
+extern tamat_soa * ipdot_g_old; // see alloc_vars.c
 
 void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
 
@@ -67,10 +70,24 @@ void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __res
     calc_ipdot_gauge_soloopenacc_tlsm(tconf_acc,local_staples,tipdot);
   }
 
-    double   temp_force_norm;
-    if(verbosity_lv > 1){
-        temp_force_norm = calc_force_norm(tipdot);
-        printf("\t\t\tGauge Force Half Norm: %e\n", temp_force_norm);
+    if(mkwch_pars.save_diagnostics == 1 || verbosity_lv > 1){
+        double  force_norm, diff_force_norm;
+        force_norm = calc_force_norm(tipdot);
+        diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old);
+        copy_ipdot_into_old(tipdot,ipdot_g_old);
+
+        if(mkwch_pars.save_diagnostics == 1){
+            FILE *foutfile = 
+                fopen(mkwch_pars.diagnostics_filename,"at");
+            fprintf(foutfile,"GFHN %e \tDGFHN %e \t",force_norm,diff_force_norm);
+            fclose(foutfile);
+        }
+
+
+
+        if(verbosity_lv > 1)
+            printf("\t\t\tGauge Force Half Norm: %e, Diff with previous: %e \n", 
+                    force_norm, diff_force_norm);
     } 
 
 

@@ -10,6 +10,7 @@
 #include "./fermion_force.h"
 #include "./fermion_force_utilities.h"
 #include "../Include/fermion_parameters.h"
+#include "../Include/markowchain.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./su3_utilities.h"
 #include "./su3_measurements.h"
@@ -27,7 +28,7 @@
 
 extern int verbosity_lv;
 
-
+extern tamat_soa * ipdot_f_old; // see alloc_vars.c
 
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
 							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
@@ -214,11 +215,25 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
      printf("\t\tCompleted fermion force openacc\n");
  }
 
- double temp_force_norm;
- if(verbosity_lv > 1){
-     temp_force_norm= calc_force_norm(tipdot_acc);
-     printf("\t\tFermion Force Half Norm: %e\n", temp_force_norm);
- } 
+
+    if(mkwch_pars.save_diagnostics == 1 || verbosity_lv > 1 ){
+        double  force_norm, diff_force_norm;
+        force_norm = calc_force_norm(tipdot_acc);
+        diff_force_norm = calc_diff_force_norm(tipdot_acc,ipdot_f_old);
+        copy_ipdot_into_old(tipdot_acc,ipdot_f_old);
+
+        if(mkwch_pars.save_diagnostics == 1){
+            FILE *foutfile = 
+                fopen(mkwch_pars.diagnostics_filename,"at");
+            fprintf(foutfile,"FFHN %e \tDFFHN %e \t",force_norm,diff_force_norm);
+            fclose(foutfile);
+        }
+
+        if(verbosity_lv > 1)
+            printf("\t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n", 
+                    force_norm, diff_force_norm);
+    } 
+
 
 }
 

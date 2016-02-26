@@ -14,6 +14,8 @@ typedef struct mc_param_t{
     int seed;
     double eps_gen;
     int input_vbl; // verbosity level
+    int save_diagnostics;
+    char diagnostics_filename[200];
 }mc_param;
 
 extern mc_param mkwch_pars;

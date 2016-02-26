@@ -18,7 +18,7 @@
 #include "./fermionic_utilities.h"
 #include "./action.h"
 #include "../Rand/random.h"
-
+#include "../Include/markowchain.h"
 
 //#define NORANDOM  // FOR debug, check also main.c 
 #ifdef NORANDOM
@@ -50,6 +50,15 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
   double dt_pretrans_to_preker;
   double dt_preker_to_postker;
   double dt_postker_to_posttrans;
+
+  if(mkwch_pars.save_diagnostics == 1){
+      FILE *foutfile = 
+          fopen(mkwch_pars.diagnostics_filename,"at");
+      fprintf(foutfile,"\nIteration %d \t",id_iter);
+      fclose(foutfile);
+  }
+
+
 
   int mu;
   double **minmaxeig; 
@@ -188,8 +197,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 	}
       }// end for iflav
       ///////////////////////////////////////////////////////////////////////////////////////
-    }
     printf(" Initial Action Computed : OK \n");
+    }
 
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
 
@@ -368,6 +377,25 @@ gettimeofday ( &t3, NULL );
     printf("\t\tPreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
     printf("\t\tPostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
   }
+
+  if(mkwch_pars.save_diagnostics == 1){
+      FILE *foutfile = 
+          fopen(mkwch_pars.diagnostics_filename,"at");
+      if(metro==1){
+          fprintf(foutfile,"GAS %.18lf GAF %.18lf \t",-action_in,-action_fin);
+          fprintf(foutfile,"MAS %.18lf MAF %.18lf \t",action_mom_in,action_mom_fin);
+          fprintf(foutfile,"FAS %.18lf FAF %.18lf \t",action_ferm_in,action_ferm_fin);
+          fprintf(foutfile," D %.18lf",delta_S);
+      }else{
+
+          fprintf(foutfile," THERM_ITERATION ");
+
+      }
+
+      fclose(foutfile);
+  }
+
+
 
   return acc;
 
