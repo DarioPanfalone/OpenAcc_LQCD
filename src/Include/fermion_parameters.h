@@ -9,7 +9,7 @@ typedef struct ferm_param_t{
   double ferm_mass;
   int degeneracy;
   int number_of_ps;
-  char name[10];
+  char name[30];
   // chem_pot or backfield related things
   double ferm_charge;
   double ferm_im_chem_pot;

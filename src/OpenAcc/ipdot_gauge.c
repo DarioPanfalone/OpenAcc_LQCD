@@ -3,12 +3,15 @@
 
 #include "struct_c_def.h"
 #include "./su3_utilities.h"
+#include "./su3_measurements.h"
 #include "./plaquettes.h"
 #include "./rettangoli.h"
 #include "./ipdot_gauge.h"
 
 #include "sys/time.h"
 //#define TIMING_STAPLES
+
+extern int verbosity_lv;
 
 void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
 
@@ -63,6 +66,14 @@ void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __res
   if(GAUGE_ACTION==1){
     calc_ipdot_gauge_soloopenacc_tlsm(tconf_acc,local_staples,tipdot);
   }
+
+    double   temp_force_norm;
+    if(verbosity_lv > 1){
+        temp_force_norm = calc_force_norm(tipdot);
+        printf("\t\t\tGauge Force Half Norm: %e\n", temp_force_norm);
+    } 
+
+
 
 
 }

@@ -12,6 +12,7 @@
 #include "../Include/fermion_parameters.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./su3_utilities.h"
+#include "./su3_measurements.h"
 #include "./plaquettes.h"
 #include "./action.h"
 
@@ -24,7 +25,7 @@
  #define __restrict
 #endif
 
-
+extern int verbosity_lv;
 
 
 
@@ -212,6 +213,13 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
  if(verbosity_lv > 2){
      printf("\t\tCompleted fermion force openacc\n");
  }
+
+ double temp_force_norm;
+ if(verbosity_lv > 1){
+     temp_force_norm= calc_force_norm(tipdot_acc);
+     printf("\t\tFermion Force Half Norm: %e\n", temp_force_norm);
+ } 
+
 }
 
 

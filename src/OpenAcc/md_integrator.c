@@ -31,7 +31,6 @@
 #include "./alloc_vars.h"
 #include "./ipdot_gauge.h"
 #include "./su3_utilities.h"
-#include "./su3_measurements.h"
 #include "../Include/common_defines.h"
 #include "../Include/fermion_parameters.h"
 #include "./action.h"
@@ -71,17 +70,13 @@ void initialize_md_global_variables(md_param md_params )
 
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
 {
-    int md;double   temp_force_norm;
+    int md;
     // Step for the P
     // P' = P - l*dt*dS/dq
     // deltas_Omelyan[3]=-cimag(ieps_acc)*scale*lambda;
 
 
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot); 
-    if(verbosity_lv > 3){
-        temp_force_norm = calc_force_norm(tipdot);
-        printf("\t\t\tGauge Force Half Norm: %e\n", temp_force_norm);
-    } 
 
     mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
     for(md=1; md<md_parameters.gauge_scale; md++){
@@ -94,10 +89,6 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
         // P' = P - (1-2l)*dt*dS/dq
         // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
         calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
-        if(verbosity_lv > 3){
-            temp_force_norm = calc_force_norm(tipdot);
-            printf("\t\t\tGauge Force Half Norm: %e\n", temp_force_norm);
-        } 
 
         mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,5);
         // Step for the Q
@@ -108,10 +99,6 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
         // P' = P - 2l*dt*dS/dq
         // deltas_Omelyan[6]=-cimag(ieps_acc)*2.0*lambda*scale;
         calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
-        if(verbosity_lv > 3){
-            temp_force_norm = calc_force_norm(tipdot);
-            printf("\t\t\tGauge Force Half Norm: %e\n", temp_force_norm);
-        } 
 
         mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,6);
     }
@@ -124,10 +111,6 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
-    if(verbosity_lv > 3){
-        temp_force_norm = calc_force_norm(tipdot);
-        printf("\t\t\tGauge Force Half Norm: %e\n", temp_force_norm);
-    } 
 
     // calc_ipdot_gauge();
     // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
@@ -141,11 +124,6 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     // P' = P - l*dt*dS/dq
     // deltas_Omelyan[3]=-cimag(ieps_acc)*lambda*scale;
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
-    if(verbosity_lv > 3){
-        temp_force_norm = calc_force_norm(tipdot);
-        printf("\t\t\tGauge Force Half Norm: %e\n", temp_force_norm);
-    } 
-
     mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
 
 
@@ -172,7 +150,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 {
 
 
-    int md;double temp_force_norm;
+    int md;
 
     // Step for the P
     // P' = P - l*dt*dS/dq
@@ -186,10 +164,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
             tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
 
-    if(verbosity_lv > 3){
-        temp_force_norm= calc_force_norm(tipdot_acc);
-        printf("\t\tFermion Force Half Norm: %e\n", temp_force_norm);
-    } 
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
 
     for(md=1; md<md_parameters.no_md; md++){
@@ -208,10 +182,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 tipdot_acc, tfermions_parameters, tNDiffFlavs,
                 ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc,
                 tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-        if(verbosity_lv > 3){
-            temp_force_norm= calc_force_norm(tipdot_acc);
-            printf("\t\tFermion Force Half Norm: %e\n", temp_force_norm);
-        } 
 
 
 
@@ -228,13 +198,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 tstout_conf_acc_arr, tauxbis_conf_acc, // parkeggio
 #endif
                 tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-
-        if(verbosity_lv > 3){
-            temp_force_norm= calc_force_norm(tipdot_acc);
-            printf("\t\tFermion Force Half Norm: %e\n", temp_force_norm);
-        } 
-
-
 
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
     }  
@@ -253,10 +216,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
             tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
 
-    if(verbosity_lv > 3){
-        temp_force_norm= calc_force_norm(tipdot_acc);
-        printf("\t\tFermion Force Half Norm: %e\n", temp_force_norm);
-    } 
 
 
     mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
@@ -273,10 +232,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
             tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
-    if(verbosity_lv > 3){
-        temp_force_norm= calc_force_norm(tipdot_acc);
-        printf("\t\tFermion Force Half Norm: %e\n", temp_force_norm);
-    } 
 
 
 

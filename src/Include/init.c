@@ -262,7 +262,7 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
     char snumber_of_ps[]     = "PseudoFermions"     ;
     char sname[]             = "Name"             ;
     char sferm_charge[]      = "Charge"      ;
-    char sferm_im_chem_pot[] = "Mu" ;
+    char sferm_im_chem_pot[] = "MuOverPiT" ;
 
     fp[0]=(par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, sferm_mass       };
     fp[1]=(par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , sdegeneracy      };

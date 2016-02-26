@@ -17,7 +17,7 @@ Degeneracy	    1
 PseudoFermions	1
 Name	        up
 Charge          2.0
-Mu	            0.0          
+MuOverPiT	    0.0
                              
 
 #down quark
@@ -27,7 +27,7 @@ Degeneracy	    1
 PseudoFermions	1
 Name	        down
 Charge          -1.0
-Mu	            0.0          
+MuOverPiT	    0.0
                              
 
 
@@ -38,7 +38,7 @@ Degeneracy	    1
 PseudoFermions	1
 Name	        strange
 Charge          -1.0
-Mu	            0.0          
+MuOverPiT	    0.0
                              
 
 
@@ -53,9 +53,9 @@ bz              0.0
 
 MDParameters
 NmdSteps	    11
-GaugeSubSteps	5
-TrajLength	    1.0
-residue_md              1e-6
+GaugeSubSteps	5         # look at gaugeforce/fermionforce ratios
+TrajLength	    1.0       # set different from 1.0 only for debugging
+residue_md      1e-6
 
 
 MontecarloParameters
@@ -66,11 +66,15 @@ SaveConfInterval	    5
 residue_metro       	1e-8
 ExpMaxEigenvalue        5      # approximate expected max eigenvalues
 StoreConfName       	test_config_store
-SaveConfName            test_config
+SaveConfName            test_config # also starting conf name.
+                                    # if it is not found, a new one is 
+                                    # generated.
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
-EpsGen                  0.1
-VerbosityLv             5
+EpsGen                  0.1 # set tis to zero to have all links
+                            # equal to identity when a new random conf is
+                            # generated.
+VerbosityLv             5   # 5 prints everything.
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt
@@ -78,18 +82,19 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
-FermionMeasCopies       1
+FermionMeasCopies       1                    # number of random vectors
+                                             # used for each quark
 
 DeviceSettings
-device_choice           0
+device_choice           0                    
 
 Geometry
 nx                      24	
 ny	                    24
 nz	                    24
 nt	                    6 
-xmap	                0
-ymap	                1    
-zmap	                2    
+xmap	                0                 # 3: slowest direction
+ymap	                1                 # 0: fastest direction
+zmap	                2                 # 0 1 2 3 is standard
 tmap	                3
 
