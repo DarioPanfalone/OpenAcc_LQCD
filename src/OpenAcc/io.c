@@ -83,7 +83,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         int minus_det_count = 0;
         CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),5);
         if((nx!=nxt)||(ny!=nyt)||(nz!=nzt)||(nz!=nzt)){
-            printf("Error\n");
+            printf("Error, configuration dimensions not compatible with code.\n");
             exit(1);
         }
 
@@ -312,7 +312,7 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     // check lattice dimensions
     if((geom_par.gnx!=nx_r)||(geom_par.gny!=ny_r)||
             (geom_par.gnz!=nz_r)||(geom_par.gnt!=nt_r)){
-        printf("Error, Lattice dimensions not compatible with input file.\n");
+        printf("Error, Configuration dimensions not compatible with input file.\n");
         exit(1);
     }
 

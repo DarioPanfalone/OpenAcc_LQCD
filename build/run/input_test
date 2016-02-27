@@ -31,8 +31,8 @@ bz              0.0
 
 
 MDParameters
-NmdSteps	    5
-GaugeSubSteps   6
+NmdSteps	    10
+GaugeSubSteps   7
 TrajLength	    0.05
 residue_md      1e-6
 
@@ -45,13 +45,13 @@ SaveConfInterval    	5
 residue_metro       	1e-8
 ExpMaxEigenvalue        5.5     # approximate expected max eigenvalues
 StoreConfName       	store.conf.ildg
-SaveConfName            conf.ildg.identity
+SaveConfName            conf.ildg
 UseILDG                 1
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
-EpsGen                  0.0    #stddev in the generation of a new configuration
-VerbosityLv             2
-SaveDiagnostics         1
+EpsGen                  0.1    #stddev in the generation of a new configuration
+VerbosityLv             1
+SaveDiagnostics         0
 SaveDiagnosticsFilename   diagnostics.dat
 
 GaugeMeasuresSettings
@@ -66,10 +66,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      4  
-ny	                    4 
-nz	                    4 
-nt	                    4 
+nx                      8  
+ny	                    8 
+nz	                    8 
+nt	                    8 
 xmap	                1 
 ymap	                3   
 zmap	                2   
