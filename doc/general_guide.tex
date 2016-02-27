@@ -338,9 +338,11 @@ the smaller the target residue, the slower. \\
 As far as the integration errors are concerned, the most basic observation is that, for 
 the Omelyan 2nd order integrator, the action difference (which is an error) should go 
 like $1/n^2_{md}$, where $n_{md}$ is the number of steps in the molecular dynamics 
-trajectory. While there is no way a priori to fix $n_{md}$, apart from experience 
-(read: look to another successful run), there are some possible rules of thumb that may 
-help in setting the number of gauge substeps $n_{gss}$:
+trajectory\footnote{(Note for self) this topic has been already discussed in the 
+literature, check}. While there is no way a priori to fix the parameters apart from 
+experience (read: look to another successful run), once a choice of the parameters is 
+reached for which acceptance is satisfying, there are some possible rules of thumb that 
+may help in optimizing $n_{md}$ and the number of gauge substeps $n_{gss}$:
 \begin{itemize}
  \item The norm of the fermion force times the number of gauge substeps should be 
 roughly equal to the norm of the gauge force. The value of both norms is calculated by 
