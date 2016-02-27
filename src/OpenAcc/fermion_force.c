@@ -215,12 +215,12 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
      printf("\t\tCompleted fermion force openacc\n");
  }
 
-
     if(mkwch_pars.save_diagnostics == 1 || verbosity_lv > 1 ){
         double  force_norm, diff_force_norm;
         force_norm = calc_force_norm(tipdot_acc);
         diff_force_norm = calc_diff_force_norm(tipdot_acc,ipdot_f_old);
         copy_ipdot_into_old(tipdot_acc,ipdot_f_old);
+
 
         if(mkwch_pars.save_diagnostics == 1){
             FILE *foutfile = 

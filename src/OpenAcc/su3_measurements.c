@@ -173,9 +173,9 @@ void copy_ipdot_into_old(
 
 
 #pragma acc kernels present(tipdot) present(tipdot_old)
-#pragma acc loop reduction(+:result)
+#pragma acc loop
         for(t=0; t<sizeh; t++) {
-#pragma acc loop reduction(+:result)
+#pragma acc loop
             for(mu=0; mu < 8; mu++) // CHECK IF WORKS
             {
                 tipdot_old[mu].rc00[t] = tipdot[mu].rc00[t];
