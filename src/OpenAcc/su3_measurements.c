@@ -169,6 +169,7 @@ void copy_ipdot_into_old(
                   const __restrict tamat_soa * tipdot,  
                   __restrict tamat_soa * tipdot_old){
 
+    // POSSIBLY SOME PROBLEMS HERE
     int t,mu;
 
 
@@ -186,10 +187,6 @@ void copy_ipdot_into_old(
 
             }
         }  
-
-
-
-
 
 }
 
