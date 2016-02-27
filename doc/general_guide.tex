@@ -313,7 +313,52 @@ files with \verb|make|).
 
 
 \section{Tuning}
-To write: setting gauge substep.
+Holy text report that optimal hybrid montecarlo acceptance should be 87.5\% or so. 
+The probability for a new configuration to be accepted is related to the action 
+difference between the start and the end of the trajectory, which should be zero in 
+perfect conditions. The reasons why it \emph{will} be different from zero are:
+\begin{itemize}
+ \item A mismatch between the 3 rational approximations used. A fast test could be done 
+to check if the first one and the last one are in good agreement, just removing all 
+molecular dynamics in between\footnote{At the moment, this result is NOT achieved by 
+putting the relevant parameters in the input file to zero.}. 
+ \item Errors in the integration of the trajectory.
+\end{itemize}
+As far as the first point is concerned: since we want our results to be accurate, we 
+would like the last inversion to be as 
+``exact'' as possible, while we can save some computing time on the molecular dynamics 
+inversions, which will be performed many times and whose precision (as long as the last 
+action calculation is ``exact'') can be traded for speed. The first inversion can be 
+done precisely since it will be performed only once. Optimization can thus be made with
+the choice of the rational approximations used during molecular dynamics. There is a 
+single parameter which must be tuned, which is the maximum error of the approximation. 
+Reducing the error will determine an increase in the order of the approximation and a 
+reduction in the target residue in the inversions. The higher the order, the slower; 
+the smaller the target residue, the slower. \\
+As far as the integration errors are concerned, the most basic observation is that, for 
+the Omelyan 2nd order integrator, the action difference (which is an error) should go 
+like $1/n^2_{md}$, where $n_{md}$ is the number of steps in the molecular dynamics 
+trajectory. While there is no way a priori to fix $n_{md}$, apart from experience 
+(read: look to another successful run), there are some possible rules of thumb that may 
+help in setting the number of gauge substeps $n_{gss}$:
+\begin{itemize}
+ \item The norm of the fermion force times the number of gauge substeps should be 
+roughly equal to the norm of the gauge force. The value of both norms is calculated by 
+the program and printed when the right level of verbosity is chosen;
+ \item The norm of the variation of the fermion force every half Omelyan macro step 
+(which is $n_{gss}$ times a micro step), and the norm of the variation of the gauge 
+force every Omelyan micro step should be equal. These quantities are also printed at 
+the same level of verbosity.
+\item (Not implemented) The same reasoning could be done with the maximum values found.
+\end{itemize}
+
+
+
+
+
+
+
+
 
 \section{Input file reading.}
 Input file reading is done in \verb|/src/Include/init.c|. The idea here is to 
