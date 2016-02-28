@@ -181,12 +181,24 @@ int read_thmat_soa(thmat_soa * ipdot, const char* nomefile)
 void print_double_soa(double_soa * const backfield, const char* nomefile)
 {
 
+
     FILE *fp;
     fp = fopen(nomefile,"w");
-    for(int q = 0 ; q < 8 ; q++){
-        for(int i = 0 ; i < sizeh ; i++){
-            fprintf(fp, "%.18lf\n",backfield[q].d[i]);
-        }
+    for(int dir = 0 ; dir < 4 ; dir++)
+        for(int t = 0 ; t <geom_par.gnt ; t++)
+        for(int z = 0 ; z <geom_par.gnz ; z++)
+        for(int y = 0 ; y <geom_par.gny ; y++)
+        for(int x = 0 ; x <geom_par.gnx ; x++){
+            int parity = (x+y+z+t)%2;
+            int xyzt[4] = {x,y,z,t};
+            int d0 = xyzt[geom_par.d0123map[0]];
+            int d1 = xyzt[geom_par.d0123map[1]];
+            int d2 = xyzt[geom_par.d0123map[2]];
+            int d3 = xyzt[geom_par.d0123map[3]];
+
+            int idxh = snum_acc(d0,d1,d2,d3);
+
+            fprintf(fp, "dir: %d (x,y,z,t): %d %d %d %d value: %.18lf\n",dir, x,y,z,t,backfield[geom_par.xyztmap[dir]+parity].d[idxh]);
     }
     fclose(fp);
 }
@@ -200,6 +212,50 @@ void print_1double_soa(double_soa * const vettore, const char* nomefile)
       fprintf(fp, "%.18lf\n",vettore->d[i]);
     }
     fclose(fp);
+}
+
+
+void transpose_vec3_soa(vec3_soa * vecin, vec3_soa *vecout, int xmap, int ymap, int zmap, int tmap){
+
+// WARNING : NOT TESTED
+    int x,y,z,t;
+    int d[4], idxh, newidxh;
+
+    for(d[3]=0; d[3] < nd3; d[3]++) for(d[2]=0; d[2] < nd2; d[2]++)
+        for(d[1]=0; d[1] < nd1; d[1]++) for(d[0]=0; d[0] < nd0; d[0]++){
+
+                    idxh = snum_acc(d[0],d[1],d[2],d[3]);
+                    int tnd[4] = {nd0,nd1,nd2,nd3};
+                    x = d[xmap];int tnx = tnd[xmap] ;
+                    y = d[ymap];int tny = tnd[ymap] ;
+                    z = d[zmap];int tnz = tnd[zmap] ;
+                    t = d[tmap];int tnt = tnd[tmap] ;
+                    newidxh = (x+tnx*(y+tny*(z+tnz*t)))/2;
+                    
+                    vecout->c0[newidxh] = vecin->c0[idxh];
+                    vecout->c1[newidxh] = vecin->c1[idxh];
+                    vecout->c2[newidxh] = vecin->c2[idxh];
+
+        }
+
+}
+
+void transpose_su3_soa(su3_soa * matin, su3_soa *matout, int xmap, int ymap, int zmap, int tmap){
+
+// WARNING : NOT TESTED
+    int dir,parity;
+    for(dir = 1; dir < 4 ; dir++) for(parity = 1; parity < 2 ; parity++)
+    {
+        int dirmod = geom_par.xyztmap[dir];
+        transpose_vec3_soa(&(matin[2*dirmod+parity].r0),
+                &(matout[2*dir+parity].r0),xmap,ymap,zmap,tmap);
+        transpose_vec3_soa(&(matin[2*dirmod+parity].r1),
+                &(matout[2*dir+parity].r1),xmap,ymap,zmap,tmap);
+        transpose_vec3_soa(&(matin[2*dirmod+parity].r2),
+                &(matout[2*dir+parity].r2),xmap,ymap,zmap,tmap);
+
+    }
+
 }
 
 

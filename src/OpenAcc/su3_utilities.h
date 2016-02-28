@@ -562,7 +562,9 @@ static inline double half_tr_thmat_squared( const __restrict thmat_soa * const m
   d_complex  E = mom->c12[idx_mom];
   double    A = mom->rc00[idx_mom];
   double    B = mom->rc11[idx_mom];
-  return A*A + B*B + A*B + creal(C)*creal(C) + cimag(C)*cimag(C) + creal(D)*creal(D) + cimag(D)*cimag(D) + creal(E)*creal(E) + cimag(E)*cimag(E);
+  return A*A + B*B + A*B + creal(C)*creal(C) + cimag(C)*cimag(C) 
+      + creal(D)*creal(D) + cimag(D)*cimag(D) 
+      + creal(E)*creal(E) + cimag(E)*cimag(E);
   
 }
 

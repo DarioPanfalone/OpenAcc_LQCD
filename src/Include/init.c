@@ -107,8 +107,10 @@ void reorder_par_infos(int npar, par_info * par_infos ){
         for(int i = 0; i < npar; i++){
             for(int j = i+1; j < npar; j++){
                 allright = 1;
-                if (strstr(par_infos[j].name,par_infos[i].name)){
-                    printf("Reordering %s and %s \n",par_infos[j].name,par_infos[i].name );
+                char* match = strstr(par_infos[j].name,par_infos[i].name);
+                //printf("DEBUG (%d,%d)params %s and %s, match %p \n",i,j,par_infos[j].name,par_infos[i].name, match );
+                if (match){
+                    printf("Reordering %s and %s\n",par_infos[j].name,par_infos[i].name);
                     par_info tmp = par_infos[i];
                     par_infos[i] = par_infos[j];
                     par_infos[j] = tmp;
@@ -116,8 +118,8 @@ void reorder_par_infos(int npar, par_info * par_infos ){
                     break;
                 }           
             }
-            if(allright) break;
         }
+        if(allright) break;
     }
 }
 
@@ -194,9 +196,9 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 found_something = strstr(filelines[iline],par_infos[i].name);
                 if(found_something){ // looks at the beginning of the line.
                     // found parameter
-                    printf("  %s\r\t\t\t ",par_infos[i].name);
+                    printf("  %s\r\t\t\t\t ",par_infos[i].name);
                     int reads = 0;
-                    char parname[20];
+                    char parname[50];
                     switch(par_infos[i].type){
                         case TYPE_INT: 
                             reads = sscanf(filelines[iline],
@@ -262,7 +264,7 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
     char snumber_of_ps[]     = "PseudoFermions"     ;
     char sname[]             = "Name"             ;
     char sferm_charge[]      = "Charge"      ;
-    char sferm_im_chem_pot[] = "Mu" ;
+    char sferm_im_chem_pot[] = "MuOverPiT" ;
 
     fp[0]=(par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, sferm_mass       };
     fp[1]=(par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , sdegeneracy      };
@@ -358,7 +360,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 {
 
     // see /OpenAcc/md_integrator.h
-    const unsigned int  npar_mc =  12;
+    const unsigned int  npar_mc =  14;
     par_info mcp[npar_mc];
 
     char sntraj[] = "Ntraj" ;
@@ -373,6 +375,9 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     char seps_gen[] = "EpsGen";
     char sinput_vbl[] = "VerbosityLv";
     char sexpected_max_eigenvalue[] = "ExpMaxEigenvalue";
+    char ssave_diagnostics[] = "SaveDiagnostics";
+    char sdiagnostics_filename[] = "SaveDiagnosticsFilename";
+
 
     mcp[0]=(par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,sntraj          };
     mcp[1]=(par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,stherm_ntraj    };
@@ -387,6 +392,8 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     mcp[10]=(par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,sinput_vbl};
     mcp[11]=(par_info){(void*) &(mcpar->expected_max_eigenvalue),
         TYPE_DOUBLE,sexpected_max_eigenvalue};
+    mcp[12]=(par_info){(void*) &(mcpar->save_diagnostics),TYPE_INT,ssave_diagnostics};
+    mcp[13]=(par_info){(void*) &(mcpar->diagnostics_filename),TYPE_STR,sdiagnostics_filename};
 
     // from here on, you should not have to modify anything.
 

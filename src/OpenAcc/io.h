@@ -26,12 +26,16 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
 //WRAPPER
 inline int read_conf(su3_soa * conf, const char* nomefile,int * conf_id_iter, int use_ildg ){
 
+
+    printf("Reading configuration. ");
     if(use_ildg){ 
         printf("Using ILDG format.\n");
         return read_su3_soa_ildg_binary(conf,nomefile,conf_id_iter);
     }
-    else 
+    else {
+        printf("Using ascii format.\n");
         return read_su3_soa_ASCII(conf,nomefile,conf_id_iter );
+    }
 
 
 }

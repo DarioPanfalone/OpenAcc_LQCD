@@ -16,6 +16,8 @@ extern double_soa * u1_back_phases; //Background,staggered,chempot phases
                                     // 8 for each flavour
 extern thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 extern tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
+extern tamat_soa * ipdot_g_old;// for HMC diagnostics
+extern tamat_soa * ipdot_f_old;// for HMC diagnostics
 extern su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases 
                       // in fermion related computation (with or without stouting)
 

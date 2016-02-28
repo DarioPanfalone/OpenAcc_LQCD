@@ -124,14 +124,71 @@ double calc_force_norm(const __restrict tamat_soa * tipdot){
 #pragma acc kernels present(tipdot)
 #pragma acc loop reduction(+:result)
         for(t=0; t<sizeh; t++) {
-            result += half_tr_tamat_squared(&tipdot[0],t);
+#pragma acc loop reduction(+:result)
+            for(mu=0; mu < 8; mu++) // CHECK IF WORKS
+            {
+                result += half_tr_tamat_squared(&tipdot[mu],t);
+            }
         }  
-
-
 
     return sqrt(result);
 
 };
+
+double calc_diff_force_norm(const __restrict tamat_soa * tipdot,  
+                            const __restrict tamat_soa * tipdot_old){
+
+    int t,mu;
+    double result=0.0;
+
+
+#pragma acc kernels present(tipdot) present(tipdot_old)
+#pragma acc loop reduction(+:result)
+        for(t=0; t<sizeh; t++) {
+#pragma acc loop reduction(+:result)
+            for(mu=0; mu < 8; mu++) // CHECK IF WORKS
+            {
+                double A = tipdot[mu].rc00[t]-tipdot_old[mu].rc00[t];
+                double B = tipdot[mu].rc11[t]-tipdot_old[mu].rc11[t];
+                d_complex C = tipdot[mu].c01[t]-tipdot_old[mu].c01[t]; 
+                d_complex D = tipdot[mu].c02[t]-tipdot_old[mu].c02[t];
+                d_complex E = tipdot[mu].c12[t]-tipdot_old[mu].c12[t];
+                result +=  A*A + B*B + A*B 
+                    + creal(C)*creal(C) + cimag(C)*cimag(C) 
+                    + creal(D)*creal(D) + cimag(D)*cimag(D) 
+                    + creal(E)*creal(E) + cimag(E)*cimag(E);
+
+            }
+        }  
+
+    return sqrt(result);
+
+};
+
+void copy_ipdot_into_old(
+                  const __restrict tamat_soa * tipdot,  
+                  __restrict tamat_soa * tipdot_old){
+
+    // POSSIBLY SOME PROBLEMS HERE
+    int t,mu;
+
+
+#pragma acc kernels present(tipdot) present(tipdot_old)
+#pragma acc loop
+        for(t=0; t<sizeh; t++) {
+#pragma acc loop
+            for(mu=0; mu < 8; mu++) // CHECK IF WORKS
+            {
+                tipdot_old[mu].rc00[t] = tipdot[mu].rc00[t];
+                tipdot_old[mu].rc11[t] = tipdot[mu].rc11[t];
+                tipdot_old[mu].c01[t]  = tipdot[mu].c01[t] ; 
+                tipdot_old[mu].c02[t]  = tipdot[mu].c02[t] ;
+                tipdot_old[mu].c12[t]  = tipdot[mu].c12[t] ;
+
+            }
+        }  
+
+}
 
 
 #endif

@@ -155,10 +155,8 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
 
     }
 
-    for(d[3]=0; d[3] < nd3; d[3]++){
-        for(d[2]=0; d[2] < nd2; d[2]++){
-            for(d[1]=0; d[1] < nd1; d[1]++){
-                for(d[0]=0; d[0] < nd0; d[0]++){
+    for(d[3]=0; d[3] < nd3; d[3]++) for(d[2]=0; d[2] < nd2; d[2]++)
+        for(d[1]=0; d[1] < nd1; d[1]++) for(d[0]=0; d[0] < nd0; d[0]++){
 
                     idxh = snum_acc(d[0],d[1],d[2],d[3]);
                    
@@ -244,10 +242,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.tmap*2+parity].d[idxh]=acc_twopi*arg;
-                } // x loop
-            } // y loop
-        } // z loop
-    } // t loop
+    } // d3,d2,d1,d0 loops
 
     int dir;
     

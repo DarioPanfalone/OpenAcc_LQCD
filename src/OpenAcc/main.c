@@ -141,7 +141,8 @@ int main(int argc, char* argv[]){
     create(local_sums[0:2]) create(d_local_sums[0:2])\
     copyin(fermions_parameters[0:NDiffFlavs])\
     copyin(deltas_Omelyan[0:7]) \
-    copyin(u1_back_phases[0:8*NDiffFlavs])
+    copyin(u1_back_phases[0:8*NDiffFlavs])\
+    create(ipdot_g_old[0:8]) create(ipdot_f_old[0:8])
     {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
@@ -251,7 +252,8 @@ int main(int argc, char* argv[]){
 
 
                     fprintf(goutfile,"%d\t%d\t",conf_id_iter,
-                            accettate_therm-accettate_therm_old);
+                            accettate_therm+accettate_metro
+                            -accettate_therm_old-accettate_metro_old);
                     fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
                             plq/size/6.0/3.0,
                             rect/size/6.0/3.0/2.0, 

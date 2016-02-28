@@ -18,7 +18,7 @@
 #include "./fermionic_utilities.h"
 #include "./action.h"
 #include "../Rand/random.h"
-
+#include "../Include/markowchain.h"
 
 //#define NORANDOM  // FOR debug, check also main.c 
 #ifdef NORANDOM
@@ -43,13 +43,22 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 
   
-  printf("UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: OK \n");
+  printf("UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: starting... \n");
   // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
   int iterazioni = id_iter+1;
   double dt_tot;
   double dt_pretrans_to_preker;
   double dt_preker_to_postker;
   double dt_postker_to_posttrans;
+
+  if(mkwch_pars.save_diagnostics == 1){
+      FILE *foutfile = 
+          fopen(mkwch_pars.diagnostics_filename,"at");
+      fprintf(foutfile,"\nIteration %d \t",id_iter);
+      fclose(foutfile);
+  }
+
+
 
   int mu;
   double **minmaxeig; 
@@ -69,7 +78,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
   if(metro==1){
     // store old conf   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
     set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
-    if(verbosity_lv > 2) printf("Backup copy of the initial gauge conf : OK \n");
+    if(verbosity_lv > 1) printf("Backup copy of the initial gauge conf : OK \n");
 
   }
 //#pragma acc data copyin(delta[0:7]) // should not be needed?
@@ -188,13 +197,15 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 	}
       }// end for iflav
       ///////////////////////////////////////////////////////////////////////////////////////
-    }
     printf(" Initial Action Computed : OK \n");
+    }
 
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
 
+    
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+          printf("Calculation of chi for fermion %d, copy %d\n", iflav,ips);
 	
         int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
         // USING STOUTED GAUGE MATRIX
@@ -346,6 +357,7 @@ gettimeofday ( &t3, NULL );
     }
   }
 
+
   if(metro==0){// accetta sempre in fase di termalizzazione
     acc++;
   }
@@ -367,6 +379,25 @@ gettimeofday ( &t3, NULL );
     printf("\t\tPreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
     printf("\t\tPostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
   }
+
+  if(mkwch_pars.save_diagnostics == 1){
+      FILE *foutfile = 
+          fopen(mkwch_pars.diagnostics_filename,"at");
+      if(metro==1){
+          fprintf(foutfile,"GAS %.18lf GAF %.18lf \t",-action_in,-action_fin);
+          fprintf(foutfile,"MAS %.18lf MAF %.18lf \t",action_mom_in,action_mom_fin);
+          fprintf(foutfile,"FAS %.18lf FAF %.18lf \t",action_ferm_in,action_ferm_fin);
+          fprintf(foutfile," D %.18lf",delta_S);
+      }else{
+
+          fprintf(foutfile," THERM_ITERATION ");
+
+      }
+
+      fclose(foutfile);
+  }
+
+
 
   return acc;
 

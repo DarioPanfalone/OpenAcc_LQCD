@@ -93,7 +93,7 @@ int multishift_invert(__restrict su3_soa * const u,
         maxiter = iter+1;
       }
     }
-    if (verbosity_lv > 3){
+    if (verbosity_lv > 0){
       printf("STARTING CG-M:\nCG\tR");
       for(iter=0; iter<(approx->approx_order); iter++)
           printf("\t%d",iter); printf("\n");
@@ -161,8 +161,14 @@ int multishift_invert(__restrict su3_soa * const u,
       }
       delta=lambda;
 
-
-      if (verbosity_lv > 3 && cg%10==0){
+      int print_condition = 0 ;
+      if (verbosity_lv == 1  ) print_condition = (cg%500 == 0);
+      if (verbosity_lv == 2  ) print_condition = (cg%200 == 0);
+      if (verbosity_lv == 3  ) print_condition = (cg%100 == 0);
+      if (verbosity_lv == 4  ) print_condition = (cg%50 == 0);
+      if (verbosity_lv > 4  ) print_condition = (cg%10 == 0);
+      
+      if(print_condition){
 
       printf("%d\t%1.1e",cg, sqrt(lambda));
       for(iter=0; iter<(approx->approx_order); iter++){
@@ -181,7 +187,7 @@ int multishift_invert(__restrict su3_soa * const u,
 //      printf("\t CG count = %i \n",cg);
     
 
-  if(verbosity_lv > 1) printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
+  if(verbosity_lv > 0) printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
   // test 
 
   if(verbosity_lv > 2){

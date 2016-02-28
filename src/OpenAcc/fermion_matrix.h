@@ -25,15 +25,4 @@ void fermion_matrix_multiplication( __restrict su3_soa * const u, __restrict vec
 void fermion_matrix_multiplication_shifted( __restrict su3_soa * const u, __restrict vec3_soa * const out,  __restrict vec3_soa * const in, __restrict vec3_soa * const temp1, __restrict ferm_param *pars, double shift);
 
 
-void dM_dmu_eo( __restrict su3_soa * const u,
-
-               __restrict vec3_soa * const out,
-               __restrict vec3_soa * const in,
-               __restrict double_soa * backfield );
-void dM_dmu_oe( __restrict su3_soa * const u,
-               __restrict vec3_soa * const out,
-               __restrict vec3_soa * const in,
-               __restrict double_soa * backfield );
-
-
 #endif

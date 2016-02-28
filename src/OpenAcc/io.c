@@ -83,7 +83,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         int minus_det_count = 0;
         CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),5);
         if((nx!=nxt)||(ny!=nyt)||(nz!=nzt)||(nz!=nzt)){
-            printf("Error\n");
+            printf("Error, configuration dimensions not compatible with code.\n");
             exit(1);
         }
 
@@ -229,7 +229,7 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     } 
 
     int alldimfound = 0;
-    fseek(fg,0,SEEK_SET);
+    fseeko(fg,0,SEEK_SET);
     // Find all headers
     int i=0;
     int  conf_machine_endianness_disagreement = machine_is_little_endian();
@@ -312,7 +312,7 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     // check lattice dimensions
     if((geom_par.gnx!=nx_r)||(geom_par.gny!=ny_r)||
             (geom_par.gnz!=nz_r)||(geom_par.gnt!=nt_r)){
-        printf("Error, Lattice dimensions not compatible with input file.\n");
+        printf("Error, Configuration dimensions not compatible with input file.\n");
         exit(1);
     }
 
@@ -320,7 +320,11 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     // read MD_traj
     if(MD_traj_index != -1){
         fseeko(fg,ildg_header_ends_positions[MD_traj_index],SEEK_SET);
-        fscanf(fg,"%d",conf_id_iter);
+        reads = fscanf(fg,"%d",conf_id_iter);
+        if(reads!= 1){
+            printf("Error in reading file: %s ,%d\n",__FILE__,__LINE__);
+            exit(1);
+        }
     }else *conf_id_iter = 1;
 
     // read ildg-binary-data (su3 gauge conf)
