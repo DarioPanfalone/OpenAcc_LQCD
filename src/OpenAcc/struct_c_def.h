@@ -56,6 +56,21 @@ typedef struct thmat_soa_t {
 } thmat_soa;
 
 
+typedef struct global_vec3_soa_t {
+    int status;
+    d_complex c0[GL_SIZEH];
+    d_complex c1[GL_SIZEH];
+    d_complex c2[GL_SIZEH];
+} global_vec3_soa;
+typedef struct global_su3_soa_t {
+  int status;
+  global_vec3_soa r0;
+  global_vec3_soa r1;
+  global_vec3_soa r2;
+} global_su3_soa;
+
+
+
 #endif
 
 

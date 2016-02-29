@@ -31,7 +31,7 @@
 
 typedef struct geom_parameters_t{
 
-    int gnx,gny,gnz,gnt;
+    int gnx,gny,gnz,gnt; // equal to the dimensions of the configuration
     // map of physical directions onto logical directions
     int xmap,ymap,zmap,tmap;// tmap is the "antiperiodic direction" for 
                             // fermions

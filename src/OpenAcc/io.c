@@ -198,7 +198,9 @@ typedef struct ILDG_header_t
     char type[128];
 }ILDG_header;
 
-int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_iter )
+int read_su3_soa_ildg_binary(
+        global_su3_soa * conf,
+        const char* nomefile,int * conf_id_iter )
 {
     FILE *fg;int reads;
     char header[1000];
@@ -558,6 +560,22 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
     return ;
 }
 
+
+
+     sprintf(chunkname,"%s.chunk%d",rootname,chunk);
+
+
+
+void write_conf_binary_chunks(su3_soa * conf, const char *rootname){
+
+    int chunk_elements = sizeh / 
+
+
+
+}
+
+
+void read_conf_binary_chunks(su3_soa * conf, const char *rootname);
 
 
 

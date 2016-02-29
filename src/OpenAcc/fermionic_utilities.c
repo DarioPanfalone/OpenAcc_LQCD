@@ -304,11 +304,6 @@ void combine_in1_minus_in2_allxfact( __restrict vec3_soa * const in1, __restrict
 
 }
 
-
-
-
-
-
 #endif
 
 

@@ -40,4 +40,9 @@ inline int read_conf(su3_soa * conf, const char* nomefile,int * conf_id_iter, in
 
 }
 
+// READ AND WRITE FOR THE POOR MAN
+void write_conf_binary_chunks(su3_soa * conf, const char *rootname,int nchunks);
+
+void read_conf_binary_chunks(su3_soa * conf, const char *rootname,int chunk);
+
 #endif 

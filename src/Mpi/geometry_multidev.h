@@ -2,10 +2,16 @@
 #define GEOMETRY_MULTIDEV_H_
 
     // GEOMETRIC DEFINES
-#define HALO_WIDTH 2  // for rectangles
+#include "../Include/common_defines.h"
+#ifdef GAUGE_ACT_TLSM
+ #define HALO_WIDTH 2  // for rectangles
+#elif defined(GAUGE_ACT_WILSON)
+ #define HALO_WIDTH 1
+#endif
 //LOCAL lattice dimensions
 
-#include "../../build/lattice_dimensions.h"
+#include "../../build/lattice_dimensions.h" // contains NRANKS_D[1234]
+                                            // and LOC_N[1234]
 
 ///HALO STRUCTURE (border widths)
 // AUTOMATIC DEFINITION OF HALOS
@@ -40,6 +46,7 @@
 // Local aNd Halo lattice dimensions 
 // Hopefully automatically calculated by the compiler during optimization
 //AUTOMATIC DEFINITIONS OF LNH STUFF
+
 #define LNH_N0 (LOC_N0+2*D0_HALO)
 #define LNH_N1 (LOC_N1+2*D1_HALO)
 #define LNH_N2 (LOC_N2+2*D2_HALO)
@@ -142,38 +149,22 @@
 #define GL_NO_LINKS (4 * GL_VOL4)
 
 typedef struct vec4int_t{
-int x,y,z,t;
+int d0,d1,d2,d3;
 
 } vec4int;
 
-
-typedef struct geom_par_multidev_t{
-    int n_ranks;//  = -1; //this should be correctly set by a call to MPI_init()
-    int myrank;// = -1 ; //this should be correctly set by a call to MPI_init()
-// following stuff set in init_LNH_geo() using myrank and NRANKS_X etc
-    vec4int myrank4int;
-    vec4int gl_loc_origin4int;
-    int gl_orig_d0123[4];
-    // "global x coordinate of the local origin"
-
-} geom_par_multidev;
-
-extern geom_par_multidev;
-int nnranks[4][2];// ranks of nearest neighbour sublattices
-
-void set_geom_glv_multidev(geom_par_multidev* gp);
 
 
 static inline int gl_to_gl_snum(int gl_0, int gl_1, int gl_2, int gl_3){
 //global coordinates to global 'snum' index
 
-    int ris = gl_x + gl_y * GL_VOL1 + gl_z * GL_VOL2 + gl_t * GL_VOL3 ;
+    int ris = gl_0 + gl_1 * GL_VOL1 + gl_2 * GL_VOL2 + gl_3 * GL_VOL3 ;
     return ris/2;// <---  /2 Pay attention to even/odd  (see init_geo) 
 
 }
 static inline int lnh_to_lnh_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
 // local'n'halo coordinates to lnh 'snum' index
-
+ 
     //NOTE: Since lnh_0 goes from 0 to LNH_N0-1,
     //      here loc_0 goes from -D0_HALO to LOC_N0+D0_HALO-1
 
@@ -195,12 +186,12 @@ static inline int loc_to_lnh_snum(int loc_0, int loc_1, int loc_2, int loc_3){
     return lnh_to_lnh_snum(loc_0,loc_1,loc_2,loc_3);
     // ^^ /2 Pay attention to even/odd  (see init_geo) 
 }
-static inline int lnh_to_gl_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
+static inline int lnh_to_gl_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3, vec4int myrank4int){
 
-    lnh_0 += erte - D0_HALO;
-    lnh_1 +=  - D1_HALO;
-    lnh_2 +=  - D2_HALO;
-    lnh_3 +=  - D3_HALO;
+    lnh_0 += LOC_N0 * myrank4int.d0 - D0_HALO; // to global ref frame
+    lnh_1 += LOC_N1 * myrank4int.d1 - D1_HALO;
+    lnh_2 += LOC_N2 * myrank4int.d2 - D2_HALO;
+    lnh_3 += LOC_N3 * myrank4int.d3 - D3_HALO;
 
     // in case lnh_* is out of bonds
     lnh_0 = lnh_0 % GL_N0; lnh_0-= GL_N0 * ( lnh_0 >> 31 );
@@ -212,139 +203,67 @@ static inline int lnh_to_gl_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
     // pay attention to even/odd
 
 }
-static inline int target_lnh_to_gl_snum(int lnh_x, int lnh_y, int lnh_z, int lnh_t,                          vec4int target_gl_loc_origin4int ){
+static inline int target_lnh_to_gl_snum(int lnh_0, int lnh_1, int lnh_2,
+        int lnh_3,
+        vec4int target_gl_loc_origin4int ){
 
-    lnh_x += target_gl_loc_origin4int.x - X_HALO;
-    lnh_y += target_gl_loc_origin4int.y - Y_HALO;
-    lnh_z += target_gl_loc_origin4int.z - Z_HALO;
-    lnh_t += target_gl_loc_origin4int.t - T_HALO;
+    lnh_0 += target_gl_loc_origin4int.d0 - D0_HALO;
+    lnh_1 += target_gl_loc_origin4int.d1 - D1_HALO;
+    lnh_2 += target_gl_loc_origin4int.d2 - D2_HALO;
+    lnh_3 += target_gl_loc_origin4int.d3 - D3_HALO;
 
-    lnh_x = lnh_x % GL_NX - GL_NX * ( lnh_x % GL_NX >> 31 );
-    lnh_y = lnh_y % GL_NY - GL_NY * ( lnh_y % GL_NY >> 31 );
-    lnh_z = lnh_z % GL_NZ - GL_NZ * ( lnh_z % GL_NZ >> 31 );
-    lnh_t = lnh_t % GL_NT - GL_NT * ( lnh_t % GL_NT >> 31 );
+    lnh_0 = lnh_0 % GL_N0; lnh_0-= GL_N0 * ( lnh_0 >> 31 );
+    lnh_1 = lnh_1 % GL_N1; lnh_1-= GL_N1 * ( lnh_1 >> 31 );
+    lnh_2 = lnh_2 % GL_N2; lnh_2-= GL_N2 * ( lnh_2 >> 31 );
+    lnh_3 = lnh_3 % GL_N3; lnh_3-= GL_N3 * ( lnh_3 >> 31 );
 
-    return gl_to_gl_snum(lnh_x,lnh_y,lnh_z,lnh_t);
+    return gl_to_gl_snum(lnh_0,lnh_1,lnh_2,lnh_3);
     // pay attention to even/odd
 
 }
-/* // ETA FUNCTIONS WHICH SHOULD NOT BE NECESSARY
-
-static inline int loc_eta(int loc_x, int loc_y, int loc_z, int loc_t, int dir){
-
-    loc_x +=  gl_loc_origin4int.x;
-    loc_y +=  gl_loc_origin4int.y;
-    loc_z +=  gl_loc_origin4int.z;
-    loc_t +=  gl_loc_origin4int.t;
-    return gl_eta(loc_x,loc_y,loc_z,loc_t,dir);
-
-}
-static inline int lnh_eta(int lnh_x, int lnh_y, int lnh_z, int lnh_t, int dir){
-    lnh_x -= X_HALO; 
-    lnh_y -= Y_HALO;
-    lnh_z -= Z_HALO;
-    lnh_t -= T_HALO;
-    return loc_eta(lnh_x,lnh_y,lnh_z,lnh_t,dir);
-}
-*/
 /***************************************************
 links used according to this scheme
 
 0           LNH_SIZE       2*LNH_SIZE      3*LNH_SIZE       LNH_NO_LINKS
 |-------|-------|-------|-------|-------|-------|-------|-------|
     e       o        e      o       e       o       e       o
-      x-dir           y-dir           z-dir           t-dir
-NOTE:the number of even and odd sites on the local lattice can be different for the local sublattice if the local sublattice dimensions are all odd.
+      0-dir           1-dir           2-dir           3-dir
+NOTE:the number of even and odd sites on the local lattice can be 
+different for the local sublattice if the local sublattice dimensions are all odd.
 initialize geometry
 periodic spatial bc are always assumed (this is relevant only if
 the considered direction is not paralelized))
 */
 
-vec4int xyzt_rank(int rank){
+inline vec4int xyzt_rank(int rank){
 
     vec4int rank4int;
 
-    rank4int.x = rank % NRANKS_X;
-    rank4int.y =( rank / NRANKS_X) % NRANKS_Y;
-    rank4int.z =( rank / (NRANKS_X*NRANKS_Y)) % NRANKS_Z;
-    rank4int.t =( rank / (NRANKS_X*NRANKS_Y*NRANKS_Z)) % NRANKS_T;
+    rank4int.d0 = rank % NRANKS_D0;
+    rank4int.d1 =( rank / NRANKS_D0) % NRANKS_D1;
+    rank4int.d2 =( rank / (NRANKS_D0*NRANKS_D1)) % NRANKS_D2;
+    rank4int.d3 =( rank / (NRANKS_D0*NRANKS_D1*NRANKS_D2)) % NRANKS_D3;
 
     return rank4int;
 
 }
-int rank_from_xyzt_rank(int rank_x, int rank_y, int rank_z, int rank_t){
+inline int rank_from_0123_rank(int rank_0, int rank_1, 
+                               int rank_2, int rank_3){
 
-    return rank_x + ( NRANKS_X * (rank_y + NRANKS_Y * (rank_z  + NRANKS_Z * rank_t)));
+    return rank_0 + ( NRANKS_D0 * (rank_1 + NRANKS_D1 * (rank_2  + NRANKS_D2 * rank_3)));
 
 }
 static inline vec4int gl_loc_origin_from_rank(int rank){
     vec4int res, rank4int = xyzt_rank(rank);
-    res.x = rank4int.x * LOC_NX;
-    res.y = rank4int.y * LOC_NY;
-    res.z = rank4int.z * LOC_NZ;
-    res.t = rank4int.t * LOC_NT;
+    res.d0 = rank4int.d0 * LOC_N0;
+    res.d1 = rank4int.d1 * LOC_N1;
+    res.d2 = rank4int.d2 * LOC_N2;
+    res.d3 = rank4int.d3 * LOC_N3;
     return res;
 
 }
-void init_LNH_geo(void){
 
-    // NOTE: loc_x = lnh_x - X_HALO; 
-    //       loc_xm = lnh_xm - X_HALO; 
-    //       loc_xp = lnh_xp - X_HALO; 
-
-    int lnh_num;
-    int sum, rest;
-
-
-    // local myrank stuff
-    // NOTICE : These global variables are declared in ../Include/common_defines.h
-
-
-    myrank4int = xyzt_rank(myrank);
-
-    gl_loc_origin4int = gl_loc_origin_from_rank(myrank);
-
-    int gl_coord_loc_origin_sum = gl_loc_origin4int.x + gl_loc_origin4int.y + 
-        gl_loc_origin4int.z + gl_loc_origin4int.t;
-
-
-    loc_origin_parity = gl_coord_loc_origin_sum % 2 ; 
-    even_LNH_size = (int)( LNH_NX*LNH_NY*LNH_NZ*LNH_NT /2);
-    if (loc_origin_parity == 0 ) even_LNH_size++;
-
-    // The number of sites in the LNH lattice having the same parity
-    // as the local origin is (int)( LNH_NX*LNH_NY*LNH_NZ*LNH_NT /2).
-    // If the total number of sites in the LNH lattice is odd, the number of 
-    // sites having opposite parity to the local origin is 
-    // (int)( LNH_NX*LNH_NY*LNH_NZ*LNH_NT /2) + 1.
-    // So, if the local origin is odd ( then loc_origin_parity==1) 
-    // the number of even sites in the LNH lattice is 
-    // (int)( LNH_NX*LNH_NY*LNH_NZ*LNH_NT /2) + 1.
-
-}
-
-void setup_nnranks(){
-
-    int nranks_vect[4] = {NRANKS_X, NRANKS_Y, NRANKS_Z, NRANKS_T};
-
-    myrank4int = xyzt_rank(myrank);
-    int myrank_vect[4];
-    myrank_vect[0] = myrank4int.x ;
-    myrank_vect[1] = myrank4int.y ; 
-    myrank_vect[2] = myrank4int.z ; 
-    myrank_vect[3] = myrank4int.t ; 
-    int dir;
-    for(dir=0;dir<4;dir++){
-        int lrank_dir = (myrank_vect[dir]-1);
-        if(lrank_dir == -1) lrank_dir = nranks_vect[dir]-1;
-        int rrank_dir = (myrank_vect[dir]+1)%nranks_vect[dir];
-        nnranks[dir][0] = lrank_dir;
-        nnranks[dir][1] = rrank_dir;
-
-    }
-
-}
-
+void setup_nnranks(int **nnranks);
 
 
 #endif

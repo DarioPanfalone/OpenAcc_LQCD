@@ -1,18 +1,29 @@
 #ifndef GEOMETRY_MULTIDEV_H_
 #define GEOMETRY_MULTIDEV_H_
 
+
 #ifdef MULTIDEVICE
+#include "./geometry_multidev.h"
 #include "mpi.h"
 
-void set_geom_glv_multidev(geom_par_multidev* gp){
+void setup_nnranks(int **nnranks, int myrank){
 
-    MPI_Comm_rank( MPI_COMM_WORLD, &(gp->rank));
-    MPI_Comm_size( MPI_COMM_WORLD, &(gp->n_ranks));
-    myrank4int;
-    gl_loc_origin4int;
+    int nranks_vect[4] = {NRANKS_D0, NRANKS_D1, NRANKS_D2, NRANKS_D3};
 
-    nnranks[4][2];// ranks of nearest neighbour sublattices
-
+    myrank4int = xyzt_rank(myrank);
+    int myrank_vect[4];
+    myrank_vect[0] = myrank4int.d0 ;
+    myrank_vect[1] = myrank4int.d1 ; 
+    myrank_vect[2] = myrank4int.d2 ; 
+    myrank_vect[3] = myrank4int.d3 ; 
+    int dir;
+    for(dir=0;dir<4;dir++){
+        int lrank_dir = (myrank_vect[dir]-1);
+        if(lrank_dir == -1) lrank_dir = nranks_vect[dir]-1;
+        int rrank_dir = (myrank_vect[dir]+1)%nranks_vect[dir];
+        nnranks[dir][0] = lrank_dir;
+        nnranks[dir][1] = rrank_dir;
+    }
 }
 
 #endif
