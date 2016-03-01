@@ -202,7 +202,6 @@ void fermion_measures( su3_soa * tconf_acc,
             d_complex barnum_size = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
             d_complex trMinvSq_size = 0.0 + 0.0*I;
             double factor = tfermions_parameters[iflv].degeneracy*0.25/size;
-            double factor2 = factor*factor*size;
 
 #pragma acc data create(phi_e[0:1]) create(phi_o[0:1])\
             create(chi_e[0:1]) create(chi_o[0:1])   \
@@ -227,10 +226,10 @@ void fermion_measures( su3_soa * tconf_acc,
                 if(icopy < tfm_par->DoubleInvNVectors ){
                 eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,chi_e,chi_o,chi2_e,chi2_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
 
-                trMinvSq_size = scal_prod_global(chi2_e,rnd_e)+
-                  scal_prod_global(chi2_o,rnd_o); 
+                trMinvSq_size = -scal_prod_global(rnd_e,chi2_e)-
+                  scal_prod_global(rnd_o,chi2_o); 
                 fprintf(foutfile,"%.16lf\t%.16lf\t",
-                        creal(trMinvSq_size*factor2),cimag(trMinvSq_size*factor2));
+                        creal(trMinvSq_size*factor),cimag(trMinvSq_size*factor));
 
                 } else if (tfm_par->DoubleInvNVectors>0)                  
                     fprintf(foutfile,"%-24s%-24s","none","none" );
