@@ -256,22 +256,14 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
 
     // see /Include/fermion_parameters.h
     const unsigned int  npar_fermions = 6;
-    par_info fp[npar_fermions];
 
-    // all names
-    char sferm_mass[]        = "Mass"        ;
-    char sdegeneracy[]       = "Degeneracy"       ;      
-    char snumber_of_ps[]     = "PseudoFermions"     ;
-    char sname[]             = "Name"             ;
-    char sferm_charge[]      = "Charge"      ;
-    char sferm_im_chem_pot[] = "MuOverPiT" ;
-
-    fp[0]=(par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, sferm_mass       };
-    fp[1]=(par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , sdegeneracy      };
-    fp[2]=(par_info){(void*) &(flpar->number_of_ps    ),TYPE_INT   , snumber_of_ps    };
-    fp[3]=(par_info){(void*) &(flpar->name            ),TYPE_STR   , sname            };
-    fp[4]=(par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, sferm_charge     };
-    fp[5]=(par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, sferm_im_chem_pot};
+    par_info fp[]={
+    (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          },
+    (par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , "Degeneracy"    },
+    (par_info){(void*) &(flpar->number_of_ps    ),TYPE_INT   , "PseudoFermions"},
+    (par_info){(void*) &(flpar->name            ),TYPE_STR   , "Name"          },
+    (par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, "Charge"        },
+    (par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, "MuOverPiT"     }};
 
 
     // from here on, you should not have to modify anything.
@@ -283,14 +275,11 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
 {
     // see OpenAcc/su3_measurements.h
     const unsigned int npar_action = 3;
-    par_info ap[npar_action];
 
-    char sbeta[]      = "Beta" ;
-    char sstoutsteps[]= "StoutSteps"  ;
-    char sstoutrho[]  = "StoutRho"  ;
-    ap[0]=(par_info){(void*) &(act_par->beta),TYPE_DOUBLE, sbeta };
-    ap[1]=(par_info){(void*) &(act_par->stout_steps),TYPE_INT, sstoutsteps };
-    ap[2]=(par_info){(void*) &(act_par->stout_rho),TYPE_DOUBLE, sstoutrho };
+    par_info ap[]={
+    (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      },
+    (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps"},
+    (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  }};
 
     // from here on, you should not have to modify anything.
     int res = scan_group_NV(npar_action,ap, filelines, startline, endline);
@@ -314,21 +303,13 @@ int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH],
 
     // see /OpenAcc/backfield.h
     const unsigned int npar_background = 6;
-    par_info bfp[npar_background];
-
-    char sex[] = "ex" ;
-    char sey[] = "ey" ;
-    char sez[] = "ez" ;
-    char sbx[] = "bx" ;
-    char sby[] = "by" ;
-    char sbz[] = "bz" ;
-    bfp[0]=(par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, sex };
-    bfp[1]=(par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, sey };
-    bfp[2]=(par_info){(void*) &(bfpar->ez ),TYPE_DOUBLE, sez };
-    bfp[3]=(par_info){(void*) &(bfpar->bx ),TYPE_DOUBLE, sbx };
-    bfp[4]=(par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, sby };
-    bfp[5]=(par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, sbz };
-
+    par_info bfp[]={
+    (par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, "ex" },
+    (par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, "ey" },
+    (par_info){(void*) &(bfpar->ez ),TYPE_DOUBLE, "ez" },
+    (par_info){(void*) &(bfpar->bx ),TYPE_DOUBLE, "bx" },
+    (par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, "by" },
+    (par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, "bz" }};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(npar_background,bfp, filelines, startline, endline);
@@ -339,17 +320,12 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 
     // see /OpenAcc/md_integrator.h
     const unsigned int  npar_md =  4;
-    par_info mdp[npar_md];
 
-    char snomd[] = "NmdSteps" ;
-    char sgs[] = "GaugeSubSteps" ;
-    char st[] = "TrajLength" ;
-    char sresidue_md[] = "residue_md";
-
-    mdp[0]=(par_info){(void*) &(mdpar->no_md ),TYPE_INT, snomd };
-    mdp[1]=(par_info){(void*) &(mdpar->gauge_scale ),TYPE_INT, sgs };
-    mdp[2]=(par_info){(void*) &(mdpar->t ),TYPE_DOUBLE, st};
-    mdp[3]=(par_info){(void*) &(mdpar->residue_md ),TYPE_DOUBLE,sresidue_md};
+    par_info mdp[]={
+    (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     },
+    (par_info){(void*) &(mdpar->gauge_scale ), TYPE_INT, "GaugeSubSteps"},
+    (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   },
+    (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   }};
 
 
     // from here on, you should not have to modify anything.
@@ -361,39 +337,21 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 
     // see /OpenAcc/md_integrator.h
     const unsigned int  npar_mc =  14;
-    par_info mcp[npar_mc];
-
-    char sntraj[] = "Ntraj" ;
-    char stherm_ntraj[] = "ThermNtraj" ;
-    char sstoreconfinterval[] = "StoreConfInterval" ;
-    char ssaveconfinterval[] = "SaveConfInterval";
-    char sresidue_metro[] = "residue_metro";
-    char sstore_conf_name[] = "StoreConfName";
-    char ssave_conf_name[] = "SaveConfName";
-    char suse_ildg[] = "UseILDG";
-    char sseed[] = "Seed";
-    char seps_gen[] = "EpsGen";
-    char sinput_vbl[] = "VerbosityLv";
-    char sexpected_max_eigenvalue[] = "ExpMaxEigenvalue";
-    char ssave_diagnostics[] = "SaveDiagnostics";
-    char sdiagnostics_filename[] = "SaveDiagnosticsFilename";
-
-
-    mcp[0]=(par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,sntraj          };
-    mcp[1]=(par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,stherm_ntraj    };
-    mcp[2]=(par_info){(void*) &(mcpar->storeconfinterval       ),TYPE_INT, sstoreconfinterval};
-    mcp[3]=(par_info){(void*) &(mcpar->saveconfinterval),TYPE_INT, ssaveconfinterval};
-    mcp[4]=(par_info){(void*) &(mcpar->residue_metro    ),TYPE_DOUBLE,sresidue_metro};
-    mcp[5]=(par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,sstore_conf_name};
-    mcp[6]=(par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,ssave_conf_name};
-    mcp[7]=(par_info){(void*) &(mcpar->use_ildg),TYPE_INT,suse_ildg};
-    mcp[8]=(par_info){(void*) &(mcpar->seed   ),TYPE_INT,sseed};
-    mcp[9]=(par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,seps_gen};
-    mcp[10]=(par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,sinput_vbl};
-    mcp[11]=(par_info){(void*) &(mcpar->expected_max_eigenvalue),
-        TYPE_DOUBLE,sexpected_max_eigenvalue};
-    mcp[12]=(par_info){(void*) &(mcpar->save_diagnostics),TYPE_INT,ssave_diagnostics};
-    mcp[13]=(par_info){(void*) &(mcpar->diagnostics_filename),TYPE_STR,sdiagnostics_filename};
+    par_info mcp[]={
+    (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  },
+    (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             },
+    (par_info){(void*) &(mcpar->storeconfinterval      ),TYPE_INT,   "StoreConfInterval"      },
+    (par_info){(void*) &(mcpar->saveconfinterval),TYPE_INT,          "SaveConfInterval"       },
+    (par_info){(void*) &(mcpar->residue_metro    ),TYPE_DOUBLE,      "residue_metro"          },
+    (par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,         "StoreConfName"          },
+    (par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,         "SaveConfName"           },
+    (par_info){(void*) &(mcpar->use_ildg),TYPE_INT,                  "UseILDG"                },
+    (par_info){(void*) &(mcpar->seed   ),TYPE_INT,                   "Seed"                   },
+    (par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,              "EpsGen"                 },
+    (par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,               "VerbosityLv"            },
+    (par_info){(void*) &(mcpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       },
+    (par_info){(void*) &(mcpar->save_diagnostics),TYPE_INT,          "SaveDiagnostics"        },
+    (par_info){(void*) &(mcpar->diagnostics_filename),TYPE_STR,      "SaveDiagnosticsFilename"}};
 
     // from here on, you should not have to modify anything.
 
@@ -405,11 +363,8 @@ int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH
 
     // see /Meas
     const unsigned int npar_gaugemeas = 1 ; 
-    par_info gmp[npar_gaugemeas];
-
-    char soutfilename[] = "GaugeOutfilename" ;
-
-    gmp[0]=(par_info){(void*) outfilename ,TYPE_STR,soutfilename };
+    par_info gmp[]= {
+    (par_info){(void*) outfilename ,TYPE_STR, "GaugeOutfilename"}};
 
 
     // from here on, you should not have to modify anything.
@@ -420,14 +375,10 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
 {
 
     const unsigned int npar_fermmeas = 2 ; 
-    par_info fmp[npar_fermmeas];
-
-    char soutfilename[] = "FermionicOutfilename" ;
-    char sferm_meas_copies[] = "FermionMeasCopies"; 
-
-    fmp[0]=(par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,soutfilename };
-    fmp[1]=(par_info){(void*) &(fmpars->meas_copies),TYPE_INT,sferm_meas_copies};
-
+    par_info fmp[]={
+    (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename" },
+    (par_info){(void*) &(fmpars->meas_copies),TYPE_INT,          "SingleInvNVectors"    },
+    (par_info){(void*) &(fmpars->meas_copies),TYPE_INT,          "DoubleInvNVectors"    }};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(npar_fermmeas,fmp, filelines, startline, endline);
@@ -437,11 +388,8 @@ int read_device_setting(device_param *device_settings,char filelines[MAXLINES][M
 {
 
     const unsigned int npar_device_settings = 1 ; 
-    par_info tp[npar_device_settings];
-
-    char sdevice_choice[] = "device_choice" ;
-
-    tp[0]=(par_info){(void*) &(device_settings->device_choice),TYPE_INT,sdevice_choice };
+    par_info tp[]= {
+    (par_info){(void*) &(device_settings->device_choice),TYPE_INT,"device_choice" }};
 
 
     // from here on, you should not have to modify anything.
@@ -454,26 +402,15 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 
     // see /OpenAcc/backfield.h
     const unsigned int npar_geometry = 8;
-    par_info gp[npar_geometry];
-
-    char sgnx[] = "nx" ;
-    char sgny[] = "ny" ;
-    char sgnz[] = "nz" ;
-    char sgnt[] = "nt" ;
-    char sxmap[] = "xmap" ;
-    char symap[] = "ymap" ;
-    char szmap[] = "zmap" ;
-    char stmap[] = "tmap" ;
-
-
-    gp[0]=(par_info){(void*) &(gpar->gnx ),TYPE_INT, sgnx };
-    gp[1]=(par_info){(void*) &(gpar->gny ),TYPE_INT, sgny };
-    gp[2]=(par_info){(void*) &(gpar->gnz ),TYPE_INT, sgnz };
-    gp[3]=(par_info){(void*) &(gpar->gnt ),TYPE_INT, sgnt };
-    gp[4]=(par_info){(void*) &(gpar->xmap ),TYPE_INT, sxmap };
-    gp[5]=(par_info){(void*) &(gpar->ymap ),TYPE_INT, symap };
-    gp[6]=(par_info){(void*) &(gpar->zmap ),TYPE_INT, szmap };
-    gp[7]=(par_info){(void*) &(gpar->tmap ),TYPE_INT, stmap };
+    par_info gp[]={
+    (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx" },
+    (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny" },
+    (par_info){(void*) &(gpar->gnz ),TYPE_INT,  "nz" },
+    (par_info){(void*) &(gpar->gnt ),TYPE_INT,  "nt" },
+    (par_info){(void*) &(gpar->xmap ),TYPE_INT, "xmap" },
+    (par_info){(void*) &(gpar->ymap ),TYPE_INT, "ymap" },
+    (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap" },
+    (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap" }};
 
     int res = scan_group_NV(npar_geometry,gp, filelines, startline, endline);
 

@@ -80,13 +80,13 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 
     strcpy(fmpar->fermionic_outfile_header,"#conf\ticopy\t");
     for(int iflv=0;iflv<NDiffFlavs;iflv++){
-            char strtocat[120];
-            sprintf(strtocat, "Reff_%-19sImff_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
-            strcat(fmpar->fermionic_outfile_header,strtocat);
-            sprintf(strtocat, "ReN_%-19sImN_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
-            strcat(fmpar->fermionic_outfile_header,strtocat);
-            sprintf(strtocat, "ReTrM^-2_%-19sImTrM^-2_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
-            strcat(fmpar->fermionic_outfile_header,strtocat);
+        char strtocat[120];
+        sprintf(strtocat, "Reff_%-19sImff_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+        strcat(fmpar->fermionic_outfile_header,strtocat);
+        sprintf(strtocat, "ReN_%-19sImN_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+        strcat(fmpar->fermionic_outfile_header,strtocat);
+        sprintf(strtocat, "ReTrM^-2_%-19sImTrM^-2_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+        strcat(fmpar->fermionic_outfile_header,strtocat);
 
     }
     strcat(fmpar->fermionic_outfile_header,"\n");
@@ -103,7 +103,7 @@ void fermion_measures( su3_soa * tconf_acc,
     vec3_soa * chi_e,* chi_o; //results of eo_inversion
     vec3_soa *chi2_e,*chi2_o; //results of second eo_inversion, 
     vec3_soa * phi_e,* phi_o; // parking variables for eo_inverter
-                              // also results of eo inversion multiplied by dM/dmu
+    // also results of eo inversion multiplied by dM/dmu
     vec3_soa * trial_sol;
     su3_soa * conf_to_use;
 
@@ -132,6 +132,11 @@ void fermion_measures( su3_soa * tconf_acc,
     ALLOCCHECK(allocation_check,chi_e);     
     allocation_check =  posix_memalign((void **)&chi_o, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,chi_o);     
+    allocation_check =  posix_memalign((void **)&chi2_e, ALIGN, sizeof(vec3_soa));
+    ALLOCCHECK(allocation_check,chi2_e);     
+    allocation_check =  posix_memalign((void **)&chi2_o, ALIGN, sizeof(vec3_soa));
+    ALLOCCHECK(allocation_check,chi2_o);     
+
     allocation_check =  posix_memalign((void **)&trial_sol, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,trial_sol);
 
@@ -196,15 +201,16 @@ void fermion_measures( su3_soa * tconf_acc,
                 chircond_size = scal_prod_global(rnd_e,chi_e)+
                     scal_prod_global(rnd_o,chi_o);
 
-                dM_dmu_eo[geom_par.tmap](conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
+                printf("PORCODIO\n");
+//                dM_dmu_eo[geom_par.tmap](conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
                 dM_dmu_oe[geom_par.tmap](conf_to_use,phi_o,chi_e,tfermions_parameters[iflv].phases);
-                barnum_size = scal_prod_global(rnd_e,phi_e)+
-                    scal_prod_global(rnd_o,phi_o);
-
-                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,chi2_e,chi2_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+//                barnum_size = scal_prod_global(rnd_e,phi_e)+
+//                    scal_prod_global(rnd_o,phi_o);
+//
+//                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,chi2_e,chi2_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
 
                 trMinvSq_size = scal_prod_global(chi2_e,rnd_e)+
-                    scal_prod_global(chi2_o,rnd_o); 
+                  scal_prod_global(chi2_o,rnd_o); 
 
 
 
@@ -230,6 +236,8 @@ void fermion_measures( su3_soa * tconf_acc,
     free(phi_o);
     free(chi_e);
     free(chi_o);
+    free(chi2_e);
+    free(chi2_o);
     free(trial_sol);
 
 
