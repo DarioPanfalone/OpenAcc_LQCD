@@ -374,11 +374,11 @@ int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH
 int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
-    const unsigned int npar_fermmeas = 2 ; 
+    const unsigned int npar_fermmeas = 3 ; 
     par_info fmp[]={
-    (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename" },
-    (par_info){(void*) &(fmpars->meas_copies),TYPE_INT,          "SingleInvNVectors"    },
-    (par_info){(void*) &(fmpars->meas_copies),TYPE_INT,          "DoubleInvNVectors"    }};
+    (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename"},
+    (par_info){(void*) &(fmpars->SingleInvNVectors),TYPE_INT,    "SingleInvNVectors"   },
+    (par_info){(void*) &(fmpars->DoubleInvNVectors),TYPE_INT,    "DoubleInvNVectors"   }};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(npar_fermmeas,fmp, filelines, startline, endline);

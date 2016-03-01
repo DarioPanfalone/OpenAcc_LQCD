@@ -83,10 +83,13 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
         char strtocat[120];
         sprintf(strtocat, "Reff_%-19sImff_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
-        sprintf(strtocat, "ReN_%-19sImN_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+        sprintf(strtocat, "ReN_%-20sImN_%-20s",tferm_par[iflv].name,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
-        sprintf(strtocat, "ReTrM^-2_%-19sImTrM^-2_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+         if (fmpar->DoubleInvNVectors>0){
+
+        sprintf(strtocat, "ReTrM^-2_%-14sImTrM^-2_%-14s",tferm_par[iflv].name,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
+         }
 
     }
     strcat(fmpar->fermionic_outfile_header,"\n");
@@ -159,7 +162,7 @@ void fermion_measures( su3_soa * tconf_acc,
     fclose(foutfile);// found file size
 
     // cycle on copies
-    for(int icopy = 0; icopy < tfm_par->meas_copies ; icopy++) {
+    for(int icopy = 0; icopy < tfm_par->SingleInvNVectors ; icopy++) {
         FILE *foutfile = fopen(tfm_par->fermionic_outfilename,"at");
         if(fsize == 0){
             set_fermion_file_header(tfm_par, tfermions_parameters);
@@ -178,9 +181,19 @@ void fermion_measures( su3_soa * tconf_acc,
         // cycle on flavours
         for(int iflv=0; iflv < NDiffFlavs ; iflv++){
 
-            if(verbosity_lv > 1) printf("Performing %d of %d chiral measures for quark %s.\n",
-                    icopy+1,tfm_par->meas_copies, tfermions_parameters[iflv].name);
+            if(verbosity_lv > 1){
+                printf("Performing %d of %d chiral measures for quark %s",
+                    icopy+1,tfm_par->SingleInvNVectors, tfermions_parameters[iflv].name);
+    
+                if(icopy < tfm_par->DoubleInvNVectors )
+                printf(" ( %d of %d double inversions)",
+                    icopy+1,tfm_par->DoubleInvNVectors);
+            
+                printf(".\n");
 
+            
+            }
+           
 
             generate_vec3_soa_z2noise(rnd_e);
             generate_vec3_soa_z2noise(rnd_o);
@@ -201,25 +214,27 @@ void fermion_measures( su3_soa * tconf_acc,
                 chircond_size = scal_prod_global(rnd_e,chi_e)+
                     scal_prod_global(rnd_o,chi_o);
 
-                printf("PORCODIO\n");
-//                dM_dmu_eo[geom_par.tmap](conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
+                dM_dmu_eo[geom_par.tmap](conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
                 dM_dmu_oe[geom_par.tmap](conf_to_use,phi_o,chi_e,tfermions_parameters[iflv].phases);
-//                barnum_size = scal_prod_global(rnd_e,phi_e)+
-//                    scal_prod_global(rnd_o,phi_o);
-//
-//                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,chi2_e,chi2_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
-
-                trMinvSq_size = scal_prod_global(chi2_e,rnd_e)+
-                  scal_prod_global(chi2_o,rnd_o); 
-
-
+                barnum_size = scal_prod_global(rnd_e,phi_e)+
+                    scal_prod_global(rnd_o,phi_o);
 
                 fprintf(foutfile,"%.16lf\t%.16lf\t",
                         creal(chircond_size*factor),cimag(chircond_size*factor));
                 fprintf(foutfile,"%.16lf\t%.16lf\t",
                         creal(barnum_size*factor),cimag(barnum_size*factor));
+
+                if(icopy < tfm_par->DoubleInvNVectors ){
+                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,chi_e,chi_o,chi2_e,chi2_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+
+                trMinvSq_size = scal_prod_global(chi2_e,rnd_e)+
+                  scal_prod_global(chi2_o,rnd_o); 
                 fprintf(foutfile,"%.16lf\t%.16lf\t",
                         creal(trMinvSq_size*factor2),cimag(trMinvSq_size*factor2));
+
+                } else if (tfm_par->DoubleInvNVectors>0)                  
+                    fprintf(foutfile,"%-24s%-24s","none","none" );
+
 
 
 
