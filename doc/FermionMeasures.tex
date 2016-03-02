@@ -1,6 +1,163 @@
 
 
-\chapter{Measurement of the chiral condensate condensate and the quark number}
+\chapter{Measurement of Fermionic observables}
+
+\section{Noisy estimators and noise vectors}
+
+Let's take a set of uncorrelated stochastic \emph{real} variables $\eta_i$, 
+which  satisfy the property
+\begin{equation}
+\label{orthonormalization}
+ \left\langle \eta_i \eta_j \right\rangle_{noise} = \delta_{i,j} \ ,
+\end{equation}
+where $ \left\langle \ldots  \right\rangle_{noise}$ represent the average over 
+``noise'' fluctuations. \\
+Let's assume we have a \emph{noise vector} $\eta$, with components $\eta_i$ 
+(where $i$ will label a lattice site), and a determined matrix $A_{i,j}$ (which 
+is not stochastic!), then we obtain
+\begin{equation}
+  \left\langle  \sum_{ij} \eta_i A_{ij} \eta_j  \right\rangle_{noise} =  
+\sum_{ij} A_{ij} \delta_{ij}  = \mbox{ Tr } A \ .
+\end{equation}
+Notice that the sum and the average over noise commute. Let's do another 
+exercise now. We want to compute
+\begin{equation}
+ \left( \mbox{Tr } A \right)^2 \ . 
+\end{equation}
+It must be remarked that\footnote{
+The right hand side of Eq.(\ref{eq_warning}) is exactly what one would obtain 
+using only \emph{one} random vector to evaluate $\left(\langle \mbox{Tr} A 
+\rangle_{noise}\right)^2$. 
+}
+\begin{equation}
+\label{eq_warning}
+\left(\left\langle  \sum_{ij} \eta_i A_{ij} \eta_j  \right\rangle_{noise} 
+\right)^2 
+\neq  \left\langle \left( \sum_{ij} \eta_i A_{ij} \eta_j \right)^2 
+\right\rangle_{noise} \ ,
+\end{equation}
+indeed
+\begin{equation}
+ \left\langle \left( \sum_{ij} \eta_i A_{ij} \eta_j \right)^2 
+\right\rangle_{noise}  = 
+\left\langle \sum_{ijkl} \eta_i A_{ij} \eta_j  \eta_k A_{kl} \eta_l
+\right\rangle_{noise} \ .
+\end{equation}
+First of all, the only terms in the sum which give a nonzero contribution are 
+the ones in which $i = j $ and $  k = l $, or $i = k$ and $  j = l$, or $ i = 
+l $ and $ j = k$. Moreover, if $i=j=k=l$, we have to take into consideration 
+also the value of $\langle \eta_i^4\rangle$ (the \emph{contact term}), so
+\begin{equation}
+\label{mess_worked_out}
+ \left\langle \left( \sum_{ij} \eta_i A_{ij} \eta_j \right)^2 
+\right\rangle_{noise}  = 
+\sum_{i \neq j} \left[ A_{ii} A_{jj} + A_{ij} A_{ji} + A_{ij} 
+A_{ij}\right] + \sum_{i} A^2_{ii} \langle \eta_i^4 \rangle_{noise}
+\end{equation}
+In order to properly estimate the LHS of Eq.(\ref{eq_warning}), we have to use 
+\emph{more than one} random vector. Different \emph{independent} random 
+vectors, labelled by greek indices, must satisfy the relation
+\begin{equation}
+\label{multi_vector}
+\left\langle \eta^\alpha_i \eta^\beta_j \right\rangle_{noise} = \delta_{ij} 
+\delta^{\alpha\beta} \ .
+\end{equation}
+Then, if $\alpha \neq \beta$,
+\begin{equation}
+ \left\langle \sum_{ij} \eta^\alpha_i A_{ij} \eta^\alpha_j  
+  \sum_{kl} \eta^\beta_k A_{kl} \eta^\beta_l  
+\right\rangle_{noise}  =  \sum_i A_{ii} \sum_j A_{jj}  = \left(\mbox{Tr} A 
+\right)^2\ \ ,  
+\end{equation}
+which is exactly what we want. \\
+Notice one could use \emph{complex} noise vectors, satisfying 
+\[\left\{\begin{array}{ccc}
+\langle \eta^\dagger_i \eta_j \rangle_{noise} & = & \delta_{ij}\\
+\langle \eta_i \eta_j \rangle_{noise} &= & 0
+\end{array} \right . \ ,
+\]
+which is implies that the real part and the imaginary part of $\eta$ must 
+satisfy a relation like Eq.(\ref{multi_vector}). Then, 
+\begin{equation}
+\label{mess_worked_out_complex}
+ \left\langle \left( \sum_{ij} \eta^\dagger_i A_{ij} \eta_j \right)^2 
+\right\rangle_{noise}  = 
+\sum_{i \neq j} \left[ A_{ii} A_{jj} + A_{ij} A_{ji} \right] + \sum_{i} 
+A^2_{ii} \left\langle \left(\eta^\dagger_i  \eta_i \right)^2 
+\right\rangle_{noise} \ , 
+\end{equation}
+which is not yet what we want. 
+\subsection{Errors}
+Getting back to the real case, we can see what is the variance\footnote{
+The variance of a complex number $ z = x + i y$ should be defined as
+\[
+ \langle x^2 \rangle + \langle y^2 \rangle - \langle x \rangle ^2 - \langle y 
+\rangle^2 = \langle z^\ast z \rangle  - \langle z^\ast \rangle  \langle z 
+\rangle 
+\]
+} of 
+our estimator of $\mbox { Tr } A $, that is
+\begin{equation}
+ \label{trace_estimator}
+ \frac{1}{N} \sum^N_{\alpha,ij}  \eta^\alpha_i A_{ij} \eta^\alpha_j \ .
+\end{equation}
+To calculate this, we need to compute the average of the modulus of its square 
+first:
+\begin{equation}
+ \frac{1}{N^2} \sum^N_{\alpha\beta} \sum_{ij,kl} A_{ij} A^\ast_{kl}
+ \left\langle \eta^\alpha_i \eta^\alpha_j  \eta^\beta_k \eta^\beta_l 
+\right\rangle_{noise}  \ .
+\end{equation}
+This is equal to
+\begin{equation}
+ \frac{1}{N^2} \sum^N_{\alpha \neq \beta} \sum_{ij,kl} A_{ij} A^\ast_{kl}
+ \left\langle \eta^\alpha_i \eta^\alpha_j  \eta^\beta_k \eta^\beta_l 
+\right\rangle_{noise} +  \frac{1}{N^2} \sum^N_{\alpha} \sum_{ij,kl} 
+A_{ij} A^\ast_{kl}
+ \left\langle \eta^\alpha_i \eta^\alpha_j  \eta^\alpha_k \eta^\alpha_l 
+\right\rangle_{noise}   \ .
+\end{equation}
+The first part is just related to the square of the trace, because if $\alpha 
+\neq \beta$ the $\eta$ vector are independent. The second term instead has been 
+already calculated in Eq.(\ref{mess_worked_out}), so we obtain
+\begin{equation}
+\frac{N(N-1)}{N^2} \left|\mbox{ Tr }  A \right|^2 + \frac{1}{N} \left[
+\sum_{i \neq j} \left[ A_{ii} A^\ast_{jj} + A_{ij} A^\ast_{ji} + A_{ij} 
+A^\ast_{ij}\right] + \sum_{i} \left|A_{ii}\right|^2 \langle 
+\left(\eta_i^\alpha\right)^4 \rangle_{noise} \right]
+\end{equation}
+In the following, we will assume $\langle 
+\left(\eta_i^\alpha\right)^4 \rangle_{noise} = c_4 $ for all $\alpha$ and $i$. 
+The terms can be rearranged to give
+\begin{equation}
+\left|\mbox{ Tr }  A \right|^2 + \frac{1}{N} \left[
+\mbox{ Tr } A A^\ast + \mbox{ Tr } A A^\dagger 
++ \sum_{i} \left|A_{ii}\right|^2 \left(c_4 -3 \right) \right]
+\end{equation}
+In order to obtain the variance of the trace estimator, we have to subtract
+\begin{equation}
+ \left\langle \frac{1}{N} \sum^N_{\alpha,ij}  \eta^\alpha_i A_{ij} 
+\eta^\alpha_j \right\rangle_{noise} ^2 = \left|\mbox{ Tr }  A \right|^2 
+\end{equation}
+and then we obtain
+\begin{equation}
+ \epsilon^2 =  \frac{1}{N} \left[
+\mbox{ Tr } A A^\ast + \mbox{ Tr } A A^\dagger 
++ \sum_{i} \left|A_{ii}\right|^2 \left(c_4 -3 \right) \right] \ . 
+\end{equation}
+Notice that, if $\eta_i$ is Gaussian, $ c_4 = 3$, 
+while if $\eta_i$ is a stochastic $Z_2$ variable, $ c_4 = 1$. Moreover, for 
+any probability distribution, $\langle x^4 \rangle \geq \langle x^2 
+\rangle ^2$, and since we fixed $\langle x^2 \rangle = 1$ in 
+Eq.(\ref{orthonormalization}), we see that the $Z_2$ choice is the one 
+that minimizes the errors.\\ 
+
+
+
+
+
+
+\section{Chiral condensate}
 
 The chiral condensate for a given quark is defined as 
 \begin{equation}

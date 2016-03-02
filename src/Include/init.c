@@ -255,7 +255,6 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
 {
 
     // see /Include/fermion_parameters.h
-    const unsigned int  npar_fermions = 6;
 
     par_info fp[]={
     (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          },
@@ -265,24 +264,23 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
     (par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, "Charge"        },
     (par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, "MuOverPiT"     }};
 
-
     // from here on, you should not have to modify anything.
-    return scan_group_NV(npar_fermions,fp, filelines, startline, endline);
+    return scan_group_NV(sizeof(fp)/sizeof(par_info),fp, filelines, startline, endline);
     
 }
 
 int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
     // see OpenAcc/su3_measurements.h
-    const unsigned int npar_action = 3;
 
     par_info ap[]={
     (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      },
     (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps"},
     (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  }};
 
+
     // from here on, you should not have to modify anything.
-    int res = scan_group_NV(npar_action,ap, filelines, startline, endline);
+    int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
 
     if(startline<endline)
     if(act_par->stout_rho != RHO ){ 
@@ -302,7 +300,6 @@ int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH],
 {
 
     // see /OpenAcc/backfield.h
-    const unsigned int npar_background = 6;
     par_info bfp[]={
     (par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, "ex" },
     (par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, "ey" },
@@ -312,14 +309,13 @@ int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH],
     (par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, "bz" }};
 
     // from here on, you should not have to modify anything.
-    return scan_group_NV(npar_background,bfp, filelines, startline, endline);
+    return scan_group_NV(sizeof(bfp)/sizeof(par_info),bfp, filelines, startline, endline);
 
 }
 int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /OpenAcc/md_integrator.h
-    const unsigned int  npar_md =  4;
 
     par_info mdp[]={
     (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     },
@@ -329,14 +325,13 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 
 
     // from here on, you should not have to modify anything.
-    return scan_group_NV(npar_md,mdp, filelines, startline, endline);
+    return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);
 
 }
 int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /OpenAcc/md_integrator.h
-    const unsigned int  npar_mc =  14;
     par_info mcp[]={
     (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  },
     (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             },
@@ -355,45 +350,42 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 
     // from here on, you should not have to modify anything.
 
-    return scan_group_NV(npar_mc,mcp, filelines, startline, endline);
+    return scan_group_NV(sizeof(mcp)/sizeof(par_info),mcp, filelines, startline, endline);
 
 }
 int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /Meas
-    const unsigned int npar_gaugemeas = 1 ; 
     par_info gmp[]= {
     (par_info){(void*) outfilename ,TYPE_STR, "GaugeOutfilename"}};
 
 
     // from here on, you should not have to modify anything.
-   return scan_group_NV(npar_gaugemeas,gmp, filelines, startline, endline);
+   return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
 
 }
 int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
-    const unsigned int npar_fermmeas = 3 ; 
     par_info fmp[]={
     (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename"},
     (par_info){(void*) &(fmpars->SingleInvNVectors),TYPE_INT,    "SingleInvNVectors"   },
     (par_info){(void*) &(fmpars->DoubleInvNVectors),TYPE_INT,    "DoubleInvNVectors"   }};
 
     // from here on, you should not have to modify anything.
-    return scan_group_NV(npar_fermmeas,fmp, filelines, startline, endline);
+    return scan_group_NV(sizeof(fmp)/sizeof(par_info),fmp, filelines, startline, endline);
 
 }
 int read_device_setting(device_param *device_settings,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
-    const unsigned int npar_device_settings = 1 ; 
     par_info tp[]= {
     (par_info){(void*) &(device_settings->device_choice),TYPE_INT,"device_choice" }};
 
 
     // from here on, you should not have to modify anything.
-    return scan_group_NV(npar_device_settings,tp, filelines, startline, endline);
+    return scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
 }
 
@@ -401,7 +393,6 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 {
 
     // see /OpenAcc/backfield.h
-    const unsigned int npar_geometry = 8;
     par_info gp[]={
     (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx" },
     (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny" },
@@ -412,7 +403,7 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
     (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap" },
     (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap" }};
 
-    int res = scan_group_NV(npar_geometry,gp, filelines, startline, endline);
+    int res = scan_group_NV(sizeof(gp)/sizeof(par_info),gp, filelines, startline, endline);
 
     set_geom_glv(gpar);
 
