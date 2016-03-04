@@ -601,6 +601,7 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * con
     mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
 }  // closes MMMPP
 
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
         __restrict su3_soa * const loc_stap ){
     int d0, d1, d2, d3, mu, iter;
@@ -690,6 +691,7 @@ void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restr
 
 }// closes routine
 
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
         __restrict su3_soa * const loc_stap ){
     int d0, d1, d2, d3, mu, iter;
@@ -783,6 +785,7 @@ void calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all(  __restr
 
 }// closes routine
 
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
         __restrict su3_soa * const loc_stap ){
     int d0, d1, d2, d3, mu, iter;
@@ -875,7 +878,8 @@ void calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all(  __restr
     }  // d3
 
 }// closes routine
-
+ 
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK (NOT USED)
 void calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
         __restrict su3_soa * const loc_stap ){
     int d0, d1, d2, d3, mu, iter;

@@ -309,10 +309,16 @@ if __name__ == '__main__':
         f = open("lattice_dimensions.h", 'w')
         ldim_string = '''
 // lattice dimensions
-#define nd0  4
-#define nd1  4
-#define nd2  4
-#define nd3  4
+#define LOC_N0  8
+#define LOC_N1  8
+#define LOC_N2  8
+#define LOC_N3  8
+
+// MULTIDEVICE
+#define NRANKS_D0 1
+#define NRANKS_D1 1
+#define NRANKS_D2 1
+#define NRANKS_D3 1
 '''
         f.write(ldim_string)
         f.close()

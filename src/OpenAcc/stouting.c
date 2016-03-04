@@ -304,21 +304,21 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
   d_complex U22 = conj(U->r0.c0[idx] * U->r1.c1[idx] - U->r0.c1[idx] * U->r1.c0[idx]);
   
   ////////////CALCOLO DI B1   (EQ 69) ////////////////////////////////////////
-  TMP->r0.c0[idx] =b10 -   b11*QA->rc00[idx]                + b12*(QA->rc00[idx]*QA->rc00[idx]
+  TMP->r0.c0[idx] =b10 -   b11*QA->ic00[idx]                + b12*(QA->ic00[idx]*QA->ic00[idx]
 								   + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]));
-  TMP->r0.c1[idx] =      ( b11*I) *  QA->c01[idx]           + b12*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]));
-  TMP->r0.c2[idx] =      ( b11*I) * QA->c02[idx]            + b12*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
+  TMP->r0.c1[idx] =      ( b11*I) *  QA->c01[idx]           + b12*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->ic00[idx]+QA->ic11[idx]));
+  TMP->r0.c2[idx] =      ( b11*I) * QA->c02[idx]            + b12*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->ic11[idx]);
   /////////
-  TMP->r1.c0[idx] =      (-b11*I) * conj(QA->c01[idx])     + b12*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]));
-  TMP->r1.c1[idx] =b10 -   b11*QA->rc11[idx]                + b12*( QA->rc11[idx]*QA->rc11[idx]
+  TMP->r1.c0[idx] =      (-b11*I) * conj(QA->c01[idx])     + b12*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->ic00[idx]+QA->ic11[idx]));
+  TMP->r1.c1[idx] =b10 -   b11*QA->ic11[idx]                + b12*( QA->ic11[idx]*QA->ic11[idx]
 								    +QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]));
-  TMP->r1.c2[idx] =      ( b11*I)*QA->c12[idx]              + b12*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
+  TMP->r1.c2[idx] =      ( b11*I)*QA->c12[idx]              + b12*((1.0*I)*QA->ic00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
   /////////
 
-  TMP->r2.c0[idx] =      (-b11*I)*conj(QA->c02[idx])        + b12*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
+  TMP->r2.c0[idx] =      (-b11*I)*conj(QA->c02[idx])        + b12*((-1.0*I)*QA->ic11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
 
-  TMP->r2.c1[idx] =      (-b11*I)*conj(QA->c12[idx])        + b12*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
-  TMP->r2.c2[idx] =b10 +   b11*(QA->rc00[idx]+QA->rc11[idx])+ b12*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
+  TMP->r2.c1[idx] =      (-b11*I)*conj(QA->c12[idx])        + b12*((-1.0*I)*QA->ic00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
+  TMP->r2.c2[idx] =b10 +   b11*(QA->ic00[idx]+QA->ic11[idx])+ b12*((QA->ic00[idx]+QA->ic11[idx])*(QA->ic00[idx]+QA->ic11[idx])
 								   + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
   //////////////////////////////////////////////////////////////////////////////
   
@@ -337,19 +337,19 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
 
 
   ////////////CALCOLO DI B2   (EQ 69) ////////////////////////////////////////
-  TMP->r0.c0[idx] =b20 -   b21*QA->rc00[idx]                + b22*(QA->rc00[idx]*QA->rc00[idx]
+  TMP->r0.c0[idx] =b20 -   b21*QA->ic00[idx]                + b22*(QA->ic00[idx]*QA->ic00[idx]
 								  + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]));
-  TMP->r0.c1[idx] =      ( b21*I) *  QA->c01[idx]           + b22*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]));
-  TMP->r0.c2[idx] =      ( b21*I) * QA->c02[idx]            + b22*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
+  TMP->r0.c1[idx] =      ( b21*I) *  QA->c01[idx]           + b22*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->ic00[idx]+QA->ic11[idx]));
+  TMP->r0.c2[idx] =      ( b21*I) * QA->c02[idx]            + b22*(-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->ic11[idx]);
   /////////
-  TMP->r1.c0[idx] =      (-b21*I) * conj(QA->c01[idx])     + b22*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]));
-  TMP->r1.c1[idx] =b20 -   b21*QA->rc11[idx]                + b22*( QA->rc11[idx]*QA->rc11[idx]
+  TMP->r1.c0[idx] =      (-b21*I) * conj(QA->c01[idx])     + b22*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->ic00[idx]+QA->ic11[idx]));
+  TMP->r1.c1[idx] =b20 -   b21*QA->ic11[idx]                + b22*( QA->ic11[idx]*QA->ic11[idx]
 								   +QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]));
-  TMP->r1.c2[idx] =      ( b21*I)*QA->c12[idx]              + b22*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
+  TMP->r1.c2[idx] =      ( b21*I)*QA->c12[idx]              + b22*((1.0*I)*QA->ic00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]));
   /////////
-  TMP->r2.c0[idx] =      (-b21*I)*conj(QA->c02[idx])        + b22*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
-  TMP->r2.c1[idx] =      (-b21*I)*conj(QA->c12[idx])        + b22*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
-  TMP->r2.c2[idx] =b20 +   b21*(QA->rc00[idx]+QA->rc11[idx])+ b22*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
+  TMP->r2.c0[idx] =      (-b21*I)*conj(QA->c02[idx])        + b22*((-1.0*I)*QA->ic11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]));
+  TMP->r2.c1[idx] =      (-b21*I)*conj(QA->c12[idx])        + b22*((-1.0*I)*QA->ic00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]));
+  TMP->r2.c2[idx] =b20 +   b21*(QA->ic00[idx]+QA->ic11[idx])+ b22*((QA->ic00[idx]+QA->ic11[idx])*(QA->ic00[idx]+QA->ic11[idx])
 								  + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
   /////////////////////////////////////////////////////////////////////////////
 
@@ -393,42 +393,42 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
   /////////////////  GAMMA_21 = U21
   /////////////////  GAMMA_22 = U22
   // prima riga
-  r0_1 = -tr1 * QA->rc00[idx]   + tr2 * (QA->rc00[idx]*QA->rc00[idx] + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]))
-    + f1 * TMP->r0.c0[idx] + f2  * (-2.0*TMP->r0.c0[idx]*QA->rc00[idx]+(1.0*I)*(QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]
+  r0_1 = -tr1 * QA->ic00[idx]   + tr2 * (QA->ic00[idx]*QA->ic00[idx] + QA->c01[idx] *conj(QA->c01[idx])+ QA->c02[idx] *conj(QA->c02[idx]))
+    + f1 * TMP->r0.c0[idx] + f2  * (-2.0*TMP->r0.c0[idx]*QA->ic00[idx]+(1.0*I)*(QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]
 										+QA->c02[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c2[idx]));
 
-  r1_1 =(tr1*I)*QA->c01[idx]    + tr2 * (QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->rc00[idx]+QA->rc11[idx]))
-    + f1 * TMP->r0.c1[idx] + f2  * (-TMP->r0.c1[idx]*(QA->rc11[idx]+QA->rc00[idx])+(1.0*I)*(QA->c01[idx]*(TMP->r0.c0[idx]+TMP->r1.c1[idx])
+  r1_1 =(tr1*I)*QA->c01[idx]    + tr2 * (QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)*QA->c01[idx]*(QA->ic00[idx]+QA->ic11[idx]))
+    + f1 * TMP->r0.c1[idx] + f2  * (-TMP->r0.c1[idx]*(QA->ic11[idx]+QA->ic00[idx])+(1.0*I)*(QA->c01[idx]*(TMP->r0.c0[idx]+TMP->r1.c1[idx])
 									    +QA->c02[idx]*TMP->r2.c1[idx]-conj(QA->c12[idx])*TMP->r0.c2[idx]));
 
-  r2_1 =(tr1*I)*QA->c02[idx]    + tr2 * (-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->rc11[idx])
-    + f1 * TMP->r0.c2[idx] + f2  * (QA->rc11[idx]*TMP->r0.c2[idx]+(1.0*I)*(QA->c02[idx]*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
+  r2_1 =(tr1*I)*QA->c02[idx]    + tr2 * (-QA->c01[idx] * QA->c12[idx] + ( 1.0*I)* QA->c02[idx] * QA->ic11[idx])
+    + f1 * TMP->r0.c2[idx] + f2  * (QA->ic11[idx]*TMP->r0.c2[idx]+(1.0*I)*(QA->c02[idx]*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
 									   QA->c01[idx]*TMP->r1.c2[idx]+QA->c12[idx]*TMP->r0.c1[idx]));
 
   // seconda riga
-  r0_2 = (-tr1*I) * conj(QA->c01[idx])  + tr2*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->rc00[idx]+QA->rc11[idx]))
-    + f1 * TMP->r1.c0[idx] + f2 *(-TMP->r1.c0[idx]*(QA->rc00[idx]+QA->rc11[idx])+(1.0*I)*(-conj(QA->c01[idx])*(TMP->r0.c0[idx]+TMP->r1.c1[idx])  
+  r0_2 = (-tr1*I) * conj(QA->c01[idx])  + tr2*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I)*conj(QA->c01[idx])*(QA->ic00[idx]+QA->ic11[idx]))
+    + f1 * TMP->r1.c0[idx] + f2 *(-TMP->r1.c0[idx]*(QA->ic00[idx]+QA->ic11[idx])+(1.0*I)*(-conj(QA->c01[idx])*(TMP->r0.c0[idx]+TMP->r1.c1[idx])  
 									       + QA->c12[idx]*TMP->r2.c0[idx] - conj(QA->c02[idx])*TMP->r1.c2[idx]));
 
-  r1_2 = -tr1*QA->rc11[idx]   + tr2*( QA->rc11[idx]*QA->rc11[idx]+QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]))
-    + f1 * TMP->r1.c1[idx] + f2*(-2.0*TMP->r1.c1[idx]*QA->rc11[idx]+(1.0*I)*(QA->c12[idx]*TMP->r2.c1[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]+
+  r1_2 = -tr1*QA->ic11[idx]   + tr2*( QA->ic11[idx]*QA->ic11[idx]+QA->c01[idx]*conj(QA->c01[idx]) + QA->c12[idx] * conj(QA->c12[idx]))
+    + f1 * TMP->r1.c1[idx] + f2*(-2.0*TMP->r1.c1[idx]*QA->ic11[idx]+(1.0*I)*(QA->c12[idx]*TMP->r2.c1[idx]-conj(QA->c01[idx])*TMP->r0.c1[idx]+
 									     QA->c01[idx]*TMP->r1.c0[idx]-conj(QA->c12[idx])*TMP->r1.c2[idx]));
 
-  r2_2 = (tr1*I)*QA->c12[idx] + tr2*((1.0*I)*QA->rc00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]))
-    + f1 * TMP->r1.c2[idx] + f2*(QA->rc00[idx]*TMP->r1.c2[idx]+(1.0*I)*(QA->c12[idx]*(TMP->r1.c1[idx]+TMP->r2.c2[idx]) 
+  r2_2 = (tr1*I)*QA->c12[idx] + tr2*((1.0*I)*QA->ic00[idx] * QA->c12[idx] + QA->c02[idx] * conj(QA->c01[idx]))
+    + f1 * TMP->r1.c2[idx] + f2*(QA->ic00[idx]*TMP->r1.c2[idx]+(1.0*I)*(QA->c12[idx]*(TMP->r1.c1[idx]+TMP->r2.c2[idx]) 
 									+QA->c02[idx]*TMP->r1.c0[idx]-conj(QA->c01[idx])*TMP->r0.c2[idx]));
   // terza riga
-  U20  = (-tr1*I)*conj(QA->c02[idx]) + tr2*((-1.0*I)*QA->rc11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]))
-    + f1 * TMP->r2.c0[idx] + f2 *(QA->rc11[idx]*TMP->r2.c0[idx]+(-1.0*I)*(conj(QA->c02[idx])*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
+  U20  = (-tr1*I)*conj(QA->c02[idx]) + tr2*((-1.0*I)*QA->ic11[idx]*conj(QA->c02[idx]) - conj(QA->c01[idx]*QA->c12[idx]))
+    + f1 * TMP->r2.c0[idx] + f2 *(QA->ic11[idx]*TMP->r2.c0[idx]+(-1.0*I)*(conj(QA->c02[idx])*(TMP->r0.c0[idx]+TMP->r2.c2[idx])+
 									  conj(QA->c01[idx])*TMP->r2.c1[idx]+conj(QA->c12[idx])*TMP->r1.c0[idx]));
 
-  U21  = (-tr1*I)*conj(QA->c12[idx]) + tr2*((-1.0*I)*QA->rc00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]))
-    + f1 * TMP->r2.c1[idx] + f2 *(QA->rc00[idx]*TMP->r2.c1[idx]+(1.0*I)*(QA->c01[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c1[idx]
+  U21  = (-tr1*I)*conj(QA->c12[idx]) + tr2*((-1.0*I)*QA->ic00[idx]*conj(QA->c12[idx]) + QA->c01[idx]*conj(QA->c02[idx]))
+    + f1 * TMP->r2.c1[idx] + f2 *(QA->ic00[idx]*TMP->r2.c1[idx]+(1.0*I)*(QA->c01[idx]*TMP->r2.c0[idx]-conj(QA->c02[idx])*TMP->r0.c1[idx]
 									 -conj(QA->c12[idx])*(TMP->r1.c1[idx]+TMP->r2.c2[idx])));
 
-  U22  = tr1*(QA->rc00[idx]+QA->rc11[idx])+ tr2*((QA->rc00[idx]+QA->rc11[idx])*(QA->rc00[idx]+QA->rc11[idx])
+  U22  = tr1*(QA->ic00[idx]+QA->ic11[idx])+ tr2*((QA->ic00[idx]+QA->ic11[idx])*(QA->ic00[idx]+QA->ic11[idx])
 						 + QA->c02[idx] * conj(QA->c02[idx])+ QA->c12[idx] * conj(QA->c12[idx]))
-    + f1 * TMP->r2.c2[idx] + f2 *(2.0*(QA->rc00[idx]+QA->rc11[idx])*TMP->r2.c2[idx]+(1.0*I)*(QA->c02[idx]*TMP->r2.c0[idx]+QA->c12[idx]*TMP->r2.c1[idx]
+    + f1 * TMP->r2.c2[idx] + f2 *(2.0*(QA->ic00[idx]+QA->ic11[idx])*TMP->r2.c2[idx]+(1.0*I)*(QA->c02[idx]*TMP->r2.c0[idx]+QA->c12[idx]*TMP->r2.c1[idx]
 											     -conj(QA->c02[idx])*TMP->r0.c2[idx]
 											     -conj(QA->c12[idx])*TMP->r1.c2[idx]));
 
@@ -617,12 +617,12 @@ static inline void compute_sigma_local_PEZZO1(__restrict thmat_soa * const L,  /
     //Calcolo il PEZZO 1 e lo metto in RES
 
     //////  CALCOLO TMP = EXP(iQ)
-    TMP->r0.c0[idx] =f0-f1  *QA->rc00[idx]+f2*(QA->rc00[idx]*QA->rc00[idx]+QA->c01[idx]*conj(QA->c01[idx]) + QA->c02[idx]*conj(QA->c02[idx]));
-    TMP->r0.c1[idx] =( f1*I)*QA->c01[idx] +f2*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)* QA->c01[idx] * ( QA->rc00[idx] + QA->rc11[idx]));
-    TMP->r0.c2[idx] =( f1*I)*QA->c02[idx] +f2*(-QA->c01[idx] * QA->c12[idx]+( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
-    TMP->r1.c0[idx] =(-f1*I)*conj(QA->c01[idx])+ f2*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I) * conj(QA->c01[idx]) * ( QA->rc00[idx] + QA->rc11[idx]));
-    TMP->r1.c1[idx] =f0-f1*QA->rc11[idx]  +f2*(QA->rc11[idx] * QA->rc11[idx]+ QA->c01[idx] * conj(QA->c01[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
-    TMP->r1.c2[idx] =( f1*I)*QA->c12[idx] + f2*((1.0*I)*QA->rc00[idx] * QA->c12[idx]+ QA->c02[idx] * conj(QA->c01[idx]));
+    TMP->r0.c0[idx] =f0-f1  *QA->ic00[idx]+f2*(QA->ic00[idx]*QA->ic00[idx]+QA->c01[idx]*conj(QA->c01[idx]) + QA->c02[idx]*conj(QA->c02[idx]));
+    TMP->r0.c1[idx] =( f1*I)*QA->c01[idx] +f2*(QA->c02[idx]*conj(QA->c12[idx])+(-1.0*I)* QA->c01[idx] * ( QA->ic00[idx] + QA->ic11[idx]));
+    TMP->r0.c2[idx] =( f1*I)*QA->c02[idx] +f2*(-QA->c01[idx] * QA->c12[idx]+( 1.0*I)* QA->c02[idx] * QA->ic11[idx]);
+    TMP->r1.c0[idx] =(-f1*I)*conj(QA->c01[idx])+ f2*(QA->c12[idx]*conj(QA->c02[idx])+(1.0*I) * conj(QA->c01[idx]) * ( QA->ic00[idx] + QA->ic11[idx]));
+    TMP->r1.c1[idx] =f0-f1*QA->ic11[idx]  +f2*(QA->ic11[idx] * QA->ic11[idx]+ QA->c01[idx] * conj(QA->c01[idx])+ QA->c12[idx] * conj(QA->c12[idx]));
+    TMP->r1.c2[idx] =( f1*I)*QA->c12[idx] + f2*((1.0*I)*QA->ic00[idx] * QA->c12[idx]+ QA->c02[idx] * conj(QA->c01[idx]));
     TMP->r2.c0[idx] = conj(TMP->r0.c1[idx] * TMP->r1.c2[idx]  - TMP->r0.c2[idx]  * TMP->r1.c1[idx]);
     TMP->r2.c1[idx] = conj(TMP->r0.c2[idx] * TMP->r1.c0[idx]  - TMP->r0.c0[idx]  * TMP->r1.c2[idx]);
     TMP->r2.c2[idx] = conj(TMP->r0.c0[idx] * TMP->r1.c1[idx]  - TMP->r0.c1[idx]  * TMP->r1.c0[idx]);

@@ -3,13 +3,13 @@
 
 #include "./struct_c_def.h"
 
-void print_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int conf_id_iter);
-void print_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int conf_id_iter);
+void print_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int conf_id_iter);
+void print_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,int conf_id_iter);
 
 
 
 //WRAPPER
-inline void save_conf(su3_soa * const conf, const char* nomefile,int conf_id_iter,int use_ildg){
+inline void save_conf(global_su3_soa * const conf, const char* nomefile,int conf_id_iter,int use_ildg){
 
     if(use_ildg){
         printf("Using ILDG format.\n");
@@ -20,11 +20,11 @@ inline void save_conf(su3_soa * const conf, const char* nomefile,int conf_id_ite
 
 }
 
-int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter );
-int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_iter );
+int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id_iter );
+int read_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,int * conf_id_iter );
 
 //WRAPPER
-inline int read_conf(su3_soa * conf, const char* nomefile,int * conf_id_iter, int use_ildg ){
+inline int read_conf(global_su3_soa * conf, const char* nomefile,int * conf_id_iter, int use_ildg ){
 
 
     printf("Reading configuration. ");
@@ -41,8 +41,7 @@ inline int read_conf(su3_soa * conf, const char* nomefile,int * conf_id_iter, in
 }
 
 // READ AND WRITE FOR THE POOR MAN
-void write_conf_binary_chunks(su3_soa * conf, const char *rootname,int nchunks);
-
-void read_conf_binary_chunks(su3_soa * conf, const char *rootname,int chunk);
+//void write_conf_binary_chunks(su3_soa * conf, const char *rootname,int nchunks);
+//void read_conf_binary_chunks(su3_soa * conf, const char *rootname,int chunk);
 
 #endif 

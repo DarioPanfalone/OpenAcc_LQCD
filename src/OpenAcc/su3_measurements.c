@@ -148,8 +148,8 @@ double calc_diff_force_norm(const __restrict tamat_soa * tipdot,
 #pragma acc loop reduction(+:result)
             for(mu=0; mu < 8; mu++) // CHECK IF WORKS
             {
-                double A = tipdot[mu].rc00[t]-tipdot_old[mu].rc00[t];
-                double B = tipdot[mu].rc11[t]-tipdot_old[mu].rc11[t];
+                double A = tipdot[mu].ic00[t]-tipdot_old[mu].ic00[t];
+                double B = tipdot[mu].ic11[t]-tipdot_old[mu].ic11[t];
                 d_complex C = tipdot[mu].c01[t]-tipdot_old[mu].c01[t]; 
                 d_complex D = tipdot[mu].c02[t]-tipdot_old[mu].c02[t];
                 d_complex E = tipdot[mu].c12[t]-tipdot_old[mu].c12[t];
@@ -179,8 +179,8 @@ void copy_ipdot_into_old(
 #pragma acc loop
             for(mu=0; mu < 8; mu++) // CHECK IF WORKS
             {
-                tipdot_old[mu].rc00[t] = tipdot[mu].rc00[t];
-                tipdot_old[mu].rc11[t] = tipdot[mu].rc11[t];
+                tipdot_old[mu].ic00[t] = tipdot[mu].ic00[t];
+                tipdot_old[mu].ic11[t] = tipdot[mu].ic11[t];
                 tipdot_old[mu].c01[t]  = tipdot[mu].c01[t] ; 
                 tipdot_old[mu].c02[t]  = tipdot[mu].c02[t] ;
                 tipdot_old[mu].c12[t]  = tipdot[mu].c12[t] ;

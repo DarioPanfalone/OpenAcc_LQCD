@@ -68,8 +68,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
     if(verbosity_lv > 5) {// printing stuff
 #pragma acc update host(QA[0:8])
         printf("-------------Q------------------\n");
-        printf("Q00 = %.18lf\n",QA[0].rc00[0]);
-        printf("Q00 = %.18lf\n",QA[0].rc11[0]);
+        printf("Q00 = %.18lf\n",QA[0].ic00[0]);
+        printf("Q00 = %.18lf\n",QA[0].ic11[0]);
         printf("Q01 = %.18lf + (%.18lf)*I\n",creal(QA[0].c01[0]),cimag(QA[0].c01[0]));
         printf("Q02 = %.18lf + (%.18lf)*I\n",creal(QA[0].c02[0]),cimag(QA[0].c02[0]));
         printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));

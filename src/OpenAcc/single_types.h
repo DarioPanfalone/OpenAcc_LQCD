@@ -27,8 +27,8 @@ typedef struct single_tamat_t {
   d_complex c01; // comp_01
   d_complex c02; // comp_02
   d_complex c12; // comp_12
-  double rc00;   // Im(comp_00)
-  double rc11;   // Im(comp_11)
+  double ic00;   // Im(comp_00)
+  double ic11;   // Im(comp_11)
 } single_tamat;
 typedef struct single_thmat_t {
   d_complex c01; // comp_01
@@ -63,31 +63,31 @@ static inline void thmat_to_su3(single_su3 * out, single_thmat * Q){
 }
 static inline void tamat_to_su3(single_su3 * out, single_tamat * QA){
 
-    out->comp[0][0] =     I* QA->rc00 ; 
+    out->comp[0][0] =     I* QA->ic00 ; 
     out->comp[0][1] =      QA->c01 ;
     out->comp[0][2] =      QA->c02 ;
     out->comp[1][0] = -conj(QA->c01) ;
-    out->comp[1][1] =     I* QA->rc11 ; 
+    out->comp[1][1] =     I* QA->ic11 ; 
     out->comp[1][2] =      QA->c12 ;
     out->comp[2][0] = -conj(QA->c02);
     out->comp[2][1] = -conj(QA->c12);
-    out->comp[2][2] =    (- QA->rc00 - QA->rc11)*I ; 
+    out->comp[2][2] =    (- QA->ic00 - QA->ic11)*I ; 
 
 
 }
 static inline void i_times_tamat_to_su3(single_su3 * out, single_tamat * QA){
   //I*tamat is a thmat
-    out->comp[0][0] =           - QA->rc00 ; 
+    out->comp[0][0] =           - QA->ic00 ; 
     out->comp[0][1] =   (1.0*I) * QA->c01  ;
     out->comp[0][2] =   (1.0*I) * QA->c02  ;
 
     out->comp[1][0] =   (-1.0*I) * conj(QA->c01) ;
-    out->comp[1][1] =           - QA->rc11 ; 
+    out->comp[1][1] =           - QA->ic11 ; 
     out->comp[1][2] =   (1.0*I) * QA->c12  ;
 
     out->comp[2][0] =   (-1.0*I) * conj(QA->c02) ;
     out->comp[2][1] =   (-1.0*I) * conj(QA->c12) ;
-    out->comp[2][2] =   QA->rc00 + QA->rc11; 
+    out->comp[2][2] =   QA->ic00 + QA->ic11; 
 }
 static inline void gl3_to_tamat(single_su3 * in , single_tamat * out){
 
@@ -97,8 +97,8 @@ static inline void gl3_to_tamat(single_su3 * in , single_tamat * out){
      out->c02 = 0.5*(in->comp[0][2] - conj(in->comp[2][0]));
      out->c12 = 0.5*(in->comp[1][2] - conj(in->comp[2][1]));
 
-     out->rc00 = cimag(in->comp[0][0])-im_trace_third;
-     out->rc11 = cimag(in->comp[1][1])-im_trace_third;
+     out->ic00 = cimag(in->comp[0][0])-im_trace_third;
+     out->ic11 = cimag(in->comp[1][1])-im_trace_third;
 
 }
 static inline void gl3_to_thmat(single_su3 * in , single_thmat * out){
@@ -124,6 +124,15 @@ static inline void single_su3_from_su3_soa( __restrict su3_soa * const mat, cons
   Omat->comp[1][2] = mat->r1.c2[idx_mat];
 
 }
+static inline void single_su3_from_global_su3_soa( __restrict global_su3_soa * const mat, const int idx_mat,						  single_su3 * Omat){
+  Omat->comp[0][0] = mat->r0.c0[idx_mat];
+  Omat->comp[0][1] = mat->r0.c1[idx_mat];
+  Omat->comp[0][2] = mat->r0.c2[idx_mat];
+  Omat->comp[1][0] = mat->r1.c0[idx_mat];
+  Omat->comp[1][1] = mat->r1.c1[idx_mat];
+  Omat->comp[1][2] = mat->r1.c2[idx_mat];
+
+}
 static inline void single_gl3_from_su3_soa( __restrict su3_soa * const mat, const int idx_mat, single_su3 * Omat){
     single_su3_from_su3_soa(mat,idx_mat,Omat);
     Omat->comp[2][0] = mat->r2.c0[idx_mat];
@@ -133,8 +142,8 @@ static inline void single_gl3_from_su3_soa( __restrict su3_soa * const mat, cons
 }
 static inline void single_tamat_from_tamat_soa(__restrict tamat_soa * in, int idx, single_tamat * out){
 
-    out->rc00 = in->rc00[idx];
-    out->rc11 = in->rc11[idx];
+    out->ic00 = in->ic00[idx];
+    out->ic11 = in->ic11[idx];
     out->c01 = in->c01[idx];
     out->c02 = in->c02[idx];
     out->c12 = in->c12[idx];
@@ -154,6 +163,14 @@ static inline void single_thmat_from_thmat_soa(__restrict thmat_soa * in, int id
 
 //insertion into soas
 static inline void single_su3_into_su3_soa( __restrict su3_soa * const mat, const int idx_mat,  single_su3 * Imat){
+  mat->r0.c0[idx_mat] = Imat->comp[0][0];
+  mat->r0.c1[idx_mat] = Imat->comp[0][1];
+  mat->r0.c2[idx_mat] = Imat->comp[0][2];
+  mat->r1.c0[idx_mat] = Imat->comp[1][0];
+  mat->r1.c1[idx_mat] = Imat->comp[1][1];
+  mat->r1.c2[idx_mat] = Imat->comp[1][2];
+}
+static inline void single_su3_into_global_su3_soa( __restrict global_su3_soa * const mat, const int idx_mat,  single_su3 * Imat){
   mat->r0.c0[idx_mat] = Imat->comp[0][0];
   mat->r0.c1[idx_mat] = Imat->comp[0][1];
   mat->r0.c2[idx_mat] = Imat->comp[0][2];
@@ -185,8 +202,8 @@ static inline void single_gl3_addinto_su3_soa( __restrict su3_soa * const mat, c
 }
 static inline void single_tamat_into_tamat_soa(__restrict tamat_soa * out, int idx, single_tamat * in){
 
-    out->rc00[idx] = in->rc00;
-    out->rc11[idx] = in->rc11;
+    out->ic00[idx] = in->ic00;
+    out->ic11[idx] = in->ic11;
     out->c01[idx]  = in->c01  ;
     out->c02[idx]  = in->c02  ;
     out->c12[idx]  = in->c12  ;
@@ -206,17 +223,17 @@ static inline void single_thmat_into_thmat_soa(__restrict thmat_soa * out, int i
 //misc. extraction and conversion
 static inline void i_times_tamat_soa_to_su3(single_su3 * out, __restrict tamat_soa * const QA,const int idx){
   //I*tamat is a thmat
-    out->comp[0][0] =           - QA->rc00[idx] ; 
+    out->comp[0][0] =           - QA->ic00[idx] ; 
     out->comp[0][1] =   (1.0*I) * QA->c01[idx]  ;
     out->comp[0][2] =   (1.0*I) * QA->c02[idx]  ;
 
     out->comp[1][0] =   (-1.0*I) * conj(QA->c01[idx]) ;
-    out->comp[1][1] =           - QA->rc11[idx] ; 
+    out->comp[1][1] =           - QA->ic11[idx] ; 
     out->comp[1][2] =   (1.0*I) * QA->c12[idx]  ;
 
     out->comp[2][0] =   (-1.0*I) * conj(QA->c02[idx]) ;
     out->comp[2][1] =   (-1.0*I) * conj(QA->c12[idx]) ;
-    out->comp[2][2] =   QA->rc00[idx] + QA->rc11[idx]; 
+    out->comp[2][2] =   QA->ic00[idx] + QA->ic11[idx]; 
 
 
 }
@@ -246,13 +263,13 @@ static inline double detQ(single_thmat *Q){
 }
 static inline double det_i_times_QA(__restrict single_tamat * const QA){
 
-    double rc22 = -QA->rc00-QA->rc11 ; 
+    double ic22 = -QA->ic00-QA->ic11 ; 
 
-    return -creal(  QA->rc00 * QA->rc11 * rc22
+    return -creal(  QA->ic00 * QA->ic11 * ic22
 		  + 2*cimag(QA->c01 * QA->c12 * conj(QA->c02))
-		  - QA->rc00 * QA->c12 * conj(QA->c12)
-		  - QA->rc11 * QA->c02 * conj(QA->c02)
-      	          - rc22 * QA->c01 * conj(QA->c01) );
+		  - QA->ic00 * QA->c12 * conj(QA->c12)
+		  - QA->ic11 * QA->c02 * conj(QA->c02)
+      	          - ic22 * QA->c01 * conj(QA->c01) );
 
 }
 static inline void print_su3_stdout(single_su3 *m){
@@ -321,9 +338,9 @@ static inline d_complex detSu3(single_su3 *m){
 }
 static inline double Tr_i_times_QA_sq(__restrict single_tamat * const QA){
   // computes Tr( (i*QA)^2 )
-    return 2 * creal( QA->rc00 * QA->rc00 +
-		      QA->rc11 * QA->rc11 +
-		      QA->rc00 * QA->rc11 +
+    return 2 * creal( QA->ic00 * QA->ic00 +
+		      QA->ic11 * QA->ic11 +
+		      QA->ic00 * QA->ic11 +
 		      QA->c01  * conj(QA->c01) +
 		      QA->c02  * conj(QA->c02) +
 		      QA->c12  * conj(QA->c12) );

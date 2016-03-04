@@ -43,6 +43,7 @@
 #include "./backfield.h"
 #include "./action.h"
 #include "../Rand/random.h"
+#include "../Mpi/communications.h"
 
 
 //#define NORANDOM  // FOR debug, check also update_versatile.c 
@@ -98,28 +99,38 @@ int main(int argc, char* argv[]){
     initialize_md_global_variables(md_parameters);
     printf("init md vars : OK \n");
 
-    //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
+    //################## INIZIALIZZAZIONE DELLA CONFIGURAZIONE #######################
     // start from saved conf
     
 
 #ifdef NORANDOM
-    if(!read_conf(conf_acc,"conf_norndtest",&conf_id_iter),mkwch_pars.use_ildg) // READS ALSO THE conf_id_iter
-        printf("Stored Gauge Conf conf_norndtest Read : OK \n", mkwch_pars.save_conf_name);
-#else
-    if(!read_conf(conf_acc,mkwch_pars.save_conf_name,&conf_id_iter,mkwch_pars.use_ildg )) // READS ALSO THE conf_id_iter
-       printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
-#endif
+    if(!read_conf(conf_rw,"conf_norndtest",&conf_id_iter),mkwch_pars.use_ildg){
+        // READS ALSO THE conf_id_iter
+        printf("Stored Gauge Conf conf_norndtest Read : OK\n",mkwch_pars.save_conf_name);
+        send_lnh_subconf_to_buffer(conf_rw,conf_acc,0);
+    }
     else{
         // cold start
-#ifdef NORANDOM
-        printf("COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED \"conf_norndtest\" MUST BE PRESENT\n");
+        printf("COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED\
+\"conf_norndtest\" MUST BE PRESENT\n");
         exit(1);
+    }
+    
 #else
-        generate_Conf_cold(conf_acc,mkwch_pars.eps_gen);    printf("Cold Gauge Conf Generated : OK \n");
-#endif
+    if(!read_conf(conf_rw,mkwch_pars.save_conf_name,
+                &conf_id_iter,mkwch_pars.use_ildg)){
+       // READS ALSO THE conf_id_iter
+       printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
+       send_lnh_subconf_to_buffer(conf_rw,conf_acc,0);
+
+    }
+    else{
+        generate_Conf_cold(conf_acc,mkwch_pars.eps_gen);
+        printf("Cold Gauge Conf Generated : OK \n");
         conf_id_iter=0;
     }
-    //###############################################################################################  
+#endif
+    //#################################################################################  
 
 
 
@@ -270,11 +281,13 @@ int main(int argc, char* argv[]){
                     sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
                     printf("Storing conf %s.\n", tempname);
-                    save_conf(conf_acc,tempname,conf_id_iter,mkwch_pars.use_ildg);
+                    recv_loc_subconf_from_buffer(conf_rw,conf_acc,0);
+                    save_conf(conf_rw,tempname,conf_id_iter,mkwch_pars.use_ildg);
                 }
                 if(conf_id_iter%mkwch_pars.saveconfinterval==0){
                     printf("Saving conf %s.\n", mkwch_pars.save_conf_name);
-                    save_conf(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
+                    recv_loc_subconf_from_buffer(conf_rw,conf_acc,0);
+                    save_conf(conf_rw,mkwch_pars.save_conf_name, conf_id_iter,
                             mkwch_pars.use_ildg);
                 }
 
@@ -285,9 +298,11 @@ int main(int argc, char* argv[]){
 
             //--------- SALVA LA CONF SU FILE ------------------//
 
-            if(mkwch_pars.ntraj > 0) // MEASURES ONLY
-            save_conf(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
+            if(mkwch_pars.ntraj > 0){
+                    recv_loc_subconf_from_buffer(conf_rw,conf_acc,0);
+                    save_conf(conf_rw,mkwch_pars.save_conf_name, conf_id_iter,
                     mkwch_pars.use_ildg );
+            }
             //-------------------------------------------------//
 
 

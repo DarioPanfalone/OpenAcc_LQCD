@@ -145,6 +145,8 @@ void RHO_times_conf_times_staples_ta_part(__restrict su3_soa * const u,        /
   }  // d3
 
 }// closes routine
+
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void mom_sum_mult( __restrict thmat_soa * const mom,
 		   const __restrict tamat_soa * const ipdot,
 		   double * factor,
@@ -176,7 +178,10 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
     }  // d2
   }  // d3
 }// closes routine
-void kernel_acc_mom_exp_times_conf( __restrict su3_soa * const conf,
+
+ 
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
+void mom_exp_times_conf_soloopenacc( __restrict su3_soa * const conf,
 				    thmat_soa * const mom, // e' costante e qui dentro non viene modificato
 				    double * factor, // questo e' il vettore delta dove sono contenuti tutti i dt richiesti nell'omelyan
 				    int id_factor)
@@ -216,13 +221,8 @@ void kernel_acc_mom_exp_times_conf( __restrict su3_soa * const conf,
   }  // d3
 
 }
-void mom_exp_times_conf_soloopenacc(
-        __restrict  su3_soa * const tconf_acc,
- thmat_soa * const tmomenta, // e' costante e qui dentro non viene modificata
- double * tdelta,  int id_delta)
-{
-  kernel_acc_mom_exp_times_conf(tconf_acc,tmomenta,tdelta, id_delta);
-}
+
+
 #endif
 
 

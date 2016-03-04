@@ -22,7 +22,7 @@
 #include "../Include/init.h"
 
 
-void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_iter){
+void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int conf_id_iter){
 
     FILE *fp;
     fp = fopen(nomefile,"w");
@@ -42,10 +42,10 @@ void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_
 
     fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
     for(int q = 0 ; q < 8 ; q++){
-        for(int i = 0 ; i < sizeh ; i++){
+        for(int i = 0 ; i < GL_SIZEH ; i++){
             // rebuilding the 3rd row
             single_su3 aux;
-            single_su3_from_su3_soa(&conf[q],i,&aux);
+            single_su3_from_global_su3_soa(&conf[q],i,&aux);
             rebuild3row(&aux);
 
 
@@ -57,7 +57,7 @@ void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_
     }
     fclose(fp);
 }
-int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter ){
+int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id_iter ){
 
 
     FILE *fp;
@@ -88,7 +88,7 @@ int read_su3_soa_ASCII(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         }
 
         for(int q = 0 ; q < 8 ; q++){
-            for(int i = 0 ; i < sizeh ; i++){
+            for(int i = 0 ; i < GL_SIZEH ; i++){
                 double re,im;
                 single_su3 m;double det;
                 //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
@@ -339,12 +339,12 @@ int read_su3_soa_ildg_binary(
     fseeko(fg,ibd_start,SEEK_SET);
     int xl,yl,zl,tl,dir;//local coordinates
     set_geom_glv(&geom_par);// should be already done
-#ifdef MULTIDEV
+#ifdef MULTIDEVICE
     set_geom_glv_multidev(&geom_par_multidev);// should be already done
 #endif
-    for(tl=0;tl<geom_par.nd[tmap];tl++)for(zl=0;zl<geom_par.nd[zmap];zl++)
-        for(yl=0;yl<geom_par.nd[ymap];yl++) 
-            for(xl=0;xl<geom_par.nd[xmap];xl++)
+
+    for(tl=0;tl<nt;tl++)for(zl=0;zl<nz;zl++)
+        for(yl=0;yl<ny;yl++) for(xl=0;xl<nx;xl++)
         {
             // ILDG format on disk is not transposed,
             //  but conf in machine memory could be.
@@ -352,16 +352,15 @@ int read_su3_soa_ildg_binary(
             int d[4];
             for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
 
-            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
             int parity = (xl+yl+zl+tl)%2;// parity = (d0+d1+d2+d3)%2;
 
             int x = xl,y = yl ,z = zl, t = tl;
-#ifdef MULTIDEV
-            x += geom_par_multidev.gl_loc_origin4int.x;
-            y += geom_par_multidev.gl_loc_origin4int.y;
-            z += geom_par_multidev.gl_loc_origin4int.z;
-            t += geom_par_multidev.gl_loc_origin4int.t;
+#ifdef MULTIDEVICE
+            int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
+#else
+            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
 #endif
+
             for(dir=0;dir<4;dir++){
                 off_t mat_off_t = 
                     dir+4*(x+nx_r*(y+ny_r*(z+nz_r*t)))*sizeof(double)*18;
@@ -386,7 +385,7 @@ int read_su3_soa_ildg_binary(
                     }
                 }
                 int dirmachine = geom_par.xyztmap[dir];
-                single_su3_into_su3_soa(&conf[2*dirmachine+parity],idxh,&m);
+                single_su3_into_global_su3_soa(&conf[2*dirmachine+parity],idxh,&m);
 
             }
 
@@ -398,7 +397,7 @@ int read_su3_soa_ildg_binary(
 
 }
 
-void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
+void print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
         int conf_id_iter)
 {
     printf("Writing ildg conf...\n");
@@ -512,14 +511,18 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
             int d[4];
             for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
 
+#ifdef MULTIDEVICE
+            int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
+#else
             int idxh = snum_acc(d[0],d[1],d[2],d[3]);
+#endif
             int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
 
             for(dir=0;dir<4;dir++){
 
                 int dirmachine = geom_par.xyztmap[dir];
                 single_su3 m;          
-                single_su3_from_su3_soa(&conf[2*dirmachine+parity],idxh,&m);
+                single_su3_from_global_su3_soa(&conf[2*dirmachine+parity],idxh,&m);
                 rebuild3row(&m);
 
                 // fix enddiannes
@@ -562,20 +565,10 @@ void print_su3_soa_ildg_binary(su3_soa * const conf, const char* nomefile,
 
 
 
-     sprintf(chunkname,"%s.chunk%d",rootname,chunk);
 
 
 
-void write_conf_binary_chunks(su3_soa * conf, const char *rootname){
 
-    int chunk_elements = sizeh / 
-
-
-
-}
-
-
-void read_conf_binary_chunks(su3_soa * conf, const char *rootname);
 
 
 

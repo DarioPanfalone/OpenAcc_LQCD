@@ -87,8 +87,8 @@ void print_tamat_soa(tamat_soa * const ipdot, const char* nomefile)
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
-            fprintf(fp, "%.18lf\n",ipdot[q].rc00[i]);
-            fprintf(fp, "%.18lf\n",ipdot[q].rc11[i]);
+            fprintf(fp, "%.18lf\n",ipdot[q].ic00[i]);
+            fprintf(fp, "%.18lf\n",ipdot[q].ic11[i]);
         }
     }
     fclose(fp);
@@ -110,8 +110,8 @@ int read_tamat_soa(tamat_soa * ipdot, const char* nomefile)
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c01[i] = re + im * I;
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c02[i] = re + im * I;
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c12[i] = re + im * I;//
-            CHECKREAD(fscanf(fp, "%lf\n",&(ipdot[q].rc00[i])),2);
-            CHECKREAD(fscanf(fp, "%lf\n",&(ipdot[q].rc11[i])),2);
+            CHECKREAD(fscanf(fp, "%lf\n",&(ipdot[q].ic00[i])),2);
+            CHECKREAD(fscanf(fp, "%lf\n",&(ipdot[q].ic11[i])),2);
         }
     }
     fclose(fp);

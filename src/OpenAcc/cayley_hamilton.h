@@ -23,21 +23,21 @@
 #pragma acc routine seq
 static inline double det_i_times_QA_soa( __restrict tamat_soa * const QA,const int idx){
 
-    double rc22 = -QA->rc00[idx]-QA->rc11[idx] ;
+    double ic22 = -QA->ic00[idx]-QA->ic11[idx] ;
 
-    return -creal(          QA->rc00[idx] *      QA->rc11[idx] * rc22
+    return -creal(          QA->ic00[idx] *      QA->ic11[idx] * ic22
 		  + 2*cimag(QA->c01[idx]  *      QA->c12[idx]  * conj(QA->c02[idx]))
-		  -         QA->rc00[idx] *      QA->c12[idx]  * conj(QA->c12[idx])
-		  -         QA->rc11[idx] *      QA->c02[idx]  * conj(QA->c02[idx])
-      	          -         QA->c01[idx]  * conj(QA->c01[idx]) * rc22  );
+		  -         QA->ic00[idx] *      QA->c12[idx]  * conj(QA->c12[idx])
+		  -         QA->ic11[idx] *      QA->c02[idx]  * conj(QA->c02[idx])
+      	          -         QA->c01[idx]  * conj(QA->c01[idx]) * ic22  );
 
 }
 #pragma acc routine seq
 static inline double Tr_i_times_QA_sq_soa( __restrict tamat_soa * const QA,const int idx){
   // computes Tr( (i*QA)^2 )
-    return 2 * creal( QA->rc00[idx] * QA->rc00[idx] +
-		      QA->rc11[idx] * QA->rc11[idx] +
-		      QA->rc00[idx] * QA->rc11[idx] +
+    return 2 * creal( QA->ic00[idx] * QA->ic00[idx] +
+		      QA->ic11[idx] * QA->ic11[idx] +
+		      QA->ic00[idx] * QA->ic11[idx] +
 		      QA->c01[idx]  * conj(QA->c01[idx]) +
 		      QA->c02[idx]  * conj(QA->c02[idx]) +
 		      QA->c12[idx]  * conj(QA->c12[idx]) );
@@ -131,33 +131,33 @@ static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa
 
     }
   // first term in eq. 19
-  exp_out->r0.c0[idx] = f0 -   f1    * QA->rc00[idx]
-                      + f2 * (  QA->rc00[idx] *      QA->rc00[idx]
+  exp_out->r0.c0[idx] = f0 -   f1    * QA->ic00[idx]
+                      + f2 * (  QA->ic00[idx] *      QA->ic00[idx]
 			      + QA->c01[idx]  * conj(QA->c01[idx])
 		              + QA->c02[idx]  * conj(QA->c02[idx]));
 
   exp_out->r0.c1[idx] =      ( f1*I) *  QA->c01[idx]
                              + f2    * (QA->c02[idx] * conj(QA->c12[idx])
-                  	                + (-1.0*I)* QA->c01[idx] * ( QA->rc00[idx] + QA->rc11[idx]));
+                  	                + (-1.0*I)* QA->c01[idx] * ( QA->ic00[idx] + QA->ic11[idx]));
 
 
   exp_out->r0.c2[idx] =      ( f1*I) * QA->c02[idx]        
                              + f2    * (-QA->c01[idx] * QA->c12[idx]
-					+ ( 1.0*I)* QA->c02[idx] * QA->rc11[idx]);
+					+ ( 1.0*I)* QA->c02[idx] * QA->ic11[idx]);
 
 
   exp_out->r1.c0[idx] =      (-f1*I) * conj(QA->c01[idx])  
                              + f2    * ( QA->c12[idx] * conj(QA->c02[idx])
-				        + ( 1.0*I) * conj(QA->c01[idx]) * ( QA->rc00[idx] + QA->rc11[idx]));
+				        + ( 1.0*I) * conj(QA->c01[idx]) * ( QA->ic00[idx] + QA->ic11[idx]));
 
 
-  exp_out->r1.c1[idx] = f0 -   f1    * QA->rc11[idx]       
-                             + f2    * ( QA->rc11[idx] * QA->rc11[idx]
+  exp_out->r1.c1[idx] = f0 -   f1    * QA->ic11[idx]       
+                             + f2    * ( QA->ic11[idx] * QA->ic11[idx]
                                        + QA->c01[idx] * conj(QA->c01[idx])
 					 + QA->c12[idx] * conj(QA->c12[idx]));
 
   exp_out->r1.c2[idx] =      ( f1*I) * QA->c12[idx]        
-                                        + f2 * ( (1.0*I)*QA->rc00[idx] * QA->c12[idx] 
+                                        + f2 * ( (1.0*I)*QA->ic00[idx] * QA->c12[idx] 
 					+ QA->c02[idx] * conj(QA->c01[idx]));
 
 
@@ -180,33 +180,33 @@ inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2
 // P = f0 + f1 * Q + f2 * Q^2 = f0 + i * f1 * QA - f2 * QA^2
 
 
-    out->comp[0][0] = f0 -   f1    * QA->rc00
-        + f2 * (  QA->rc00 *      QA->rc00
+    out->comp[0][0] = f0 -   f1    * QA->ic00
+        + f2 * (  QA->ic00 *      QA->ic00
                 + QA->c01  * conj(QA->c01)
                 + QA->c02  * conj(QA->c02));
 
     out->comp[0][1] =      ( f1*I) *  QA->c01
         + f2    * (QA->c02 * conj(QA->c12)
-                + (-1.0*I)* QA->c01 * ( QA->rc00 + QA->rc11));
+                + (-1.0*I)* QA->c01 * ( QA->ic00 + QA->ic11));
 
 
     out->comp[0][2] =      ( f1*I) * QA->c02        
         + f2    * (-QA->c01 * QA->c12
-                + ( 1.0*I)* QA->c02 * QA->rc11);
+                + ( 1.0*I)* QA->c02 * QA->ic11);
 
 
     out->comp[1][0] =      (-f1*I) * conj(QA->c01)  
         + f2    * ( QA->c12 * conj(QA->c02)
-                + ( 1.0*I) * conj(QA->c01) * ( QA->rc00 + QA->rc11));
+                + ( 1.0*I) * conj(QA->c01) * ( QA->ic00 + QA->ic11));
 
 
-    out->comp[1][1] = f0 -   f1    * QA->rc11       
-        + f2    * ( QA->rc11 * QA->rc11
+    out->comp[1][1] = f0 -   f1    * QA->ic11       
+        + f2    * ( QA->ic11 * QA->ic11
                 + QA->c01 * conj(QA->c01)
                 + QA->c12 * conj(QA->c12));
 
     out->comp[1][2] =      ( f1*I) * QA->c12        
-        + f2 * ( (1.0*I)*QA->rc00 * QA->c12 
+        + f2 * ( (1.0*I)*QA->ic00 * QA->c12 
                 + QA->c02 * conj(QA->c01));
 
 }
@@ -216,15 +216,15 @@ inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_
     Itamat_2ndDeg_poly_no3rdrow(f0,f1,f2,QA,out);
 
     out->comp[2][0] = (f1*I) * (-conj(QA->c02)) 
-        - f2 * conj(QA->c01 * QA->c12 - QA->c02 * QA->rc11 * I );
+        - f2 * conj(QA->c01 * QA->c12 - QA->c02 * QA->ic11 * I );
 
     out->comp[2][1] = (f1*I) * (-conj(QA->c12))
-        - f2 * (-conj(QA->c02) * QA->c01 + conj(QA->c12)* QA->rc00 * I );
+        - f2 * (-conj(QA->c02) * QA->c01 + conj(QA->c12)* QA->ic00 * I );
 
 
-    out->comp[2][2] = f0 + f1*(QA->rc00 + QA->rc11)
+    out->comp[2][2] = f0 + f1*(QA->ic00 + QA->ic11)
         +  f2 * (QA->c02 * conj(QA->c02) + QA->c12 * conj(QA->c12)
-               +  (QA->rc00 + QA->rc11 ) *  (QA->rc00 + QA->rc11 ) );
+               +  (QA->ic00 + QA->ic11 ) *  (QA->ic00 + QA->ic11 ) );
 
 
 }

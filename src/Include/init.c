@@ -480,16 +480,24 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
     set_geom_glv(gpar);
 
     if(startline<endline){
-    if(gpar->gnx != gpar->nd[gpar->xmap] || gpar->gny != gpar->nd[gpar->ymap] ||
-            gpar->gnz != gpar->nd[gpar->zmap] || gpar->gnt != gpar->nd[gpar->tmap] ){ 
+
+        int expnx = gpar->nd[gpar->xmap] * gpar->nranks[gpar->xmap]; 
+        int expny = gpar->nd[gpar->ymap] * gpar->nranks[gpar->ymap]; 
+        int expnz = gpar->nd[gpar->zmap] * gpar->nranks[gpar->zmap]; 
+        int expnt = gpar->nd[gpar->tmap] * gpar->nranks[gpar->tmap]; 
+
+    if(gpar->gnx != expnx || gpar->gny != expny ||
+            gpar->gnz != expnz  || gpar->gnt != expnt ){ 
         printf("Error, input file lattice dimensions are not compatible\n");
         printf("       with the lattice dimensions written in geometry.h.\n");
         printf("       Either modify the input file, or recompile,\n");
         printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
                                gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
-        printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",
-                gpar->nd[gpar->xmap], gpar->nd[gpar->ymap],
-                gpar->nd[gpar->zmap], gpar->nd[gpar->tmap]);
+        printf("(code)  nx=%dx%d\tny=%dx%d\tnz=%dx%d\tnt=%dx%d\n",
+                gpar->nd[gpar->xmap], gpar->nranks[gpar->xmap],
+                gpar->nd[gpar->ymap], gpar->nranks[gpar->ymap],
+                gpar->nd[gpar->zmap], gpar->nranks[gpar->zmap],
+                gpar->nd[gpar->tmap], gpar->nranks[gpar->tmap]);
         exit(1);
     }
     int maps[4] = {gpar->xmap,gpar->ymap,gpar->zmap,gpar->tmap};

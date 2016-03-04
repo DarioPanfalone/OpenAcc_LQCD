@@ -48,10 +48,6 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
         const __restrict tamat_soa * const ipdot, double * factor,
         int id_factor);
 
-void kernel_acc_mom_exp_times_conf( __restrict su3_soa * const conf,
-thmat_soa * const mom, // e' costante e qui dentro non viene modificato
-double * factor, // questo e' il vettore delta dove sono contenuti tutti i dt richiesti nell'omelyan
-int id_factor);
 
 // Ora che abbiamo tolto i prodotti con le fasi staggered questo e' diventato un wrapper inutile... lo togliamo poi ... 
 void mom_exp_times_conf_soloopenacc(
@@ -432,8 +428,8 @@ static inline void mat1_times_mat2_into_tamat3(__restrict su3_soa * const mat1,
   mat3->c01[idx_mat3]  = 0.5*(mat3_01-conj(mat1_00));
   mat3->c02[idx_mat3]  = 0.5*(mat3_02-conj(mat1_10));
   mat3->c12[idx_mat3]  = 0.5*(mat1_02-conj(mat1_11));
-  mat3->rc00[idx_mat3] = cimag(mat3_00)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
-  mat3->rc11[idx_mat3] = cimag(mat1_01)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
+  mat3->ic00[idx_mat3] = cimag(mat3_00)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
+  mat3->ic11[idx_mat3] = cimag(mat1_01)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
 }
 
 #pragma acc routine seq
@@ -485,8 +481,8 @@ static inline void RHO_times_mat1_times_mat2_into_tamat3(__restrict su3_soa * co
   mat3->c01[idx_mat3]  = tmp*(0.5*(mat3_01-conj(mat1_00)));
   mat3->c02[idx_mat3]  = tmp*(0.5*(mat3_02-conj(mat1_10)));
   mat3->c12[idx_mat3]  = tmp*(0.5*(mat1_02-conj(mat1_11)));
-  mat3->rc00[idx_mat3] = tmp*((cimag(mat3_00)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12))));
-  mat3->rc11[idx_mat3] = tmp*((cimag(mat1_01)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12))));
+  mat3->ic00[idx_mat3] = tmp*((cimag(mat3_00)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12))));
+  mat3->ic11[idx_mat3] = tmp*((cimag(mat1_01)-ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12))));
 }
 
 // mat1 = mat1 * integer factor
@@ -574,8 +570,8 @@ static inline double half_tr_tamat_squared( const __restrict tamat_soa * const m
   d_complex  C = mom->c01[idx_mom];
   d_complex  D = mom->c02[idx_mom];
   d_complex  E = mom->c12[idx_mom];
-  double    A = mom->rc00[idx_mom];
-  double    B = mom->rc11[idx_mom];
+  double    A = mom->ic00[idx_mom];
+  double    B = mom->ic11[idx_mom];
   return A*A + B*B + A*B + creal(C)*creal(C) + cimag(C)*cimag(C) + creal(D)*creal(D) + cimag(D)*cimag(D) + creal(E)*creal(E) + cimag(E)*cimag(E);
   
 }
@@ -622,8 +618,8 @@ static inline void thmat1_plus_tamat2_times_factor_into_thmat1(__restrict thmat_
   thm1->c01[idx]  -= ifact * tam2->c01[idx]; // complex
   thm1->c02[idx]  -= ifact * tam2->c02[idx]; // complex
   thm1->c12[idx]  -= ifact * tam2->c12[idx]; // complex
-  thm1->rc00[idx] += fact * tam2->rc00[idx];  // double
-  thm1->rc11[idx] += fact * tam2->rc11[idx];  // double
+  thm1->rc00[idx] += fact * tam2->ic00[idx];  // double
+  thm1->rc11[idx] += fact * tam2->ic11[idx];  // double
   
 }
 

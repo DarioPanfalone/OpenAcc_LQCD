@@ -98,8 +98,8 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
   ipdot->c01[idipdot]  -= 0.5*((a01) - conj(mat1_00));
   ipdot->c02[idipdot]  -= 0.5*((a02) - conj(mat1_10));
   ipdot->c12[idipdot]  -= 0.5*((mat1_02) - conj(mat1_11));
-  ipdot->rc00[idipdot] -= cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
-  ipdot->rc11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
+  ipdot->ic00[idipdot] -= cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
+  ipdot->ic11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
 
 }
 
@@ -149,8 +149,8 @@ static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * 
   ipdot->c01[idipdot]  -= 0.5*((a01) - conj(mat1_00));
   ipdot->c02[idipdot]  -= 0.5*((a02) - conj(mat1_10));
   ipdot->c12[idipdot]  -= 0.5*((mat1_02) - conj(mat1_11));
-  ipdot->rc00[idipdot] -= cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
-  ipdot->rc11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
+  ipdot->ic00[idipdot] -= cimag(a00)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
+  ipdot->ic11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
 
 }
 #endif // ifdef STOUT_FERMIONS
@@ -208,8 +208,8 @@ static inline void assign_zero_to_tamat_soa_component(__restrict tamat_soa * con
   matrix_comp->c01[idx]=0.0+I*0.0;
   matrix_comp->c02[idx]=0.0+I*0.0;
   matrix_comp->c12[idx]=0.0+I*0.0;
-  matrix_comp->rc00[idx]=0.0;
-  matrix_comp->rc11[idx]=0.0;
+  matrix_comp->ic00[idx]=0.0;
+  matrix_comp->ic11[idx]=0.0;
 }
 
 void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix);

@@ -16,6 +16,7 @@ extern int verbosity_lv;
 
 extern tamat_soa * ipdot_g_old; // see alloc_vars.c
 
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
 
 #ifdef TIMING_STAPLES
@@ -35,6 +36,7 @@ void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  _
 
 }
 
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void calc_ipdot_gauge_soloopenacc_tlsm( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
 
 #ifdef TIMING_STAPLES
@@ -62,6 +64,7 @@ void calc_ipdot_gauge_soloopenacc_tlsm( __restrict  su3_soa * const tconf_acc,  
 
 }
 
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot){
     if(GAUGE_ACTION==0){
         calc_ipdot_gauge_soloopenacc_std(tconf_acc,local_staples,tipdot);

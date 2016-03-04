@@ -15,6 +15,7 @@
 #include "./action.h"
 
 #define ALIGN 128
+global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 su3_soa  * conf_acc; // the gauge configuration.
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
                          // if the metro test fails.
@@ -83,13 +84,16 @@ void mem_alloc()
 
 
 
+  allocation_check =  posix_memalign((void **)&conf_rw, ALIGN,8*sizeof(global_su3_soa));
+  ALLOCCHECK(allocation_check, conf_rw);
   allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
   ALLOCCHECK(allocation_check, conf_acc);
 
 
 
 
-  //the double bracket in the setfree macro MUST be there (because of operators precedence)
+
+  //the double bracket in the setfree macro MUST be there(because of operators precedence)
   allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_conf_acc[mu])); 
   allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&auxbis_conf_acc[mu]));
   ALLOCCHECK(allocation_check, auxbis_conf_acc ) ;

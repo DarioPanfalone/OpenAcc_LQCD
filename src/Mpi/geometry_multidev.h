@@ -57,9 +57,27 @@
 #define nd2 LNH_N2
 #define nd3 LNH_N3
 
-#ifdef MULTIDEVICE
+// GLOBAL quantities
+//AUTOMATIC DEFINITIONS OF GLOBAL STUFF
+#define GL_N0 (LOC_N0*NRANKS_D0)
+#define GL_N1 (LOC_N1*NRANKS_D1)
+#define GL_N2 (LOC_N2*NRANKS_D2)
+#define GL_N3 (LOC_N3*NRANKS_D3)
 
-#define NRANKS NRANKS_D0*NRANKS_D1*NRANKS_D2*NRANKS_D3
+#define GL_VOL1  GL_N0
+#define GL_VOL2 (GL_N1 * GL_VOL1)
+#define GL_VOL3 (GL_N2 * GL_VOL2)
+#define GL_VOL4 (GL_N3 * GL_VOL3)
+#define GL_N0H ( GL_N0 >> 1) // nx/2
+#define GL_N1H ( GL_N1 >> 1)
+#define GL_N2H ( GL_N2 >> 1)
+#define GL_N3H ( GL_N3 >> 1)
+
+#define GL_SIZE GL_VOL4
+#define GL_SIZE2 (2*GL_SIZE)
+#define GL_SIZE3 (3*GL_SIZE)
+#define GL_SIZEH (GL_SIZE / 2)
+#define GL_NO_LINKS (4 * GL_VOL4)
 
 // LOCAL STUFF
 #define LOC_VOL1  LOC_N0
@@ -78,6 +96,10 @@
 #define LOC_SIZEH_A ((int)(LOC_SIZE / 2) + LOC_SIZE % 2) //no of sites having the same parity as the local origin
 #define LOC_SIZEH_B ((int)(LOC_SIZE / 2)) // no of sites having opposite parity to the local origin
 #define LOC_NO_LINKS (4 * LOC_VOL4)
+
+#ifdef MULTIDEVICE
+
+#define NRANKS NRANKS_D0*NRANKS_D1*NRANKS_D2*NRANKS_D3
 
 
 #define LNH_VOL1  LNH_N0
@@ -126,28 +148,28 @@
 #define LB_SIZEH (LB_SIZE / 2)
 #define LB_NO_LINKS (4 * LB_VOL4)
 
-// GLOBAL quantities
-//AUTOMATIC DEFINITIONS OF GLOBAL STUFF
-#define GL_N0 (LOC_N0*NRANKS_D0)
-#define GL_N1 (LOC_N1*NRANKS_D1)
-#define GL_N2 (LOC_N2*NRANKS_D2)
-#define GL_N3 (LOC_N3*NRANKS_D3)
 
-#define GL_VOL1  GL_N0
-#define GL_VOL2 (GL_N1 * GL_VOL1)
-#define GL_VOL3 (GL_N2 * GL_VOL2)
-#define GL_VOL4 (GL_N3 * GL_VOL3)
-#define GL_N0H ( GL_N0 >> 1) // nx/2
-#define GL_N1H ( GL_N1 >> 1)
-#define GL_N2H ( GL_N2 >> 1)
-#define GL_N3H ( GL_N3 >> 1)
+void setup_nnranks(int **nnranks);
 
-#define GL_SIZE GL_VOL4
-#define GL_SIZE2 (2*GL_SIZE)
-#define GL_SIZE3 (3*GL_SIZE)
-#define GL_SIZEH (GL_SIZE / 2)
-#define GL_NO_LINKS (4 * GL_VOL4)
+#else
 
+#define LNH_VOL1      LOC_VOL1
+#define LNH_VOL2      LOC_VOL2
+#define LNH_VOL3      LOC_VOL3
+#define LNH_VOL4      LOC_VOL4
+#define LNH_N0H       LOC_N0H 
+#define LNH_N1H       LOC_N1H 
+#define LNH_N2H       LOC_N2H 
+#define LNH_N3H       LOC_N3H 
+                                  
+#define LNH_SIZE      LOC_SIZE 
+#define LNH_SIZE2     LOC_SIZE2
+#define LNH_SIZE3     LOC_SIZE3
+#define LNH_SIZEH     LOC_SIZEH
+#define LNH_NO_LINKS  LOC_NO_LINKS
+    
+                       
+#endif                 
 typedef struct vec4int_t{
 int d0,d1,d2,d3;
 
@@ -263,9 +285,7 @@ static inline vec4int gl_loc_origin_from_rank(int rank){
 
 }
 
-void setup_nnranks(int **nnranks);
 
 
-#endif
 
 #endif
