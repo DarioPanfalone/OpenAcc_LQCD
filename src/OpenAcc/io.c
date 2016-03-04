@@ -354,8 +354,13 @@ int read_su3_soa_ildg_binary(
 
             int parity = (xl+yl+zl+tl)%2;// parity = (d0+d1+d2+d3)%2;
 
+//            printf("d0 %d d1 %d d2 %d d3 %d\n", d[0],d[1],d[2],d[3]);//DEBUG
+//            printf("x  %d y  %d z  %d t  %d\n", xs[0],xs[1],xs[2],xs[3]);//DEBUG
+
+
             int x = xl,y = yl ,z = zl, t = tl;
 #ifdef MULTIDEVICE
+            printf("DEFINED MULTIDEVICE\n");
             int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
 #else
             int idxh = snum_acc(d[0],d[1],d[2],d[3]);
@@ -363,13 +368,15 @@ int read_su3_soa_ildg_binary(
 
             for(dir=0;dir<4;dir++){
                 off_t mat_off_t = 
-                    dir+4*(x+nx_r*(y+ny_r*(z+nz_r*t)))*sizeof(double)*18;
-                fseeko(fg,ibd_start + mat_off_t);
+                    (dir+4*(x+nx*(y+ny*(z+nz*t))))*sizeof(double)*18;
+                fseeko(fg,ibd_start + mat_off_t, SEEK_SET);
+                printf("idxh = %d , dir  %d,  mat_off_t %d\n",idxh, dir, mat_off_t);
             
                 single_su3 m;          
                 reads = fread((void*)m.comp,sizeof(double),18,fg);
                 if(reads!= 18){
-                    printf("Error in reading file: %s ,%d\n",__FILE__,__LINE__);
+                    printf("Error in reading file: %s ,%d, idxh: %d, dir %d , reads %d\n",
+                            __FILE__,__LINE__, idxh, dir,reads );
                     exit(1);
                 }
 
