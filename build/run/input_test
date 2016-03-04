@@ -38,7 +38,7 @@ residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                100
+Ntraj	                0
 ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
@@ -50,7 +50,7 @@ UseILDG                 1
 Seed                    42 # if you set it to zero, time() will be used.
                            # don't use negative values!
 EpsGen                  0.1    #stddev in the generation of a new configuration
-VerbosityLv             2
+VerbosityLv             5
 SaveDiagnostics         1
 SaveDiagnosticsFilename   diagnostics.dat
 
@@ -60,7 +60,8 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
-FermionMeasCopies       1
+SingleInvNVectors       1
+DoubleInvNVectors       1
 
 DeviceSettings
 device_choice           0
