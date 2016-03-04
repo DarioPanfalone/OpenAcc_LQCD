@@ -19,10 +19,226 @@
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
 
+#ifdef MULTIDEVICE
+#include <mpi.h>
+
+
+d_complex scal_prod_loc(const RESTRICT vec3_soa * const in_vect1,const RESTRICT vec3_soa * const in_vect2	){
+  int t;
+  d_complex res = 0.0 + 0.0I;
+  double * res_RI_p;
+  posix_memalign((void **)&res_RI_p, 64, 2*sizeof(double));
+
+  res_RI_p[0]=0.0;
+  res_RI_p[1]=0.0;
+  double resR = 0.0;
+  double resI = 0.0;
+
+  int loc_h0, loc_1, loc_2, loc_3;
+#pragma acc kernels present(in_vect1) present(in_vect2)
+#pragma acc loop independent gang(LOC_N3) // REDUCTION PRAGMAS ?
+  for(loc_3=0; loc_3<LOC_N3; loc_3++) {
+#pragma acc loop independent gang(LOC_N2/DIM_BLOCK_2) vector(DIM_BLOCK_2)
+    for(loc_2=0; loc_2<LOC_N2; loc_2++) {
+#pragma acc loop independent gang(LOC_N1/DIM_BLOCK_1) vector(DIM_BLOCK_1)
+      for(loc_1=0; loc_1<LOC_N1; loc_1++) {
+#pragma acc loop independent vector(DIM_BLOCK_0)
+        for(loc_h0=0; loc_h0 <LOC_N0H; loc_h0++) {
+            int loc_0, 
+                lnh_0 , lnh_1, lnh_2, lnh_3;
+
+            loc_0 = 2*loc_h0 + ((loc_1+loc_2+loc_3) & 0x1);
+            lnh_0 = loc_0 + D0_HALO;
+            lnh_1 = loc_1 + D1_HALO;
+            lnh_2 = loc_2 + D2_HALO;
+            lnh_3 = loc_3 + D3_HALO;
+            int lnh_idxh = lnh_to_lnh_snum(lnh_0,lnh_1,lnh_2,lnh_3);
+
+            d_complex color_sum  =  conj(in_vect1->c0[t]) *  in_vect2->c0[t] ;
+            color_sum +=  conj(in_vect1->c1[t]) *  in_vect2->c1[t] ;
+            color_sum +=  conj(in_vect1->c2[t]) *  in_vect2->c2[t] ;
+
+            resR+=creal(color_sum);
+            resI+=cimag(color_sum);
+
+
+
+        }
+      }
+    }
+  }
+  res = resR+resI*1.0I;
+  return res;
+}
+double real_scal_prod_loc(  const RESTRICT vec3_soa * const in_vect1,
+        const RESTRICT vec3_soa * const in_vect2 ){
+  int t;
+  double res_R_p;
+  double resR = 0.0;
+
+  int loc_h0, loc_1, loc_2, loc_3;
+#pragma acc kernels present(in_vect1) present(in_vect2)
+#pragma acc loop independent gang(LOC_N3)  // REDUCTION PRAGMAS ?
+  for(loc_3=0; loc_3<LOC_N3; loc_3++) {
+#pragma acc loop independent gang(LOC_N2/DIM_BLOCK_2) vector(DIM_BLOCK_2)
+    for(loc_2=0; loc_2<LOC_N2; loc_2++) {
+#pragma acc loop independent gang(LOC_N1/DIM_BLOCK_1) vector(DIM_BLOCK_1)
+      for(loc_1=0; loc_1<LOC_N1; loc_1++) {
+#pragma acc loop independent vector(DIM_BLOCK_0)
+        for(loc_h0=0; loc_h0 <LOC_N0H; loc_h0++) {
+            int loc_0, 
+                lnh_0 , lnh_1, lnh_2, lnh_3;
+
+            loc_0 = 2*loc_h0 + ((loc_1+loc_2+loc_3) & 0x1);
+            lnh_0 = loc_0 + D0_HALO;
+            lnh_1 = loc_1 + D1_HALO;
+            lnh_2 = loc_2 + D2_HALO;
+            lnh_3 = loc_3 + D3_HALO;
+            int lnh_idxh = lnh_to_lnh_snum(lnh_0,lnh_1,lnh_2,lnh_3);
+
+            res_R_p=scal_prod_kernel_1double_lnh(in_vect1,in_vect2,lnh_idxh);
+            resR+=res_R_p;
+        }
+      }
+    }
+  }
+  return resR;
+}
+double l2norm2_loc( const RESTRICT lnh_vec3_soa * const in_vect1		       ){
+  int t;
+  double res_R_p;
+  double resR = 0.0;
+
+  int loc_h0, loc_1, loc_2, loc_3;
+#pragma acc kernels present(in_vect1) present(in_vect2)
+#pragma acc loop independent gang(LOC_N3)  // REDUCTION PRAGMAS ?
+  for(loc_3=0; loc_3<LOC_N3; loc_3++) {
+#pragma acc loop independent gang(LOC_N2/DIM_BLOCK_2) vector(DIM_BLOCK_2)
+    for(loc_2=0; loc_2<LOC_N2; loc_2++) {
+#pragma acc loop independent gang(LOC_N1/DIM_BLOCK_1) vector(DIM_BLOCK_1)
+      for(loc_1=0; loc_1<LOC_N1; loc_1++) {
+#pragma acc loop independent vector(DIM_BLOCK_0)
+        for(loc_h0=0; loc_h0 <LOC_N0H; loc_h0++) {
+            int loc_0, 
+                lnh_0 , lnh_1, lnh_2, lnh_3;
+
+            loc_0 = 2*loc_h0 + ((loc_1+loc_2+loc_3) & 0x1);
+            lnh_0 = loc_0 + D0_HALO;
+            lnh_1 = loc_1 + D1_HALO;
+            lnh_2 = loc_2 + D2_HALO;
+            lnh_3 = loc_3 + D3_HALO;
+            int lnh_idxh = lnh_to_lnh_snum(lnh_0,lnh_1,lnh_2,lnh_3);
+
+            res_R_p=l2norm2_loc(in_vect1,lnh_idxh);
+            resR+=res_R_p;
+        }
+      }
+    }
+  }
+  return resR;
+}
+
+
+d_complex scal_prod_loc_1Dcut(  const RESTRICT vec3_soa * const in_vect1,
+        const RESTRICT vec3_soa * const in_vect2 ){
+    int t;
+    double resR = 0.0;
+    double resI = 0.0;
+
+#pragma acc kernels present(in_vect1) present(in_vect2)
+#pragma acc loop reduction(+:resR) // DEBUG
+    for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+        d_complex color_sum  =  conj(in_vect1->c0[t]) *  in_vect2->c0[t] ;
+        color_sum +=  conj(in_vect1->c1[t]) *  in_vect2->c1[t] ;
+        color_sum +=  conj(in_vect1->c2[t]) *  in_vect2->c2[t] ;
+
+        resR+=creal(color_sum);
+        resI+=cimag(color_sum);
+
+    }
+    return resR+resI*I;
+
+}
+double real_scal_prod_loc_1Dcut(  const RESTRICT lnh_vec3_soa * const in_vect1,const RESTRICT lnh_vec3_soa * const in_vect2			       ){
+  int t;
+  double res_R_p;
+  double resR = 0.0;
+
+#pragma acc kernels present(in_vect1) present(in_vect2)
+#pragma acc loop reduction(+:resR) // DEBUG
+  for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+    res_R_p=scal_prod_loc_1double(in_vect1,in_vect2,t);
+    resR+=res_R_p;
+  }
+  return resR;
+}
+double l2norm2_loc_1Dcut( const RESTRICT vec3_soa * const in_vect1		       ){
+  int t;
+  double res_R_p;
+  double resR = 0.0;
+
+#pragma acc kernels present(in_vect1)
+#pragma acc loop reduction(+:resR) // DEBUG
+  for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+    res_R_p=l2norm2_loc(in_vect1,t);
+    resR+=res_R_p;
+  }
+  return resR;
+}
+
+// MPI REQUIRING FUNCTIONS
+d_complex scal_prod_global(  const RESTRICT vec3_soa * const in_vect1,
+        const RESTRICT vec3_soa * const in_vect2 ){
+    // RETURNS THE TOTAL RESULT USING MPI
+
+     d_complex total_res=0;
+     d_complex local_res;
+
+     local_res = scal_prod_loc_1Dcut(in_vect1,in_vect2); 
+     
+     if(myrank ==0){
+         int rank;
+         d_complex temp_loc_res = local_res;
+         total_res += temp_loc_res; 
+         for(rank = 1; rank < NRANKS ; rank++ ){
+             MPI_Recv(&temp_loc_res,2,MPI_DOUBLE,rank,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+             total_res += temp_loc_res;
+
+         }
+         for(rank = 1; rank < NRANKS ;rank++ )
+             MPI_Send(&total_res,2,MPI_DOUBLE,rank,0,MPI_COMM_WORLD);
+
+     }else{
+          MPI_Send(&local_res,2,MPI_DOUBLE,0,0,MPI_COMM_WORLD);
+          MPI_Recv(&total_res,2,MPI_DOUBLE,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+     }
+     return total_res;
+}
+inline double real_scal_prod_global(  const RESTRICT vec3_soa * const in_vect1,
+        const RESTRICT vec3_soa * const in_vect2 ){
+    // RETURNS THE TOTAL RESULT USING MPI
+     double total_res,local_res;
+     //local_res = real_scal_prod_loc(in_vect1,in_vect2); 
+     local_res = real_scal_prod_loc_1Dcut(in_vect1,in_vect2); 
+     MPI_Allreduce((void*)&local_res,(void*)&total_res,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+     return total_res;
+}
+inline double l2norm2_global( const RESTRICT vec3_soa * const in_vect1  ){
+
+     double total_res,local_res;
+     //local_res = l2norm2_loc(in_vect1); 
+     local_res = l2norm2_loc_1Dcut(in_vect1); 
+     MPI_Allreduce((void*)&local_res,(void*)&total_res,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+     return total_res;
+}
+
+
+#else // NO MULTIDEV
+
 
 d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
 			     const __restrict vec3_soa * const in_vect2
-			     ){
+		     ){
   int t;
 
   double resR = 0.0;
@@ -35,15 +251,12 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
   color_sum +=  conj(in_vect1->c1[t]) *  in_vect2->c1[t] ;
   color_sum +=  conj(in_vect1->c2[t]) *  in_vect2->c2[t] ;
 
-
   resR+=creal(color_sum);
   resI+=cimag(color_sum);
 
   }
   return resR+resI*I;
 }
-
-
 double real_scal_prod_global(  __restrict vec3_soa * const in_vect1,
 			       __restrict vec3_soa * const in_vect2
 			       ){
@@ -59,7 +272,6 @@ double real_scal_prod_global(  __restrict vec3_soa * const in_vect1,
   }
   return resR;
 }
-
 double l2norm2_global( __restrict  vec3_soa * const in_vect1 // constant --> is not updated
 		       ){
   int t;
@@ -74,8 +286,11 @@ double l2norm2_global( __restrict  vec3_soa * const in_vect1 // constant --> is 
   }
   return resR;
 }
+#endif
 
 
+
+// NEXT, only "embarassingly parallel" functions, not requiring any reduction.
 
 void combine_in1xfactor_plus_in2(  __restrict vec3_soa * const in_vect1,
 				   const double factor,
@@ -152,7 +367,7 @@ void combine_inside_loop( __restrict vec3_soa * const vect_out,
   }
 }
 
-void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * const in_vect1,double ferm_mass2, __restrict vec3_soa * const in_vect2){
+void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * in_vect1,double ferm_mass2, __restrict vec3_soa * in_vect2){
 #pragma acc kernels present(in_vect1) present(in_vect2)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -162,9 +377,9 @@ void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * const in_vect1,double
   }
 }
 
-void combine_in1_minus_in2( __restrict vec3_soa * const in_vect1,
-                            __restrict vec3_soa * const in_vect2,
-                            __restrict vec3_soa * const out){
+void combine_in1_minus_in2(  __restrict const vec3_soa * in_vect1,
+                             __restrict const vec3_soa * in_vect2,
+                            __restrict vec3_soa * out){
 #pragma acc kernels present(in_vect1) present(in_vect2) present(out)
 #pragma acc loop independent 
   for(int ih=0; ih<sizeh; ih++) {
@@ -174,8 +389,7 @@ void combine_in1_minus_in2( __restrict vec3_soa * const in_vect1,
   }
 }
 
-void assign_in_to_out(  __restrict vec3_soa * const in_vect1,
-                        __restrict vec3_soa * const out){
+void assign_in_to_out(__restrict vec3_soa * in_vect1,__restrict vec3_soa * out){
   SETINUSE(out);
 #pragma acc kernels present(in_vect1)  present(out)
 #pragma acc loop independent 
@@ -186,9 +400,6 @@ void assign_in_to_out(  __restrict vec3_soa * const in_vect1,
   }
 
 }
-
-
-
 // Altre funzioni aggiunte per l'algebra lineare multishift "versatilizzato"
 void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
   //  printf(" puntatore incriminato (%p) \n",fermion);
@@ -280,8 +491,6 @@ void combine_in1_x_fact1_minus_in2_back_into_in2( __restrict vec3_soa * const in
   } //acc data
 
 }
-
-
 void combine_in1_minus_in2_allxfact( __restrict vec3_soa * const in1, __restrict vec3_soa * const in2, double fact, __restrict vec3_soa * const out ) {
 
   int ih;
@@ -303,6 +512,11 @@ void combine_in1_minus_in2_allxfact( __restrict vec3_soa * const in1, __restrict
   } //acc data
 
 }
+
+
+
+
+
 
 #endif
 
