@@ -212,7 +212,7 @@ void fermion_measures( su3_soa * tconf_acc,
             d_complex chircond_size = 0.0 + 0.0*I;
             d_complex barnum_size = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
             d_complex trMinvSq_size = 0.0 + 0.0*I; // for connected chiral susc
-            d_complex trdM_dmu_sqMinv_size = 0.0 + 0.0*I; //for connected baryon susc,1
+            d_complex trd2M_dmu2_Minv_size = 0.0 + 0.0*I; //for connected baryon susc,1
             d_complex trdM_dmuMinv_sq_size = 0.0 + 0.0*I; //for connected baryon susc,2
 
             double factor = tfermions_parameters[iflv].degeneracy*0.25/size;
@@ -275,20 +275,20 @@ void fermion_measures( su3_soa * tconf_acc,
                     // CONNECTED QUARK NUMBER SUSCEPTIBILITY (1),
                     // (dM/dmu)^2 M^{-1}
 
-                    // (chi2_e, * ) = dM/dmu (* , bnchi_o)
-                    dM_dmu_eo[geom_par.tmap](conf_to_use,chi2_e,bnchi_o,
+                    // (chi2_e, * ) = d^2M/dmu^2 (* , chi_o)
+                    d2M_dmu2_eo[geom_par.tmap](conf_to_use,chi2_e,bnchi_o,
                             tfermions_parameters[iflv].phases); 
-                    // ( * ,chi2_o) = dM/dmu (bnchi_e, * )      
-                    dM_dmu_oe[geom_par.tmap](conf_to_use,chi2_o,bnchi_e,
+                    // ( * ,chi2_o) = d^2M/dmu^2 (chi_e, * )      
+                    d2M_dmu2_oe[geom_par.tmap](conf_to_use,chi2_o,bnchi_e,
                             tfermions_parameters[iflv].phases);
                     
-                    // (chi2_e,chi2_o) = (dM/dmu)^2 M^{-1} (rnd_e,rnd_o) = 
-                    trdM_dmu_sqMinv_size = scal_prod_global(rnd_e,chi2_e)
+                    // (chi2_e,chi2_o) = d^2M/dmu^2 M^{-1} (rnd_e,rnd_o)
+                    trd2M_dmu2_Minv_size = scal_prod_global(rnd_e,chi2_e)
                         + scal_prod_global(rnd_o,chi2_o);
                     
                     fprintf(foutfile,"%.16lf\t%.16lf\t",
-                            creal(trdM_dmu_sqMinv_size*factor),
-                            cimag(trdM_dmu_sqMinv_size*factor));
+                            creal(trd2M_dmu2_Minv_size*factor),
+                            cimag(trd2M_dmu2_Minv_size*factor));
 
                     // CONNECTED QUARK NUMBER SUSCEPTIBILITY (2),
                     // (dM/dmu M^{-1})^2
