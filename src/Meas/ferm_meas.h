@@ -11,7 +11,8 @@ typedef struct ferm_meas_param_t{
 
     char fermionic_outfilename[50];
     char fermionic_outfile_header[1000];
-    int SingleInvNVectors, DoubleInvNVectors;
+    int SingleInvNVectors, DoubleInvNVectorsChiral;
+    int DoubleInvNVectorsQuarkNumber;
 } ferm_meas_params;
 
 extern ferm_meas_params fm_par;

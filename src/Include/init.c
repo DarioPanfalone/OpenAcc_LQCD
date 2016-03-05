@@ -371,7 +371,9 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
     par_info fmp[]={
     (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename"},
     (par_info){(void*) &(fmpars->SingleInvNVectors),TYPE_INT,    "SingleInvNVectors"   },
-    (par_info){(void*) &(fmpars->DoubleInvNVectors),TYPE_INT,    "DoubleInvNVectors"   }};
+    (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),TYPE_INT,    "DoubleInvNVectorsChiral"   },
+    (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,    "DoubleInvNVectorsQuarkNumber"   }};
+
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(fmp)/sizeof(par_info),fmp, filelines, startline, endline);
