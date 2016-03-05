@@ -1,7 +1,60 @@
 
-- Check function 
-su3_measurements.c:calc_momenta_action()
-Is it really necessary to use two cycles?
+- phases in the multinode setup
+- Kernels that must be restricted to local lattice
+  (NO LINEAR COMBINATIONS)
+  calc_loc_plaquettes_removing_stag_phases_nnptrick
+  generation of random fermions
+  generation of rangom momenta
+  generation of random config
+  acc_Deo 
+  acc_Doe
+  force calculation routines:
+   calc_loc_staples_removing_stag_phases_nnptrick_all 
+   calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all
+   calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all
+   calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all
+  
+  mom_sum_mult
+  mom_exp_times_conf_soloopenacc 
+
+  cooling:
+   compute_cooled_even_links
+   compute_cooled_odd_links
+   calc_loc_staples_removing_stag_phases_nnptrick_all_only_even
+   calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd
 
 
+
+
+
+===============================================================
+Possible improvements for performance
+
+- To improve strong scaling on multishift: (+30% max scalability )
+  - modify matrix multiplication, to have only one communication BUT
+    TWICE AS LARGE (and more calculations).
+  - kernels working only on the surface:
+
+    |--/////BULK/////--|
+   -|---////BULK////---|-
+  --|----///BULK///----|--
+
+  The gain would be that this would allow to superpose the bulk
+  calculations of ALL the multishift machinery (the linear combinations on
+  all the shifted vectors)  with the communications of the halos.
+  Especially when the number of terms in the rational approximation is
+  high, this is likely to allow better scalability (note that is is
+  going to slow down performance a little bit in the case where )
+
+- Single precision molecular dynamics: (+100% flat)
+  -known advantages
+  -doubling of "soa" data types 
+  -brainless rewrite of the gauge part 
+  -fermion part semi-brainless
+  -need conversion functions
+
+- No multishift (boh)
+  -advantages not precisely known 
+    (possibility of preconditioning, deflation and such)
+  -functions already in place (not for multinode though).
  
