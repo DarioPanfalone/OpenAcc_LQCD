@@ -291,10 +291,10 @@ void fermion_measures( su3_soa * tconf_acc,
                     // (dM/dmu)^2 M^{-1}
 
                     // (chi2_e, * ) = d^2M/dmu^2 (* , chi_o)
-                    d2M_dmu2_eo[geom_par.tmap](conf_to_use,chi2_e,bnchi_o,
+                    d2M_dmu2_eo[geom_par.tmap](conf_to_use,chi2_e,chi_o,
                             tfermions_parameters[iflv].phases); 
                     // ( * ,chi2_o) = d^2M/dmu^2 (chi_e, * )      
-                    d2M_dmu2_oe[geom_par.tmap](conf_to_use,chi2_o,bnchi_e,
+                    d2M_dmu2_oe[geom_par.tmap](conf_to_use,chi2_o,chi_e,
                             tfermions_parameters[iflv].phases);
                     
                     // (chi2_e,chi2_o) = d^2M/dmu^2 M^{-1} (rnd_e,rnd_o)
