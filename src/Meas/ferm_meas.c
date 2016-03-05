@@ -79,22 +79,37 @@ d_complex eo_scal_prod_global(vec3_soa * rnd_e,
 void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 
     strcpy(fmpar->fermionic_outfile_header,"#conf\ticopy\t");
+    int col_count=2;
     for(int iflv=0;iflv<NDiffFlavs;iflv++){
         char strtocat[200];
-        sprintf(strtocat, "Reff_%-19sImff_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+        sprintf(strtocat, "%02d.Reff_%-16s%02d.Imff_%-16s",col_count+1,
+                tferm_par[iflv].name,col_count+2,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
-        sprintf(strtocat, "ReN_%-20sImN_%-20s",tferm_par[iflv].name,tferm_par[iflv].name);
+        sprintf(strtocat, "%02d.ReN_%-17s%02d.ImN_%-17s",col_count+3,
+                tferm_par[iflv].name,col_count+4,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
+        col_count +=4;
         if (fmpar->DoubleInvNVectorsChiral>0){
-            sprintf(strtocat, "ReChSuscConn_%-10sImChSuscConn_%-10s",tferm_par[iflv].name,tferm_par[iflv].name);
+            sprintf(strtocat, 
+                    "%02d.ReChSuscConn_%-7s%02d.ImChSuscConn_%-7s",
+                    col_count+1,tferm_par[iflv].name,
+                    col_count+2,tferm_par[iflv].name);
             strcat(fmpar->fermionic_outfile_header,strtocat);
+            col_count+=2;
         }
         if (fmpar->DoubleInvNVectorsQuarkNumber>0){
             // Actually, the first connected piece does not need a second inversion
-            sprintf(strtocat, "ReQNSuscConn1_%-9sImQNSuscConn1_%-9s",tferm_par[iflv].name,tferm_par[iflv].name);
+            sprintf(strtocat, 
+                    "%02d.ReQNSuscConn1_%-6s%02d.ImQNSuscConn1_%-6s",
+                    col_count+1,tferm_par[iflv].name,
+                    col_count+2,tferm_par[iflv].name);
             strcat(fmpar->fermionic_outfile_header,strtocat);
-            sprintf(strtocat, "ReQNSuscConn2_%-9sImQNSuscConn2_%-9s",tferm_par[iflv].name,tferm_par[iflv].name);
+            sprintf(strtocat, 
+                    "%02d.ReQNSuscConn2_%-7s%02d.ImQNSuscConn2_%-7s",
+                    col_count+3,tferm_par[iflv].name,
+                    col_count+4,tferm_par[iflv].name);
             strcat(fmpar->fermionic_outfile_header,strtocat);
+            col_count+=4;
 
         }
 
