@@ -15,9 +15,14 @@
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
 
+#include "./hash.h"
+
 #include <stdio.h>
 #include <strings.h>
 #include <stdlib.h>
+
+#include <inttypes.h>
+#include <stdint.h>
 
 #define MAXLINES 300
 #define MAXLINELENGTH 500 // pretty long to accomodate all the comments
@@ -574,6 +579,17 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     
         printf("There are errors in some groups, exiting.\n")   ;
         exit(1);
+
+    }
+    if(!helpmode){
+
+        uint32_t hash = hash_settings();
+        char hash_string[32];
+        sprintf(hash_string,"%" PRIu32, hash);
+        printf("Hash of all relevant settings: %s\n", hash_string );
+        strcat(gauge_outfilename, hash_string);
+        strcat(fm_par.fermionic_outfilename, hash_string);
+
 
     }
 
