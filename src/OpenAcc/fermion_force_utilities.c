@@ -238,10 +238,6 @@ void multiply_backfield_times_force(__restrict ferm_param * const tpars,
       phase_times_auxmat_into_auxmat(&auxmat[dirindex],&pseudo_ipdot[dirindex],idxh,phase);
     }
   }
-
-
-
-
 } 
 // end multiply_backfield_times_force()
 

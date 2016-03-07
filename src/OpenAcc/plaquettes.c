@@ -79,67 +79,7 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa *
   return res_R_p;
 }// closes routine
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
-void calc_loc_staples_removing_stag_phases_nnptrick(  __restrict su3_soa * const u,
-						      __restrict su3_soa * const loc_stap,
-						      const int mu,
-						      const int nu){
-  //       r+mu-nu  r+mu   r+mu+nu
-  //          +<-----+----->+
-  //          |  1L  ^  1R  |
-  // mu    2L |      |      | 2R
-  // ^        V  3L  |  3R  V
-  // |        +----->+<-----+
-  // |       r-nu    r     r+nu
-  // +---> nu       
-  //            r is idxh in the following      
 
-  int d0, d1, d2, d3;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang //gang(nd3)
-  for(d3=0; d3<nd3; d3++) {
-#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-    for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
-      for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector //vector(DIM_BLOCK_X)
-	for(d0=0; d0 < nd0; d0++) {
-	  int idxh,idx_pmu,idx_pnu,idx_pmu_mnu,idx_mnu;
-	  int parity;
-	  int dir_link;
-	  int dir_nu_1R,dir_nu_1L;
-	  int dir_mu_2R,dir_mu_2L;
-	  int dir_nu_3R,dir_nu_3L;
-
-	  idxh = snum_acc(d0,d1,d2,d3);  // r 
-	  parity = (d0+d1+d2+d3) % 2;
-
-
-
-	  dir_link = 2*mu + parity;
-	  dir_nu_1R = 2*nu + !parity;
-	  dir_mu_2R = 2*mu + !parity;
-	  dir_nu_3R = 2*nu +  parity;
-
-	  dir_nu_1L = 2*nu +  parity;
-	  dir_mu_2L = 2*mu + !parity;
-	  dir_nu_3L = 2*nu + !parity;
-
-	  idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
-	  idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-	  idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-	  idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu 
-	  
-	  //computation of the Right part of the staple
-	  mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],idx_pmu,&u[dir_mu_2R],idx_pnu,&u[dir_nu_3R],idxh,&loc_stap[dir_link],idxh);
-	  //computation of the Left  part of the staple
-	  conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1L],idx_pmu_mnu,&u[dir_mu_2L],idx_mnu,&u[dir_nu_3L],idx_mnu,&loc_stap[dir_link],idxh);
-
-	}  // d0
-      }  // d1
-    }  // d2
-  }  // d3
-
-}// closes routine
 void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
 							  __restrict su3_soa * const loc_stap ){
     SETINUSE(loc_stap);

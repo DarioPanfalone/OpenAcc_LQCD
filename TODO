@@ -1,28 +1,60 @@
 
 - phases in the multinode setup
 - Kernels that must be restricted to local lattice
-  (NO LINEAR COMBINATIONS)
+  fermionic_utilities (basic linear algebra):
+   (NO LINEAR COMBINATIONS)
+   real_scal_prod_loc DONE
+   scal_prod_loc DONE, 1D CUT TOO
+   l2norm2_loc DONE, 1D CUT TOO
   calc_loc_plaquettes_removing_stag_phases_nnptrick
-  generation of random fermions
-  generation of rangom momenta
-  generation of random config
-  acc_Deo 
-  acc_Doe
-  force calculation routines:
+  fermion_matrix
+   acc_Deo  
+    acc_Deo full (inherits the name)
+    acc_Deo_bulk
+    acc_Deo_d3p
+    acc_Deo_d3m
+   acc_Doe
+    acc_Doe full (inherits the name)
+    acc_Doe_bulk
+    acc_Doe_d3p
+    acc_Doe_d3m
+  fermion force utilities:
+   direct_product_of_fermions_into_auxmat
+   multiply_conf_times_force_and_take_ta_even_nophase
+   multiply_conf_times_force_and_take_ta_odd_nophase
+   multiply_conf_times_force_and_take_ta_nophase
+   multiply_backfield_times_force
+   accumulate_gl3soa_into_gl3soa
+  plaquettes:
+   calc_loc_plaquettes_removing_stag_phases_nnptrick
    calc_loc_staples_removing_stag_phases_nnptrick_all 
+   calc_loc_staples_removing_stag_phases_nnptrick_all_only_even 
+   calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd
+  random_assignement:
+   generate_vec3_soa_gauss
+   generate_Momenta_gauss
+   generate_Conf_cold
+   generate_vec3_soa_z2noise
+  rettangoli:
+   calc_loc_rectangles_2x1_removing_stag_phases_nnptrick
+   calc_loc_rectangles_1x2_removing_stag_phases_nnptrick
    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all
    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all
    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all
-  
-  mom_sum_mult
-  mom_exp_times_conf_soloopenacc 
+   calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all
 
+// TO CONTINUE 
+ 
+  mom_sum_mult
+  mom_exp_times_conf_soloopenacc
+ 
+  
+- NNP and NNM must give errors when they should
+  
+  FOR MEASURES
   cooling:
    compute_cooled_even_links
    compute_cooled_odd_links
-   calc_loc_staples_removing_stag_phases_nnptrick_all_only_even
-   calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd
-
 
 
 

@@ -370,8 +370,6 @@ int read_su3_soa_ildg_binary(
                 off_t mat_off_t = 
                     (dir+4*(x+nx*(y+ny*(z+nz*t))))*sizeof(double)*18;
                 fseeko(fg,ibd_start + mat_off_t, SEEK_SET);
-                printf("idxh = %d , dir  %d,  mat_off_t %d\n",idxh, dir, mat_off_t);
-            
                 single_su3 m;          
                 reads = fread((void*)m.comp,sizeof(double),18,fg);
                 if(reads!= 18){

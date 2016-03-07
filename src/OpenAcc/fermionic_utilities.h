@@ -52,7 +52,9 @@ void combine_inside_loop( __restrict vec3_soa * const vect_out,  __restrict vec3
 
 void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * const in_vect1,double ferm_mass2, __restrict vec3_soa * const in_vect2);
 
-void combine_in1_minus_in2( __restrict vec3_soa * const in_vect1, __restrict vec3_soa * const in_vect2, __restrict vec3_soa * const out);
+void combine_in1_minus_in2( __restrict const vec3_soa * in_vect1,
+                            __restrict const vec3_soa * in_vect2,
+                            __restrict vec3_soa * out);
 
 void assign_in_to_out(  __restrict vec3_soa * const in_vect1, __restrict vec3_soa * const out);
 

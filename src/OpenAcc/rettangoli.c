@@ -110,10 +110,10 @@ double calc_loc_rectangles_1x2_removing_stag_phases_nnptrick(   __restrict su3_s
                     dir_nuE = 2*nu + !parity;
                     dir_nuF = 2*nu +  parity;
 
-                    idxpmu = nnp_openacc[idxh][mu][parity];        // r+mu 
-                    idxpmupnu = nnp_openacc[idxpmu][nu][!parity];  // r+mu+nu
-                    idxpnu = nnp_openacc[idxh][nu][parity];        // r+nu
-                    idxpnupnu = nnp_openacc[idxpnu][nu][!parity];  // r+nu+nu
+                    idxpmu = nnp_openacc[idxh][mu][parity];      //r+mu 
+                    idxpmupnu = nnp_openacc[idxpmu][nu][!parity];//r+mu+nu
+                    idxpnu = nnp_openacc[idxh][nu][parity];      //r+nu
+                    idxpnupnu = nnp_openacc[idxpnu][nu][!parity];//r+nu+nu
                     //            (D)
                     //    r+2nu +<---+ r+mu+2nu
                     //          |    ^
