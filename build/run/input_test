@@ -6,18 +6,18 @@
 
 
 ActionParameters
-Beta            3.55
+Beta            6.0
 StoutSteps      2
 StoutRho        0.15
  
-#up quark
-FlavourParameters   
-Mass	        0.01 
-Degeneracy	    1
-PseudoFermions	1
-Name	        pippo
-Charge          0.0
-MuOverPiT       0.24
+##up quark
+#FlavourParameters   
+#Mass	        0.01 
+#Degeneracy	    1
+#PseudoFermions	1
+#Name	        pippo
+#Charge          0.0
+#MuOverPiT       0.24
                              
 
 
@@ -31,14 +31,14 @@ bz              0.0
 
 
 MDParameters
-NmdSteps	    7
-GaugeSubSteps   4
+NmdSteps	    2
+GaugeSubSteps   3
 TrajLength	    1.0
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                0
+Ntraj	                1
 ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
@@ -61,16 +61,17 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
 SingleInvNVectors       1
-DoubleInvNVectors       1
+DoubleInvNVectorsChiral       1
+DoubleInvNVectorsQuarkNumber  1
 
 DeviceSettings
 device_choice           0
 
 Geometry
-nx                      8  
-ny	                    8 
-nz	                    8 
-nt	                    8 
+nx                      4  
+ny	                    4 
+nz	                    4 
+nt	                    4 
 xmap	                1 
 ymap	                3   
 zmap	                2   

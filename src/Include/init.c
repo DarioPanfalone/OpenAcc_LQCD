@@ -493,7 +493,12 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         // see global var in /Include/fermion_parameters.
         // setting NDiffFlavs first
         NDiffFlavs = tagcounts[PMG_FERMION];
-        fermions_parameters = (ferm_param*) malloc(NDiffFlavs*sizeof(ferm_param));
+        if(NDiffFlavs==0){
+            fermions_parameters = NULL;
+            printf("NO FERMIONS FOUND, ");
+            printf("SIMULATING PURE GAUGE THEORY...\n");
+        }
+        else fermions_parameters = (ferm_param*) malloc(NDiffFlavs*sizeof(ferm_param));
     }
     else
     {   // goes into help mode
@@ -513,7 +518,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     // check if all parameter groups were found
     int check = 1;
     for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-        check *= tagcounts[igrouptype];
+        if(igrouptype != PMG_FERMION )  check *= tagcounts[igrouptype];
     if(!check){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
             if (!tagcounts[igrouptype]) printf("\"%s\"  parameter group not found!\n",

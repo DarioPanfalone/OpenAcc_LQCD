@@ -71,29 +71,26 @@ int rationalapprox_read(RationalApprox* rational_approx)
     char * nomefile = rational_approx_filename(rational_approx->error,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
 
     int error = rationalapprox_read_custom_nomefile(rational_approx,nomefile);
-    free(nomefile);
     if(error){
 
-        FILE * bash_repair_commands = fopen("genappfiles.sh","a");
-
-        printf("You may want to generate a rational approximation file using the tool \'rgen\' (look in the tools directory). Please try\n");
-        printf("./rgen %e %d %d %e\n", rational_approx->error, 
-                rational_approx->exponent_num, rational_approx->exponent_den, 
+        char command[100];
+        sprintf(command,
+                "./rgen %e %d %d %e\n",
+                rational_approx->error, rational_approx->exponent_num,
+                rational_approx->exponent_den, 
                 rational_approx->lambda_min);
-        printf("(see and modify \"genappfiles.sh\", check for doublers)\n");
-        printf("(Or give command \n bash <(sort genappfiles.sh | uniq)\n.");
-        fprintf(bash_repair_commands,
-                "echo \'./rgen %e %d %d %e >> rat_app_gen_log.txt &\'\n",
-                rational_approx->error, rational_approx->exponent_num,
-                rational_approx->exponent_den, rational_approx->lambda_min);
-        fprintf(bash_repair_commands,"./rgen %e %d %d %e >> rat_app_gen_log.txt &\n",
-                rational_approx->error, rational_approx->exponent_num,
-                rational_approx->exponent_den, rational_approx->lambda_min);
-        fclose(bash_repair_commands);
-        return 1;
-    }
-    else return 0;
 
+        printf("Creating (and caching) file %s, wait ...\n", nomefile);
+        int status=system(command);
+        error = rationalapprox_read_custom_nomefile(rational_approx,nomefile);
+        free(nomefile);
+        return error;
+    }
+    else{
+
+        free(nomefile);
+        return 0;
+    }
 }
 
 
