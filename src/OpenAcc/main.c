@@ -279,6 +279,14 @@ int main(int argc, char* argv[]){
                 }
 
                 //-------------------------------------------------//
+                // program exits if it finds a file called "stop"
+                
+                FILE * test_stop = fopen("stop","r");
+                if(test_stop){
+                    fclose(test_stop);
+                    printf("File  \'stop\' found, stopping cycle now.\n");
+                    break;
+                }
 
             }// id_iter loop ends here
 

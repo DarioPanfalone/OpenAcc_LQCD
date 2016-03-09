@@ -6,53 +6,38 @@
 
 
 ActionParameters
-Beta            6.0
+Beta            3.55
 StoutSteps      2
 StoutRho        0.15
  
-##up quark
-#FlavourParameters   
-#Mass	        0.01 
-#Degeneracy	    1
-#PseudoFermions	1
-#Name	        pippo
-#Charge          0.0
-#MuOverPiT       0.24
+#up quark
+FlavourParameters   
+Mass	        0.01 
+Degeneracy	    1
+PseudoFermions	1
+Name	        pippo
+Charge          0.0
+MuOverPiT       0.24
                              
 
 
 BackgroundFieldParameters
-ex              0.0      
-ey              0.0	     
-ez              0.0	
-bx              0.0	
-by              0.0	
-bz              0.0	
-
 
 MDParameters
-NmdSteps	    2
+NmdSteps	    4
 GaugeSubSteps   3
-TrajLength	    1.0
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                1
+Ntraj	                100
 ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
 residue_metro       	1e-8
-ExpMaxEigenvalue        5.5     # approximate expected max eigenvalues
 StoreConfName       	store.conf.ildg
 SaveConfName            conf.ildg
-UseILDG                 1
-Seed                    42 # if you set it to zero, time() will be used.
-                           # don't use negative values!
-EpsGen                  0.1    #stddev in the generation of a new configuration
-VerbosityLv             5
-SaveDiagnostics         1
-SaveDiagnosticsFilename   diagnostics.dat
+VerbosityLv             0
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt
@@ -61,8 +46,6 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
 SingleInvNVectors       1
-DoubleInvNVectorsChiral       1
-DoubleInvNVectorsQuarkNumber  1
 
 DeviceSettings
 device_choice           0

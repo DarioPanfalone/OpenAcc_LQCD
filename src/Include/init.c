@@ -33,13 +33,15 @@ char input_file_str[MAXLINES*MAXLINELENGTH];
 #define TYPE_INT 0
 #define TYPE_DOUBLE 1
 #define TYPE_STR 2
-const char * type_strings[]={"(int)", "(double)", "(string)"};
+const char * type_strings[]={"(int)", "(double)", "(string)" };
 
 typedef struct par_info_t{
 
     void* par;
     int type;
     char* name;
+    int is_optional;
+    const void* default_value;
 
 }par_info;
 
@@ -72,13 +74,13 @@ FILE * helpfile;
 
 // just to save it in the conf
 int prepare_string_from_stringarray(char file_lines[MAXLINES][MAXLINELENGTH], 
-                                   int maxlines,
-                                   char* input_filename_to_write){
+        int maxlines,
+        char* input_filename_to_write){
 
     int iline;int totlen = 0;
     for(iline = 0; iline < maxlines ; iline++){
-       strcat(input_filename_to_write,file_lines[iline]);
-       totlen += strlen(file_lines[iline]);
+        strcat(input_filename_to_write,file_lines[iline]);
+        totlen += strlen(file_lines[iline]);
     }
     return totlen;
 
@@ -243,17 +245,44 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
 
 
         if(! res){
-            printf("ERROR: not all parameters needed read!");
-            for(int i =0; i<npars; i++) 
-                if (rc[i]==0) printf("Parameter %s not set!\n",par_infos[i].name);
-            free(rc);
+            for(int i =0; i<npars; i++){
+                res = 1;
+                if (rc[i]==0){
+                    printf("Parameter %s not set in input file.",par_infos[i].name);
+                    if(par_infos[i].is_optional==1){
+                        printf(" Parameter is optional. Default value: ");
+                            switch(par_infos[i].type){
+                                case TYPE_INT:
+                                    *((int*)(par_infos[i].par)) = 
+                                        *((const int*) (par_infos[i].default_value));
+                                    printf(" %d", *((int*)(par_infos[i].par)));
+                                    break;
+                                case TYPE_DOUBLE:
+                                    *((double*)(par_infos[i].par)) = 
+                                        *((const double*) (par_infos[i].default_value));
+                                    printf(" %f", *((double*)(par_infos[i].par)));
+                                    break;
+                                case TYPE_STR:
+                                    strcpy((char*)par_infos[i].par,(const char*) par_infos[i].default_value);
+                                    printf(" %s", (char*)(par_infos[i].par));
+                                    break;
+                            }
+                        printf("\n");
+                    }
+                    else{
+                        printf(" Parameter is NOT optional!\n");
+                        res = 0;
+                    }
+                }
+            }
+        } // if(!res)
+        free(rc);
+        if(!res){
+            printf("NON OPTIONAL PARAMETERS NOT FOUND IN INPUT FILE. PLEASE CHECK.\n");
             return 1;
         }
-        else{
-            free(rc);
-            return 0;
-        }
-    }
+        else return 0;
+    }// else normal mode
 }
 
 int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
@@ -262,16 +291,16 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
     // see /Include/fermion_parameters.h
 
     par_info fp[]={
-    (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          },
-    (par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , "Degeneracy"    },
-    (par_info){(void*) &(flpar->number_of_ps    ),TYPE_INT   , "PseudoFermions"},
-    (par_info){(void*) &(flpar->name            ),TYPE_STR   , "Name"          },
-    (par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, "Charge"        },
-    (par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, "MuOverPiT"     }};
+        (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          , 0 , NULL},
+        (par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , "Degeneracy"    , 0 , NULL},
+        (par_info){(void*) &(flpar->number_of_ps    ),TYPE_INT   , "PseudoFermions", 0 , NULL},
+        (par_info){(void*) &(flpar->name            ),TYPE_STR   , "Name"          , 0 , NULL},
+        (par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, "Charge"        , 0 , NULL},
+        (par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, "MuOverPiT"     , 0 , NULL}};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(fp)/sizeof(par_info),fp, filelines, startline, endline);
-    
+
 }
 
 int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
@@ -279,22 +308,22 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
     // see OpenAcc/su3_measurements.h
 
     par_info ap[]={
-    (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      },
-    (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps"},
-    (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  }};
+        (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      , 0 , NULL},
+        (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps", 0 , NULL},
+        (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  , 0 , NULL}};
 
 
     // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
 
     if(startline<endline)
-    if(act_par->stout_rho != RHO ){ 
-        printf("Error, input file stout_rho != RHO \n");
-        printf("  Either modify the input file, or recompile changing RHO\n");
-        printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
-        exit(1);
+        if(act_par->stout_rho != RHO ){ 
+            printf("Error, input file stout_rho != RHO \n");
+            printf("  Either modify the input file, or recompile changing RHO\n");
+            printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
+            exit(1);
 
-    }
+        }
 
     return res;
 
@@ -305,13 +334,14 @@ int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH],
 {
 
     // see /OpenAcc/backfield.h
+    const double default_value = 0.0;
     par_info bfp[]={
-    (par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, "ex" },
-    (par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, "ey" },
-    (par_info){(void*) &(bfpar->ez ),TYPE_DOUBLE, "ez" },
-    (par_info){(void*) &(bfpar->bx ),TYPE_DOUBLE, "bx" },
-    (par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, "by" },
-    (par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, "bz" }};
+        (par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, "ex", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, "ey", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->ez ),TYPE_DOUBLE, "ez", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->bx ),TYPE_DOUBLE, "bx", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, "by", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, "bz", 1 ,(const void*) &default_value  }};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(bfp)/sizeof(par_info),bfp, filelines, startline, endline);
@@ -321,12 +351,13 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 {
 
     // see /OpenAcc/md_integrator.h
+    const double tlendef = 1.0;
 
     par_info mdp[]={
-    (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     },
-    (par_info){(void*) &(mdpar->gauge_scale ), TYPE_INT, "GaugeSubSteps"},
-    (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   },
-    (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   }};
+        (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
+        (par_info){(void*) &(mdpar->gauge_scale ), TYPE_INT, "GaugeSubSteps", 0 , NULL},
+        (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   , 1 , (const void*) &tlendef},
+        (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL}};
 
 
     // from here on, you should not have to modify anything.
@@ -337,21 +368,28 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 {
 
     // see /OpenAcc/md_integrator.h
+    const int useildg_def = 1;
+    const int seed_def = 42; 
+    const double epsgen_def = 0.1 ; 
+    const double expmaxeigenv_def = 5.5 ; 
+    const int save_diagnostics_def = 0;
+    const const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
+
     par_info mcp[]={
-    (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  },
-    (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             },
-    (par_info){(void*) &(mcpar->storeconfinterval      ),TYPE_INT,   "StoreConfInterval"      },
-    (par_info){(void*) &(mcpar->saveconfinterval),TYPE_INT,          "SaveConfInterval"       },
-    (par_info){(void*) &(mcpar->residue_metro    ),TYPE_DOUBLE,      "residue_metro"          },
-    (par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,         "StoreConfName"          },
-    (par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,         "SaveConfName"           },
-    (par_info){(void*) &(mcpar->use_ildg),TYPE_INT,                  "UseILDG"                },
-    (par_info){(void*) &(mcpar->seed   ),TYPE_INT,                   "Seed"                   },
-    (par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,              "EpsGen"                 },
-    (par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,               "VerbosityLv"            },
-    (par_info){(void*) &(mcpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       },
-    (par_info){(void*) &(mcpar->save_diagnostics),TYPE_INT,          "SaveDiagnostics"        },
-    (par_info){(void*) &(mcpar->diagnostics_filename),TYPE_STR,      "SaveDiagnosticsFilename"}};
+        (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
+        (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             , 0, NULL},
+        (par_info){(void*) &(mcpar->storeconfinterval      ),TYPE_INT,   "StoreConfInterval"      , 0, NULL},
+        (par_info){(void*) &(mcpar->saveconfinterval),TYPE_INT,          "SaveConfInterval"       , 0, NULL},
+        (par_info){(void*) &(mcpar->residue_metro    ),TYPE_DOUBLE,      "residue_metro"          , 0, NULL},
+        (par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,         "StoreConfName"          , 0, NULL},
+        (par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,         "SaveConfName"           , 0, NULL},
+        (par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,               "VerbosityLv"            , 0, NULL},
+        (par_info){(void*) &(mcpar->use_ildg),TYPE_INT,                  "UseILDG"                , 1,(const void*) &useildg_def},
+        (par_info){(void*) &(mcpar->seed   ),TYPE_INT,                   "Seed"                   , 1,(const void*) &seed_def},
+        (par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,              "EpsGen"                 , 1,(const void*) &epsgen_def},
+        (par_info){(void*) &(mcpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
+        (par_info){(void*) &(mcpar->save_diagnostics),TYPE_INT,          "SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
+        (par_info){(void*) &(mcpar->diagnostics_filename),TYPE_STR,      "SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
 
     // from here on, you should not have to modify anything.
 
@@ -363,21 +401,22 @@ int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH
 
     // see /Meas
     par_info gmp[]= {
-    (par_info){(void*) outfilename ,TYPE_STR, "GaugeOutfilename"}};
+        (par_info){(void*) outfilename ,TYPE_STR, "GaugeOutfilename", 0 , NULL}};
 
 
     // from here on, you should not have to modify anything.
-   return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
+    return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
 
 }
 int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
+    const int doubleinv_def = 0;
     par_info fmp[]={
-    (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename"},
-    (par_info){(void*) &(fmpars->SingleInvNVectors),TYPE_INT,    "SingleInvNVectors"   },
-    (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),TYPE_INT,    "DoubleInvNVectorsChiral"   },
-    (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,    "DoubleInvNVectorsQuarkNumber"   }};
+        (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename", 0 , NULL},
+        (par_info){(void*) &(fmpars->SingleInvNVectors),TYPE_INT,    "SingleInvNVectors"   , 0, NULL },
+        (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),TYPE_INT,    "DoubleInvNVectorsChiral", 1, (const void*) &doubleinv_def  },
+        (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,    "DoubleInvNVectorsQuarkNumber", 1, (const void*) &doubleinv_def   }};
 
 
     // from here on, you should not have to modify anything.
@@ -388,7 +427,7 @@ int read_device_setting(device_param *device_settings,char filelines[MAXLINES][M
 {
 
     par_info tp[]= {
-    (par_info){(void*) &(device_settings->device_choice),TYPE_INT,"device_choice" }};
+        (par_info){(void*) &(device_settings->device_choice),TYPE_INT,"device_choice", 0 , NULL  }};
 
 
     // from here on, you should not have to modify anything.
@@ -401,43 +440,43 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 
     // see /OpenAcc/backfield.h
     par_info gp[]={
-    (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx" },
-    (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny" },
-    (par_info){(void*) &(gpar->gnz ),TYPE_INT,  "nz" },
-    (par_info){(void*) &(gpar->gnt ),TYPE_INT,  "nt" },
-    (par_info){(void*) &(gpar->xmap ),TYPE_INT, "xmap" },
-    (par_info){(void*) &(gpar->ymap ),TYPE_INT, "ymap" },
-    (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap" },
-    (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap" }};
+        (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx"  , 0 , NULL },
+        (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny"  , 0 , NULL },
+        (par_info){(void*) &(gpar->gnz ),TYPE_INT,  "nz"  , 0 , NULL },
+        (par_info){(void*) &(gpar->gnt ),TYPE_INT,  "nt"  , 0 , NULL },
+        (par_info){(void*) &(gpar->xmap ),TYPE_INT, "xmap", 0 , NULL },
+        (par_info){(void*) &(gpar->ymap ),TYPE_INT, "ymap", 0 , NULL },
+        (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap", 0 , NULL },
+        (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap", 0 , NULL }};
 
     int res = scan_group_NV(sizeof(gp)/sizeof(par_info),gp, filelines, startline, endline);
 
     set_geom_glv(gpar);
 
     if(startline<endline){
-    if(gpar->gnx != gpar->nd[gpar->xmap] || gpar->gny != gpar->nd[gpar->ymap] ||
-            gpar->gnz != gpar->nd[gpar->zmap] || gpar->gnt != gpar->nd[gpar->tmap] ){ 
-        printf("Error, input file lattice dimensions are not compatible\n");
-        printf("       with the lattice dimensions written in geometry.h.\n");
-        printf("       Either modify the input file, or recompile,\n");
-        printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
-                               gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
-        printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",
-                gpar->nd[gpar->xmap], gpar->nd[gpar->ymap],
-                gpar->nd[gpar->zmap], gpar->nd[gpar->tmap]);
-        exit(1);
-    }
-    int maps[4] = {gpar->xmap,gpar->ymap,gpar->zmap,gpar->tmap};
-    int stop = 0;
-    int imap,jmap;
-    for(imap = 0 ; imap<3; imap++) for(jmap = imap+1 ; jmap<4; jmap++)
-        stop = stop || (maps[imap] == maps[jmap]);
+        if(gpar->gnx != gpar->nd[gpar->xmap] || gpar->gny != gpar->nd[gpar->ymap] ||
+                gpar->gnz != gpar->nd[gpar->zmap] || gpar->gnt != gpar->nd[gpar->tmap] ){ 
+            printf("Error, input file lattice dimensions are not compatible\n");
+            printf("       with the lattice dimensions written in geometry.h.\n");
+            printf("       Either modify the input file, or recompile,\n");
+            printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
+                    gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
+            printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",
+                    gpar->nd[gpar->xmap], gpar->nd[gpar->ymap],
+                    gpar->nd[gpar->zmap], gpar->nd[gpar->tmap]);
+            res = 1;
+        }
+        int maps[4] = {gpar->xmap,gpar->ymap,gpar->zmap,gpar->tmap};
+        int stop = 0;
+        int imap,jmap;
+        for(imap = 0 ; imap<3; imap++) for(jmap = imap+1 ; jmap<4; jmap++)
+            stop = stop || (maps[imap] == maps[jmap]);
 
-    if(stop){
-        printf("ERROR: found two equal direction mappings (%s:%d)\n",
-                __FILE__,__LINE__);
-        exit(1);
-    }
+        if(stop){
+            printf("ERROR: found two equal direction mappings (%s:%d)\n",
+                    __FILE__,__LINE__);
+            res = 1;
+        }
 
     }
 
@@ -580,12 +619,6 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     // check == 1 means at least a parameter was not found.
     if(helpmode) exit(1);
-    if(totcheck!=0){
-    
-        printf("There are errors in some groups, exiting.\n")   ;
-        exit(1);
-
-    }
     if(!helpmode){
 
         uint32_t hash = hash_settings();
@@ -594,11 +627,17 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         printf("Hash of all relevant settings: %s\n", hash_string );
         strcat(gauge_outfilename, hash_string);
         strcat(fm_par.fermionic_outfilename, hash_string);
+        strcat(mkwch_pars.diagnostics_filename,hash_string);
 
+    }
+    if(totcheck!=0){
+
+        printf("There are errors in some groups, exiting.\n")   ;
+        exit(1);
 
     }
 
-    
+
 }
 
 
