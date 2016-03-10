@@ -45,6 +45,12 @@
 #include "../Rand/random.h"
 #include "../Mpi/communications.h"
 
+#ifdef __GNUC__
+#include "sys/time.h"
+#endif
+
+
+
 
 //#define NORANDOM  // FOR debug, check also update_versatile.c 
 
@@ -54,7 +60,8 @@ int verbosity_lv = 5;// 5 should print everything.
 int main(int argc, char* argv[]){
 
 #define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
-
+    struct timeval tinit;
+    gettimeofday ( &tinit, NULL );
 
 #ifdef NORANDOM
     printf("WELCOME! NORANDOM MODE. (main()) \n" );
@@ -210,6 +217,8 @@ int main(int argc, char* argv[]){
             // THERMALIZATION & METRO    ----   UPDATES //
     
             for(int id_iter=id_iter_offset;id_iter<(mkwch_pars.ntraj+id_iter_offset);id_iter++){
+                struct timeval tstart_cycle;
+                gettimeofday(&tstart_cycle, NULL);
 
                 check_unitarity_device(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
                 printf("\tAvg/Max unitarity deviation on device: %e / %e\n", avg_unitarity_deviation, max_unitarity_deviation);
@@ -292,6 +301,37 @@ int main(int argc, char* argv[]){
                 }
 
                 //-------------------------------------------------//
+                // program exits if it finds a file called "stop"
+                
+                FILE * test_stop = fopen("stop","r");
+                if(test_stop){
+                    fclose(test_stop);
+                    printf("File  \'stop\' found, stopping cycle now.\n");
+                    break;
+                }
+                struct timeval tend_cycle;
+                gettimeofday(&tend_cycle, NULL);
+
+                double cycle_duration = (double) 
+                    (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
+                    (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
+
+                double total_duration = (double) 
+                    (tend_cycle.tv_sec - tinit.tv_sec)+
+                    (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
+
+
+                double max_expected_duration_with_another_cycle = 
+                    total_duration + 2*cycle_duration ; 
+
+                if(max_expected_duration_with_another_cycle > mkwch_pars.MaxRunTimeS){
+                    printf("Time is running out (%d of %d seconds elapsed),",
+                          (int) total_duration, (int) mkwch_pars.MaxRunTimeS);
+                    printf(" shutting down now.\n");
+                    //https://www.youtube.com/watch?v=MfGhlVcrc8U
+                    // but without that much pathos
+                    break;
+                }
 
             }// id_iter loop ends here
 
@@ -310,7 +350,7 @@ int main(int argc, char* argv[]){
             topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
             printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/size/6.0/3.0,topoch);
 
-//
+//               // You might want to put this inside the loop
 //               for(int icool=0;icool<5000;icool++){
 //               cool_conf(conf_acc,aux_conf_acc);
 //               plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);

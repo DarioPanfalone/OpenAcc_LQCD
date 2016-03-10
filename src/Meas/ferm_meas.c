@@ -79,17 +79,40 @@ d_complex eo_scal_prod_global(vec3_soa * rnd_e,
 void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 
     strcpy(fmpar->fermionic_outfile_header,"#conf\ticopy\t");
+    int col_count=2;
     for(int iflv=0;iflv<NDiffFlavs;iflv++){
-        char strtocat[120];
-        sprintf(strtocat, "Reff_%-19sImff_%-19s",tferm_par[iflv].name,tferm_par[iflv].name);
+        char strtocat[200];
+        sprintf(strtocat, "%02d.Reff_%-16s%02d.Imff_%-16s",col_count+1,
+                tferm_par[iflv].name,col_count+2,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
-        sprintf(strtocat, "ReN_%-20sImN_%-20s",tferm_par[iflv].name,tferm_par[iflv].name);
+        sprintf(strtocat, "%02d.ReN_%-17s%02d.ImN_%-17s",col_count+3,
+                tferm_par[iflv].name,col_count+4,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
-         if (fmpar->DoubleInvNVectors>0){
+        col_count +=4;
+        if (fmpar->DoubleInvNVectorsChiral>0){
+            sprintf(strtocat, 
+                    "%02d.ReChSuscConn_%-7s%02d.ImChSuscConn_%-7s",
+                    col_count+1,tferm_par[iflv].name,
+                    col_count+2,tferm_par[iflv].name);
+            strcat(fmpar->fermionic_outfile_header,strtocat);
+            col_count+=2;
+        }
+        if (fmpar->DoubleInvNVectorsQuarkNumber>0){
+            // Actually, the first connected piece does not need a second inversion
+            sprintf(strtocat, 
+                    "%02d.ReQNSuscConn1_%-6s%02d.ImQNSuscConn1_%-6s",
+                    col_count+1,tferm_par[iflv].name,
+                    col_count+2,tferm_par[iflv].name);
+            strcat(fmpar->fermionic_outfile_header,strtocat);
+            sprintf(strtocat, 
+                    "%02d.ReQNSuscConn2_%-7s%02d.ImQNSuscConn2_%-7s",
+                    col_count+3,tferm_par[iflv].name,
+                    col_count+4,tferm_par[iflv].name);
+            strcat(fmpar->fermionic_outfile_header,strtocat);
+            col_count+=4;
 
-        sprintf(strtocat, "ReTrM^-2_%-14sImTrM^-2_%-14s",tferm_par[iflv].name,tferm_par[iflv].name);
-        strcat(fmpar->fermionic_outfile_header,strtocat);
-         }
+        }
+
 
     }
     strcat(fmpar->fermionic_outfile_header,"\n");
@@ -104,9 +127,11 @@ void fermion_measures( su3_soa * tconf_acc,
         int conf_id_iter  ){
     vec3_soa * rnd_e,* rnd_o;
     vec3_soa * chi_e,* chi_o; //results of eo_inversion
+    vec3_soa *bnchi_e,*bnchi_o; //for baryon number calculation 
     vec3_soa *chi2_e,*chi2_o; //results of second eo_inversion, 
+    // for susceptibilities
+
     vec3_soa * phi_e,* phi_o; // parking variables for eo_inverter
-    // also results of eo inversion multiplied by dM/dmu
     vec3_soa * trial_sol;
     su3_soa * conf_to_use;
 
@@ -135,6 +160,10 @@ void fermion_measures( su3_soa * tconf_acc,
     ALLOCCHECK(allocation_check,chi_e);     
     allocation_check =  posix_memalign((void **)&chi_o, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,chi_o);     
+    allocation_check =  posix_memalign((void **)&bnchi_e, ALIGN, sizeof(vec3_soa));
+    ALLOCCHECK(allocation_check,bnchi_e);     
+    allocation_check =  posix_memalign((void **)&bnchi_o, ALIGN, sizeof(vec3_soa));
+    ALLOCCHECK(allocation_check,bnchi_o);     
     allocation_check =  posix_memalign((void **)&chi2_e, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,chi2_e);     
     allocation_check =  posix_memalign((void **)&chi2_o, ALIGN, sizeof(vec3_soa));
@@ -183,56 +212,126 @@ void fermion_measures( su3_soa * tconf_acc,
 
             if(verbosity_lv > 1){
                 printf("Performing %d of %d chiral measures for quark %s",
-                    icopy+1,tfm_par->SingleInvNVectors, tfermions_parameters[iflv].name);
-    
-                if(icopy < tfm_par->DoubleInvNVectors )
-                printf(" ( %d of %d double inversions)",
-                    icopy+1,tfm_par->DoubleInvNVectors);
-            
-                printf(".\n");
+                        icopy+1,tfm_par->SingleInvNVectors, tfermions_parameters[iflv].name);
 
-            
+                printf("(%d for chiral susc, %d for quark number susc).",
+                        tfm_par->DoubleInvNVectorsChiral,
+                        tfm_par->DoubleInvNVectorsQuarkNumber);
+
             }
-           
+
 
             generate_vec3_soa_z2noise(rnd_e);
             generate_vec3_soa_z2noise(rnd_o);
             generate_vec3_soa_gauss(trial_sol);
             d_complex chircond_size = 0.0 + 0.0*I;
             d_complex barnum_size = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
-            d_complex trMinvSq_size = 0.0 + 0.0*I;
+            d_complex trMinvSq_size = 0.0 + 0.0*I; // for connected chiral susc
+            d_complex trd2M_dmu2_Minv_size = 0.0 + 0.0*I; //for connected baryon susc,1
+            d_complex trdM_dmuMinv_sq_size = 0.0 + 0.0*I; //for connected baryon susc,2
+
             double factor = tfermions_parameters[iflv].degeneracy*0.25/size;
 
 #pragma acc data create(phi_e[0:1]) create(phi_o[0:1])\
             create(chi_e[0:1]) create(chi_o[0:1])   \
+            create(bnchi_e[0:1]) create(bnchi_o[0:1])   \
             create(chi2_e[0:1]) create(chi2_o[0:1])   \
             copyin(rnd_e[0:1]) copyin(rnd_o[0:1]) copyin(trial_sol[0:1])
             {
-                // i fermioni ausiliari kloc_* sono quelli GLOBALI !!!
-                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+                // CHIRAL CONDENSATE
+                // (chi_e,chi_o) = M^{-1} (rnd_e,rnd_o)
+                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,
+                        rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,
+                        trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
                 chircond_size = scal_prod_global(rnd_e,chi_e)+
                     scal_prod_global(rnd_o,chi_o);
+                fprintf(foutfile,"%.16lf\t%.16lf\t",
+                        creal(chircond_size*factor),
+                        cimag(chircond_size*factor));
 
-                dM_dmu_eo[geom_par.tmap](conf_to_use,phi_e,chi_o,tfermions_parameters[iflv].phases);
-                dM_dmu_oe[geom_par.tmap](conf_to_use,phi_o,chi_e,tfermions_parameters[iflv].phases);
-                barnum_size = scal_prod_global(rnd_e,phi_e)+
-                    scal_prod_global(rnd_o,phi_o);
+                // QUARK NUMBER
+                // (bnchi_e, * ) = dM/dmu (* , chi_o)
+                dM_dmu_eo[geom_par.tmap](conf_to_use,bnchi_e,chi_o,
+                        tfermions_parameters[iflv].phases);
+                // ( * ,bnchi_o) = dM/dmu (chi_e, * )
+                dM_dmu_oe[geom_par.tmap](conf_to_use,bnchi_o,chi_e,
+                        tfermions_parameters[iflv].phases);
+                // (bnchi_e,bnchi_o) = dM/dmu (chi_e,chi_o) 
+                barnum_size = scal_prod_global(rnd_e,bnchi_e)+
+                    scal_prod_global(rnd_o,bnchi_o);
 
                 fprintf(foutfile,"%.16lf\t%.16lf\t",
-                        creal(chircond_size*factor),cimag(chircond_size*factor));
-                fprintf(foutfile,"%.16lf\t%.16lf\t",
-                        creal(barnum_size*factor),cimag(barnum_size*factor));
+                        creal(barnum_size*factor),
+                        cimag(barnum_size*factor));
 
-                if(icopy < tfm_par->DoubleInvNVectors ){
-                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,chi_e,chi_o,chi2_e,chi2_o,phi_e,phi_o,trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+                // SUSCEPTIBILITIES
+                if(icopy < tfm_par->DoubleInvNVectorsChiral ){
 
-                trMinvSq_size = -scal_prod_global(rnd_e,chi2_e)-
-                  scal_prod_global(rnd_o,chi2_o); 
-                fprintf(foutfile,"%.16lf\t%.16lf\t",
-                        creal(trMinvSq_size*factor),cimag(trMinvSq_size*factor));
+                    // CHIRAL SUSCEPTIBILITY
+                    // (chi2_e,chi2_o) = M^{-1} (chi_e,chi_o) = 
+                    // = M^{-2} (rnd_e, rnd_o)
+                    eo_inversion(conf_to_use,&tfermions_parameters[iflv],
+                            res,chi_e,chi_o,chi2_e,chi2_o,phi_e,phi_o,
+                            trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
 
-                } else if (tfm_par->DoubleInvNVectors>0)                  
+                    trMinvSq_size = -scal_prod_global(rnd_e,chi2_e)-
+                        scal_prod_global(rnd_o,chi2_o); 
+                    fprintf(foutfile,"%.16lf\t%.16lf\t",
+                            creal(trMinvSq_size*factor),
+                            cimag(trMinvSq_size*factor));
+
+                } else if (tfm_par->DoubleInvNVectorsChiral>0)                  
                     fprintf(foutfile,"%-24s%-24s","none","none" );
+
+                if(icopy < tfm_par->DoubleInvNVectorsQuarkNumber ){
+                    // Actually, the first connected piece 
+                    // does not need a second inversion
+
+                    // CONNECTED QUARK NUMBER SUSCEPTIBILITY (1),
+                    // (dM/dmu)^2 M^{-1}
+
+                    // (chi2_e, * ) = d^2M/dmu^2 (* , chi_o)
+                    d2M_dmu2_eo[geom_par.tmap](conf_to_use,chi2_e,chi_o,
+                            tfermions_parameters[iflv].phases); 
+                    // ( * ,chi2_o) = d^2M/dmu^2 (chi_e, * )      
+                    d2M_dmu2_oe[geom_par.tmap](conf_to_use,chi2_o,chi_e,
+                            tfermions_parameters[iflv].phases);
+                    
+                    // (chi2_e,chi2_o) = d^2M/dmu^2 M^{-1} (rnd_e,rnd_o)
+                    trd2M_dmu2_Minv_size = scal_prod_global(rnd_e,chi2_e)
+                        + scal_prod_global(rnd_o,chi2_o);
+                    
+                    fprintf(foutfile,"%.16lf\t%.16lf\t",
+                            creal(trd2M_dmu2_Minv_size*factor),
+                            cimag(trd2M_dmu2_Minv_size*factor));
+
+                    // CONNECTED QUARK NUMBER SUSCEPTIBILITY (2),
+                    // (dM/dmu M^{-1})^2
+
+                    // (chi2_e,chi2_o) = M^{-1} (bnchi_e,bnchi_o) =
+                    // = M^{-1} dM/dmu M^{-1} (rnd_e,rnd_o)
+                    eo_inversion(conf_to_use,&tfermions_parameters[iflv],
+                            res,bnchi_e,bnchi_o,chi2_e,chi2_o,
+                            phi_e,phi_o,
+                            trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+
+                    // (bnchi_e, * ) = dM/dmu (* , chi2_o)
+                    dM_dmu_eo[geom_par.tmap](conf_to_use,bnchi_e,chi2_o,
+                            tfermions_parameters[iflv].phases);
+                    // ( * ,bnchi_o) = dM/dmu (chi2_e, * )
+                    dM_dmu_oe[geom_par.tmap](conf_to_use,bnchi_o,chi2_e,
+                            tfermions_parameters[iflv].phases);
+                    // (bnchi_e,bnchi_o) = (dM/dmu M^{-1})^2 (rnd_e,rnd_o)
+                    trdM_dmuMinv_sq_size = 
+                        -scal_prod_global(rnd_e,bnchi_e)
+                        -scal_prod_global(rnd_o,bnchi_o); 
+                    fprintf(foutfile,"%.16lf\t%.16lf\t",
+                            creal(trdM_dmuMinv_sq_size*factor),
+                            cimag(trdM_dmuMinv_sq_size*factor));
+
+
+                } else if (tfm_par->DoubleInvNVectorsQuarkNumber>0)                  
+                    fprintf(foutfile,"%-24s%-24s%-24s%-24s","none","none","none","none" );
 
 
 

@@ -198,7 +198,7 @@ int multishift_invert(__restrict su3_soa * const u,
       assign_in_to_out(&out[iter],loc_p);
       fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
-      double  giustoono=l2norm2_global(loc_h);
+      double  giustoono=l2norm2_global(loc_h)/source_norm;
       printf("\t%1.1e",sqrt(giustoono)/residuo);
     }
     printf("\n");

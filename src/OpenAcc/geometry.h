@@ -47,7 +47,6 @@ typedef struct geom_parameters_t{
 
 extern geom_parameters geom_par;
 
-
 #pragma acc routine seq
 static inline int snum_acc(int d0, int d1, int d2, int d3) {
   int ris;
