@@ -308,11 +308,13 @@ int main(int argc, char* argv[]){
                     (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
 
 
-                double expected_duration_with_another_cycle = 
-                    total_duration + cycle_duration ; 
+                double max_expected_duration_with_another_cycle = 
+                    total_duration + 2*cycle_duration ; 
 
-                if(expected_duration_with_another_cycle > mkwch_pars.MaxRunTimeS){
-                    printf("Time is running out, shutting down now.\n");
+                if(max_expected_duration_with_another_cycle > mkwch_pars.MaxRunTimeS){
+                    printf("Time is running out (%d of %d seconds elapsed),",
+                          (int) total_duration, (int) mkwch_pars.MaxRunTimeS);
+                    printf(" shutting down now.\n");
                     //https://www.youtube.com/watch?v=MfGhlVcrc8U
                     // but without that much pathos
                     break;
