@@ -168,28 +168,42 @@ it. Various remarks on its content:
         low as possible to optimize simulation time, the length of the trajectory 
         should be kept equal to $1$ but for bugfixing purposes.
 
-    \item{Simulation: \verb|MontecarloParameters|.} A lot of parameters here: 
-        \begin{itemize}
-            \item \verb|NTraj| is the number of trajectories that have to be performed in 
-                this run.
-            \item \verb|ThermNTraj| is the number of trajectories from the beginning of the 
-                \emph{history} for which the Metropolis test can be skipped. Notice that, if 
-                the run starts from a configuration which has a nonzero \verb|conf_id| 
-                (because, for example, it comes from an earlier run) and if \verb|conf_id| is 
-                larger than \verb|ThermNTraj|, the Metropolis test won't be skipped at all.
-            \item \verb|StoreConfInterval|: configurations will be stored, with 
-                \verb|conf_id| in their name, once every this number of trajectories. The name 
-                is will be the one specified by \verb|StoreConfName| with \verb|conf_id| 
-                attached to it. 
-            \item \verb|SaveConfInterval|: the file specified in \verb|SaveConfName| will 
-                be saved once every this number of trajectories. For safety, set 1, for speed, 
-                you can increase it.
-            \item \verb|UseILDG|: if this flag is set to $1$, the gauge configuration file 
-                I/O will be done using ILDG format. The default value is 1, so ILDG activated.
-        \end{itemize}
-        You can also set the \verb|Seed| of the simulation, a parameter 
-        \verb|EpsGen| defining the randomness in cold gauge conf generation, and the 
-        verbosity level \verb|VerbosityLv|. If you want 
+\item{Simulation: \verb|MontecarloParameters|.} A lot of parameters here: 
+\begin{itemize}
+\item \verb|NTraj| is the number of trajectories that have to be performed in 
+    this run.
+\item \verb|ThermNTraj| is the number of trajectories from the beginning of the 
+    \emph{history} for which the Metropolis test can be skipped. Notice that, 
+if 
+    the run starts from a configuration which has a nonzero \verb|conf_id| 
+    (because, for example, it comes from an earlier run) and if \verb|conf_id| 
+is 
+    larger than \verb|ThermNTraj|, the Metropolis test won't be skipped at all.
+\item \verb|StoreConfInterval|: configurations will be stored, with 
+    \verb|conf_id| in their name, once every this number of trajectories. The 
+name 
+    is will be the one specified by \verb|StoreConfName| with \verb|conf_id| 
+    attached to it. 
+\item \verb|SaveConfInterval|: the file specified in \verb|SaveConfName| will 
+    be saved once every this number of trajectories. For safety, set 1, for 
+speed, 
+    you can increase it.
+\item \verb|UseILDG|: if this flag is set to $1$, the gauge configuration file 
+    I/O will be done using ILDG format. The default value is 1, 
+so ILDG activated.
+\item Thing related to random initialization. \verb|RandGenStatusFilename| is 
+used to specify the name of a file where the random number generator status 
+will be stored. At present, it is optional and the default value is 
+\verb|rgstatus.bin|. If this file is not found, the variable \verb|Seed| is 
+instead use to initialise the random number generator. If \verb|Seed| is zero, 
+the function \verb|time()| will be used. Notice that after a successful run 
+the file will be generated, and will be read on the next run, while \verb|Seed| 
+will be ignored.
+\end{itemize}
+You can also set the \verb|Seed| of the simulation, 
+a parameter 
+\verb|EpsGen| defining the randomness in cold gauge conf generation, and the 
+verbosity level \verb|VerbosityLv|. 
 
     \item{Measures: \verb|GaugeMeasuresSettings|.} Now, only the name of the 
         file for the {\bf basic} gauge measures is specified (plaquette, 

@@ -37,7 +37,7 @@ SaveConfInterval    	5
 residue_metro       	1e-8
 StoreConfName       	store.conf.ildg8
 SaveConfName            conf.ildg8
-Seed                    0
+Seed                    12
 VerbosityLv             5
 MaxRunTimeS             600
 

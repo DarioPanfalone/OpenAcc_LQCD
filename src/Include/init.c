@@ -174,7 +174,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
     if(startline >= endline){ // goes into 'help mode'
         for(int ipar = 0;ipar< npars ; ipar++)
             fprintf(
-                    helpfile,"%s\t%s\n",
+                    helpfile,"%s\t\t\t%s\n",
                     par_infos[ipar].name,
                     type_strings[par_infos[ipar].type]);
         return 0;
@@ -369,7 +369,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 
     // see /OpenAcc/md_integrator.h
     const int useildg_def = 1;
-    const int seed_def = 42; 
+    const int seed_def = 0;  // which means time()
     const double epsgen_def = 0.1 ; 
     const double expmaxeigenv_def = 5.5 ; 
     const int save_diagnostics_def = 0;
