@@ -374,6 +374,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const double expmaxeigenv_def = 5.5 ; 
     const int save_diagnostics_def = 0;
     const const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
+    const double MaxRunTimeS_def = 1.0e9; // 30 years should be enough
 
     par_info mcp[]={
         (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
@@ -384,6 +385,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,         "StoreConfName"          , 0, NULL},
         (par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,         "SaveConfName"           , 0, NULL},
         (par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,               "VerbosityLv"            , 0, NULL},
+        (par_info){(void*) &(mcpar->MaxRunTimeS            ),TYPE_DOUBLE, "MaxRunTimeS"           , 1, (const void*) &MaxRunTimeS_def},
         (par_info){(void*) &(mcpar->use_ildg),TYPE_INT,                  "UseILDG"                , 1,(const void*) &useildg_def},
         (par_info){(void*) &(mcpar->seed   ),TYPE_INT,                   "Seed"                   , 1,(const void*) &seed_def},
         (par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,              "EpsGen"                 , 1,(const void*) &epsgen_def},
