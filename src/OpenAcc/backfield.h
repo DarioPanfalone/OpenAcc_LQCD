@@ -15,7 +15,26 @@ typedef struct bf_param_t{
 extern bf_param backfield_parameters;
 
 
-void init_backfield(double_soa * tu1_back_field_phases, bf_param bfpars);
+//void init_backfield(double_soa * tu1_back_field_phases, bf_param bfpars);
+
+
+inline int KSphaseX(int x,int y,int z,int t){return 1;};
+inline int KSphaseY(int x,int y,int z,int t){
+    return 1 - ( 2*(x & 0x1) );
+
+}
+inline int KSphaseZ(int x,int y,int z,int t){
+    return 1 - ( 2*((x+y) & 0x1) );
+}
+inline int KSphaseT(int x,int y,int z,int t){ 
+    return 1 - ( 2*((x+y+z) & 0x1) );
+}
+
+
+
+
+
+
 
 
 #endif

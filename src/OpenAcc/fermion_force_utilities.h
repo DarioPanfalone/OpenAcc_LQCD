@@ -45,14 +45,11 @@ static inline void vec1_directprod_conj_vec2_into_mat1( __restrict su3_soa * con
 #pragma acc routine seq
 static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
 						   const  int idx,
-						   const  int eta,
 						   __restrict su3_soa * const auxmat,  // e' costante e non viene modificato
 						   const  int idx_aux,
 						   __restrict tamat_soa * const ipdot,
 						   const  int idipdot
-#if defined(BACKFIELD) || defined(IMCHEMPOT)
 						   ,d_complex phase
-#endif
                            ){
   d_complex mat1_00 = mat1->r0.c0[idx];
   d_complex mat1_01 = mat1->r0.c1[idx];
@@ -64,12 +61,7 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
   d_complex mat1_20 = conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
   d_complex mat1_21 = conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
   d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
-  //Multiply 3rd row by eta
-  mat1_20 *= eta;
-  mat1_21 *= eta;
-  mat1_22 *= eta;
 
-#if defined(BACKFIELD) || defined(IMCHEMPOT)
   mat1_00 *= phase;
   mat1_01 *= phase;
   mat1_02 *= phase;
@@ -79,7 +71,6 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
   mat1_20 *= phase;
   mat1_21 *= phase;
   mat1_22 *= phase;
-#endif
 
   d_complex auxmat_00 = auxmat->r0.c0[idx_aux];
   d_complex auxmat_01 = auxmat->r0.c1[idx_aux];
@@ -117,7 +108,6 @@ static inline  void mat1_times_auxmat_into_tamat(  __restrict su3_soa * const ma
 #pragma acc routine seq
 static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * const mat1, // e' costante e non viene modificato
 						   const  int idx,
-						   const  int eta,
 						   __restrict su3_soa * const auxmat,  // e' costante e non viene modificato
 						   const  int idx_aux,
 						   __restrict tamat_soa * const ipdot,
@@ -133,11 +123,6 @@ static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * 
   d_complex mat1_20 = conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
   d_complex mat1_21 = conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
   d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
-  //Multiply 3rd row by eta
-  mat1_20 *= eta;
-  mat1_21 *= eta;
-  mat1_22 *= eta;
-
   d_complex auxmat_00 = auxmat->r0.c0[idx_aux];
   d_complex auxmat_01 = auxmat->r0.c1[idx_aux];
   d_complex auxmat_02 = auxmat->r0.c2[idx_aux];
@@ -171,7 +156,6 @@ static inline  void mat1_times_auxmat_into_tamat_nophase(  __restrict su3_soa * 
 #endif // ifdef STOUT_FERMIONS
 
 
-#if defined(BACKFIELD) || defined(IMCHEMPOT)
 #pragma acc routine seq
 static inline  void phase_times_auxmat_into_auxmat(
 						   __restrict su3_soa * const auxmat,  // e' costante e non viene modificato
@@ -180,21 +164,20 @@ static inline  void phase_times_auxmat_into_auxmat(
                            d_complex phase
                            ){
 
-    pseudo_ipdot->r0.c0[idx] += phase * auxmat->r0.c0[idx];
-    pseudo_ipdot->r0.c1[idx] += phase * auxmat->r0.c1[idx];
-    pseudo_ipdot->r0.c2[idx] += phase * auxmat->r0.c2[idx];
-    pseudo_ipdot->r1.c0[idx] += phase * auxmat->r1.c0[idx];
-    pseudo_ipdot->r1.c1[idx] += phase * auxmat->r1.c1[idx];
-    pseudo_ipdot->r1.c2[idx] += phase * auxmat->r1.c2[idx];
-    pseudo_ipdot->r2.c0[idx] += phase * auxmat->r2.c0[idx];
-    pseudo_ipdot->r2.c1[idx] += phase * auxmat->r2.c1[idx];
-    pseudo_ipdot->r2.c2[idx] += phase * auxmat->r2.c2[idx];
+    pseudo_ipdot->r0.c0[idx] += auxmat->r0.c0[idx]*phase ; 
+    pseudo_ipdot->r0.c1[idx] += auxmat->r0.c1[idx]*phase ; 
+    pseudo_ipdot->r0.c2[idx] += auxmat->r0.c2[idx]*phase ; 
+    pseudo_ipdot->r1.c0[idx] += auxmat->r1.c0[idx]*phase ; 
+    pseudo_ipdot->r1.c1[idx] += auxmat->r1.c1[idx]*phase ; 
+    pseudo_ipdot->r1.c2[idx] += auxmat->r1.c2[idx]*phase ; 
+    pseudo_ipdot->r2.c0[idx] += auxmat->r2.c0[idx]*phase ; 
+    pseudo_ipdot->r2.c1[idx] += auxmat->r2.c1[idx]*phase ; 
+    pseudo_ipdot->r2.c2[idx] += auxmat->r2.c2[idx]*phase ; 
 
 
 }
 
-#else  //if defined(BACKFIELD) || defined(IMCHEMPOT)
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline void accumulate_auxmat1_into_auxmat2(
 						   __restrict su3_soa * const auxmat1,  // e' costante e non viene modificato
 						   __restrict su3_soa * const auxmat2,
@@ -213,7 +196,6 @@ static inline void accumulate_auxmat1_into_auxmat2(
 
 }
 
-#endif  //if defined(BACKFIELD) || defined(IMCHEMPOT)
 
 
 
@@ -242,22 +224,6 @@ void direct_product_of_fermions_into_auxmat(__restrict vec3_soa  * const loc_s, 
 
 
 
-void multiply_conf_times_force_and_take_ta_even(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
-						__restrict ferm_param * const tpars,
-						__restrict double_soa * const backfield,
-						__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
-						__restrict tamat_soa * const ipdot);
-
-
-
-void multiply_conf_times_force_and_take_ta_odd(  __restrict su3_soa * const u, // e' costante e non viene modificata
-						 __restrict ferm_param * const tpars,
-						 __restrict double_soa * const backfield,
-					         __restrict su3_soa * const auxmat, // e' costante e non viene modificata
-					         __restrict tamat_soa * const ipdot);
-
-
-#ifdef STOUT_FERMIONS
 void multiply_conf_times_force_and_take_ta_even_nophase(__restrict su3_soa * const u, // la conf e' costante e non viene modificata
 							__restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante; non viene modificata
 							__restrict tamat_soa * const ipdot);
@@ -267,24 +233,22 @@ void multiply_conf_times_force_and_take_ta_odd_nophase(  __restrict su3_soa * co
 							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
 							 __restrict tamat_soa * const ipdot);
 
-#endif //ifdef STOUT_FERMIONS
+void multiply_conf_times_force_and_take_ta_nophase(  __restrict su3_soa * const u, // e' costante e non viene modificata
+							 __restrict su3_soa * const auxmat, // e' costante e non viene modificata
+							 __restrict tamat_soa * const ipdot);
 
 
-#if defined(IMCHEMPOT) || defined(BACKFIELD)
-void multiply_backfield_times_force(__restrict ferm_param * const tpars,
-        __restrict double_soa * const backfield,
+
+void multiply_backfield_times_force(__restrict ferm_param * const tpars, 
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot);
 
-#else 
 void accumulate_gl3soa_into_gl3soa(
         __restrict su3_soa * const auxmat, // anche questa conf ausiliaria e' costante e non viene modificata
         __restrict su3_soa * const pseudo_ipdot);
 
-#endif
 
 void ker_openacc_compute_fermion_force( __restrict su3_soa * const u, // e' costante e non viene mai modificato qui dentro
-					__restrict double_soa * backfield,
 					__restrict su3_soa * const aux_u,
 					__restrict vec3_soa * const in_shiftmulti,  // e' costante e non viene mai modificato qui dentro
 					__restrict vec3_soa  * const loc_s,

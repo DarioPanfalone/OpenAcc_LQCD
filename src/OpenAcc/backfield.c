@@ -8,10 +8,15 @@
 #include <accelmath.h>
 #endif
 #include "./struct_c_def.h"
+#include "../Include/fermion_parameters.h"
+#include "./geometry.h"
+
 
 
 bf_param backfield_parameters;
 
+
+/*
 void init_backfield(double_soa * tu1_back_field_phases,bf_param bf_pars ){
 
     double  ex_quantum = bf_pars.ex;
@@ -21,7 +26,7 @@ void init_backfield(double_soa * tu1_back_field_phases,bf_param bf_pars ){
     double  by_quantum = bf_pars.by;
     double  bz_quantum = bf_pars.bz;
 
-    int X,T,Z,Y;
+    int X,Z,Y;
     double  arg;
 
     int x, y, z, t, parity,idxh;
@@ -97,4 +102,92 @@ void init_backfield(double_soa * tu1_back_field_phases,bf_param bf_pars ){
 }
 
 
+
+void mult_backfield_by_stag_phases(double_soa * phases){
+
+    int X,Y,Z,T;
+    double  arg2pi;
+    const double pi = 0.5*acc_twopi;
+
+    int x, y, z, t, parity;
+    int d[4], nd[4], idxh;
+    nd[0] = nd0;
+    nd[1] = nd1;
+    nd[2] = nd2;
+    nd[3] = nd3;
+
+    for(d[3]=0; d[3] < nd3; d[3]++){
+        for(d[2]=0; d[2] < nd2; d[2]++){
+            for(d[1]=0; d[1] < nd1; d[1]++){
+                for(d[0]=0; d[0] < nd0; d[0]++){
+
+                    idxh = snum_acc(d[0],d[1],d[2],d[3]);
+                   
+                    x = d[geom_par.xmap];
+                    y = d[geom_par.ymap];
+                    z = d[geom_par.zmap];
+                    t = d[geom_par.tmap];
+
+                    if((x+y+z+t)%2==0) parity = 0; //pari
+                    else parity = 1; //dispari
+                
+
+                    X = x + 1;
+                    Y = y + 1;
+                    Z = z + 1;
+                    T = t + 1;
+
+                    ////////X-oriented////////
+                    // X even --> dir=0
+                    // X odd  --> dir=1
+                    arg2pi = phases[parity].d[idxh]; 
+                    if(KSphaseX(x,y,z,t) == -1) arg2pi += pi;
+                    // ^this should be false, UNLESS one chooses
+                    // a different setup for the staggered phases....
+                    while(arg2pi >  pi) arg2pi -= 2*pi;
+                    while(arg2pi < -pi) arg2pi += 2*pi;
+
+                    phases[parity].d[idxh]= arg2pi; 
+
+                    ////////Y-oriented/////////
+                    // Y even --> dir=2
+                    // Y odd  --> dir=3
+
+                    arg2pi = phases[2+parity].d[idxh]; 
+                    if(KSphaseY(x,y,z,t) == -1) arg2pi += pi;
+                    while(arg2pi >  pi) arg2pi -= 2*pi;
+                    while(arg2pi < -pi) arg2pi += 2*pi;
+
+                    phases[2+parity].d[idxh]= arg2pi; 
+                    
+                    ////////Z-oriented////////
+                    // Z even --> dir=4
+                    // Z odd  --> dir=5
+
+                    arg2pi = phases[4+parity].d[idxh]; 
+                    if(KSphaseZ(x,y,z,t) == -1) arg2pi += pi;
+                    while(arg2pi >  pi) arg2pi -= 2*pi;
+                    while(arg2pi < -pi) arg2pi += 2*pi;
+
+                    phases[4+parity].d[idxh]= arg2pi; 
+
+
+                    ///////T-oriented////////
+                    // T even --> dir=6
+                    // T odd  --> dir=7
+                   
+                    if(KSphaseZ(x,y,z,t) == -1) arg2pi += pi;
+                    if(T == nt) arg2pi += pi; // antiperiodic boundary conds
+                    while(arg2pi >  pi) arg2pi -= 2*pi;
+                    while(arg2pi < -pi) arg2pi += 2*pi;
+
+                    phases[6+parity].d[idxh]=arg2pi;
+                } // x loop
+            } // y loop
+        } // z loop
+    } // t loop
+}*/
+
+
 #endif
+

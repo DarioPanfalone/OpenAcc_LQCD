@@ -5,6 +5,7 @@ typedef struct action_param_t{
 
     double beta;
     int stout_steps;
+    double stout_rho; // AT PRESENT, ONLY FOR CHECKING PURPOSES
 
 } action_param;
 

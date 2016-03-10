@@ -15,30 +15,39 @@
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
 
+#include "./hash.h"
+
 #include <stdio.h>
 #include <strings.h>
 #include <stdlib.h>
 
+#include <inttypes.h>
+#include <stdint.h>
+
 #define MAXLINES 300
 #define MAXLINELENGTH 500 // pretty long to accomodate all the comments
+
+char input_file_str[MAXLINES*MAXLINELENGTH];
 
 //types that can be found in an input file
 #define TYPE_INT 0
 #define TYPE_DOUBLE 1
 #define TYPE_STR 2
-const char * type_strings[]={"(int)", "(double)", "(string)"};
+const char * type_strings[]={"(int)", "(double)", "(string)" };
 
 typedef struct par_info_t{
 
     void* par;
     int type;
     char* name;
+    int is_optional;
+    const void* default_value;
 
 }par_info;
 
 #define NPMGTYPES 9
 #define MAXPMG 20
-const char * par_macro_groups_name[] ={ // NPMTYPES strings, NO SPACES!
+const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "ActionParameters",         // 0 
     "FlavourParameters",        // 1   
     "BackgroundFieldParameters",// 2            
@@ -62,6 +71,20 @@ const char * par_macro_groups_name[] ={ // NPMTYPES strings, NO SPACES!
 
 
 FILE * helpfile;
+
+// just to save it in the conf
+int prepare_string_from_stringarray(char file_lines[MAXLINES][MAXLINELENGTH], 
+        int maxlines,
+        char* input_filename_to_write){
+
+    int iline;int totlen = 0;
+    for(iline = 0; iline < maxlines ; iline++){
+        strcat(input_filename_to_write,file_lines[iline]);
+        totlen += strlen(file_lines[iline]);
+    }
+    return totlen;
+
+}
 
 void erase_comments(char file_lines[MAXLINES][MAXLINELENGTH], int maxlines)
 {
@@ -91,8 +114,10 @@ void reorder_par_infos(int npar, par_info * par_infos ){
         for(int i = 0; i < npar; i++){
             for(int j = i+1; j < npar; j++){
                 allright = 1;
-                if (strstr(par_infos[j].name,par_infos[i].name)){
-                    printf("Reordering %s and %s \n",par_infos[j].name,par_infos[i].name );
+                char* match = strstr(par_infos[j].name,par_infos[i].name);
+                //printf("DEBUG (%d,%d)params %s and %s, match %p \n",i,j,par_infos[j].name,par_infos[i].name, match );
+                if (match){
+                    printf("Reordering %s and %s\n",par_infos[j].name,par_infos[i].name);
                     par_info tmp = par_infos[i];
                     par_infos[i] = par_infos[j];
                     par_infos[j] = tmp;
@@ -100,8 +125,8 @@ void reorder_par_infos(int npar, par_info * par_infos ){
                     break;
                 }           
             }
-            if(allright) break;
         }
+        if(allright) break;
     }
 }
 
@@ -129,7 +154,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         for(int itype =0; itype <ntagstofind; itype++){
             found_something = strstr(filelines[iline],strtofind[itype]);
             if(found_something){
-                printf("Found group %s on line %d\n",strtofind[itype], iline);
+                //printf("Found group %s on line %d\n",strtofind[itype], iline);
                 taglines[nres] = iline;
                 tagtypes[nres] = itype;
                 nres++;
@@ -144,7 +169,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
     return nres;
 }
 
-void scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {   
     if(startline >= endline){ // goes into 'help mode'
         for(int ipar = 0;ipar< npars ; ipar++)
@@ -152,6 +177,7 @@ void scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLIN
                     helpfile,"%s\t%s\n",
                     par_infos[ipar].name,
                     type_strings[par_infos[ipar].type]);
+        return 0;
     }
     else // 'normal mode'
     {   // scans lines in the form 
@@ -177,9 +203,9 @@ void scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLIN
                 found_something = strstr(filelines[iline],par_infos[i].name);
                 if(found_something){ // looks at the beginning of the line.
                     // found parameter
-                    printf("  %s\r\t\t\t ",par_infos[i].name);
+                    printf("  %s\r\t\t\t\t ",par_infos[i].name);
                     int reads = 0;
-                    char parname[20];
+                    char parname[50];
                     switch(par_infos[i].type){
                         case TYPE_INT: 
                             reads = sscanf(filelines[iline],
@@ -192,7 +218,7 @@ void scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLIN
                             reads = sscanf(filelines[iline],
                                     "%s %lf",parname,(double*) par_infos[i].par);
                             if(reads == 2)
-                                printf("%f\n", *((double*)par_infos[i].par));
+                                printf("%e\n", *((double*)par_infos[i].par));
                             break;
                         case TYPE_STR: 
                             reads = sscanf(filelines[iline],
@@ -217,251 +243,246 @@ void scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLIN
         }
 
 
-        if(! res){
-            printf("ERROR: not all parameters needed read!");
-            for(int i =0; i<npars; i++) 
-                if (rc[i]==0) printf("Parameter %s not set!\n",par_infos[i].name);
-            exit(1);
-        }
 
-    }
+        if(! res){
+            for(int i =0; i<npars; i++){
+                res = 1;
+                if (rc[i]==0){
+                    printf("Parameter %s not set in input file.",par_infos[i].name);
+                    if(par_infos[i].is_optional==1){
+                        printf(" Parameter is optional. Default value: ");
+                            switch(par_infos[i].type){
+                                case TYPE_INT:
+                                    *((int*)(par_infos[i].par)) = 
+                                        *((const int*) (par_infos[i].default_value));
+                                    printf(" %d", *((int*)(par_infos[i].par)));
+                                    break;
+                                case TYPE_DOUBLE:
+                                    *((double*)(par_infos[i].par)) = 
+                                        *((const double*) (par_infos[i].default_value));
+                                    printf(" %f", *((double*)(par_infos[i].par)));
+                                    break;
+                                case TYPE_STR:
+                                    strcpy((char*)par_infos[i].par,(const char*) par_infos[i].default_value);
+                                    printf(" %s", (char*)(par_infos[i].par));
+                                    break;
+                            }
+                        printf("\n");
+                    }
+                    else{
+                        printf(" Parameter is NOT optional!\n");
+                        res = 0;
+                    }
+                }
+            }
+        } // if(!res)
+        free(rc);
+        if(!res){
+            printf("NON OPTIONAL PARAMETERS NOT FOUND IN INPUT FILE. PLEASE CHECK.\n");
+            return 1;
+        }
+        else return 0;
+    }// else normal mode
 }
 
-void read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /Include/fermion_parameters.h
-    const unsigned int  npar_fermions = 6;
-    par_info fp[npar_fermions];
 
-    // all names
-    char sferm_mass[]        = "Mass"        ;
-    char sdegeneracy[]       = "Degeneracy"       ;      
-    char snumber_of_ps[]     = "PseudoFermions"     ;
-    char sname[]             = "Name"             ;
-    char sferm_charge[]      = "Charge"      ;
-    char sferm_im_chem_pot[] = "Mu" ;
+    par_info fp[]={
+        (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          , 0 , NULL},
+        (par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , "Degeneracy"    , 0 , NULL},
+        (par_info){(void*) &(flpar->number_of_ps    ),TYPE_INT   , "PseudoFermions", 0 , NULL},
+        (par_info){(void*) &(flpar->name            ),TYPE_STR   , "Name"          , 0 , NULL},
+        (par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, "Charge"        , 0 , NULL},
+        (par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, "MuOverPiT"     , 0 , NULL}};
 
-    fp[0]=(par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, sferm_mass       };
-    fp[1]=(par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , sdegeneracy      };
-    fp[2]=(par_info){(void*) &(flpar->number_of_ps    ),TYPE_INT   , snumber_of_ps    };
-    fp[3]=(par_info){(void*) &(flpar->name            ),TYPE_STR   , sname            };
-    fp[4]=(par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, sferm_charge     };
-    fp[5]=(par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, sferm_im_chem_pot};
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(fp)/sizeof(par_info),fp, filelines, startline, endline);
 
-
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_fermions,fp, filelines, startline, endline);
-
-#ifndef IMCHEMPOT
-    if(flpar)
-        if(flpar->ferm_im_chem_pot != 0) {
-            printf("ERROR! Found a nonzero chemical potential for quark %s!\n", flpar->name);
-            printf("ERROR! This program was not compiled with \'IMCHEMPOT\'.\n");
-            printf("ERROR! This program cannot perform simulations at nonzero \n");
-            printf("       chemical potential. \n");
-            exit(1);
-        }
-#endif
 }
 
-void read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
     // see OpenAcc/su3_measurements.h
-    const unsigned int npar_action = 2;
-    par_info ap[npar_action];
 
-    char sbeta[]        = "Beta" ;
-    char sstoutsteps[]  = "StoutSteps"  ;
-    ap[0]=(par_info){(void*) &(act_par->beta),TYPE_DOUBLE, sbeta };
-    ap[1]=(par_info){(void*) &(act_par->stout_steps),TYPE_INT, sstoutsteps };
+    par_info ap[]={
+        (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      , 0 , NULL},
+        (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps", 0 , NULL},
+        (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  , 0 , NULL}};
 
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_action,ap, filelines, startline, endline);
+
+    // from here on, you should not have to modify anything.
+    int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
+
+    if(startline<endline)
+        if(act_par->stout_rho != RHO ){ 
+            printf("Error, input file stout_rho != RHO \n");
+            printf("  Either modify the input file, or recompile changing RHO\n");
+            printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
+            exit(1);
+
+        }
+
+    return res;
+
+
 
 }
-void read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /OpenAcc/backfield.h
-    const unsigned int npar_background = 6;
-    par_info bfp[npar_background];
+    const double default_value = 0.0;
+    par_info bfp[]={
+        (par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, "ex", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, "ey", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->ez ),TYPE_DOUBLE, "ez", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->bx ),TYPE_DOUBLE, "bx", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, "by", 1 ,(const void*) &default_value  },
+        (par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, "bz", 1 ,(const void*) &default_value  }};
 
-    char sex[] = "ex" ;
-    char sey[] = "ey" ;
-    char sez[] = "ez" ;
-    char sbx[] = "bx" ;
-    char sby[] = "by" ;
-    char sbz[] = "bz" ;
-    bfp[0]=(par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, sex };
-    bfp[1]=(par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, sey };
-    bfp[2]=(par_info){(void*) &(bfpar->ez ),TYPE_DOUBLE, sez };
-    bfp[3]=(par_info){(void*) &(bfpar->bx ),TYPE_DOUBLE, sbx };
-    bfp[4]=(par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, sby };
-    bfp[5]=(par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, sbz };
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(bfp)/sizeof(par_info),bfp, filelines, startline, endline);
 
-
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_background,bfp, filelines, startline, endline);
-
-#ifndef BACKFIELD
-    if(bfpar->ex || bfpar->ey || bfpar->ez || bfpar->bx || bfpar->by || bfpar->bz ){
-        printf("ERROR! Found nonzero field value, please check.\n");
-        printf("ERROR! \'BACKFIELD\' not defined at compile time.\n");
-        printf("ERROR! This program DOES NOT run simulation with a\n");
-        printf("       background field.\n");
-        exit(1);
-    }
-#endif
 }
-void read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /OpenAcc/md_integrator.h
-    const unsigned int  npar_md =  3;
-    par_info mdp[npar_md];
+    const double tlendef = 1.0;
 
-    char snomd[] = "NmdSteps" ;
-    char sgs[] = "GaugeSubSteps" ;
-    char st[] = "TrajLength" ;
-
-    mdp[0]=(par_info){(void*) &(mdpar->no_md ),TYPE_INT, snomd };
-    mdp[1]=(par_info){(void*) &(mdpar->gauge_scale ),TYPE_INT, sgs };
-    mdp[2]=(par_info){(void*) &(mdpar->t ),TYPE_DOUBLE, st};
+    par_info mdp[]={
+        (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
+        (par_info){(void*) &(mdpar->gauge_scale ), TYPE_INT, "GaugeSubSteps", 0 , NULL},
+        (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   , 1 , (const void*) &tlendef},
+        (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL}};
 
 
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_md,mdp, filelines, startline, endline);
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);
 
 }
-void read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /OpenAcc/md_integrator.h
-    const unsigned int  npar_mc =  12;
-    par_info mcp[npar_mc];
+    const int useildg_def = 1;
+    const int seed_def = 42; 
+    const double epsgen_def = 0.1 ; 
+    const double expmaxeigenv_def = 5.5 ; 
+    const int save_diagnostics_def = 0;
+    const const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
+    const double MaxRunTimeS_def = 1.0e9; // 30 years should be enough
 
-    char sntraj[] = "Ntraj" ;
-    char stherm_ntraj[] = "ThermNtraj" ;
-    char ssaveconfinterval[] = "SaveConfInterval" ;
-    char ssaverunningconfinterval[] = "SaveRunningConfInterval";
-    char sresidue_metro[] = "residue_metro";
-    char sresidue_md[] = "residue_md";
-    char sstore_conf_name[] = "StoreConfName";
-    char ssave_conf_name[] = "SaveConfName";
-    char sseed[] = "Seed";
-    char seps_gen[] = "EpsGen";
-    char sinput_vbl[] = "VerbosityLv";
-    char sexpected_max_eigenvalue[] = "ExpMaxEigenvalue";
+    par_info mcp[]={
+        (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
+        (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             , 0, NULL},
+        (par_info){(void*) &(mcpar->storeconfinterval      ),TYPE_INT,   "StoreConfInterval"      , 0, NULL},
+        (par_info){(void*) &(mcpar->saveconfinterval),TYPE_INT,          "SaveConfInterval"       , 0, NULL},
+        (par_info){(void*) &(mcpar->residue_metro    ),TYPE_DOUBLE,      "residue_metro"          , 0, NULL},
+        (par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,         "StoreConfName"          , 0, NULL},
+        (par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,         "SaveConfName"           , 0, NULL},
+        (par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,               "VerbosityLv"            , 0, NULL},
+        (par_info){(void*) &(mcpar->MaxRunTimeS            ),TYPE_DOUBLE, "MaxRunTimeS"           , 1, (const void*) &MaxRunTimeS_def},
+        (par_info){(void*) &(mcpar->use_ildg),TYPE_INT,                  "UseILDG"                , 1,(const void*) &useildg_def},
+        (par_info){(void*) &(mcpar->seed   ),TYPE_INT,                   "Seed"                   , 1,(const void*) &seed_def},
+        (par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,              "EpsGen"                 , 1,(const void*) &epsgen_def},
+        (par_info){(void*) &(mcpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
+        (par_info){(void*) &(mcpar->save_diagnostics),TYPE_INT,          "SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
+        (par_info){(void*) &(mcpar->diagnostics_filename),TYPE_STR,      "SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
 
-    mcp[0]=(par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,sntraj          };
-    mcp[1]=(par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,stherm_ntraj    };
-    mcp[2]=(par_info){(void*) &(mcpar->saveconfinterval       ),TYPE_INT, ssaveconfinterval};
-    mcp[3]=(par_info){(void*) &(mcpar->saverunningconfinterval),TYPE_INT, ssaverunningconfinterval};
-    mcp[4]=(par_info){(void*) &(mcpar->residue_metro    ),TYPE_DOUBLE,sresidue_metro};
-    mcp[5]=(par_info){(void*) &(mcpar->residue_md       ),TYPE_DOUBLE,sresidue_md};
-    mcp[6]=(par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,sstore_conf_name};
-    mcp[7]=(par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,ssave_conf_name};
-    mcp[8]=(par_info){(void*) &(mcpar->seed   ),TYPE_INT,sseed};
-    mcp[9]=(par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,seps_gen};
-    mcp[10]=(par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,sinput_vbl};
-    mcp[11]=(par_info){(void*) &(mcpar->expected_max_eigenvalue),
-        TYPE_DOUBLE,sexpected_max_eigenvalue};
+    // from here on, you should not have to modify anything.
 
-    // from then on, you should not have to modify anything.
-
-    scan_group_NV(npar_mc,mcp, filelines, startline, endline);
+    return scan_group_NV(sizeof(mcp)/sizeof(par_info),mcp, filelines, startline, endline);
 
 }
-void read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /Meas
-    const unsigned int npar_gaugemeas = 1 ; 
-    par_info gmp[npar_gaugemeas];
-
-    char soutfilename[] = "GaugeOutfilename" ;
-
-    gmp[0]=(par_info){(void*) outfilename ,TYPE_STR,soutfilename };
+    par_info gmp[]= {
+        (par_info){(void*) outfilename ,TYPE_STR, "GaugeOutfilename", 0 , NULL}};
 
 
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_gaugemeas,gmp, filelines, startline, endline);
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
 
 }
-void read_fermmeas_info(char * outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
-    const unsigned int npar_fermmeas = 1 ; 
-    par_info fmp[npar_fermmeas];
+    const int doubleinv_def = 0;
+    par_info fmp[]={
+        (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename", 0 , NULL},
+        (par_info){(void*) &(fmpars->SingleInvNVectors),TYPE_INT,    "SingleInvNVectors"   , 0, NULL },
+        (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),TYPE_INT,    "DoubleInvNVectorsChiral", 1, (const void*) &doubleinv_def  },
+        (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,    "DoubleInvNVectorsQuarkNumber", 1, (const void*) &doubleinv_def   }};
 
-    char soutfilename[] = "FermionicOutfilename" ;
 
-    fmp[0]=(par_info){(void*) outfilename ,TYPE_STR,soutfilename };
-
-
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_fermmeas,fmp, filelines, startline, endline);
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(fmp)/sizeof(par_info),fmp, filelines, startline, endline);
 
 }
-void read_device_setting(device_param *device_settings,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_device_setting(device_param *device_settings,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
-    const unsigned int npar_device_settings = 1 ; 
-    par_info tp[npar_device_settings];
-
-    char sdevice_choice[] = "device_choice" ;
-
-    tp[0]=(par_info){(void*) &(device_settings->device_choice),TYPE_INT,sdevice_choice };
+    par_info tp[]= {
+        (par_info){(void*) &(device_settings->device_choice),TYPE_INT,"device_choice", 0 , NULL  }};
 
 
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_device_settings,tp, filelines, startline, endline);
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
 }
 
-void read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /OpenAcc/backfield.h
-    const unsigned int npar_geometry = 8;
-    par_info gp[npar_geometry];
+    par_info gp[]={
+        (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx"  , 0 , NULL },
+        (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny"  , 0 , NULL },
+        (par_info){(void*) &(gpar->gnz ),TYPE_INT,  "nz"  , 0 , NULL },
+        (par_info){(void*) &(gpar->gnt ),TYPE_INT,  "nt"  , 0 , NULL },
+        (par_info){(void*) &(gpar->xmap ),TYPE_INT, "xmap", 0 , NULL },
+        (par_info){(void*) &(gpar->ymap ),TYPE_INT, "ymap", 0 , NULL },
+        (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap", 0 , NULL },
+        (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap", 0 , NULL }};
 
-    char sgnx[] = "nx" ;
-    char sgny[] = "ny" ;
-    char sgnz[] = "nz" ;
-    char sgnt[] = "nt" ;
-    char sxmap[] = "xmap" ;
-    char symap[] = "ymap" ;
-    char szmap[] = "zmap" ;
-    char stmap[] = "tmap" ;
+    int res = scan_group_NV(sizeof(gp)/sizeof(par_info),gp, filelines, startline, endline);
 
+    set_geom_glv(gpar);
 
-    gp[0]=(par_info){(void*) &(gpar->gnx ),TYPE_INT, sgnx };
-    gp[1]=(par_info){(void*) &(gpar->gny ),TYPE_INT, sgny };
-    gp[2]=(par_info){(void*) &(gpar->gnz ),TYPE_INT, sgnz };
-    gp[3]=(par_info){(void*) &(gpar->gnt ),TYPE_INT, sgnt };
-    gp[4]=(par_info){(void*) &(gpar->xmap ),TYPE_INT, sxmap };
-    gp[5]=(par_info){(void*) &(gpar->ymap ),TYPE_INT, symap };
-    gp[6]=(par_info){(void*) &(gpar->zmap ),TYPE_INT, szmap };
-    gp[7]=(par_info){(void*) &(gpar->tmap ),TYPE_INT, stmap };
+    if(startline<endline){
+        if(gpar->gnx != gpar->nd[gpar->xmap] || gpar->gny != gpar->nd[gpar->ymap] ||
+                gpar->gnz != gpar->nd[gpar->zmap] || gpar->gnt != gpar->nd[gpar->tmap] ){ 
+            printf("Error, input file lattice dimensions are not compatible\n");
+            printf("       with the lattice dimensions written in geometry.h.\n");
+            printf("       Either modify the input file, or recompile,\n");
+            printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
+                    gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
+            printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",
+                    gpar->nd[gpar->xmap], gpar->nd[gpar->ymap],
+                    gpar->nd[gpar->zmap], gpar->nd[gpar->tmap]);
+            res = 1;
+        }
+        int maps[4] = {gpar->xmap,gpar->ymap,gpar->zmap,gpar->tmap};
+        int stop = 0;
+        int imap,jmap;
+        for(imap = 0 ; imap<3; imap++) for(jmap = imap+1 ; jmap<4; jmap++)
+            stop = stop || (maps[imap] == maps[jmap]);
 
-    // from then on, you should not have to modify anything.
-    scan_group_NV(npar_geometry,gp, filelines, startline, endline);
-
-    if(startline<endline)
-    if(gpar->gnx != nx || gpar->gny != ny || gpar->gnz != nz || gpar->gnt != nt ){ 
-        printf("Error, input file lattice dimensions are not compatible\n");
-        printf("       with the lattice dimensions written in geometry.h.\n");
-        printf("       Either modify the input file, or recompile,\n");
-        printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
-                               gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
-        printf("(code)  nx=%d\tny=%d\tnz=%d\tnt=%d\n",nx,ny,nz,nt );
-        exit(1);
+        if(stop){
+            printf("ERROR: found two equal direction mappings (%s:%d)\n",
+                    __FILE__,__LINE__);
+            res = 1;
+        }
 
     }
 
-
+    return res;
 
 }
 
@@ -494,18 +515,18 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
         printf("lines read: %d\n", lines_read);
 
+        int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str);
+        printf("Written %d characters into input_file_str\n",totlen);
+
 
         // erasing comments 
         erase_comments(filelines,lines_read);
         //for(int dbgline = 0 ; dbgline < lines_read; dbgline++) // DBG
         //  printf("%d %s",dbgline, filelines[dbgline]);
 
-
-
-
         //scanning for macro parameter families
 
-        found_tags = scan_group_V(NPMGTYPES,par_macro_groups_name,
+        found_tags = scan_group_V(NPMGTYPES,par_macro_groups_names,
                 tagcounts,
                 tagpositions,tagtypes,MAXPMG,
                 filelines,0,lines_read );
@@ -513,7 +534,12 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         // see global var in /Include/fermion_parameters.
         // setting NDiffFlavs first
         NDiffFlavs = tagcounts[PMG_FERMION];
-        fermions_parameters = (ferm_param*) malloc(NDiffFlavs*sizeof(ferm_param));
+        if(NDiffFlavs==0){
+            fermions_parameters = NULL;
+            printf("NO FERMIONS FOUND, ");
+            printf("SIMULATING PURE GAUGE THEORY...\n");
+        }
+        else fermions_parameters = (ferm_param*) malloc(NDiffFlavs*sizeof(ferm_param));
     }
     else
     {   // goes into help mode
@@ -533,62 +559,87 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     // check if all parameter groups were found
     int check = 1;
     for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-        check *= tagcounts[igrouptype];
+        if(igrouptype != PMG_FERMION )  check *= tagcounts[igrouptype];
     if(!check){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-            if (!tagcounts[igrouptype]) printf("\"%s\" not found!\n",par_macro_groups_name[igrouptype]);
+            if (!tagcounts[igrouptype]) printf("\"%s\"  parameter group not found!\n",
+                    par_macro_groups_names[igrouptype]);
         exit(1);
     }
 
 
     int fermion_count = 0;
+    // note 'check' is reused here
+    int totcheck = 0;
     for(int igroup  = 0 ; igroup < found_tags; igroup++){
         int startline = tagpositions[igroup];
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
-        if(helpmode) fprintf(helpfile,"\n\n%s\n",  par_macro_groups_name[tagtypes[igroup]]);
-        else printf("Reading %s...\n", par_macro_groups_name[tagtypes[igroup]]);
+        if(helpmode) fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
+        else printf("Reading %s...\n", par_macro_groups_names[tagtypes[igroup]]);
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
-                read_action_info(&act_params,filelines,startline,endline);
+                check = read_action_info(&act_params,filelines,startline,endline);
                 break; 
             case PMG_FERMION   : 
-                read_flavour_info(&(fermions_parameters[fermion_count]),
+                check = read_flavour_info(&(fermions_parameters[fermion_count]),
                         filelines,startline,endline);
                 fermion_count++;
                 break; 
             case PMG_BACKGROUND: 
-                read_backfield_info(&backfield_parameters, 
+                check = read_backfield_info(&backfield_parameters, 
                         filelines,startline,endline);
                 break; 
             case PMG_MD        : 
-                read_md_info(&md_parameters,filelines,startline,endline);
+                check = read_md_info(&md_parameters,filelines,startline,endline);
                 break; 
             case PMG_MC        : 
-                read_mc_info(&mkwch_pars,filelines,startline,endline);
+                check = read_mc_info(&mkwch_pars,filelines,startline,endline);
                 break; 
             case PMG_GMEAS     : 
-                read_gaugemeas_info(gauge_outfilename,
+                check = read_gaugemeas_info(gauge_outfilename,
                         filelines,startline,endline);
                 break; 
             case PMG_FMEAS     : 
-                read_fermmeas_info(fermionic_outfilename,
+                check = read_fermmeas_info(&fm_par,
                         filelines,startline,endline);
                 break; 
             case PMG_DEVICE     : 
-                read_device_setting(&dev_settings,
+                check = read_device_setting(&dev_settings,
                         filelines,startline,endline);
                 break; 
             case PMG_GEOMETRY   : 
-                read_geometry(&geom_par, 
+                check = read_geometry(&geom_par, 
                         filelines,startline,endline);
                 break; 
 
-
         }
+        if(check)
+            printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
+        totcheck += check;
     }
 
+    // check == 1 means at least a parameter was not found.
     if(helpmode) exit(1);
+    if(!helpmode){
+
+        uint32_t hash = hash_settings();
+        char hash_string[32];
+        sprintf(hash_string,"%" PRIu32, hash);
+        printf("Hash of all relevant settings: %s\n", hash_string );
+        strcat(gauge_outfilename, hash_string);
+        strcat(fm_par.fermionic_outfilename, hash_string);
+        strcat(mkwch_pars.diagnostics_filename,hash_string);
+
+    }
+    if(totcheck!=0){
+
+        printf("There are errors in some groups, exiting.\n")   ;
+        exit(1);
+
+    }
+
+
 }
 
 

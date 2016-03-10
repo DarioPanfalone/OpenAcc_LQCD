@@ -14,7 +14,6 @@
 int multishift_invert(__restrict su3_soa * const u,
 		      __restrict ferm_param * pars,
 		      RationalApprox * approx,
-		      __restrict double_soa * backfield,
 		      __restrict vec3_soa * out, // multi-fermion [nshifts]
 		      __restrict vec3_soa * const  in, // single ferm
 		      double residuo,

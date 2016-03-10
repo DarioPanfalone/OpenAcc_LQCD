@@ -8,47 +8,37 @@
 ActionParameters
 Beta            3.55
 StoutSteps      2
+StoutRho        0.15
  
 #up quark
 FlavourParameters   
-Mass	        1 
+Mass	        0.01 
 Degeneracy	    1
 PseudoFermions	1
 Name	        pippo
 Charge          0.0
-Mu	            0.0          # keep to zero unless 
-                             # IMCHEMPOT is defined
+MuOverPiT       0.24
+                             
 
 
 BackgroundFieldParameters
-ex              0.0      #keep these to zero unless	
-ey              0.0	     # BACKFIELD is defined
-ez              0.0	
-bx              0.0	
-by              0.0	
-bz              0.0	
-
 
 MDParameters
-NmdSteps	    3
-GaugeSubSteps	3
-TrajLength	    1.0
+NmdSteps	    4
+GaugeSubSteps   3
+residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                100
+Ntraj	                5
 ThermNtraj	            20
-SaveConfInterval	    2
-SaveRunningConfInterval	5
+StoreConfInterval	    20
+SaveConfInterval    	5
 residue_metro       	1e-8
-residue_md              1e-6
-ExpMaxEigenvalue        6.5      # approximate expected max eigenvalues
-StoreConfName       	test_config_store
-SaveConfName            test_config
-Seed                    42 # if you set it to zero, time() will be used.
-                           # don't use negative values!
-EpsGen                  0.1    #stddev in the generation of a new configuration
-VerbosityLv             5
+StoreConfName       	store.conf.ildg
+SaveConfName            conf.ildg
+VerbosityLv             0
+MaxRunTimeS             10
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt
@@ -56,18 +46,17 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
-
+SingleInvNVectors       1
 
 DeviceSettings
 device_choice           0
 
 Geometry
-nx                      8 
-ny	                    8
-nz	                    8
-nt	                    8
-xmap	                0
-ymap	                1    
-zmap	                2    
-tmap	                3
-
+nx                      4  
+ny	                    4 
+nz	                    4 
+nt	                    4 
+xmap	                1 
+ymap	                3   
+zmap	                2   
+tmap	                0 

@@ -16,7 +16,6 @@
 
 
 int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata mai qui dentro
-			  double_soa * const backfield,
 			  ferm_param *pars,
 			  __restrict vec3_soa * const out,
 			  __restrict vec3_soa * const in, // non viene aggiornato mai qui dentro
