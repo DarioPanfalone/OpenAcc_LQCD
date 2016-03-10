@@ -373,25 +373,27 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const double epsgen_def = 0.1 ; 
     const double expmaxeigenv_def = 5.5 ; 
     const int save_diagnostics_def = 0;
-    const const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
+    const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
+    const char RandGenStatusFilename_def[] = "rgstatus.bin"; 
     const double MaxRunTimeS_def = 1.0e9; // 30 years should be enough
 
     par_info mcp[]={
         (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
         (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             , 0, NULL},
         (par_info){(void*) &(mcpar->storeconfinterval      ),TYPE_INT,   "StoreConfInterval"      , 0, NULL},
-        (par_info){(void*) &(mcpar->saveconfinterval),TYPE_INT,          "SaveConfInterval"       , 0, NULL},
-        (par_info){(void*) &(mcpar->residue_metro    ),TYPE_DOUBLE,      "residue_metro"          , 0, NULL},
-        (par_info){(void*) &(mcpar->store_conf_name  ),TYPE_STR,         "StoreConfName"          , 0, NULL},
-        (par_info){(void*) &(mcpar->save_conf_name   ),TYPE_STR,         "SaveConfName"           , 0, NULL},
-        (par_info){(void*) &(mcpar->input_vbl  ),TYPE_INT,               "VerbosityLv"            , 0, NULL},
-        (par_info){(void*) &(mcpar->MaxRunTimeS            ),TYPE_DOUBLE, "MaxRunTimeS"           , 1, (const void*) &MaxRunTimeS_def},
-        (par_info){(void*) &(mcpar->use_ildg),TYPE_INT,                  "UseILDG"                , 1,(const void*) &useildg_def},
-        (par_info){(void*) &(mcpar->seed   ),TYPE_INT,                   "Seed"                   , 1,(const void*) &seed_def},
-        (par_info){(void*) &(mcpar->eps_gen  ),TYPE_DOUBLE,              "EpsGen"                 , 1,(const void*) &epsgen_def},
+        (par_info){(void*) &(mcpar->saveconfinterval),       TYPE_INT,   "SaveConfInterval"       , 0, NULL},
+        (par_info){(void*) &(mcpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , 0, NULL},
+        (par_info){(void*) &(mcpar->store_conf_name),        TYPE_STR,   "StoreConfName"          , 0, NULL},
+        (par_info){(void*) &(mcpar->save_conf_name),         TYPE_STR,   "SaveConfName"           , 0, NULL},
+        (par_info){(void*) &(mcpar->input_vbl),              TYPE_INT,   "VerbosityLv"            , 0, NULL},
+        (par_info){(void*) &(mcpar->RandGenStatusFilename),  TYPE_STR,   "RandGenStatusFilename"  , 1,(const void*) &RandGenStatusFilename_def},
+        (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , 1,(const void*) &MaxRunTimeS_def},
+        (par_info){(void*) &(mcpar->use_ildg),               TYPE_INT,   "UseILDG"                , 1,(const void*) &useildg_def},
+        (par_info){(void*) &(mcpar->seed),                   TYPE_INT,   "Seed"                   , 1,(const void*) &seed_def},
+        (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , 1,(const void*) &epsgen_def},
         (par_info){(void*) &(mcpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
-        (par_info){(void*) &(mcpar->save_diagnostics),TYPE_INT,          "SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
-        (par_info){(void*) &(mcpar->diagnostics_filename),TYPE_STR,      "SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
+        (par_info){(void*) &(mcpar->save_diagnostics),       TYPE_INT,   "SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
+        (par_info){(void*) &(mcpar->diagnostics_filename),   TYPE_STR,   "SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
 
     // from here on, you should not have to modify anything.
 

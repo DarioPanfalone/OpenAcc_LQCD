@@ -24,6 +24,7 @@ void initrand(unsigned long s)
     {
       time_t t;
       //      srand((unsigned) time(&t));
+    
       dsfmt_init_gen_rand(&dsfmt, time(NULL));
     }
   else
@@ -32,6 +33,55 @@ void initrand(unsigned long s)
       dsfmt_init_gen_rand(&dsfmt, s);
     }
   }
+
+
+
+void initrand_fromfile(const char * filename, unsigned long seed_default){
+
+    FILE * seedfile = fopen(filename,"r");
+    int reads;
+    int problems_in_read = 0;
+    if(!seedfile){
+        problems_in_read = 1;
+    }else{
+        reads = fread(&dsfmt,1,sizeof(dsfmt_t), seedfile);
+        if(reads!=sizeof(dsfmt_t))
+            problems_in_read = 1;
+        fclose(seedfile);
+    }
+
+    if(problems_in_read)
+        initrand(seed_default);
+
+    if(verbosity_lv > 0){
+        if(problems_in_read){
+            printf("Problems in reading file %s, ",filename );
+            printf("Initialising RNG with seed %lu\n",seed_default);
+        }
+        else{
+            printf("RNG initialised from file %s.\n",filename );
+
+        }
+    }
+
+
+
+}
+
+void saverand_tofile(const char * filename){
+
+    FILE * seedfile = fopen(filename,"w");
+
+    fwrite(&dsfmt, 1,sizeof(dsfmt_t), seedfile);
+    fclose(seedfile);
+    if(verbosity_lv > 0)
+            printf("RNG status saved in file %s.\n",filename );
+
+}
+
+
+
+
 
 
 // 4 parameters for random SU(2) matrix
@@ -53,6 +103,9 @@ void su2_rand(double *pp)
   pp[2]/=p;
   pp[3]/=p;
   }
+
+
+
 
 
 #endif

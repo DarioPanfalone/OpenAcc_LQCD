@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
     printf("Device Selected : OK \n");
 #endif
 
-    initrand((unsigned int) mkwch_pars.seed);
+    initrand_fromfile(mkwch_pars.RandGenStatusFilename, (unsigned int) mkwch_pars.seed);
     verbosity_lv = mkwch_pars.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     if(init_ferm_params(fermions_parameters)) exit(1);
@@ -328,6 +328,7 @@ int main(int argc, char* argv[]){
             if(mkwch_pars.ntraj > 0) // MEASURES ONLY
             save_conf(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
                     mkwch_pars.use_ildg );
+            saverand_tofile(mkwch_pars.RandGenStatusFilename);
             //-------------------------------------------------//
 
 

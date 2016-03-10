@@ -30,15 +30,16 @@ residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                15
+Ntraj	                1
 ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
 residue_metro       	1e-8
 StoreConfName       	store.conf.ildg8
 SaveConfName            conf.ildg8
-VerbosityLv             0
-MaxRunTimeS             60
+Seed                    0
+VerbosityLv             5
+MaxRunTimeS             600
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt

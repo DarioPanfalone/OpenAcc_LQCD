@@ -221,7 +221,7 @@ int read_su3_soa_ildg_binary(su3_soa * conf, const char* nomefile,int * conf_id_
     int input_file_index = -1;// not used now 
 
 
-    fg = fopen(nomefile,"r+");
+    fg = fopen(nomefile,"r");
     if(!fg){
         printf("Gauge configuration ILDG file %s not readable.\n",nomefile);
         *conf_id_iter = -1;

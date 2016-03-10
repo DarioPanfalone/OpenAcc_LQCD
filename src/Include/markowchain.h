@@ -10,6 +10,7 @@ typedef struct mc_param_t{
     int use_ildg;
     double residue_metro;
     double expected_max_eigenvalue; // verbosity level
+    char RandGenStatusFilename[200];
     char store_conf_name[200];
     char save_conf_name[200];
     int seed;
