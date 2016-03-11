@@ -3,6 +3,7 @@
 
 typedef struct mc_param_t{
     int ntraj                  ;
+    int MaxConfIdIter; 
     double MaxRunTimeS ;
     int therm_ntraj            ;
     int storeconfinterval       ;

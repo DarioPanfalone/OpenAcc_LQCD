@@ -172,11 +172,39 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {   
     if(startline >= endline){ // goes into 'help mode'
-        for(int ipar = 0;ipar< npars ; ipar++)
-            fprintf(
-                    helpfile,"%s\t\t\t%s\n",
-                    par_infos[ipar].name,
-                    type_strings[par_infos[ipar].type]);
+        for(int ipar = 0;ipar< npars ; ipar++){
+            if(par_infos[ipar].is_optional) switch(par_infos[ipar].type){
+                case TYPE_INT:
+                    fprintf(
+                            helpfile,"%-30s%-20d#%s\n",
+                            par_infos[ipar].name,
+                            *((const int *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
+                    break;
+                case TYPE_DOUBLE:
+                    fprintf(
+                            helpfile,"%-30s%-20e#%s\n",
+                            par_infos[ipar].name,
+                            *((const double *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
+                    break;
+                case TYPE_STR:
+                    fprintf(
+                            helpfile,"%-30s%-20s#%s\n",
+                            par_infos[ipar].name,
+                            ((const char *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
+
+
+                    break;
+            }
+            else 
+                    fprintf(
+                            helpfile,"%-50s#%s\n",
+                            par_infos[ipar].name,
+                            type_strings[par_infos[ipar].type]);
+
+        }
         return 0;
     }
     else // 'normal mode'
@@ -251,22 +279,22 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                     printf("Parameter %s not set in input file.",par_infos[i].name);
                     if(par_infos[i].is_optional==1){
                         printf(" Parameter is optional. Default value: ");
-                            switch(par_infos[i].type){
-                                case TYPE_INT:
-                                    *((int*)(par_infos[i].par)) = 
-                                        *((const int*) (par_infos[i].default_value));
-                                    printf(" %d", *((int*)(par_infos[i].par)));
-                                    break;
-                                case TYPE_DOUBLE:
-                                    *((double*)(par_infos[i].par)) = 
-                                        *((const double*) (par_infos[i].default_value));
-                                    printf(" %f", *((double*)(par_infos[i].par)));
-                                    break;
-                                case TYPE_STR:
-                                    strcpy((char*)par_infos[i].par,(const char*) par_infos[i].default_value);
-                                    printf(" %s", (char*)(par_infos[i].par));
-                                    break;
-                            }
+                        switch(par_infos[i].type){
+                            case TYPE_INT:
+                                *((int*)(par_infos[i].par)) = 
+                                    *((const int*) (par_infos[i].default_value));
+                                printf(" %d", *((int*)(par_infos[i].par)));
+                                break;
+                            case TYPE_DOUBLE:
+                                *((double*)(par_infos[i].par)) = 
+                                    *((const double*) (par_infos[i].default_value));
+                                printf(" %f", *((double*)(par_infos[i].par)));
+                                break;
+                            case TYPE_STR:
+                                strcpy((char*)par_infos[i].par,(const char*) par_infos[i].default_value);
+                                printf(" %s", (char*)(par_infos[i].par));
+                                break;
+                        }
                         printf("\n");
                     }
                     else{
@@ -376,6 +404,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
     const char RandGenStatusFilename_def[] = "rgstatus.bin"; 
     const double MaxRunTimeS_def = 1.0e9; // 30 years should be enough
+    const int MaxConfIdIter_def = 1000000; 
 
     par_info mcp[]={
         (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
@@ -386,6 +415,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mcpar->store_conf_name),        TYPE_STR,   "StoreConfName"          , 0, NULL},
         (par_info){(void*) &(mcpar->save_conf_name),         TYPE_STR,   "SaveConfName"           , 0, NULL},
         (par_info){(void*) &(mcpar->input_vbl),              TYPE_INT,   "VerbosityLv"            , 0, NULL},
+        (par_info){(void*) &(mcpar->MaxConfIdIter),          TYPE_INT,   "MaxConfIdIter"          , 0,(const void*) &MaxConfIdIter_def},
         (par_info){(void*) &(mcpar->RandGenStatusFilename),  TYPE_STR,   "RandGenStatusFilename"  , 1,(const void*) &RandGenStatusFilename_def},
         (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , 1,(const void*) &MaxRunTimeS_def},
         (par_info){(void*) &(mcpar->use_ildg),               TYPE_INT,   "UseILDG"                , 1,(const void*) &useildg_def},
@@ -443,15 +473,24 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 {
 
     // see /OpenAcc/backfield.h
+    const int nx_def   = nd0; 
+    const int ny_def   = nd1; 
+    const int nz_def   = nd2; 
+    const int nt_def   = nd3; 
+    const int xmap_def = 0;
+    const int ymap_def = 1;
+    const int zmap_def = 2;
+    const int tmap_def = 3;
+
     par_info gp[]={
-        (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx"  , 0 , NULL },
-        (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny"  , 0 , NULL },
-        (par_info){(void*) &(gpar->gnz ),TYPE_INT,  "nz"  , 0 , NULL },
-        (par_info){(void*) &(gpar->gnt ),TYPE_INT,  "nt"  , 0 , NULL },
-        (par_info){(void*) &(gpar->xmap ),TYPE_INT, "xmap", 0 , NULL },
-        (par_info){(void*) &(gpar->ymap ),TYPE_INT, "ymap", 0 , NULL },
-        (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap", 0 , NULL },
-        (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap", 0 , NULL }};
+        (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx"  ,1,(const void*) &nx_def  },
+        (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny"  ,1,(const void*) &ny_def  },
+        (par_info){(void*) &(gpar->gnz ),TYPE_INT,  "nz"  ,1,(const void*) &nz_def  },
+        (par_info){(void*) &(gpar->gnt ),TYPE_INT,  "nt"  ,1,(const void*) &nt_def  },
+        (par_info){(void*) &(gpar->xmap ),TYPE_INT, "xmap",1,(const void*) &xmap_def},
+        (par_info){(void*) &(gpar->ymap ),TYPE_INT, "ymap",1,(const void*) &ymap_def},
+        (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap",1,(const void*) &zmap_def},
+        (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap",1,(const void*) &tmap_def}};
 
     int res = scan_group_NV(sizeof(gp)/sizeof(par_info),gp, filelines, startline, endline);
 
@@ -498,7 +537,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     FILE *input = fopen(input_filename,"r");
     if (input == NULL) {
         printf("Could not open file %s \n",input_filename );
-        printf("writing an input_template for your convenience.\n" );
+        printf("writing an template_input file for your convenience.\n" );
         helpmode = 1;
     }
 
@@ -554,7 +593,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
             // type anyway
 
         }
-        helpfile = fopen("input_template", "w");
+        helpfile = fopen("template_input", "w");
     }
 
 

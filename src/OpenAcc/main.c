@@ -227,7 +227,9 @@ int main(int argc, char* argv[]){
                           mkwch_pars.residue_metro,md_parameters.residue_md,id_iter-id_iter_offset,
                             accettate_therm,0);
                 }else{
-                   accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,mkwch_pars.residue_metro,md_parameters.residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+                   accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
+                           mkwch_pars.residue_metro,md_parameters.residue_md,
+                           id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
                 }
 #pragma acc update host(conf_acc[0:8])
                 //---------------------------------------//
@@ -305,18 +307,17 @@ int main(int argc, char* argv[]){
                     printf("File  \'stop\' found, stopping cycle now.\n");
                     break;
                 }
+                
+                // program exits if it time is running out
                 struct timeval tend_cycle;
                 gettimeofday(&tend_cycle, NULL);
 
                 double cycle_duration = (double) 
                     (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
                     (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
-
                 double total_duration = (double) 
                     (tend_cycle.tv_sec - tinit.tv_sec)+
                     (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
-
-
                 double max_expected_duration_with_another_cycle = 
                     total_duration + 2*cycle_duration ; 
 
@@ -329,8 +330,16 @@ int main(int argc, char* argv[]){
                     break;
                 }
 
-            }// id_iter loop ends here
+                // program exits if MaxConfIdIter is reached
+                if(conf_id_iter >= mkwch_pars.MaxConfIdIter ){
 
+                    printf( "MaxConfIdIter=%d reached, job done!", mkwch_pars.MaxConfIdIter);
+                    printf(" shutting down now.\n");
+                    break;
+                }
+                
+
+            }// id_iter loop ends here             
 
             //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
 
