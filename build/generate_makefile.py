@@ -15,6 +15,16 @@ LINKER_FLAGS=-lm\n'
 
 compiler_linker_settings = ''
 
+make_rgen_string ='\n\
+\
+rgen: \n\
+\tcd ../tools/ && $(MAKE) rgen\n\
+\tcp ../tools/rgen ./run/\n'
+
+
+
+
+
 
 import os.path as path
 from sys import exit,argv,stderr,stdout
@@ -267,11 +277,15 @@ def generate_makefile_from_main(inputfiles):
         exename = path.basename(filename)[:-2]
         makeclean_string += ' ' + exename
 
+    
+    makeall_string='all: '
+    for filename in main_files:
+        exename = path.basename(filename)[:-2]
+        makeall_string += ' ' + exename
 
-    res += makeclean_string + '\n'
  
 
-    return res
+    return res, makeclean_string, makeall_string
 
 
 if __name__ == '__main__':
@@ -327,9 +341,19 @@ if __name__ == '__main__':
 
 
 
-    makefile = generate_makefile_from_main(argv[1:])
+    makemains,makeclean,makeall = generate_makefile_from_main(argv[1:])
 
-    stdout.write(makefile)
+    makeclean += ' rgen\n'
+    makeall += ' rgen\n'
+
+
+    stdout.write(makemains)
+    stdout.write(make_rgen_string)
+    stdout.write(makeall)
+    stdout.write(makeclean)
+
+    
+
 
 
 

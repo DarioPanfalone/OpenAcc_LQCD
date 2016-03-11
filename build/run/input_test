@@ -6,7 +6,7 @@
 
 
 ActionParameters
-Beta            3.55
+#Beta            3.55
 StoutSteps      2
 StoutRho        0.15
  
@@ -22,13 +22,6 @@ MuOverPiT       0.24
 
 
 BackgroundFieldParameters
-ex              0.0      
-ey              0.0	     
-ez              0.0	
-bx              0.0	
-by              0.0	
-bz              0.0	
-
 
 MDParameters
 NmdSteps	    3
@@ -43,16 +36,11 @@ ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
 residue_metro       	1e-8
-ExpMaxEigenvalue        5.5     # approximate expected max eigenvalues
-StoreConfName       	store.conf.ildg
-SaveConfName            conf.ildg
-UseILDG                 1
-Seed                    42 # if you set it to zero, time() will be used.
-                           # don't use negative values!
-EpsGen                  0.1    #stddev in the generation of a new configuration
+StoreConfName       	store.conf.ildg8
+SaveConfName            conf.ildg8
+Seed                    12
 VerbosityLv             5
-SaveDiagnostics         1
-SaveDiagnosticsFilename   diagnostics.dat
+#MaxRunTimeS             6000
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt
@@ -61,16 +49,15 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
 SingleInvNVectors       1
-DoubleInvNVectors       0
 
 DeviceSettings
 device_choice           0
 
 Geometry
-nx                      4  
-ny	                    4 
-nz	                    4 
-nt	                    4 
+nx                      8  
+ny	                    8 
+nz	                    8 
+nt	                    8 
 xmap	                1 
 ymap	                3   
 zmap	                2   

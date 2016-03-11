@@ -7,6 +7,7 @@
 #define FERMION_HALO 1
 
 #ifdef MULTIDEVICE
+#include <mpi.h>
 // fermion border communications (only FERMION HALO thick)
 void communicate_fermion_borders(vec3_soa *lnh_fermion);
 void communicate_fermion_borders_async(vec3_soa *lnh_fermion, 
@@ -26,7 +27,7 @@ void communicate_tamat_soa_borders(thmat_soa* lnh_ipdot);
 
 // communication of lattice chunks, for file IO only on master
 void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank);
-void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, int tag);:w
+void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, int tag);
 void send_lnh_subconf_to_master(su3_soa *lnh_soa_conf, int tag);
 void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf);
 #endif

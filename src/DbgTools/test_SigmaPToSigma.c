@@ -145,20 +145,20 @@ int main(){
                if(!goutfile) goutfile = fopen(nome_file_gauge_output,"wt");
                if(goutfile){
 		 if(id_iter<therm_ITERATIONS){
-		   printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-		   printf("Therm_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
-		   printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+		   printf("Therm_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/NSITES/6.0/3.0);
+		   printf("Therm_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/NSITES/6.0/3.0);
+		   printf("Therm_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/NSITES/6.0/3.0/2.0);
 		   
 		   fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_therm-accettate_therm_old);
-		   fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
+		   fprintf(goutfile,"%.18lf\t%.18lf\n",plq/NSITES/6.0/3.0,rect/NSITES/6.0/3.0/2.0);
 		   
 		 }else{
-		   printf("Metro_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/size/6.0/3.0);
-		   printf("Metro_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/size/6.0/3.0);
-		   printf("Metro_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/size/6.0/3.0/2.0);
+		   printf("Metro_iter %d   Placchetta= %.18lf \n",conf_id_iter,plq/NSITES/6.0/3.0);
+		   printf("Metro_iter %d   Placchetta_bis= %.18lf \n",conf_id_iter,plqbis/NSITES/6.0/3.0);
+		   printf("Metro_iter %d   Rettangolo= %.18lf \n",conf_id_iter,rect/NSITES/6.0/3.0/2.0);
 		   
 		   fprintf(goutfile,"%d\t%d\t",conf_id_iter,accettate_metro-accettate_metro_old);
-		   fprintf(goutfile,"%.18lf\t%.18lf\n",plq/size/6.0/3.0,rect/size/6.0/3.0/2.0);
+		   fprintf(goutfile,"%.18lf\t%.18lf\n",plq/NSITES/6.0/3.0,rect/NSITES/6.0/3.0/2.0);
 		   
 		 }
 	       }

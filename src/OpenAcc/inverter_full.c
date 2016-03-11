@@ -83,10 +83,11 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
 
   fermion_matrix_multiplication(u,loc_s,out,loc_h,pars);
   combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
-  double  giustoono=l2norm2_global(loc_h);
+  double  giustoono=l2norm2_global(loc_h)/source_norm;
   if(verbosity_lv > 1){
       printf("Terminated invert after   %d    iterations", cg);
-      printf("[res/stop_res=  %e , stop_res=%e ]\n",sqrt(giustoono)/res,res);
+      printf("[res/stop_res=  %e , stop_res=%e ]\n",
+              sqrt(giustoono)/res,res);
   }
 #endif
   if(cg==max_cg)

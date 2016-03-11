@@ -4,7 +4,6 @@
 
 #ifdef MULTIDEVICE
 #include "./geometry_multidev.h"
-#include "mpi.h"
 
 void setup_nnranks(int **nnranks, int myrank){
 

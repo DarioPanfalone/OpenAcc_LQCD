@@ -22,10 +22,10 @@
 #define vol2 (nd1 * vol1)
 #define vol3 (nd2 * vol2)
 #define vol4 (nd3 * vol3)
-#define size vol4
-#define size2 (2*size)
-#define size3 (3*size)
-#define sizeh (size / 2)
+#define NSITES vol4
+#define size2 (2*NSITES)
+#define size3 (3*NSITES)
+#define sizeh (NSITES / 2)
 #define no_links (4 * vol4)
 
 
@@ -46,7 +46,6 @@ typedef struct geom_parameters_t{
 } geom_parameters;
 
 extern geom_parameters geom_par;
-
 
 #pragma acc routine seq
 static inline int snum_acc(int d0, int d1, int d2, int d3) {

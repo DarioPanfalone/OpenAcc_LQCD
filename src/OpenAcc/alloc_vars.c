@@ -77,7 +77,7 @@ void mem_alloc()
 
   allocation_check =  posix_memalign((void **)&u1_back_phases, ALIGN,
          NDiffFlavs*8*sizeof(double_soa));   
-         //  --> NDiffFlavs*4*size phases (as many as links)
+         //  --> NDiffFlavs*4*NSITES phases (as many as links)
   SETFREE(u1_back_phases);
   ALLOCCHECK(allocation_check, u1_back_phases);
 
@@ -102,7 +102,7 @@ void mem_alloc()
   
 
   // GAUGE EVOLUTION
-  allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  for(int mu=0;mu<8;mu++) SETFREE((&momenta[mu]));  //  -->  4*size
+  allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  for(int mu=0;mu<8;mu++) SETFREE((&momenta[mu]));  //  -->  4*NSITES
   ALLOCCHECK(allocation_check, momenta ) ;
   allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_acc[mu])); 
   ALLOCCHECK(allocation_check, ipdot_acc) ;
@@ -123,9 +123,9 @@ void mem_alloc()
   allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&gipdot[mu])); 
   ALLOCCHECK(allocation_check, gipdot) ;
 
-  allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_th[mu]));   //  -->  4*size
+  allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_th[mu]));   //  -->  4*NSITES
   ALLOCCHECK(allocation_check, aux_th ) ;
-  allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++)  SETFREE((&aux_ta[mu])); //  -->  4*size
+  allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++)  SETFREE((&aux_ta[mu])); //  -->  4*NSITES
   ALLOCCHECK(allocation_check, aux_ta ) ;
 
 
