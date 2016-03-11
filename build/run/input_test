@@ -24,13 +24,13 @@ MuOverPiT       0.24
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	    4
-GaugeSubSteps   3
+NmdSteps	    6
+GaugeSubSteps   5
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                1
+Ntraj	                100
 ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
@@ -39,7 +39,7 @@ StoreConfName       	store.conf.ildg8
 SaveConfName            conf.ildg8
 Seed                    12
 VerbosityLv             5
-MaxRunTimeS             600
+#MaxRunTimeS             6000
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt

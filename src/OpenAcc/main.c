@@ -272,19 +272,28 @@ int main(int argc, char* argv[]){
                 fclose(goutfile);
                 //-------------------------------------------------//
 
-                //--------- SALVA LA CONF SU FILE ------------------//
+                //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
                 if(conf_id_iter%mkwch_pars.storeconfinterval==0){
-                    char tempname[50];char serial[10];
+                    char tempname[50];
+                    char serial[10];
                     strcpy(tempname,mkwch_pars.store_conf_name);
                     sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
                     printf("Storing conf %s.\n", tempname);
                     save_conf(conf_acc,tempname,conf_id_iter,mkwch_pars.use_ildg);
+                    strcpy(tempname,mkwch_pars.RandGenStatusFilename);
+                    sprintf(serial,".%05d",conf_id_iter);
+                    strcat(tempname,serial);
+                    printf("Storing rng status in %s.\n", tempname);
+                    saverand_tofile(tempname);
                 }
                 if(conf_id_iter%mkwch_pars.saveconfinterval==0){
                     printf("Saving conf %s.\n", mkwch_pars.save_conf_name);
                     save_conf(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
                             mkwch_pars.use_ildg);
+                    printf("Saving rng status in %s.\n",
+                            mkwch_pars.RandGenStatusFilename);
+                    saverand_tofile(mkwch_pars.RandGenStatusFilename);
                 }
 
                 //-------------------------------------------------//
@@ -323,7 +332,7 @@ int main(int argc, char* argv[]){
             }// id_iter loop ends here
 
 
-            //--------- SALVA LA CONF SU FILE ------------------//
+            //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
 
             if(mkwch_pars.ntraj > 0) // MEASURES ONLY
             save_conf(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
