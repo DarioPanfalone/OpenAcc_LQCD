@@ -35,6 +35,16 @@ void init_multidev1D(multidev_info * mdi){
     setup_nnranks(mdi->nnranks,mdi->myrank);
     mdi->gl_loc_origin4int = gl_loc_origin_from_rank(mdi->myrank);
 
+    mdi->halo_widths0123[0] = D0_HALO ;  
+    mdi->halo_widths0123[1] = D1_HALO ;  
+    mdi->halo_widths0123[2] = D2_HALO ;  
+    mdi->halo_widths0123[3] = D3_HALO ;  
+    mdi->origin_0123[0]     = mdi->gl_loc_origin4int.d0;
+    mdi->origin_0123[1]     = mdi->gl_loc_origin4int.d1;
+    mdi->origin_0123[2]     = mdi->gl_loc_origin4int.d2;
+    mdi->origin_0123[3]     = mdi->gl_loc_origin4int.d3;
+
+
 }
 
 

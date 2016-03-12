@@ -1,5 +1,5 @@
 
-- phases in the multinode setup
+- phases in the multinode setup  (DONE, TO CHECK)
 - Kernels that must be restricted to local lattice (conf generation)
   fermionic_utilities (basic linear algebra):
    (NO LINEAR COMBINATIONS)

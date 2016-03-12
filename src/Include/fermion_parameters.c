@@ -11,6 +11,9 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "../DbgTools/dbgtools.h"
 
+#ifdef MULTIDEV
+ #include "../Mpi/multidev.h"
+#endif
 
 #define ALIGN 128
 #define acc_twopi 2*3.14159265358979323846
@@ -165,8 +168,19 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     z = d[geom_par.zmap];int tnz = geom_par.gnz;
                     t = d[geom_par.tmap];int tnt = geom_par.gnt;
 
+#ifdef MULTIDEV
+                    x+= mdevinfo.origin_0123[geom_par.xmap]
+                        - mdevinfo.halo_widths0123[geom_par.xmap];  
+                    y+= mdevinfo.origin_0123[geom_par.ymap]
+                        - mdevinfo.halo_widths0123[geom_par.ymap];
+                    z+= mdevinfo.origin_0123[geom_par.zmap]
+                        - mdevinfo.halo_widths0123[geom_par.zmap];
+                    t+= mdevinfo.origin_0123[geom_par.tmap]
+                        - mdevinfo.halo_widths0123[geom_par.tmap];
+#endif                  
 
-                    parity = (x+y+z+t) %2 ; 
+                    parity = (x+y+z+t)%2; 
+                    // NOTICE: (x+y+z+t)%2 =/= (nd0+nd1+nd2+nd3)%2
 
                     X = x + 1;
                     Y = y + 1;

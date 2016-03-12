@@ -20,6 +20,8 @@ typedef struct multidev_info_t{
     // FROM INPUT FILE
     int proc_per_node;
     int nranks_read;
+    int halo_widths0123[4];
+    int origin_0123[4];
 
 } multidev_info ; 
 
