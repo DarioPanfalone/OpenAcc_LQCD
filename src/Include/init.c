@@ -527,9 +527,9 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
             printf("ERROR: found two equal direction mappings (%s:%d)\n",
                     __FILE__,__LINE__);
             res = 1;
+        
         }
     }
-
     return res;
 
 }
