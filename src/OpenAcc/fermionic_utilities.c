@@ -15,19 +15,26 @@
 #ifndef FERMIONIC_UTILITIES_C_
 #define FERMIONIC_UTILITIES_C_
 
+#ifdef __GNUC__
+ #define __restrict
+ #define _POSIX_C_SOURCE 200809L // not to have warning on posix memalign
+#endif
+
 #include "./geometry.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
 
+#include <stdlib.h>
+
 #ifdef MULTIDEVICE
 #include <mpi.h>
+#include "../Mpi/multidev.h"
 
-
-d_complex scal_prod_loc(const RESTRICT vec3_soa * const in_vect1,const RESTRICT vec3_soa * const in_vect2	){
+d_complex scal_prod_loc(const __restrict vec3_soa * const in_vect1,const __restrict vec3_soa * const in_vect2	){
   int t;
   d_complex res = 0.0 + 0.0I;
   double * res_RI_p;
-  posix_memalign((void **)&res_RI_p, 64, 2*sizeof(double));
+  int check = posix_memalign((void **)&res_RI_p, 64, 2*sizeof(double));
 
   res_RI_p[0]=0.0;
   res_RI_p[1]=0.0;
@@ -70,8 +77,8 @@ d_complex scal_prod_loc(const RESTRICT vec3_soa * const in_vect1,const RESTRICT 
   res = resR+resI*1.0I;
   return res;
 }
-double real_scal_prod_loc(  const RESTRICT vec3_soa * const in_vect1,
-        const RESTRICT vec3_soa * const in_vect2 ){
+double real_scal_prod_loc(  const __restrict vec3_soa * const in_vect1,
+        const __restrict vec3_soa * const in_vect2 ){
   int t;
   double res_R_p;
   double resR = 0.0;
@@ -96,7 +103,8 @@ double real_scal_prod_loc(  const RESTRICT vec3_soa * const in_vect1,
             lnh_3 = loc_3 + D3_HALO;
             int lnh_idxh = lnh_to_lnh_snum(lnh_0,lnh_1,lnh_2,lnh_3);
 
-            res_R_p=scal_prod_kernel_1double_lnh(in_vect1,in_vect2,lnh_idxh);
+            res_R_p=scal_prod_loc_1double(in_vect1,in_vect2,
+                    (const int)lnh_idxh);
             resR+=res_R_p;
         }
       }
@@ -104,8 +112,8 @@ double real_scal_prod_loc(  const RESTRICT vec3_soa * const in_vect1,
   }
   return resR;
 }
-double l2norm2_loc( const RESTRICT lnh_vec3_soa * const in_vect1		       ){
-  int t;
+double l2norm2_loc_vol( const __restrict vec3_soa * const in_vect1){
+int t;
   double res_R_p;
   double resR = 0.0;
 
@@ -139,8 +147,8 @@ double l2norm2_loc( const RESTRICT lnh_vec3_soa * const in_vect1		       ){
 }
 
 
-d_complex scal_prod_loc_1Dcut(  const RESTRICT vec3_soa * const in_vect1,
-        const RESTRICT vec3_soa * const in_vect2 ){
+d_complex scal_prod_loc_1Dcut(  const __restrict vec3_soa * const in_vect1,
+        const __restrict vec3_soa * const in_vect2 ){
     int t;
     double resR = 0.0;
     double resI = 0.0;
@@ -159,7 +167,8 @@ d_complex scal_prod_loc_1Dcut(  const RESTRICT vec3_soa * const in_vect1,
     return resR+resI*I;
 
 }
-double real_scal_prod_loc_1Dcut(  const RESTRICT lnh_vec3_soa * const in_vect1,const RESTRICT lnh_vec3_soa * const in_vect2			       ){
+double real_scal_prod_loc_1Dcut(  const __restrict vec3_soa * in_vect1,
+        const __restrict vec3_soa * in_vect2			       ){
   int t;
   double res_R_p;
   double resR = 0.0;
@@ -172,7 +181,7 @@ double real_scal_prod_loc_1Dcut(  const RESTRICT lnh_vec3_soa * const in_vect1,c
   }
   return resR;
 }
-double l2norm2_loc_1Dcut( const RESTRICT vec3_soa * const in_vect1		       ){
+double l2norm2_loc_1Dcut( const __restrict vec3_soa * const in_vect1		       ){
   int t;
   double res_R_p;
   double resR = 0.0;
@@ -187,8 +196,8 @@ double l2norm2_loc_1Dcut( const RESTRICT vec3_soa * const in_vect1		       ){
 }
 
 // MPI REQUIRING FUNCTIONS
-d_complex scal_prod_global(  const RESTRICT vec3_soa * const in_vect1,
-        const RESTRICT vec3_soa * const in_vect2 ){
+d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
+        const __restrict vec3_soa * const in_vect2 ){
     // RETURNS THE TOTAL RESULT USING MPI
 
      d_complex total_res=0;
@@ -196,7 +205,7 @@ d_complex scal_prod_global(  const RESTRICT vec3_soa * const in_vect1,
 
      local_res = scal_prod_loc_1Dcut(in_vect1,in_vect2); 
      
-     if(myrank ==0){
+     if(mdevinfo.myrank ==0){
          int rank;
          d_complex temp_loc_res = local_res;
          total_res += temp_loc_res; 
@@ -214,8 +223,8 @@ d_complex scal_prod_global(  const RESTRICT vec3_soa * const in_vect1,
      }
      return total_res;
 }
-inline double real_scal_prod_global(  const RESTRICT vec3_soa * const in_vect1,
-        const RESTRICT vec3_soa * const in_vect2 ){
+inline double real_scal_prod_global(  const __restrict vec3_soa * const in_vect1,
+        const __restrict vec3_soa * const in_vect2 ){
     // RETURNS THE TOTAL RESULT USING MPI
      double total_res,local_res;
      //local_res = real_scal_prod_loc(in_vect1,in_vect2); 
@@ -223,7 +232,7 @@ inline double real_scal_prod_global(  const RESTRICT vec3_soa * const in_vect1,
      MPI_Allreduce((void*)&local_res,(void*)&total_res,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
      return total_res;
 }
-inline double l2norm2_global( const RESTRICT vec3_soa * const in_vect1  ){
+inline double l2norm2_global( const __restrict vec3_soa * const in_vect1  ){
 
      double total_res,local_res;
      //local_res = l2norm2_loc(in_vect1); 

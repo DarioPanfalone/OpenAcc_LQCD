@@ -339,9 +339,6 @@ int read_su3_soa_ildg_binary(
     fseeko(fg,ibd_start,SEEK_SET);
     int xl,yl,zl,tl,dir;//local coordinates
     set_geom_glv(&geom_par);// should be already done
-#ifdef MULTIDEVICE
-    set_geom_glv_multidev(&geom_par_multidev);// should be already done
-#endif
 
     for(tl=0;tl<nt;tl++)for(zl=0;zl<nz;zl++)
         for(yl=0;yl<ny;yl++) for(xl=0;xl<nx;xl++)

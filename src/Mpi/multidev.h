@@ -1,10 +1,10 @@
 #ifndef MULTIDEV_H_
 #define MULTIDEV_H_
-#ifdef MULTIDEVICE
-
+#define FERMION_HALO 1
 #include <mpi.h>
 #include "./geometry_multidev.h"
 
+#ifdef MULTIDEVICE
 typedef struct multidev_info_t{
 
     // FROM MPI INIT AND SIMILAR
@@ -16,8 +16,7 @@ typedef struct multidev_info_t{
     // GEOMETRIC QUANTITIES
     vec4int myrank4int;
     int nnranks[4][2];// ranks of nearest neighbour sublattices
-    vec4int gl_loc_origin4int; = gl_loc_origin_from_rank(myrank);
-
+    vec4int gl_loc_origin4int;
     // FROM INPUT FILE
     int proc_per_node;
     int nranks_read;

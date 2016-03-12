@@ -2,8 +2,10 @@
 #define COMMUNICATIONS_H_
 
 #include "./geometry_multidev.h"
+#include "./geometry_multidev.h"
+#include "../OpenAcc/struct_c_def.h"
 
-#define GAUGE_HALO HALO
+#define GAUGE_HALO HALO_WIDTH
 #define FERMION_HALO 1
 
 #ifdef MULTIDEVICE
@@ -21,7 +23,7 @@ void communicate_su3_borders(su3_soa* lnh_conf);
 void communicate_thmat_soa_borders(thmat_soa* lnh_momenta);
 // force communication (only GAUGE_HALO thick)
 // this is performance critical and an async version should be produced
-void communicate_tamat_soa_borders(thmat_soa* lnh_ipdot);
+void communicate_tamat_soa_borders(tamat_soa* lnh_ipdot);
 
 
 

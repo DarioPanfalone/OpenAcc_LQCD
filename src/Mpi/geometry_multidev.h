@@ -149,7 +149,7 @@
 #define LB_NO_LINKS (4 * LB_VOL4)
 
 
-void setup_nnranks(int **nnranks);
+void setup_nnranks(int **nnranks, int myrank);
 
 #else
 

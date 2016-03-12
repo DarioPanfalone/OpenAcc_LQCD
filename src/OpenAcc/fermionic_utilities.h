@@ -8,12 +8,15 @@
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
  #define __restrict
+ #define _POSIX_C_SOURCE 200809L // not to have warning on posix memalign
 #endif
 
 
+
 #pragma acc routine seq
-static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect1,
-					     __restrict vec3_soa * const in_vect2,
+static inline double scal_prod_loc_1double(  
+        __restrict const vec3_soa * in_vect1,
+        __restrict const vec3_soa * in_vect2,
 					     const int idx_vect
                                           ) {
 
@@ -25,7 +28,7 @@ static inline double scal_prod_loc_1double(  __restrict vec3_soa * const in_vect
 
 
 #pragma acc routine seq
-static inline double l2norm2_loc( __restrict vec3_soa * const in_vect1,
+static inline double l2norm2_loc( __restrict const vec3_soa * in_vect1,
 				  const int idx_vect
 				  ) {
   double sum = creal(in_vect1->c0[idx_vect])*creal(in_vect1->c0[idx_vect])+cimag(in_vect1->c0[idx_vect])*cimag(in_vect1->c0[idx_vect]);
@@ -36,9 +39,9 @@ static inline double l2norm2_loc( __restrict vec3_soa * const in_vect1,
 
 
 
-d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1, const __restrict vec3_soa * const in_vect2 );
-double real_scal_prod_global(  __restrict vec3_soa * const in_vect1, __restrict vec3_soa * const in_vect2 );
-double l2norm2_global( __restrict  vec3_soa * const in_vect1);
+d_complex scal_prod_global(  const __restrict vec3_soa *   in_vect1, const __restrict vec3_soa * in_vect2 );
+double real_scal_prod_global(  __restrict const vec3_soa * in_vect1, __restrict const vec3_soa * in_vect2 );
+double l2norm2_global( __restrict  const vec3_soa * in_vect1);
 
 void combine_in1xfactor_plus_in2(  __restrict vec3_soa * const in_vect1, const double factor, __restrict vec3_soa * const in_vect2, __restrict vec3_soa * const out);
 

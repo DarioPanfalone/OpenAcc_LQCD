@@ -6,7 +6,7 @@
 
 
 ActionParameters
-#Beta            3.55
+Beta            3.55
 StoutSteps      2
 StoutRho        0.15
  
@@ -36,8 +36,8 @@ ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
 residue_metro       	1e-8
-StoreConfName       	store.conf.ildg8
-SaveConfName            conf.ildg8
+StoreConfName       	store.conf.ildg
+SaveConfName            conf.ildg
 Seed                    12
 VerbosityLv             5
 #MaxRunTimeS             6000
@@ -54,10 +54,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      8  
-ny	                    8 
-nz	                    8 
-nt	                    8 
+nx                      4  
+ny	                    4 
+nz	                    4 
+nt	                    4 
 xmap	                1 
 ymap	                3   
 zmap	                2   
