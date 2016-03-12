@@ -53,11 +53,13 @@ void eo_inversion(su3_soa *tconf_acc,
 
 
     acc_Deo(tconf_acc, phi_e, in_o,tfermions_parameters->phases);
+    // COMMUNICATE BORDERS, TO DO
     combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
     ker_invert_openacc(tconf_acc,tfermions_parameters,
             out_e,phi_e,res,trialSolution,
             tloc_r,tloc_h,tloc_s,tloc_p);
     acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
+    // COMMUNICATE BORDERS
     combine_in1_minus_in2_allxfact(in_o,phi_o,(double)1/tfermions_parameters->ferm_mass,out_o);
 
 

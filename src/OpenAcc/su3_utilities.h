@@ -51,8 +51,6 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
         int id_factor);
 
 
-// Ora che abbiamo tolto i prodotti con le fasi staggered 
-// questo e' diventato un wrapper inutile... lo togliamo poi ... 
 void mom_exp_times_conf_soloopenacc(
         __restrict  su3_soa * const tconf_acc,
         __restrict const thmat_soa * const tmomenta, 
@@ -748,9 +746,11 @@ static inline void extract_mom(
 }
 
 #pragma acc routine seq
-static inline void matrix_exp_openacc(const __restrict single_su3 * const MOM,
-				      __restrict single_su3 * AUX,
-				      __restrict single_su3 * RES){
+static inline void matrix_exp_openacc(
+        __restrict const single_su3 * const MOM,
+        __restrict single_su3 * AUX,
+        __restrict single_su3 * RES)
+{
   // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
   // first iteration
   // ris=1+x/5
@@ -838,7 +838,8 @@ static inline void conf_left_exp_multiply(
 #pragma acc routine seq
 static inline void project_on_su3(
         __restrict su3_soa * const cnf,  const int idx_cnf,
-				  __restrict single_su3 *  AUX){
+        __restrict single_su3 *  AUX)
+{
   
   //normalizzo la prima riga
   double NORM = creal(AUX->comp[0][0])*creal(AUX->comp[0][0])
