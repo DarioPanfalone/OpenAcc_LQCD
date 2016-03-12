@@ -53,8 +53,9 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix){
   }
 }
 //copy matrix in into matrix out, this has to happen on the host
-void set_su3_soa_to_su3_soa( __restrict su3_soa * const matrix_in,
-			     __restrict su3_soa * const matrix_out){
+void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
+			     __restrict su3_soa * const matrix_out)
+{
   int hd0, d1, d2, d3;
   for(d3=0; d3<nd3; d3++) {
     for(d2=0; d2<nd2; d2++) {
@@ -77,9 +78,10 @@ void set_su3_soa_to_su3_soa( __restrict su3_soa * const matrix_in,
   }
 }
 // tamattamat
-void conf_times_staples_ta_part(__restrict su3_soa * const u,        // constant --> is not updated
-			        __restrict su3_soa * const loc_stap, // constant --> is not updated
-				__restrict tamat_soa * const tipdot)
+void conf_times_staples_ta_part(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot)
 {
 
   int d0, d1, d2, d3;
@@ -111,9 +113,10 @@ void conf_times_staples_ta_part(__restrict su3_soa * const u,        // constant
 
 }// closes routine
 // tamattamat
-void RHO_times_conf_times_staples_ta_part(__restrict su3_soa * const u,        // constant --> is not updated
-					  __restrict su3_soa * const loc_stap, // constant --> is not updated
-					  __restrict tamat_soa * const tipdot)
+void RHO_times_conf_times_staples_ta_part(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot)
 {
 
     SETINUSE(tipdot);
@@ -181,10 +184,13 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
 
  
 // FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
-void mom_exp_times_conf_soloopenacc( __restrict su3_soa * const conf,
-				    thmat_soa * const mom, // e' costante e qui dentro non viene modificato
-				    double * factor, // questo e' il vettore delta dove sono contenuti tutti i dt richiesti nell'omelyan
-				    int id_factor)
+void mom_exp_times_conf_soloopenacc( 
+        __restrict su3_soa * const conf,
+        __restrict const thmat_soa * const mom,
+        double * factor, 
+        // questo e' il vettore delta dove sono contenuti 
+        // tutti i dt richiesti nell'omelyan
+        int id_factor)
 {
 
   int d0, d1, d2, d3;

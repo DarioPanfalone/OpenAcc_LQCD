@@ -42,6 +42,20 @@
    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all
    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all
    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all
+  su3_measurements:
+   calc_momenta_action
+   calc_force_norm
+   calc_diff_force_norm
+   copy_ipdot_into_old (not necessary for correctness)
+  su3_utilities:
+   unitarize_conf
+   conf_times_staples_ta_part
+   RHO_times_conf_times_staples_ta_part
+   mom_sum_mult
+   mom_exp_times_conf_soloopenacc
+
+
+
 
 // TO CONTINUE 
  

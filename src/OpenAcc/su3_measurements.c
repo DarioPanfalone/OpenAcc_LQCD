@@ -36,8 +36,9 @@ void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarit
 
         }
     }
+    printf("Warning: max unitarity deviation NOT calculated (%s:%d)",
+            __FILE__,__LINE__);
     //adding them again
-
     *avg_unitarity_deviation = r/(sizeh*8);
     *max_unitarity_deviation = rmax;
 

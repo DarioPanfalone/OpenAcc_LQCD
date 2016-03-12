@@ -1,6 +1,10 @@
 #ifndef POLYAKOV_C_
 #define POLYAKOV_C_
 
+#ifdef __GNUC__
+#define _POSIX_C_SOURCE 200809L // not to have warning on posix memalign
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "../OpenAcc/su3_utilities.h"

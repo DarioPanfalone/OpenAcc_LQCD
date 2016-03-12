@@ -9,11 +9,12 @@
 // routine for the computation of the average of the plaquettes computed on the plane mu-nu
 // 1) all the plaquettes on the plane mu-nu are computed and saved locally
 // 2) finally the reduction of the traces is performed
-double calc_loc_plaquettes_removing_stag_phases_nnptrick(   __restrict su3_soa * const u,
-							    __restrict su3_soa * const loc_plaq,
-							    dcomplex_soa * const tr_local_plaqs,
-							    const int mu,
-							    const int nu){
+double calc_loc_plaquettes_removing_stag_phases_nnptrick(
+        __restrict su3_soa * const u,
+        __restrict su3_soa * const loc_plaq,
+        dcomplex_soa * const tr_local_plaqs,
+        const int mu, const int nu)
+{
 
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)

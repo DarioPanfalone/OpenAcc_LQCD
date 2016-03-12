@@ -2,7 +2,7 @@
 #define ALLOC_VARS_C_
 
 #ifdef __GNUC__
-#define _POSIX_C_SOURCE 200809L   // not to have warning on posix memalign
+#define _POSIX_C_SOURCE 200809L // not to have warning on posix memalign
 #endif
 
 #include <stdio.h>

@@ -1,6 +1,11 @@
 #ifndef COMMUNICATIONS_C_
 #define COMMUNICATIONS_C_
 
+#ifdef __GNUC__
+#define _POSIX_C_SOURCE 200809L // not to have warning on posix memalign
+#endif
+
+#include <stdlib.h>
 #include "./multidev.h"
 #include "./communications.h"
 #include "../OpenAcc/geometry.h"
@@ -10,6 +15,17 @@
 
 #ifdef MULTIDEVICE
 #include "mpi.h"
+
+#define ALIGN 128
+#define ALLOCCHECK(control_int,var)  if(control_int != 0 ) \
+    printf("\tError in  allocation of %s . \n", #var);\
+    else if(verbosity_lv > 2) printf("\tAllocation of %s : OK , %p\n", #var, var );\
+
+#define FREECHECK(var) if(verbosity_lv >2) \
+    printf("\tFreed %s, %p ...", #var,var);\
+    free(var); if(verbosity_lv > 2)  printf(" done.\n");
+
+
 
 
 // fermions
@@ -624,7 +640,12 @@ void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank){
     //target sublattice information
     vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
     // building sublattice duplicate, target_conf
-    su3_soa* target_su3_soa = (su3_soa*) malloc(8*sizeof(su3_soa)); 
+
+    int allocation_check;  
+    su3_soa* target_su3_soa;
+    allocation_check = posix_memalign((void**) &target_su3_soa, ALIGN,
+            8*sizeof(su3_soa)); 
+    ALLOCCHECK(allocation_check, target_su3_soa);
 
     int tg_loc_0,tg_loc_1,tg_loc_2,tg_loc_3,dir; //target-loc coordinates
     // and link direction
@@ -670,7 +691,7 @@ void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank){
     //MPI_Send(target_su3_soa, 2*4*(6*2)*LNH_SIZEH,MPI_DOUBLE, rank, 0, MPI_COMM_WORLD);
     //Or maybe do multiple sends in a more complicated way
     // ^^ CHECK
-    free(target_su3_soa);
+    FREECHECK(target_su3_soa);
 }
 void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, int tag){
     // USE ONLY FROM MASTER RANK
@@ -685,7 +706,13 @@ void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, in
        if(target_loc_origin_parity) printf("Problems\n");
        */
     // building sublattice duplicate, target_conf
-    su3_soa* target_su3_soa = (su3_soa*) malloc(8*sizeof(su3_soa)); 
+   
+    int allocation_check; 
+    su3_soa* target_su3_soa;
+    allocation_check = posix_memalign((void**) &target_su3_soa, ALIGN,
+            8*sizeof(su3_soa)); 
+    ALLOCCHECK(allocation_check, target_su3_soa);
+
     MPI_Recv(target_su3_soa, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE,target_rank,tag,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
     int tg_loc_0,tg_loc_1,tg_loc_2,tg_loc_3,dir; //target-loc coordinates
@@ -726,7 +753,7 @@ void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, in
 
                     }
 
-    free(target_su3_soa);
+    FREECHECK(target_su3_soa);
 }
 void send_lnh_subconf_to_master(su3_soa *lnh_soa_conf, int tag){
    //sending the subconfiguration
