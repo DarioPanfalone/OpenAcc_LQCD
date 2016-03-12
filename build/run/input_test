@@ -53,10 +53,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      8  
-ny	                    8 
-nz	                    8 
-nt	                    8 
+nx                      4  
+ny	                    4 
+nz	                    4 
+nt	                    4 
 xmap	                1 
 ymap	                3   
 zmap	                2   
