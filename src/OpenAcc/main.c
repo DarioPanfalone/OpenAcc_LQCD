@@ -15,7 +15,7 @@
 #endif
 
 #include "../Include/fermion_parameters.h"
-#include "../Include/init.h"
+#include "../Include/setting_file_parser.h"
 #include "../Include/markowchain.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../RationalApprox/rationalapprox.h"
@@ -82,7 +82,7 @@ int main(int argc, char* argv[]){
     // Intel XeonPhi
     //acc_device_t my_device_type = acc_device_xeonphi;
     // Select device ID
-    SELECT_INIT_ACC_DEVICE(my_device_type, dev_settings.device_choice);
+    select_init_acc_device(my_device_type, dev_settings.device_choice);
     printf("Device Selected : OK \n");
 #endif
 
@@ -390,7 +390,7 @@ int main(int argc, char* argv[]){
 
 #ifndef __GNUC__
     //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
-    SHUTDOWN_ACC_DEVICE(my_device_type);
+    shutdown_acc_device(my_device_type);
     /////////////////////////////////////////////////////////////////////////////////////////////////
 #endif
 

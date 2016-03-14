@@ -1,4 +1,4 @@
-#include "../Include/init.h"
+#include "../Include/setting_file_parser.h"
 #include "../OpenAcc/io.h"
 #include "../Include/fermion_parameters.h"
 #include "../Include/markowchain.h"

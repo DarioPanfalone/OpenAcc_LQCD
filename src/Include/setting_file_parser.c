@@ -1,7 +1,7 @@
-#ifndef _INIT_C_
-#define _INIT_C_
+#ifndef _SETTING_FILE_PARSER_C_
+#define _SETTING_FILE_PARSER_C_
 
-#include "./init.h"
+#include "./setting_file_parser.h"
 #include "./common_defines.h"
 #include "./markowchain.h"
 #include "./fermion_parameters.h"
@@ -334,11 +334,12 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
 int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
     // see OpenAcc/su3_measurements.h
+    const double stout_rho_def = RHO;
 
     par_info ap[]={
         (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      , 0 , NULL},
         (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps", 0 , NULL},
-        (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  , 0 , NULL}};
+        (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  , 1 , (const void*) &stout_rho_def}};
 
 
     // from here on, you should not have to modify anything.

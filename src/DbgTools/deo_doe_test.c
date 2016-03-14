@@ -6,7 +6,7 @@
 #endif
 
 #include "../Include/common_defines.h"
-#include "../Include/init.h"
+#include "../Include/setting_file_parser.h"
 #include "../Include/fermion_parameters.h"
 #include "../OpenAcc/fermion_matrix.h"
 #include "../OpenAcc/alloc_vars.h"
