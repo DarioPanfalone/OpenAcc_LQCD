@@ -16,16 +16,10 @@ extern device_param dev_settings;
        // at the moment only nvidia gpus are supported.
 
 #include "openacc.h"
-
-// ROUTINE TO CHOOSE AND INITIALIZE THE OPENACC DEVICE
-void SELECT_INIT_ACC_DEVICE(acc_device_t my_device_type, int dev_index);
-void SHUTDOWN_ACC_DEVICE(acc_device_t my_device_type);
-
-
-
-
+void select_init_acc_device(acc_device_t my_device_type, int dev_index);
+void shutdown_acc_device(acc_device_t my_device_type);
 
 
 #endif
-#endif
 
+#endif
