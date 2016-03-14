@@ -10,7 +10,7 @@ COMPILER_FLAGS=-O0 \n\
 LINKER_FLAGS=-O0 \n' 
 
 GNUcls = 'COMPILER=gcc\n\
-COMPILER_FLAGS=-O3 -std=c99\n\
+COMPILER_FLAGS=-O3 -std=gnu99\n\
 LINKER_FLAGS=-lm\n' 
 
 compiler_linker_settings = ''
@@ -74,7 +74,7 @@ def header_scanner(filename): # only headers!
                    # and should not be cheked by make
 
     for line in f.readlines():
-        if 'main(' in line and ')' in line:
+        if 'main(' in line and ')' in line and filename not in main_files:
             main_files.append(filename)
         if '#include' in line :
             init_filename_position = line.find('<')
@@ -283,6 +283,7 @@ def generate_makefile_from_main(inputfiles):
         exename = path.basename(filename)[:-2]
         makeall_string += ' ' + exename
 
+
  
 
     return res, makeclean_string, makeall_string
@@ -341,9 +342,9 @@ if __name__ == '__main__':
     makeall += ' rgen\n'
 
 
-    stdout.write(makemains)
-    stdout.write(make_rgen_string)
-    stdout.write(makeall)
+    stdout.write(makemains+'\n')
+    stdout.write(make_rgen_string+'\n')
+    stdout.write(makeall+'\n')
     stdout.write(makeclean)
 
     

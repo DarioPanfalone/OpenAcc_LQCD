@@ -19,7 +19,7 @@
 #include "./struct_c_def.h"
 #include "../Include/common_defines.h"
 #include "./single_types.h"
-#include "../Include/init.h"
+#include "../Include/setting_file_parser.h"
 
 
 void print_su3_soa_ASCII(su3_soa * const conf, const char* nomefile,int conf_id_iter){

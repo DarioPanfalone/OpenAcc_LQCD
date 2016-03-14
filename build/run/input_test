@@ -35,8 +35,8 @@ ThermNtraj	            20
 StoreConfInterval	    20
 SaveConfInterval    	5
 residue_metro       	1e-8
-StoreConfName       	store.conf.ildg8
-SaveConfName            conf.ildg8
+StoreConfName       	store.conf.ildg
+SaveConfName            conf.ildg
 Seed                    12
 VerbosityLv             5
 #MaxRunTimeS             6000
@@ -53,10 +53,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      4  
-ny	                    4 
-nz	                    4 
-nt	                    4 
+nx                      4 
+ny	                    4
+nz	                    4
+nt	                    4
 xmap	                1 
 ymap	                3   
 zmap	                2   

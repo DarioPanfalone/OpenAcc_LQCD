@@ -15,7 +15,7 @@
 #endif
 
 #include "../Include/fermion_parameters.h"
-#include "../Include/init.h"
+#include "../Include/setting_file_parser.h"
 #include "../Include/markowchain.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../RationalApprox/rationalapprox.h"

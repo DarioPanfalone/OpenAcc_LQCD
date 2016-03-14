@@ -1,5 +1,5 @@
-#ifndef _INIT_H_
-#define _INIT_H_
+#ifndef _SETTING_FILE_PARSER_H_
+#define _SETTING_FILE_PARSER_H_
 
 #define MAXLINES 300
 #define MAXLINELENGTH 500 // pretty long to accomodate all the comments
