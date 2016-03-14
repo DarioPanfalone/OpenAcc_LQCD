@@ -1,6 +1,6 @@
 
 
-#include "./input_file_parser.h"
+#include "./setting_file_parser.h"
 
 #include "stdio.h"
 
