@@ -169,14 +169,14 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     t = d[geom_par.tmap];int tnt = geom_par.gnt;
 
 #ifdef MULTIDEV
-                    x+= mdevinfo.origin_0123[geom_par.xmap]
-                        - mdevinfo.halo_widths0123[geom_par.xmap];  
-                    y+= mdevinfo.origin_0123[geom_par.ymap]
-                        - mdevinfo.halo_widths0123[geom_par.ymap];
-                    z+= mdevinfo.origin_0123[geom_par.zmap]
-                        - mdevinfo.halo_widths0123[geom_par.zmap];
-                    t+= mdevinfo.origin_0123[geom_par.tmap]
-                        - mdevinfo.halo_widths0123[geom_par.tmap];
+                    x+= devinfo.origin_0123[geom_par.xmap]
+                        - devinfo.halo_widths0123[geom_par.xmap];  
+                    y+= devinfo.origin_0123[geom_par.ymap]
+                        - devinfo.halo_widths0123[geom_par.ymap];
+                    z+= devinfo.origin_0123[geom_par.zmap]
+                        - devinfo.halo_widths0123[geom_par.zmap];
+                    t+= devinfo.origin_0123[geom_par.tmap]
+                        - devinfo.halo_widths0123[geom_par.tmap];
 #endif                  
 
                     parity = (x+y+z+t)%2; 

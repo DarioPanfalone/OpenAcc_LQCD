@@ -30,127 +30,6 @@
 #include <mpi.h>
 #include "../Mpi/multidev.h"
 
-d_complex scal_prod_loc(const __restrict vec3_soa * const in_vect1,
-        const __restrict vec3_soa * const in_vect2	)
-{
-  int t;
-  d_complex res = 0.0 + 0.0I;
-  double * res_RI_p;
-  int check = posix_memalign((void **)&res_RI_p, 64, 2*sizeof(double));
-
-  res_RI_p[0]=0.0;
-  res_RI_p[1]=0.0;
-  double resR = 0.0;
-  double resI = 0.0;
-
-  int loc_h0, loc_1, loc_2, loc_3;
-#pragma acc kernels present(in_vect1) present(in_vect2)
-#pragma acc loop independent gang(LOC_N3) // REDUCTION PRAGMAS ?
-  for(loc_3=0; loc_3<LOC_N3; loc_3++) {
-#pragma acc loop independent gang(LOC_N2/DIM_BLOCK_2) vector(DIM_BLOCK_2)
-    for(loc_2=0; loc_2<LOC_N2; loc_2++) {
-#pragma acc loop independent gang(LOC_N1/DIM_BLOCK_1) vector(DIM_BLOCK_1)
-      for(loc_1=0; loc_1<LOC_N1; loc_1++) {
-#pragma acc loop independent vector(DIM_BLOCK_0)
-        for(loc_h0=0; loc_h0 <LOC_N0H; loc_h0++) {
-            int loc_0, 
-                lnh_0 , lnh_1, lnh_2, lnh_3;
-
-            loc_0 = 2*loc_h0 + ((loc_1+loc_2+loc_3) & 0x1);
-            lnh_0 = loc_0 + D0_HALO;
-            lnh_1 = loc_1 + D1_HALO;
-            lnh_2 = loc_2 + D2_HALO;
-            lnh_3 = loc_3 + D3_HALO;
-            int lnh_idxh = lnh_to_lnh_snum(lnh_0,lnh_1,lnh_2,lnh_3);
-
-            d_complex color_sum  =  conj(in_vect1->c0[t]) *  in_vect2->c0[t] ;
-            color_sum +=  conj(in_vect1->c1[t]) *  in_vect2->c1[t] ;
-            color_sum +=  conj(in_vect1->c2[t]) *  in_vect2->c2[t] ;
-
-            resR+=creal(color_sum);
-            resI+=cimag(color_sum);
-
-
-
-        }
-      }
-    }
-  }
-  res = resR+resI*1.0I;
-  return res;
-}
-double real_scal_prod_loc(  const __restrict vec3_soa * const in_vect1,
-        const __restrict vec3_soa * const in_vect2 )
-{
-  int t;
-  double res_R_p;
-  double resR = 0.0;
-
-  int loc_h0, loc_1, loc_2, loc_3;
-#pragma acc kernels present(in_vect1) present(in_vect2)
-#pragma acc loop independent gang(LOC_N3)  // REDUCTION PRAGMAS ?
-  for(loc_3=0; loc_3<LOC_N3; loc_3++) {
-#pragma acc loop independent gang(LOC_N2/DIM_BLOCK_2) vector(DIM_BLOCK_2)
-    for(loc_2=0; loc_2<LOC_N2; loc_2++) {
-#pragma acc loop independent gang(LOC_N1/DIM_BLOCK_1) vector(DIM_BLOCK_1)
-      for(loc_1=0; loc_1<LOC_N1; loc_1++) {
-#pragma acc loop independent vector(DIM_BLOCK_0)
-        for(loc_h0=0; loc_h0 <LOC_N0H; loc_h0++) {
-            int loc_0, 
-                lnh_0 , lnh_1, lnh_2, lnh_3;
-
-            loc_0 = 2*loc_h0 + ((loc_1+loc_2+loc_3) & 0x1);
-            lnh_0 = loc_0 + D0_HALO;
-            lnh_1 = loc_1 + D1_HALO;
-            lnh_2 = loc_2 + D2_HALO;
-            lnh_3 = loc_3 + D3_HALO;
-            int lnh_idxh = lnh_to_lnh_snum(lnh_0,lnh_1,lnh_2,lnh_3);
-
-            res_R_p=scal_prod_loc_1double(in_vect1,in_vect2,
-                    (const int)lnh_idxh);
-            resR+=res_R_p;
-        }
-      }
-    }
-  }
-  return resR;
-}
-double l2norm2_loc_vol( const __restrict vec3_soa * const in_vect1)
-{
-int t;
-  double res_R_p;
-  double resR = 0.0;
-
-  int loc_h0, loc_1, loc_2, loc_3;
-#pragma acc kernels present(in_vect1) present(in_vect2)
-#pragma acc loop independent gang(LOC_N3)  // REDUCTION PRAGMAS ?
-  for(loc_3=0; loc_3<LOC_N3; loc_3++) {
-#pragma acc loop independent gang(LOC_N2/DIM_BLOCK_2) vector(DIM_BLOCK_2)
-    for(loc_2=0; loc_2<LOC_N2; loc_2++) {
-#pragma acc loop independent gang(LOC_N1/DIM_BLOCK_1) vector(DIM_BLOCK_1)
-      for(loc_1=0; loc_1<LOC_N1; loc_1++) {
-#pragma acc loop independent vector(DIM_BLOCK_0)
-        for(loc_h0=0; loc_h0 <LOC_N0H; loc_h0++) {
-            int loc_0, 
-                lnh_0 , lnh_1, lnh_2, lnh_3;
-
-            loc_0 = 2*loc_h0 + ((loc_1+loc_2+loc_3) & 0x1);
-            lnh_0 = loc_0 + D0_HALO;
-            lnh_1 = loc_1 + D1_HALO;
-            lnh_2 = loc_2 + D2_HALO;
-            lnh_3 = loc_3 + D3_HALO;
-            int lnh_idxh = lnh_to_lnh_snum(lnh_0,lnh_1,lnh_2,lnh_3);
-
-            res_R_p=l2norm2_loc(in_vect1,lnh_idxh);
-            resR+=res_R_p;
-        }
-      }
-    }
-  }
-  return resR;
-}
-
-
 d_complex scal_prod_loc_1Dcut(  
         const __restrict vec3_soa * const in_vect1,
         const __restrict vec3_soa * const in_vect2 )
@@ -210,28 +89,17 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
 {
     // RETURNS THE TOTAL RESULT USING MPI
 
-     d_complex total_res=0;
      d_complex local_res;
 
      local_res = scal_prod_loc_1Dcut(in_vect1,in_vect2); 
-     
-     if(mdevinfo.myrank ==0){
-         int rank;
-         d_complex temp_loc_res = local_res;
-         total_res += temp_loc_res; 
-         for(rank = 1; rank < NRANKS ; rank++ ){
-             MPI_Recv(&temp_loc_res,2,MPI_DOUBLE,rank,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-             total_res += temp_loc_res;
+     double lrr = creal(local_res);
+     double lri = cimag(local_res);
+     double trr,trl;
 
-         }
-         for(rank = 1; rank < NRANKS ;rank++ )
-             MPI_Send(&total_res,2,MPI_DOUBLE,rank,0,MPI_COMM_WORLD);
+     MPI_Allreduce((void*)&lrr,(void*)&trr,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+     MPI_Allreduce((void*)&lri,(void*)&tri,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 
-     }else{
-          MPI_Send(&local_res,2,MPI_DOUBLE,0,0,MPI_COMM_WORLD);
-          MPI_Recv(&total_res,2,MPI_DOUBLE,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-     }
-     return total_res;
+     return trr + tri * I;
 }
 inline double real_scal_prod_global(  
         const __restrict vec3_soa * const in_vect1,

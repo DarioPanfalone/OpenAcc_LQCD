@@ -28,61 +28,87 @@
    multiply_backfield_times_force   DONE
    accumulate_gl3soa_into_gl3soa  DONE
   plaquettes:
-   calc_loc_plaquettes_removing_stag_phases_nnptrick
-   calc_loc_staples_removing_stag_phases_nnptrick_all 
-   calc_loc_staples_removing_stag_phases_nnptrick_all_only_even 
-   calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd
+   calc_loc_plaquettes_removing_stag_phases_nnptrick  1DCUTWARNING - DONE
+   calc_loc_staples_removing_stag_phases_nnptrick_all:
+    calc_loc_staples_removing_stag_phases_nnptrick_all (full) DONE 
+    calc_loc_staples_removing_stag_phases_nnptrick_all_bulk        
+    calc_loc_staples_removing_stag_phases_nnptrick_all_d3p         
+    calc_loc_staples_removing_stag_phases_nnptrick_all_d3m         
+   calc_loc_staples_removing_stag_phases_nnptrick_all_only_even DONE 
+   calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd DONE
   random_assignement:
-   generate_vec3_soa_gauss 
+   generate_vec3_soa_gauss WRITTEN
    // should include border communication
-   generate_Momenta_gauss
+   generate_Momenta_gauss  WRITTEN
    // should include border communication
-   generate_Conf_cold
+   generate_Conf_cold  WRITTEN
    // should include border communication
-   generate_vec3_soa_z2noise
+   generate_vec3_soa_z2noise WRITTEN 
    // should include border communication
   rettangoli:
-   calc_loc_rectangles_2x1_removing_stag_phases_nnptrick
-   calc_loc_rectangles_1x2_removing_stag_phases_nnptrick
-   calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all
-   calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all
-   calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all
-   calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all
+   calc_loc_rectangles_2x1_removing_stag_phases_nnptrick  1DCUTWARNING - DONE
+   calc_loc_rectangles_1x2_removing_stag_phases_nnptrick  1DCUTWARNING - DONE
+   calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all:
+    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all_bulk
+    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all_d3p
+    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all_d3m
+   calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all:
+    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all_bulk
+    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all_d3p
+    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all_d3m
+   calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all:
+    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all_bulk
+    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all_d3p
+    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all_d3m
+   calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all:
+    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all_bulk
+    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all_d3p
+    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all_d3m
+  stouting:
+   exp_minus_QA_times_conf DONE
+   compute_lambda DONE
   su3_measurements:
-   calc_momenta_action
-   calc_force_norm
-   calc_diff_force_norm
-   copy_ipdot_into_old (not necessary for correctness)
+   calc_momenta_action   1DCUTWARNING - DONE
+   calc_force_norm       1DCUTWARNING - DONE CHECK REDUCTIONS
+   calc_diff_force_norm  1DCUTWARNING - DONE CHECK REDUCTIONS
+   copy_ipdot_into_old   1DCUTWARNING - DONE
   su3_utilities:
-   unitarize_conf
-   conf_times_staples_ta_part
-   RHO_times_conf_times_staples_ta_part
-   mom_sum_mult
-    mom_sum_mult full (inherits the name )
+   unitarize_conf        DONE
+   conf_times_staples_ta_part   DONE
+   RHO_times_conf_times_staples_ta_part DONE
+   mom_sum_mult:
+    mom_sum_mult full DONE
     mom_sum_mult_bulk
     mom_sum_mult_d3p
     mom_sum_mult_d3m
-   mom_exp_times_conf_soloopenacc
-    mom_exp_times_conf_soloopenacc full (inherits the name)
+   mom_exp_times_conf_soloopenacc:
+    mom_exp_times_conf_soloopenacc full DONE 
     mom_exp_times_conf_soloopenacc_bulk
     mom_exp_times_conf_soloopenacc_d3p
     mom_exp_times_conf_soloopenacc_d3m
 
 - Kernels that must be restricted to local lattice (measurements)
   baryon number utilities:
-   dM_dmu_eo(0123)
-   dM_dmu_oe(0123)
-   d2M_dmu2_eo(0123)
-   d2M_dmu2_oe(0123)
+   dM_dmu_eo(0123)    DONE
+   dM_dmu_oe(0123)    DONE
+   d2M_dmu2_eo(0123)    DONE
+   d2M_dmu2_oe(0123)    DONE
   gauge_meas:
-   reduce_loc_top_charge
+   reduce_loc_top_charge   DONE
+   compute_local_topological_charge DONE 
   polyakov:
-   polyakov_loop(0123) // REDEFINE structure sizes!!
-                       // not trivial
+   polyakov_loop(0123)  DONE
+
+                     
 
 OTHER MODIFICATIONS
   
-- NNP and NNM must give errors when they should
+- NNP and NNM must give errors when they should 
+  DONE : now they give -1 if the site is not included in the local+halo lattice.
   
   FOR MEASURES
   cooling:
@@ -96,6 +122,26 @@ OTHER MODIFICATIONS
     (border communication should already be done by the generating
      functions. )
     
+
+COMMUNICATIONS
+  - in fermion matrix multiplication (fermion_borders, after acc_Deo and acc_Doe)
+  - in multistep_2MN_gauge (conf borders, after mom_exp_times_conf_soloopenacc) 
+  - in stout_wrapper
+  - in compute_sigma_from_sigma_prime_backinto_sigma_prime
+
+
+REDUCTIONS:
+  in su3_measurements:
+  - in calc_plaquette_soloopenacc(); 
+  - in calc_momenta_action(); 
+  - in calc_force_norm(); 
+  - in calc_diff_force_norm(); 
+
+  in fermionic_utilities:
+  - in scal_prod_global()
+  - in real_scal_prod_global()
+  - in l2norm2_global()
+
 
 
 ===============================================================

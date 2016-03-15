@@ -13,10 +13,18 @@
 
 // For Polyakov loop calculations
 #define ALIGN 128
+#ifdef MULTIDEVICE
+#define vol30h LOC_VOL4/LOC_N0/2 
+#define vol31h LOC_VOL4/LOC_N1/2 
+#define vol32h LOC_VOL4/LOC_N2/2 
+#define vol33h LOC_VOL4/LOC_N3/2 
+#else
 #define vol30h vol4/nd0/2
 #define vol31h vol4/nd1/2
 #define vol32h vol4/nd2/2
 #define vol33h vol4/nd3/2
+#endif
+
 
 #define ALLOCCHECK(control_int,var)  if(control_int != 0 ) \
                                                        printf("\tError in  allocation of %s . \n", #var);\
@@ -136,7 +144,7 @@ d_complex polyakov_loop0(__restrict const su3_soa * const u)
 #pragma acc loop independent gang //gang(nd3)
         for(d0=0; d0 < nd0; d0++) {	    
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-            for(d3=0; d3<nd3; d3++) {
+            for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
                 for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
@@ -198,7 +206,7 @@ d_complex polyakov_loop1(__restrict const su3_soa * const u)
 #pragma acc loop independent gang 
         for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
-            for(d3=0; d3<nd3; d3++) {
+            for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
                 for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
@@ -260,7 +268,7 @@ d_complex polyakov_loop2(__restrict const su3_soa * const u)
 #pragma acc loop independent gang 
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector
-            for(d3=0; d3<nd3; d3++) {
+            for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector
                 for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
@@ -319,7 +327,7 @@ d_complex polyakov_loop3(__restrict const su3_soa * const u)
         int d0, d1, d2, d3,h,idxh,parity;
 #pragma acc kernels present(u) present(loopplk3)
 #pragma acc loop independent gang
-        for(d3=0; d3<nd3; d3++) {
+        for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
 #pragma acc loop independent gang vector
             for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector

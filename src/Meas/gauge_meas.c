@@ -23,12 +23,13 @@ char gauge_outfile_header[100];
 void compute_local_topological_charge(  __restrict su3_soa * const u,
 					__restrict su3_soa * const quadri,
 					double_soa * const loc_q,
-					int mu, int nu){
+					int mu, int nu)
+{
   
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(quadri) present(loc_q) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang 
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector 
       for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector 
@@ -139,15 +140,16 @@ void compute_local_topological_charge(  __restrict su3_soa * const u,
 }
 
 
-double reduce_loc_top_charge(double_soa * const loc_q){
+double reduce_loc_top_charge(double_soa * const loc_q)
+{
 
     double result=0.0;
-    int d3;
+    int t;
 #pragma acc kernels present(loc_q)
 #pragma acc loop reduction(+:result)
-    for(d3=0; d3<sizeh; d3++) {
-        result += loc_q[0].d[d3];
-        result += loc_q[1].d[d3];
+  for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+        result += loc_q[0].d[t];
+        result += loc_q[1].d[t];
     }
     return result;
 }

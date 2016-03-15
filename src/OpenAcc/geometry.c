@@ -8,7 +8,8 @@ geom_parameters geom_par;
 
 void compute_nnp_and_nnm_openacc(void){
   int d0, d1, d2, d3,parity;
-  for(d3=0; d3<nd3; d3++) {
+
+  for(d3=1; d3<nd3-D3_HALO; d3++) {
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
         for(d0=0; d0 < nd0; d0++) {
@@ -17,12 +18,12 @@ void compute_nnp_and_nnm_openacc(void){
           parity = (d0+d1+d2+d3) % 2;
 
           d0m = d0 - 1;
-          d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
           d1m = d1 - 1;
-          d1m = d1m + (((d1m >> 31) & 0x1) * nd1);
           d2m = d2 - 1;
-          d2m = d2m + (((d2m >> 31) & 0x1) * nd2);
           d3m = d3 - 1;
+          d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
+          d1m = d1m + (((d1m >> 31) & 0x1) * nd1);
+          d2m = d2m + (((d2m >> 31) & 0x1) * nd2);
           d3m = d3m + (((d3m >> 31) & 0x1) * nd3);
 
           nnm_openacc[idxh][0][parity] = snum_acc(d0m,d1,d2,d3);
@@ -31,19 +32,35 @@ void compute_nnp_and_nnm_openacc(void){
           nnm_openacc[idxh][3][parity] = snum_acc(d0,d1,d2,d3m);
 
           d0p = d0 + 1;
-          d0p *= (((d0p-nd0) >> 31) & 0x1);
           d1p = d1 + 1;
-          d1p *= (((d1p-nd1) >> 31) & 0x1);
           d2p = d2 + 1;
-          d2p *= (((d2p-nd2) >> 31) & 0x1);
           d3p = d3 + 1;
+          d0p *= (((d0p-nd0) >> 31) & 0x1);
+          d1p *= (((d1p-nd1) >> 31) & 0x1);
+          d2p *= (((d2p-nd2) >> 31) & 0x1);
           d3p *= (((d3p-nd3) >> 31) & 0x1);
-
+          
           nnp_openacc[idxh][0][parity] = snum_acc(d0p,d1,d2,d3);
           nnp_openacc[idxh][1][parity] = snum_acc(d0,d1p,d2,d3);
           nnp_openacc[idxh][2][parity] = snum_acc(d0,d1,d2p,d3);
           nnp_openacc[idxh][3][parity] = snum_acc(d0,d1,d2,d3p);
 
+          if(NRANKS_D0 != 1){
+              if(d0m == nd0-1 )  nnm_openacc[idxh][0][parity] = -1; 
+              if(d0p == 0 )  nnp_openacc[idxh][0][parity] = -1;
+          }  
+          if(NRANKS_D1 != 1){
+              if(d1m == nd1-1 )  nnm_openacc[idxh][1][parity] = -1; 
+              if(d1p == 0 )  nnp_openacc[idxh][1][parity] = -1;
+          }  
+          if(NRANKS_D2 != 1){
+              if(d2m == nd2-1 )  nnm_openacc[idxh][2][parity] = -1; 
+              if(d2p == 0 )  nnp_openacc[idxh][2][parity] = -1;
+          }  
+          if(NRANKS_D3 != 1){
+              if(d3m == nd3-1 )  nnm_openacc[idxh][3][parity] = -1;
+              if(d3p == 0 )  nnp_openacc[idxh][3][parity] = -1;
+          }  
         }
       }
     }
@@ -51,7 +68,6 @@ void compute_nnp_and_nnm_openacc(void){
 }
 
 void set_geom_glv(geom_parameters* gp){
-
 
     gp->nd[0]= nd0; gp->nd[1] = nd1; gp->nd[2] = nd2; gp->nd[3] = nd3;
     gp->nranks[0] = NRANKS_D0; gp->nranks[1] = NRANKS_D1; 
@@ -65,7 +81,6 @@ void set_geom_glv(geom_parameters* gp){
 
     gp->d0123map[gp->xmap] = 0;   gp->d0123map[gp->ymap] = 1;
     gp->d0123map[gp->zmap] = 2;   gp->d0123map[gp->tmap] = 3;
-
 
 }
 

@@ -13,6 +13,12 @@
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../Include/fermion_parameters.h"
 #include "./action.h"
+#include "./action.h"
+
+#ifdef MULTIDEVICE 
+#include "../Mpi/multidev.h"
+#endif
+
 
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
@@ -83,9 +89,16 @@ void mem_alloc()
 
 
 
-
+#ifdef MULTIDEVICE 
+  if(devinfo.myrank == 0){
+#endif
   allocation_check =  posix_memalign((void **)&conf_rw, ALIGN,8*sizeof(global_su3_soa));
   ALLOCCHECK(allocation_check, conf_rw);
+
+#ifdef MULTIDEVICE
+  }
+#endif
+
   allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
   ALLOCCHECK(allocation_check, conf_acc);
 
@@ -179,6 +192,14 @@ inline void mem_free()
 
   printf("Deallocation.\n");
 
+#ifdef MULTIDEVICE 
+  if(devinfo.myrank == 0){
+#endif
+  FREECHECK(conf_rw);
+#ifdef MULTIDEVICE
+  }
+#endif
+  
   FREECHECK(conf_acc);
   FREECHECK(u1_back_phases);        
   FREECHECK(momenta);               

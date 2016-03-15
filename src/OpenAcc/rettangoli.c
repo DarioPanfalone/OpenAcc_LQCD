@@ -9,7 +9,8 @@
 #include "./su3_utilities.h"
 
 
-double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(   __restrict su3_soa * const u,
+double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(
+        __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_plaq,
         dcomplex_soa * const tr_local_plaqs,
         const int mu,
@@ -18,7 +19,7 @@ double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(   __restrict su3_s
     int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang
-    for(d3=0; d3<nd3; d3++) {
+   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector
@@ -68,28 +69,29 @@ double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(   __restrict su3_s
     double resR = 0.0;
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
-    for(d3=0; d3<sizeh; d3++) {
-        res_R_p += creal(tr_local_plaqs[0].c[d3]);
-        res_R_p += creal(tr_local_plaqs[1].c[d3]);
-        res_I_p += cimag(tr_local_plaqs[0].c[d3]);
-        res_I_p += cimag(tr_local_plaqs[1].c[d3]);
-    }
+  int t;  // ONLY GOOD FOR 1D CUT
+  for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+    res_R_p += creal(tr_local_plaqs[0].c[t]);
+    res_R_p += creal(tr_local_plaqs[1].c[t]);
+  }
 
     return res_R_p;
 }// closes routine 
 
 
 
-double calc_loc_rectangles_1x2_removing_stag_phases_nnptrick(   __restrict su3_soa * const u,
+double calc_loc_rectangles_1x2_removing_stag_phases_nnptrick(
+        __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_plaq,
         dcomplex_soa * const tr_local_plaqs,
         const int mu,
-        const int nu){
+        const int nu)
+{
 
     int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang
-    for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector
@@ -143,12 +145,11 @@ double calc_loc_rectangles_1x2_removing_stag_phases_nnptrick(   __restrict su3_s
     double resR = 0.0;
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
-    for(d3=0; d3<sizeh; d3++) {
-        res_R_p += creal(tr_local_plaqs[0].c[d3]);
-        res_R_p += creal(tr_local_plaqs[1].c[d3]);
-        res_I_p += cimag(tr_local_plaqs[0].c[d3]);
-        res_I_p += cimag(tr_local_plaqs[1].c[d3]);
-    }
+  int t;  // ONLY GOOD FOR 1D CUT
+  for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+    res_R_p += creal(tr_local_plaqs[0].c[t]);
+    res_R_p += creal(tr_local_plaqs[1].c[t]);
+  }
 
     return res_R_p;
 }// closes routine 
@@ -159,18 +160,14 @@ double calc_loc_rectangles_1x2_removing_stag_phases_nnptrick(   __restrict su3_s
 // mat6 += mat1 * mat2 * hermitian_conjugate(mat3) * hermitian_conjugate(mat4) * hermitian_conjugate(mat5)
 //static inline 
 #pragma acc routine seq
-void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
-        const int idx_mat1,
-        __restrict su3_soa * const mat2,
-        const int idx_mat2,
-        __restrict su3_soa * const mat3,
-        const int idx_mat3,
-        __restrict su3_soa * const mat4,
-        const int idx_mat4,
-        __restrict su3_soa * const mat5,
-        const int idx_mat5,
-        __restrict su3_soa * const mat6,
-        const int idx_mat6){
+void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  
+        __restrict const su3_soa * const mat1, const int idx_mat1,
+        __restrict const su3_soa * const mat2, const int idx_mat2,
+        __restrict const su3_soa * const mat3, const int idx_mat3,
+        __restrict const su3_soa * const mat4, const int idx_mat4,
+        __restrict const su3_soa * const mat5, const int idx_mat5,
+        __restrict su3_soa * const mat6, const int idx_mat6)
+{
 
     // La logica della operazioni che seguono:
     // M1 = m1
@@ -309,18 +306,14 @@ void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * con
 // mat6 += mat1 * hermitian_conjugate(mat2) * hermitian_conjugate(mat3) * hermitian_conjugate(mat4) * mat5
 //static inline 
 #pragma acc routine seq
-void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
-        const int idx_mat1,
-        __restrict su3_soa * const mat2,
-        const int idx_mat2,
-        __restrict su3_soa * const mat3,
-        const int idx_mat3,
-        __restrict su3_soa * const mat4,
-        const int idx_mat4,
-        __restrict su3_soa * const mat5,
-        const int idx_mat5,
-        __restrict su3_soa * const mat6,
-        const int idx_mat6){
+void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases( 
+        __restrict const su3_soa * const mat1, const int idx_mat1,
+        __restrict const su3_soa * const mat2, const int idx_mat2,
+        __restrict const su3_soa * const mat3, const int idx_mat3,
+        __restrict const su3_soa * const mat4, const int idx_mat4,
+        __restrict const su3_soa * const mat5, const int idx_mat5,
+        __restrict su3_soa * const mat6, const int idx_mat6)
+{
 
     // La logica della operazioni che seguono:
     // M1 = m1
@@ -455,18 +448,14 @@ void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * con
 // mat6 += hermitian_conjugate(mat1) * hermitian_conjugate(mat2) * hermitian_conjugate(mat3) * mat4 * mat5
 //static inline 
 #pragma acc routine seq
-void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * const mat1,
-        const int idx_mat1,
-        __restrict su3_soa * const mat2,
-        const int idx_mat2,
-        __restrict su3_soa * const mat3,
-        const int idx_mat3,
-        __restrict su3_soa * const mat4,
-        const int idx_mat4,
-        __restrict su3_soa * const mat5,
-        const int idx_mat5,
-        __restrict su3_soa * const mat6,
-        const int idx_mat6){
+void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  
+        __restrict const su3_soa * const mat1, const int idx_mat1,
+        __restrict const su3_soa * const mat2, const int idx_mat2,
+        __restrict const su3_soa * const mat3, const int idx_mat3,
+        __restrict const su3_soa * const mat4, const int idx_mat4,
+        __restrict const su3_soa * const mat5, const int idx_mat5,
+        __restrict su3_soa * const mat6, const int idx_mat6)
+{
 
     // La logica della operazioni che seguono:
     // M1 = hc(m1)
@@ -602,12 +591,14 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(  __restrict su3_soa * con
 }  // closes MMMPP
 
 // FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
-void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
-        __restrict su3_soa * const loc_stap ){
+void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap )
+{
     int d0, d1, d2, d3, mu, iter;
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang
-    for(d3=0; d3<nd3; d3++) {
+    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
 #pragma acc loop independent gang vector(4)
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4)
@@ -692,12 +683,14 @@ void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(  __restr
 }// closes routine
 
 // FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
-void calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
-        __restrict su3_soa * const loc_stap ){
+void calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap )
+{
     int d0, d1, d2, d3, mu, iter;
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang
-    for(d3=0; d3<nd3; d3++) {
+    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
 #pragma acc loop independent gang vector(4)
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4)
@@ -786,12 +779,14 @@ void calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all(  __restr
 }// closes routine
 
 // FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
-void calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
-        __restrict su3_soa * const loc_stap ){
+void calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap )
+{
     int d0, d1, d2, d3, mu, iter;
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang
-    for(d3=0; d3<nd3; d3++) {
+    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
 #pragma acc loop independent gang vector(4)
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4)
@@ -880,12 +875,14 @@ void calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all(  __restr
 }// closes routine
  
 // FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK (NOT USED)
-void calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
-        __restrict su3_soa * const loc_stap ){
+void calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap )
+{
     int d0, d1, d2, d3, mu, iter;
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang
-    for(d3=0; d3<nd3; d3++) {
+    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
 #pragma acc loop independent gang vector(4)
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4)
@@ -1024,7 +1021,11 @@ void calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all(  __res
 
 }// closes routine
 
-double  calc_rettangolo_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
+double  calc_rettangolo_soloopenacc( 
+        __restrict const su3_soa * const tconf_acc, 
+        __restrict su3_soa * const local_plaqs, 
+        dcomplex_soa * const tr_local_plaqs)
+{
 
     double temp=0.0;
     // calculation of reactangle on the 6 planes

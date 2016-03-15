@@ -10,7 +10,7 @@
 // 2) finally the reduction of the traces is performed
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
 double calc_loc_plaquettes_removing_stag_phases_nnptrick(
-        __restrict su3_soa * const u,
+        __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_plaq,
         dcomplex_soa * const tr_local_plaqs,
         const int mu, const int nu);

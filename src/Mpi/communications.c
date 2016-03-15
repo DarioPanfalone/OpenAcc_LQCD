@@ -112,7 +112,7 @@ void communicate_fermion_borders(vec3_soa *lnh_fermion){ //WRAPPER
     // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
     MPI_Barrier(MPI_COMM_WORLD);
     sendrecv_vec3soa_borders_1Dcut(lnh_fermion,
-            mdevinfo.myrank_L, mdevinfo.myrank_R, 
+            devinfo.myrank_L, devinfo.myrank_R, 
             FERMION_HALO);
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -191,7 +191,7 @@ void communicate_fermion_borders_async(vec3_soa *lnh_fermion,
     // NOTICE send_border_requests recv_border_requests are both 
     // 6-elements long
     sendrecv_vec3soa_borders_1Dcut_async(lnh_fermion,
-            mdevinfo.myrank_L, mdevinfo.myrank_R,
+            devinfo.myrank_L, devinfo.myrank_R,
             FERMION_HALO,
             send_border_requests,
             recv_border_requests );
@@ -213,11 +213,34 @@ void communicate_su3_borders(su3_soa* lnh_conf){
 
     for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
         sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r0),
-            mdevinfo.myrank_L, mdevinfo.myrank_R,
+            devinfo.myrank_L, devinfo.myrank_R,
             GAUGE_HALO);
         sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r1),
-            mdevinfo.myrank_L, mdevinfo.myrank_R,
+            devinfo.myrank_L, devinfo.myrank_R,
             GAUGE_HALO);
+    }
+
+}
+
+
+void communicate_gl_borders(su3_soa* lnh_conf){
+
+    // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
+    // note for async:
+    // NOTICE send_border_requests recv_border_requests are both 
+    // 12*8-elements long
+
+    for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
+        sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r0),
+            devinfo.myrank_L, devinfo.myrank_R,
+            GAUGE_HALO);
+        sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r1),
+            devinfo.myrank_L, devinfo.myrank_R,
+            GAUGE_HALO);
+        sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r2),
+            devinfo.myrank_L, devinfo.myrank_R,
+            GAUGE_HALO);
+
     }
 
 }
@@ -616,7 +639,7 @@ void sendrecv_tamat_soa_borders_1Dcut_async(tamat_soa *lnh_ipdot,
 void communicate_thmat_soa_borders(thmat_soa* lnh_momenta){
     for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
         sendrecv_thmat_soa_borders_1Dcut(&(lnh_momenta[c]),
-            mdevinfo.myrank_L, mdevinfo.myrank_R );
+            devinfo.myrank_L, devinfo.myrank_R );
     }
 }
 // force communication (only GAUGE_HALO thick)
@@ -625,7 +648,7 @@ void communicate_tamat_soa_borders(tamat_soa* lnh_ipdot){
 
     for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
         sendrecv_tamat_soa_borders_1Dcut(&(lnh_ipdot[c]),
-            mdevinfo.myrank_L, mdevinfo.myrank_R );
+            devinfo.myrank_L, devinfo.myrank_R );
     }
 }
 
@@ -669,7 +692,7 @@ void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank){
                             target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, 
                                     tg_lnh_2, tg_lnh_3, 
                                     target_gl_loc_origin_from_rank);
-                        int target_lnh_snum = lnh_to_lnh_snum(tg_lnh_0,
+                        int target_lnh_snum = snum_acc(tg_lnh_0,
                                 tg_lnh_1, tg_lnh_2, tg_lnh_3);
 
                         tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
@@ -737,7 +760,7 @@ void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, in
                             target_lnh_to_gl_snum( tg_lnh_0, tg_lnh_1,
                                    tg_lnh_2, tg_lnh_3,
                                    target_gl_loc_origin_from_rank);
-                        int target_lnh_snum = lnh_to_lnh_snum(tg_lnh_0,
+                        int target_lnh_snum = snum_acc(tg_lnh_0,
                                 tg_lnh_1, tg_lnh_2, tg_lnh_3);
 
                         tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
@@ -762,7 +785,7 @@ void send_lnh_subconf_to_master(su3_soa *lnh_soa_conf, int tag){
 void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf){
 
     MPI_Recv(lnh_su3_conf, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE,0,
-            mdevinfo.myrank,MPI_COMM_WORLD, MPI_STATUS_IGNORE); 
+            devinfo.myrank,MPI_COMM_WORLD, MPI_STATUS_IGNORE); 
             // tag = myrank
     // In case we remove the third line possibly 
     // we have to do something different
@@ -794,7 +817,7 @@ void send_lnh_subconf_to_buffer(global_su3_soa *gl_soa_conf, su3_soa *lnh_conf, 
                         int tsprlo ; // target site parity respect (to his) local origin;
 
                         int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
-                        int target_lnh_snum = lnh_to_lnh_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+                        int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
 
                         tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
                         //      gtsp = (target_loc_origin_parity + tsprlo )%2;
@@ -846,7 +869,7 @@ void recv_loc_subconf_from_buffer(global_su3_soa *gl_soa_conf, su3_soa* lnh_conf
                         int tsprlo ; // target site parity respect (to his) local origin;
 
                         int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
-                        int target_lnh_snum = lnh_to_lnh_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+                        int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
 
                         tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
 

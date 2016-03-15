@@ -10,7 +10,7 @@
 // 1) all the plaquettes on the plane mu-nu are computed and saved locally
 // 2) finally the reduction of the traces is performed
 double calc_loc_plaquettes_removing_stag_phases_nnptrick(
-        __restrict su3_soa * const u,
+        __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_plaq,
         dcomplex_soa * const tr_local_plaqs,
         const int mu, const int nu)
@@ -18,7 +18,7 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(
 
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
-#pragma acc loop independent gang //gang(nd3)
+#pragma acc loop independent gang 
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(d2=0; d2<nd2; d2++) {
@@ -67,20 +67,18 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(
   double resR = 0.0;
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
-  for(d3=0; d3<sizeh; d3++) {
-    res_R_p += creal(tr_local_plaqs[0].c[d3]);
-    res_R_p += creal(tr_local_plaqs[1].c[d3]);
-    res_I_p += cimag(tr_local_plaqs[0].c[d3]);
-    res_I_p += cimag(tr_local_plaqs[1].c[d3]);
+  int t;  // ONLY GOOD FOR 1D CUT
+  for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+    res_R_p += creal(tr_local_plaqs[0].c[t]);
+    res_R_p += creal(tr_local_plaqs[1].c[t]);
   }
-
-  //  plaqs[0] = res_R_p;
-  //  plaqs[1] = res_I_p;
 
   return res_R_p;
 }// closes routine
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
 
+
+// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void calc_loc_staples_removing_stag_phases_nnptrick_all(  
         __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_stap )

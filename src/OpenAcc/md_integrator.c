@@ -35,6 +35,9 @@
 #include "../Include/fermion_parameters.h"
 #include "./action.h"
 
+#ifdef MULTIDEVICE
+#include "../Mpi/communications.h"
+#endif
 
 md_param md_parameters;
 
@@ -85,6 +88,10 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
         // Q' = exp[dt/2 *i P] Q
         // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
         mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
+#ifdef MULTIDEVICE
+        communicate_su3_borders(tconf_acc);  
+#endif
+
         // Step for the P
         // P' = P - (1-2l)*dt*dS/dq
         // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
@@ -95,6 +102,9 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
         // Q' = exp[dt/2 *i P] Q
         // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
         mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
+#ifdef MULTIDEVICE
+        communicate_su3_borders(tconf_acc);  
+#endif
         // Step for the P
         // P' = P - 2l*dt*dS/dq
         // deltas_Omelyan[6]=-cimag(ieps_acc)*2.0*lambda*scale;
@@ -102,12 +112,15 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 
         mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,6);
     }
-        if(verbosity_lv > 2) printf("Last Gauge step of %d...\n",md_parameters.gauge_scale);
+    if(verbosity_lv > 2) printf("Last Gauge step of %d...\n",md_parameters.gauge_scale);
 
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
     // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
     mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
+#ifdef MULTIDEVICE
+    communicate_su3_borders(tconf_acc);  
+#endif
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
@@ -120,6 +133,9 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     // Q' = exp[dt/2 *i P] Q
     // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
     mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
+#ifdef MULTIDEVICE
+    communicate_su3_borders(tconf_acc);  
+#endif
     // Step for the P
     // P' = P - l*dt*dS/dq
     // deltas_Omelyan[3]=-cimag(ieps_acc)*lambda*scale;

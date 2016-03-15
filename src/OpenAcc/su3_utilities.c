@@ -14,17 +14,34 @@
 
 // reunitarize the conf by brute force
 void unitarize_conf( __restrict su3_soa * const u){
-  int idxh, dirindex;
+    int dirindex;
 #pragma acc kernels present(u)
 #pragma acc loop independent
-  for(dirindex = 0 ; dirindex < 8 ; dirindex++){
-#pragma acc loop independent
-    for( idxh = 0 ; idxh < sizeh; idxh++){
-      loc_unitarize_conf(&u[dirindex],idxh);
+    for(dirindex = 0 ; dirindex < 8 ; dirindex++){
+
+        int d0h, d1, d2, d3;
+
+#pragma acc loop independent gang 
+        for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+            for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+                for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+                    for(d0=0; d0 < nd0; d0++) {
+
+                        // I take the size to be even, but it's the same
+                        int  d0 = 2*d0h + ((d1+d2+d3) & 0x1);
+                        int t  = snum_acc(d0,d1,d2,d3);  
+                        loc_unitarize_conf(&u[dirindex],t);
+                    }
+                }
+            }
+        }
     }
-  }
 }
-void set_su3_soa_to_zero( __restrict su3_soa * const matrix){
+void set_su3_soa_to_zero( __restrict su3_soa * const matrix)
+{
   SETINUSE(matrix);
   int hd0, d1, d2, d3;
 #pragma acc kernels present(matrix)
@@ -87,7 +104,7 @@ void conf_times_staples_ta_part(
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang //gang(nd3)
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
@@ -123,7 +140,7 @@ void RHO_times_conf_times_staples_ta_part(
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang //gang(nd3)
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
@@ -159,7 +176,7 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
   int d0, d1, d2, d3;
 #pragma acc kernels present(mom) present(ipdot) present(factor)
 #pragma acc loop independent //gang(nd3)
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
@@ -196,7 +213,7 @@ void mom_exp_times_conf_soloopenacc(
   int d0, d1, d2, d3;
 #pragma acc kernels present(mom) present(conf) present(factor)
 #pragma acc loop independent gang //gang(nd3)
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)

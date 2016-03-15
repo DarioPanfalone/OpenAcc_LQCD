@@ -184,7 +184,7 @@ static inline int gl_to_gl_snum(int gl_0, int gl_1, int gl_2, int gl_3){
     return ris/2;// <---  /2 Pay attention to even/odd  (see init_geo) 
 
 }
-static inline int lnh_to_lnh_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
+static inline int snum_acc(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
 // local'n'halo coordinates to lnh 'snum' index
  
     //NOTE: Since lnh_0 goes from 0 to LNH_N0-1,
@@ -195,6 +195,7 @@ static inline int lnh_to_lnh_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
     return ris/2;// <---  /2 Pay attention to even/odd  (see init_geo) 
 
 }
+
 static inline int loc_to_lnh_snum(int loc_0, int loc_1, int loc_2, int loc_3){
 //local coordinates to loc'n'halo 'snum'index
     // Actually, the real memory layout is of the LNH type.
@@ -205,7 +206,7 @@ static inline int loc_to_lnh_snum(int loc_0, int loc_1, int loc_2, int loc_3){
     loc_2+=D2_HALO;
     loc_3+=D3_HALO;
 
-    return lnh_to_lnh_snum(loc_0,loc_1,loc_2,loc_3);
+    return snum_acc(loc_0,loc_1,loc_2,loc_3);
     // ^^ /2 Pay attention to even/odd  (see init_geo) 
 }
 static inline int lnh_to_gl_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3, vec4int myrank4int){

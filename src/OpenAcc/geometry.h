@@ -47,13 +47,6 @@ typedef struct geom_parameters_t{
 
 extern geom_parameters geom_par;
 
-#pragma acc routine seq
-static inline int snum_acc(int d0, int d1, int d2, int d3) {
-  int ris;
-  ris = d0 + (d1*vol1) + (d2*vol2) + (d3*vol3);
-  return ris/2;   // <---  /2 Pay attention to even/odd 
-}
-
 // TABLES FOR THE NEAREST NEIGHBOURS       
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            
 //                            starting from the site "site_half" (from 0 to sizeh) of parity "par"         

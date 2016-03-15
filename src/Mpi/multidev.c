@@ -1,16 +1,17 @@
 #ifndef MULTIDEV_C_
 #define MULTIDEV_C_
 
-#include <mpi.h>
 #include <stdio.h>
 #include "./geometry_multidev.h"
 
-#ifdef MULTIDEVICE
 #include "./multidev.h"
 
-multidev_info mdevinfo;
+dev_info devinfo;
 
-void init_multidev1D(multidev_info * mdi){
+#ifdef MULTIDEVICE
+#include <mpi.h>
+
+void init_multidev1D(dev_info * mdi){
 
     MPI_Init(NULL,NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &(mdi->myrank));

@@ -214,7 +214,7 @@ void send_lnh_subfermion_to_buffer(const global_vec3_soa * gl_soa_fermion, lnh_v
 
 
         int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_x, tg_lnh_y, tg_lnh_z, tg_lnh_t, target_gl_loc_origin_from_rank);
-        int target_lnh_snum = lnh_to_lnh_snum(tg_lnh_x, tg_lnh_y, tg_lnh_z, tg_lnh_t);
+        int target_lnh_snum = snum_acc(tg_lnh_x, tg_lnh_y, tg_lnh_z, tg_lnh_t);
 
         vec3 aux = vec3_from_global_vec3_soa(gl_soa_fermion,target_gl_snum);
         vec3_into_vec3_soa(aux,target_vec3_soa,target_lnh_snum);
@@ -259,7 +259,7 @@ void recv_loc_subfermion_from_buffer(global_vec3_soa * gl_soa_fermion, lnh_vec3_
         or_lnh_t = or_loc_t + T_HALO;
 
         int origin_gl_snum = target_lnh_to_gl_snum(or_lnh_x, or_lnh_y, or_lnh_z, or_lnh_t, origin_gl_loc_origin_from_rank);
-        int origin_lnh_snum = lnh_to_lnh_snum(or_lnh_x, or_lnh_y, or_lnh_z, or_lnh_t);
+        int origin_lnh_snum = snum_acc(or_lnh_x, or_lnh_y, or_lnh_z, or_lnh_t);
 
         vec3 aux = vec3_from_vec3_soa(origin_vec3_soa,origin_lnh_snum);
         vec3_into_global_vec3_soa(aux,gl_soa_fermion,origin_gl_snum);
@@ -290,7 +290,7 @@ void send_lnh_subfermion_to_rank(const global_vec3_soa * gl_soa_fermion, int tar
 
 
         int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_x, tg_lnh_y, tg_lnh_z, tg_lnh_t, target_gl_loc_origin_from_rank);
-        int target_lnh_snum = lnh_to_lnh_snum(tg_lnh_x, tg_lnh_y, tg_lnh_z, tg_lnh_t);
+        int target_lnh_snum = snum_acc(tg_lnh_x, tg_lnh_y, tg_lnh_z, tg_lnh_t);
 
         vec3 aux = vec3_from_global_vec3_soa(gl_soa_fermion,target_gl_snum);
         vec3_into_vec3_soa(aux,target_vec3_soa,target_lnh_snum);
@@ -344,7 +344,7 @@ void recv_loc_subfermion_from_rank(const global_vec3_soa * gl_soa_fermion, int r
         or_lnh_t = or_loc_t + T_HALO;
 
         int origin_gl_snum = target_lnh_to_gl_snum(or_lnh_x, or_lnh_y, or_lnh_z, or_lnh_t, origin_gl_loc_origin_from_rank);
-        int origin_lnh_snum = lnh_to_lnh_snum(or_lnh_x, or_lnh_y, or_lnh_z, or_lnh_t);
+        int origin_lnh_snum = snum_acc(or_lnh_x, or_lnh_y, or_lnh_z, or_lnh_t);
 
         vec3 aux = vec3_from_vec3_soa(origin_vec3_soa,origin_lnh_snum);
         vec3_into_global_vec3_soa(aux,gl_soa_fermion,origin_gl_snum);

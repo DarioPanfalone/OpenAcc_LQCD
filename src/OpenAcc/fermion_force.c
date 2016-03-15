@@ -26,6 +26,10 @@
 #define __restrict
 #endif
 
+#ifdef MULTIDEV
+#include "../Mpi/communications.h"
+#endif 
+
 extern int verbosity_lv;
 
 extern tamat_soa * ipdot_f_old; // see alloc_vars.c
@@ -33,8 +37,8 @@ extern tamat_soa * ipdot_f_old; // see alloc_vars.c
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
         __restrict thmat_soa  * Lambda, // la var globale e' aux_th
         __restrict tamat_soa  * QA, // la var globale e' aux_ta
-        __restrict su3_soa    * const U, // la var globale e' .... per adesso conf_acc
-        __restrict su3_soa    * const TMP// la var globale e' aux_conf_acc //PARCHEGGIO??
+        __restrict const su3_soa * const U,// la var globale e' .... per adesso conf_acc
+        __restrict su3_soa * const TMP//la var globale e' aux_conf_acc //PARCHEGGIO??
         ){
 
 
@@ -55,7 +59,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Sigma[old]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
     }
 
-    SETREQUESTED(TMP);
     set_su3_soa_to_zero(TMP);
 
     calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
@@ -63,7 +66,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
     RHO_times_conf_times_staples_ta_part(U,TMP,QA);
     // check: TMP = local staples.
-    SETFREE(TMP);
     if(verbosity_lv > 4) printf("         computed Q  \n");
     if(verbosity_lv > 5) {// printing stuff
 #pragma acc update host(QA[0:8])
@@ -74,7 +76,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Q02 = %.18lf + (%.18lf)*I\n",creal(QA[0].c02[0]),cimag(QA[0].c02[0]));
         printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
     }
-    SETREQUESTED(Lambda);
     compute_lambda(Lambda,Sigma,U,QA,TMP);
     if(verbosity_lv > 4)   printf("         computed Lambda  \n");
 
@@ -87,7 +88,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Lambda02 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c02[0]),cimag(Lambda[0].c02[0]));
         printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
     }
-    SETREQUESTED(Sigma);
     compute_sigma(Lambda,U,Sigma,QA,TMP);
     if(verbosity_lv > 4)   printf("         computed Sigma  \n");
 
@@ -105,8 +105,9 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Sigma[new]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
     }
 
-    SETFREE(Lambda);
-
+#ifdef MULTIDEV
+        communicate_gl3_borders(Sigma);
+#endif
 
 }
 

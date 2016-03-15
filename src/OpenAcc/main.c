@@ -43,11 +43,16 @@
 #include "./backfield.h"
 #include "./action.h"
 #include "../Rand/random.h"
+
+#include "../Mpi/multidev.h"
 #include "../Mpi/communications.h"
+
 
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
+
+
 
 
 
@@ -70,7 +75,13 @@ int main(int argc, char* argv[]){
     printf("WELCOME! \n");
     // READ input file.
     set_global_vars_and_fermions_from_input_file(argv[1]);
-    //
+#ifdef MULTIDEVICE
+    init_multidev1D(&devinfo);
+#else
+    devinfo.myrank = 0;
+    devinfo.myrank = 1;
+#endif
+
 
 
 #ifndef __GNUC__
@@ -82,16 +93,23 @@ int main(int argc, char* argv[]){
     // Intel XeonPhi
     //acc_device_t my_device_type = acc_device_xeonphi;
     // Select device ID
-    select_init_acc_device(my_device_type, dev_settings.device_choice);
+    select_init_acc_device(my_device_type, devinfo.single_dev_choice);
     printf("Device Selected : OK \n");
 #endif
 
-    initrand_fromfile(mkwch_pars.RandGenStatusFilename, (unsigned int) mkwch_pars.seed);
+    unsigned int myseed_default =  (unsigned int) mkwch_pars.seed; 
+
+#ifdef MULTIDEVICE
+    myseed_default =  (unsigned int) (myseed_default + devinfo.myrank) ;
+    char myrank_string[6];
+    sprintf(myrank_string,".R%d",devinfo.myrank);
+    strcat(mkwch_pars.RandGenStatusFilename,myrank_string);
+#endif
+
+    initrand_fromfile(mkwch_pars.RandGenStatusFilename,myseed_default);
     verbosity_lv = mkwch_pars.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     if(init_ferm_params(fermions_parameters)) exit(1);
-
-
 
     mem_alloc();
     printf("Allocazione della memoria : OK \n");
@@ -99,36 +117,31 @@ int main(int argc, char* argv[]){
     printf("nn computation : OK \n");
     init_all_u1_phases(backfield_parameters,fermions_parameters);
 
-
-
     printf("u1_backfield initialization : OK \n");
-    
+
     initialize_md_global_variables(md_parameters);
     printf("init md vars : OK \n");
 
     //################## INIZIALIZZAZIONE DELLA CONFIGURAZIONE #######################
     // start from saved conf
-    
 
 #ifdef NORANDOM
-    if(!read_conf(conf_rw,"conf_norndtest",&conf_id_iter),mkwch_pars.use_ildg){
+    if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter),mkwch_pars.use_ildg){
         // READS ALSO THE conf_id_iter
         printf("Stored Gauge Conf conf_norndtest Read : OK\n",mkwch_pars.save_conf_name);
-        send_lnh_subconf_to_buffer(conf_rw,conf_acc,0);
     }
     else{
         // cold start
         printf("COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED\
-\"conf_norndtest\" MUST BE PRESENT\n");
+                \"conf_norndtest\" MUST BE PRESENT\n");
         exit(1);
     }
-    
+
 #else
-    if(!read_conf(conf_rw,mkwch_pars.save_conf_name,
+    if(!read_conf_wrapper(conf_acc,mkwch_pars.save_conf_name,
                 &conf_id_iter,mkwch_pars.use_ildg)){
-       // READS ALSO THE conf_id_iter
-       printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
-       send_lnh_subconf_to_buffer(conf_rw,conf_acc,0);
+        // READS ALSO THE conf_id_iter
+        printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
 
     }
     else{
@@ -140,11 +153,12 @@ int main(int argc, char* argv[]){
     //#################################################################################  
 
 
-
     double max_unitarity_deviation,avg_unitarity_deviation;
     check_unitarity_host(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
-    printf("\tAvg_unitarity_deviation on host: %e\n", avg_unitarity_deviation);
-    printf("\tMax_unitarity_deviation on host: %e\n", max_unitarity_deviation);
+    printf("\tMPI%02d: Avg_unitarity_deviation on host: %e\n", devinfo.myrank, 
+            avg_unitarity_deviation);
+    printf("\tMPI%02d: Max_unitarity_deviation on host: %e\n", devinfo.myrank,
+            max_unitarity_deviation);
 
 
 
@@ -180,12 +194,12 @@ int main(int argc, char* argv[]){
             plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
-            printf("Therm_iter %d Placchetta    = %.18lf \n",
-                    conf_id_iter,plq/NSITES/6.0/3.0);
-            printf("Therm_iter %d Rettangolo    = %.18lf \n",
-                    conf_id_iter,rect/NSITES/6.0/3.0/2.0);
-            printf("Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",conf_id_iter,
-                    creal(poly),cimag(poly));
+            printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
+                    devinfo.myrank, conf_id_iter,plq/NSITES/6.0/3.0);
+            printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
+                    devinfo.myrank, conf_id_iter,rect/NSITES/6.0/3.0/2.0);
+            printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
+                    devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
 
             if(mkwch_pars.ntraj==0){ // MEASURES ONLY
 
@@ -195,14 +209,15 @@ int main(int argc, char* argv[]){
 
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
-             printf("Fermion Measurements: see file %s\n",fm_par.fermionic_outfilename);
-             fermion_measures(conf_acc,fermions_parameters,
+                if(devinfo.myrank == 0)  printf("Fermion Measurements: see file %s\n",
+                        fm_par.fermionic_outfilename);
+                fermion_measures(conf_acc,fermions_parameters,
                         &fm_par, mkwch_pars.residue_metro, id_iter_offset) ;
 
 
                 //-------------------------------------------------// 
                 //--------- MISURA ROBA DI GAUGE ------------------//
-                printf("Misure di Gauge:\n");
+                if(devinfo.myrank == 0 ) printf("Misure di Gauge:\n");
                 plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
@@ -212,35 +227,43 @@ int main(int argc, char* argv[]){
                 printf("Polyakov Loop : (%.18lf,%.18lf) \n",creal(poly),cimag(poly));
 
 
-            }else printf("Starting generation of Configurations.\n");
+            }else printf("MPI%02d: Starting generation of Configurations.\n",
+                    devinfo.myrank);
 
             // THERMALIZATION & METRO    ----   UPDATES //
-    
-            for(int id_iter=id_iter_offset;id_iter<(mkwch_pars.ntraj+id_iter_offset);id_iter++){
+
+            for(int id_iter=id_iter_offset;id_iter<(mkwch_pars.ntraj+id_iter_offset);
+                    id_iter++){
                 struct timeval tstart_cycle;
                 gettimeofday(&tstart_cycle, NULL);
 
-                check_unitarity_device(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
-                printf("\tAvg/Max unitarity deviation on device: %e / %e\n", avg_unitarity_deviation, max_unitarity_deviation);
+                check_unitarity_device(conf_acc,&max_unitarity_deviation,
+                        &avg_unitarity_deviation);
+                printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
+                        devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
                 accettate_therm_old = accettate_therm;
                 accettate_metro_old = accettate_metro;
                 conf_id_iter++;
-                printf("\n#################################################\n");
-                printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
-                        conf_id_iter,mkwch_pars.ntraj+id_iter_offset,
-                        geom_par.gnx,geom_par.gny,
-                        geom_par.gnz,geom_par.gnt,
-                        act_params.beta);
-                printf(  "#################################################\n\n");
+                if(devinfo.myrank ==0 ){
+                    printf("\n#################################################\n");
+                    printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
+                            conf_id_iter,mkwch_pars.ntraj+id_iter_offset,
+                            geom_par.gnx,geom_par.gny,
+                            geom_par.gnz,geom_par.gnt,
+                            act_params.beta);
+                    printf(  "#################################################\n\n");
+                }
+
                 //--------- CONF UPDATE ----------------//
                 if(id_iter<mkwch_pars.therm_ntraj){
                     accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                          mkwch_pars.residue_metro,md_parameters.residue_md,id_iter-id_iter_offset,
+                            mkwch_pars.residue_metro,md_parameters.residue_md,
+                            id_iter-id_iter_offset,
                             accettate_therm,0);
                 }else{
-                   accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                           mkwch_pars.residue_metro,md_parameters.residue_md,
-                           id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+                    accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
+                            mkwch_pars.residue_metro,md_parameters.residue_md,
+                            id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
                 }
 #pragma acc update host(conf_acc[0:8])
                 //---------------------------------------//
@@ -257,32 +280,35 @@ int main(int argc, char* argv[]){
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
 
-                FILE *goutfile = fopen(gauge_outfilename,"at");
-                if(!goutfile){
-                    goutfile = fopen(gauge_outfilename,"wt");
-                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\n");
-                    fprintf(goutfile,"%s",gauge_outfile_header);
+
+                if(devinfo.myrank ==0 ){
+                    FILE *goutfile = fopen(gauge_outfilename,"at");
+                    if(!goutfile){
+                        goutfile = fopen(gauge_outfilename,"wt");
+                        strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\n");
+                        fprintf(goutfile,"%s",gauge_outfile_header);
+                    }
+                    if(goutfile){
+                        if(id_iter<mkwch_pars.therm_ntraj){
+                            printf("Therm_iter %d",conf_id_iter );
+                            printf("Placchetta= %.18lf    ", plq/NSITES/6.0/3.0);
+                            printf("Rettangolo= %.18lf\n",rect/NSITES/6.0/3.0/2.0);
+
+
+                        }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/NSITES/6.0/3.0,rect/NSITES/6.0/3.0/2.0);
+
+
+                        fprintf(goutfile,"%d\t%d\t",conf_id_iter,
+                                accettate_therm+accettate_metro
+                                -accettate_therm_old-accettate_metro_old);
+                        fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
+                                plq/NSITES/6.0/3.0,
+                                rect/NSITES/6.0/3.0/2.0, 
+                                creal(poly), cimag(poly));
+
+                    }
+                    fclose(goutfile);
                 }
-                if(goutfile){
-                    if(id_iter<mkwch_pars.therm_ntraj){
-                        printf("Therm_iter %d",conf_id_iter );
-                        printf("Placchetta= %.18lf    ", plq/NSITES/6.0/3.0);
-                        printf("Rettangolo= %.18lf\n",rect/NSITES/6.0/3.0/2.0);
-                    
-
-                    }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/NSITES/6.0/3.0,rect/NSITES/6.0/3.0/2.0);
-
-
-                    fprintf(goutfile,"%d\t%d\t",conf_id_iter,
-                            accettate_therm+accettate_metro
-                            -accettate_therm_old-accettate_metro_old);
-                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
-                            plq/NSITES/6.0/3.0,
-                            rect/NSITES/6.0/3.0/2.0, 
-                            creal(poly), cimag(poly));
-                    
-                }
-                fclose(goutfile);
                 //-------------------------------------------------//
 
                 //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
@@ -293,8 +319,8 @@ int main(int argc, char* argv[]){
                     sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
                     printf("Storing conf %s.\n", tempname);
-                    recv_loc_subconf_from_buffer(conf_rw,conf_acc,0);
-                    save_conf(conf_rw,tempname,conf_id_iter,mkwch_pars.use_ildg);
+                    save_conf_wrapper(conf_acc,tempname,conf_id_iter,
+                            mkwch_pars.use_ildg);
                     strcpy(tempname,mkwch_pars.RandGenStatusFilename);
                     sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
@@ -303,8 +329,7 @@ int main(int argc, char* argv[]){
                 }
                 if(conf_id_iter%mkwch_pars.saveconfinterval==0){
                     printf("Saving conf %s.\n", mkwch_pars.save_conf_name);
-                    recv_loc_subconf_from_buffer(conf_rw,conf_acc,0);
-                    save_conf(conf_rw,mkwch_pars.save_conf_name, conf_id_iter,
+                    save_conf_wrapper(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
                             mkwch_pars.use_ildg);
                     printf("Saving rng status in %s.\n",
                             mkwch_pars.RandGenStatusFilename);
@@ -313,54 +338,61 @@ int main(int argc, char* argv[]){
 
                 //-------------------------------------------------//
                 // program exits if it finds a file called "stop"
+
+                int run_condition = 1;
+
                 
-                FILE * test_stop = fopen("stop","r");
-                if(test_stop){
-                    fclose(test_stop);
-                    printf("File  \'stop\' found, stopping cycle now.\n");
-                    break;
+                if(devinfo.myrank ==0 ){
+                    FILE * test_stop = fopen("stop","r");
+                    if(test_stop){
+                        fclose(test_stop);
+                        printf("File  \'stop\' found, stopping cycle now.\n");
+                        run_condition = 0;
+                    }
+
+                    // program exits if it time is running out
+                    struct timeval tend_cycle;
+                    gettimeofday(&tend_cycle, NULL);
+
+                    double cycle_duration = (double) 
+                        (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
+                        (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
+                    double total_duration = (double) 
+                        (tend_cycle.tv_sec - tinit.tv_sec)+
+                        (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
+                    double max_expected_duration_with_another_cycle = 
+                        total_duration + 2*cycle_duration ; 
+
+                    if(max_expected_duration_with_another_cycle > mkwch_pars.MaxRunTimeS){
+                        printf("Time is running out (%d of %d seconds elapsed),",
+                                (int) total_duration, (int) mkwch_pars.MaxRunTimeS);
+                        printf(" shutting down now.\n");
+                        //https://www.youtube.com/watch?v=MfGhlVcrc8U
+                        // but without that much pathos
+                        run_condition = 0;
+                    }
+
+                    // program exits if MaxConfIdIter is reached
+                    if(conf_id_iter >= mkwch_pars.MaxConfIdIter ){
+
+                        printf( "MaxConfIdIter=%d reached, job done!", mkwch_pars.MaxConfIdIter);
+                        printf(" shutting down now.\n");
+                        run_condition = 0;
+                    }
                 }
-                
-                // program exits if it time is running out
-                struct timeval tend_cycle;
-                gettimeofday(&tend_cycle, NULL);
-
-                double cycle_duration = (double) 
-                    (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
-                    (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
-                double total_duration = (double) 
-                    (tend_cycle.tv_sec - tinit.tv_sec)+
-                    (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
-                double max_expected_duration_with_another_cycle = 
-                    total_duration + 2*cycle_duration ; 
-
-                if(max_expected_duration_with_another_cycle > mkwch_pars.MaxRunTimeS){
-                    printf("Time is running out (%d of %d seconds elapsed),",
-                          (int) total_duration, (int) mkwch_pars.MaxRunTimeS);
-                    printf(" shutting down now.\n");
-                    //https://www.youtube.com/watch?v=MfGhlVcrc8U
-                    // but without that much pathos
-                    break;
-                }
-
-                // program exits if MaxConfIdIter is reached
-                if(conf_id_iter >= mkwch_pars.MaxConfIdIter ){
-
-                    printf( "MaxConfIdIter=%d reached, job done!", mkwch_pars.MaxConfIdIter);
-                    printf(" shutting down now.\n");
-                    break;
-                }
-                
+#ifdef MULTIDEVICE
+                MPI_Bcast((void*)&run_condition,1,MPI_INT,0,MPI_COMM_WORLD);
+#endif
+                if(run_condition == 0) break;
 
             }// id_iter loop ends here             
 
             //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
 
             if(mkwch_pars.ntraj > 0){
-                    recv_loc_subconf_from_buffer(conf_rw,conf_acc,0);
-                    save_conf(conf_rw,mkwch_pars.save_conf_name, conf_id_iter,
-                    mkwch_pars.use_ildg );
-                    saverand_tofile(mkwch_pars.RandGenStatusFilename);
+                save_conf_wrapper(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
+                        mkwch_pars.use_ildg );
+                saverand_tofile(mkwch_pars.RandGenStatusFilename);
             }
             //-------------------------------------------------//
 
@@ -369,15 +401,15 @@ int main(int argc, char* argv[]){
             topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
             printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/NSITES/6.0/3.0,topoch);
 
-//               // You might want to put this inside the loop
-//               for(int icool=0;icool<5000;icool++){
-//               cool_conf(conf_acc,aux_conf_acc);
-//               plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-//               topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
-//               printf("COOL %d  Placchetta= %.18lf  TopCh= %.18lf \n",icool+1,plq/NSITES/6.0/3.0,topoch);
-//               }
-//               
-//
+            //               // You might want to put this inside the loop
+            //               for(int icool=0;icool<5000;icool++){
+            //               cool_conf(conf_acc,aux_conf_acc);
+            //               plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+            //               topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
+            //               printf("COOL %d  Placchetta= %.18lf  TopCh= %.18lf \n",icool+1,plq/NSITES/6.0/3.0,topoch);
+            //               }
+            //               
+            //
 
 #ifdef STOUT_FERMIONS
         } // end pragma acc data (le cose del caso stout)
@@ -392,6 +424,10 @@ int main(int argc, char* argv[]){
     //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
     shutdown_acc_device(my_device_type);
     /////////////////////////////////////////////////////////////////////////////////////////////////
+#endif
+
+#ifdef MULTIDEVICE
+    shutdown_multidev();
 #endif
 
     mem_free();

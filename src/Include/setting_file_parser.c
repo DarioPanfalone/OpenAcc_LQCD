@@ -9,7 +9,7 @@
 #include "../OpenAcc/md_integrator.h"
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/su3_measurements.h"
-#include "../OpenAcc/deviceinit.h"
+#include "../Mpi/multidev.h"
 #include "../OpenAcc/geometry.h"
 #include "../RationalApprox/rationalapprox.h"
 #include "../Meas/ferm_meas.h"
@@ -458,12 +458,23 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
     return scan_group_NV(sizeof(fmp)/sizeof(par_info),fmp, filelines, startline, endline);
 
 }
-int read_device_setting(device_param *device_settings,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
-    par_info tp[]= {
-        (par_info){(void*) &(device_settings->device_choice),TYPE_INT,"device_choice", 0 , NULL  }};
+#ifdef MULTIDEVICE
+    const int single_dev_choice_def = 0;
+#endif 
 
+
+    par_info tp[]= {
+#ifndef MULTIDEVICE        
+        (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 0 , NULL  }
+#else
+        (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 1 , (const void*) &single_dev_choice_def},
+        (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL},
+        (par_info){(void*) &(di->proc_per_node),TYPE_INT,"NProcPerNode", 0 , NULL},
+#endif
+};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);

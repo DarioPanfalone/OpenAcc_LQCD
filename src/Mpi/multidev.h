@@ -1,14 +1,17 @@
 #ifndef MULTIDEV_H_
 #define MULTIDEV_H_
+
 #define FERMION_HALO 1
-#include <mpi.h>
 #include "./geometry_multidev.h"
 
-#ifdef MULTIDEVICE
-typedef struct multidev_info_t{
+typedef struct dev_info_t{
 
     // FROM MPI INIT AND SIMILAR
+    
+    int single_dev_choice; // from input file
     int myrank, nranks;
+
+#ifdef MULTIDEVICE
     int myrank_L,myrank_R; // nearest neighbours, salamino
     int node_subrank; // which card it will use?
     char processor_name[MPI_MAX_PROCESSOR_NAME]; int namelen;
@@ -22,16 +25,21 @@ typedef struct multidev_info_t{
     int nranks_read;
     int halo_widths0123[4];
     int origin_0123[4];
+#endif
 
-} multidev_info ; 
+
+} dev_info ; 
 
 
-extern multidev_info mdevinfo;
+extern dev_info devinfo;
 
-void init_multidev1D(multidev_info * mdi);
+
+#ifdef MULTIDEVICE
+
+void init_multidev1D(dev_info * mdi);
 
 void shutdown_multidev();
 
-
 #endif
+
 #endif

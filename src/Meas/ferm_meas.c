@@ -31,7 +31,13 @@
 #endif
 #include "../OpenAcc/action.h"
 
-ferm_meas_params  fm_par;
+#ifdef MULTIDEVICE
+#include "../Mpi/communications.h"
+#endif
+#include "../Mpi/multidev.h"
+
+
+ferm_meas_params fm_par;
 
 // vedi tesi LS F.Negro per ragguagli (Appendici)
 void eo_inversion(su3_soa *tconf_acc,
@@ -53,13 +59,21 @@ void eo_inversion(su3_soa *tconf_acc,
 
 
     acc_Deo(tconf_acc, phi_e, in_o,tfermions_parameters->phases);
-    // COMMUNICATE BORDERS, TO DO
+
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(phi_e);
+#endif
+
+
+
     combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
     ker_invert_openacc(tconf_acc,tfermions_parameters,
             out_e,phi_e,res,trialSolution,
             tloc_r,tloc_h,tloc_s,tloc_p);
     acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
-    // COMMUNICATE BORDERS
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(phi_o);
+#endif
     combine_in1_minus_in2_allxfact(in_o,phi_o,(double)1/tfermions_parameters->ferm_mass,out_o);
 
 
@@ -147,8 +161,9 @@ void fermion_measures( su3_soa * tconf_acc,
 
     int allocation_check;
 #define ALLOCCHECK(control_int,var)  if(control_int != 0 ) \
-    printf("\tError in  allocation of %s . \n", #var);\
-    else if(verbosity_lv > 2) printf("\tAllocation of %s : OK , %p\n", #var, var );\
+    printf("\tMPI%02d: Error in  allocation of %s . \n",devinfo.myrank, #var);\
+    else if(verbosity_lv > 2) printf("\tMPI%02d: Allocation of %s : OK , %p\n",\
+            devinfo.myrank, #var, var );\
 
     allocation_check =  posix_memalign((void **)&rnd_e, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,rnd_e);     
@@ -178,43 +193,53 @@ void fermion_measures( su3_soa * tconf_acc,
 
     // FILE checks
     // find the actual file size
-    FILE *foutfile = fopen(tfm_par->fermionic_outfilename,"ab");
+    FILE *foutfile;
     int fsize;
-    if(foutfile){
-        fseek(foutfile, 0L, SEEK_END);
-        fsize = ftell(foutfile);
-        fseek(foutfile, 0L, SEEK_SET);
-        fsize -= ftell(foutfile);
 
-    }else {
-        printf("File %s can't be opened for writing. Exiting.\n", fm_par.fermionic_outfilename);
-        exit(1);
-    }
-    fclose(foutfile);// found file size
+    if(devinfo.myrank == 0 ){
+        foutfile = fopen(tfm_par->fermionic_outfilename,"ab");
 
-    // cycle on copies
-    for(int icopy = 0; icopy < tfm_par->SingleInvNVectors ; icopy++) {
-        FILE *foutfile = fopen(tfm_par->fermionic_outfilename,"at");
-        if(fsize == 0){
-            set_fermion_file_header(tfm_par, tfermions_parameters);
-            fprintf(foutfile,"%s",fm_par.fermionic_outfile_header);
-            fsize++;
-        }
+        if(foutfile){
+            fseek(foutfile, 0L, SEEK_END);
+            fsize = ftell(foutfile);
+            fseek(foutfile, 0L, SEEK_SET);
+            fsize -= ftell(foutfile);
 
-        if(!foutfile) {
+        }else {
             printf("File %s can't be opened for writing. Exiting.\n", fm_par.fermionic_outfilename);
             exit(1);
         }
+        fclose(foutfile);// found file size
+    }
 
+    // cycle on copies
+    for(int icopy = 0; icopy < tfm_par->SingleInvNVectors ; icopy++) {
+        FILE *foutfile;
 
-        fprintf(foutfile,"%d\t%d\t",conf_id_iter,icopy);
+        if(devinfo.myrank == 0 ){
+            foutfile = fopen(tfm_par->fermionic_outfilename,"at");
+            if(fsize == 0){
+                set_fermion_file_header(tfm_par, tfermions_parameters);
+                fprintf(foutfile,"%s",fm_par.fermionic_outfile_header);
+                fsize++;
+            }
+
+            if(!foutfile) {
+                printf("File %s can't be opened for writing. Exiting.\n", fm_par.fermionic_outfilename);
+                exit(1);
+            }
+
+            fprintf(foutfile,"%d\t%d\t",conf_id_iter,icopy);
+        }        
+
 
         // cycle on flavours
         for(int iflv=0; iflv < NDiffFlavs ; iflv++){
 
-            if(verbosity_lv > 1){
-                printf("Performing %d of %d chiral measures for quark %s",
-                        icopy+1,tfm_par->SingleInvNVectors, tfermions_parameters[iflv].name);
+            if(verbosity_lv > 1 && devinfo.myrank == 0){
+                printf("MPI%02d: Performing %d of %d chiral measures for quark %s",
+                        devinfo.myrank,icopy+1,tfm_par->SingleInvNVectors, 
+                        tfermions_parameters[iflv].name);
 
                 printf("(%d for chiral susc, %d for quark number susc).",
                         tfm_par->DoubleInvNVectorsChiral,
@@ -247,9 +272,11 @@ void fermion_measures( su3_soa * tconf_acc,
                         trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
                 chircond_size = scal_prod_global(rnd_e,chi_e)+
                     scal_prod_global(rnd_o,chi_o);
-                fprintf(foutfile,"%.16lf\t%.16lf\t",
-                        creal(chircond_size*factor),
-                        cimag(chircond_size*factor));
+
+                if(devinfo.myrank == 0)
+                    fprintf(foutfile,"%.16lf\t%.16lf\t",
+                            creal(chircond_size*factor),
+                            cimag(chircond_size*factor));
 
                 // QUARK NUMBER
                 // (bnchi_e, * ) = dM/dmu (* , chi_o)
@@ -258,13 +285,24 @@ void fermion_measures( su3_soa * tconf_acc,
                 // ( * ,bnchi_o) = dM/dmu (chi_e, * )
                 dM_dmu_oe[geom_par.tmap](conf_to_use,bnchi_o,chi_e,
                         tfermions_parameters[iflv].phases);
+
+#ifdef MULTIDEVICE
+                communicate_fermion_borders(bnchi_e);
+                communicate_fermion_borders(bnchi_o);
+#endif
+
+
+
+
                 // (bnchi_e,bnchi_o) = dM/dmu (chi_e,chi_o) 
                 barnum_size = scal_prod_global(rnd_e,bnchi_e)+
                     scal_prod_global(rnd_o,bnchi_o);
 
-                fprintf(foutfile,"%.16lf\t%.16lf\t",
-                        creal(barnum_size*factor),
-                        cimag(barnum_size*factor));
+
+                if(devinfo.myrank == 0)
+                    fprintf(foutfile,"%.16lf\t%.16lf\t",
+                            creal(barnum_size*factor),
+                            cimag(barnum_size*factor));
 
                 // SUSCEPTIBILITIES
                 if(icopy < tfm_par->DoubleInvNVectorsChiral ){
@@ -278,12 +316,15 @@ void fermion_measures( su3_soa * tconf_acc,
 
                     trMinvSq_size = -scal_prod_global(rnd_e,chi2_e)-
                         scal_prod_global(rnd_o,chi2_o); 
-                    fprintf(foutfile,"%.16lf\t%.16lf\t",
-                            creal(trMinvSq_size*factor),
-                            cimag(trMinvSq_size*factor));
+
+                    if(devinfo.myrank == 0)
+                        fprintf(foutfile,"%.16lf\t%.16lf\t",
+                                creal(trMinvSq_size*factor),
+                                cimag(trMinvSq_size*factor));
 
                 } else if (tfm_par->DoubleInvNVectorsChiral>0)                  
-                    fprintf(foutfile,"%-24s%-24s","none","none" );
+                    if(devinfo.myrank == 0)
+                        fprintf(foutfile,"%-24s%-24s","none","none" );
 
                 if(icopy < tfm_par->DoubleInvNVectorsQuarkNumber ){
                     // Actually, the first connected piece 
@@ -298,14 +339,19 @@ void fermion_measures( su3_soa * tconf_acc,
                     // ( * ,chi2_o) = d^2M/dmu^2 (chi_e, * )      
                     d2M_dmu2_oe[geom_par.tmap](conf_to_use,chi2_o,chi_e,
                             tfermions_parameters[iflv].phases);
-                    
+#ifdef MULTIDEVICE
+                    communicate_fermion_borders(chi2_e);
+                    communicate_fermion_borders(chi2_o);
+#endif
+
                     // (chi2_e,chi2_o) = d^2M/dmu^2 M^{-1} (rnd_e,rnd_o)
                     trd2M_dmu2_Minv_size = scal_prod_global(rnd_e,chi2_e)
                         + scal_prod_global(rnd_o,chi2_o);
-                    
-                    fprintf(foutfile,"%.16lf\t%.16lf\t",
-                            creal(trd2M_dmu2_Minv_size*factor),
-                            cimag(trd2M_dmu2_Minv_size*factor));
+
+                    if(devinfo.myrank == 0)
+                        fprintf(foutfile,"%.16lf\t%.16lf\t",
+                                creal(trd2M_dmu2_Minv_size*factor),
+                                cimag(trd2M_dmu2_Minv_size*factor));
 
                     // CONNECTED QUARK NUMBER SUSCEPTIBILITY (2),
                     // (dM/dmu M^{-1})^2
@@ -324,25 +370,33 @@ void fermion_measures( su3_soa * tconf_acc,
                     dM_dmu_oe[geom_par.tmap](conf_to_use,bnchi_o,chi2_e,
                             tfermions_parameters[iflv].phases);
                     // (bnchi_e,bnchi_o) = (dM/dmu M^{-1})^2 (rnd_e,rnd_o)
+#ifdef MULTIDEVICE
+                    communicate_fermion_borders(bnchi_e);
+                    communicate_fermion_borders(bnchi_o);
+#endif
+
                     trdM_dmuMinv_sq_size = 
                         -scal_prod_global(rnd_e,bnchi_e)
                         -scal_prod_global(rnd_o,bnchi_o); 
-                    fprintf(foutfile,"%.16lf\t%.16lf\t",
-                            creal(trdM_dmuMinv_sq_size*factor),
-                            cimag(trdM_dmuMinv_sq_size*factor));
 
+                    if(devinfo.myrank == 0)
+                        fprintf(foutfile,"%.16lf\t%.16lf\t",
+                                creal(trdM_dmuMinv_sq_size*factor),
+                                cimag(trdM_dmuMinv_sq_size*factor));
 
                 } else if (tfm_par->DoubleInvNVectorsQuarkNumber>0)                  
-                    fprintf(foutfile,"%-24s%-24s%-24s%-24s","none","none","none","none" );
 
-
-
+                    if(devinfo.myrank == 0)
+                        fprintf(foutfile,"%-24s%-24s%-24s%-24s","none",
+                                "none","none","none" );
 
             }
         }// end of cycle over flavours
 
-        fprintf(foutfile,"\n");
-        fclose(foutfile);
+        if(devinfo.myrank == 0){
+            fprintf(foutfile,"\n");
+            fclose(foutfile);
+        }
     }// end of cycle over copies
 
     free(rnd_e);
