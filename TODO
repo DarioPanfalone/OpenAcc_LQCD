@@ -3,28 +3,30 @@
 - Kernels that must be restricted to local lattice (conf generation)
   fermionic_utilities (basic linear algebra):
    (NO LINEAR COMBINATIONS)
-   real_scal_prod_loc DONE
+   real_scal_prod_loc DONE, 1D CUT TOO
    scal_prod_loc DONE, 1D CUT TOO
    l2norm2_loc DONE, 1D CUT TOO
-  calc_loc_plaquettes_removing_stag_phases_nnptrick
   fermion_matrix
    acc_Deo  
-    acc_Deo full (inherits the name)
-    acc_Deo_bulk
-    acc_Deo_d3p
-    acc_Deo_d3m
-   acc_Doe
-    acc_Doe full (inherits the name)
-    acc_Doe_bulk
-    acc_Doe_d3p
-    acc_Doe_d3m
+    acc_Deo full (inherits the name) WRITTEN
+    acc_Deo_bulk                     WRITTEN
+    acc_Deo_d3p                      WRITTEN
+    acc_Deo_d3m                      WRITTEN
+   acc_Doe                           WRITTEN
+    acc_Doe full (inherits the name) WRITTEN
+    acc_Doe_bulk                     WRITTEN
+    acc_Doe_d3p                      WRITTEN
+    acc_Doe_d3m                      WRITTEN
+  NOTE: write fermion_matrix_multiplication to make use 
+  of async transfers etc.
+  
   fermion force utilities:
-   direct_product_of_fermions_into_auxmat
-   multiply_conf_times_force_and_take_ta_even_nophase
-   multiply_conf_times_force_and_take_ta_odd_nophase
-   multiply_conf_times_force_and_take_ta_nophase
-   multiply_backfield_times_force
-   accumulate_gl3soa_into_gl3soa
+   direct_product_of_fermions_into_auxmat             DONE  
+   multiply_conf_times_force_and_take_ta_even_nophase DELETED
+   multiply_conf_times_force_and_take_ta_odd_nophase  DELETED 
+   multiply_conf_times_force_and_take_ta_nophase DONE
+   multiply_backfield_times_force   DONE
+   accumulate_gl3soa_into_gl3soa  DONE
   plaquettes:
    calc_loc_plaquettes_removing_stag_phases_nnptrick
    calc_loc_staples_removing_stag_phases_nnptrick_all 

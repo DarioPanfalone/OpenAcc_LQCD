@@ -30,7 +30,9 @@
 #include <mpi.h>
 #include "../Mpi/multidev.h"
 
-d_complex scal_prod_loc(const __restrict vec3_soa * const in_vect1,const __restrict vec3_soa * const in_vect2	){
+d_complex scal_prod_loc(const __restrict vec3_soa * const in_vect1,
+        const __restrict vec3_soa * const in_vect2	)
+{
   int t;
   d_complex res = 0.0 + 0.0I;
   double * res_RI_p;
@@ -78,7 +80,8 @@ d_complex scal_prod_loc(const __restrict vec3_soa * const in_vect1,const __restr
   return res;
 }
 double real_scal_prod_loc(  const __restrict vec3_soa * const in_vect1,
-        const __restrict vec3_soa * const in_vect2 ){
+        const __restrict vec3_soa * const in_vect2 )
+{
   int t;
   double res_R_p;
   double resR = 0.0;
@@ -112,7 +115,8 @@ double real_scal_prod_loc(  const __restrict vec3_soa * const in_vect1,
   }
   return resR;
 }
-double l2norm2_loc_vol( const __restrict vec3_soa * const in_vect1){
+double l2norm2_loc_vol( const __restrict vec3_soa * const in_vect1)
+{
 int t;
   double res_R_p;
   double resR = 0.0;
@@ -147,8 +151,10 @@ int t;
 }
 
 
-d_complex scal_prod_loc_1Dcut(  const __restrict vec3_soa * const in_vect1,
-        const __restrict vec3_soa * const in_vect2 ){
+d_complex scal_prod_loc_1Dcut(  
+        const __restrict vec3_soa * const in_vect1,
+        const __restrict vec3_soa * const in_vect2 )
+{
     int t;
     double resR = 0.0;
     double resI = 0.0;
@@ -168,7 +174,8 @@ d_complex scal_prod_loc_1Dcut(  const __restrict vec3_soa * const in_vect1,
 
 }
 double real_scal_prod_loc_1Dcut(  const __restrict vec3_soa * in_vect1,
-        const __restrict vec3_soa * in_vect2			       ){
+        const __restrict vec3_soa * in_vect2			       )
+{
   int t;
   double res_R_p;
   double resR = 0.0;
@@ -181,7 +188,9 @@ double real_scal_prod_loc_1Dcut(  const __restrict vec3_soa * in_vect1,
   }
   return resR;
 }
-double l2norm2_loc_1Dcut( const __restrict vec3_soa * const in_vect1		       ){
+double l2norm2_loc_1Dcut( 
+        const __restrict vec3_soa * const in_vect1		       )
+{
   int t;
   double res_R_p;
   double resR = 0.0;
@@ -197,7 +206,8 @@ double l2norm2_loc_1Dcut( const __restrict vec3_soa * const in_vect1		       ){
 
 // MPI REQUIRING FUNCTIONS
 d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
-        const __restrict vec3_soa * const in_vect2 ){
+        const __restrict vec3_soa * const in_vect2 )
+{
     // RETURNS THE TOTAL RESULT USING MPI
 
      d_complex total_res=0;
@@ -223,8 +233,10 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
      }
      return total_res;
 }
-inline double real_scal_prod_global(  const __restrict vec3_soa * const in_vect1,
-        const __restrict vec3_soa * const in_vect2 ){
+inline double real_scal_prod_global(  
+        const __restrict vec3_soa * const in_vect1,
+        const __restrict vec3_soa * const in_vect2 )
+{
     // RETURNS THE TOTAL RESULT USING MPI
      double total_res,local_res;
      //local_res = real_scal_prod_loc(in_vect1,in_vect2); 
@@ -232,7 +244,9 @@ inline double real_scal_prod_global(  const __restrict vec3_soa * const in_vect1
      MPI_Allreduce((void*)&local_res,(void*)&total_res,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
      return total_res;
 }
-inline double l2norm2_global( const __restrict vec3_soa * const in_vect1  ){
+inline double l2norm2_global( 
+        const __restrict vec3_soa * const in_vect1  )
+{
 
      double total_res,local_res;
      //local_res = l2norm2_loc(in_vect1); 
@@ -245,9 +259,9 @@ inline double l2norm2_global( const __restrict vec3_soa * const in_vect1  ){
 #else // NO MULTIDEV
 
 
-d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
-			     const __restrict vec3_soa * const in_vect2
-		     ){
+d_complex scal_prod_global(  const __restrict vec3_soa * in_vect1,
+			     const __restrict vec3_soa * in_vect2 )
+{
   int t;
 
   double resR = 0.0;
@@ -266,9 +280,9 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
   }
   return resR+resI*I;
 }
-double real_scal_prod_global(  __restrict vec3_soa * const in_vect1,
-			       __restrict vec3_soa * const in_vect2
-			       ){
+double real_scal_prod_global(  __restrict const  vec3_soa * in_vect1,
+			       __restrict const vec3_soa * in_vect2 )
+{
   int t;
   double res_R_p;
   double resR = 0.0;
@@ -281,8 +295,8 @@ double real_scal_prod_global(  __restrict vec3_soa * const in_vect1,
   }
   return resR;
 }
-double l2norm2_global( __restrict  vec3_soa * const in_vect1 // constant --> is not updated
-		       ){
+double l2norm2_global( __restrict  const vec3_soa * in_vect1 )
+{
   int t;
   double res_R_p;
   double resR = 0.0;
@@ -301,10 +315,12 @@ double l2norm2_global( __restrict  vec3_soa * const in_vect1 // constant --> is 
 
 // NEXT, only "embarassingly parallel" functions, not requiring any reduction.
 
-void combine_in1xfactor_plus_in2(  __restrict vec3_soa * const in_vect1,
-				   const double factor,
-                                   __restrict vec3_soa * const in_vect2,
-                                   __restrict vec3_soa * const out){
+void combine_in1xfactor_plus_in2(
+        __restrict const vec3_soa * in_vect1,
+        const double factor,
+        __restrict const vec3_soa * in_vect2,
+        __restrict vec3_soa * const out)
+{
 
 #pragma acc kernels present(in_vect1) present(in_vect2) present(out)
 #pragma acc loop independent 
@@ -316,9 +332,10 @@ void combine_in1xfactor_plus_in2(  __restrict vec3_soa * const in_vect1,
 }
 
 
-void multiply_fermion_x_doublefactor(  __restrict vec3_soa * const in1,
-                                       const double factor
-				       ){
+void multiply_fermion_x_doublefactor( 
+        __restrict vec3_soa * const in1,
+        const double factor )
+{
 
 #pragma acc kernels present(in1)
 #pragma acc loop independent
@@ -329,7 +346,11 @@ void multiply_fermion_x_doublefactor(  __restrict vec3_soa * const in1,
   }
 }
 
-void combine_add_factor_x_in2_to_in1( __restrict vec3_soa * const in1,__restrict vec3_soa * const in2, double factor){
+void combine_add_factor_x_in2_to_in1( 
+        __restrict vec3_soa * const in1,
+        __restrict const vec3_soa * const in2, 
+        double factor)
+{
 #pragma acc kernels present(in1) present(in2)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -342,11 +363,13 @@ void combine_add_factor_x_in2_to_in1( __restrict vec3_soa * const in1,__restrict
 
 
 
-void combine_in1xferm_mass2_minus_in2_minus_in3(   __restrict vec3_soa * const in_vect1,
-						   double ferm_mass,
-						   __restrict vec3_soa * const in_vect2,
-						   __restrict vec3_soa * const in_vect3,
-						   __restrict vec3_soa * const out){ // l'ultimo argomento e' l'unico che viene modificato
+void combine_in1xferm_mass2_minus_in2_minus_in3(   
+        __restrict const vec3_soa * const in_vect1,
+        double ferm_mass,
+        __restrict const vec3_soa * const in_vect2,
+        __restrict const vec3_soa * const in_vect3,
+        __restrict vec3_soa * const out)
+{ // l'ultimo argomento e' l'unico che viene modificato
 #pragma acc kernels present(in_vect1) present(in_vect2) present(in_vect3) present(out)
 #pragma acc loop independent 
   for(int ih=0; ih<sizeh; ih++) {
@@ -361,7 +384,8 @@ void combine_inside_loop( __restrict vec3_soa * const vect_out,
 			  __restrict vec3_soa * const vect_r,
 			  const __restrict vec3_soa * const vect_s,
 			  const __restrict vec3_soa * const vect_p,
-			  const double omega){
+			  const double omega)
+{
 #pragma acc kernels present(vect_out) present(vect_r) present(vect_s) present(vect_p)
 #pragma acc loop independent 
   for(int ih=0; ih<sizeh; ih++) {
@@ -376,7 +400,11 @@ void combine_inside_loop( __restrict vec3_soa * const vect_out,
   }
 }
 
-void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * in_vect1,double ferm_mass2, __restrict vec3_soa * in_vect2){
+void combine_in1xferm_mass_minus_in2(
+        __restrict const vec3_soa * const in_vect1,
+        double ferm_mass2,
+        __restrict vec3_soa * const in_vect2)
+{
 #pragma acc kernels present(in_vect1) present(in_vect2)
 #pragma acc loop independent
   for(int ih=0; ih<sizeh; ih++) {
@@ -388,7 +416,8 @@ void combine_in1xferm_mass_minus_in2(__restrict vec3_soa * in_vect1,double ferm_
 
 void combine_in1_minus_in2(  __restrict const vec3_soa * in_vect1,
                              __restrict const vec3_soa * in_vect2,
-                            __restrict vec3_soa * out){
+                            __restrict vec3_soa * out)
+{
 #pragma acc kernels present(in_vect1) present(in_vect2) present(out)
 #pragma acc loop independent 
   for(int ih=0; ih<sizeh; ih++) {
@@ -398,7 +427,10 @@ void combine_in1_minus_in2(  __restrict const vec3_soa * in_vect1,
   }
 }
 
-void assign_in_to_out(__restrict vec3_soa * in_vect1,__restrict vec3_soa * out){
+void assign_in_to_out(
+        __restrict const vec3_soa * in_vect1,
+        __restrict vec3_soa * out)
+{
   SETINUSE(out);
 #pragma acc kernels present(in_vect1)  present(out)
 #pragma acc loop independent 
@@ -410,7 +442,8 @@ void assign_in_to_out(__restrict vec3_soa * in_vect1,__restrict vec3_soa * out){
 
 }
 // Altre funzioni aggiunte per l'algebra lineare multishift "versatilizzato"
-void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
+void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion)
+{
   //  printf(" puntatore incriminato (%p) \n",fermion);
   SETINUSE((fermion));
 #pragma acc kernels present(fermion)
@@ -424,7 +457,13 @@ void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion){
         fermion->c2[i]=0;
     }
 }
-void multiple_combine_in1_minus_in2x_factor_back_into_in1( __restrict vec3_soa * const out, __restrict vec3_soa * const in, const int maxiter, __restrict const int * const flag, __restrict const double * const omegas) {
+void multiple_combine_in1_minus_in2x_factor_back_into_in1( 
+        __restrict vec3_soa * const out, 
+        __restrict const vec3_soa * const in, 
+        const int maxiter, 
+        __restrict const int * const flag, 
+        __restrict const double * const omegas)
+{
   int ia, ih;
   
 #pragma acc kernels present(in) present(out) copyin(omegas[0:maxiter]) copyin(flag[0:maxiter])
@@ -445,7 +484,14 @@ void multiple_combine_in1_minus_in2x_factor_back_into_in1( __restrict vec3_soa *
     } //ia
   } //acc kernels
 }
-void multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1( __restrict vec3_soa * const in1, int maxiter, __restrict const int * const flag, __restrict const double * const gammas, __restrict vec3_soa * const in2, __restrict const double * const zeta_iii ) {
+void multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1( 
+        __restrict vec3_soa * const in1,
+        int maxiter, 
+        __restrict const int * const flag, 
+        __restrict const double * const gammas, 
+        __restrict const vec3_soa * const in2, 
+        __restrict const double * const zeta_iii ) 
+{
 
   int ia, ih;
 
@@ -479,7 +525,11 @@ void multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1( __restrict ve
   } //acc data
 
 }
-void combine_in1_x_fact1_minus_in2_back_into_in2( __restrict vec3_soa * const in1, double fact1, __restrict vec3_soa * const in2 ) {
+void combine_in1_x_fact1_minus_in2_back_into_in2( 
+        __restrict const vec3_soa * const in1, 
+        double fact1, 
+        __restrict vec3_soa * const in2 )
+{
 
   int ih;
 
@@ -500,32 +550,23 @@ void combine_in1_x_fact1_minus_in2_back_into_in2( __restrict vec3_soa * const in
   } //acc data
 
 }
-void combine_in1_minus_in2_allxfact( __restrict vec3_soa * const in1, __restrict vec3_soa * const in2, double fact, __restrict vec3_soa * const out ) {
-
+void combine_in1_minus_in2_allxfact( 
+        __restrict const vec3_soa * const in1, 
+        __restrict const vec3_soa * const in2, 
+        double fact,
+        __restrict vec3_soa * const out )
+{
   int ih;
-
-
 #pragma acc kernels present(in1) present(in2) present(out) 
   {
-
-
 #pragma acc loop independent gang vector(512)
     for(ih=0; ih<sizeh; ih++) {
-
-
         out->c0[ih] = fact * (in1->c0[ih] - in2->c0[ih]);
         out->c1[ih] = fact * (in1->c1[ih] - in2->c1[ih]);
         out->c2[ih] = fact * (in1->c2[ih] - in2->c2[ih]);
-
     } //ih
   } //acc data
-
 }
-
-
-
-
-
 
 #endif
 

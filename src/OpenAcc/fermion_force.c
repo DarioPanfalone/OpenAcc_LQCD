@@ -178,17 +178,24 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
     }
 #ifdef STOUT_FERMIONS
 
-    for(int stout_level = act_params.stout_steps ; stout_level > 1 ; stout_level--){
-        if(verbosity_lv > 1) printf("\t\tSigma' to Sigma [lvl %d to lvl %d]\n",stout_level,stout_level-1);
+    for(int stout_level = act_params.stout_steps ; stout_level > 1 ; 
+            stout_level--){
+        if(verbosity_lv > 1) 
+            printf("\t\tSigma' to Sigma [lvl %d to lvl %d]\n",
+                    stout_level,stout_level-1);
         conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
-        compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,conf_to_use, taux_conf_acc );
+        compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
+                aux_th,aux_ta,conf_to_use, taux_conf_acc );
     }
-    if(verbosity_lv > 1)  printf("\t\tSigma' to Sigma [lvl 1 to lvl 0]\n");
-    compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux, aux_th,aux_ta,tconf_acc, taux_conf_acc );
+    if(verbosity_lv > 1) 
+        printf("\t\tSigma' to Sigma [lvl 1 to lvl 0]\n");
+    compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
+            aux_th,aux_ta,tconf_acc, taux_conf_acc );
 
 #endif
 
-    multiply_conf_times_force_and_take_ta_nophase(tconf_acc, gl3_aux,tipdot_acc);
+    multiply_conf_times_force_and_take_ta_nophase(tconf_acc, gl3_aux,
+            tipdot_acc);
 
 
 

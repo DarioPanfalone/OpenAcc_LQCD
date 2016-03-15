@@ -19,7 +19,7 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang //gang(nd3)
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
     for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
@@ -81,8 +81,10 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(
 }// closes routine
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
 
-void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * const u,
-							  __restrict su3_soa * const loc_stap ){
+void calc_loc_staples_removing_stag_phases_nnptrick_all(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap )
+{
     SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
@@ -99,7 +101,7 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * c
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
  #pragma acc loop independent gang 
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector(4)
     for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4) 
@@ -161,8 +163,10 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all(  __restrict su3_soa * c
   }  // d3
 
 }// closes routine
-void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even(  __restrict su3_soa * const u,
-								    __restrict su3_soa * const loc_stap ){
+void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even( 
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap )
+{
   SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
@@ -179,7 +183,7 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even(  __restrict s
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
  #pragma acc loop independent gang 
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector(4)
     for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4) 
@@ -242,7 +246,9 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_even(  __restrict s
 
 }// closes routine
 void calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd(
-        __restrict su3_soa * const u,__restrict su3_soa * const loc_stap ){
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap )
+{
   SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
@@ -259,7 +265,7 @@ void calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd(
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
  #pragma acc loop independent gang 
-  for(d3=0; d3<nd3; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector(4)
     for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector(4) 
