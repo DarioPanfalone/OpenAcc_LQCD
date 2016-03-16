@@ -85,6 +85,9 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot); 
 #ifdef DEBUG_MD
     if(!already_printed_debug)
+       print_thmat_soa(tmomenta,"tmomenta_0");
+
+    if(!already_printed_debug)
         print_tamat_soa(tipdot,"tipdot_gauge_0");
 #endif
 
