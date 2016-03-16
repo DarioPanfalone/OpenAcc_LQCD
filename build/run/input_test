@@ -26,7 +26,7 @@ BackgroundFieldParameters
 MDParameters
 NmdSteps	    1
 GaugeSubSteps   1
-TrajLength	    0.01
+TrajLength	    0.05
 residue_md      1e-6
 
 
@@ -55,10 +55,10 @@ DeviceSettings
 device_choice           0
 
 Geometry
-nx                      8  
-ny	                    8 
-nz	                    8 
-nt	                    8 
+nx                      4  
+ny	                    4 
+nz	                    4 
+nt	                    4 
 xmap	                1 
 ymap	                3   
 zmap	                2   

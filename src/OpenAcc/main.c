@@ -126,9 +126,9 @@ int main(int argc, char* argv[]){
     // start from saved conf
 
 #ifdef NORANDOM
-    if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter),mkwch_pars.use_ildg){
+    if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter,mkwch_pars.use_ildg)){
         // READS ALSO THE conf_id_iter
-        printf("Stored Gauge Conf conf_norndtest Read : OK\n",mkwch_pars.save_conf_name);
+        printf("Stored Gauge Conf conf_norndtest Read : OK\n");
     }
     else{
         // cold start
