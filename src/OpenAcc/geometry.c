@@ -2,14 +2,16 @@
 #define GEOMETRY_C_
 
 #include "./geometry.h"
-
+#include "stdio.h"
 
 geom_parameters geom_par;
 
 void compute_nnp_and_nnm_openacc(void){
   int d0, d1, d2, d3,parity;
 
-  for(d3=1; d3<nd3-D3_HALO; d3++) {
+  FILE * nnfile = fopen("nnfile","w");
+
+  for(d3=0; d3<nd3; d3++) {
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
         for(d0=0; d0 < nd0; d0++) {
@@ -45,6 +47,8 @@ void compute_nnp_and_nnm_openacc(void){
           nnp_openacc[idxh][2][parity] = snum_acc(d0,d1,d2p,d3);
           nnp_openacc[idxh][3][parity] = snum_acc(d0,d1,d2,d3p);
 
+
+
           if(NRANKS_D0 != 1){
               if(d0m == nd0-1 )  nnm_openacc[idxh][0][parity] = -1; 
               if(d0p == 0 )  nnp_openacc[idxh][0][parity] = -1;
@@ -61,10 +65,23 @@ void compute_nnp_and_nnm_openacc(void){
               if(d3m == nd3-1 )  nnm_openacc[idxh][3][parity] = -1;
               if(d3p == 0 )  nnp_openacc[idxh][3][parity] = -1;
           }  
+
+          fprintf(nnfile,"%d %d %d %d    %d    %d   ",d0,d1,d2,d3,parity,idxh);
+          int dir;
+          for(dir = 0; dir < 4 ;dir ++)
+              fprintf(nnfile," %d ", nnm_openacc[idxh][dir][parity]);
+          for(dir = 0; dir < 4 ;dir ++)
+              fprintf(nnfile," %d ", nnm_openacc[idxh][dir][parity]);
+          fprintf(nnfile,"\n");
+
+
+
         }
       }
     }
   }
+
+  fclose(nnfile);
 }
 
 void set_geom_glv(geom_parameters* gp){

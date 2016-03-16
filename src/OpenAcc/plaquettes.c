@@ -25,7 +25,7 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(
 #pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
       for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
-	for(d0=0; d0 < nd0; d0++) {
+          for(d0=0; d0 < nd0; d0++) {
 	  int idxh,idxpmu,idxpnu;
 	  int parity;
 	  int dir_muA,dir_nuB;
@@ -73,6 +73,7 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(
     res_R_p += creal(tr_local_plaqs[1].c[t]);
   }
 
+  printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);
   return res_R_p;
 }// closes routine
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples

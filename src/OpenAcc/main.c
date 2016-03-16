@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
     init_multidev1D(&devinfo);
 #else
     devinfo.myrank = 0;
-    devinfo.myrank = 1;
+    devinfo.nranks = 1;
 #endif
 
 
