@@ -21,7 +21,9 @@
 
 
 #pragma acc routine seq
-static inline double det_i_times_QA_soa( __restrict tamat_soa * const QA,const int idx){
+static inline double det_i_times_QA_soa( __restrict const tamat_soa * const QA,
+        const int idx)
+{
 
     double ic22 = -QA->ic00[idx]-QA->ic11[idx] ;
 
@@ -33,7 +35,9 @@ static inline double det_i_times_QA_soa( __restrict tamat_soa * const QA,const i
 
 }
 #pragma acc routine seq
-static inline double Tr_i_times_QA_sq_soa( __restrict tamat_soa * const QA,const int idx){
+static inline double Tr_i_times_QA_sq_soa( __restrict const tamat_soa * const QA,
+        const int idx)
+{
   // computes Tr( (i*QA)^2 )
     return 2 * creal( QA->ic00[idx] * QA->ic00[idx] +
 		      QA->ic11[idx] * QA->ic11[idx] +
@@ -44,8 +48,10 @@ static inline double Tr_i_times_QA_sq_soa( __restrict tamat_soa * const QA,const
 }
 
 #pragma acc routine seq
-static inline void CH_exponential_antihermitian_soa_nissalike(__restrict su3_soa * const exp_out,
-							      __restrict tamat_soa * const QA,const int idx){
+static inline void CH_exponential_antihermitian_soa_nissalike(
+        __restrict su3_soa * const exp_out,
+        __restrict tamat_soa * const QA,const int idx)
+{
   // exp( - QA) , where Q=i*QA ==> exp(-QA) = exp(i*Q)
   //        ~~>  QA is anti-hermitian
   //        ~~>  hence Q=i*QA is hermitian

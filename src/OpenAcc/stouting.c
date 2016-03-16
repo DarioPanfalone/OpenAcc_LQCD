@@ -16,11 +16,13 @@
 #ifdef MULTIDEV
 #include "../Mpi/communications.h"
 #endif 
+#include "math.h"
+#include "../Include/common_defines.h"
 
 extern int verbosity_lv;
 
 #ifdef STOUT_FERMIONS
-void stout_wrapper(__restrict su3_soa * const tconf_acc,
+void stout_wrapper(__restrict const su3_soa * const tconf_acc,
         __restrict su3_soa * tstout_conf_acc_arr)
 {
 
@@ -45,7 +47,8 @@ void stout_isotropic(
         __restrict su3_soa * const uprime,          // --> output conf [stouted]
         __restrict su3_soa * const local_staples,   // --> parking variable
         __restrict su3_soa * const auxiliary,       // --> parking variable
-        __restrict tamat_soa * const tipdot){       // --> parking variable
+        __restrict tamat_soa * const tipdot)       // --> parking variable
+{
 
     SETREQUESTED(uprime);
     SETREQUESTED(local_staples);
@@ -78,10 +81,11 @@ void stout_isotropic(
 
 
 #pragma acc routine seq
-static inline void conf_left_exp_multiply_to_su3_soa(__restrict su3_soa * const cnf,
-        const int idx,
+static inline void conf_left_exp_multiply_to_su3_soa(
+        __restrict const su3_soa * const cnf, const int idx,
         __restrict su3_soa * const  EXP,
-        __restrict su3_soa * const cnf_out){
+        __restrict su3_soa * const cnf_out)
+{
 
     single_su3 AUX;
     //Multiply: U_new = EXP * U_old
@@ -108,10 +112,11 @@ static inline void conf_left_exp_multiply_to_su3_soa(__restrict su3_soa * const 
 }
 
 
-void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
+void exp_minus_QA_times_conf(__restrict const su3_soa * const tu,
         __restrict tamat_soa * const QA,
         __restrict su3_soa * const tu_out,
-        __restrict su3_soa * const exp_aux){
+        __restrict su3_soa * const exp_aux)
+{
 
     SETINUSE(exp_aux);
     SETINUSE(tu_out);
@@ -152,12 +157,12 @@ void exp_minus_QA_times_conf(__restrict su3_soa * const tu,
 //calcolo di lambda
 #pragma acc routine seq
 static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lambda --> ouput
-        __restrict su3_soa   * const SP, // Sigma primo --> input
-        __restrict su3_soa   * const U,    // la configurazione di gauge --> input
-        __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input
+        __restrict const su3_soa   * const SP, // Sigma primo --> input
+        __restrict const su3_soa   * const U,    // la configurazione di gauge --> input
+        __restrict const tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input
         __restrict su3_soa   * const TMP,  // variabile di parcheggio
-        int idx
-        ){
+        int idx )
+{
 
     double c0 = det_i_times_QA_soa(QA,idx);
     double c1  = 0.5 * Tr_i_times_QA_sq_soa(QA,idx);
@@ -505,9 +510,9 @@ static inline void compute_loc_Lambda(__restrict thmat_soa * const L, // la Lamb
 
 
 void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
-        __restrict su3_soa   * const SP, // Sigma primo --> input (forza fermionica del passo precedente)
-        __restrict su3_soa   * const U,    // la configurazione di gauge --> input
-        __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
+        __restrict const su3_soa   * const SP, // Sigma primo --> input (forza fermionica del passo precedente)
+        __restrict const su3_soa   * const U,    // la configurazione di gauge --> input
+        __restrict const tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
         __restrict su3_soa   * const TMP  // variabile di parcheggio
         ){
     SETINUSE(L);
@@ -540,10 +545,11 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
 
 
 #pragma acc routine seq
-static inline void compute_sigma_local_PEZZO1(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
-        __restrict su3_soa   * const U,  // la configurazione di gauge --> input
+static inline void compute_sigma_local_PEZZO1(
+        __restrict const thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
+        __restrict const su3_soa   * const U,  // la configurazione di gauge --> input
         __restrict su3_soa   * const SP,  // entra Sigma primo (input: fermforce del passo precedente) ED esce Sigma --> sia input che ouput
-        __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
+        __restrict const tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
         __restrict su3_soa   * const TMP, // variabile di parcheggio
         int idx )
 {
@@ -1153,10 +1159,10 @@ static inline void LEFT_miAFBC_absent_stag_phases(
 }
 
 
-void compute_sigma(__restrict thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
-        __restrict su3_soa   * const U,  // la configurazione di gauge --> input
+void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
+        __restrict const su3_soa   * const U,  // la configurazione di gauge --> input
         __restrict su3_soa   * const S,  // entra Sigma primo (input: fermforce del passo precedente) ED esce Sigma --> sia input che ouput
-        __restrict tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
+        __restrict const tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
         __restrict su3_soa   * const TMP // variabile di parcheggio
         )
 {

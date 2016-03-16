@@ -28,8 +28,6 @@
 #include "../OpenAcc/fermion_matrix.h"
 #include "../OpenAcc/find_min_max.c"
 #include "../OpenAcc/find_min_max.h"
-#include "../OpenAcc/float_double_conv.c"
-#include "../OpenAcc/float_double_conv.h"
 #include "../OpenAcc/geometry.c"
 #include "../OpenAcc/geometry.h"
 #include "../OpenAcc/inverter_full.c"

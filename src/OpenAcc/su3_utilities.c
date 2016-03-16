@@ -28,7 +28,7 @@ void unitarize_conf( __restrict su3_soa * const u){
 #pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
                 for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
-                    for(d0=0; d0 < nd0; d0++) {
+                    for(d0h=0; d0h < nd0h; d0h++) {
 
                         // I take the size to be even, but it's the same
                         int  d0 = 2*d0h + ((d1+d2+d3) & 0x1);

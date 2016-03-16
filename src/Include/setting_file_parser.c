@@ -665,7 +665,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                         filelines,startline,endline);
                 break; 
             case PMG_DEVICE     : 
-                check = read_device_setting(&dev_settings,
+                check = read_device_setting(&devinfo,
                         filelines,startline,endline);
                 break; 
             case PMG_GEOMETRY   : 

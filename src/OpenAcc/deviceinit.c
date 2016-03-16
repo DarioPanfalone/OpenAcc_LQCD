@@ -3,8 +3,6 @@
 
 #include "./deviceinit.h"
 
-device_param dev_settings;
-
 #ifndef __GNUC__  // assuming then PGI is used for compilation on accelerator
        // at the moment only nvidia gpus are supported.
 

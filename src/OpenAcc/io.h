@@ -8,6 +8,8 @@
 #include "../Mpi/multidev.h"
 #endif 
 
+#include "../Mpi/communications.h"
+
 
 
 void print_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int conf_id_iter);
