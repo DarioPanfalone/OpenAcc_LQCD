@@ -110,8 +110,8 @@ int main(int argc, char* argv[]){
     
 
 #ifdef NORANDOM
-    if(!read_conf(conf_acc,"conf_norndtest",&conf_id_iter),mkwch_pars.use_ildg) // READS ALSO THE conf_id_iter
-        printf("Stored Gauge Conf conf_norndtest Read : OK \n", mkwch_pars.save_conf_name);
+    if(!read_conf(conf_acc,"conf_norndtest",&conf_id_iter,mkwch_pars.use_ildg)) // READS ALSO THE conf_id_iter
+        printf("Stored Gauge Conf conf_norndtest Read : OK \n");
 #else
     if(!read_conf(conf_acc,mkwch_pars.save_conf_name,&conf_id_iter,mkwch_pars.use_ildg )) // READS ALSO THE conf_id_iter
        printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);

@@ -42,6 +42,7 @@ double deltas_Omelyan[7];
 
 
 #ifdef DEBUG_MD
+#include "../DbgTools/dbgtools.h"
 int already_printed_debug = 0;
 #endif
 
