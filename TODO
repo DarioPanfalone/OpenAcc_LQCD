@@ -4,6 +4,7 @@ Things to do:
 1. Compilation with GCC, no multidev: DONE
 2. Correct execution with GCC, no multidev
    (check-bugfix)  
+     TEST PURE GAUGE (no fermions): Fail!
 3. Compilation with PGI, no multidev
 4. Correct execution with PGI, no multidev
    (check-bugfix)  
