@@ -1,4 +1,21 @@
 
+
+Things to do:
+1. Compilation with GCC, no multidev: DONE
+2. Correct execution with GCC, no multidev
+   (check-bugfix)  
+3. Compilation with PGI, no multidev
+4. Correct execution with PGI, no multidev
+   (check-bugfix)  
+5. Compilation with MPICC, multidev (2 ranks, minilattice)
+6. Correct execution with MPICC (2 ranks, minilattice)
+   (check-bugfix)  
+
+
+
+
+NO ASYNC WORK DONE YET
+----------------------------------------------------------------
 - phases in the multinode setup  (DONE, TO CHECK)
 - Kernels that must be restricted to local lattice (conf generation)
   fermionic_utilities (basic linear algebra):
