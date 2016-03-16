@@ -43,6 +43,11 @@ md_param md_parameters;
 
 double deltas_Omelyan[7];
 
+
+#ifdef DEBUG_MD
+int already_printed_debug = 0;
+#endif
+
 void initialize_md_global_variables(md_param md_params )
 {
     int no_md = md_params.no_md;// number of MD steps
@@ -80,8 +85,21 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 
 
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot); 
+#ifdef DEBUG_MD
+    if(!already_printed_debug)
+        print_tamat_soa(tipdot,"tipdot_gauge_0");
+#endif
 
     mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
+#ifdef DEBUG_MD
+    if(!already_printed_debug)
+       print_thmat_soa(tmomenta,"tmomenta_1");
+    already_printed_debug = 1;
+#endif
+
+
+
+
     for(md=1; md<md_parameters.gauge_scale; md++){
         if(verbosity_lv > 2) printf("Gauge step %d of %d...\n",md,md_parameters.gauge_scale);
         // Step for the Q
@@ -121,9 +139,13 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 #ifdef MULTIDEVICE
     communicate_su3_borders(tconf_acc);  
 #endif
+
+
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+
+
 
     // calc_ipdot_gauge();
     // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
