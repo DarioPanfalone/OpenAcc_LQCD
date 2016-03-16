@@ -77,8 +77,18 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 
 
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot); 
+#ifdef DEBUG_MD
+    print_tamat_soa(tipdot,"tipdot_gauge_0");
+#endif
 
     mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
+#ifdef DEBUG_MD
+    print_thmat_soa(tmomenta,"tmomenta_1");
+#endif
+
+
+
+
     for(md=1; md<md_parameters.gauge_scale; md++){
         if(verbosity_lv > 2) printf("Gauge step %d of %d...\n",md,md_parameters.gauge_scale);
         // Step for the Q
@@ -108,9 +118,13 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     // Q' = exp[dt/2 *i P] Q
     // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
     mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
+
+
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+
+
 
     // calc_ipdot_gauge();
     // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
