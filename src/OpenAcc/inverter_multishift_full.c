@@ -15,7 +15,6 @@ extern int verbosity_lv;
 int multishift_invert(__restrict su3_soa * const u,
 		      __restrict ferm_param * pars,
 		      RationalApprox * approx,
-		      __restrict double_soa * backfield,
 		      __restrict vec3_soa * out, // multi-fermion [nshifts]
 		      __restrict vec3_soa * const in, // single ferm
 		      double residuo,
@@ -94,7 +93,7 @@ int multishift_invert(__restrict su3_soa * const u,
         maxiter = iter+1;
       }
     }
-    if (verbosity_lv > 3){
+    if (verbosity_lv > 0){
       printf("STARTING CG-M:\nCG\tR");
       for(iter=0; iter<(approx->approx_order); iter++)
           printf("\t%d",iter); printf("\n");
@@ -103,8 +102,8 @@ int multishift_invert(__restrict su3_soa * const u,
       cg++;
 
       // s=(M^dagM)p, alhpa=(p,s)=(p,Ap)
-//fermion_matrix_multiplication(su3_soa *u,vec3_soa *out,vec3_soa *in,vec3_soa *temp1, ferm_param *pars,double_soa * backfield)
-      fermion_matrix_multiplication(u,loc_s,loc_p,loc_h,pars,backfield);
+//fermion_matrix_multiplication(su3_soa *u,vec3_soa *out,vec3_soa *in,vec3_soa *temp1, ferm_param *pars)
+      fermion_matrix_multiplication(u,loc_s,loc_p,loc_h,pars);
       
       
       
@@ -162,8 +161,14 @@ int multishift_invert(__restrict su3_soa * const u,
       }
       delta=lambda;
 
-
-      if (verbosity_lv > 3 && cg%10==0){
+      int print_condition = 0 ;
+      if (verbosity_lv == 1  ) print_condition = (cg%500 == 0);
+      if (verbosity_lv == 2  ) print_condition = (cg%200 == 0);
+      if (verbosity_lv == 3  ) print_condition = (cg%100 == 0);
+      if (verbosity_lv == 4  ) print_condition = (cg%50 == 0);
+      if (verbosity_lv > 4  ) print_condition = (cg%10 == 0);
+      
+      if(print_condition){
 
       printf("%d\t%1.1e",cg, sqrt(lambda));
       for(iter=0; iter<(approx->approx_order); iter++){
@@ -182,7 +187,7 @@ int multishift_invert(__restrict su3_soa * const u,
 //      printf("\t CG count = %i \n",cg);
     
 
-  if(verbosity_lv > 1) printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
+  if(verbosity_lv > 0) printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
   // test 
 
   if(verbosity_lv > 2){
@@ -191,9 +196,9 @@ int multishift_invert(__restrict su3_soa * const u,
 
     for(iter=0; iter<approx->approx_order; iter++){
       assign_in_to_out(&out[iter],loc_p);
-      fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,backfield,approx->RA_b[iter]);
+      fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
-      double  giustoono=l2norm2_global(loc_h);
+      double  giustoono=l2norm2_global(loc_h)/source_norm;
       printf("\t%1.1e",sqrt(giustoono)/residuo);
     }
     printf("\n");

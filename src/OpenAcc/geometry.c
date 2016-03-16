@@ -6,52 +6,66 @@
 
 geom_parameters geom_par;
 
-
 void compute_nnp_and_nnm_openacc(void){
-  int x, y, z, t,parity;
-  for(t=0; t<nt; t++) {
-    for(z=0; z<nz; z++) {
-      for(y=0; y<ny; y++) {
-        for(x=0; x < nx; x++) {
-          int  xm, ym, zm, tm, xp, yp, zp, tp, idxh;
-          idxh = snum_acc(x,y,z,t);
-          parity = (x+y+z+t) % 2;
+  int d0, d1, d2, d3,parity;
+  for(d3=0; d3<nd3; d3++) {
+    for(d2=0; d2<nd2; d2++) {
+      for(d1=0; d1<nd1; d1++) {
+        for(d0=0; d0 < nd0; d0++) {
+          int  d0m, d1m, d2m, d3m, d0p, d1p, d2p, d3p, idxh;
+          idxh = snum_acc(d0,d1,d2,d3);
+          parity = (d0+d1+d2+d3) % 2;
 
-          xm = x - 1;
-          xm = xm + (((xm >> 31) & 0x1) * nx);
-          ym = y - 1;
-          ym = ym + (((ym >> 31) & 0x1) * ny);
-          zm = z - 1;
-          zm = zm + (((zm >> 31) & 0x1) * nz);
-          tm = t - 1;
-          tm = tm + (((tm >> 31) & 0x1) * nt);
+          d0m = d0 - 1;
+          d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
+          d1m = d1 - 1;
+          d1m = d1m + (((d1m >> 31) & 0x1) * nd1);
+          d2m = d2 - 1;
+          d2m = d2m + (((d2m >> 31) & 0x1) * nd2);
+          d3m = d3 - 1;
+          d3m = d3m + (((d3m >> 31) & 0x1) * nd3);
 
-          nnm_openacc[idxh][0][parity] = snum_acc(xm,y,z,t);
-          nnm_openacc[idxh][1][parity] = snum_acc(x,ym,z,t);
-          nnm_openacc[idxh][2][parity] = snum_acc(x,y,zm,t);
-          nnm_openacc[idxh][3][parity] = snum_acc(x,y,z,tm);
+          nnm_openacc[idxh][0][parity] = snum_acc(d0m,d1,d2,d3);
+          nnm_openacc[idxh][1][parity] = snum_acc(d0,d1m,d2,d3);
+          nnm_openacc[idxh][2][parity] = snum_acc(d0,d1,d2m,d3);
+          nnm_openacc[idxh][3][parity] = snum_acc(d0,d1,d2,d3m);
 
-          xp = x + 1;
-          xp *= (((xp-nx) >> 31) & 0x1);
-          yp = y + 1;
-          yp *= (((yp-ny) >> 31) & 0x1);
-          zp = z + 1;
-          zp *= (((zp-nz) >> 31) & 0x1);
-          tp = t + 1;
-          tp *= (((tp-nt) >> 31) & 0x1);
+          d0p = d0 + 1;
+          d0p *= (((d0p-nd0) >> 31) & 0x1);
+          d1p = d1 + 1;
+          d1p *= (((d1p-nd1) >> 31) & 0x1);
+          d2p = d2 + 1;
+          d2p *= (((d2p-nd2) >> 31) & 0x1);
+          d3p = d3 + 1;
+          d3p *= (((d3p-nd3) >> 31) & 0x1);
 
-          nnp_openacc[idxh][0][parity] = snum_acc(xp,y,z,t);
-          nnp_openacc[idxh][1][parity] = snum_acc(x,yp,z,t);
-          nnp_openacc[idxh][2][parity] = snum_acc(x,y,zp,t);
-          nnp_openacc[idxh][3][parity] = snum_acc(x,y,z,tp);
+          nnp_openacc[idxh][0][parity] = snum_acc(d0p,d1,d2,d3);
+          nnp_openacc[idxh][1][parity] = snum_acc(d0,d1p,d2,d3);
+          nnp_openacc[idxh][2][parity] = snum_acc(d0,d1,d2p,d3);
+          nnp_openacc[idxh][3][parity] = snum_acc(d0,d1,d2,d3p);
 
         }
       }
     }
   }
-
 }
 
+void set_geom_glv(geom_parameters* gp){
+
+
+    gp->nd[0]= nd0; gp->nd[1] = nd1; gp->nd[2] = nd2; gp->nd[3] = nd3;
+
+    gp->vol3s[0] = vol4/nd0; gp->vol3s[1] = vol4/nd1;
+    gp->vol3s[2] = vol4/nd2; gp->vol3s[3] = vol4/nd3;
+
+    gp->xyztmap[0] = gp->xmap;  gp->xyztmap[1] = gp->ymap;
+    gp->xyztmap[2] = gp->zmap;  gp->xyztmap[3] = gp->tmap;
+
+    gp->d0123map[gp->xmap] = 0;   gp->d0123map[gp->ymap] = 1;
+    gp->d0123map[gp->zmap] = 2;   gp->d0123map[gp->tmap] = 3;
+
+
+}
 
 
 #endif

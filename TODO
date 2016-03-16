@@ -1,0 +1,7 @@
+
+- Check function 
+su3_measurements.c:calc_momenta_action()
+Is it really necessary to use two cycles?
+
+
+ 

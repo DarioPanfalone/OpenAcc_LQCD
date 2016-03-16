@@ -165,7 +165,6 @@ void cool_conf(__restrict su3_soa   * const U,
 	       __restrict su3_soa   * const TMP){ // parcheggio per le staples
 
   set_su3_soa_to_zero(TMP);
-  mult_conf_times_stag_phases(U);
 
   calc_loc_staples_removing_stag_phases_nnptrick_all_only_even(U,TMP);
   compute_cooled_even_links(U,TMP);
@@ -173,7 +172,6 @@ void cool_conf(__restrict su3_soa   * const U,
   compute_cooled_odd_links(U,TMP);
   unitarize_conf(U);
 
-  mult_conf_times_stag_phases(U);
 }
 
 

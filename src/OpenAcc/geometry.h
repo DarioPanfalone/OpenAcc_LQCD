@@ -7,29 +7,12 @@
  #define __restrict
 #endif
 
-// lattice dimensions
-#define nd0 16 
-#define nd1 16  
-#define nd2 16  
-#define nd3 16  
+#include "../../build/lattice_dimensions.h"
 
 #define nd0h (nd0 >> 1) // nx/2
 #define nd1h (nd1 >> 1)
 #define nd2h (nd2 >> 1)
 #define nd3h (nd3 >> 1)
-
-// for legacy - to remove after refactoring is complete
-#define nx nd0    
-#define ny nd1
-#define nz nd2
-#define nt nd3
-
-#define nxh (nx >> 1) // nx/2
-#define nyh (ny >> 1)
-#define nzh (nz >> 1)
-#define nth (nt >> 1)
-
-
 
 #define sizehh nd0*nd1*nd2*nd3/2 
 
@@ -52,7 +35,13 @@ typedef struct geom_parameters_t{
     // map of physical directions onto logical directions
     int xmap,ymap,zmap,tmap;// tmap is the "antiperiodic direction" for 
                             // fermions
-    
+
+    // The following will be set by set_geom_glv()
+    int nd[4];
+    int vol3s[4];
+    int xyztmap[4];
+    int d0123map[4];
+
 
 } geom_parameters;
 
@@ -75,7 +64,7 @@ int nnp_openacc[sizeh][4][2];
 int nnm_openacc[sizeh][4][2];
 
 
-
+void set_geom_glv(geom_parameters* gp);
 void compute_nnp_and_nnm_openacc(void);
 
 #endif

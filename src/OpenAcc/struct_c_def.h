@@ -33,7 +33,7 @@ typedef struct vec3_t {
   d_complex c2;
 } vec3;
 typedef struct su3_soa_t {
-  int status;  
+  int status;
   vec3_soa r0;
   vec3_soa r1;
   vec3_soa r2;
@@ -54,7 +54,6 @@ typedef struct thmat_soa_t {
   double rc00[sizeh];   // Re(comp_00)
   double rc11[sizeh];   // Re(comp_11)
 } thmat_soa;
-
 
 
 #endif

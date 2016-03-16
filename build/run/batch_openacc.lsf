@@ -1,7 +1,21 @@
 #!/bin/bash
 
+#BSUB -J T24MU24D3
+#BSUB -o out.%J
+#BSUB -e err.%J
+#BSUB -q gpuday
+#BSUB -m cudawn7
+
+cd /home/users/mesiti/OPENACCREPO/build/run
+
 module load pgi/15.9 cuda/7.0
 export PGI_ACC_BUFFERSIZE=3000000000
 
-cd /home/users/mesiti/BENCHVSNISSA/build/run
-./main input_openacc 
+./main input | tee out_job_last
+
+sleep 100
+
+if [ $? == 0 ] && [ ! -f stop ]
+then
+   bsub < /home/users/mesiti/OPENACCREPO/build/run/batch_openacc.lsf
+fi

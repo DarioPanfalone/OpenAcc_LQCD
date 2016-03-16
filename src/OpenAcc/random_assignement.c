@@ -1,19 +1,5 @@
 #ifndef RANDOM_ASSIGNEMENT_C_
 #define RANDOM_ASSIGNEMENT_C_
-// random number generator in (0,1)
-double casuale(void);
-
-/*
-// random number initialization
-extern "C" {
-  void initrand(unsigned long s);
-}
-
-// 4 parameters for random SU(2) matrix
-extern "C" {
-  void su2_rand(double *pp);
-}
-*/
 
 #include "./geometry.h"
 #include "./su3_utilities.h"
@@ -21,6 +7,7 @@ extern "C" {
 #include "./random_assignement.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./single_types.h"
+#include "../Rand/random.h"
 
 #define acc_twopi 2*3.14159265358979323846
 
@@ -164,13 +151,14 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom8){
 // iterations of random assignements over all the 8 components
 void generate_Conf_cold(__restrict su3_soa * const conf,double factor){
   SETINUSE(conf);
+   printf("\t Generating random cold configuration with eps = %f .\n", factor);
   for(int mu=0; mu<8; mu++)
       for(int idx=0;idx<sizeh;idx++){
          single_su3 aux;
          generate_random_su3(&aux,factor);
          single_gl3_into_su3_soa(&conf[mu],idx,&aux);
+
   }
-  mult_conf_times_stag_phases_nodev(conf);
 }
 
 

@@ -25,7 +25,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			       __restrict su3_soa * tstout_conf_acc_arr,// parking
 			       __restrict su3_soa * gl3_aux, // gl(3) parking
 #endif
-			       __restrict double_soa * backfield,
 			       __restrict tamat_soa  * tipdot_acc,
 			       __restrict ferm_param * tfermion_parameters,// [nflavs] 
 			       int tNDiffFlavs,

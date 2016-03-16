@@ -1,0 +1,546 @@
+
+\chapter{Guide to the code}
+
+\section{Directory content}
+
+\begin{itemize}
+    \item \texttt{src}: the code.
+    \item tools: various utilities, for example to generate the rational
+        approximations and test them (at present the only thing, but this
+        folder could contain tools to convert configurations from a format to
+        another and things like that), 
+    \item scripts: basically, collections of commands that you would have to
+        type too many times.
+    \item \verb|saved_approxs|: saved rational approximations, for your 
+        convenience. 
+    \item build: the place where build happens. 
+    \item build/run: the place where your program should run. Try to put here
+        all the things your program needs (rational approximation files,
+        start configurations, files where data should be appended and so on.)
+    \item docs: where documentation should be.
+\end{itemize}
+
+
+
+
+
+\section{Compilation}
+\label{compilation}
+If you don't have a makefile, or if you changed the dependence
+structure in your code, you have to create a makefile first. NO FEAR! The 
+\verb|generate_makefile.py| utility will do it for you.
+The \verb|generate_makefile.py| takes a number of arguments (in any order), 
+namely 
+\begin{itemize}
+    \item a list of files containing a \verb|main()| function that you want to 
+        compile
+    \item a \verb|compiler&linker| flag option.
+\end{itemize}
+For example:
+\begin{verbatim}
+[OPENACCREPO/build]~>./generate_makefile.py
+Please specify one compiler: either PGISLOW, GNU or PGI
+\end{verbatim}
+As you see, it will tell you to choose a compiler. Try, for example
+\begin{verbatim}
+[OPENACCREPO/build]~>./generate_makefile.py GNU ../src/OpenAcc/main.c \
+../src/Include/checkinput.c > makefile
+\end{verbatim}
+and a makefile will be generated, using gcc and -O3 optimization
+(for more informations, look into \verb|generate_makefile.py|). 
+
+Then just  type
+
+\begin{verbatim}
+make main
+\end{verbatim}
+Or, if you want to make all necessary things:
+\begin{verbatim}
+make all
+\end{verbatim}
+this will \emph{make} all the ``main'' files you passed to 
+\verb|generate_makefile.py|, plus \verb|rgen|, the executable needed to 
+generate the files of the rational approximations. 
+
+\subsection{Remarks} 
+You may need to do this on the right machine, with the right modules.
+For example, on the Pisa localui3, if you use the PGI compiler,
+you have to type
+\begin{verbatim}
+../scripts/vai_su_cudawn?.sh    # choose 6 or 7
+module load pgi                 # last version
+module load cuda                # last version
+\end{verbatim}
+
+
+
+
+FAQ \\
+Q: Why don't you just use autotools? \\
+A: Because I don't know how to use them! If you can do better, do
+it (please).
+
+
+
+\section{Run a simulation}
+
+If you want to run a program compiled with PGI, you have to set this 
+environment variable in advance.
+\begin{verbatim}
+export PGI_ACC_BUFFERSIZE= ???? #think
+\end{verbatim}
+where $????$ stands of a reasonable number, which is larger than the largest 
+data transfer you have to perform between the host and the device. The largest 
+single data transfer that can be performed is likely to be the gauge 
+configuration (it might be different though). \\
+{ \bf When running on GPUS, make sure you set \verb|PGI_ACC_BUFFERSIZE| to at 
+    least $576$ times the number of lattice sites. Unfortunately, the program WILL 
+    NOT TELL YOU when this variable is too small, but the results will be wrong. 
+So, be careful.}
+A small buffer size will make your program fail (\emph{possibly silently}) 
+but a too big one will make your program need too much memory, up to the point 
+where it will fail as well.
+
+
+Once you have set all you need, go into \verb|./run| and launch 
+\verb|./main <input_file>|. Here, the program 
+will  need some  files that you have to prepare in advance. Another section
+of this guide (\ref{filesneeded}) will tell you what you usually need to 
+prepare.
+
+Launching \verb|./main| without an input file won't be that useful,
+except for the fact that an \verb|input_template| will be generated.
+In this repo is also included a \verb|input_openacc| file that serves as
+a better template.
+You may also want to generate the \emph{rational approximations} in advance. If 
+the
+program does not find them, il will try to generate them by calling 
+the \verb|rgen| executable, which must be present in the \verb|run| directory.
+
+\subsection{Output files}
+At present you will have two output files other than standard output (plus an 
+optional one), one for the gauge observables and onr for fermionic observables 
+(the optional one contains action differences, force moduli and force 
+derivative moduli that can be used to tune the parameters in the molecular 
+dynamics). To the names of the files a simple hash of the relevant parameters 
+in the input files is appended (see \verb|src/Include/hash.c|).\\
+Notice that after input file reading during the generation of the 
+configurations this hash is displayed.\\
+If you want to calculate the hash on an input file, just compile [using make, 
+see section (\ref{compilation})] the file \verb|src/Include/checkinput.c|, and 
+use it on any input file. The input file reading routines will be called and 
+the hash will be displayed again.\\
+While this mechanism prevents writing on the same file in two 
+different simulations, unfortunately it is very hard to get back from the hash 
+(which is part of the file name) to the parameters of the simulation. This 
+would require writing a lot more information in the output file names.
+
+\section{Files you may need to run the program}
+\label{filesneeded}
+The kind of file needed are usually the rational approximations and
+the starting gauge configuration file (unless you want to start from
+a random configuration).
+
+\subsection{Input file}
+The format of the input file is pretty self explanatory. If you try
+to run \verb|./main| without arguments, it will produce a template, but
+you can also look to \verb|/buld/run/input_openacc| and take inspiration from 
+it. Various remarks on its content:
+
+\begin{itemize}
+    \item{Theory: \verb|ActionParameters|.}
+        Here you can set the value of $\beta$ and the number of stout steps used. You 
+        have to write here also the value of $\rho$, but unfortunately at present 
+        \verb|RHO| is used in a lot of places in the stouting routines in the code, and 
+        the most efficient thing seems to be keeping it as a \verb|#define|: for this 
+        reason, only a check is made to see if the value of $\rho$ you want is in 
+        the one in code.
+    \item{Theory: \verb|FlavourParameters|.}
+        If no groups of this kind are found, no fermions will be put in the theory.
+        Remark: only purely imaginary chemical potential is allowed (because of the 
+        sign problem). 
+    \item{Theory: \verb|BackgroundFieldParameters|.}
+        An electromagnetic field. Notice that while the magnetic field is real, only 
+        a purely imaginary electric field is allowed (because of another sign problem).
+    \item{Simulation: \verb|MDParameters|.} You can specify the number of steps, 
+        the number of gauge substeps for each step, the length of the trajectory, and 
+        the norm (not squared) of the target residue for matrix inversion during 
+        molecular dynamics evolution. While the other two parameters should be kept as 
+        low as possible to optimize simulation time, the length of the trajectory 
+        should be kept equal to $1$ but for bugfixing purposes.
+
+\item{Simulation: \verb|MontecarloParameters|.} A lot of parameters here: 
+\begin{itemize}
+\item \verb|NTraj| is the number of trajectories that have to be performed in 
+    this run.
+\item \verb|ThermNTraj| is the number of trajectories from the beginning of the 
+    \emph{history} for which the Metropolis test can be skipped. Notice that, 
+if 
+    the run starts from a configuration which has a nonzero \verb|conf_id| 
+    (because, for example, it comes from an earlier run) and if \verb|conf_id| 
+is 
+    larger than \verb|ThermNTraj|, the Metropolis test won't be skipped at all.
+\item \verb|StoreConfInterval|: configurations will be stored, with 
+    \verb|conf_id| in their name, once every this number of trajectories. The 
+name 
+    is will be the one specified by \verb|StoreConfName| with \verb|conf_id| 
+    attached to it. 
+\item \verb|SaveConfInterval|: the file specified in \verb|SaveConfName| will 
+    be saved once every this number of trajectories. For safety, set 1, for 
+speed, 
+    you can increase it.
+\item \verb|UseILDG|: if this flag is set to $1$, the gauge configuration file 
+    I/O will be done using ILDG format. The default value is 1, 
+so ILDG activated.
+\item Thing related to random initialization. \verb|RandGenStatusFilename| is 
+used to specify the name of a file where the random number generator status 
+will be stored. At present, it is optional and the default value is 
+\verb|rgstatus.bin|. If this file is not found, the variable \verb|Seed| is 
+instead use to initialise the random number generator. If \verb|Seed| is zero, 
+the function \verb|time()| will be used. Notice that after a successful run 
+the file will be generated, and will be read on the next run, while \verb|Seed| 
+will be ignored.
+\end{itemize}
+You can also set the \verb|Seed| of the simulation, 
+a parameter 
+\verb|EpsGen| defining the randomness in cold gauge conf generation, and the 
+verbosity level \verb|VerbosityLv|. 
+
+    \item{Measures: \verb|GaugeMeasuresSettings|.} Now, only the name of the 
+        file for the {\bf basic} gauge measures is specified (plaquette, 
+rectangle, real and imaginary part of the Polyakov loop). 
+        Notice that the name of the 
+output file will be dependent on the relevant parameters of the input file, 
+through a simple hash procedure (see \verb|src/Include/hash.c|.)
+        Of course there are, in principle, a lot of observables that 
+can be implemented. Now only the Polyakov loop and the topological charge are 
+implemented but the topological charge measurement (which involves cooling) is 
+not currently handled in the input file. 
+    \item{Measures: \verb|FermionMeasuresSettings|.}
+    Apart from the file name (which will be modified as in the gauge case),   
+you can set how many random vectors will be used for the measurement of various 
+fermionic quantities. For the chiral condensate and the quark number only one 
+inversion for random vector is needed. For the susceptiiblities, two inversions 
+per random vector are needed. The inversion in the chiral case and the inversion 
+in the quark number case have to be performed on different vectors. Notice: the 
+number of ``single inversions'' must be higher than the 
+number of ``double inversions''; this is because each ``double inversion'' 
+contains a ``single inversion'', so it is assumed that there are no reasons to 
+ask for \verb|SingleInvNVectors| to be smaller than 
+\verb|DoubleInvNVectorsChiral| or \verb|DoubleInvNVectorsQuarkNumber|.
+    
+    
+    \item{Device: \verb|DeviceSettings|.} At present, just the choice of the 
+        device in case of running on a GPU.
+    \item{\verb|Geometry|} Here the lattice dimensions are listed and the 
+        direction mapping too. Unfortunately, the lattice dimensions cannot be set in 
+        this way; as in the case of \verb|StoutRho| they are read just to check the 
+        intention of the user and suggest recompilation.  
+\end{itemize}
+
+
+\subsubsection{Remarks: verbosity level}
+Don't forget to set the \verb|VerbosityLv| variable to the desired result. 
+The value of it is assigned to the \verb|verbosity_lv| global variable.
+As a rule of thumb, '5' prints all, '1' prints nearly nothing. Note
+that the behaviour of \verb|VerbosityLv| is likely to change over time, no
+policy is yet decided. If you implement anything new, you can use this 
+feature to give informative messages.
+
+\subsubsection{Remarks: Optimization of parameters}
+
+There is an interplay between \verb|NmdSteps|, \verb|GaugeSubSteps|,
+\verb|residue_md| and the order of the rational approximations used in the 
+molecular dynamics. The goal of the optimization is to obtain a reasonable 
+value of the acceptance from the Metropolis test while using the lowest value 
+possible. For a discussion on this topic, see Sec.(\ref{tuning}).
+
+
+\subsubsection{Remarks: seemingly insignificant things that you have to take 
+care of}
+A parameter named \verb|ExpMaxEigenvalue| can be used in the 
+\verb|MontecarloParameters| group, and represent an estimate
+of the maximum eigenvalue of the Dirac Operator. Its default value is $5.5$.  
+This will influence  the choice of the rational approximations you need. 
+Notice that the highest eigenvalue of the fermion matrix is calculated during 
+the update and printed out if the right verbosity value is set. Notice that the 
+smaller \verb|StoutSteps is|, the larger this number is likely to be. 
+
+What you \emph{can't} set with the input file (now) and you have to
+recompile\footnote{ It is not a problem if you use gcc or pgi to compile for 
+    CPUs, but compiling with pgi for GPUs can require time, depending on the
+version of the compiler.}:
+\begin{itemize}
+    \item The type of gauge action. [triggers some long recompilation]
+    \item The stouting strength RHO 
+    \item The lattice dimensions in /src/OpenAcc/geometry.h [this will
+        practically trigger a full recompilation].
+\end{itemize}
+Of course, changing the input file format requires to recompile the functions 
+to read it, in \verb|/src/Include/init.c|.
+
+\subsection{ Rational Approximation files}
+Rational approximations are used to approximate powers (like $1/4$,
+$1/8$) of the Dirac Operator.
+You need $3$ rational approximations files for each quark flavour in the
+theory, one for the first inversion (to map the original
+gaussianly generated pseudofermion to one generated according to the
+right pdf), one used during the molecular dynamics evolution (with a
+lower order, so less precise, for speed), and a third one for the
+calculation of the final action for the metropolis test (more
+precise). At the time of writing, it is common that at least 2 flavour are 
+degenerate in mass, and this allows you to use the same set of rational
+approximations. For example, for a $N_f=2+1$ simulation, you need a total
+of 6 rational approximations.
+NOTICE: the name of the rational approximation file is related to
+its content, and can be generated using the function
+\verb|char* rational_approx_filename()| in
+\verb|src/RationalApprox/rationalapprox.h|.
+
+\subsubsection{ How to generate and check rational approximations}
+Use the tools in \verb|tools/|. A makefile should be there. 
+\begin{itemize}
+    \item '\verb|rgen|' (\verb|rationalapprox_calc.c|) 
+        the tool for generating them, it takes the tolerance (plus other
+        things) as input and will try to increase the number of poles until
+        the required level of acuracy is reached. It takes time to generate
+        high order approximations (~minutes). Notice that it needs arbitary
+        precision libraries to be compiled.
+    \item '\verb|rgenfo|' (\verb|rationalapprox_calc.c|) 
+        Same as rgen, but the order of the approximation is fixed.
+    \item '\verb|ratnormalizer|' (\verb|normalize_ratapprox.c|) 
+        takes a rational approx and
+        rescales it so that the upper limit of the validity range is 1.
+    \item '\verb|eval_ratapprox|' (\verb|eval_ratapprox.c|)
+        Are you sure that your rational approx works? With this tool, you
+        can check! \verb|bc -l| is your friend too.
+\end{itemize}
+
+\subsection{Gauge configuration files}
+For the format of the gauge configuration files, look in 
+\verb|src/OpenAcc/io.c: print_su3_soa() - read_su3_soa()| or similar.
+Notice there are two possible formats for the gauge configuration files: the 
+ASCII format, and the ILDG format. The first one is simple and is useful for 
+simplicity. The ILDG file format is a standard format used in Lattice QCD, 
+where the data is stored in binary format (notice: big endian).  
+The read and/or write of the initial/final gauge configuration file
+is usually done in \verb|/src/OpenAcc/main.c|.
+
+
+\section{Debug Tools}
+Given the intended usage of debug tools, the user/developer should be always 
+wary of them, and check that they work as he would expect: debug tools are not 
+tested as extensively as the production code. None the less, it seems pretty
+reasonable to add some work that has been done on this tools in the released 
+code.
+\subsection{ NORANDOM Mode}
+If you need your run to be reproducible for a whole molecular dynamics 
+trajectory and want the random number generation not used, use 
+\verb|#define NORANDOM|. It may also be useful to shorten the length of the 
+trajectory (to improve acceptance).
+At present random number generation is used in:
+\begin{itemize}
+    \item The generation of a new configuration;
+    \item The generation of the pseudo fermions for the molecular dynamics 
+        evolution;
+    \item The generation of the momenta for the molecular dynamics evolution.
+    \item It is also used to generate the pseudofermions in stochastic fermion 
+        measurements, however at present this aspect is not touched by 
+        \verb|#define NORANDOM|.
+\end{itemize}
+The only files where \verb|#define NORANDOM| has an effect are, at present, 
+\verb|/src/OpenAcc/main.c| and \verb|/src/OpenAcc/update_versatile.c|. In order 
+to activate NORANDOM mode, you can also add a suitable \verb|-DNORANDOM| in the 
+\verb|COMPILER_FLAGS| in the makefile (don't forget to also ``touch'' 
+\verb|main.c| and \verb|update_versatile.c| to trigger the compilation of those 
+files with \verb|make|).
+
+
+
+\subsection{The DbgTools directory}
+In this directory you can find various \emph{skeletons} for many testing needs:
+\begin{itemize}
+    \item Test for $D_{eo}$ and $D_{oe}$, the Dirac 
+        operator (\verb|deo_doe_test.c|).
+    \item Tests for some functions involved in stouting
+    \item (to be continued)
+\end{itemize}
+In the header file \verb|dbgtools.h| you can find the declarations of many 
+functions that print out or read from file various datatypes.
+
+
+\section{Tuning}
+\label{tuning}
+Holy text report that optimal hybrid montecarlo acceptance should be 87.5\% or 
+so. 
+The probability for a new configuration to be accepted is related to the action 
+difference between the start and the end of the trajectory, which should be zero 
+in 
+perfect conditions. The reasons why it \emph{will} be different from zero are:
+\begin{itemize}
+    \item A mismatch between the 3 rational approximations used. A fast test could 
+        be done 
+        to check if the first one and the last one are in good agreement, just removing 
+        all 
+        molecular dynamics in between\footnote{At the moment, this result is NOT 
+            achieved by 
+        putting the relevant parameters in the input file to zero.}. 
+    \item Errors in the integration of the trajectory.
+\end{itemize}
+As far as the first point is concerned: since we want our results to be 
+accurate, we 
+would like the last inversion to be as 
+``exact'' as possible, while we can save some computing time on the molecular 
+dynamics 
+inversions, which will be performed many times and whose precision (as long as 
+the last 
+action calculation is ``exact'') can be traded for speed. The first inversion 
+can be 
+done precisely since it will be performed only once. Optimization can thus be 
+made with
+the choice of the rational approximations used during molecular dynamics. There 
+is a 
+single parameter which must be tuned, which is the maximum error of the 
+approximation. 
+Reducing the error will determine an increase in the order of the approximation 
+and a 
+reduction in the target residue in the inversions. The higher the order, the 
+slower; 
+the smaller the target residue, the slower. \\
+As far as the integration errors are concerned, the most basic observation is 
+that, for 
+the Omelyan 2nd order integrator, the action difference (which is an error) 
+should go 
+like $[t/n_{md}]^2$, where $n_{md}$ is the number of steps in the molecular 
+dynamics 
+trajectory, while $t$ is the molecular dynamics time\footnote{(Note for self) 
+this topic has been already discussed in 
+    the 
+literature, check}. While there is no way a priori to fix the parameters apart 
+from 
+experience (read: look to another successful run), once a choice of the 
+parameters is 
+reached for which acceptance is satisfying, there are some possible rules of 
+thumb that 
+may help in optimizing $n_{md}$ and the number of gauge substeps $n_{gss}$:
+\begin{itemize}
+    \item The norm of the fermion force times the number of gauge substeps should 
+        be 
+        roughly equal to the norm of the gauge force. The value of both norms is 
+        calculated by 
+        the program and printed when the right level of verbosity is chosen;
+    \item The norm of the variation of the fermion force every half Omelyan macro 
+        step 
+        (which is $n_{gss}$ times a micro step), and the norm of the variation of the 
+        gauge 
+        force every Omelyan micro step should be equal. These quantities are also 
+        printed at 
+        the same level of verbosity.
+    \item (Not implemented) The same reasoning could be done with the maximum values 
+        found.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\section{Input file reading (and advices for format modifications).}
+Input file reading is done in \verb|/src/Include/init.c|. The idea here is to 
+read parameters from a file and store them into global variables (or, better, 
+into variables of limited number of global structures). The input file should 
+be composed by parameter ``macro groups'', with a name that is needed to find 
+them, and each of the parameter macro groups consist of a collection of tags 
+which are put next to a value (an integer, a floating point number, or a 
+string). The function 
+\verb|set_global_vars_and_fermions_from_input_file()| does the 
+following things:
+\begin{enumerate}
+    \item Tries to open the specified input file. If it is successful:
+        \begin{enumerate}
+            \item Loads all the file as an array of lines, and modifies lines removing 
+                comments (everything beyond a \verb|#| sign, including \verb|#| itself)
+            \item Scan the file to find names of macro-groups of parameters, thus 
+                identifying for each group a type, an initial line and an ending line;
+            \item For each of the groups found, it calls the appropriate parser (which 
+                is actually a wrapper) passing to it the correct \emph{global} data member, 
+                the start file line and the end file line of the group. Every parser-wrapper 
+                defines an array of structures of the kind \verb|par_info|:
+                \begin{verbatim}
+                typedef struct par_info_t{
+                    void* par;
+                    int type; // 0 = int, 1 = double, 2 = string
+                    char* name;
+                    int is_optional;
+                    const void * default_value;
+                }par_info;
+                \end{verbatim}
+                Inside every parser-wrapper, this array is passed to a real parser that looks 
+                for the \verb|name| in the range of lines specified by the parser-wrapper, 
+                reads a value whose type is speficied in \verb|type|, and puts it into the 
+                variable pointed at by \verb|*par|. If no value specified by \verb|type| is 
+                found, and if \verb|is_optional| is zero, an error will be generated; if 
+                instead \verb|is_optional| is one, the default value read from the pointer 
+                \verb|*default_value| will be assigned to the variable pointer at by 
+                \verb|*par|.
+        \end{enumerate}
+    \item If it is not opened for any reason, it goes into ``help'' mode, and the 
+        same chain of parser-wrappers and parser is called in help mode writing an 
+        \verb|input_template| file.
+\end{enumerate}
+If you want to add another parameter ``macro group'', you have to add the name 
+to the \verb|par_macro_groups_names| list, increasing also \verb|NPMGTYPES|.
+You also need to create the correct parser-wrapper for it, and modify the 
+\verb|set_global_vars_and_fermions_from_input_file()| function to accomodate 
+the reading of that parameter ``macro group''.\\
+If you want just to add a parameter to an existing group, you just have to 
+modify its parser-wrapper and possibly the structure that should hold the value 
+of that new parameter.
+
+\section{Configuration file reading}
+All this is performed in \verb|src/OpenAcc/io.c|.
+
+\subsection{ASCII Format}
+The ASCII format is really useful for checking and debugging, and at present is 
+the only one which is extensively tested. This format is fast to modif (of 
+course you need to modify both reading and writing functions), and being able 
+to edit the configuration files with a text editor might be useful.
+Unfortunately files tend to be files which are 3 times larger than binary 
+files, and for large lattices this might be a problem.
+
+\subsection{ILDG format (binary)}
+By activating the correct flag in the input file, the ILDG format will be read 
+and written instead. The ILDG format is used for gauge configuration 
+storage which is a diffused standard (Google it). It is made up by LIME records 
+(google LIME, scidac, there is also a GitHub repo with documentation), which 
+are made up of a header and a body. Binary data in the header and the body are 
+assumed to be Big Endian. The header has a ``type'' string, which identifies 
+the 
+kind of record.
+The standard ILDG format requires a \texttt{ildg-format} record, an 
+\texttt{ildg-binary-data} record, and a \texttt{ildg-data-lfn} record:
+\begin{itemize}
+    \item The \texttt{ildg-format} record contains, most notably the dimensions of 
+        the configuration, the precision and the kind of gauge field (in ASCII);
+    \item \texttt{ildg-binary-data} contains instead the values of the 
+        configuration gauge links in binary format;
+    \item The \texttt{ildg-data-lfn} is not actually used here.
+\end{itemize}
+Non standard records:
+\begin{itemize}
+    \item \verb|MD_traj|: a number identifying the Montecarlo Trajectory, needed 
+        to restart the simulation (ASCII format).
+    \item \verb|input-file|: the entire input file with comments (ASCII format).
+\end{itemize}
+You can look into \verb|src/OpenAcc/io.c| or into a gauge configuration 
+file with a text editor to get more informations.
+
+\subsection{Configuration file format conversion}
+A tool for file conversion is \verb|/src/DbgTools/ildgtest.c|. You can add it 
+to the list of arguments you pass to \verb|generate_makefile.py| in order to 
+build a makefile that will have, amongst other targets,\verb|ildgtest|.
+Modify the \verb|main()| to obtain your desired result.
+

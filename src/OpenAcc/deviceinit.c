@@ -12,7 +12,8 @@ device_param dev_settings;
 
 
 // ROUTINE TO CHOOSE AND INITIALIZE THE OPENACC DEVICE
-void SELECT_INIT_ACC_DEVICE(acc_device_t my_device_type, int dev_index) {
+void select_init_acc_device(acc_device_t my_device_type, int dev_index)
+{
 
   // Initialize context for this device type
   acc_init(my_device_type);
@@ -27,7 +28,8 @@ void SELECT_INIT_ACC_DEVICE(acc_device_t my_device_type, int dev_index) {
 
 }
 
-void SHUTDOWN_ACC_DEVICE(acc_device_t my_device_type) {
+void shutdown_acc_device(acc_device_t my_device_type) 
+{
 
   // Close context for this device type
   acc_shutdown(my_device_type);

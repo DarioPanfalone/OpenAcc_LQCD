@@ -2,59 +2,27 @@
 #define FERMION_PARAMETERS_C_
 
 #include "./fermion_parameters.h"
+#include "../OpenAcc/backfield.h"
+#include "../OpenAcc/alloc_vars.h"
 #include "./markowchain.h"
+#include "../OpenAcc/md_integrator.h"
 #include <string.h>
 #include <math.h>
 #include "../RationalApprox/rationalapprox.h"
+#include "../DbgTools/dbgtools.h"
+
 
 #define ALIGN 128
+#define acc_twopi 2*3.14159265358979323846
 
-int NDiffFlavs;
+int NDiffFlavs;// set in init.c, from input file
 int NPS_tot;
 int max_ps;
-ferm_param *fermions_parameters;
+ferm_param *fermions_parameters;// set in init.c, from input file
 
 int init_ferm_params(ferm_param *fermion_settings){
 
     int errorstatus = 0;
-
-
-/*
-  NDiffFlavs = 3;  // the number of different quark flavours
-
-  int allocation_check; 
-
-  // al posto di 128 c'era ALIGN, solo che qui questa variabile non è ancora definita (viene fatto in struct_c_def)
-  allocation_check =  posix_memalign((void **)&fermion_settings, ALIGN, NDiffFlavs*sizeof(ferm_param));   //  -->  4*size phases (as many as links)
-  if(allocation_check != 0)  printf("Errore nella allocazione di fermion_settings \n");
-
-  ferm_param *up,*down,*strange;
-  up = &fermion_settings[0];
-  down = &fermion_settings[1];
-  strange = &fermion_settings[2];
-
-  up->ferm_charge       = -1.0;   // up    charge
-  up->ferm_mass         = 0.00362345;    //0.075;  // up    mass
-  up->ferm_im_chem_pot  = 0.0;    // up    chem pot
-  up->degeneracy        = 1;      // up    degeneracy
-  up->number_of_ps      = 1;      // up    number of pseudo fermions
-  strcpy(up->name,"up");
-
-  down->ferm_charge       = 2.0;    // down  charge
-  down->ferm_mass         = 0.00362345;    //0.075;  // down  mass
-  down->ferm_im_chem_pot  = 0.0;    // down  chem pot
-  down->degeneracy        = 1;      // down  degeneracy
-  down->number_of_ps      = 1;      // down  number of pseudo fermions
-  strcpy(up->name,"down");
-
-  strange->ferm_charge       = -1.0;    // strange  charge
-  strange->ferm_mass         = 0.102;    //0.075;  // strange  mass
-  strange->ferm_im_chem_pot  = 0.0;    // strange  chem pot
-  strange->degeneracy        = 1;      // strange  degeneracy
-  strange->number_of_ps      = 1;      // strange  number of pseudo fermions
-  strcpy(up->name,"strange");
-*/
-  
     
     
   printf("Initializing fermions...\n");
@@ -62,13 +30,13 @@ int init_ferm_params(ferm_param *fermion_settings){
   NPS_tot = 0;
   max_ps = 0;
 
-
+  // calculation of NPS_tot, max_ps,index_of_the_first_ps; 
   for(int i=0;i<NDiffFlavs;i++){
     // compute the total number of ps
     NPS_tot += fermion_settings[i].number_of_ps;
     // compute the max number of ps among the various flavs
     if(fermion_settings[i].number_of_ps>=max_ps) max_ps = fermion_settings[i].number_of_ps;
-    // deterime the offset (where does the ps of the flavour i starts?)
+    // determine the offset (where does the ps of the flavour i starts?)
     if(i==0){
       fermion_settings[i].index_of_the_first_ps=0;
     }else{
@@ -79,6 +47,7 @@ int init_ferm_params(ferm_param *fermion_settings){
   printf("NPS_tot = %d \n",NPS_tot);
   printf("max_ps = %d \n",max_ps);
 
+  // Rational Approximation related stuff
   for(int i=0;i<NDiffFlavs;i++){
     ferm_param *quark = &fermion_settings[i];
     quark->approx_fi_mother.exponent_num =  +quark->degeneracy;
@@ -101,7 +70,7 @@ int init_ferm_params(ferm_param *fermion_settings){
         pow(mkwch_pars.expected_max_eigenvalue,
                 (double) quark->approx_fi_mother.exponent_num/
                 quark->approx_fi_mother.exponent_den );
-    quark->approx_md_mother.error =  mkwch_pars.residue_md/
+    quark->approx_md_mother.error =  md_parameters.residue_md/
         pow(mkwch_pars.expected_max_eigenvalue,
                 (double) quark->approx_md_mother.exponent_num/
                 quark->approx_md_mother.exponent_den );
@@ -143,4 +112,139 @@ int init_ferm_params(ferm_param *fermion_settings){
 
 }
 
+
+void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
+{
+
+
+  for(int i=0;i<NDiffFlavs;i++){
+      fpar[i].phases = &u1_back_phases[i*8];
+      init_fermion_backfield(bfpars,&(fpar[i]));
+      char tempname[50];                            // DEBUG
+      strcpy(tempname,"backfield_");                //
+      strcat(tempname,fpar[i].name);                // 
+      print_double_soa(fpar[i].phases,tempname);    //
+  }
+}
+
+
+void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
+
+    double  ex_quantum = bf_pars.ex;
+    double  ey_quantum = bf_pars.ey;
+    double  ez_quantum = bf_pars.ez;
+    double  bx_quantum = bf_pars.bx;
+    double  by_quantum = bf_pars.by;
+    double  bz_quantum = bf_pars.bz;
+
+    int X,Y,Z,T;
+    double  arg;
+    double ferm_charge = fermion_parameters->ferm_charge;
+    double chpotphase = fermion_parameters->ferm_im_chem_pot/geom_par.gnt; 
+
+    double_soa * phases = fermion_parameters->phases;
+
+    int x, y, z, t, parity;
+    int d[4], idxh;
+
+    if(verbosity_lv > 2) { 
+        printf("Generating external field (containing staggered phases) ");
+        printf("for flavour %s\n",fermion_parameters->name);
+        printf("Direction mapping  x y z t: %d %d %d %d\n",
+                geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap);
+
+    }
+
+    for(d[3]=0; d[3] < nd3; d[3]++) for(d[2]=0; d[2] < nd2; d[2]++)
+        for(d[1]=0; d[1] < nd1; d[1]++) for(d[0]=0; d[0] < nd0; d[0]++){
+
+                    idxh = snum_acc(d[0],d[1],d[2],d[3]);
+                   
+                    x = d[geom_par.xmap];int tnx = geom_par.gnx;
+                    y = d[geom_par.ymap];int tny = geom_par.gny;
+                    z = d[geom_par.zmap];int tnz = geom_par.gnz;
+                    t = d[geom_par.tmap];int tnt = geom_par.gnt;
+
+
+                    parity = (x+y+z+t) %2 ; 
+
+                    X = x + 1;
+                    Y = y + 1;
+                    Z = z + 1;
+                    T = t + 1;
+
+                    ////////X-oriented////////
+                    if(X == tnx){
+                        // x-oriented links on the boundary
+                        arg = (y+1)*tnx*bz_quantum/(tnx*tny);
+                        arg+= (t+1)*tnx*ex_quantum/(tnx*tnt);
+                        arg-= (z+1)*by_quantum/(tnz*tnx);
+                    }
+                    else arg = -(z+1)*by_quantum/(tnz*tnx);
+
+                    arg *= ferm_charge;// only em phase so far
+                    if(KSphaseX(x,y,z,t) == -1) arg += 0.5;
+                    // ^this should be false, UNLESS one chooses
+                    // a different setup for the staggered phases....
+                    while(arg > 0.5) arg -= 1.0;
+                    while(arg < -0.5) arg += 1.0;
+
+                    phases[geom_par.xmap*2+parity].d[idxh]= acc_twopi*arg; 
+
+
+                    ////////Y-oriented/////////
+                    if(Y == tny){
+                        // y-oriented links on the boundary
+                        arg = (z+1)*tny*bx_quantum/(tny*tnz);
+                        arg+= (t+1)*tny*ey_quantum/(tny*tnt);
+                        arg-= (x+1)*bz_quantum/(tnx*tny);
+                    }
+                    else arg = -(x+1)*bz_quantum/(tnx*tny);
+
+                    arg *= ferm_charge;// only am phase so far
+                    if(KSphaseY(x,y,z,t) == -1) arg += 0.5;
+                    while(arg > 0.5) arg -= 1.0;
+                    while(arg < -0.5) arg += 1.0;
+
+                    phases[geom_par.ymap*2+parity].d[idxh]=acc_twopi*arg;
+
+                    
+                    ////////Z-oriented////////
+                    if(Z == tnz){
+                        // z-oriented links on the boundary
+                        arg = (t+1)*tnz*ez_quantum/(tnz*tnt);
+                        arg += (x+1)*tnz*by_quantum/(tnz*tnx);
+                        arg -= (y+1)*bx_quantum/(tny*tnz);
+                    }
+                    else arg = -(y+1)*bx_quantum/(tny*tnz);
+
+                    arg *= ferm_charge;// only am phase so far
+                    if(KSphaseZ(x,y,z,t) == -1) arg += 0.5;
+                    while(arg > 0.5) arg -= 1.0;
+                    while(arg < -0.5) arg += 1.0;
+
+                    phases[geom_par.zmap*2+parity].d[idxh]=acc_twopi*arg;
+
+
+                    ///////T-oriented////////
+                    arg = -(z+1)*ez_quantum/(tnz*tnt);
+                    arg -= (y+1)*ey_quantum/(tny*tnt);
+                    arg -= (x+1)*ex_quantum/(tnx*tnt);
+                   
+                    arg *= ferm_charge;// only am phase so far
+                    if(KSphaseT(x,y,z,t) == -1) arg += 0.5;
+                    arg += chpotphase*0.5; // it must be multiplied by pi, not 2pi
+                    if(T == tnt) arg += 0.5;
+                    // antiperiodic boundary conds
+                                           // notice T = t+1 !!
+
+                    while(arg > 0.5) arg -= 1.0;
+                    while(arg < -0.5) arg += 1.0;
+
+                    phases[geom_par.tmap*2+parity].d[idxh]=acc_twopi*arg;
+    } // d3,d2,d1,d0 loops
+
+    int dir;
+    
+}
 #endif
