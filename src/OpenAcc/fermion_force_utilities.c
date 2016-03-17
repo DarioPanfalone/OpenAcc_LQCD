@@ -12,7 +12,6 @@
 void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix)
 {
     //int hd0, d1, d2, d3;
-    int mu, idxh;
     //SETINUSE(matrix);
     //#pragma acc kernels present(matrix)
     //#pragma acc loop independent gang(nd3)
@@ -34,9 +33,11 @@ void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix)
     //    }  // d2
     //  }  // d3
 
-    for(mu=0; mu<8; mu++) {
+    int mu, idxh;
 #pragma acc kernels present(matrix)
-#pragma acc loop independent gang(nd3)
+#pragma acc loop independent // gang(nd3)
+    for(mu=0; mu<8; mu++) {
+#pragma acc loop independent // gang(nd3)
         for(idxh=0; idxh<sizeh; idxh++) {
             assign_zero_to_tamat_soa_component(&matrix[mu],idxh);
 

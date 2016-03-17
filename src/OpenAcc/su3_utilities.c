@@ -6,33 +6,33 @@
 #ifdef __GNUC__
  #include <math.h>
 #else // assuming PGI is used to compile on accelerators
+ #include <openacc.h>
  #include <accelmath.h>
 #endif
 #include "./su3_utilities.h"
+#include "./struct_c_def.h"
 #include "./single_types.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
+
 
 // reunitarize the conf by brute force
-void unitarize_conf( __restrict su3_soa * const u){
+void unitarize_conf( __restrict su3_soa * const u)
+{
     int dirindex;
+    int d0h, d1, d2, d3;
 #pragma acc kernels present(u)
-#pragma acc loop independent
+#pragma acc loop independent 
     for(dirindex = 0 ; dirindex < 8 ; dirindex++){
-
-        int d0h, d1, d2, d3;
-
-#pragma acc loop independent gang 
-        for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent
+        for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) { // DEBUG
+#pragma acc loop independent //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
             for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
                 for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+#pragma acc loop independent //vector(DIM_BLOCK_X)
                     for(d0h=0; d0h < nd0h; d0h++) {
-
                         // I take the size to be even, but it's the same
-                        int  d0 = 2*d0h + ((d1+d2+d3) & 0x1);
-                        int t  = snum_acc(d0,d1,d2,d3);  
+                        int d0 = 2*d0h + ((d1+d2+d3) & 0x1);
+                        int t = snum_acc(d0,d1,d2,d3);  
                         loc_unitarize_conf(&u[dirindex],t);
                     }
                 }
@@ -40,9 +40,11 @@ void unitarize_conf( __restrict su3_soa * const u){
         }
     }
 }
+
+
+
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix)
 {
-  SETINUSE(matrix);
   int hd0, d1, d2, d3;
 #pragma acc kernels present(matrix)
 #pragma acc loop independent gang //gang(nd3)
@@ -69,6 +71,8 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix)
     }
   }
 }
+
+
 //copy matrix in into matrix out, this has to happen on the host
 void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
 			     __restrict su3_soa * const matrix_out)
