@@ -7,6 +7,7 @@ Things to do:
      TEST PURE GAUGE (no fermions):    OK (8^4)
      TEST WITH FERMIONS (no fermions): OK (8^4) 
 3. Compilation with PGI, no multidev
+   YES, but problems with acceleration of Deo and Doe
 4. Correct execution with PGI, no multidev
    (check-bugfix)  
 5. Compilation with MPICC, multidev (2 ranks, minilattice)

@@ -12,6 +12,7 @@
 #include "./su3_utilities.h"
 #include "./struct_c_def.h"
 #include "./single_types.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
 
 
 // reunitarize the conf by brute force

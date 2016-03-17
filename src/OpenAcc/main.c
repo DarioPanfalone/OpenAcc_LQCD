@@ -46,7 +46,7 @@
 
 #include "../Mpi/multidev.h"
 #include "../Mpi/communications.h"
-
+#include "./deviceinit.h"
 
 #ifdef __GNUC__
 #include "sys/time.h"
