@@ -8,16 +8,19 @@ Things to do:
      TEST WITH FERMIONS (no fermions): OK (8^4) 
 3. Compilation with PGI, no multidev
    YES, but problems with acceleration of Deo and Doe
+    CHECK ACC_DEO, ACC_DOE - They might not be accelerated correctly.
 4. Correct execution with PGI, no multidev
    (check-bugfix)  
-5. Compilation with MPICC, multidev (2 ranks, minilattice)
-6. Correct execution with MPICC (2 ranks, minilattice)
+5. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
+5.5 Preparation of input file for run                      DONE 
+6. Correct execution with MPICC (2 ranks, minilattice) FAIL
+   LOL - Crashes after reading input file
+
    (check-bugfix)  
 
-
-
-
 NO ASYNC WORK DONE YET
+
+
 ----------------------------------------------------------------
 - phases in the multinode setup  (DONE, TO CHECK)
 - Kernels that must be restricted to local lattice (conf generation)

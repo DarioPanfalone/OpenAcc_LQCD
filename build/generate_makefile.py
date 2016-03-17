@@ -13,6 +13,12 @@ GNUcls = 'COMPILER=gcc\n\
 COMPILER_FLAGS=-O3 -std=gnu99\n\
 LINKER_FLAGS=-lm\n' 
 
+
+MPIcls = 'COMPILER=mpicc\n\
+COMPILER_FLAGS=-O3 -std=gnu99\n\
+LINKER_FLAGS=-lm\n' 
+
+
 compiler_linker_settings = ''
 
 make_rgen_string ='\n\
@@ -90,7 +96,7 @@ def header_scanner(filename): # only headers!
                     filesfound.append(filefound)
                 else:
 #                   stderr.write("  " + filefound +' is not in this package, not adding it.\n')
-                   standards.append(filefound) # libraries like stdio.h
+                    standards.append(filefound) # libraries like stdio.h
             else:
                 stderr.write( "  #include line incorrect:" + filename + ' ' + line + '\n')
 
@@ -170,6 +176,9 @@ class file_node:
         for dependence in self.direct_dependences_relative:
             # gets the absolute path for robustness
             dependencem = path.abspath(path.dirname(self.name)+ '/'+dependence)
+            if dependencem == self.name :
+                stderr.write("%s has itself as a dependence, fix this!\n" % self.name)
+                exit(1)
             self.direct_dependences.append(dependencem)
             dependencemc = dependencem[:-2] + '.c' 
             if path.exists(dependencemc):
@@ -283,7 +292,6 @@ def generate_makefile_from_main(inputfiles):
         exename = path.basename(filename)[:-2]
         makeall_string += ' ' + exename
 
-
  
 
     return res, makeclean_string, makeall_string
@@ -291,8 +299,8 @@ def generate_makefile_from_main(inputfiles):
 
 if __name__ == '__main__':
 
-    if 'PGISLOW' not in argv and 'GNU' not in argv and 'PGI' not in argv:
-        stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
+    if 'PGISLOW' not in argv and 'GNU' not in argv and 'PGI' not in argv and 'MPI' not in argv:
+        stderr.write("Please specify one compiler: either PGISLOW, GNU, PGI or MPI\n")
         exit(1)
 
     clsset = False
@@ -318,6 +326,18 @@ if __name__ == '__main__':
             compiler_linker_settings = PGIcls;
             argv.remove('PGI')
             clsset = True
+    if 'MPI' in argv :
+        if clsset :
+            stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
+            argv.remove('MPI')
+            exit(1)
+        else:
+            compiler_linker_settings = MPIcls;
+            argv.remove('MPI')
+            clsset = True
+
+
+
 
     if not path.exists("lattice_dimensions.h"):
         stderr.write("generating lattice_dimensions.h\n")
@@ -348,9 +368,9 @@ if __name__ == '__main__':
     makeall += ' rgen\n'
 
 
-    stdout.write(makemains+'\n')
-    stdout.write(make_rgen_string+'\n')
-    stdout.write(makeall+'\n')
+    stdout.write(makemains)
+    stdout.write(make_rgen_string)
+    stdout.write(makeall)
     stdout.write(makeclean)
 
     

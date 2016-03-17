@@ -510,10 +510,14 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 
     if(startline<endline){
 
-        int expnx = gpar->nd[gpar->xmap] * gpar->nranks[gpar->xmap]; 
-        int expny = gpar->nd[gpar->ymap] * gpar->nranks[gpar->ymap]; 
-        int expnz = gpar->nd[gpar->zmap] * gpar->nranks[gpar->zmap]; 
-        int expnt = gpar->nd[gpar->tmap] * gpar->nranks[gpar->tmap]; 
+        int expnx =(gpar->nd[gpar->xmap]-2*gpar->halos[gpar->xmap])*
+            gpar->nranks[gpar->xmap]; 
+        int expny =(gpar->nd[gpar->ymap]-2*gpar->halos[gpar->ymap])*
+            gpar->nranks[gpar->ymap]; 
+        int expnz =(gpar->nd[gpar->zmap]-2*gpar->halos[gpar->zmap])*
+            gpar->nranks[gpar->zmap]; 
+        int expnt =(gpar->nd[gpar->tmap]-2*gpar->halos[gpar->tmap])*
+            gpar->nranks[gpar->tmap]; 
 
         if(gpar->gnx != expnx || gpar->gny != expny ||
                 gpar->gnz != expnz  || gpar->gnt != expnt ){ 

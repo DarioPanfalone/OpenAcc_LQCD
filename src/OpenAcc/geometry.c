@@ -87,8 +87,6 @@ void compute_nnp_and_nnm_openacc(void){
 void set_geom_glv(geom_parameters* gp){
 
     gp->nd[0]= nd0; gp->nd[1] = nd1; gp->nd[2] = nd2; gp->nd[3] = nd3;
-    gp->nranks[0] = NRANKS_D0; gp->nranks[1] = NRANKS_D1; 
-    gp->nranks[2] = NRANKS_D2; gp->nranks[3] = NRANKS_D3;
 
     gp->vol3s[0] = vol4/nd0; gp->vol3s[1] = vol4/nd1;
     gp->vol3s[2] = vol4/nd2; gp->vol3s[3] = vol4/nd3;
@@ -98,6 +96,16 @@ void set_geom_glv(geom_parameters* gp){
 
     gp->d0123map[gp->xmap] = 0;   gp->d0123map[gp->ymap] = 1;
     gp->d0123map[gp->zmap] = 2;   gp->d0123map[gp->tmap] = 3;
+
+    gp->nranks[0] = NRANKS_D0; gp->nranks[1] = NRANKS_D1; 
+    gp->nranks[2] = NRANKS_D2; gp->nranks[3] = NRANKS_D3;
+    
+#ifdef MULTIDEVICE
+    gp->halos[0] = D0_HALO; 
+    gp->halos[1] = D1_HALO; 
+    gp->halos[2] = D2_HALO; 
+    gp->halos[3] = D3_HALO;
+#endif
 
 }
 

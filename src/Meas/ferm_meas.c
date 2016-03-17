@@ -21,19 +21,19 @@
 #include "../OpenAcc/random_assignement.h"
 #include "./ferm_meas.h"
 #include "./baryon_number_utilities.h"
-//#include "../Include/fermion_parameters.h"
+#include "../Include/fermion_parameters.h"
 #include "../OpenAcc/fermion_matrix.h"
-//#include "../OpenAcc/fermionic_utilities.h"
-//#include "../DbgTools/debug_macros_glvarcheck.h"
-//#include "../Include/common_defines.h"
-//#ifdef STOUT_FERMIONS
+#include "../OpenAcc/fermionic_utilities.h"
+#include "../DbgTools/debug_macros_glvarcheck.h"
+#include "../Include/common_defines.h"
+#ifdef STOUT_FERMIONS
 #include "../OpenAcc/stouting.h"
-//#endif
+#endif
 #include "../OpenAcc/action.h"
-//
-//#ifdef MULTIDEVICE
-//#include "../Mpi/communications.h"
-//#endif
+
+#ifdef MULTIDEVICE
+#include "../Mpi/communications.h"
+#endif
 #include "../Mpi/multidev.h"
 
 

@@ -94,7 +94,7 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
      local_res = scal_prod_loc_1Dcut(in_vect1,in_vect2); 
      double lrr = creal(local_res);
      double lri = cimag(local_res);
-     double trr,trl;
+     double trr,tri;
 
      MPI_Allreduce((void*)&lrr,(void*)&trr,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
      MPI_Allreduce((void*)&lri,(void*)&tri,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
