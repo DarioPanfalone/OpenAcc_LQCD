@@ -48,11 +48,11 @@ inline void save_conf_wrapper(su3_soa* conf, const char* nomefile,int conf_id_it
     if(devinfo.myrank == 0){
         int irank;
         for(irank = 1 ; irank < devinfo.nranks; irank++)
-            recv_loc_subconf_from_rank(conf_rw,irank);
+            recv_loc_subconf_from_rank(conf_rw,irank,irank);
         recv_loc_subconf_from_buffer(conf_rw,conf,0);
         save_conf(conf_rw, nomefile,conf_id_iter, use_ildg);
     }
-    else  send_lnh_subconf_to_master(conf);
+    else  send_lnh_subconf_to_master(conf,devinfo.myrank);
 
 #else 
     recv_loc_subconf_from_buffer(conf_rw,conf,0);

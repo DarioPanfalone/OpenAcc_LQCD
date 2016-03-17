@@ -4,6 +4,10 @@
 #define FERMION_HALO 1
 #include "./geometry_multidev.h"
 
+#ifdef MULTIDEVICE
+#include "mpi.h"
+#endif
+
 typedef struct dev_info_t{
 
     // FROM MPI INIT AND SIMILAR

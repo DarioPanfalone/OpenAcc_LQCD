@@ -55,13 +55,15 @@ SingleInvNVectors       1
 
 DeviceSettings
 device_choice           0
+NRanks                  2
+NProcPerNode            2
 
 Geometry
-nx                      8  
-ny	                    8 
-nz	                    8 
+nx                      4  
+ny	                    4 
+nz	                    4 
 nt	                    8 
-xmap	                1 
-ymap	                3   
+xmap	                0 
+ymap	                1   
 zmap	                2   
-tmap	                0 
+tmap	                3 

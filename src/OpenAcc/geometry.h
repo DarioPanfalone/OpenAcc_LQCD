@@ -38,10 +38,14 @@ typedef struct geom_parameters_t{
 
     // The following will be set by set_geom_glv()
     int nd[4];
-    int nranks[4];
     int vol3s[4];
     int xyztmap[4];
     int d0123map[4];
+
+    int nranks[4];
+#ifdef MULTIDEVICE
+    int halos[4];
+#endif
 
 } geom_parameters;
 

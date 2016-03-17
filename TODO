@@ -6,17 +6,21 @@ Things to do:
    (check-bugfix)  
      TEST PURE GAUGE (no fermions):    OK (8^4)
      TEST WITH FERMIONS (no fermions): OK (8^4) 
-3. Compilation with PGI, no multidev
-4. Correct execution with PGI, no multidev
+3. Compilation with PGI, no multidev        PROBLEM: PGI LICENSE SERVER DOWN
+4. Correct execution with PGI, no multidev  PROBLEM: PGI LICENSE SERVER DOWN
+   (check-bugfix)                           PROBLEM: PGI LICENSE SERVER DOWN
+    CHECK ACC_DEO, ACC_DOE - They might not be accelerated correctly.
+
+5. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
+5.5 Preparation of input file for run                      DONE 
+6. Correct execution with MPICC (2 ranks, minilattice) FAIL
+   LOL - Crashes after reading input file
+
    (check-bugfix)  
-5. Compilation with MPICC, multidev (2 ranks, minilattice)
-6. Correct execution with MPICC (2 ranks, minilattice)
-   (check-bugfix)  
-
-
-
 
 NO ASYNC WORK DONE YET
+
+
 ----------------------------------------------------------------
 - phases in the multinode setup  (DONE, TO CHECK)
 - Kernels that must be restricted to local lattice (conf generation)

@@ -80,7 +80,7 @@ def header_scanner(filename): # only headers!
                    # and should not be cheked by make
 
     for line in f.readlines():
-        if 'main(' in line and ')' in line:
+        if 'main(' in line and ')' in line and filename not in main_files:
             main_files.append(filename)
         if '#include' in line :
             init_filename_position = line.find('<')
