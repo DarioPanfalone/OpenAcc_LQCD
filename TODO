@@ -6,15 +6,10 @@ Things to do:
    (check-bugfix)  
      TEST PURE GAUGE (no fermions):    OK (8^4) (accepts)
      TEST WITH FERMIONS              : OK (8^4) (accepts)
-3. Compilation with PGI, no multidev
-   YES, but problems with acceleration of Deo and Doe
-    CHECK ACC_DEO, ACC_DOE - They might not be accelerated correctly. <<<<--------notice
-
-    COMPARISON WITH OLD CODE                                    <<<<<<<<------start here
-
+3. Compilation with PGI, no multidev ~OK (only pgi15.9)
 4. Correct execution with PGI, no multidev
-   (check-bugfix)  
-
+    STATUS : Compiles and ~accepts bu~t it's slow AS HELL (3x )
+    - CHECK ACC_DEO, ACC_DOE - They might not be accelerated correctly. <<<<-------notice
 
 5. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
 5.5 Preparation of input file for run                      DONE 
