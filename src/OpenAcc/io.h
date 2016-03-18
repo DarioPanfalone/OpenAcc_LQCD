@@ -5,6 +5,7 @@
 #include "./alloc_vars.h"
 
 #ifdef MULTIDEVICE
+#include "mpi.h"
 #include "../Mpi/multidev.h"
 #endif 
 
@@ -103,15 +104,33 @@ inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,int * conf_id_i
 #ifdef MULTIDEVICE
 
     if(devinfo.myrank == 0){
+        if(verbosity_lv > 2)
+            printf("MPI%02d - reading global conf \n",devinfo.myrank );
         error = read_conf(conf_rw, nomefile,conf_id_iter, use_ildg);
+        MPI_Bcast((void*) &error,1,MPI_INT,0,MPI_COMM_WORLD);
+
         if(!error) {
             send_lnh_subconf_to_buffer(conf_rw,conf,0);
             int irank;
             for(irank = 1 ; irank < devinfo.nranks; irank++)
                 send_lnh_subconf_to_rank(conf_rw,irank);
         }
+        else 
+        if(verbosity_lv > 2)
+            printf("MPI%02d - no conf sent!\n",devinfo.myrank );
+
     }
-    else receive_lnh_subconf_from_master(conf);
+    else{
+        if(verbosity_lv > 2)
+            printf("MPI%02d - receiving conf \n",devinfo.myrank );
+        
+        MPI_Bcast((void*) &error,1,MPI_INT,0,MPI_COMM_WORLD);
+        if(!error) 
+            receive_lnh_subconf_from_master(conf);
+        else 
+        if(verbosity_lv > 2)
+            printf("MPI%02d - no conf received!\n",devinfo.myrank );
+    }
 
 #else 
     error = read_conf(conf_rw, nomefile,conf_id_iter, use_ildg);

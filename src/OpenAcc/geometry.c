@@ -4,12 +4,25 @@
 #include "./geometry.h"
 #include "stdio.h"
 
+#ifdef MULTIDEVICE
+#include "../Mpi/multidev.h"
+#endif 
+
+
 geom_parameters geom_par;
 
 void compute_nnp_and_nnm_openacc(void){
   int d0, d1, d2, d3,parity;
 
-  FILE * nnfile = fopen("nnfile","w");
+
+  char nnfilename[50];
+#ifdef MULTIDEVICE
+  sprintf(nnfilename,"nnfile_rank%d",devinfo.myrank);
+#else
+  sprintf(nnfilename,"nnfile");
+#endif
+
+  FILE * nnfile = fopen(nnfilename,"w");
 
   for(d3=0; d3<nd3; d3++) {
     for(d2=0; d2<nd2; d2++) {

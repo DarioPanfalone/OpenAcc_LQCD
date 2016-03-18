@@ -40,6 +40,7 @@ extern dev_info devinfo;
 
 #ifdef MULTIDEVICE
 
+void pre_init_multidev1D(dev_info * mdi);
 void init_multidev1D(dev_info * mdi);
 
 void shutdown_multidev();

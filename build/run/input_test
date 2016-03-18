@@ -10,28 +10,28 @@ Beta            3.55
 StoutSteps      2
 StoutRho        0.15
  
-up quark
-FlavourParameters   
-Mass	        0.01 
-Degeneracy	    1
-PseudoFermions	1
-Name	        pippo
-Charge          0.0
-MuOverPiT       0.24
+#up quark
+#FlavourParameters   
+#Mass	        0.01 
+#Degeneracy	    1
+#PseudoFermions	1
+#Name	        pippo
+#Charge          0.0
+#MuOverPiT       0.24
                              
 
 
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	    4
-GaugeSubSteps   5
-TrajLength	    1.0
+NmdSteps	    1
+GaugeSubSteps   1
+TrajLength	    0.1
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                20
+Ntraj	                1
 ThermNtraj	            0
 StoreConfInterval	    20
 SaveConfInterval    	5
@@ -39,10 +39,10 @@ residue_metro       	1e-8
 StoreConfName       	store.conf.ascii
 SaveConfName            conf.ascii
 Seed                    12
-VerbosityLv             1
+VerbosityLv             6
 SaveDiagnostics         0
 UseILDG                 0
-EpsGen                  0.4
+EpsGen                  0.0
 #MaxRunTimeS             6000
 
 GaugeMeasuresSettings

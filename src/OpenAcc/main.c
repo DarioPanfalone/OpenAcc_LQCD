@@ -74,13 +74,24 @@ int main(int argc, char* argv[]){
 
     printf("WELCOME! \n");
     // READ input file.
+#ifdef MULTIDEVICE
+    pre_init_multidev1D(&devinfo);
+#endif
+
     set_global_vars_and_fermions_from_input_file(argv[1]);
+    verbosity_lv = mkwch_pars.input_vbl;
+
 #ifdef MULTIDEVICE
     init_multidev1D(&devinfo);
 #else
     devinfo.myrank = 0;
     devinfo.nranks = 1;
 #endif
+
+
+    if(verbosity_lv > 2) 
+        printf("MPI%02d, Input file read and initialized multidev1D...\n",
+                devinfo.myrank);
 
 
 
@@ -106,21 +117,36 @@ int main(int argc, char* argv[]){
     strcat(mkwch_pars.RandGenStatusFilename,myrank_string);
 #endif
 
+
+
+
     initrand_fromfile(mkwch_pars.RandGenStatusFilename,myseed_default);
-    verbosity_lv = mkwch_pars.input_vbl;
+
+
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
-    if(init_ferm_params(fermions_parameters)) exit(1);
+    if(init_ferm_params(fermions_parameters)){
+        printf("MPI%02d - Finalizing...\n",devinfo.myrank);
+#ifdef MULTIDEVICE
+    MPI_Finalize();
+#endif
+        exit(1);
+    }
+
+
 
     mem_alloc();
-    printf("Allocazione della memoria : OK \n");
+    printf("MPI%02d - Allocazione della memoria : OK \n",devinfo.myrank);
     compute_nnp_and_nnm_openacc();
-    printf("nn computation : OK \n");
+    printf("MPI%02d - nn computation : OK \n",devinfo.myrank);
     init_all_u1_phases(backfield_parameters,fermions_parameters);
 
-    printf("u1_backfield initialization : OK \n");
+    printf("MPI%02d - u1_backfield initialization : OK \n",devinfo.myrank);
 
     initialize_md_global_variables(md_parameters);
-    printf("init md vars : OK \n");
+    printf("MPI%02d - init md vars : OK \n",devinfo.myrank);
+
+
+
 
     //################## INIZIALIZZAZIONE DELLA CONFIGURAZIONE #######################
     // start from saved conf
@@ -128,12 +154,12 @@ int main(int argc, char* argv[]){
 #ifdef NORANDOM
     if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter,mkwch_pars.use_ildg)){
         // READS ALSO THE conf_id_iter
-        printf("Stored Gauge Conf conf_norndtest Read : OK\n");
+        printf("MPI%02d - Stored Gauge Conf conf_norndtest Read : OK\n",devinfo.myrank);
     }
     else{
         // cold start
-        printf("COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED\
-                \"conf_norndtest\" MUST BE PRESENT\n");
+        printf("MPI%02d - COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED\
+                \"conf_norndtest\" MUST BE PRESENT\n",devinfo.myrank);
         exit(1);
     }
 
@@ -141,16 +167,17 @@ int main(int argc, char* argv[]){
     if(!read_conf_wrapper(conf_acc,mkwch_pars.save_conf_name,
                 &conf_id_iter,mkwch_pars.use_ildg)){
         // READS ALSO THE conf_id_iter
-        printf("Stored Gauge Conf \"%s\" Read : OK \n", mkwch_pars.save_conf_name);
+        printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",devinfo.myrank, mkwch_pars.save_conf_name);
 
     }
     else{
         generate_Conf_cold(conf_acc,mkwch_pars.eps_gen);
-        printf("Cold Gauge Conf Generated : OK \n");
+        printf("MPI%02d - Cold Gauge Conf Generated : OK \n",devinfo.myrank);
         conf_id_iter=0;
     }
 #endif
     //#################################################################################  
+
 
 
     double max_unitarity_deviation,avg_unitarity_deviation;
@@ -201,6 +228,8 @@ int main(int argc, char* argv[]){
             printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
                     devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
 
+
+
             if(mkwch_pars.ntraj==0){ // MEASURES ONLY
 
                 printf("\n#################################################\n");
@@ -244,6 +273,8 @@ int main(int argc, char* argv[]){
                 accettate_therm_old = accettate_therm;
                 accettate_metro_old = accettate_metro;
                 conf_id_iter++;
+
+
                 if(devinfo.myrank ==0 ){
                     printf("\n#################################################\n");
                     printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
@@ -253,6 +284,8 @@ int main(int argc, char* argv[]){
                             act_params.beta);
                     printf(  "#################################################\n\n");
                 }
+
+
 
                 //--------- CONF UPDATE ----------------//
                 if(id_iter<mkwch_pars.therm_ntraj){
@@ -265,6 +298,10 @@ int main(int argc, char* argv[]){
                             mkwch_pars.residue_metro,md_parameters.residue_md,
                             id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
                 }
+    return 0;
+
+
+
 #pragma acc update host(conf_acc[0:8])
                 //---------------------------------------//
 

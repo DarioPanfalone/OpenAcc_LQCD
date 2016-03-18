@@ -29,6 +29,10 @@
 #include "sys/time.h"
 #endif
 
+#ifdef MULTIDEVICE
+#include <mpi.h>
+#endif 
+
 action_param act_params;
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
@@ -81,6 +85,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     if(verbosity_lv > 1) printf("Backup copy of the initial gauge conf : OK \n");
 
   }
+
+
 //#pragma acc data copyin(delta[0:7]) // should not be needed?
   {
   
@@ -102,7 +108,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     //    read_thmat_soa(momenta,"momenta");
 #pragma acc update device(momenta[0:8])
-    
+    MPI_Finalize();  // <<<<<<<<<<<<<<<---------------------- start here
+    return 0;
+
+
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
       for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
       int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;

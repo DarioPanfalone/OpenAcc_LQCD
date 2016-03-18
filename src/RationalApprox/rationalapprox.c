@@ -5,6 +5,14 @@
 #include "../Include/common_defines.h"
 #include <stdlib.h>
 
+
+
+#include "../OpenAcc/geometry.h" // to know if MULTIDEVICE is defined or not
+#ifdef MULTIDEVICE
+#include <mpi.h>
+#include  "../Mpi/multidev.h"
+#endif 
+
 extern int verbosity_lv;
 
 char* rational_approx_filename_old(int approx_order, int exponent_num, int exponent_den, double lambda_min)
@@ -71,7 +79,38 @@ int rationalapprox_read(RationalApprox* rational_approx)
     char * nomefile = rational_approx_filename(rational_approx->error,rational_approx->exponent_num,rational_approx->exponent_den,rational_approx->lambda_min);
 
     int error = rationalapprox_read_custom_nomefile(rational_approx,nomefile);
+#ifdef MULTIDEVICE
+    MPI_Bcast((void*) &error,1,MPI_INT,0,MPI_COMM_WORLD );
+#endif
+    
     if(error){
+
+#ifdef MULTIDEVICE
+        printf("MPI%02d - Some error happened in reading %s ...\n",
+                devinfo.myrank,nomefile );
+        if(0==devinfo.myrank){
+        FILE * bash_repair_commands = fopen("genappfiles.sh","a");
+
+        printf("You may want to generate a rational approximation file using the tool \'rgen\' (look in the tools directory). Please try\n");
+        printf("./rgen %e %d %d %e\n", rational_approx->error, 
+                rational_approx->exponent_num, rational_approx->exponent_den, 
+                rational_approx->lambda_min);
+        printf("(see and modify \"genappfiles.sh\", check for doublers)\n");
+        printf("(Or give command \n bash <(sort genappfiles.sh | uniq).\n");
+        fprintf(bash_repair_commands,
+                "echo \'./rgen %e %d %d %e >> rat_app_gen_log.txt &\'\n",
+                rational_approx->error, rational_approx->exponent_num,
+                rational_approx->exponent_den, rational_approx->lambda_min);
+        fprintf(bash_repair_commands,"./rgen %e %d %d %e >> rat_app_gen_log.txt &\n",
+                rational_approx->error, rational_approx->exponent_num,
+                rational_approx->exponent_den, rational_approx->lambda_min);
+        fclose(bash_repair_commands);
+
+        }
+
+        MPI_Barrier(MPI_COMM_WORLD);
+#else
+
 
         char command[100];
         sprintf(command,
@@ -82,8 +121,10 @@ int rationalapprox_read(RationalApprox* rational_approx)
 
         printf("Creating (and caching) file %s, wait ...\n", nomefile);
         int status=system(command);
+
         error = rationalapprox_read_custom_nomefile(rational_approx,nomefile);
         free(nomefile);
+#endif
         return error;
     }
     else{

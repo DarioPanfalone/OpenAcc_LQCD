@@ -115,9 +115,10 @@ void reorder_par_infos(int npar, par_info * par_infos ){
             for(int j = i+1; j < npar; j++){
                 allright = 1;
                 char* match = strstr(par_infos[j].name,par_infos[i].name);
-                //printf("DEBUG (%d,%d)params %s and %s, match %p \n",i,j,par_infos[j].name,par_infos[i].name, match );
+                // if(0==devinfo.myrank) printf("DEBUG (%d,%d)params %s and %s, match %p \n",i,j,par_infos[j].name,par_infos[i].name, match );
                 if (match){
-                    printf("Reordering %s and %s\n",par_infos[j].name,par_infos[i].name);
+                    if(0==devinfo.myrank)
+                        printf("Reordering %s and %s\n",par_infos[j].name,par_infos[i].name);
                     par_info tmp = par_infos[i];
                     par_infos[i] = par_infos[j];
                     par_infos[j] = tmp;
@@ -141,7 +142,9 @@ int scan_group_V(int ntagstofind, const char **strtofind,
     // scans for lines in the format
     // (stuff that will be ignored )NAME (stuff that will be ignored)
     // the arrays 'taglines' and 'types' and must be maxnres long
-    printf("Scanning for parameter macro groups..\n");
+
+    if(0==devinfo.myrank)
+        printf("Scanning for parameter macro groups..\n");
     for(int i =0; i<ntagstofind; i++) tagcount[i] = 0;
     for(int i =0; i<maxnres; i++){// initializing output arrays
         taglines[i] = -1;
@@ -164,7 +167,8 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         iline++;
     }
     for(int i =0; i<ntagstofind; i++)
-        printf("Found %s %d times.\n", strtofind[i], tagcount[i]); 
+        if(0==devinfo.myrank)
+            printf("Found %s %d times.\n", strtofind[i], tagcount[i]); 
 
     return nres;
 }
@@ -175,31 +179,31 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
         for(int ipar = 0;ipar< npars ; ipar++){
             if(par_infos[ipar].is_optional) switch(par_infos[ipar].type){
                 case TYPE_INT:
-                    fprintf(
-                            helpfile,"%-30s%-20d#%s\n",
-                            par_infos[ipar].name,
-                            *((const int *) par_infos[ipar].default_value),
-                            type_strings[par_infos[ipar].type]);
+                    if(0==devinfo.myrank) fprintf(
+                                helpfile,"%-30s%-20d#%s\n",
+                                par_infos[ipar].name,
+                                *((const int *) par_infos[ipar].default_value),
+                                type_strings[par_infos[ipar].type]);
                     break;
                 case TYPE_DOUBLE:
-                    fprintf(
-                            helpfile,"%-30s%-20e#%s\n",
-                            par_infos[ipar].name,
-                            *((const double *) par_infos[ipar].default_value),
-                            type_strings[par_infos[ipar].type]);
+                    if(0==devinfo.myrank) fprintf(
+                                helpfile,"%-30s%-20e#%s\n",
+                                par_infos[ipar].name,
+                                *((const double *) par_infos[ipar].default_value),
+                                type_strings[par_infos[ipar].type]);
                     break;
                 case TYPE_STR:
-                    fprintf(
-                            helpfile,"%-30s%-20s#%s\n",
-                            par_infos[ipar].name,
-                            ((const char *) par_infos[ipar].default_value),
-                            type_strings[par_infos[ipar].type]);
+                    if(0==devinfo.myrank) fprintf(
+                                helpfile,"%-30s%-20s#%s\n",
+                                par_infos[ipar].name,
+                                ((const char *) par_infos[ipar].default_value),
+                                type_strings[par_infos[ipar].type]);
 
 
                     break;
             }
             else 
-                    fprintf(
+                if(0==devinfo.myrank) fprintf(
                             helpfile,"%-50s#%s\n",
                             par_infos[ipar].name,
                             type_strings[par_infos[ipar].type]);
@@ -231,7 +235,8 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 found_something = strstr(filelines[iline],par_infos[i].name);
                 if(found_something){ // looks at the beginning of the line.
                     // found parameter
-                    printf("  %s\r\t\t\t\t ",par_infos[i].name);
+                    if(0==devinfo.myrank)
+                        printf("  %s\r\t\t\t\t ",par_infos[i].name);
                     int reads = 0;
                     char parname[50];
                     switch(par_infos[i].type){
@@ -239,28 +244,32 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                             reads = sscanf(filelines[iline],
                                     "%s %d",parname,(int*)par_infos[i].par);
                             if(reads == 2) 
-                                printf("%d\n", *((int*)par_infos[i].par));
+                                if(0==devinfo.myrank)
+                                    printf("%d\n", *((int*)par_infos[i].par));
                             break;
                         case TYPE_DOUBLE:
 
                             reads = sscanf(filelines[iline],
                                     "%s %lf",parname,(double*) par_infos[i].par);
                             if(reads == 2)
-                                printf("%e\n", *((double*)par_infos[i].par));
+                                if(0==devinfo.myrank)
+                                    printf("%e\n", *((double*)par_infos[i].par));
                             break;
                         case TYPE_STR: 
                             reads = sscanf(filelines[iline],
                                     "%s %s",parname,(char*) par_infos[i].par);
                             if(reads == 2) 
-                                printf("\"%s\"\n", ((char*)par_infos[i].par));
+                                if(0==devinfo.myrank)
+                                    printf("\"%s\"\n", ((char*)par_infos[i].par));
                             break;
                         default: 
-                            printf("WARNING, variable type not set in sourcecode.\n");
+                            if(0==devinfo.myrank)
+                                printf("WARNING, variable type not set in sourcecode.\n");
                             break;
 
                     }
                     if(reads == 2)rc[i]++;
-                    else printf("WARNING, NO VALUE READ!");
+                    else if(0==devinfo.myrank) printf("WARNING, NO VALUE READ!");
                     break;
                 };
             }
@@ -276,29 +285,35 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
             res = 1;
             for(int i =0; i<npars; i++){
                 if (rc[i]==0){
-                    printf("Parameter %s not set in input file.",par_infos[i].name);
+                    if(0==devinfo.myrank)
+                        printf("Parameter %s not set in input file.",par_infos[i].name);
                     if(par_infos[i].is_optional==1){
-                        printf(" Parameter is optional. Default value: ");
+                        if(0==devinfo.myrank)
+                            printf(" Parameter is optional. Default value: ");
                         switch(par_infos[i].type){
                             case TYPE_INT:
                                 *((int*)(par_infos[i].par)) = 
                                     *((const int*) (par_infos[i].default_value));
-                                printf(" %d", *((int*)(par_infos[i].par)));
+                                if(0==devinfo.myrank)
+                                    printf(" %d", *((int*)(par_infos[i].par)));
                                 break;
                             case TYPE_DOUBLE:
                                 *((double*)(par_infos[i].par)) = 
                                     *((const double*) (par_infos[i].default_value));
-                                printf(" %f", *((double*)(par_infos[i].par)));
+                                if(0==devinfo.myrank)
+                                    printf(" %f", *((double*)(par_infos[i].par)));
                                 break;
                             case TYPE_STR:
                                 strcpy((char*)par_infos[i].par,(const char*) par_infos[i].default_value);
-                                printf(" %s", (char*)(par_infos[i].par));
+                                if(0==devinfo.myrank)
+                                    printf(" %s", (char*)(par_infos[i].par));
                                 break;
                         }
-                        printf("\n");
+                        if(0==devinfo.myrank) printf("\n");
                     }
                     else{
-                        printf(" Parameter is NOT optional!\n");
+                        if(0==devinfo.myrank)
+                            printf(" Parameter is NOT optional!\n");
                         res = 0;
                     }
                 }
@@ -306,7 +321,9 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
         } // if(!res)
         free(rc);
         if(!res){
-            printf("NON OPTIONAL PARAMETERS NOT FOUND IN INPUT FILE. PLEASE CHECK.\n");
+
+            if(0==devinfo.myrank)
+                printf("NON OPTIONAL PARAMETERS NOT FOUND IN INPUT FILE. PLEASE CHECK.\n");
             return 1;
         }
         else return 0;
@@ -347,9 +364,12 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
 
     if(startline<endline)
         if(act_par->stout_rho != RHO ){ 
-            printf("Error, input file stout_rho != RHO \n");
-            printf("  Either modify the input file, or recompile changing RHO\n");
-            printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
+
+            if(0==devinfo.myrank){
+                printf("Error, input file stout_rho != RHO \n");
+                printf("  Either modify the input file, or recompile changing RHO\n");
+                printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
+            }
             exit(1);
 
         }
@@ -471,10 +491,10 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
         (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 0 , NULL  }
 #else
         (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 1 , (const void*) &single_dev_choice_def},
-        (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL},
-        (par_info){(void*) &(di->proc_per_node),TYPE_INT,"NProcPerNode", 0 , NULL},
+            (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL},
+            (par_info){(void*) &(di->proc_per_node),TYPE_INT,"NProcPerNode", 0 , NULL},
 #endif
-};
+    };
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
@@ -521,16 +541,19 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 
         if(gpar->gnx != expnx || gpar->gny != expny ||
                 gpar->gnz != expnz  || gpar->gnt != expnt ){ 
-            printf("Error, input file lattice dimensions are not compatible\n");
-            printf("       with the lattice dimensions written in geometry.h.\n");
-            printf("       Either modify the input file, or recompile,\n");
-            printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
-                    gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
-            printf("(code)  nx=%dx%d\tny=%dx%d\tnz=%dx%d\tnt=%dx%d\n",
-                    gpar->nd[gpar->xmap], gpar->nranks[gpar->xmap],
-                    gpar->nd[gpar->ymap], gpar->nranks[gpar->ymap],
-                    gpar->nd[gpar->zmap], gpar->nranks[gpar->zmap],
-                    gpar->nd[gpar->tmap], gpar->nranks[gpar->tmap]);
+
+            if(0==devinfo.myrank){
+                printf("Error, input file lattice dimensions are not compatible\n");
+                printf("       with the lattice dimensions written in geometry.h.\n");
+                printf("       Either modify the input file, or recompile,\n");
+                printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
+                        gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
+                printf("(code)  nx=%dx%d\tny=%dx%d\tnz=%dx%d\tnt=%dx%d\n",
+                        gpar->nd[gpar->xmap], gpar->nranks[gpar->xmap],
+                        gpar->nd[gpar->ymap], gpar->nranks[gpar->ymap],
+                        gpar->nd[gpar->zmap], gpar->nranks[gpar->zmap],
+                        gpar->nd[gpar->tmap], gpar->nranks[gpar->tmap]);
+            }
             res = 1;
         }
         int maps[4] = {gpar->xmap,gpar->ymap,gpar->zmap,gpar->tmap};
@@ -540,10 +563,12 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
             stop = stop || (maps[imap] == maps[jmap]);
 
         if(stop){
-            printf("ERROR: found two equal direction mappings (%s:%d)\n",
-                    __FILE__,__LINE__);
+
+            if(0==devinfo.myrank)
+                printf("ERROR: found two equal direction mappings (%s:%d)\n",
+                        __FILE__,__LINE__);
             res = 1;
-        
+
         }
     }
     return res;
@@ -558,9 +583,12 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     int helpmode = 0;
     char filelines[MAXLINES][MAXLINELENGTH];
     FILE *input = fopen(input_filename,"r");
-    if (input == NULL) {
-        printf("Could not open file %s \n",input_filename );
-        printf("writing an template_input file for your convenience.\n" );
+    if (input == NULL){
+
+        if(0==devinfo.myrank){
+            printf("Could not open file %s \n",input_filename );
+            printf("writing an template_input file for your convenience.\n" );
+        }
         helpmode = 1;
     }
 
@@ -577,10 +605,13 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         }
         fclose(input);
 
-        printf("lines read: %d\n", lines_read);
+        if(0==devinfo.myrank)
+            printf("lines read: %d\n", lines_read);
 
         int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str);
-        printf("Written %d characters into input_file_str\n",totlen);
+
+        if(0==devinfo.myrank)
+            printf("Written %d characters into input_file_str\n",totlen);
 
 
         // erasing comments 
@@ -598,10 +629,13 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         // see global var in /Include/fermion_parameters.
         // setting NDiffFlavs first
         NDiffFlavs = tagcounts[PMG_FERMION];
-        if(NDiffFlavs==0){
+        if(NDiffFlavs==0)
+        {
             fermions_parameters = NULL;
-            printf("NO FERMIONS FOUND, ");
-            printf("SIMULATING PURE GAUGE THEORY...\n");
+            if(0==devinfo.myrank){
+                printf("NO FERMIONS FOUND, ");
+                printf("SIMULATING PURE GAUGE THEORY...\n");
+            }
         }
         else fermions_parameters = (ferm_param*) malloc(NDiffFlavs*sizeof(ferm_param));
     }
@@ -616,7 +650,9 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
             // type anyway
 
         }
-        helpfile = fopen("template_input", "w");
+        if(0==devinfo.myrank)
+
+            helpfile = fopen("template_input", "w");
     }
 
 
@@ -626,8 +662,9 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         if(igrouptype != PMG_FERMION )  check *= tagcounts[igrouptype];
     if(!check){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-            if (!tagcounts[igrouptype]) printf("\"%s\"  parameter group not found!\n",
-                    par_macro_groups_names[igrouptype]);
+            if (!tagcounts[igrouptype]) if(0==devinfo.myrank)
+                printf("\"%s\"  parameter group not found!\n",
+                        par_macro_groups_names[igrouptype]);
         exit(1);
     }
 
@@ -639,8 +676,11 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         int startline = tagpositions[igroup];
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
-        if(helpmode) fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
-        else printf("Reading %s...\n", par_macro_groups_names[tagtypes[igroup]]);
+        if(helpmode) if(0==devinfo.myrank)
+            fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
+        else 
+            if(0==devinfo.myrank)
+                printf("Reading %s...\n", par_macro_groups_names[tagtypes[igroup]]);
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
                 check = read_action_info(&act_params,filelines,startline,endline);
@@ -679,7 +719,8 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
         }
         if(check)
-            printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
+            if(0==devinfo.myrank)
+                printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
         totcheck += check;
     }
 
@@ -690,7 +731,8 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         uint32_t hash = hash_settings();
         char hash_string[32];
         sprintf(hash_string,"%" PRIu32, hash);
-        printf("Hash of all relevant settings: %s\n", hash_string );
+        if(0==devinfo.myrank)
+            printf("Hash of all relevant settings: %s\n", hash_string );
         strcat(gauge_outfilename, hash_string);
         strcat(fm_par.fermionic_outfilename, hash_string);
         strcat(mkwch_pars.diagnostics_filename,hash_string);
@@ -698,7 +740,8 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     }
     if(totcheck!=0){
 
-        printf("There are errors in some groups, exiting.\n")   ;
+        if(0==devinfo.myrank)
+            printf("There are errors in some groups, exiting.\n")   ;
         exit(1);
 
     }

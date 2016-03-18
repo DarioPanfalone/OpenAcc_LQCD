@@ -350,9 +350,9 @@ if __name__ == '__main__':
 #define LOC_N3  8
 
 // MULTIDEVICE
-#define NRANKS_D0 1
-#define NRANKS_D1 1
-#define NRANKS_D2 1
+#define NRANKS_D0 1   // Keep 1 - only "salamino" allowed
+#define NRANKS_D1 1   // Keep 1 - only "salamino" allowed
+#define NRANKS_D2 1   // Keep 1 - only "salamino" allowed
 #define NRANKS_D3 1
 '''
         f.write(ldim_string)
