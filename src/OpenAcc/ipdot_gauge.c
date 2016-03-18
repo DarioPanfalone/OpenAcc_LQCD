@@ -14,6 +14,14 @@
 
 extern int verbosity_lv;
 
+#ifdef DEBUG_MD
+#include "../Mpi/multidev.h"
+#include "../DbgTools/dbgtools.h"
+int already_printed_staples_debug = 0;
+#endif
+
+
+
 extern tamat_soa * ipdot_g_old; // see alloc_vars.c
 
 // FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
@@ -27,6 +35,17 @@ void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  _
     set_su3_soa_to_zero(local_staples);
     calc_loc_staples_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
+#ifdef DEBUG_MD
+    if(!already_printed_staples_debug){
+        char genericfilename[50];
+        sprintf(genericfilename,"staples_0_%s",devinfo.myrankstr);
+        dbgprint_gl3_soa(local_staples,genericfilename,1000);
+        sprintf(genericfilename,"tipdot_staples_0_%s",devinfo.myrankstr);
+        print_tamat_soa(tipdot,genericfilename);
+        already_printed_staples_debug = 1;
+    }
+#endif
+
 
 #ifdef TIMING_STAPLES
     gettimeofday ( &t2, NULL );
@@ -53,7 +72,16 @@ void calc_ipdot_gauge_soloopenacc_tlsm( __restrict  su3_soa * const tconf_acc,  
     calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
     calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
     calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all(tconf_acc,local_staples);
-
+#ifdef DEBUG_MD
+    if(!already_printed_staples_debug){
+        char genericfilename[50];
+        sprintf(genericfilename,"impr_staples_0_%s",devinfo.myrankstr);
+        dbgprint_gl3_soa(local_staples,genericfilename,1000);
+        sprintf(genericfilename,"tipdot_improved_staples_0_%s",devinfo.myrankstr);
+        print_tamat_soa(tipdot,genericfilename);
+        already_printed_staples_debug = 1;
+    }
+#endif
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 
 #ifdef TIMING_STAPLES

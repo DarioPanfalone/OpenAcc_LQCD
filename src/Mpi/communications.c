@@ -12,6 +12,7 @@
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/single_types.h"
 
+extern int verbosity_lv;
 
 #ifdef MULTIDEVICE
 #include "mpi.h"
@@ -38,6 +39,8 @@ void sendrecv_vec3soa_borders_1Dcut(vec3_soa *lnh_fermion,
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
      printf("THIS SETUP IS NOT SALAMINO-LIKE!!!\n communication of fermion borders will FAIL!!\n");
+   if(verbosity_lv > 5) printf("MPI%02d - sendrecv_vec3soa_borders_1Dcut() \n",
+           devinfo.myrank);
 
 /*   // PREAMBLE
    // This function is written taking the following assumptions:
@@ -128,6 +131,9 @@ void sendrecv_vec3soa_borders_1Dcut_async(vec3_soa *lnh_fermion,
         int thickness,
         MPI_Request* send_border_requests, 
         MPI_Request* recv_border_requests){
+   if(verbosity_lv > 5) printf("MPI%02d - sendrecv_vec3soa_borders_1Dcut_async() \n",
+           devinfo.myrank);
+
    // NOTICE YOU HAVE TO SET MYRANK CORRECTLY TO USE THIS FUNCTION
    // NOTICE send_border_requests recv_border_requests are both 
    // 6-elements long
@@ -253,6 +259,8 @@ void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
      printf("THIS SETUP IS NOT SALAMINO-LIKE!!!\n communication of fermion borders will FAIL!!\n");
+   if(verbosity_lv > 4) printf("MPI%02d - sendrecv_thmat_soa_borders_1Dcut() \n",
+           devinfo.myrank);
 
   // PREAMBLE : see  void sendrecv_vec3soa_borders_1Dcut()
   // no. of 'fermion' point in each slab)
@@ -270,10 +278,11 @@ void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
       c[2] = lnh_momenta->c02;
       double  * cd[2];
       cd[0] = lnh_momenta->rc00;
-      cd[0] = lnh_momenta->rc11;
+      cd[1] = lnh_momenta->rc11;
+
 
       int ii;
-      for(int ii =0; ii<3; ii++){
+      for(ii =0; ii<3; ii++){
 
           // ASK FOR BACKS FIRST, THEN FACES
           int sendtag = ii;
@@ -309,7 +318,9 @@ void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
 #pragma acc update device(tmpc[offset_size-slab_sizeh:slab_sizeh])
 #endif
       }
-      for(int ii =0; ii<2; ii++){
+
+
+      for(ii =0; ii<2; ii++){
 
           // ASK FOR BACKS FIRST, THEN FACES
           int sendtag = 6+ii;
@@ -344,6 +355,7 @@ void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
 #ifndef USE_MPI_CUDA_AWARE
 #pragma acc update device(tmpc[offset_size-slab_sizeh:slab_sizeh])
 #endif
+
       }
 #ifdef USE_MPI_CUDA_AWARE
   }
@@ -359,6 +371,9 @@ void sendrecv_thmat_soa_borders_1Dcut_async(thmat_soa *lnh_momenta,
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
      printf("THIS SETUP IS NOT SALAMINO-LIKE!!!\n communication of fermion borders will FAIL!!\n");
+   if(verbosity_lv > 4) printf("MPI%02d - sendrecv_thmat_soa_borders_1Dcut_async()\n",
+           devinfo.myrank);
+
 
    //SEE PREAMBLE FOR sendrecv_vec3soa_borders_1Dcut()
    //must be done for the three components of the fermion.
@@ -376,7 +391,7 @@ void sendrecv_thmat_soa_borders_1Dcut_async(thmat_soa *lnh_momenta,
       c[2] = lnh_momenta->c02;
       double  * cd[2];
       cd[0] = lnh_momenta->rc00;
-      cd[0] = lnh_momenta->rc11;
+      cd[1] = lnh_momenta->rc11;
 
       int ii;
       for(int ii =0; ii<3; ii++){
@@ -448,6 +463,9 @@ void sendrecv_tamat_soa_borders_1Dcut(tamat_soa *lnh_ipdot,
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
      printf("THIS SETUP IS NOT SALAMINO-LIKE!!!\n communication of fermion borders will FAIL!!\n");
+   if(verbosity_lv > 4) printf("MPI%02d - sendrecv_tamat_soa_borders_1Dcut() \n",
+           devinfo.myrank);
+
 
   // PREAMBLE : see  void sendrecv_vec3soa_borders_1Dcut()
   // no. of 'fermion' point in each slab)
@@ -465,7 +483,7 @@ void sendrecv_tamat_soa_borders_1Dcut(tamat_soa *lnh_ipdot,
       c[2] = lnh_ipdot->c02;
       double  * cd[2];
       cd[0] = lnh_ipdot->ic00;
-      cd[0] = lnh_ipdot->ic11;
+      cd[1] = lnh_ipdot->ic11;
 
       int ii;
       for(int ii =0; ii<3; ii++){
@@ -554,6 +572,9 @@ void sendrecv_tamat_soa_borders_1Dcut_async(tamat_soa *lnh_ipdot,
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
      printf("THIS SETUP IS NOT SALAMINO-LIKE!!!\n communication of fermion borders will FAIL!!\n");
+   if(verbosity_lv > 4) printf("MPI%02d - sendrecv_tamat_soa_borders_1Dcut_async() \n",
+           devinfo.myrank);
+
 
    //SEE PREAMBLE FOR sendrecv_vec3soa_borders_1Dcut()
    //must be done for the three components of the fermion.
@@ -571,7 +592,7 @@ void sendrecv_tamat_soa_borders_1Dcut_async(tamat_soa *lnh_ipdot,
       c[2] = lnh_ipdot->c02;
       double  * cd[2];
       cd[0] = lnh_ipdot->ic00;
-      cd[0] = lnh_ipdot->ic11;
+      cd[1] = lnh_ipdot->ic11;
 
       int ii;
       for(int ii =0; ii<3; ii++){
@@ -670,43 +691,41 @@ void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank){
             8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check, target_su3_soa);
 
-    int tg_loc_0,tg_loc_1,tg_loc_2,tg_loc_3,dir; //target-loc coordinates
+   if(verbosity_lv > 3) printf("MPI%02d - send_lnh_subconf_to_rank()\n",
+           devinfo.myrank);
+
+    int tg_lnh_0,tg_lnh_1,tg_lnh_2,tg_lnh_3,dir; //target-lnh coordinates
     // and link direction
     // Copying all relevant links into the sublattice
     for(dir =0; dir < 4; dir++)
-        for(tg_loc_3=0;tg_loc_3<LOC_N3; tg_loc_3++)
-            for(tg_loc_2=0;tg_loc_2<LOC_N2; tg_loc_2++)
-                for(tg_loc_1=0;tg_loc_1<LOC_N1; tg_loc_1++)
-                    for(tg_loc_0=0;tg_loc_0<LOC_N0; tg_loc_0++){
-
-                        int tg_lnh_0,tg_lnh_1,tg_lnh_2,tg_lnh_3; //target-lnh coordinates
-                        tg_lnh_0 = tg_loc_0 + D0_HALO;
-                        tg_lnh_1 = tg_loc_1 + D1_HALO;
-                        tg_lnh_2 = tg_loc_2 + D2_HALO;
-                        tg_lnh_3 = tg_loc_3 + D3_HALO;
+        for(tg_lnh_3=0;tg_lnh_3 < LNH_N3; tg_lnh_3++)
+        for(tg_lnh_2=0;tg_lnh_2 < LNH_N2; tg_lnh_2++)
+        for(tg_lnh_1=0;tg_lnh_1 < LNH_N1; tg_lnh_1++)
+        for(tg_lnh_0=0;tg_lnh_0 < LNH_N0; tg_lnh_0++){
 
                         //        int gtsp; // global target site parity
                         int tsprlo ; // target site parity respect (to his) local origin;
 
-                        int target_gl_snum = 
-                            target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, 
-                                    tg_lnh_2, tg_lnh_3, 
-                                    target_gl_loc_origin_from_rank);
-                        int target_lnh_snum = snum_acc(tg_lnh_0,
-                                tg_lnh_1, tg_lnh_2, tg_lnh_3);
+                        int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+                        int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
 
                         tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
+                        //      gtsp = (target_loc_origin_parity + tsprlo )%2;
 
+                        //      printf("%d %d  %d  %d  %d  %d  %d ",dir, tg_lnh_t, tg_lnh_z, tg_lnh_y, tg_lnh_x, target_gl_snum, tsprlo);
                         single_su3 aux;
-                        single_su3_from_global_su3_soa(
-                                &gl_soa_conf[2*dir+tsprlo],
-                                target_gl_snum, &aux);
-
-                        single_su3_into_su3_soa(
-                                &target_su3_soa[2*dir+tsprlo],
-                                target_lnh_snum,&aux);
+                        single_su3_from_global_su3_soa(&(gl_soa_conf[2*dir+tsprlo]),
+                                target_gl_snum,&aux);
+                        //    printf("ciao \n");
+                        //        printf("ciao ");
+                        //      print_su3(aux);
+                        single_su3_into_su3_soa(&(target_su3_soa[2*dir+tsprlo]),
+                                target_lnh_snum, &aux);
+                        //        printf("ciao \n");
 
                     }
+
+
 
     //sending the subconfiguration
     MPI_Send(target_su3_soa, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE, target_rank , target_rank, MPI_COMM_WORLD); // tag = target_rank
@@ -716,7 +735,8 @@ void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank){
     // ^^ CHECK
     FREECHECK(target_su3_soa);
 }
-void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, int tag){
+void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, int tag)
+{
     // USE ONLY FROM MASTER RANK
     //target sublattice information
     vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
@@ -729,7 +749,10 @@ void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, in
        if(target_loc_origin_parity) printf("Problems\n");
        */
     // building sublattice duplicate, target_conf
-   
+
+   if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subconf_from_rank(), tag %d\n",
+           devinfo.myrank,tag);
+
     int allocation_check; 
     su3_soa* target_su3_soa;
     allocation_check = posix_memalign((void**) &target_su3_soa, ALIGN,
@@ -738,48 +761,14 @@ void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, in
 
     MPI_Recv(target_su3_soa, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE,target_rank,tag,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    int tg_loc_0,tg_loc_1,tg_loc_2,tg_loc_3,dir; //target-loc coordinates
-    // and link direction
-    // Copying all relevant links from the sublattice to the global lattice
-    for(dir =0; dir < 4; dir++)
-        for(tg_loc_3=0;tg_loc_3<LOC_N3; tg_loc_3++)
-            for(tg_loc_2=0;tg_loc_2<LOC_N2; tg_loc_2++)
-                for(tg_loc_1=0;tg_loc_1<LOC_N1; tg_loc_1++)
-                    for(tg_loc_0=0;tg_loc_0<LOC_N0; tg_loc_0++){
-    
-                        int tg_lnh_0,tg_lnh_1,tg_lnh_2,tg_lnh_3; //target-lnh coordinates
-                        tg_lnh_0 = tg_loc_0 + D0_HALO;
-                        tg_lnh_1 = tg_loc_1 + D1_HALO;
-                        tg_lnh_2 = tg_loc_2 + D2_HALO;
-                        tg_lnh_3 = tg_loc_3 + D3_HALO;
-
-                        //        int gtsp; // global target site parity
-                        int tsprlo ; // target site parity respect (to his) local origin;
-
-                        int target_gl_snum = 
-                            target_lnh_to_gl_snum( tg_lnh_0, tg_lnh_1,
-                                   tg_lnh_2, tg_lnh_3,
-                                   target_gl_loc_origin_from_rank);
-                        int target_lnh_snum = snum_acc(tg_lnh_0,
-                                tg_lnh_1, tg_lnh_2, tg_lnh_3);
-
-                        tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
-
-                        single_su3 aux;
-                        single_su3_from_su3_soa(
-                                &target_su3_soa[2*dir+tsprlo],
-                                target_lnh_snum, & aux);
-
-                        single_su3_into_global_su3_soa(
-                                &gl_soa_conf[2*dir+tsprlo],
-                                target_gl_snum,&aux);
-
-                    }
+    recv_loc_subconf_from_buffer(gl_soa_conf,target_su3_soa,target_rank);
 
     FREECHECK(target_su3_soa);
 }
 void send_lnh_subconf_to_master(su3_soa *lnh_soa_conf, int tag){
    //sending the subconfiguration
+      if(verbosity_lv > 3) printf("MPI%02d - send_lnh_subconf_to_master(), tag %d\n",
+           devinfo.myrank,tag);
     MPI_Send(lnh_soa_conf, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE, 0, tag , MPI_COMM_WORLD);
 }
 void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf){
@@ -795,8 +784,12 @@ void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf){
 
 #endif
 // only for the master rank
-void send_lnh_subconf_to_buffer(global_su3_soa *gl_soa_conf, su3_soa *lnh_conf, int target_rank){
+void send_lnh_subconf_to_buffer(global_su3_soa *gl_soa_conf, su3_soa *lnh_conf, 
+        int target_rank)
+{
     // USE ONLY FROM MASTER RANK
+
+if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subconf_to_buffer()", devinfo.myrank);
 
 
     //target sublattice information
@@ -844,7 +837,12 @@ void send_lnh_subconf_to_buffer(global_su3_soa *gl_soa_conf, su3_soa *lnh_conf, 
     // ^^ CHECK
     */ // COMMENTED FOR TEST
 }
-void recv_loc_subconf_from_buffer(global_su3_soa *gl_soa_conf, su3_soa* lnh_conf, int target_rank){
+void recv_loc_subconf_from_buffer(global_su3_soa *gl_soa_conf, su3_soa* lnh_conf,
+        int target_rank)
+{
+
+
+if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subconf_from_buffer()", devinfo.myrank);
     // USE ONLY FROM MASTER RANK
     //target sublattice information
     vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);

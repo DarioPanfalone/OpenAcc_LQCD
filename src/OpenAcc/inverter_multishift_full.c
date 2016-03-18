@@ -7,6 +7,7 @@
 #include "./inverter_multishift_full.h"
 #include "./inverter_full.h"
 
+#include "../Mpi/multidev.h"
 
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
@@ -93,7 +94,7 @@ int multishift_invert(__restrict su3_soa * const u,
         maxiter = iter+1;
       }
     }
-    if (verbosity_lv > 0){
+    if (verbosity_lv > 0 && 0==devinfo.myrank ){
       printf("STARTING CG-M:\nCG\tR");
       for(iter=0; iter<(approx->approx_order); iter++)
           printf("\t%d",iter); printf("\n");
@@ -167,8 +168,9 @@ int multishift_invert(__restrict su3_soa * const u,
       if (verbosity_lv == 3  ) print_condition = (cg%100 == 0);
       if (verbosity_lv == 4  ) print_condition = (cg%50 == 0);
       if (verbosity_lv > 4  ) print_condition = (cg%10 == 0);
+
       
-      if(print_condition){
+      if(print_condition && 0==devinfo.myrank  ){
 
       printf("%d\t%1.1e",cg, sqrt(lambda));
       for(iter=0; iter<(approx->approx_order); iter++){
@@ -180,14 +182,14 @@ int multishift_invert(__restrict su3_soa * const u,
       }
     } while(maxiter>0 && cg<max_cg); // end of cg iterations 
 
-    if(cg==max_cg)
+    if(cg==max_cg && 0==devinfo.myrank )
       {
 	printf("WARNING: maximum number of iterations reached in invert\n");
       }
 //      printf("\t CG count = %i \n",cg);
     
 
-  if(verbosity_lv > 0) printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
+  if(verbosity_lv > 0 && 0==devinfo.myrank ) printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
   // test 
 
   if(verbosity_lv > 2){

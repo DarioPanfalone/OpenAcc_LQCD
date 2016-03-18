@@ -17,7 +17,7 @@ void compute_nnp_and_nnm_openacc(void){
 
   char nnfilename[50];
 #ifdef MULTIDEVICE
-  sprintf(nnfilename,"nnfile_rank%d",devinfo.myrank);
+  sprintf(nnfilename,"nnfile_%s",devinfo.myrankstr);
 #else
   sprintf(nnfilename,"nnfile");
 #endif
@@ -84,7 +84,7 @@ void compute_nnp_and_nnm_openacc(void){
           for(dir = 0; dir < 4 ;dir ++)
               fprintf(nnfile," %d ", nnm_openacc[idxh][dir][parity]);
           for(dir = 0; dir < 4 ;dir ++)
-              fprintf(nnfile," %d ", nnm_openacc[idxh][dir][parity]);
+              fprintf(nnfile," %d ", nnp_openacc[idxh][dir][parity]);
           fprintf(nnfile,"\n");
 
 
@@ -113,12 +113,10 @@ void set_geom_glv(geom_parameters* gp){
     gp->nranks[0] = NRANKS_D0; gp->nranks[1] = NRANKS_D1; 
     gp->nranks[2] = NRANKS_D2; gp->nranks[3] = NRANKS_D3;
     
-#ifdef MULTIDEVICE
     gp->halos[0] = D0_HALO; 
     gp->halos[1] = D1_HALO; 
     gp->halos[2] = D2_HALO; 
     gp->halos[3] = D3_HALO;
-#endif
 
 }
 

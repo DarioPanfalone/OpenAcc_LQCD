@@ -166,6 +166,7 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom8)
                 mom->c12[t]  =  casuali[5] - casuali[6] * I;
             }   
     }
+
 #ifdef MULTIDEVICE
     communicate_thmat_soa_borders(mom8);
 #endif

@@ -19,6 +19,7 @@
 #include "./action.h"
 #include "../Rand/random.h"
 #include "../Include/markowchain.h"
+#include "../Mpi/multidev.h"
 
 //#define NORANDOM  // FOR debug, check also main.c 
 #ifdef NORANDOM
@@ -104,12 +105,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     generate_Momenta_gauss(momenta);
 #endif
 
-    printf("Momenta generated/read : OK \n");
+    printf("MPI%02d - Momenta generated/read : OK \n", devinfo.myrank);
 
     //    read_thmat_soa(momenta,"momenta");
 #pragma acc update device(momenta[0:8])
-    MPI_Finalize();  // <<<<<<<<<<<<<<<---------------------- start here
-    return 0;
 
 
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -145,7 +144,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #else
     gconf_as_fermionmatrix = tconf_acc;
 #endif
-
 
 
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
@@ -186,7 +184,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 #pragma acc update device(approx_fi[0:1])
     }//end for iflav
-    
+
+
+
     if(metro==1){
       /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
       if(GAUGE_ACTION == 0)// Standard gauge action 
@@ -206,7 +206,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 	}
       }// end for iflav
       ///////////////////////////////////////////////////////////////////////////////////////
-    printf(" Initial Action Computed : OK \n");
+    printf("MPI%02d - Initial Action Computed : OK \n", devinfo.myrank);
     }
 
     // FIRST INV APPROX CALC --> calcolo del fermione CHI
@@ -244,7 +244,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 			      ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
 			      k_p_shiftferm,momenta,local_sums,res_md);
     
-    if(verbosity_lv > 1) printf(" Molecular Dynamics Completed \n");
+    if(verbosity_lv > 1) printf("MPI%02d - Molecular Dynamics Completed \n", 
+            devinfo.myrank);
 
 
 #ifdef STOUT_FERMIONS
@@ -285,8 +286,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
 	}
       }
-      printf(" Final Action Computed : OK \n");
-      
+      printf(" MPI%02d - Final Action Computed : OK \n", devinfo.myrank);
+     
       ///////////////   FINAL ACTION COMPUTATION  ////////////////////////////////////////////
       if(GAUGE_ACTION == 0) // Standard gauge action
       action_fin = BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
@@ -311,14 +312,17 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
       // delta_S = action_new - action_old
       delta_S  = - (-action_in+action_mom_in+action_ferm_in) + (-action_fin+action_mom_fin+action_ferm_fin);
-      if(verbosity_lv > 2){
-      printf("iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,-action_in,-action_fin);
-      printf("iterazione %i:  Momen_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,action_mom_in,action_mom_fin);
-      printf("iterazione %i:  Fermi_ACTION  (in and out) = %.18lf , %.18lf\n",iterazioni,action_ferm_in,action_ferm_fin);
-      }
-      printf("iterazione %i:  DELTA_ACTION = %.18lf, ",iterazioni,delta_S);
+      if(verbosity_lv > 2 && 0 == devinfo.myrank ){
+      printf("MPI%02d-iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",
+              devinfo.myrank,iterazioni,-action_in,-action_fin);
+      printf("MPI%02d-iterazione %i:  Momen_ACTION  (in and out) = %.18lf , %.18lf\n",
+              devinfo.myrank,iterazioni,action_mom_in,action_mom_fin);
+      printf("MPI%02d-iterazione %i:  Fermi_ACTION  (in and out) = %.18lf , %.18lf\n",
+              devinfo.myrank,iterazioni,action_ferm_in,action_ferm_fin);
+      }       
+      printf("MPI%02d-iterazione %i:  DELTA_ACTION = %.18lf. ",
+              devinfo.myrank,iterazioni,delta_S);
      
-
 
 #ifdef NORANDOM      
       printf("Always accept in NORANDOM MODE!!!\n");
@@ -333,7 +337,12 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef NORANDOM      
       p2=0;
 #else
-	  p2=casuale();
+	  if(0==devinfo.myrank)p2=casuale();
+#ifdef MULTIDEVICE
+      MPI_Bcast((void*) &p2,1,MPI_INT,0,MPI_COMM_WORLD);
+#endif
+
+
 #endif
 	  if(p2<p1)
 	    {
@@ -354,11 +363,13 @@ gettimeofday ( &t3, NULL );
   if(metro==1){
     if(accettata==1){
       acc++;
-      printf("ACCEPTED   ---> [acc/iter] = [%i/%i] \n",acc,iterazioni);
+      printf("MPI%02d,ACCEPTED   ---> [acc/iter] = [%i/%i] \n",
+              devinfo.myrank,acc,iterazioni);
       // configuration accepted   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
       set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
     }else{
-      printf("REJECTED   ---> [acc/iter] = [%i/%i] \n",acc,iterazioni);
+      printf("MPI%02d,REJECTED   ---> [acc/iter] = [%i/%i] \n",
+              devinfo.myrank,acc,iterazioni);
       // configuration rejected   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
       set_su3_soa_to_su3_soa(conf_acc_bkp,tconf_acc);
 #pragma acc update device(tconf_acc[0:8])
@@ -371,22 +382,23 @@ gettimeofday ( &t3, NULL );
     acc++;
   }
 
+
   dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
   dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
   dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
   dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
 
   if(metro==0){
-    printf("   FULL UPDATE COMPUTATION TIME NOMETRO - Tot time : %f sec \n",dt_tot);
-    printf("\t\tPreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
-    printf("\t\tPreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
-    printf("\t\tPostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
+    printf("MPI%02d-   FULL UPDATE COMPUTATION TIME NOMETRO - Tot time : %f sec \n",devinfo.myrank,dt_tot);
+    printf("MPI%02d-\t\tPreTrans->Preker  : %f sec  \n",devinfo.myrank,dt_pretrans_to_preker);
+    printf("MPI%02d-\t\tPreKer->PostKer   : %f sec  \n",devinfo.myrank,dt_preker_to_postker);
+    printf("MPI%02d-\t\tPostKer->PostTrans: %f sec  \n",devinfo.myrank,dt_postker_to_posttrans);
   }
   if(metro==1){
-    printf("   FULL UPDATE COMPUTATION TIME SIMETRO - Tot time : %f sec  \n",dt_tot);
-    printf("\t\tPreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
-    printf("\t\tPreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
-    printf("\t\tPostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
+    printf("MPI%02d-   FULL UPDATE COMPUTATION TIME SIMETRO - Tot time : %f sec  \n",devinfo.myrank,dt_tot);
+    printf("MPI%02d-\t\tPreTrans->Preker  : %f sec  \n",devinfo.myrank,dt_pretrans_to_preker);
+    printf("MPI%02d-\t\tPreKer->PostKer   : %f sec  \n",devinfo.myrank,dt_preker_to_postker);
+    printf("MPI%02d-\t\tPostKer->PostTrans: %f sec  \n",devinfo.myrank,dt_postker_to_posttrans);
   }
 
   if(mkwch_pars.save_diagnostics == 1){
@@ -405,7 +417,6 @@ gettimeofday ( &t3, NULL );
 
       fclose(foutfile);
   }
-
 
 
   return acc;

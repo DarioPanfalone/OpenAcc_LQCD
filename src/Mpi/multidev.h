@@ -5,7 +5,7 @@
 #include "./geometry_multidev.h"
 
 #ifdef MULTIDEVICE
-#include "mpi.h"
+#include <mpi.h>
 #endif
 
 typedef struct dev_info_t{
@@ -14,6 +14,7 @@ typedef struct dev_info_t{
     
     int single_dev_choice; // from input file
     int myrank, nranks;
+    char myrankstr[50];
 
 #ifdef MULTIDEVICE
     int myrank_L,myrank_R; // nearest neighbours, salamino

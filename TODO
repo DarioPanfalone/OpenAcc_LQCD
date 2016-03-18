@@ -14,16 +14,21 @@ Things to do:
 
 4. Correct execution with PGI, no multidev
    (check-bugfix)  
+
+
 5. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
 5.5 Preparation of input file for run                      DONE 
-6. Correct execution with MPICC (2 ranks, minilattice) FAIL
-   - checks for segmentation faults and mpi errors:
-     OK until generation of momenta (segmentation fault)         <<<<<<<<<-----start here
-     
-
-
+6. Correct execution with MPICC (2 ranks, minilattice) IN PROGRESS
+   - checks for segmentation faults and mpi errors: OK
    - check for actual correctness of the code:
-      calculation of gauge observables on a given conf: TO CHECK
+     - TEST PURE GAUGE   (no fermions):     OK (4^4 x 2) (accepts)
+     - dynamical fermions: FAIL
+         STATUS: multishift inverter takes too long to converge. Can't be right.
+         TEST dirac operator
+         TEST inverter
+         TEST multishift inverter
+
+     - calculation of gauge observables on a given conf: TO CHECK
    
 
 NO ASYNC WORK DONE YET

@@ -34,6 +34,7 @@
 #include "../Include/common_defines.h"
 #include "../Include/fermion_parameters.h"
 #include "./action.h"
+#include "../Mpi/multidev.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
@@ -87,25 +88,33 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot); 
 #ifdef DEBUG_MD
-    if(!already_printed_debug)
-       print_thmat_soa(tmomenta,"tmomenta_0");
-
-    if(!already_printed_debug)
-        print_tamat_soa(tipdot,"tipdot_gauge_0");
+    char conffilename[50];
+    char momfilename[50];
+    char ipdotfilename[50];
+    if(!already_printed_debug){
+        sprintf(conffilename,"conf_md_0_%s",devinfo.myrankstr);
+        sprintf(momfilename,"tmomenta_0_%s",devinfo.myrankstr);
+        sprintf(ipdotfilename,"tipdot_0_%s",devinfo.myrankstr);
+        dbg_print_su3_soa(tconf_acc,conffilename, 1);
+        print_thmat_soa(tmomenta,momfilename);
+        print_tamat_soa(tipdot,ipdotfilename);
+    }
 #endif
 
     mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
 #ifdef DEBUG_MD
-    if(!already_printed_debug)
-       print_thmat_soa(tmomenta,"tmomenta_1");
-    already_printed_debug = 1;
+    if(!already_printed_debug){
+        sprintf(momfilename,"tmomenta_1_%s",devinfo.myrankstr);
+       print_thmat_soa(tmomenta,momfilename);
+    }
 #endif
 
 
 
 
     for(md=1; md<md_parameters.gauge_scale; md++){
-        if(verbosity_lv > 2) printf("Gauge step %d of %d...\n",md,md_parameters.gauge_scale);
+        if(verbosity_lv > 2) printf("MPI%02d - Gauge step %d of %d...\n",
+                devinfo.myrank,md,md_parameters.gauge_scale);
         // Step for the Q
         // Q' = exp[dt/2 *i P] Q
         // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
@@ -134,7 +143,8 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 
         mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,6);
     }
-    if(verbosity_lv > 2) printf("Last Gauge step of %d...\n",md_parameters.gauge_scale);
+    if(verbosity_lv > 2) printf("MPI%02d - Last Gauge step of %d...\n",
+            devinfo.myrank,md_parameters.gauge_scale);
 
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
@@ -149,11 +159,24 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     // P' = P - (1-2l)*dt*dS/dq
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
 
-
-
     // calc_ipdot_gauge();
     // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
     mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,5);
+
+#ifdef DEBUG_MD
+    if(!already_printed_debug){
+        sprintf(conffilename,"conf_md_1_%s",devinfo.myrankstr);
+        sprintf(momfilename,"tmomenta_3_%s",devinfo.myrankstr);
+        sprintf(ipdotfilename,"tipdot_2_%s",devinfo.myrankstr);
+        dbg_print_su3_soa(tconf_acc,conffilename, 2);
+        print_thmat_soa(tmomenta,momfilename);
+        print_tamat_soa(tipdot,ipdotfilename);
+    }
+    already_printed_debug = 1;
+#endif
+
+
+
 
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
@@ -205,11 +228,17 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             tipdot_acc, tfermions_parameters, tNDiffFlavs, 
             ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
             tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+    
+    if(verbosity_lv > 4) printf("MPI%02d - Calculated first fermion force/n", 
+            devinfo.myrank);
+
 
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
 
     for(md=1; md<md_parameters.no_md; md++){
-        printf("\n\n\t\tRUNNING MD STEP %d OF %d...\n", md, md_parameters.no_md);
+
+        printf("\n\nMPI%02d\t\tRUNNING MD STEP %d OF %d...\n",
+               devinfo.myrank, md, md_parameters.no_md);
         // Step for the Q
         // Q' = exp[dt/2 *i P] Q
         multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
@@ -244,7 +273,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
     }  
 
-    printf("\n\n\t\tRUNNING LAST MD STEP OF %d...\n",md_parameters.no_md);
+    printf("\n\nMPI%02d\t\tRUNNING LAST MD STEP OF %d...\n",
+            devinfo.myrank,md_parameters.no_md);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
     multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);

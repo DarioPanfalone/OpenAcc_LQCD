@@ -52,7 +52,7 @@
 #include "sys/time.h"
 #endif
 
-
+#include "../DbgTools/dbgtools.h" // DEBUG
 
 
 
@@ -147,7 +147,6 @@ int main(int argc, char* argv[]){
 
 
 
-
     //################## INIZIALIZZAZIONE DELLA CONFIGURAZIONE #######################
     // start from saved conf
 
@@ -228,6 +227,14 @@ int main(int argc, char* argv[]){
             printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
                     devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
 
+            char confile_dbg[50];
+            sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
+            dbg_print_su3_soa(conf_acc,confile_dbg,0);
+
+//            MPI_Finalize();
+//            return 0;
+
+
 
 
             if(mkwch_pars.ntraj==0){ // MEASURES ONLY
@@ -298,7 +305,6 @@ int main(int argc, char* argv[]){
                             mkwch_pars.residue_metro,md_parameters.residue_md,
                             id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
                 }
-    return 0;
 
 
 
@@ -318,7 +324,10 @@ int main(int argc, char* argv[]){
                 poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
 
 
+                printf("MPI%02d - Printing gauge obs - only by master rank...\n",
+                        devinfo.myrank);
                 if(devinfo.myrank ==0 ){
+
                     FILE *goutfile = fopen(gauge_outfilename,"at");
                     if(!goutfile){
                         goutfile = fopen(gauge_outfilename,"wt");
@@ -355,20 +364,23 @@ int main(int argc, char* argv[]){
                     strcpy(tempname,mkwch_pars.store_conf_name);
                     sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
-                    printf("Storing conf %s.\n", tempname);
+                    printf("MPI%02d - Storing conf %s.\n",
+                            devinfo.myrank, tempname);
                     save_conf_wrapper(conf_acc,tempname,conf_id_iter,
                             mkwch_pars.use_ildg);
                     strcpy(tempname,mkwch_pars.RandGenStatusFilename);
                     sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
-                    printf("Storing rng status in %s.\n", tempname);
+                    printf("MPI%02d - Storing rng status in %s.\n", 
+                            devinfo.myrank , tempname);
                     saverand_tofile(tempname);
                 }
                 if(conf_id_iter%mkwch_pars.saveconfinterval==0){
-                    printf("Saving conf %s.\n", mkwch_pars.save_conf_name);
+                    printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
+                            mkwch_pars.save_conf_name);
                     save_conf_wrapper(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
                             mkwch_pars.use_ildg);
-                    printf("Saving rng status in %s.\n",
+                    printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
                             mkwch_pars.RandGenStatusFilename);
                     saverand_tofile(mkwch_pars.RandGenStatusFilename);
                 }
@@ -412,13 +424,17 @@ int main(int argc, char* argv[]){
                     // program exits if MaxConfIdIter is reached
                     if(conf_id_iter >= mkwch_pars.MaxConfIdIter ){
 
-                        printf( "MaxConfIdIter=%d reached, job done!", mkwch_pars.MaxConfIdIter);
-                        printf(" shutting down now.\n");
+                        printf("%s - MaxConfIdIter=%d reached, job done!",
+                                devinfo.myrankstr, mkwch_pars.MaxConfIdIter);
+                        printf("%s - shutting down now.\n", devinfo.myrankstr);
                         run_condition = 0;
                     }
                 }
 #ifdef MULTIDEVICE
+
                 MPI_Bcast((void*)&run_condition,1,MPI_INT,0,MPI_COMM_WORLD);
+                printf("MPI%02d - Broadcast of run %d condition from master...\n",
+                        devinfo.myrank, run_condition);
 #endif
                 if(run_condition == 0) break;
 

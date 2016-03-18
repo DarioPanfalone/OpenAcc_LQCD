@@ -73,7 +73,7 @@ double calc_loc_plaquettes_removing_stag_phases_nnptrick(
     res_R_p += creal(tr_local_plaqs[1].c[t]);
   }
 
-  printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);
+  //printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);
   return res_R_p;
 }// closes routine
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples

@@ -7,9 +7,17 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "../OpenAcc/geometry.h"
 #include "../OpenAcc/su3_utilities.h"
 #include "./polyakov.h"
 #include "../OpenAcc/su3_measurements.h"
+
+
+#ifdef MULTIDEVICE
+#include <mpi.h>
+#endif
+#include "../Mpi/multidev.h"
+
 
 // For Polyakov loop calculations
 #define ALIGN 128
@@ -121,6 +129,11 @@ DEF_SU3_PLKN_TRACE(su3_plk3_trace,su3_plk3)
 
 d_complex polyakov_loop0(__restrict const su3_soa * const u)
 {
+
+    if(geom_par.nranks[0] !=1 ){
+        printf("MPI%02d, POLYAKOV LOOP CALCULATION NOT IMPLEMENTED!\n", devinfo.myrank);
+        return 0+0*I;
+    }
     su3_plk0 *loopplk0;
     double rel,iml;
     int allocation_check;
@@ -176,13 +189,29 @@ d_complex polyakov_loop0(__restrict const su3_soa * const u)
 
     }
     free(loopplk0);
-    return (rel + iml * I)/(vol30h*2*3);
+
+    double trr,tri;
+#ifdef MULTIDEVICE
+     MPI_Allreduce((void*)&rel,(void*)&trr,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+     MPI_Allreduce((void*)&iml,(void*)&tri,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+     trr = rel;
+     tri = iml;
+#endif 
+
+    return (trr + tri * I)/(vol30h*2*3)/devinfo.nranks;
 
 }
 
 d_complex polyakov_loop1(__restrict const su3_soa * const u)
 {
 
+    if(geom_par.nranks[1] !=1 ){
+        printf("MPI%02d, POLYAKOV LOOP CALCULATION NOT IMPLEMENTED!\n", devinfo.myrank);
+        return 0+0*I;
+    }
 
     su3_plk1 *loopplk1;
     double rel,iml;
@@ -239,13 +268,29 @@ d_complex polyakov_loop1(__restrict const su3_soa * const u)
 
     }
     free(loopplk1);
-    return (rel + iml * I)/(vol31h*2*3);
+
+    double trr,tri;
+#ifdef MULTIDEVICE
+     MPI_Allreduce((void*)&rel,(void*)&trr,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+     MPI_Allreduce((void*)&iml,(void*)&tri,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+     trr = rel;
+     tri = iml;
+#endif 
+
+    return (trr + tri * I)/(vol31h*2*3)/devinfo.nranks;
 
 }
 
 d_complex polyakov_loop2(__restrict const su3_soa * const u)
 {
 
+    if(geom_par.nranks[2] !=1 ){
+        printf("MPI%02d, POLYAKOV LOOP CALCULATION NOT IMPLEMENTED!\n", devinfo.myrank);
+        return 0+0*I;
+    }
 
     su3_plk2 *loopplk2;
     double rel,iml;
@@ -300,13 +345,29 @@ d_complex polyakov_loop2(__restrict const su3_soa * const u)
 
     }
     free(loopplk2);
-    return (rel + iml * I)/(vol32h*2*3);
+
+    double trr,tri;
+#ifdef MULTIDEVICE
+     MPI_Allreduce((void*)&rel,(void*)&trr,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+     MPI_Allreduce((void*)&iml,(void*)&tri,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+     trr = rel;
+     tri = iml;
+#endif 
+
+    return (trr + tri * I)/(vol32h*2*3)/devinfo.nranks;
 
 }
 
 d_complex polyakov_loop3(__restrict const su3_soa * const u)
 {
 
+    if(geom_par.nranks[3] !=1 ){
+        printf("MPI%02d, POLYAKOV LOOP CALCULATION NOT IMPLEMENTED!\n", devinfo.myrank);
+        return 0+0*I;
+    }
 
     su3_plk3 *loopplk3;
     double rel,iml;
@@ -361,7 +422,19 @@ d_complex polyakov_loop3(__restrict const su3_soa * const u)
 
     }
     free(loopplk3);
-    return (rel + iml * I)/(vol33h*2*3);
+
+    double trr,tri;
+#ifdef MULTIDEVICE
+     MPI_Allreduce((void*)&rel,(void*)&trr,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+     MPI_Allreduce((void*)&iml,(void*)&tri,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+     trr = rel;
+     tri = iml;
+#endif 
+
+    return (trr + tri * I)/(vol33h*2*3)/devinfo.nranks;
 
 }
 

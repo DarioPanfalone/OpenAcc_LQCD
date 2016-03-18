@@ -6,9 +6,9 @@
 
 #ifdef MULTIDEVICE
 #include "mpi.h"
-#include "../Mpi/multidev.h"
 #endif 
 
+#include "../Mpi/multidev.h"
 #include "../Mpi/communications.h"
 
 
@@ -43,6 +43,8 @@ inline void save_conf(global_su3_soa * const conf, const char* nomefile,int conf
 // WRAPPER OF WRAPPER
 inline void save_conf_wrapper(su3_soa* conf, const char* nomefile,int conf_id_iter, 
         int use_ildg){
+
+    printf("MPI%02d - Saving whole configuration...\n", devinfo.myrank);
 
 #ifdef MULTIDEVICE
 
@@ -114,6 +116,9 @@ inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,int * conf_id_i
             int irank;
             for(irank = 1 ; irank < devinfo.nranks; irank++)
                 send_lnh_subconf_to_rank(conf_rw,irank);
+        
+            MPI_Bcast((void*) conf_id_iter,1,MPI_INT,0,MPI_COMM_WORLD);
+
         }
         else 
         if(verbosity_lv > 2)
@@ -125,8 +130,10 @@ inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,int * conf_id_i
             printf("MPI%02d - receiving conf \n",devinfo.myrank );
         
         MPI_Bcast((void*) &error,1,MPI_INT,0,MPI_COMM_WORLD);
-        if(!error) 
+        if(!error){ 
             receive_lnh_subconf_from_master(conf);
+            MPI_Bcast((void*) conf_id_iter,1,MPI_INT,0,MPI_COMM_WORLD);
+        }
         else 
         if(verbosity_lv > 2)
             printf("MPI%02d - no conf received!\n",devinfo.myrank );

@@ -8,6 +8,10 @@
 #include "./rettangoli.h"
 #include "./su3_utilities.h"
 
+#ifdef MULTIDEVICE
+#include <mpi.h>
+#endif
+
 
 double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(
         __restrict const su3_soa * const u,
@@ -1028,6 +1032,7 @@ double  calc_rettangolo_soloopenacc(
 {
 
     double temp=0.0;
+    double total_result=0.0;
     // calculation of reactangle on the 6 planes
     for(int mu=0;mu<3;mu++){
         for(int nu=mu+1;nu<4;nu++){
@@ -1036,7 +1041,15 @@ double  calc_rettangolo_soloopenacc(
         }
     }
 
-    return temp;
+#ifdef MULTIDEVICE
+     MPI_Allreduce((void*)&temp,(void*)&total_result,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+     total_result = temp;
+
+#endif 
+
+    return total_result;
 
 }
 

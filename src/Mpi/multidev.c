@@ -40,6 +40,7 @@ void init_multidev1D(dev_info * mdi){
     mdi->myrank_R = (mdi->myrank + 1 ) % mdi->nranks;       //SALAMINO
     mdi->node_subrank =  mdi->myrank % mdi->proc_per_node;   //SALAMINO
 
+    sprintf(mdi->myrankstr,"MPI%02d",mdi->myrank);
 
     printf("#MPI%02d: of \"%02d\" tasks running on host \"%s\", local rank: %d, rankL: %d, rankR: %d\n",
     mdi->myrank, mdi->nranks, mdi->processor_name, 

@@ -43,9 +43,7 @@ typedef struct geom_parameters_t{
     int d0123map[4];
 
     int nranks[4];
-#ifdef MULTIDEVICE
     int halos[4];
-#endif
 
 } geom_parameters;
 

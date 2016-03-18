@@ -10,14 +10,14 @@ Beta            3.55
 StoutSteps      2
 StoutRho        0.15
  
-#up quark
-#FlavourParameters   
-#Mass	        0.01 
-#Degeneracy	    1
-#PseudoFermions	1
-#Name	        pippo
-#Charge          0.0
-#MuOverPiT       0.24
+up quark
+FlavourParameters   
+Mass	        0.01 
+Degeneracy	    1
+PseudoFermions	1
+Name	        pippo
+Charge          0.0
+MuOverPiT       0.24
                              
 
 
@@ -26,7 +26,7 @@ BackgroundFieldParameters
 MDParameters
 NmdSteps	    1
 GaugeSubSteps   1
-TrajLength	    0.1
+TrajLength	    0.0
 residue_md      1e-6
 
 
@@ -39,8 +39,8 @@ residue_metro       	1e-8
 StoreConfName       	store.conf.ascii
 SaveConfName            conf.ascii
 Seed                    12
-VerbosityLv             6
-SaveDiagnostics         0
+VerbosityLv             5
+SaveDiagnostics         1
 UseILDG                 0
 EpsGen                  0.0
 #MaxRunTimeS             6000
@@ -55,14 +55,14 @@ SingleInvNVectors       1
 
 DeviceSettings
 device_choice           0
-NRanks                  2
-NProcPerNode            2
+NRanks                 1 
+NProcPerNode           1 
 
 Geometry
 nx                      4  
 ny	                    4 
 nz	                    4 
-nt	                    8 
+nt	                    8
 xmap	                0 
 ymap	                1   
 zmap	                2   
