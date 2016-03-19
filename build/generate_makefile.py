@@ -368,10 +368,10 @@ if __name__ == '__main__':
     makeall += ' rgen\n'
 
 
-    stdout.write(makemains)
-    stdout.write(make_rgen_string)
     stdout.write(makeall)
     stdout.write(makeclean)
+    stdout.write(makemains)
+    stdout.write(make_rgen_string)
 
     
 
