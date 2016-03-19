@@ -2,6 +2,7 @@
 #define MULTIDEV_C_
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "./geometry_multidev.h"
 #include "../OpenAcc/geometry.h"
 
@@ -24,6 +25,7 @@ void pre_init_multidev1D(dev_info * mdi){
     if(mdi->nranks != NRANKS_D3){
         printf("#MPI%02d: NRANKS_D3 is different from nranks: no salamino? Exiting now\n",mdi->myrank);
         MPI_Finalize();
+        exit(1);
         return;
     }
     

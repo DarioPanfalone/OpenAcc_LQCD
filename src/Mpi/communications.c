@@ -26,11 +26,7 @@ extern int verbosity_lv;
     printf("\tFreed %s, %p ...", #var,var);\
     free(var); if(verbosity_lv > 2)  printf(" done.\n");
 
-
-
-
 // fermions
-
 
 // offset stands for the 
 void sendrecv_vec3soa_borders_1Dcut(vec3_soa *lnh_fermion,
@@ -120,12 +116,14 @@ void communicate_fermion_borders(vec3_soa *lnh_fermion){ //WRAPPER
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
-#ifdef USE_MPI_CUDA_AWARE  // This can work only if cuda aware MPI is used.
-                           // If instead you wanted to use the update
-                           // directive, this cannot work with MPI_Irecv
-                           // because the directive should wait for the 
-                           // completion the recv, but Irecv is not bloking!!
-                          
+#ifdef USE_MPI_CUDA_AWARE  
+/*
+ This can work only if cuda aware MPI is used.
+ If instead you wanted to use the update
+ directive, this cannot work with MPI_Irecv
+ because the directive should wait for the 
+ completion the recv, but Irecv is not bloking!!
+*/                        
 void sendrecv_vec3soa_borders_1Dcut_async(vec3_soa *lnh_fermion, 
         int rankL, int rankR, 
         int thickness,
@@ -203,8 +201,7 @@ void communicate_fermion_borders_async(vec3_soa *lnh_fermion,
             recv_border_requests );
 }
 
-#endif
-
+#endif //#ifdef USE_MPI_CUDA_AWARE  
 
 
 // GAUGE COMMS
