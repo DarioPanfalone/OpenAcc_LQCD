@@ -17,6 +17,14 @@ Things to do:
    - checks for segmentation faults and mpi errors: OK
    - check for actual correctness of the code:
      - TEST PURE GAUGE   (no fermions):     OK (4^4 x 2) (accepts)
+
+DISCOVERED ISSUES:                              <<<<<<<<<<<<---------------- start here
+
+    - DOES NOT WORK ON MY LAPTOP (nans everywhere), WHILE IT WORKS ON MY DESKTOP
+    - there should be a check between nranks read from input file and nranks read from 
+      MPI_Init()
+    - DIFFERENT MPI PROCESSES DON'T AGREE ON ACCEPTING!!!!! CHECK!!!
+
      - dynamical fermions: FAIL
          STATUS: multishift inverter takes too long to converge. Can't be right.
          TEST dirac operator
