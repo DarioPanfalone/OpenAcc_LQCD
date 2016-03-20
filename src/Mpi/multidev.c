@@ -24,6 +24,7 @@ void pre_init_multidev1D(dev_info * mdi){
 
     if(mdi->nranks != NRANKS_D3){
         printf("#MPI%02d: NRANKS_D3 is different from nranks: no salamino? Exiting now\n",mdi->myrank);
+        printf("#MPI%02d: NRANKS_D3 = %d, nranks = %d\n", NRANKS_D3, mdi->nranks);
         exit(1);
     }
     
@@ -77,12 +78,17 @@ void init_multidev1D(dev_info * mdi){
     mdi->origin_0123[3]     = mdi->gl_loc_origin4int.d3;
     if(verbosity_lv > 2){
         printf("MPI%02d - Finished init_multidev1D\n", mdi->myrank);   
+        printf("MPI%02d - Origin(%d,%d,%d,%d)",mdi->myrank,
+                mdi->origin_0123[0],mdi->origin_0123[1],
+                mdi->origin_0123[2], mdi->origin_0123[3]);
    
     }
 
 
-
 }
+
+
+
 
 
 

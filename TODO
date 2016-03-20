@@ -25,8 +25,14 @@ Things to do:
 
      - dynamical fermions: FAIL
          STATUS: multishift inverter takes too long to converge. Can't be right.
-          + read/communicate pieces of/write global fermions
-         TEST dirac operator
+          + read/communicate pieces of/write global fermions 
+               WRITTEN, TO CHECK (seems to work reasonably)
+         TEST dirac operator WRITTEN, TO CHECK
+              (checking) - it seems that only the firs and the last 
+               slices of the global configuration is wrong. Moreover,
+               the last imaginary component of 
+               the second rank is zero.
+             - write more checks on parameters
          TEST inverter
          TEST multishift inverter
 

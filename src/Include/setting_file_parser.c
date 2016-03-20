@@ -504,7 +504,6 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
 #ifdef MULTIDEVICE
-    printf("PORCODIO\n");
     if(di->nranks_read != di->nranks){
         printf("MPI%02d: ERROR: nranks from settings file ", di->myrank);
         printf("and from MPI_Init() DIFFER!\n");

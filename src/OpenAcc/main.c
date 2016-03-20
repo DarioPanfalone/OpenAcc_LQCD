@@ -166,12 +166,14 @@ int main(int argc, char* argv[]){
     if(!read_conf_wrapper(conf_acc,mkwch_pars.save_conf_name,
                 &conf_id_iter,mkwch_pars.use_ildg)){
         // READS ALSO THE conf_id_iter
-        printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",devinfo.myrank, mkwch_pars.save_conf_name);
+        printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",
+                devinfo.myrank, mkwch_pars.save_conf_name);
 
     }
     else{
         generate_Conf_cold(conf_acc,mkwch_pars.eps_gen);
-        printf("MPI%02d - Cold Gauge Conf Generated : OK \n",devinfo.myrank);
+        printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
+                devinfo.myrank);
         conf_id_iter=0;
     }
 #endif

@@ -74,18 +74,15 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
         int nz = geom_par.gnz;
         int nt = geom_par.gnt;
 
-
-
-
-
-
         int nxt,nyt,nzt,ntt;
         int minus_det_count = 0;
         CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),5);
-        if((nx!=nxt)||(ny!=nyt)||(nz!=nzt)||(nz!=nzt)){
+        if( nx!=nxt || ny!=nyt || nz!=nzt || (nt != ntt)){
             printf("Error, configuration dimensions not compatible with code.\n");
+            printf("Conf dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nx,ny,nz,nt);
+            printf("Code dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nxt,nyt,nzt,ntt);
             exit(1);
-        }
+        }else
 
         for(int q = 0 ; q < 8 ; q++){
             for(int i = 0 ; i < GL_SIZEH ; i++){

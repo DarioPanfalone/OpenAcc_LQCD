@@ -2,6 +2,10 @@
 #define DBGTOOLS_OPENACC_H_
 
 #include "../OpenAcc/struct_c_def.h"
+void print_vec3_soa_wrapper(vec3_soa * const fermion,
+        const char* nomefile);
+int read_vec3_soa_wrapper(vec3_soa * fermion, 
+        const char* nomefile);
 
 void print_vec3_soa(vec3_soa * const fermion, const char* nomefile);
 int read_vec3_soa(vec3_soa * fermion, const char* nomefile);

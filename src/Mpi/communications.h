@@ -28,10 +28,27 @@ void communicate_thmat_soa_borders(thmat_soa* lnh_momenta);
 void communicate_tamat_soa_borders(tamat_soa* lnh_ipdot);
 
 // communication of lattice chunks, for file IO only on master
-void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank);
-void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, int tag);
+// chunks, conf
+void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, 
+        int target_rank);
+void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, 
+        int target_rank, int tag);
 void send_lnh_subconf_to_master(su3_soa *lnh_soa_conf, int tag);
 void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf);
+
+// chunks, fermions
+void send_lnh_subfermion_to_rank(global_vec3_soa *gl_soa_ferm, 
+        int target_rank);
+void recv_loc_subfermion_from_rank(global_vec3_soa *gl_soa_ferm,
+        int target_rank);
+
+
+void send_lnh_subfermion_to_master(vec3_soa *lnh_ferm, int tag);
+void receive_lnh_subfermion_from_master(vec3_soa* lnh_ferm);
+
+
+
+
 #endif
 
 
@@ -41,5 +58,14 @@ void send_lnh_subconf_to_buffer(global_su3_soa *gl_soa_conf,
         su3_soa *lnh_conf, int target_rank);
 void recv_loc_subconf_from_buffer(global_su3_soa *gl_soa_conf,
         su3_soa* lnh_conf, int target_rank);
+
+void send_lnh_subfermion_to_buffer(global_vec3_soa *gl_soa_ferm,
+        vec3_soa *lnh_ferm, int target_rank);
+void recv_loc_subfermion_from_buffer(global_vec3_soa *gl_soa_ferm,
+        vec3_soa* lnh_ferm, int target_rank);
+
+
+
+
 
 #endif

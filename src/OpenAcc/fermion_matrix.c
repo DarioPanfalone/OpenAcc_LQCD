@@ -20,6 +20,7 @@
 #define DEO_DOE_PREAMBLE(OFFSET3,THICKNESS3)\
     int hd0, d1, d2, d3;\
 _Pragma(" acc kernels present(u) present(out) present(in) present(backfield)")\
+printf("OFFSET3: %d THICKNESS3 :%d",OFFSET3,THICKNESS3 );\
 _Pragma(" acc loop independent ")\
 for(d3=OFFSET3; d3<OFFSET3+THICKNESS3; d3++) {\
     _Pragma(" acc loop independent ")\

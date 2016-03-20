@@ -19,8 +19,9 @@ void print_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,
 
 
 //WRAPPER
-inline void save_conf(global_su3_soa * const conf, const char* nomefile,int conf_id_iter,
-        int use_ildg){
+inline void save_conf(global_su3_soa * const conf, const char* nomefile,
+        int conf_id_iter, int use_ildg)
+{
 
 #ifdef MULTIDEVICE
     if(devinfo.myrank != 0){
@@ -41,8 +42,9 @@ inline void save_conf(global_su3_soa * const conf, const char* nomefile,int conf
 
 
 // WRAPPER OF WRAPPER
-inline void save_conf_wrapper(su3_soa* conf, const char* nomefile,int conf_id_iter, 
-        int use_ildg){
+inline void save_conf_wrapper(su3_soa* conf, const char* nomefile,
+        int conf_id_iter, int use_ildg)
+ {
 
     printf("MPI%02d - Saving whole configuration...\n", devinfo.myrank);
 
@@ -72,8 +74,9 @@ int read_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,
 
 
 //WRAPPER
-inline int read_conf(global_su3_soa * conf, const char* nomefile,int * conf_id_iter,
-        int use_ildg ){
+inline int read_conf(global_su3_soa * conf, const char* nomefile,
+        int * conf_id_iter, int use_ildg )
+{
 
 #ifdef MULTIDEVICE
     if(devinfo.myrank != 0){
@@ -98,8 +101,8 @@ inline int read_conf(global_su3_soa * conf, const char* nomefile,int * conf_id_i
 
 
 // WRAPPER OF WRAPPER
-inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,int * conf_id_iter, 
-        int use_ildg)
+inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,
+        int * conf_id_iter, int use_ildg)
 {
 
     int error =  0;

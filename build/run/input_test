@@ -11,13 +11,13 @@ StoutSteps      2
 StoutRho        0.15
  
 #up quark
-#FlavourParameters   
-#Mass	        0.01 
-#Degeneracy	    1
-#PseudoFermions	1
-#Name	        pippo
-#Charge          0.0
-#MuOverPiT       0.24
+FlavourParameters   
+Mass	        0.01 
+Degeneracy	    1
+PseudoFermions	1
+Name	        pippo
+Charge          0.0
+MuOverPiT       0.24
                              
 
 
@@ -55,14 +55,14 @@ SingleInvNVectors       1
 
 DeviceSettings
 device_choice           0
-NRanks                 2 
+NRanks                 2
 NProcPerNode           4 
 
 Geometry
-nx                      8  
-ny	                    8 
-nz	                    8 
-nt	                    16
+nx                      4 
+ny	                    4
+nz	                    4
+nt	                    8
 xmap	                0 
 ymap	                1   
 zmap	                2   

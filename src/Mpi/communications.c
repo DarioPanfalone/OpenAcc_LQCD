@@ -671,12 +671,10 @@ void communicate_tamat_soa_borders(tamat_soa* lnh_ipdot){
 }
 
 
-
-
-
-
-// chunks
-void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank){
+// chunks, conf
+void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, 
+        int target_rank)
+{
     // USE ONLY FROM MASTER RANK
     //target sublattice information
     vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
@@ -732,7 +730,8 @@ void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf, int target_rank){
     // ^^ CHECK
     FREECHECK(target_su3_soa);
 }
-void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, int tag)
+void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, 
+        int target_rank, int tag)
 {
     // USE ONLY FROM MASTER RANK
     //target sublattice information
@@ -762,13 +761,15 @@ void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf, int target_rank, in
 
     FREECHECK(target_su3_soa);
 }
-void send_lnh_subconf_to_master(su3_soa *lnh_soa_conf, int tag){
+void send_lnh_subconf_to_master(su3_soa *lnh_soa_conf, int tag)
+{
    //sending the subconfiguration
       if(verbosity_lv > 3) printf("MPI%02d - send_lnh_subconf_to_master(), tag %d\n",
            devinfo.myrank,tag);
     MPI_Send(lnh_soa_conf, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE, 0, tag , MPI_COMM_WORLD);
 }
-void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf){
+void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf)
+{
 
     MPI_Recv(lnh_su3_conf, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE,0,
             devinfo.myrank,MPI_COMM_WORLD, MPI_STATUS_IGNORE); 
@@ -778,15 +779,56 @@ void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf){
     // ^^ CHECK
 }
 
+// chunks, fermions
+void send_lnh_subfermion_to_rank(global_vec3_soa *gl_soa_ferm, 
+        int target_rank)
+{
+    vec3_soa* lnh_ferm;
+    int allocation_check = posix_memalign((void**) &lnh_ferm, ALIGN,
+            sizeof(vec3_soa)); 
+    ALLOCCHECK(allocation_check, lnh_ferm);
+    send_lnh_subfermion_to_buffer(gl_soa_ferm,lnh_ferm,target_rank);
+    MPI_Send(lnh_ferm, 6*LNH_SIZEH,MPI_DOUBLE, target_rank , target_rank, MPI_COMM_WORLD); // tag = target_rank
+
+    FREECHECK(lnh_ferm);
+}
+void recv_loc_subfermion_from_rank(global_vec3_soa *gl_soa_ferm,
+        int target_rank)
+{
+    vec3_soa* lnh_ferm;
+    int allocation_check = posix_memalign((void**) &lnh_ferm, ALIGN,
+            sizeof(vec3_soa)); 
+    ALLOCCHECK(allocation_check, lnh_ferm);
+
+    MPI_Recv(lnh_ferm, 6*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    recv_loc_subfermion_from_buffer(gl_soa_ferm, lnh_ferm, target_rank);
+
+
+    FREECHECK(lnh_ferm);
+
+}
+
+void send_lnh_subfermion_to_master(vec3_soa *lnh_ferm, int tag)
+{
+    MPI_Send(lnh_ferm, 6*LNH_SIZEH,MPI_DOUBLE,0,tag           ,
+            MPI_COMM_WORLD); // tag = myrank
+}
+void receive_lnh_subfermion_from_master(vec3_soa* lnh_ferm)
+{
+    MPI_Recv(lnh_ferm, 6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,
+            MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+}
 
 #endif
 // only for the master rank
-void send_lnh_subconf_to_buffer(global_su3_soa *gl_soa_conf, su3_soa *lnh_conf, 
-        int target_rank)
+void send_lnh_subconf_to_buffer(global_su3_soa *gl_soa_conf, 
+        su3_soa *lnh_conf, int target_rank)
 {
     // USE ONLY FROM MASTER RANK
 
-if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subconf_to_buffer()", devinfo.myrank);
+if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subconf_to_buffer()\n", devinfo.myrank);
 
 
     //target sublattice information
@@ -834,8 +876,8 @@ if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subconf_to_buffer()", devinfo.myr
     // ^^ CHECK
     */ // COMMENTED FOR TEST
 }
-void recv_loc_subconf_from_buffer(global_su3_soa *gl_soa_conf, su3_soa* lnh_conf,
-        int target_rank)
+void recv_loc_subconf_from_buffer(global_su3_soa *gl_soa_conf, 
+        su3_soa* lnh_conf, int target_rank)
 {
 
 
@@ -878,7 +920,67 @@ if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subconf_from_buffer()", devinfo.
 
 }
 
+void send_lnh_subfermion_to_buffer(global_vec3_soa *gl_soa_ferm,
+        vec3_soa *lnh_ferm, int target_rank)
+{
+    // USE ONLY FROM MASTER RANK
+
+if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subferm_to_buffer()", devinfo.myrank);
+    
+//target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+    // building sublattice duplicate, target_ferm
+
+    int tg_lnh_0h,tg_lnh_1,tg_lnh_2,tg_lnh_3; //target-lnh coordinates
+    // Copying all relevant sites into the sublattice
+        for(tg_lnh_3=0;tg_lnh_3 < LNH_N3; tg_lnh_3++)
+        for(tg_lnh_2=0;tg_lnh_2 < LNH_N2; tg_lnh_2++)
+        for(tg_lnh_1=0;tg_lnh_1 < LNH_N1; tg_lnh_1++)
+        for(tg_lnh_0h=0;tg_lnh_0h < LNH_N0H; tg_lnh_0h++){
 
 
+            int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+            int target_lnh_snum = snum_acc(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+            //printf("%d %d %d %d  %d  %d\n",tg_lnh_0h,tg_lnh_1,           // DEBUG
+            //        tg_lnh_2, tg_lnh_3, target_gl_snum,target_lnh_snum); // DEBUG
+
+            lnh_ferm->c0[target_lnh_snum] = gl_soa_ferm->c0[target_gl_snum];
+            lnh_ferm->c1[target_lnh_snum] = gl_soa_ferm->c1[target_gl_snum];
+            lnh_ferm->c2[target_lnh_snum] = gl_soa_ferm->c2[target_gl_snum];
+
+        }
+}
+void recv_loc_subfermion_from_buffer(global_vec3_soa *gl_soa_ferm,
+        vec3_soa* lnh_ferm, int target_rank)
+{
+
+if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subferm_from_buffer()", devinfo.myrank);
+    // USE ONLY FROM MASTER RANK
+    //target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+
+    int tg_loc_0h,tg_loc_1,tg_loc_2,tg_loc_3; //target-loc coordinates
+    // and link direction
+    //Copying all relevant links from the sublattice to the global lattice
+    for(tg_loc_3=0;tg_loc_3<LOC_N3; tg_loc_3++)
+        for(tg_loc_2=0;tg_loc_2<LOC_N2; tg_loc_2++)
+        for(tg_loc_1=0;tg_loc_1<LOC_N1; tg_loc_1++)
+        for(tg_loc_0h=0;tg_loc_0h<LOC_N0H; tg_loc_0h++){
+    
+                        int tg_lnh_0 = 2*tg_loc_0h + D0_HALO;
+                        int tg_lnh_1 = tg_loc_1 + D1_HALO;
+                        int tg_lnh_2 = tg_loc_2 + D2_HALO;
+                        int tg_lnh_3 = tg_loc_3 + D3_HALO;
+
+
+                        int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+                        int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+                        gl_soa_ferm->c0[target_gl_snum] = lnh_ferm->c0[target_lnh_snum];
+                        gl_soa_ferm->c1[target_gl_snum] = lnh_ferm->c1[target_lnh_snum];
+                        gl_soa_ferm->c2[target_gl_snum] = lnh_ferm->c2[target_lnh_snum];
+
+                    }
+
+}
 
 #endif

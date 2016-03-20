@@ -22,6 +22,7 @@
 
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
+global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
 su3_soa  * conf_acc; // the gauge configuration.
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
                          // if the metro test fails.
@@ -94,7 +95,8 @@ void mem_alloc()
 #endif
   allocation_check =  posix_memalign((void **)&conf_rw, ALIGN,8*sizeof(global_su3_soa));
   ALLOCCHECK(allocation_check, conf_rw);
-
+  allocation_check =  posix_memalign((void **)&ferm_rw, ALIGN,sizeof(global_vec3_soa));
+  ALLOCCHECK(allocation_check, ferm_rw);
 #ifdef MULTIDEVICE
   }
 #endif
@@ -196,12 +198,13 @@ inline void mem_free()
   if(devinfo.myrank == 0){
 #endif
   FREECHECK(conf_rw);
+//  FREECHECK(ferm_rw);
 #ifdef MULTIDEVICE
   }
 #endif
   
-  FREECHECK(conf_acc);
-  FREECHECK(u1_back_phases);        
+//  FREECHECK(conf_acc);
+//  FREECHECK(u1_back_phases);        
   FREECHECK(momenta);               
   FREECHECK(aux_conf_acc);          
   FREECHECK(auxbis_conf_acc);       
@@ -220,9 +223,9 @@ inline void mem_free()
   FREECHECK(ipdot_g_old);           
   FREECHECK(ipdot_f_old);           
 
-  FREECHECK(ferm_chi_acc);          
-  FREECHECK(ferm_phi_acc);          
-  FREECHECK(ferm_out_acc);          
+//  FREECHECK(ferm_chi_acc);          
+//  FREECHECK(ferm_phi_acc);          
+//  FREECHECK(ferm_out_acc);          
 //    
   FREECHECK(ferm_shiftmulti_acc);   
 //                                

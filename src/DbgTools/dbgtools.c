@@ -13,12 +13,13 @@
 #include "../OpenAcc/single_types.h"
 #include "../OpenAcc/io.h"
 
-void print_vec3_soa(vec3_soa * const fermion, const char* nomefile)
+void save_gl_fermion(global_vec3_soa * const fermion, 
+        const char* nomefile)
 {
 
     FILE *fp;
     fp = fopen(nomefile,"w");
-    for(int i = 0 ; i < sizeh ; i++){
+    for(int i = 0 ; i < GL_SIZEH ; i++){
         fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c0[i]),cimag(fermion->c0[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c1[i]),cimag(fermion->c1[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c2[i]),cimag(fermion->c2[i]));
@@ -26,6 +27,108 @@ void print_vec3_soa(vec3_soa * const fermion, const char* nomefile)
     fclose(fp);
 
 }
+
+int read_gl_fermion(global_vec3_soa * fermion, const char* nomefile)
+{
+
+
+    FILE *fp;
+    fp = fopen(nomefile,"r");
+    if(!fp){
+        printf("vec3_soa File %s not found.\n", nomefile );
+        return 1;
+    }
+    else{
+        if(verbosity_lv > 2) 
+            printf("Reading vec3_soa %s\n", nomefile );
+
+    for(int i = 0 ; i < GL_SIZEH ; i++){
+        double re,im;
+        CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c0[i] = re + im * I;
+        CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c1[i] = re + im * I;
+        CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c2[i] = re + im * I;
+    }
+    fclose(fp);
+    return 0;
+    }
+
+}
+
+
+void print_vec3_soa_wrapper(vec3_soa * const fermion, 
+        const char* nomefile)
+ {
+
+    printf("MPI%02d - Saving whole fermion...\n", devinfo.myrank);
+
+#ifdef MULTIDEVICE
+
+    if(devinfo.myrank == 0){
+        int irank;
+        for(irank = 1 ; irank < devinfo.nranks; irank++)
+            recv_loc_subfermion_from_rank(ferm_rw,irank);
+        recv_loc_subfermion_from_buffer(ferm_rw,fermion,0);
+        save_gl_fermion(ferm_rw, nomefile);
+    }
+    else  send_lnh_subfermion_to_master(fermion,devinfo.myrank);
+
+#else 
+    recv_loc_subfermion_from_buffer(ferm_rw,fermion,0);
+    save_gl_fermion(ferm_rw, nomefile);
+#endif
+
+
+}
+
+
+int read_vec3_soa_wrapper(vec3_soa * fermion, const char* nomefile)
+{
+
+    int error =  0;
+#ifdef MULTIDEVICE
+
+    if(devinfo.myrank == 0){
+        if(verbosity_lv > 2)
+            printf("MPI%02d - reading global fermion \n",devinfo.myrank );
+        error = read_gl_fermion(ferm_rw, nomefile);
+        MPI_Bcast((void*) &error,1,MPI_INT,0,MPI_COMM_WORLD);
+
+        if(!error) {
+            send_lnh_subfermion_to_buffer(ferm_rw,fermion,0);
+            int irank;
+            for(irank = 1 ; irank < devinfo.nranks; irank++)
+                send_lnh_subfermion_to_rank(ferm_rw,irank);
+
+
+        }
+        else 
+        if(verbosity_lv > 2)
+            printf("MPI%02d - no fermion sent!\n",devinfo.myrank );
+
+    }
+    else{
+        if(verbosity_lv > 2)
+            printf("MPI%02d - receiving fermion \n",devinfo.myrank );
+        
+        MPI_Bcast((void*) &error,1,MPI_INT,0,MPI_COMM_WORLD);
+        if(!error){ 
+            receive_lnh_subfermion_from_master(fermion);
+        }
+        else 
+        if(verbosity_lv > 2)
+            printf("MPI%02d - no fermion received!\n",devinfo.myrank );
+    }
+
+#else 
+    error = read_gl_fermion(ferm_rw, nomefile);
+    if(!error)  send_lnh_subfermion_to_buffer(ferm_rw,fermion,0);
+#endif
+
+    return error;
+
+}
+
+
 
 
 void dbg_print_su3_soa(su3_soa * const conf, const char* nomefile,int conf_id_iter)
@@ -260,6 +363,20 @@ int dbgread_gl3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter )
 }
 
 
+void print_vec3_soa(vec3_soa * const fermion, const char* nomefile)
+{
+
+    FILE *fp;
+    fp = fopen(nomefile,"w");
+    for(int i = 0 ; i < sizeh ; i++){
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c0[i]),cimag(fermion->c0[i]));
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c1[i]),cimag(fermion->c1[i]));
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c2[i]),cimag(fermion->c2[i]));
+    }
+    fclose(fp);
+
+}
+
 int read_vec3_soa(vec3_soa * fermion, const char* nomefile)
 {
 
@@ -285,6 +402,7 @@ int read_vec3_soa(vec3_soa * fermion, const char* nomefile)
     }
 
 }
+
 
 void print_1su3_soa(su3_soa * const conf, const char* nomefile)
 {
