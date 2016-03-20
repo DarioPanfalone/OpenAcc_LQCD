@@ -339,7 +339,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #else
 	  if(0==devinfo.myrank)p2=casuale();
 #ifdef MULTIDEVICE
-      MPI_Bcast((void*) &p2,1,MPI_INT,0,MPI_COMM_WORLD);
+      MPI_Bcast((void*) &p2,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+      printf("MPI%02d p2 : %f, p1 %f \n",devinfo.myrank, p2,p1);
 #endif
 
 

@@ -15,6 +15,7 @@
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
 
+#include "../OpenAcc/geometry.h" // for MULTIDEVICE to be defined or not
 #include "./hash.h"
 
 #include <stdio.h>
@@ -481,6 +482,9 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
 int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
+    // notice that pre_init_multidev1D or any relevant function
+    // must have been called before, in order to get nranks
+    // from MPI_Init()
 #ifdef MULTIDEVICE
     const int single_dev_choice_def = 0;
 #endif 
@@ -497,7 +501,20 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     };
 
     // from here on, you should not have to modify anything.
-    return scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
+    int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
+
+#ifdef MULTIDEVICE
+    printf("PORCODIO\n");
+    if(di->nranks_read != di->nranks){
+        printf("MPI%02d: ERROR: nranks from settings file ", di->myrank);
+        printf("and from MPI_Init() DIFFER!\n");
+        printf("settings: %d , MPI_Init(): %d\n",
+                di->nranks_read, di->nranks);
+        exit(1);
+    }
+#endif
+
+    return res;
 
 }
 

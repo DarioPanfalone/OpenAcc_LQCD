@@ -9,24 +9,23 @@ Things to do:
 3. Compilation with PGI, no multidev ~OK (only pgi15.9)
 4. Correct execution with PGI, no multidev
     STATUS : Compiles and ~accepts bu~t it's slow AS HELL (3x )
-    - CHECK ACC_DEO, ACC_DOE - They might not be accelerated correctly. <<<<-------notice
+    - ACC_DEO, ACC_DOE not accelerated correctly. <<<<-------notice
 
 5. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
 5.5 Preparation of input file for run                      DONE 
 6. Correct execution with MPICC (2 ranks, minilattice) IN PROGRESS
    - checks for segmentation faults and mpi errors: OK
    - check for actual correctness of the code:
-     - TEST PURE GAUGE   (no fermions):     OK (4^4 x 2) (accepts)
-
-DISCOVERED ISSUES:                              <<<<<<<<<<<<---------------- start here
-
-    - DOES NOT WORK ON MY LAPTOP (nans everywhere), WHILE IT WORKS ON MY DESKTOP
-    - there should be a check between nranks read from input file and nranks read from 
-      MPI_Init()
-    - DIFFERENT MPI PROCESSES DON'T AGREE ON ACCEPTING!!!!! CHECK!!!
+     - TEST PURE GAUGE   (no fermions):     OK (8^4 x 2) (accepts)
+     - TEST PURE GAUGE on different machines 
+           (sbombolator, cudawn7, zassenhaus(using openmpi1.8):  OK)
+    - check of nranks read from input file from MPI_Init() WRITTEN
+    - DIFFERENT MPI PROCESSES DON'T AGREE ON ACCEPTING (solved)
+       MPI_Bcast was called on a double variable with MPI_INT datatype.
 
      - dynamical fermions: FAIL
          STATUS: multishift inverter takes too long to converge. Can't be right.
+          + read/communicate pieces of/write global fermions
          TEST dirac operator
          TEST inverter
          TEST multishift inverter
