@@ -101,7 +101,6 @@ static inline  void mat1_times_auxmat_into_tamat(
 }
 
 
-#ifdef STOUT_FERMIONS
 #pragma acc routine seq
 static inline  void mat1_times_auxmat_into_tamat_nophase(  
         __restrict const su3_soa * const mat1, const  int idx,
@@ -148,7 +147,6 @@ static inline  void mat1_times_auxmat_into_tamat_nophase(
     ipdot->ic11[idipdot] -= cimag(mat1_01)-ONE_BY_THREE*(cimag(a00)+cimag(mat1_01)+cimag(mat1_12));
 
 }
-#endif // ifdef STOUT_FERMIONS
 
 
 #pragma acc routine seq

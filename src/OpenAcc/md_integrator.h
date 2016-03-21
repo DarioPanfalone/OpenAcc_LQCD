@@ -2,6 +2,7 @@
 #define MD_INTEGRATOR_H
 
 #include "./struct_c_def.h"
+#include "../Include/fermion_parameters.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -30,8 +31,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				su3_soa  * tconf_acc,
 #ifdef STOUT_FERMIONS
                 su3_soa  * tstout_conf_acc_arr, // huge parking for stouting
-                su3_soa  * tauxbis_conf_acc, 
 #endif
+                su3_soa  * tauxbis_conf_acc, 
 				su3_soa  * taux_conf_acc,
 				ferm_param * tfermions_parameters,// [nflavs]
 				int tNDiffFlavs,
