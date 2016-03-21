@@ -529,24 +529,22 @@ int read_thmat_soa(thmat_soa * ipdot, const char* nomefile)
 void print_double_soa(double_soa * const backfield, const char* nomefile)
 {
 
-
+    
     FILE *fp;
     fp = fopen(nomefile,"w");
     for(int dir = 0 ; dir < 4 ; dir++)
-        for(int t = 0 ; t <geom_par.gnt ; t++)
-        for(int z = 0 ; z <geom_par.gnz ; z++)
-        for(int y = 0 ; y <geom_par.gny ; y++)
-        for(int x = 0 ; x <geom_par.gnx ; x++){
-            int parity = (x+y+z+t)%2;
-            int xyzt[4] = {x,y,z,t};
-            int d0 = xyzt[geom_par.d0123map[0]];
-            int d1 = xyzt[geom_par.d0123map[1]];
-            int d2 = xyzt[geom_par.d0123map[2]];
-            int d3 = xyzt[geom_par.d0123map[3]];
+        for(int d3 = 0 ; d3 < nd3; d3++)
+        for(int d2 = 0 ; d2 < nd2; d2++)
+        for(int d1 = 0 ; d1 < nd1; d1++)
+        for(int d0 = 0 ; d0 < nd0; d0++){
+            int parity = (d0+d1+d2+d3)%2;
 
             int idxh = snum_acc(d0,d1,d2,d3);
 
-            fprintf(fp, "dir: %d (x,y,z,t): %d %d %d %d value: %.18lf\n",dir, x,y,z,t,backfield[geom_par.xyztmap[dir]+parity].d[idxh]);
+            fprintf(fp,
+                    "dir: %d (d0,d1,d2,d3): %d %d %d %d value: %.18lf\n",
+                    dir, d0,d1,d2,d3,
+                    backfield[geom_par.xyztmap[dir]+parity].d[idxh]);
     }
     fclose(fp);
 }

@@ -124,7 +124,7 @@ inline double l2norm2_global(
 }
 
 
-#else // NO MULTIDEV
+#else // NO MULTIDEVICE
 
 
 d_complex scal_prod_global(  const __restrict vec3_soa * in_vect1,

@@ -26,7 +26,7 @@
 #define __restrict
 #endif
 
-#ifdef MULTIDEV
+#ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
 #endif 
 
@@ -105,7 +105,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Sigma[new]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
     }
 
-#ifdef MULTIDEV
+#ifdef MULTIDEVICE
         communicate_gl3_borders(Sigma);
 #endif
 

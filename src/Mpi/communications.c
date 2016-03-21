@@ -226,7 +226,7 @@ void communicate_su3_borders(su3_soa* lnh_conf){
 }
 
 
-void communicate_gl_borders(su3_soa* lnh_conf){
+void communicate_gl3_borders(su3_soa* lnh_conf){
 
     // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
     // note for async:

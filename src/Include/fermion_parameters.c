@@ -11,7 +11,8 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "../DbgTools/dbgtools.h"
 
-#ifdef MULTIDEV
+#include "../OpenAcc/geometry.h"
+#ifdef MULTIDEVICE
  #include "../Mpi/multidev.h"
 #endif
 
@@ -126,6 +127,9 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
       char tempname[50];                            // DEBUG
       strcpy(tempname,"backfield_");                //
       strcat(tempname,fpar[i].name);                // 
+#ifdef MULTIDEVICE      
+      strcat(tempname,devinfo.myrankstr);           // 
+#endif
       print_double_soa(fpar[i].phases,tempname);    //
   }
 }
@@ -168,7 +172,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     z = d[geom_par.zmap];int tnz = geom_par.gnz;
                     t = d[geom_par.tmap];int tnt = geom_par.gnt;
 
-#ifdef MULTIDEV
+#ifdef MULTIDEVICE
                     x+= devinfo.origin_0123[geom_par.xmap]
                         - devinfo.halo_widths0123[geom_par.xmap];  
                     y+= devinfo.origin_0123[geom_par.ymap]
@@ -181,6 +185,11 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
 
                     parity = (x+y+z+t)%2; 
                     // NOTICE: (x+y+z+t)%2 =/= (nd0+nd1+nd2+nd3)%2
+                    if(x>tnx-1)  x-= tnx ; if(x<0)  x+= tnx ; 
+                    if(y>tny-1)  y-= tny ; if(y<0)  y+= tny ; 
+                    if(z>tnz-1)  z-= tnz ; if(z<0)  z+= tnz ; 
+                    if(t>tnt-1)  t-= tnt ; if(t<0)  t+= tnt ; 
+                    
 
                     X = x + 1;
                     Y = y + 1;
