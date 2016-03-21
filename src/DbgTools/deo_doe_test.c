@@ -131,7 +131,9 @@ int main(int argc, char* argv[]){
         print_vec3_soa_wrapper(ferm_chi_acc,fermionname);
     }
 
+#ifdef MULTIDEVICE
     communicate_fermion_borders(ferm_chi_acc);
+#endif
     print_vec3_soa(ferm_chi_acc,myfermionname);
     //    ferm_phi_acc->c0[0] = 5;
     //#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
