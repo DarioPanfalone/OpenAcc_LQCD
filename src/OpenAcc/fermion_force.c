@@ -121,8 +121,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata           
 #ifdef STOUT_FERMIONS        
         __restrict su3_soa * tstout_conf_acc_arr,// parking
-        __restrict su3_soa * gl3_aux, // gl(3) parking
 #endif
+        __restrict su3_soa * gl3_aux, // gl(3) parking
         __restrict tamat_soa  * tipdot_acc,
         __restrict ferm_param * tfermion_parameters,// [nflavs] 
         int tNDiffFlavs,
@@ -151,10 +151,10 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 #ifdef STOUT_FERMIONS
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
     conf_to_use =  &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
-    set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
 #else
     conf_to_use = tconf_acc;
 #endif
+    set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
 
     set_tamat_soa_to_zero(tipdot_acc);
 

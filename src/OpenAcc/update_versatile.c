@@ -238,8 +238,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
 #ifdef STOUT_FERMIONS
 			      tstout_conf_acc_arr,
-			      auxbis_conf_acc, // globale
 #endif
+			      auxbis_conf_acc, // globale
 			      aux_conf_acc,fermions_parameters,NDiffFlavs,
 			      ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
 			      k_p_shiftferm,momenta,local_sums,res_md);

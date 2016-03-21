@@ -27,12 +27,14 @@ Things to do:
          STATUS: multishift inverter takes too long to converge. Can't be right.
           + read/communicate pieces of/write global fermions 
                WRITTEN, TO CHECK (seems to work reasonably)
-         TEST dirac operator WRITTEN, TO CHECK
-              (checking) - it seems that only the firs and the last 
-               slices of the global configuration is wrong. Moreover,
-               the last imaginary component of 
-               the second rank is zero.
-             - write more checks on parameters
+         TEST dirac operator: OK (4^4x2)
+           some #defines were wrong, MULTIDEV instead of MULTIDEVICE
+           moreover the initialization of u1 phases was incorrect,
+           not taking correctly into account the antiperiodicity when
+           considering the negative halo of the first rank.
+         TEST no stouting: Does not seem to accept (CHECK)
+           - test no stouting single node: TO RESURRECT (see correct branch)
+           - test no stouging multi device
          TEST inverter
          TEST multishift inverter
 
