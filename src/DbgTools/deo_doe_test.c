@@ -32,9 +32,9 @@ int main(int argc, char* argv[]){
 
     const char confname[50] = "test_conf";
     const char fermionname[50] = "test_fermion";
-    const char fermionname_doe[50] = "test_fermion_result_doe1";
-    const char fermionname_deo[50] = "test_fermion_result_deo1";
-    const char fermionname_fulldirac[50] = "test_fermion_result_fulldirac1";
+    const char fermionname_doe[50] = "test_fermion_result_doe2";
+    const char fermionname_deo[50] = "test_fermion_result_deo2";
+    const char fermionname_fulldirac[50] = "test_fermion_result_fulldirac2";
     char myconfname             [50];
     char myfermionname          [50];
     char myfermionname_doe      [50];
