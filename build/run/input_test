@@ -42,7 +42,7 @@ Seed                    12
 VerbosityLv             5
 SaveDiagnostics         0
 UseILDG                 0
-EpsGen                  0.35
+EpsGen                  0.0
 #MaxRunTimeS             6000
 
 GaugeMeasuresSettings
@@ -55,7 +55,7 @@ SingleInvNVectors       1
 
 DeviceSettings
 device_choice           0
-NRanks                 2
+NRanks                 1
 NProcPerNode           4 
 
 Geometry

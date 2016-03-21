@@ -32,9 +32,9 @@ int main(int argc, char* argv[]){
 
     const char confname[50] = "test_conf";
     const char fermionname[50] = "test_fermion";
-    const char fermionname_doe[50] = "test_fermion_result_doe";
-    const char fermionname_deo[50] = "test_fermion_result_deo";
-    const char fermionname_fulldirac[50] = "test_fermion_result_fulldirac";
+    const char fermionname_doe[50] = "test_fermion_result_doe1";
+    const char fermionname_deo[50] = "test_fermion_result_deo1";
+    const char fermionname_fulldirac[50] = "test_fermion_result_fulldirac1";
     char myconfname             [50];
     char myfermionname          [50];
     char myfermionname_doe      [50];
@@ -135,7 +135,6 @@ int main(int argc, char* argv[]){
     communicate_fermion_borders(ferm_chi_acc);
 #endif
     print_vec3_soa(ferm_chi_acc,myfermionname);
-    //    ferm_phi_acc->c0[0] = 5;
     //#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
     create(ferm_phi_acc[0:1])  copyin(u1_back_phases[0:8*NDiffFlavs]) \
         create(kloc_s[0:1])

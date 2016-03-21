@@ -21,46 +21,46 @@
 void acc_Deo( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        double_soa * backfield);
+        const double_soa * backfield);
 
 void acc_Doe( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        double_soa * backfield);
+        const double_soa * backfield);
 
 
 
 void acc_Deo_bulk( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        double_soa * backfield);
+        const double_soa * backfield);
 
 void acc_Doe_bulk( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        double_soa * backfield);
+        const double_soa * backfield);
 
 
 void acc_Deo_d3p( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        double_soa * backfield);
+        const double_soa * backfield);
 
 void acc_Doe_d3p( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        double_soa * backfield);
+        const double_soa * backfield);
 
 
 void acc_Deo_d3m( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        double_soa * backfield);
+        const double_soa * backfield);
 
 void acc_Doe_d3m( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        double_soa * backfield);
+        const double_soa * backfield);
 
 
 void fermion_matrix_multiplication( 

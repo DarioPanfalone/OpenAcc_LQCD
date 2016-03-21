@@ -8,7 +8,7 @@ static inline vec3 mat_vec_mul( __restrict const su3_soa * const matrix,
         const int idx_mat,
         __restrict const vec3_soa * const in_vect,
         const int idx_vect,
-        d_complex phase)
+        const d_complex phase)
 {
     vec3 out_vect;
 
@@ -46,7 +46,7 @@ static inline vec3 conjmat_vec_mul(__restrict const su3_soa *const matrix,
         const int idx_mat,
         __restrict const vec3_soa * const in_vect,
         const int idx_vect,
-        d_complex phase)
+        const d_complex phase)
 {
     vec3 out_vect;
 
@@ -86,7 +86,7 @@ static inline vec3 mat_vec_mul_arg(__restrict const su3_soa *const matrix,
         const int idx_mat,
         __restrict const vec3_soa * const in_vect,
         const int idx_vect,
-        __restrict double_soa * arrarg)
+        __restrict const double_soa * arrarg)
 {
     vec3 out_vect;
     double arg = arrarg->d[idx_mat];

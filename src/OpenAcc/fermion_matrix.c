@@ -20,7 +20,6 @@
 #define DEO_DOE_PREAMBLE(OFFSET3,THICKNESS3)\
     int hd0, d1, d2, d3;\
 _Pragma(" acc kernels present(u) present(out) present(in) present(backfield)")\
-printf("OFFSET3: %d THICKNESS3 :%d",OFFSET3,THICKNESS3 );\
 _Pragma(" acc loop independent ")\
 for(d3=OFFSET3; d3<OFFSET3+THICKNESS3; d3++) {\
     _Pragma(" acc loop independent ")\
@@ -52,7 +51,7 @@ for(d3=OFFSET3; d3<OFFSET3+THICKNESS3; d3++) {\
 void acc_Deo( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        double_soa * backfield)
+        const double_soa * backfield)
 {
 
     DEO_DOE_PREAMBLE(D3_HALO,LOC_N3);
@@ -98,7 +97,7 @@ void acc_Deo( __restrict const su3_soa * const u,
 void acc_Doe( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        double_soa * backfield)
+        const double_soa * backfield)
 {
 
     DEO_DOE_PREAMBLE(D3_HALO,LOC_N3);
@@ -149,7 +148,7 @@ void acc_Doe( __restrict const su3_soa * const u,
 void acc_Deo_bulk( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        double_soa * backfield)
+        const double_soa * backfield)
 {
 
     DEO_DOE_PREAMBLE(D3_HALO+1,LOC_N3-2);
@@ -195,7 +194,7 @@ void acc_Deo_bulk( __restrict const su3_soa * const u,
 void acc_Doe_bulk( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        double_soa * backfield)
+        const double_soa * backfield)
 {
 
     DEO_DOE_PREAMBLE(D3_HALO+1,LOC_N3-2);
@@ -246,7 +245,7 @@ void acc_Doe_bulk( __restrict const su3_soa * const u,
 void acc_Deo_d3p( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        double_soa * backfield)
+        const double_soa * backfield)
 {
 
     DEO_DOE_PREAMBLE(nd3-1-D3_HALO,1);
@@ -292,7 +291,7 @@ void acc_Deo_d3p( __restrict const su3_soa * const u,
 void acc_Doe_d3p( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        double_soa * backfield)
+        const double_soa * backfield)
 {
 
     DEO_DOE_PREAMBLE(nd3-1-D3_HALO,1);
@@ -342,7 +341,7 @@ void acc_Doe_d3p( __restrict const su3_soa * const u,
 void acc_Deo_d3m( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        double_soa * backfield)
+        const double_soa * backfield)
 {
 
     DEO_DOE_PREAMBLE(D3_HALO,1);
@@ -388,7 +387,7 @@ void acc_Deo_d3m( __restrict const su3_soa * const u,
 void acc_Doe_d3m( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        double_soa * backfield)
+        const double_soa * backfield)
 {
 
     DEO_DOE_PREAMBLE(D3_HALO,1);
