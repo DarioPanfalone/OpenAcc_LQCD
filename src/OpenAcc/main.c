@@ -175,6 +175,8 @@ int main(int argc, char* argv[]){
                     conf_id_iter,rect/size/6.0/3.0/2.0);
             printf("Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",conf_id_iter,
                     creal(poly),cimag(poly));
+   
+     
 
             if(mkwch_pars.ntraj==0){ // MEASURES ONLY
 
