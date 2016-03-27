@@ -27,21 +27,22 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
 {
 
     if(verbosity_lv > 1) printf("Stouting gauge conf %d times.\n", act_params.stout_steps);
-    
-    if(act_params.stout_steps > 0) 
+
+    if(act_params.stout_steps > 0){
         stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, 
                 glocal_staples, gipdot );
 #ifdef MULTIDEVICE
-    communicate_su3_borders(tstout_conf_acc_arr);
+        communicate_su3_borders(tstout_conf_acc_arr);
 #endif
-    for(int stoutlevel=1;stoutlevel < act_params.stout_steps;
-            stoutlevel++){
-        stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),
-                &(tstout_conf_acc_arr[8*stoutlevel]),auxbis_conf_acc,
-                glocal_staples,  gipdot );
+        for(int stoutlevel=1;stoutlevel < act_params.stout_steps;
+                stoutlevel++){
+            stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),
+                    &(tstout_conf_acc_arr[8*stoutlevel]),auxbis_conf_acc,
+                    glocal_staples,  gipdot );
 #ifdef MULTIDEVICE
-        communicate_su3_borders(&(tstout_conf_acc_arr[8*stoutlevel]));
+            communicate_su3_borders(&(tstout_conf_acc_arr[8*stoutlevel]));
 #endif
+        }
     }
 }
 

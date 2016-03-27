@@ -24,8 +24,8 @@ MuOverPiT       0.24
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	    20   
-GaugeSubSteps   1
+NmdSteps	    10
+GaugeSubSteps   4
 TrajLength	    1.0
 residue_md      1e-6
 

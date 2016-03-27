@@ -193,11 +193,12 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
                 aux_th,aux_ta,conf_to_use, taux_conf_acc );
     }
+    if(act_params.stout_steps > 0 ){
     if(verbosity_lv > 1) 
         printf("\t\tSigma' to Sigma [lvl 1 to lvl 0]\n");
     compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
             aux_th,aux_ta,tconf_acc, taux_conf_acc );
-
+    }
 #endif
 
     multiply_conf_times_force_and_take_ta_nophase(tconf_acc, gl3_aux,
