@@ -38,6 +38,7 @@ void initrand(unsigned long s)
 
 void initrand_fromfile(const char * filename, unsigned long seed_default){
 
+#ifndef NORANDOM
     FILE * seedfile = fopen(filename,"r");
     int reads;
     int problems_in_read = 0;
@@ -49,10 +50,8 @@ void initrand_fromfile(const char * filename, unsigned long seed_default){
             problems_in_read = 1;
         fclose(seedfile);
     }
-
     if(problems_in_read)
         initrand(seed_default);
-
     if(verbosity_lv > 0){
         if(problems_in_read){
             printf("Problems in reading file %s, ",filename );
@@ -63,7 +62,9 @@ void initrand_fromfile(const char * filename, unsigned long seed_default){
 
         }
     }
-
+#else
+    initrand(seed_default);
+#endif
 
 
 }
