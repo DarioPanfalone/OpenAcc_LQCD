@@ -139,12 +139,15 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef STOUT_FERMIONS 
     // USO DELLA VERSIONE STOUTATA GIA' PER LO STIRACCHIAMENTO
     // STOUTING...(ALREADY ON DEVICE)
+    if(act_params.stout_steps > 0){
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
-    gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+    gconf_as_fermionmatrix = 
+        &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+    }
+    else gconf_as_fermionmatrix = tconf_acc;
 #else
     gconf_as_fermionmatrix = tconf_acc;
 #endif
-
 
     // STIRACCHIAMENTO DELL'APPROX RAZIONALE FIRST_INV
     for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -250,8 +253,12 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
+        if(act_params.stout_steps > 0){
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
-    gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+    gconf_as_fermionmatrix = 
+        &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+    }
+    else gconf_as_fermionmatrix = tconf_acc;
 #else
     gconf_as_fermionmatrix = tconf_acc;
 #endif

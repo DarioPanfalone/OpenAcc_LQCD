@@ -118,7 +118,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
 //STANDARD VERSION OF THE FERMIONIC FORCE
-void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata           
+void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
+        // la configurazione qui dentro e' costante e non viene modificata
 #ifdef STOUT_FERMIONS        
         __restrict su3_soa * tstout_conf_acc_arr,// parking
 #endif
@@ -150,10 +151,14 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
     // FERMION FORCE
 #ifdef STOUT_FERMIONS
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
-    conf_to_use =  &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+    if(act_params.stout_steps > 0) 
+        conf_to_use =  
+            &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+    else conf_to_use = tconf_acc;
 #else
     conf_to_use = tconf_acc;
 #endif
+
     set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
 
     set_tamat_soa_to_zero(tipdot_acc);
