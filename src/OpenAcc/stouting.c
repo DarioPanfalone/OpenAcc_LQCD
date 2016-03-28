@@ -524,10 +524,12 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
     SETINUSE(L);
     SETINUSE(TMP);
 
+    // TO CORRECT
+
     int d0, d1, d2, d3;
 #pragma acc kernels present(L)  present(SP)  present(U)  present(QA)  present(TMP)
 #pragma acc loop independent gang
-    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) { 
 #pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector

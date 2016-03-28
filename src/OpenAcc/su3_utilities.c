@@ -24,7 +24,7 @@ void unitarize_conf( __restrict su3_soa * const u)
 #pragma acc loop independent 
     for(dirindex = 0 ; dirindex < 8 ; dirindex++){
 #pragma acc loop independent
-        for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) { // DEBUG
+        for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) { 
 #pragma acc loop independent //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
             for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)

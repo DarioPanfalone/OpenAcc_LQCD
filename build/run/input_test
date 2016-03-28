@@ -24,15 +24,15 @@ MuOverPiT       0.24
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	    10
-GaugeSubSteps   4
+NmdSteps	    9
+GaugeSubSteps   5
 TrajLength	    1.0
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                1
-ThermNtraj	            0
+Ntraj	                80
+ThermNtraj	            40
 StoreConfInterval	    20
 SaveConfInterval    	5
 residue_metro       	1e-8
@@ -40,7 +40,7 @@ StoreConfName       	store.conf.ascii
 SaveConfName            conf.ascii
 Seed                    12
 ExpMaxEigenvalue        6
-VerbosityLv             5
+VerbosityLv             2
 SaveDiagnostics         0
 UseILDG                 0
 EpsGen                  0.35
@@ -56,7 +56,7 @@ SingleInvNVectors       1
 
 DeviceSettings
 device_choice          0
-NRanks                 1
+NRanks                 2
 NProcPerNode           4 
 
 Geometry

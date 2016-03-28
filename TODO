@@ -23,8 +23,9 @@ Things to do:
     - DIFFERENT MPI PROCESSES DON'T AGREE ON ACCEPTING (solved)
        MPI_Bcast was called on a double variable with MPI_INT datatype.
 
-     - dynamical fermions: FAIL
+     - dynamical fermions: HALF FAIL
          STATUS: multishift inverter takes too long to converge. Can't be right.
+            CHECK!!
           + read/communicate pieces of/write global fermions 
                WRITTEN, TO CHECK (seems to work reasonably)
          TEST dirac operator: OK (4^4x2)
@@ -32,11 +33,20 @@ Things to do:
            moreover the initialization of u1 phases was incorrect,
            not taking correctly into account the antiperiodicity when
            considering the negative halo of the first rank.
-         TEST no stouting: Does not seem to accept (CHECK)
-           - test no stouting single node: TO RESURRECT (see correct branch)
-           - test no stouging multi device
-         TEST inverter
-         TEST multishift inverter
+         TEST no stouting: Accept, but with suspicions (4^4x2) (CHECK)
+           - test no stouging multi device - seems to accept, 
+             but there can be mistakes - In particular, the action difference
+             seems to tend to zero perhaps very slowly or perhaps even 
+             not at all. Maybe it's just that, without stouting, the situation 
+             is generally worse?
+         TEST inverter TO CHECK (see below)
+         TEST multishift inverter: OK, probably
+           - acceptance in metropolis test suggests that it's ok.
+         STOUTING: FAIL, 
+           - Error: some non local routines in the fermion force calculation 
+             (compute sigma from sigma primo, as an example) are treated as local,
+             and this is a mistake. Correcting this mistake does not seem to 
+             fix everything though.
 
      - calculation of gauge observables on a given conf: TO CHECK
    
