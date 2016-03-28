@@ -11,13 +11,13 @@ StoutSteps      0
 StoutRho        0.15
  
 #up quark
-FlavourParameters   
-Mass	        0.01 
-Degeneracy	    1
-PseudoFermions	1
-Name	        pippo
-Charge          0.0
-MuOverPiT       0.24
+#FlavourParameters   
+#Mass	        0.01 
+#Degeneracy	    1
+#PseudoFermions	1
+#Name	        pippo
+#Charge          0.0
+#MuOverPiT       0.24
                              
 
 

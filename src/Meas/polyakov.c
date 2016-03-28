@@ -154,7 +154,7 @@ d_complex polyakov_loop0(__restrict const su3_soa * const u)
         int d0, d1, d2, d3,h,idxh,parity;
         double r = 0;
 #pragma acc kernels present(u) present(loopplk0)
-#pragma acc loop independent gang //gang(nd3)
+#pragma acc loop gang // NOT INDEPENDENT
         for(d0=0; d0 < nd0; d0++) {	    
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
             for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
@@ -232,7 +232,7 @@ d_complex polyakov_loop1(__restrict const su3_soa * const u)
         int d0, d1, d2, d3,h,idxh,parity;
 
 #pragma acc kernels present(u) present(loopplk1)
-#pragma acc loop independent gang 
+#pragma acc loop gang // NOT INDEPENDENT 
         for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
             for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
@@ -310,7 +310,7 @@ d_complex polyakov_loop2(__restrict const su3_soa * const u)
         }
         int d0, d1, d2, d3,h,idxh,parity;
 #pragma acc kernels present(u) present(loopplk2)
-#pragma acc loop independent gang 
+#pragma acc loop gang  // NOT INDEPENDENT
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector
             for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
@@ -387,7 +387,7 @@ d_complex polyakov_loop3(__restrict const su3_soa * const u)
         }
         int d0, d1, d2, d3,h,idxh,parity;
 #pragma acc kernels present(u) present(loopplk3)
-#pragma acc loop independent gang
+#pragma acc loop gang // NOT INDEPENDENT
         for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
 #pragma acc loop independent gang vector
             for(d2=0; d2<nd2; d2++) {

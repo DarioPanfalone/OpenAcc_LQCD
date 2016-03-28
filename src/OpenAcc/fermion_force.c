@@ -16,6 +16,7 @@
 #include "./su3_measurements.h"
 #include "./plaquettes.h"
 #include "./action.h"
+#include "../Mpi/multidev.h"
 
 #ifndef __GNUC__
 #define TIMING_FERMION_FORCE
@@ -44,7 +45,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
 
 
-    if(verbosity_lv > 2) printf("\t\tSIGMA_PRIME --> SIGMA\n");
+    if(verbosity_lv > 2) printf("MPI%02d:\t\tSIGMA_PRIME --> SIGMA\n",
+            devinfo.myrank);
     if(verbosity_lv > 5){// printing stuff
 #pragma acc update host(Sigma[0:8])
         printf("-------------Sigma[old]------------------\n");                                                                                             
@@ -62,13 +64,23 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
     set_su3_soa_to_zero(TMP);
 
     calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
-    if(verbosity_lv > 4)printf("         computed staples  \n");
+    if(verbosity_lv > 4)printf("MPI%02d:\t\tcomputed staples  \n",
+            devinfo.myrank);
+#ifdef MULTIDEVICE
+    communicate_gl3_borders(TMP);
+#endif
 
     RHO_times_conf_times_staples_ta_part(U,TMP,QA);
+
+#ifdef MULTIDEVICE
+    communicate_tamat_soa_borders(QA);
+#endif
+
     // check: TMP = local staples.
-    if(verbosity_lv > 4) printf("         computed Q  \n");
+    if(verbosity_lv > 4) printf("MPI%02d:\t\tcomputed Q  \n",
+            devinfo.myrank);
     if(verbosity_lv > 5) {// printing stuff
-#pragma acc update host(QA[0:8])
+#pragma acc update host(QA[ 0:8])
         printf("-------------Q------------------\n");
         printf("Q00 = %.18lf\n",QA[0].ic00[0]);
         printf("Q00 = %.18lf\n",QA[0].ic11[0]);
@@ -77,7 +89,13 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Q12 = %.18lf + (%.18lf)*I\n\n",creal(QA[0].c12[0]),cimag(QA[0].c12[0]));
     }
     compute_lambda(Lambda,Sigma,U,QA,TMP);
-    if(verbosity_lv > 4)   printf("         computed Lambda  \n");
+
+#ifdef MULTIDEVICE
+    communicate_thmat_soa_borders(Lambda);
+#endif
+
+    if(verbosity_lv > 4)   printf("MPI%02d:\t\tcomputed Lambda  \n",
+            devinfo.myrank);
 
     if(verbosity_lv > 5) {// printing stuff
 #pragma acc update host(Lambda[0:8])
@@ -89,7 +107,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
     }
     compute_sigma(Lambda,U,Sigma,QA,TMP);
-    if(verbosity_lv > 4)   printf("         computed Sigma  \n");
+    if(verbosity_lv > 4)   printf("MPI%02d:\t\tcomputed Sigma  \n",
+            devinfo.myrank);
 
     if(verbosity_lv > 5) {// printing stuff
 #pragma acc update host(Sigma[0:8])
@@ -139,7 +158,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         ){
 
     if(verbosity_lv > 2){
-        printf("\tInside fermion force soloopenacc\n");
+        printf("MPI%02d:\tCalculation of fermion force...\n", 
+                devinfo.myrank);
     }
 
 #ifdef TIMING_FERMION_FORCE
@@ -187,15 +207,16 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
     for(int stout_level = act_params.stout_steps ; stout_level > 1 ; 
             stout_level--){
         if(verbosity_lv > 1) 
-            printf("\t\tSigma' to Sigma [lvl %d to lvl %d]\n",
-                    stout_level,stout_level-1);
+            printf("MPI%02d:\t\tSigma' to Sigma [lvl %d to lvl %d]\n",
+                    devinfo.myrank, stout_level,stout_level-1);
         conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
         compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
                 aux_th,aux_ta,conf_to_use, taux_conf_acc );
     }
     if(act_params.stout_steps > 0 ){
     if(verbosity_lv > 1) 
-        printf("\t\tSigma' to Sigma [lvl 1 to lvl 0]\n");
+        printf("MPI%02d:\t\tSigma' to Sigma [lvl 1 to lvl 0]\n",
+                devinfo.myrank);
     compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
             aux_th,aux_ta,tconf_acc, taux_conf_acc );
     }
@@ -220,10 +241,13 @@ printf("F12 = %.18lf + (%.18lf)*I\n\n",creal(tipdot_acc[0].c12[0]),cimag(tipdot_
 #ifdef TIMING_FERMION_FORCE
     gettimeofday ( &t2, NULL );
     double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
-    printf("\t\tFULL FERMION FORCE COMPUTATION  PreKer->PostKer :%f sec  \n",dt_preker_to_postker);
+    printf("MPI%02d\t\t\
+FULL FERMION FORCE COMPUTATION  PreKer->PostKer :%f sec  \n",
+dt_preker_to_postker,devinfo.myrank);
 #endif
     if(verbosity_lv > 0){
-        printf("\t\tCompleted fermion force openacc\n");
+        printf("MPI%02d:\t\tCompleted fermion force openacc\n",
+                devinfo.myrank);
     }
 
     if(mkwch_pars.save_diagnostics == 1 ){
@@ -235,12 +259,14 @@ printf("F12 = %.18lf + (%.18lf)*I\n\n",creal(tipdot_acc[0].c12[0]),cimag(tipdot_
 
         FILE *foutfile = 
             fopen(mkwch_pars.diagnostics_filename,"at");
-        fprintf(foutfile,"FFHN %e \tDFFHN %e \t",force_norm,diff_force_norm);
+        fprintf(foutfile,"FFHN %e \tDFFHN %e \t",
+                force_norm,diff_force_norm);
         fclose(foutfile);
 
         if(verbosity_lv > 1)
-            printf("\t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n", 
-                    force_norm, diff_force_norm);
+            printf("MPI%02d:\
+\t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n",
+                    devinfo.myrank, force_norm, diff_force_norm);
     } 
 
 

@@ -12,6 +12,7 @@
 
 #include "./single_types.h"
 #include "./action.h"
+#include "../Mpi/multidev.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
@@ -26,7 +27,9 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
         __restrict su3_soa * tstout_conf_acc_arr)
 {
 
-    if(verbosity_lv > 1) printf("Stouting gauge conf %d times.\n", act_params.stout_steps);
+    if(verbosity_lv > 1) 
+        printf("MPI%02d:Stouting gauge conf %d times.\n",
+               devinfo.myrank, act_params.stout_steps);
 
     if(act_params.stout_steps > 0){
         stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, 
@@ -61,7 +64,8 @@ void stout_isotropic(
     SETREQUESTED(auxiliary);
     SETREQUESTED(tipdot);
 
-    if(verbosity_lv > 1) printf("Isotropic stouting...\n");
+    if(verbosity_lv > 1) 
+        printf("MPI%02d: Isotropic stouting...\n",devinfo.myrank);
 
 
     set_su3_soa_to_zero(local_staples);

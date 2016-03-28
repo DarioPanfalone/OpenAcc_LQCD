@@ -6,14 +6,9 @@ Things to do:
    (check-bugfix)  
      TEST PURE GAUGE (no fermions):    OK (8^4) (accepts)
      TEST WITH FERMIONS              : OK (8^4) (accepts)
-3. Compilation with PGI, no multidev ~OK (only pgi15.9)
-4. Correct execution with PGI, no multidev
-    STATUS : Compiles and ~accepts bu~t it's slow AS HELL (3x )
-    - ACC_DEO, ACC_DOE not accelerated correctly. <<<<-------notice
 
-5. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
-5.5 Preparation of input file for run                      DONE 
-6. Correct execution with MPICC (2 ranks, minilattice) IN PROGRESS
+3. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
+4. Correct execution with MPICC (2 ranks, minilattice) IN PROGRESS
    - checks for segmentation faults and mpi errors: OK
    - check for actual correctness of the code:
      - TEST PURE GAUGE   (no fermions):     OK (8^4 x 2) (accepts)
@@ -24,35 +19,38 @@ Things to do:
        MPI_Bcast was called on a double variable with MPI_INT datatype.
 
      - dynamical fermions: HALF FAIL
-         STATUS: multishift inverter takes too long to converge. Can't be right.
-            CHECK!!
-          + read/communicate pieces of/write global fermions 
-               WRITTEN, TO CHECK (seems to work reasonably)
          TEST dirac operator: OK (4^4x2)
            some #defines were wrong, MULTIDEV instead of MULTIDEVICE
            moreover the initialization of u1 phases was incorrect,
            not taking correctly into account the antiperiodicity when
            considering the negative halo of the first rank.
-         TEST no stouting: Accept, but with suspicions (4^4x2) (CHECK)
-           - test no stouging multi device - seems to accept, 
-             but there can be mistakes - In particular, the action difference
-             seems to tend to zero perhaps very slowly or perhaps even 
-             not at all. Maybe it's just that, without stouting, the situation 
-             is generally worse?
-         TEST inverter TO CHECK (see below)
-         TEST multishift inverter: OK, probably
+         TEST no stouting: Accepts (4^4x2) 
+           - after an acc_Doe() call in fermion force calculation,
+             fermion borders must be communicated.
+           - test no stouging multi device - seems to accept.
            - acceptance in metropolis test suggests that it's ok.
-         STOUTING: FAIL, 
-           - Error: some non local routines in the fermion force calculation 
-             (compute sigma from sigma primo, as an example) are treated as local,
-             and this is a mistake. Correcting this mistake does not seem to 
-             fix everything though.
+             Acceptance on 4^3x8 on single device and on two ranks are in 
+             agreement.
+         STOUTING:  OKish (4^4x2)
+           - Results seems correct, acceptance is consistent.
+           - SEVERAL BORDERS COMMUNICATIONS IN
+             compute_sigma_from_sigma_prime_backinto_sigma_prime()
+             ARE INEFFICIENT. Thickness = 2 borders are passed instead 
+             of the necessary Thickness = 1 borders. <<<<------ TODO
 
-     - calculation of gauge observables on a given conf: TO CHECK
+5. Compilation with PGI, no multidev ~OK (only pgi15.9)
+6. Correct execution with PGI, no multidev
+    STATUS : Compiles and ~accepts bu~t it's slow AS HELL (3x )
+    - ACC_DEO, ACC_DOE not accelerated correctly. <<<<-------TODO
+                            
+TODO: 
+7. Integration MPI-OPENACC
+8. Re-integration of async communications
+   in fermion matrix multiplication (discuss thickness-2 trick)
+9. Async communications in gauge substep
+10. Observables
+11. Single precision MD
    
-
-NO ASYNC WORK DONE YET
-
 
 ----------------------------------------------------------------
 - phases in the multinode setup  (DONE, TO CHECK)
