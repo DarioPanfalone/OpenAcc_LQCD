@@ -40,7 +40,7 @@ StoreConfName       	store.conf.ildg
 SaveConfName            conf.ildg
 Seed                    12
 ExpMaxEigenvalue        6
-VerbosityLv             8
+VerbosityLv             2
 SaveDiagnostics         0
 UseILDG                 1
 EpsGen                  0.35
@@ -57,7 +57,7 @@ SingleInvNVectors       1
 DeviceSettings
 device_choice          0
 AsyncFermionComms      1
-AsyncGaugeComms        0
+AsyncGaugeComms        1
 NRanks                 2
 NProcPerNode           4 
 

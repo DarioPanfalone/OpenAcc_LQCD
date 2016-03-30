@@ -15,6 +15,11 @@ void communicate_fermion_borders(vec3_soa *lnh_fermion);
 void communicate_fermion_borders_async(vec3_soa *lnh_fermion, 
         MPI_Request* send_border_requests,// 6 element long
         MPI_Request* recv_border_requests);// 6 element long
+
+void communicate_su3_borders_async(su3_soa* lnh_conf, int thickness,
+        MPI_Request* send_border_requests, // 96 element long
+        MPI_Request* recv_border_requests);// 96 element long
+
 #endif
 
 // gauge conf border communication (only GAUGE_HALO thick)

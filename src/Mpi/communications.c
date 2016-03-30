@@ -30,7 +30,8 @@ extern int verbosity_lv;
 
 // offset stands for the 
 void sendrecv_vec3soa_borders_1Dcut(vec3_soa *lnh_fermion,
-        int rankL, int rankR, int thickness){
+        int rankL, int rankR, int thickness)
+{
    // NOTICE YOU HAVE TO SET MYRANK CORRECTLY TO USE THIS FUNCTION
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
@@ -106,7 +107,8 @@ void sendrecv_vec3soa_borders_1Dcut(vec3_soa *lnh_fermion,
   }
 #endif
  }
-void communicate_fermion_borders(vec3_soa *lnh_fermion){ //WRAPPER
+void communicate_fermion_borders(vec3_soa *lnh_fermion) // WRAPPER
+{
 
     // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
     MPI_Barrier(MPI_COMM_WORLD);

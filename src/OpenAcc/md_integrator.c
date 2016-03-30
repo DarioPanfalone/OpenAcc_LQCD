@@ -78,6 +78,93 @@ void initialize_md_global_variables(md_param md_params )
 
 }
 
+
+
+#ifdef MULTIDEVICE
+void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc,su3_soa *local_staples,
+        tamat_soa *tipdot,thmat_soa *tmomenta, int omelyan_index){
+
+    MPI_Request send_border_requests[96]; 
+    MPI_Request recv_border_requests[96];
+
+    // LOWER SURFACE
+    calc_ipdot_gauge_soloopenacc_d3c(tconf_acc,local_staples,tipdot,
+            HALO_WIDTH,GAUGE_HALO); 
+    mom_sum_mult_d3c(tmomenta,tipdot,deltas_Omelyan,omelyan_index,
+            HALO_WIDTH,GAUGE_HALO);
+    mom_exp_times_conf_soloopenacc_d3c(tconf_acc,tmomenta,
+            deltas_Omelyan,4,
+            HALO_WIDTH,GAUGE_HALO);
+
+    // UPPER SURFACE
+    calc_ipdot_gauge_soloopenacc_d3c(tconf_acc,local_staples,tipdot,
+            nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
+    mom_sum_mult_d3c(tmomenta,tipdot,deltas_Omelyan,omelyan_index,
+            nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
+    mom_exp_times_conf_soloopenacc_d3c(tconf_acc,tmomenta,
+            deltas_Omelyan,4,
+            nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
+
+    communicate_su3_borders_async(tconf_acc,GAUGE_HALO,
+            send_border_requests,recv_border_requests);
+
+    // BULK
+    calc_ipdot_gauge_soloopenacc_bulk(tconf_acc,local_staples,tipdot); 
+    mom_sum_mult_bulk(tmomenta,tipdot,deltas_Omelyan,omelyan_index);
+    mom_exp_times_conf_soloopenacc_bulk(tconf_acc,tmomenta,
+            deltas_Omelyan,4);
+
+    MPI_Waitall(96,send_border_requests,MPI_STATUSES_IGNORE);
+}
+
+void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
+{
+    int md;
+
+    multistep_2MN_gauge_async_bloc(tconf_acc,local_staples,
+            tipdot,tmomenta,3);
+
+#ifdef DEBUG_MD
+    char conffilename[50];
+    char momfilename[50];
+    char ipdotfilename[50];
+    if(!already_printed_debug){
+        sprintf(conffilename,"conf_md_0_%s",devinfo.myrankstr);
+        sprintf(momfilename,"tmomenta_0_%s",devinfo.myrankstr);
+        sprintf(ipdotfilename,"tipdot_0_%s",devinfo.myrankstr);
+        dbg_print_su3_soa(tconf_acc,conffilename, 1);
+        print_thmat_soa(tmomenta,momfilename);
+        print_tamat_soa(tipdot,ipdotfilename);
+    }
+#endif
+    for(md=1; md<md_parameters.gauge_scale; md++){
+        if(verbosity_lv > 2) printf("MPI%02d - Gauge step %d of %d...\n",
+                devinfo.myrank,md,md_parameters.gauge_scale);
+
+        multistep_2MN_gauge_async_bloc(tconf_acc,local_staples,
+                tipdot,tmomenta,5);
+
+        multistep_2MN_gauge_async_bloc(tconf_acc,local_staples,
+                tipdot,tmomenta,6);
+
+    }
+    if(verbosity_lv > 2) printf("MPI%02d - Last Gauge step of %d...\n",
+            devinfo.myrank,md_parameters.gauge_scale);
+
+    multistep_2MN_gauge_async_bloc(tconf_acc,local_staples,
+            tipdot,tmomenta,5);
+
+    // LAST PAST IS NOT ASYNCED
+    // Step for the P
+    // P' = P - l*dt*dS/dq
+    // deltas_Omelyan[3]=-cimag(ieps_acc)*lambda*scale;
+    calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+    mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
+
+}
+#endif
+
+
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
 {
     int md;
@@ -105,7 +192,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 #ifdef DEBUG_MD
     if(!already_printed_debug){
         sprintf(momfilename,"tmomenta_1_%s",devinfo.myrankstr);
-       print_thmat_soa(tmomenta,momfilename);
+        print_thmat_soa(tmomenta,momfilename);
     }
 #endif
 
@@ -229,7 +316,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             tipdot_acc, tfermions_parameters, tNDiffFlavs, 
             ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
             tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
-    
+
     if(verbosity_lv > 4) printf("MPI%02d - Calculated first fermion force/n", 
             devinfo.myrank);
 
@@ -239,10 +326,12 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     for(md=1; md<md_parameters.no_md; md++){
 
         printf("\n\nMPI%02d\t\tRUNNING MD STEP %d OF %d...\n",
-               devinfo.myrank, md, md_parameters.no_md);
+                devinfo.myrank, md, md_parameters.no_md);
         // Step for the Q
         // Q' = exp[dt/2 *i P] Q
-        multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+        if(devinfo.async_comm_gauge)
+            multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+        else multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
         // Step for the P
         // P' = P - (1-2l)*dt*dS/dq
         // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
@@ -261,7 +350,11 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,1);
         // Step for the Q
         // Q' = exp[dt/2 *i P] Q
-        multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+        if(devinfo.async_comm_gauge)
+            multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+        else multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+
+
         // Step for the P
         // P' = P - 2l*dt*dS/dq
         // deltas_Omelyan[2]=-cimag(ieps_acc)*(2.0*lambda);
@@ -280,7 +373,11 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             devinfo.myrank,md_parameters.no_md);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
-    multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+    if(devinfo.async_comm_gauge)
+        multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+    else multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+
+
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
@@ -297,7 +394,10 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
-    multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+    if(devinfo.async_comm_gauge)
+        multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+    else multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+
     // Step for the P
     // P' = P - l*dt*dS/dq
     // deltas_Omelyan[0]=-cimag(ieps_acc)*lambda;

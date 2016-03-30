@@ -163,19 +163,17 @@ inline void acc_Deo( __restrict const su3_soa * const u,
 
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_fermion){
-        
+
         MPI_Request send_border_requests[6], recv_border_requests[6];
         int ir;
-        
+
         acc_Deo_d3c(u, out, in, backfield,HALO_WIDTH,1);
         acc_Deo_d3c(u, out, in, backfield,nd3-HALO_WIDTH-1,1);
         communicate_fermion_borders_async(out,send_border_requests,
                 recv_border_requests);
         acc_Deo_bulk(u, out, in, backfield);
-        for(ir = 0; ir < 6 ; ir++){
-          MPI_Wait(&(recv_border_requests[ir]),MPI_STATUS_IGNORE);
-          MPI_Wait(&(send_border_requests[ir]),MPI_STATUS_IGNORE);
-        }
+        MPI_Waitall(6,recv_border_requests,MPI_STATUSES_IGNORE);
+        MPI_Waitall(6,send_border_requests,MPI_STATUSES_IGNORE);
 
     }else{ 
         acc_Deo_unsafe(u, out, in, backfield);
@@ -195,18 +193,18 @@ inline void acc_Doe( __restrict const su3_soa * const u,
 
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_fermion){
-        
+
         MPI_Request send_border_requests[6], recv_border_requests[6];
         int ir;
-        
+
         acc_Doe_d3c(u, out, in, backfield,HALO_WIDTH,1);
         acc_Doe_d3c(u, out, in, backfield,nd3-HALO_WIDTH-1,1);
         communicate_fermion_borders_async(out,send_border_requests,
                 recv_border_requests);
         acc_Doe_bulk(u, out, in, backfield);
         for(ir = 0; ir < 6 ; ir++){
-          MPI_Wait(&(recv_border_requests[ir]),MPI_STATUS_IGNORE);
-          MPI_Wait(&(send_border_requests[ir]),MPI_STATUS_IGNORE);
+            MPI_Wait(&(recv_border_requests[ir]),MPI_STATUS_IGNORE);
+            MPI_Wait(&(send_border_requests[ir]),MPI_STATUS_IGNORE);
         }
 
     }else{ 
