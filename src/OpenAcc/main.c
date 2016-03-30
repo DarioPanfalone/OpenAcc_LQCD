@@ -220,21 +220,23 @@ int main(int argc, char* argv[]){
             int accettate_metro_old=0;
             int id_iter_offset=conf_id_iter;
             plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
             printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
                     devinfo.myrank, conf_id_iter,plq/NSITES/6.0/3.0);
+            rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+
+
             printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
                     devinfo.myrank, conf_id_iter,rect/NSITES/6.0/3.0/2.0);
+           
+            poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
             printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
                     devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
+
 
             char confile_dbg[50];
             sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
             dbg_print_su3_soa(conf_acc,confile_dbg,0);
 
-//            MPI_Finalize();
-//            return 0;
 
 
 

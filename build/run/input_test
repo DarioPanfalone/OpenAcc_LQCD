@@ -7,42 +7,42 @@
 
 ActionParameters
 Beta            3.55
-StoutSteps      0
+StoutSteps      2
 StoutRho        0.15
  
 #up quark
-#FlavourParameters   
-#Mass	        0.01 
-#Degeneracy	    1
-#PseudoFermions	1
-#Name	        pippo
-#Charge          0.0
-#MuOverPiT       0.24
+FlavourParameters   
+Mass	        0.01 
+Degeneracy	    1
+PseudoFermions	1
+Name	        pippo
+Charge          0.0
+MuOverPiT       0.24
                              
 
 
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	    9
-GaugeSubSteps   5
+NmdSteps	    7
+GaugeSubSteps   4
 TrajLength	    1.0
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                80
-ThermNtraj	            40
+Ntraj	                1
+ThermNtraj	            15
 StoreConfInterval	    20
 SaveConfInterval    	5
 residue_metro       	1e-8
-StoreConfName       	store.conf.ascii
-SaveConfName            conf.ascii
+StoreConfName       	store.conf.ildg
+SaveConfName            conf.ildg
 Seed                    12
 ExpMaxEigenvalue        6
-VerbosityLv             2
+VerbosityLv             8
 SaveDiagnostics         0
-UseILDG                 0
+UseILDG                 1
 EpsGen                  0.35
 #MaxRunTimeS            6000
 
@@ -56,15 +56,17 @@ SingleInvNVectors       1
 
 DeviceSettings
 device_choice          0
+AsyncFermionComms      1
+AsyncGaugeComms        0
 NRanks                 2
 NProcPerNode           4 
 
 Geometry
-nx                      4 
-ny	                    4
-nz	                    4
+nx                      8
+ny	                    8
+nz	                    8
 nt	                    8
-xmap	                0 
-ymap	                1   
-zmap	                2   
-tmap	                3 
+xmap	                1 
+ymap	                2   
+zmap	                3  
+tmap	                0

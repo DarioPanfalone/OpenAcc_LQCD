@@ -8,6 +8,8 @@
 #elif defined(GAUGE_ACT_WILSON)
  #define HALO_WIDTH 1
 #endif
+#define FERMION_HALO 1
+#define GAUGE_HALO HALO_WIDTH
 //LOCAL lattice dimensions
 
 #include "../../build/lattice_dimensions.h" // contains NRANKS_D[1234]

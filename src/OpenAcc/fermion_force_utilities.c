@@ -231,9 +231,6 @@ void ker_openacc_compute_fermion_force(
     for(iter=0; iter<tpars->approx_md.approx_order; iter++){
         assign_in_to_out(&in_shiftmulti[iter],loc_s);
         acc_Doe(u,loc_h,loc_s,tpars->phases);
-#ifdef MULTIDEVICE
-        communicate_fermion_borders(loc_h);
-#endif
         direct_product_of_fermions_into_auxmat(loc_s,loc_h,aux_u,&(tpars->approx_md),iter);
 
 

@@ -168,7 +168,7 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom8)
     }
 
 #ifdef MULTIDEVICE
-    communicate_thmat_soa_borders(mom8);
+    communicate_thmat_soa_borders(mom8, HALO_WIDTH);
 #endif
 }
 
@@ -192,7 +192,7 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
 
             }
 #ifdef MULTIDEVICE
-    communicate_su3_borders(conf);
+    communicate_su3_borders(conf, HALO_WIDTH);
 #endif
 
 }

@@ -35,7 +35,7 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
         stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, 
                 glocal_staples, gipdot );
 #ifdef MULTIDEVICE
-        communicate_su3_borders(tstout_conf_acc_arr);
+        communicate_su3_borders(tstout_conf_acc_arr,1);
 #endif
         for(int stoutlevel=1;stoutlevel < act_params.stout_steps;
                 stoutlevel++){
@@ -43,7 +43,8 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
                     &(tstout_conf_acc_arr[8*stoutlevel]),auxbis_conf_acc,
                     glocal_staples,  gipdot );
 #ifdef MULTIDEVICE
-            communicate_su3_borders(&(tstout_conf_acc_arr[8*stoutlevel]));
+            communicate_su3_borders(
+                    &(tstout_conf_acc_arr[8*stoutlevel]),1);
 #endif
         }
     }
@@ -71,7 +72,7 @@ void stout_isotropic(
     set_su3_soa_to_zero(local_staples);
 
 
-    calc_loc_staples_removing_stag_phases_nnptrick_all(u,local_staples);
+    calc_loc_staples_nnptrick_all(u,local_staples);
 
     RHO_times_conf_times_staples_ta_part(u,local_staples,tipdot);
     SETFREE(local_staples);

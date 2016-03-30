@@ -120,7 +120,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
         // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
         mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
 #ifdef MULTIDEVICE
-        communicate_su3_borders(tconf_acc);  
+        communicate_su3_borders(tconf_acc,GAUGE_HALO);  
 #endif
 
         // Step for the P
@@ -134,7 +134,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
         // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
         mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
 #ifdef MULTIDEVICE
-        communicate_su3_borders(tconf_acc);  
+        communicate_su3_borders(tconf_acc, GAUGE_HALO);  
 #endif
         // Step for the P
         // P' = P - 2l*dt*dS/dq
@@ -151,7 +151,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
     mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
 #ifdef MULTIDEVICE
-    communicate_su3_borders(tconf_acc);  
+    communicate_su3_borders(tconf_acc, GAUGE_HALO);  
 #endif
 
 
@@ -183,7 +183,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
     mom_exp_times_conf_soloopenacc(tconf_acc,tmomenta,deltas_Omelyan,4);
 #ifdef MULTIDEVICE
-    communicate_su3_borders(tconf_acc);  
+    communicate_su3_borders(tconf_acc, GAUGE_HALO);  
 #endif
     // Step for the P
     // P' = P - l*dt*dS/dq

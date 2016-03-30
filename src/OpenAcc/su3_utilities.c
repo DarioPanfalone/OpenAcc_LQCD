@@ -171,7 +171,6 @@ void RHO_times_conf_times_staples_ta_part(
 
 }// closes routine
 
-// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void mom_sum_mult( __restrict thmat_soa * const mom,
 		   const __restrict tamat_soa * const ipdot,
 		   double * factor,
@@ -205,7 +204,6 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
 }// closes routine
 
  
-// FOR ASYNC TRANSFERS-MULTIDEVICE: SPLIT BORDERS-BULK
 void mom_exp_times_conf_soloopenacc( 
         __restrict su3_soa * const conf,
         __restrict const thmat_soa * const mom,
@@ -250,6 +248,294 @@ void mom_exp_times_conf_soloopenacc(
 
 }
 
+#ifdef MULTIDEVICE
+
+void set_su3_soa_to_zero_bulk( __restrict su3_soa * const matrix)
+{
+  int hd0, d1, d2, d3;
+#pragma acc kernels present(matrix)
+#pragma acc loop independent gang //gang(nd3)
+  for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+	for(hd0=0; hd0 < nd0h; hd0++) {
+	  int d0,idxh;
+          d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
+          idxh = snum_acc(d0,d1,d2,d3);
+	  assign_zero_to_su3_soa_component(&matrix[0],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[1],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[2],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[3],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[4],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[5],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[6],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[7],idxh);
+	}
+      }
+    }
+  }
+}
+
+void conf_times_staples_ta_part_bulk(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot)
+{
+
+  int d0, d1, d2, d3;
+#pragma acc kernels present(u) present(loc_stap) present(tipdot)
+#pragma acc loop independent gang //gang(nd3)
+  for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+	for(d0=0; d0 < nd0; d0++) {
+	  int idxh;
+	  int parity;
+	  int dir_link;
+	  int mu;
+	  idxh = snum_acc(d0,d1,d2,d3);  // r 
+	  parity = (d0+d1+d2+d3) % 2;
+	  for(mu=0;mu<4;mu++){ 
+	    dir_link = 2*mu + parity;
+	    mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh);
+
+	  }
+
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
+
+}// closes routine
+
+void mom_sum_mult_bulk( __restrict thmat_soa * const mom,
+		   const __restrict tamat_soa * const ipdot,
+		   double * factor,
+		   int id_factor)
+{
+  // !!!!!!!!!!!!!!!  factor  is  equal to   -beta/3.0*timestep !!!!!!!!!!!!!!!!!!!!
+  int d0, d1, d2, d3;
+#pragma acc kernels present(mom) present(ipdot) present(factor)
+#pragma acc loop independent //gang(nd3)
+  for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
+#pragma acc loop independent //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent //vector(DIM_BLOCK_X)
+	for(d0=0; d0 < nd0; d0++) {
+	  int idxh;
+	  int parity;
+	  int dir_link;
+	  int mu;
+	  idxh = snum_acc(d0,d1,d2,d3);  // r 
+	  parity = (d0+d1+d2+d3) % 2;
+	  for(mu=0;mu<4;mu++){ 
+	    dir_link = 2*mu + parity;
+            thmat1_plus_tamat2_times_factor_into_thmat1(&mom[dir_link],&ipdot[dir_link],idxh,factor[id_factor]);
+	  }
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
+}// closes routine
+
+ 
+void mom_exp_times_conf_soloopenacc_bulk( 
+        __restrict su3_soa * const conf,
+        __restrict const thmat_soa * const mom,
+        double * factor, 
+        // questo e' il vettore delta dove sono contenuti 
+        // tutti i dt richiesti nell'omelyan
+        int id_factor)
+{
+
+  int d0, d1, d2, d3;
+#pragma acc kernels present(mom) present(conf) present(factor)
+#pragma acc loop independent gang //gang(nd3)
+  for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+        for(d0=0; d0 < nd0; d0++) {
+          int idxh;
+          int parity;
+          int dir_link;
+          int mu;
+	  single_su3 mom_aux[1];
+	  single_su3 expo[1];
+	  single_su3 aux[1];
+          idxh = snum_acc(d0,d1,d2,d3);  // r
+          parity = (d0+d1+d2+d3) % 2;
+	  for(mu=0;mu<4;mu++){
+	    dir_link = 2*mu + parity;
+
+	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux[0]);
+	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
+	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
+	    project_on_su3(&conf[dir_link],idxh,&mom_aux[0]);
+	  }
+	  
+        }  // d0
+      }  // d1
+    }  // d2
+  }  // d3
+
+}
+
+void set_su3_soa_to_zero_d3c( __restrict su3_soa * const matrix,
+        int offset3, int thickness3)
+{
+  int hd0, d1, d2, d3;
+#pragma acc kernels present(matrix)
+#pragma acc loop independent gang //gang(nd3)
+  for(d3=offset3; d3<offset3+thickness3; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+	for(hd0=0; hd0 < nd0h; hd0++) {
+	  int d0,idxh;
+          d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
+          idxh = snum_acc(d0,d1,d2,d3);
+	  assign_zero_to_su3_soa_component(&matrix[0],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[1],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[2],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[3],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[4],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[5],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[6],idxh);
+	  assign_zero_to_su3_soa_component(&matrix[7],idxh);
+	}
+      }
+    }
+  }
+}
+
+void conf_times_staples_ta_part_d3c(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot,
+        int offset3, int thickness3)
+{
+
+  int d0, d1, d2, d3;
+#pragma acc kernels present(u) present(loc_stap) present(tipdot)
+#pragma acc loop independent gang //gang(nd3)
+  for(d3=offset3; d3<offset3+thickness3; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+	for(d0=0; d0 < nd0; d0++) {
+	  int idxh;
+	  int parity;
+	  int dir_link;
+	  int mu;
+	  idxh = snum_acc(d0,d1,d2,d3);  // r 
+	  parity = (d0+d1+d2+d3) % 2;
+	  for(mu=0;mu<4;mu++){ 
+	    dir_link = 2*mu + parity;
+	    mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh);
+
+	  }
+
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
+
+}// closes routine
+
+void mom_sum_mult_d3c( __restrict thmat_soa * const mom,
+		   const __restrict tamat_soa * const ipdot,
+		   double * factor,
+		   int id_factor,
+           int offset3, int thickness3)
+{
+  // !!!!!!!  factor  is  equal to   -beta/3.0*timestep !!!!!!!!!!!!!!!!
+  int d0, d1, d2, d3;
+#pragma acc kernels present(mom) present(ipdot) present(factor)
+#pragma acc loop independent //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+  for(d3=offset3; d3<offset3+thickness3; d3++) {
+#pragma acc loop independent //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent //vector(DIM_BLOCK_X)
+	for(d0=0; d0 < nd0; d0++) {
+	  int idxh;
+	  int parity;
+	  int dir_link;
+	  int mu;
+	  idxh = snum_acc(d0,d1,d2,d3);  // r 
+	  parity = (d0+d1+d2+d3) % 2;
+	  for(mu=0;mu<4;mu++){ 
+	    dir_link = 2*mu + parity;
+            thmat1_plus_tamat2_times_factor_into_thmat1(&mom[dir_link],&ipdot[dir_link],idxh,factor[id_factor]);
+	  }
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
+}// closes routine
+
+void mom_exp_times_conf_soloopenacc_d3c( 
+        __restrict su3_soa * const conf,
+        __restrict const thmat_soa * const mom,
+        double * factor, 
+        // questo e' il vettore delta dove sono contenuti 
+        // tutti i dt richiesti nell'omelyan
+        int id_factor,
+        int offset3, int thickness3)
+{
+
+  int d0, d1, d2, d3;
+#pragma acc kernels present(mom) present(conf) present(factor)
+#pragma acc loop independent 
+  for(d3=offset3; d3<offset3+thickness3; d3++) {
+#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+    for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+      for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+        for(d0=0; d0 < nd0; d0++) {
+          int idxh;
+          int parity;
+          int dir_link;
+          int mu;
+	  single_su3 mom_aux[1];
+	  single_su3 expo[1];
+	  single_su3 aux[1];
+          idxh = snum_acc(d0,d1,d2,d3);  // r
+          parity = (d0+d1+d2+d3) % 2;
+	  for(mu=0;mu<4;mu++){
+	    dir_link = 2*mu + parity;
+
+	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux[0]);
+	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
+	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
+	    project_on_su3(&conf[dir_link],idxh,&mom_aux[0]);
+	  }
+	  
+        }  // d0
+      }  // d1
+    }  // d2
+  }  // d3
+
+}
+
+#endif
 
 #endif
 

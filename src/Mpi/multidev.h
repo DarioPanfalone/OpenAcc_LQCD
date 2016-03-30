@@ -1,7 +1,6 @@
 #ifndef MULTIDEV_H_
 #define MULTIDEV_H_
 
-#define FERMION_HALO 1
 #include "./geometry_multidev.h"
 
 #ifdef MULTIDEVICE
@@ -17,6 +16,9 @@ typedef struct dev_info_t{
     char myrankstr[50];
 
 #ifdef MULTIDEVICE
+    int async_comm_fermion;
+    int async_comm_gauge;
+
     int myrank_L,myrank_R; // nearest neighbours, salamino
     int node_subrank; // which card it will use?
     char processor_name[MPI_MAX_PROCESSOR_NAME]; int namelen;

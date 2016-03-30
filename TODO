@@ -18,7 +18,7 @@ Things to do:
     - DIFFERENT MPI PROCESSES DON'T AGREE ON ACCEPTING (solved)
        MPI_Bcast was called on a double variable with MPI_INT datatype.
 
-     - dynamical fermions: HALF FAIL
+     - dynamical fermions: SUCCESS
          TEST dirac operator: OK (4^4x2)
            some #defines were wrong, MULTIDEV instead of MULTIDEVICE
            moreover the initialization of u1 phases was incorrect,
@@ -29,19 +29,18 @@ Things to do:
              fermion borders must be communicated.
            - test no stouging multi device - seems to accept.
            - acceptance in metropolis test suggests that it's ok.
-             Acceptance on 4^3x8 on single device and on two ranks are in 
+             Acceptance on 4^3x8 on single device and on two ranks are in
              agreement.
-         STOUTING:  OKish (4^4x2)
+         STOUTING:  OK (4^4x2)
            - Results seems correct, acceptance is consistent.
-           - SEVERAL BORDERS COMMUNICATIONS IN
-             compute_sigma_from_sigma_prime_backinto_sigma_prime()
-             ARE INEFFICIENT. Thickness = 2 borders are passed instead 
-             of the necessary Thickness = 1 borders. <<<<------ TODO
+           - Border passing functions made more versatile, 
+             should be efficient now.
 
-5. Compilation with PGI, no multidev ~OK (only pgi15.9)
-6. Correct execution with PGI, no multidev
-    STATUS : Compiles and ~accepts bu~t it's slow AS HELL (3x )
-    - ACC_DEO, ACC_DOE not accelerated correctly. <<<<-------TODO
+5. Compilation with PGI, no multidev (TO RECHECK) (only pgi15.9)
+6. Correct execution with PGI, no multidev (TO RECHECK)
+    STATUS : Compiles and ~accepts but it's slow AS HELL (3x )
+    - ACC_DEO, ACC_DOE rewritten.
+    - performance to check.    <<<<-------TODO
                             
 TODO: 
 7. Integration MPI-OPENACC
@@ -51,7 +50,36 @@ TODO:
 10. Observables
 11. Single precision MD
    
+TESTS
 
+Montecarlo with more nodes
+Montecarlo with transposed configurations
+Observables 1 rank vs N ranks
+With OPENACC
+
+ASYNC WORK:
+
+1. Fermions: Deo and Doe separately, ansync versions:
+   0. Splitting Deo and Doe in different versions (bulk/slices*) DONE
+   NOTE: the bulk version is ok, but it does not make sense to have 
+         TWO functions, one for up surface and one for down surface.
+         One function, more versatile, is fine, which works on slices
+         of custom thickness. No parallelization is done in the direction
+         of the cut.
+   1. calculation of both surfaces and then communication, while
+      calculation in the bulk is performed (slightly inefficient)
+      DONE, ACCEPTS
+   2. calculation of one surface, start communication, calculation on 
+      the other surface, start communication, 
+      then start calculation in the bulk (more efficient)
+   NOTE: for approach 1 and 2 no big gains are expected in scalability 
+         for the fermion part, but something more significant can happen
+         for the gauge part.
+2. Gauge: 
+   0. Splitting functions in different versions (see Fermions) WRITTEN
+      See all functions below [14 functions, to be modified in 
+      full, bulk and 'direction 3 custom' (d3c) versions]
+ 
 ----------------------------------------------------------------
 - phases in the multinode setup  (DONE, TO CHECK)
 - Kernels that must be restricted to local lattice (conf generation)
@@ -64,13 +92,11 @@ TODO:
    acc_Deo  
     acc_Deo full (inherits the name) WRITTEN
     acc_Deo_bulk                     WRITTEN
-    acc_Deo_d3p                      WRITTEN
-    acc_Deo_d3m                      WRITTEN
+    acc_Deo_d3c                      WRITTEN
    acc_Doe                           WRITTEN
     acc_Doe full (inherits the name) WRITTEN
     acc_Doe_bulk                     WRITTEN
-    acc_Doe_d3p                      WRITTEN
-    acc_Doe_d3m                      WRITTEN
+    acc_Doe_d3c                      WRITTEN
   NOTE: write fermion_matrix_multiplication to make use 
   of async transfers etc.
   
@@ -82,14 +108,13 @@ TODO:
    multiply_backfield_times_force   DONE
    accumulate_gl3soa_into_gl3soa  DONE
   plaquettes:
-   calc_loc_plaquettes_removing_stag_phases_nnptrick  1DCUTWARNING - DONE
-   calc_loc_staples_removing_stag_phases_nnptrick_all:
-    calc_loc_staples_removing_stag_phases_nnptrick_all (full) DONE 
-    calc_loc_staples_removing_stag_phases_nnptrick_all_bulk        
-    calc_loc_staples_removing_stag_phases_nnptrick_all_d3p         
-    calc_loc_staples_removing_stag_phases_nnptrick_all_d3m         
-   calc_loc_staples_removing_stag_phases_nnptrick_all_only_even DONE 
-   calc_loc_staples_removing_stag_phases_nnptrick_all_only_odd DONE
+   calc_loc_plaquettes_nnptrick  1DCUTWARNING - DONE
+   calc_loc_staples_nnptrick_all:
+    calc_loc_staples_nnptrick_all (full) DONE 
+    calc_loc_staples_nnptrick_all_bulk WRITTEN
+    calc_loc_staples_nnptrick_all_d3c  WRITTEN
+   calc_loc_staples_nnptrick_all_only_even DONE 
+   calc_loc_staples_nnptrick_all_only_odd DONE
   random_assignement:
    generate_vec3_soa_gauss WRITTEN
    // should include border communication
@@ -100,28 +125,24 @@ TODO:
    generate_vec3_soa_z2noise WRITTEN 
    // should include border communication
   rettangoli:
-   calc_loc_rectangles_2x1_removing_stag_phases_nnptrick  1DCUTWARNING - DONE
-   calc_loc_rectangles_1x2_removing_stag_phases_nnptrick  1DCUTWARNING - DONE
-   calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all:
-    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all (full) DONE
-    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all_bulk
-    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all_d3p
-    calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all_d3m
-   calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all:
-    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all (full) DONE
-    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all_bulk
-    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all_d3p
-    calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all_d3m
-   calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all:
-    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all (full) DONE
-    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all_bulk
-    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all_d3p
-    calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all_d3m
-   calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all:
-    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all (full) DONE
-    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all_bulk
-    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all_d3p
-    calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all_d3m
+   calc_loc_rectangles_2x1_nnptrick  1DCUTWARNING - DONE
+   calc_loc_rectangles_1x2_nnptrick  1DCUTWARNING - DONE
+   calc_loc_improved_staples_typeA_nnptrick_all:
+    calc_loc_improved_staples_typeA_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeA_nnptrick_all_bulk  WRITTEN
+    calc_loc_improved_staples_typeA_nnptrick_all_d3c   WRITTEN
+   calc_loc_improved_staples_typeB_nnptrick_all:
+    calc_loc_improved_staples_typeB_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeB_nnptrick_all_bulk  WRITTEN
+    calc_loc_improved_staples_typeB_nnptrick_all_d3c   WRITTEN
+   calc_loc_improved_staples_typeC_nnptrick_all:
+    calc_loc_improved_staples_typeC_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeC_nnptrick_all_bulk  WRITTEN
+    calc_loc_improved_staples_typeC_nnptrick_all_d3c   WRITTEN
+   calc_loc_improved_staples_typeABC_nnptrick_all:
+    calc_loc_improved_staples_typeABC_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeABC_nnptrick_all_bulk  WRITTEN
+    calc_loc_improved_staples_typeABC_nnptrick_all_d3c   WRITTEN
   stouting:
    exp_minus_QA_times_conf DONE
    compute_lambda DONE
@@ -131,19 +152,36 @@ TODO:
    calc_diff_force_norm  1DCUTWARNING - DONE CHECK REDUCTIONS
    copy_ipdot_into_old   1DCUTWARNING - DONE
   su3_utilities:
+   set_su3_soa_to_zero:
+    set_su3_soa_to_zero full  WRITTEN
+    set_su3_soa_to_zero_bulk  WRITTEN
+    set_su3_soa_to_zero_d3c   WRITTEN
+   conf_times_staples_ta_part:
+    conf_times_staples_ta_part full WRITTEN
+    conf_times_staples_ta_part_bulk WRITTEN
+    conf_times_staples_ta_part_d3c WRITTEN
    unitarize_conf        DONE
    conf_times_staples_ta_part   DONE
    RHO_times_conf_times_staples_ta_part DONE
    mom_sum_mult:
     mom_sum_mult full DONE
-    mom_sum_mult_bulk
-    mom_sum_mult_d3p
-    mom_sum_mult_d3m
+    mom_sum_mult_bulk WRITTEN
+    mom_sum_mult_d3c WRITTE
    mom_exp_times_conf_soloopenacc:
     mom_exp_times_conf_soloopenacc full DONE 
-    mom_exp_times_conf_soloopenacc_bulk
-    mom_exp_times_conf_soloopenacc_d3p
-    mom_exp_times_conf_soloopenacc_d3m
+    mom_exp_times_conf_soloopenacc_bulk WRITTEN
+    mom_exp_times_conf_soloopenacc_d3c WRITTEN
+  ipdot_gauge: (HIGHER LEVEL FUNCTIONS)
+    calc_ipdot_gauge_soloopenacc:
+     calc_ipdot_gauge_soloopenacc full DONE
+     calc_ipdot_gauge_soloopenacc_bulk WRITTEN
+     calc_ipdot_gauge_soloopenacc_d3c WRITTEN
+     calc_ipdot_gauge_soloopenacc_std full DONE
+     calc_ipdot_gauge_soloopenacc_std_bulk WRITTEN
+     calc_ipdot_gauge_soloopenacc_std_d3c WRITTEN
+     calc_ipdot_gauge_soloopenacc_tlsm full DONE 
+     calc_ipdot_gauge_soloopenacc_tlsm_bulk WRITTEN
+     calc_ipdot_gauge_soloopenacc_tlsm_d3c WRITTEN
 
 - Kernels that must be restricted to local lattice (measurements)
   baryon number utilities:

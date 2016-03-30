@@ -892,5 +892,55 @@ static inline void project_on_su3(
 }
 
 
+#ifdef MULTIDEVICE
+
+void set_su3_soa_to_zero_bulk( __restrict su3_soa * const matrix);
+
+void conf_times_staples_ta_part_bulk(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot);
+
+void mom_sum_mult_bulk( __restrict thmat_soa * const mom,
+		   const __restrict tamat_soa * const ipdot,
+		   double * factor,
+		   int id_factor);
+
+void mom_exp_times_conf_soloopenacc_bulk( 
+        __restrict su3_soa * const conf,
+        __restrict const thmat_soa * const mom,
+        double * factor, 
+        // questo e' il vettore delta dove sono contenuti 
+        // tutti i dt richiesti nell'omelyan
+        int id_factor);
+
+void set_su3_soa_to_zero_d3c( __restrict su3_soa * const matrix,
+        int offset3, int thickness3);
+
+void conf_times_staples_ta_part_d3c(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot,
+        int offset3, int thickness3);
+
+void mom_sum_mult_d3c( __restrict thmat_soa * const mom,
+		   const __restrict tamat_soa * const ipdot,
+		   double * factor,
+		   int id_factor,
+           int offset3, int thickness3);
+
+void mom_exp_times_conf_soloopenacc_d3c( 
+        __restrict su3_soa * const conf,
+        __restrict const thmat_soa * const mom,
+        double * factor, 
+        // questo e' il vettore delta dove sono contenuti 
+        // tutti i dt richiesti nell'omelyan
+        int id_factor,
+        int offset3, int thickness3);
+
+#endif
+
+
+
 #endif
 

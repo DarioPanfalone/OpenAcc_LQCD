@@ -120,7 +120,7 @@ double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __res
     for(int mu=0;mu<3;mu++){
         for(int nu=mu+1;nu<4;nu++){
             // sommo i 6 risultati in tempo
-            result  += calc_loc_plaquettes_removing_stag_phases_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+            result  += calc_loc_plaquettes_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
         }
     }
 

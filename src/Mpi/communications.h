@@ -5,27 +5,28 @@
 #include "./geometry_multidev.h"
 #include "../OpenAcc/struct_c_def.h"
 
-#define GAUGE_HALO HALO_WIDTH
-#define FERMION_HALO 1
 
 #ifdef MULTIDEVICE
 #include <mpi.h>
 // fermion border communications (only FERMION HALO thick)
 void communicate_fermion_borders(vec3_soa *lnh_fermion);
-void communicate_fermion_borders_async(vec3_soa *lnh_fermion, 
-        MPI_Request* send_border_requests, MPI_Request* recv_border_requests);
 
+#if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
+void communicate_fermion_borders_async(vec3_soa *lnh_fermion, 
+        MPI_Request* send_border_requests,// 6 element long
+        MPI_Request* recv_border_requests);// 6 element long
+#endif
 
 // gauge conf border communication (only GAUGE_HALO thick)
-void communicate_su3_borders(su3_soa* lnh_conf);
+void communicate_su3_borders(su3_soa* lnh_conf, int thickness);
 // communications of gl3 quantities (e.g. Sigma for stouting)
-void communicate_gl3_borders(su3_soa* lnh_conf);
+void communicate_gl3_borders(su3_soa* lnh_conf, int thickness);
 
-// used just at the beginning of MD trajectory (only GAUGE_HALO thick)
-void communicate_thmat_soa_borders(thmat_soa* lnh_momenta);
-// force communication (only GAUGE_HALO thick)
+// used just at the beginning of MD trajectory, but also in stouting
+void communicate_thmat_soa_borders(thmat_soa* lnh_momenta,int thickness);
+// force communication
 // this is performance critical and an async version should be produced
-void communicate_tamat_soa_borders(tamat_soa* lnh_ipdot);
+void communicate_tamat_soa_borders(tamat_soa* lnh_ipdot, int thickness);
 
 // communication of lattice chunks, for file IO only on master
 // chunks, conf

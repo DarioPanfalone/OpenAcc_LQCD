@@ -116,7 +116,7 @@ void communicate_fermion_borders(vec3_soa *lnh_fermion){ //WRAPPER
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
-#ifdef USE_MPI_CUDA_AWARE  
+#if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
 /*
  This can work only if cuda aware MPI is used.
  If instead you wanted to use the update
@@ -128,7 +128,8 @@ void sendrecv_vec3soa_borders_1Dcut_async(vec3_soa *lnh_fermion,
         int rankL, int rankR, 
         int thickness,
         MPI_Request* send_border_requests, 
-        MPI_Request* recv_border_requests){
+        MPI_Request* recv_border_requests)
+{
    if(verbosity_lv > 5) printf("MPI%02d - sendrecv_vec3soa_borders_1Dcut_async() \n",
            devinfo.myrank);
 
@@ -193,7 +194,9 @@ void communicate_fermion_borders_async(vec3_soa *lnh_fermion,
    
     // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
     // NOTICE send_border_requests recv_border_requests are both 
-    // 6-elements long
+    // 3*2-elements long
+    // 3 colours
+    // 2 ends
     sendrecv_vec3soa_borders_1Dcut_async(lnh_fermion,
             devinfo.myrank_L, devinfo.myrank_R,
             FERMION_HALO,
@@ -201,32 +204,57 @@ void communicate_fermion_borders_async(vec3_soa *lnh_fermion,
             recv_border_requests );
 }
 
-#endif //#ifdef USE_MPI_CUDA_AWARE  
+void communicate_su3_borders_async(su3_soa* lnh_conf, int thickness,
+        MPI_Request* send_border_requests, 
+        MPI_Request* recv_border_requests)
+{
+
+    // NOTICE send_border_requests recv_border_requests are both 
+    // 3*2*8*2 = 96 -elements long
+    // 3 colours (columns of the matrix)
+    // 2 ends
+    // 8 = 2 even/odd * 4 link directions
+    // 2 rows of the matrix
+
+    for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
+        sendrecv_vec3soa_borders_1Dcut_async(&(lnh_conf[c].r0),
+            devinfo.myrank_L, devinfo.myrank_R,
+            thickness,
+            &send_border_requests[3*2*c],
+            &recv_border_requests[3*2*c]);
+    
+        sendrecv_vec3soa_borders_1Dcut_async(&(lnh_conf[c].r1),
+            devinfo.myrank_L, devinfo.myrank_R,
+            thickness,
+            &send_border_requests[48+3*2*c],
+            &recv_border_requests[48+3*2*c]);
+    
+    }
+}
+
+#endif //#ifdef USE_MPI_CUDA_AWARE, or gcc
 
 
 // GAUGE COMMS
 
 // borders
-void communicate_su3_borders(su3_soa* lnh_conf){
-
-    // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
-    // note for async:
-    // NOTICE send_border_requests recv_border_requests are both 
-    // 12*8-elements long
+void communicate_su3_borders(su3_soa* lnh_conf, int thickness)
+{
 
     for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
         sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r0),
             devinfo.myrank_L, devinfo.myrank_R,
-            GAUGE_HALO);
+            thickness);
         sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r1),
             devinfo.myrank_L, devinfo.myrank_R,
-            GAUGE_HALO);
+            thickness);
     }
 
 }
 
 
-void communicate_gl3_borders(su3_soa* lnh_conf){
+void communicate_gl3_borders(su3_soa* lnh_conf,int thickness)
+{
 
     // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
     // note for async:
@@ -236,13 +264,13 @@ void communicate_gl3_borders(su3_soa* lnh_conf){
     for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
         sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r0),
             devinfo.myrank_L, devinfo.myrank_R,
-            GAUGE_HALO);
+            thickness);
         sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r1),
             devinfo.myrank_L, devinfo.myrank_R,
-            GAUGE_HALO);
+            thickness);
         sendrecv_vec3soa_borders_1Dcut(&(lnh_conf[c].r2),
             devinfo.myrank_L, devinfo.myrank_R,
-            GAUGE_HALO);
+            thickness);
 
     }
 
@@ -251,7 +279,8 @@ void communicate_gl3_borders(su3_soa* lnh_conf){
 
 
 void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
-        int rankL, int rankR){
+        int rankL, int rankR, int thickness)
+{
    // NOTICE YOU HAVE TO SET MYRANK CORRECTLY TO USE THIS FUNCTION
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
@@ -261,7 +290,7 @@ void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
 
   // PREAMBLE : see  void sendrecv_vec3soa_borders_1Dcut()
   // no. of 'fermion' point in each slab)
-  int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*GAUGE_HALO;
+  int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*thickness;
   int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
   // NOTICE THERE IS LNH_NXH
   MPI_Status status;
@@ -359,9 +388,10 @@ void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
 #endif
  }
 void sendrecv_thmat_soa_borders_1Dcut_async(thmat_soa *lnh_momenta, 
-        int rankL, int rankR, 
+        int rankL, int rankR, int thickness,
         MPI_Request* send_border_requests, 
-        MPI_Request* recv_border_requests){
+        MPI_Request* recv_border_requests)
+{
    // NOTICE YOU HAVE TO SET MYRANK CORRECTLY TO USE THIS FUNCTION
    // NOTICE send_border_requests recv_border_requests are both 
    // 10-elements long
@@ -376,7 +406,7 @@ void sendrecv_thmat_soa_borders_1Dcut_async(thmat_soa *lnh_momenta,
    //must be done for the three components of the fermion.
 
   // no. of 'fermion' point in each slab)
-  int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2 )*GAUGE_HALO;
+  int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2 )*thickness;
   int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
   // NOTICE THERE IS LNH_NXH
 
@@ -455,7 +485,8 @@ void sendrecv_thmat_soa_borders_1Dcut_async(thmat_soa *lnh_momenta,
 
 
 void sendrecv_tamat_soa_borders_1Dcut(tamat_soa *lnh_ipdot,
-        int rankL, int rankR){
+        int rankL, int rankR, int thickness)
+{
    // NOTICE YOU HAVE TO SET MYRANK CORRECTLY TO USE THIS FUNCTION
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
@@ -466,7 +497,7 @@ void sendrecv_tamat_soa_borders_1Dcut(tamat_soa *lnh_ipdot,
 
   // PREAMBLE : see  void sendrecv_vec3soa_borders_1Dcut()
   // no. of 'fermion' point in each slab)
-  int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*GAUGE_HALO;
+  int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*thickness;
   int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
   // NOTICE THERE IS LNH_NXH
   MPI_Status status;
@@ -560,9 +591,10 @@ void sendrecv_tamat_soa_borders_1Dcut(tamat_soa *lnh_ipdot,
 #endif
  }
 void sendrecv_tamat_soa_borders_1Dcut_async(tamat_soa *lnh_ipdot, 
-        int rankL, int rankR, 
+        int rankL, int rankR, int thickness,
         MPI_Request* send_border_requests, 
-        MPI_Request* recv_border_requests){
+        MPI_Request* recv_border_requests)
+{
    // NOTICE YOU HAVE TO SET MYRANK CORRECTLY TO USE THIS FUNCTION
    // NOTICE send_border_requests recv_border_requests are both 
    // 10-elements long
@@ -577,7 +609,7 @@ void sendrecv_tamat_soa_borders_1Dcut_async(tamat_soa *lnh_ipdot,
    //must be done for the three components of the fermion.
 
   // no. of 'fermion' point in each slab)
-  int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2 )*GAUGE_HALO;
+  int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2 )*thickness;
   int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
   // NOTICE THERE IS LNH_NXH
 
@@ -654,19 +686,21 @@ void sendrecv_tamat_soa_borders_1Dcut_async(tamat_soa *lnh_ipdot,
 }
 
 // used just at the beginning of MD trajectory (only GAUGE_HALO thick)
-void communicate_thmat_soa_borders(thmat_soa* lnh_momenta){
+void communicate_thmat_soa_borders(thmat_soa* lnh_momenta,int thickness)
+{
     for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
         sendrecv_thmat_soa_borders_1Dcut(&(lnh_momenta[c]),
-            devinfo.myrank_L, devinfo.myrank_R );
+            devinfo.myrank_L, devinfo.myrank_R,thickness );
     }
 }
 // force communication (only GAUGE_HALO thick)
-void communicate_tamat_soa_borders(tamat_soa* lnh_ipdot){
+void communicate_tamat_soa_borders(tamat_soa* lnh_ipdot,int thickness)
+{
 
 
     for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
         sendrecv_tamat_soa_borders_1Dcut(&(lnh_ipdot[c]),
-            devinfo.myrank_L, devinfo.myrank_R );
+            devinfo.myrank_L, devinfo.myrank_R, thickness);
     }
 }
 

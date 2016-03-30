@@ -354,7 +354,6 @@ int read_su3_soa_ildg_binary(
 
             int x = xl,y = yl ,z = zl, t = tl;
 #ifdef MULTIDEVICE
-            printf("DEFINED MULTIDEVICE\n");
             int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
 #else
             int idxh = snum_acc(d[0],d[1],d[2],d[3]);

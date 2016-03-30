@@ -63,17 +63,17 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 
     set_su3_soa_to_zero(TMP);
 
-    calc_loc_staples_removing_stag_phases_nnptrick_all(U,TMP);
+    calc_loc_staples_nnptrick_all(U,TMP);
     if(verbosity_lv > 4)printf("MPI%02d:\t\tcomputed staples  \n",
             devinfo.myrank);
 #ifdef MULTIDEVICE
-    communicate_gl3_borders(TMP);
+    communicate_gl3_borders(TMP,1);
 #endif
 
     RHO_times_conf_times_staples_ta_part(U,TMP,QA);
 
 #ifdef MULTIDEVICE
-    communicate_tamat_soa_borders(QA);
+    communicate_tamat_soa_borders(QA,1);
 #endif
 
     // check: TMP = local staples.
@@ -91,7 +91,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
     compute_lambda(Lambda,Sigma,U,QA,TMP);
 
 #ifdef MULTIDEVICE
-    communicate_thmat_soa_borders(Lambda);
+    communicate_thmat_soa_borders(Lambda,1);
 #endif
 
     if(verbosity_lv > 4)   printf("MPI%02d:\t\tcomputed Lambda  \n",
@@ -125,7 +125,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
     }
 
 #ifdef MULTIDEVICE
-        communicate_gl3_borders(Sigma);
+        communicate_gl3_borders(Sigma,1);
 #endif
 
 }

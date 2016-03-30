@@ -10,13 +10,13 @@
 
 
 
-double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick( 
+double calc_loc_rectangles_2x1_nnptrick( 
         __restrict const su3_soa * const u,__restrict su3_soa * const loc_plaq, 
         dcomplex_soa * const tr_local_plaqs,const int mu,	const int nu);
 
 
 
-double calc_loc_rectangles_2x1_removing_stag_phases_nnptrick(  
+double calc_loc_rectangles_2x1_nnptrick(  
         __restrict const su3_soa * const u,__restrict su3_soa * const loc_plaq,
         dcomplex_soa * const tr_local_plaqs,const int mu,const int nu);
 
@@ -48,17 +48,63 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(
         __restrict const su3_soa * const mat5, const int idx_mat5,
         __restrict su3_soa * const mat6, const int idx_mat6);
 
-void calc_loc_improved_staples_typeA_removing_stag_phases_nnptrick_all( 
+void calc_loc_improved_staples_typeA_nnptrick_all( 
         __restrict const su3_soa * const u, __restrict su3_soa * const loc_stap );
 
-void calc_loc_improved_staples_typeB_removing_stag_phases_nnptrick_all( 
+void calc_loc_improved_staples_typeB_nnptrick_all( 
         __restrict const su3_soa * const u, __restrict su3_soa * const loc_stap );
 
-void calc_loc_improved_staples_typeC_removing_stag_phases_nnptrick_all( 
+void calc_loc_improved_staples_typeC_nnptrick_all( 
         __restrict const su3_soa * const u, __restrict su3_soa * const loc_stap );
 
-void calc_loc_improved_staples_typeABC_removing_stag_phases_nnptrick_all( 
+void calc_loc_improved_staples_typeABC_nnptrick_all( 
         __restrict const su3_soa * const u,__restrict su3_soa * const loc_stap );
+
+
+#ifdef MULTIDEVICE
+void calc_loc_improved_staples_typeA_nnptrick_all_bulk(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap );
+
+void calc_loc_improved_staples_typeB_nnptrick_all_bulk(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap );
+
+void calc_loc_improved_staples_typeC_nnptrick_all_bulk(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap );
+ 
+void calc_loc_improved_staples_typeABC_nnptrick_all_bulk(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap );
+
+void calc_loc_improved_staples_typeA_nnptrick_all_d3c(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap,
+        int offset3, int thickness3 );
+
+void calc_loc_improved_staples_typeB_nnptrick_all_d3c(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap,
+        int offset3, int thickness3 );
+
+void calc_loc_improved_staples_typeC_nnptrick_all_d3c(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap,
+        int offset3, int thickness3 );
+ 
+void calc_loc_improved_staples_typeABC_nnptrick_all_d3c(  
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_stap,
+        int offset3, int thickness3 );
+
+
+
+
+#endif
+
+
+
 
 double  calc_rettangolo_soloopenacc( 
         __restrict const  su3_soa * const tconf_acc,

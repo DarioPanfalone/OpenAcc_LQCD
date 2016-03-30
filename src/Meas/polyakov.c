@@ -162,9 +162,14 @@ d_complex polyakov_loop0(__restrict const su3_soa * const u)
                 for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
                     for(d1=0; d1<nd1; d1++) {
+                        int ld0,ld1,ld2,ld3;
+                        ld0 = d0 - D0_HALO;
+                        ld1 = d1 - D1_HALO;
+                        ld2 = d2 - D2_HALO;
+                        ld3 = d3 - D3_HALO;
 
-                        int parity0 = ( 0+d1+d2+d3) % 2;
-                        int id0h = (d1+nd1*(d2+nd2*d3))/2;
+                        int parity0 = ( 0+ld1+ld2+ld3) % 2;
+                        int id0h = (ld1+LOC_N1*(ld2+LOC_N2*ld3))/2;
 
                         parity = (d0+d1+d2+d3) % 2;
                         idxh = snum_acc(d0,d1,d2,d3);  	
@@ -240,9 +245,14 @@ d_complex polyakov_loop1(__restrict const su3_soa * const u)
                 for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
                     for(d0=0; d0 < nd0; d0++) {	    
+                        int ld0,ld1,ld2,ld3;
+                        ld0 = d0 - D0_HALO;
+                        ld1 = d1 - D1_HALO;
+                        ld2 = d2 - D2_HALO;
+                        ld3 = d3 - D3_HALO;
 
-                        int parity1 = (d0+ 0+d2+d3) % 2;
-                        int id1h = (d0+nd0*(d2+nd2*d3))/2;
+                        int parity1 = (ld0+ 0+ld2+ld3) % 2;
+                        int id1h = (ld0+LOC_N0*(ld2+LOC_N2*ld3))/2;
 
 
                         parity = (d0+d1+d2+d3) % 2;
@@ -318,9 +328,13 @@ d_complex polyakov_loop2(__restrict const su3_soa * const u)
                 for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
                     for(d0=0; d0 < nd0; d0++) {	    
-
-                        int parity2 = (d0+d1+ 0+d3) % 2;
-                        int id2h = (d0+nd0*(d1+nd1*d3))/2;
+                        int ld0,ld1,ld2,ld3;
+                        ld0 = d0 - D0_HALO;
+                        ld1 = d1 - D1_HALO;
+                        ld2 = d2 - D2_HALO;
+                        ld3 = d3 - D3_HALO;
+                        int parity2 = (ld0+ld1+ 0+ld3) % 2;
+                        int id2h = (ld0+LOC_N0*(ld1+LOC_N1*ld3))/2;
 
                         parity = (d0+d1+d2+d3) % 2;
                         idxh = snum_acc(d0,d1,d2,d3);  	
@@ -345,6 +359,7 @@ d_complex polyakov_loop2(__restrict const su3_soa * const u)
 
     }
     free(loopplk2);
+
 
     double trr,tri;
 #ifdef MULTIDEVICE
@@ -395,9 +410,14 @@ d_complex polyakov_loop3(__restrict const su3_soa * const u)
                 for(d1=0; d1<nd1; d1++) {
 #pragma acc loop independent vector //vector(DIM_BLOCK_X)
                     for(d0=0; d0 < nd0; d0++) {	    
+                        int ld0,ld1,ld2,ld3;
+                        ld0 = d0 - D0_HALO;
+                        ld1 = d1 - D1_HALO;
+                        ld2 = d2 - D2_HALO;
+                        ld3 = d3 - D3_HALO;
 
-                        int parity3 = (d0+d1+d2+0) % 2;
-                        int id3h = (d0+nd0*(d1+nd1*d2))/2;
+                        int parity3 = (ld0+ld1+ld2+0) % 2;
+                        int id3h = (ld0+LOC_N0*(ld1+LOC_N1*ld2))/2;
 
                         parity = (d0+d1+d2+d3) % 2;
                         idxh = snum_acc(d0,d1,d2,d3);  	

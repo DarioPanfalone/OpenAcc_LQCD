@@ -487,6 +487,8 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     // from MPI_Init()
 #ifdef MULTIDEVICE
     const int single_dev_choice_def = 0;
+    const int async_comm_fermion_def = 0;
+    const int async_comm_gauge_def   = 0;
 #endif 
 
 
@@ -494,7 +496,9 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
 #ifndef MULTIDEVICE        
         (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 0 , NULL  }
 #else
-        (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 1 , (const void*) &single_dev_choice_def},
+        (par_info){(void*) &(di->async_comm_fermion),TYPE_INT,"AsyncFermionComms",1,(const void*) &async_comm_fermion_def},
+        (par_info){(void*) &(di->async_comm_gauge),  TYPE_INT,"AsyncGaugeComms"  ,1,(const void*) &async_comm_gauge_def  },
+        (par_info){(void*) &(di->single_dev_choice), TYPE_INT,"device_choice"    ,1,(const void*) &single_dev_choice_def},
             (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL},
             (par_info){(void*) &(di->proc_per_node),TYPE_INT,"NProcPerNode", 0 , NULL},
 #endif
