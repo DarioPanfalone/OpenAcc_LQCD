@@ -331,9 +331,12 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 devinfo.myrank, md, md_parameters.no_md);
         // Step for the Q
         // Q' = exp[dt/2 *i P] Q
+#ifdef MULTIDEVICE
         if(devinfo.async_comm_gauge)
             multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
-        else multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+        else 
+#endif
+            multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
         // Step for the P
         // P' = P - (1-2l)*dt*dS/dq
         // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
@@ -352,9 +355,13 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,1);
         // Step for the Q
         // Q' = exp[dt/2 *i P] Q
+#ifdef MULTIDEVICE
         if(devinfo.async_comm_gauge)
             multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
-        else multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+        else
+#endif           
+            multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+
 
 
         // Step for the P
@@ -375,9 +382,12 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             devinfo.myrank,md_parameters.no_md);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
+#ifdef MULTIDEVICE
     if(devinfo.async_comm_gauge)
         multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
-    else multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+    else
+#endif
+        multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
 
 
     // Step for the P
@@ -396,9 +406,12 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
+#ifdef MULTIDEVICE
     if(devinfo.async_comm_gauge)
         multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
-    else multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+    else 
+#endif
+        multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
 
     // Step for the P
     // P' = P - l*dt*dS/dq

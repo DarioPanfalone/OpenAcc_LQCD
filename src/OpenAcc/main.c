@@ -221,12 +221,12 @@ int main(int argc, char* argv[]){
             int id_iter_offset=conf_id_iter;
             plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
-                    devinfo.myrank, conf_id_iter,plq/NSITES/6.0/3.0);
+                    devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
             rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 
 
             printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
-                    devinfo.myrank, conf_id_iter,rect/NSITES/6.0/3.0/2.0);
+                    devinfo.myrank, conf_id_iter,rect/GL_SIZE/6.0/3.0/2.0);
            
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
             printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
@@ -262,8 +262,8 @@ int main(int argc, char* argv[]){
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
 
-                printf("Plaquette     : %.18lf\n" ,plq/NSITES/3.0/6.0);
-                printf("Rectangle     : %.18lf\n" ,rect/NSITES/3.0/6.0/2.0);
+                printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
+                printf("Rectangle     : %.18lf\n" ,rect/GL_SIZE/3.0/6.0/2.0);
                 printf("Polyakov Loop : (%.18lf,%.18lf) \n",creal(poly),cimag(poly));
 
 
@@ -341,19 +341,19 @@ int main(int argc, char* argv[]){
                     if(goutfile){
                         if(id_iter<mkwch_pars.therm_ntraj){
                             printf("Therm_iter %d",conf_id_iter );
-                            printf("Placchetta= %.18lf    ", plq/NSITES/6.0/3.0);
-                            printf("Rettangolo= %.18lf\n",rect/NSITES/6.0/3.0/2.0);
+                            printf("Placchetta= %.18lf    ", plq/GL_SIZE/6.0/3.0);
+                            printf("Rettangolo= %.18lf\n",rect/GL_SIZE/6.0/3.0/2.0);
 
 
-                        }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/NSITES/6.0/3.0,rect/NSITES/6.0/3.0/2.0);
+                        }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/GL_SIZE/6.0/3.0,rect/GL_SIZE/6.0/3.0/2.0);
 
 
                         fprintf(goutfile,"%d\t%d\t",conf_id_iter,
                                 accettate_therm+accettate_metro
                                 -accettate_therm_old-accettate_metro_old);
                         fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
-                                plq/NSITES/6.0/3.0,
-                                rect/NSITES/6.0/3.0/2.0, 
+                                plq/GL_SIZE/6.0/3.0,
+                                rect/GL_SIZE/6.0/3.0/2.0, 
                                 creal(poly), cimag(poly));
 
                     }
@@ -456,14 +456,14 @@ int main(int argc, char* argv[]){
 
             plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
-            printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/NSITES/6.0/3.0,topoch);
+            printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/GL_SIZE/6.0/3.0,topoch);
 
             //               // You might want to put this inside the loop
             //               for(int icool=0;icool<5000;icool++){
             //               cool_conf(conf_acc,aux_conf_acc);
             //               plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             //               topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
-            //               printf("COOL %d  Placchetta= %.18lf  TopCh= %.18lf \n",icool+1,plq/NSITES/6.0/3.0,topoch);
+            //               printf("COOL %d  Placchetta= %.18lf  TopCh= %.18lf \n",icool+1,plq/GL_SIZE/6.0/3.0,topoch);
             //               }
             //               
             //

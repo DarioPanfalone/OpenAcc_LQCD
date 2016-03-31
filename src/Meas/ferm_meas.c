@@ -60,9 +60,6 @@ void eo_inversion(su3_soa *tconf_acc,
 
     acc_Deo(tconf_acc, phi_e, in_o,tfermions_parameters->phases);
 
-#ifdef MULTIDEVICE
-    communicate_fermion_borders(phi_e);
-#endif
 
 
 
@@ -71,9 +68,6 @@ void eo_inversion(su3_soa *tconf_acc,
             out_e,phi_e,res,trialSolution,
             tloc_r,tloc_h,tloc_s,tloc_p);
     acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
-#ifdef MULTIDEVICE
-    communicate_fermion_borders(phi_o);
-#endif
     combine_in1_minus_in2_allxfact(in_o,phi_o,(double)1/tfermions_parameters->ferm_mass,out_o);
 
 
@@ -291,10 +285,6 @@ void fermion_measures( su3_soa * tconf_acc,
                 dM_dmu_oe[geom_par.tmap](conf_to_use,bnchi_o,chi_e,
                         tfermions_parameters[iflv].phases);
 
-#ifdef MULTIDEVICE
-                communicate_fermion_borders(bnchi_e);
-                communicate_fermion_borders(bnchi_o);
-#endif
 
 
 
@@ -344,10 +334,6 @@ void fermion_measures( su3_soa * tconf_acc,
                     // ( * ,chi2_o) = d^2M/dmu^2 (chi_e, * )      
                     d2M_dmu2_oe[geom_par.tmap](conf_to_use,chi2_o,chi_e,
                             tfermions_parameters[iflv].phases);
-#ifdef MULTIDEVICE
-                    communicate_fermion_borders(chi2_e);
-                    communicate_fermion_borders(chi2_o);
-#endif
 
                     // (chi2_e,chi2_o) = d^2M/dmu^2 M^{-1} (rnd_e,rnd_o)
                     trd2M_dmu2_Minv_size = scal_prod_global(rnd_e,chi2_e)
@@ -375,10 +361,6 @@ void fermion_measures( su3_soa * tconf_acc,
                     dM_dmu_oe[geom_par.tmap](conf_to_use,bnchi_o,chi2_e,
                             tfermions_parameters[iflv].phases);
                     // (bnchi_e,bnchi_o) = (dM/dmu M^{-1})^2 (rnd_e,rnd_o)
-#ifdef MULTIDEVICE
-                    communicate_fermion_borders(bnchi_e);
-                    communicate_fermion_borders(bnchi_o);
-#endif
 
                     trdM_dmuMinv_sq_size = 
                         -scal_prod_global(rnd_e,bnchi_e)

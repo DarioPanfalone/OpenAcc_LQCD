@@ -24,20 +24,20 @@ MuOverPiT       0.24
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	   7
-GaugeSubSteps  4
+NmdSteps	   10
+GaugeSubSteps  8
 TrajLength	   1.0
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                10
+Ntraj	                1000
 ThermNtraj	            15
 StoreConfInterval	    20
 SaveConfInterval    	5
 residue_metro       	1e-8
-StoreConfName       	store.conf.ildg
-SaveConfName            conf.ildg
+StoreConfName       	store.conf.ildg44164
+SaveConfName            conf.ildg.44164
 Seed                    12
 ExpMaxEigenvalue        6
 VerbosityLv             2
@@ -52,7 +52,11 @@ GaugeOutfilename	    gaugemeas_openacc.txt
 
 FermionMeasuresSettings
 FermionicOutfilename    fermmeas_openacc.txt
-SingleInvNVectors       1
+SingleInvNVectors       2
+DoubleInvNVectorsChiral       1                   #(int)
+DoubleInvNVectorsQuarkNumber  1                   #(int)
+
+
 
 DeviceSettings
 device_choice          0
@@ -62,10 +66,10 @@ NRanks                 2
 NProcPerNode           4 
 
 Geometry
-nx                      8
-ny	                    8
-nz	                    8
-nt	                    8
+nx                     4 
+ny	                   4 
+nz	                   16 
+nt	                   4 
 xmap	                1 
 ymap	                2   
 zmap	                3  

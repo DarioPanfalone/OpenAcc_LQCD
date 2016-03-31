@@ -3,6 +3,11 @@
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/matvecmul.h"
 #include "./baryon_number_utilities.h"
+#include "../OpenAcc/geometry.h"
+
+#ifdef MULTIDEVICE
+#include "../Mpi/communications.h"
+#endif
 
 // FIRST DERIVATIVES
 
@@ -58,6 +63,11 @@ void dM_dmu_eo0( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
+
 }
 void dM_dmu_eo1( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -111,6 +121,9 @@ void dM_dmu_eo1( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void dM_dmu_eo2( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -164,6 +177,9 @@ void dM_dmu_eo2( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void dM_dmu_eo3( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -217,6 +233,9 @@ void dM_dmu_eo3( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 
 void (*dM_dmu_eo[4])( __restrict su3_soa * const u,
@@ -276,6 +295,9 @@ void dM_dmu_oe0( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void dM_dmu_oe1( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -328,6 +350,9 @@ void dM_dmu_oe1( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void dM_dmu_oe2( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -380,6 +405,9 @@ void dM_dmu_oe2( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void dM_dmu_oe3( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -432,6 +460,9 @@ void dM_dmu_oe3( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 
 void (*dM_dmu_oe[4]) ( __restrict su3_soa * const u,
@@ -494,6 +525,9 @@ void d2M_dmu2_eo0( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void d2M_dmu2_eo1( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -547,6 +581,9 @@ void d2M_dmu2_eo1( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void d2M_dmu2_eo2( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -600,6 +637,9 @@ void d2M_dmu2_eo2( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void d2M_dmu2_eo3( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -653,6 +693,9 @@ void d2M_dmu2_eo3( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 
 void (*d2M_dmu2_eo[4])( __restrict su3_soa * const u,
@@ -712,6 +755,9 @@ void d2M_dmu2_oe0( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void d2M_dmu2_oe1( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -764,6 +810,9 @@ void d2M_dmu2_oe1( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void d2M_dmu2_oe2( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -816,6 +865,9 @@ void d2M_dmu2_oe2( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 void d2M_dmu2_oe3( __restrict su3_soa * const u,
         vec3_soa * const out,
@@ -868,6 +920,9 @@ void d2M_dmu2_oe3( __restrict su3_soa * const u,
             } // Loop over nd1
         } // Loop over nd2
     } // Loop over nd3
+#ifdef MULTIDEVICE
+    communicate_fermion_borders(out);
+#endif
 }
 
 void (*d2M_dmu2_oe[4]) ( __restrict su3_soa * const u,
