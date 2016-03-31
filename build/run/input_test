@@ -24,14 +24,14 @@ MuOverPiT       0.24
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	    7
-GaugeSubSteps   4
-TrajLength	    1.0
+NmdSteps	   7
+GaugeSubSteps  4
+TrajLength	   1.0
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                1
+Ntraj	                10
 ThermNtraj	            15
 StoreConfInterval	    20
 SaveConfInterval    	5

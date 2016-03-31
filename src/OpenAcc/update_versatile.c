@@ -247,7 +247,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 			      ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
 			      k_p_shiftferm,momenta,local_sums,res_md);
     
-    if(verbosity_lv > 1) printf("MPI%02d - Molecular Dynamics Completed \n", 
+    if(verbosity_lv > 1) printf("MPI%02d - MOLECULAR DYNAMICS COMPLETED \n", 
             devinfo.myrank);
 
 
