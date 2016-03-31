@@ -427,6 +427,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const char RandGenStatusFilename_def[] = "rgstatus.bin"; 
     const double MaxRunTimeS_def = 1.0e9; // 30 years should be enough
     const int MaxConfIdIter_def = 1000000; 
+    const int SaveAllAtEnd_def = 1;
 
     par_info mcp[]={
         (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
@@ -441,6 +442,7 @@ int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mcpar->RandGenStatusFilename),  TYPE_STR,   "RandGenStatusFilename"  , 1,(const void*) &RandGenStatusFilename_def},
         (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , 1,(const void*) &MaxRunTimeS_def},
         (par_info){(void*) &(mcpar->use_ildg),               TYPE_INT,   "UseILDG"                , 1,(const void*) &useildg_def},
+        (par_info){(void*) &(mcpar->SaveAllAtEnd),           TYPE_INT,   "SaveAllAtEnd"           , 1,(const void*) &SaveAllAtEnd_def},
         (par_info){(void*) &(mcpar->seed),                   TYPE_INT,   "Seed"                   , 1,(const void*) &seed_def},
         (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , 1,(const void*) &epsgen_def},
         (par_info){(void*) &(mcpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
@@ -499,9 +501,9 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
         (par_info){(void*) &(di->async_comm_fermion),TYPE_INT,"AsyncFermionComms",1,(const void*) &async_comm_fermion_def},
         (par_info){(void*) &(di->async_comm_gauge),  TYPE_INT,"AsyncGaugeComms"  ,1,(const void*) &async_comm_gauge_def  },
         (par_info){(void*) &(di->single_dev_choice), TYPE_INT,"device_choice"    ,1,(const void*) &single_dev_choice_def},
-            (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL},
             (par_info){(void*) &(di->proc_per_node),TYPE_INT,"NProcPerNode", 0 , NULL},
 #endif
+            (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL}
     };
 
     // from here on, you should not have to modify anything.
@@ -514,6 +516,12 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
         printf("settings: %d , MPI_Init(): %d\n",
                 di->nranks_read, di->nranks);
         exit(1);
+    }
+#else 
+    if(di->nranks_read != 1){
+        printf("ERROR: \'Nranks\' from setting file is %d,", di->nranks_read);
+        printf(" but code is not compiled for muiltidevice\n");
+
     }
 #endif
 

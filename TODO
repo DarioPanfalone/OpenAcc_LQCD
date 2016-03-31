@@ -79,7 +79,9 @@ ASYNC WORK:
    0. Splitting functions in different versions (see Fermions) WRITTEN
       See all functions below [14 functions, to be modified in 
       full, bulk and 'direction 3 custom' (d3c) versions]
-   1. Similar to fermion case - DONE, ACCEPTS
+   1. Similar to fermion case - DOES NOT WORK WHEN BULK SIZE > 0
+      <<<<<<<<<<<<<--------------- TO FIX
+
  
 ----------------------------------------------------------------
 - phases in the multinode setup  (DONE, TO CHECK)

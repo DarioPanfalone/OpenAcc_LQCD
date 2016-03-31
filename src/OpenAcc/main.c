@@ -446,11 +446,16 @@ int main(int argc, char* argv[]){
 
             //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
 
-            if(mkwch_pars.ntraj > 0){
+            if(mkwch_pars.SaveAllAtEnd){
+            if(mkwch_pars.ntraj > 0 ){
                 save_conf_wrapper(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
                         mkwch_pars.use_ildg );
-                saverand_tofile(mkwch_pars.RandGenStatusFilename);
             }
+            saverand_tofile(mkwch_pars.RandGenStatusFilename);
+            }
+            else 
+                printf(
+            "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
             //-------------------------------------------------//
 
 

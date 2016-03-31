@@ -24,14 +24,14 @@ MuOverPiT       0.24
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	   10
-GaugeSubSteps  8
-TrajLength	   1.0
+NmdSteps	   1
+GaugeSubSteps  1
+TrajLength	   0.05
 residue_md      1e-6
 
 
 MontecarloParameters
-Ntraj	                1000
+Ntraj	                1
 ThermNtraj	            15
 StoreConfInterval	    20
 SaveConfInterval    	5
@@ -45,6 +45,8 @@ SaveDiagnostics         0
 UseILDG                 1
 EpsGen                  0.35
 #MaxRunTimeS            6000
+SaveAllAtEnd            0    # only for debug purposes!
+
 
 GaugeMeasuresSettings
 GaugeOutfilename	    gaugemeas_openacc.txt
