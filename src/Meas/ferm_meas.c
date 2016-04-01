@@ -256,7 +256,7 @@ void fermion_measures( su3_soa * tconf_acc,
             d_complex trd2M_dmu2_Minv_size = 0.0 + 0.0*I; //for connected baryon susc,1
             d_complex trdM_dmuMinv_sq_size = 0.0 + 0.0*I; //for connected baryon susc,2
 
-            double factor = tfermions_parameters[iflv].degeneracy*0.25/NSITES;
+            double factor = tfermions_parameters[iflv].degeneracy*0.25/GL_SIZE;
 
 #pragma acc data create(phi_e[0:1]) create(phi_o[0:1])\
             create(chi_e[0:1]) create(chi_o[0:1])   \
