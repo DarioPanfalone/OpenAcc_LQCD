@@ -496,7 +496,7 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
 
     par_info tp[]= {
 #ifndef MULTIDEVICE        
-        (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 0 , NULL  }
+        (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 0 , NULL  },
 #else
         (par_info){(void*) &(di->async_comm_fermion),TYPE_INT,"AsyncFermionComms",1,(const void*) &async_comm_fermion_def},
         (par_info){(void*) &(di->async_comm_gauge),  TYPE_INT,"AsyncGaugeComms"  ,1,(const void*) &async_comm_gauge_def  },
@@ -521,7 +521,7 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     if(di->nranks_read != 1){
         printf("ERROR: \'Nranks\' from setting file is %d,", di->nranks_read);
         printf(" but code is not compiled for muiltidevice\n");
-
+        exit(1);
     }
 #endif
 
