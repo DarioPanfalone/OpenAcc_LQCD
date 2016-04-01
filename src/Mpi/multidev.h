@@ -14,6 +14,7 @@ typedef struct dev_info_t{
     int single_dev_choice; // from input file
     int myrank, nranks;
     char myrankstr[50];
+    int nranks_read;
 
 #ifdef MULTIDEVICE
     int async_comm_fermion;
@@ -29,7 +30,6 @@ typedef struct dev_info_t{
     vec4int gl_loc_origin4int;
     // FROM INPUT FILE
     int proc_per_node;
-    int nranks_read;
     int halo_widths0123[4];
     int origin_0123[4];
 #endif
