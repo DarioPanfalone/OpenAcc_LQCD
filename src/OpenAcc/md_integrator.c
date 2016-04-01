@@ -88,16 +88,27 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc,su3_soa *local_staples,
     if(verbosity_lv > 3) printf("MPI%02d - In async bloc - Index %d\n",
             devinfo.myrank, omelyan_index);
 
-
+/* // At present, useless!
     calc_ipdot_gauge_soloopenacc_d3c(tconf_acc,local_staples,tipdot,
             HALO_WIDTH,GAUGE_HALO); 
     calc_ipdot_gauge_soloopenacc_d3c(tconf_acc,local_staples,tipdot,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
+    calc_ipdot_gauge_soloopenacc_bulk(tconf_acc,local_staples,tipdot);
+*/
+    // ISSUE : calc_ipdot_gauge_bulk depends on tconf_acc in the surface.
+    // mom_exp_times_conf_soloopenacc_d3c() is goig to modify it. 
+    // So, calc_ipdot_gauge_soloopenacc_bulk must be done before 
+    // mom_exp_times_conf_soloopenacc_d3c(), unless we find another 
+    // clever way to fix it, like using another conf in 
+    // mom_exp_times_conf_soloopenacc().
+
+    calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
 
     mom_sum_mult_d3c(tmomenta,tipdot,deltas_Omelyan,omelyan_index,
             HALO_WIDTH,GAUGE_HALO);
     mom_sum_mult_d3c(tmomenta,tipdot,deltas_Omelyan,omelyan_index,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
+
 
     mom_exp_times_conf_soloopenacc_d3c(tconf_acc,tmomenta,
             deltas_Omelyan,4,
@@ -105,13 +116,9 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc,su3_soa *local_staples,
     mom_exp_times_conf_soloopenacc_d3c(tconf_acc,tmomenta,
             deltas_Omelyan,4,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
-
 
     communicate_su3_borders_async(tconf_acc,GAUGE_HALO,
             send_border_requests,recv_border_requests);
-
-
-    calc_ipdot_gauge_soloopenacc_bulk(tconf_acc,local_staples,tipdot);
 
     mom_sum_mult_bulk(tmomenta,tipdot,deltas_Omelyan,omelyan_index);
 
