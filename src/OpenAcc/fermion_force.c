@@ -178,6 +178,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
 #else
     conf_to_use = tconf_acc;
 #endif
+    set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
 
     set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
 
