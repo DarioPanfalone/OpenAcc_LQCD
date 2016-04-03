@@ -99,22 +99,24 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc,su3_soa *local_staples,
     mom_sum_mult_d3c(tmomenta,tipdot,deltas_Omelyan,omelyan_index,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
 
+
+    // this function should have differen in and out for the gauge conf
     mom_exp_times_conf_soloopenacc_d3c(tconf_acc,tmomenta,
             deltas_Omelyan,4,
             HALO_WIDTH,GAUGE_HALO);
+    // this function should have differen in and out for the gauge conf
     mom_exp_times_conf_soloopenacc_d3c(tconf_acc,tmomenta,
             deltas_Omelyan,4,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
 
-
     communicate_su3_borders_async(tconf_acc,GAUGE_HALO,
             send_border_requests,recv_border_requests);
-
 
     calc_ipdot_gauge_soloopenacc_bulk(tconf_acc,local_staples,tipdot);
 
     mom_sum_mult_bulk(tmomenta,tipdot,deltas_Omelyan,omelyan_index);
 
+    // this function should have differen in and out for the gauge conf
     mom_exp_times_conf_soloopenacc_bulk(tconf_acc,tmomenta,
             deltas_Omelyan,4);
 

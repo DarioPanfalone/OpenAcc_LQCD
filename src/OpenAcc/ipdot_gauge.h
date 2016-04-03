@@ -9,44 +9,53 @@
 #endif
 
 
-void calc_ipdot_gauge_soloopenacc_std( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot);
+void calc_ipdot_gauge_soloopenacc_std( 
+        __restrict const  su3_soa * const tconf_acc,
+        __restrict su3_soa * const local_staples,
+        __restrict tamat_soa * const tipdot);
 
-void calc_ipdot_gauge_soloopenacc_tlsm( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot);
+void calc_ipdot_gauge_soloopenacc_tlsm( 
+        __restrict const  su3_soa * const tconf_acc,  
+        __restrict su3_soa * const local_staples,
+        __restrict tamat_soa * const tipdot);
 
 
 // VERSATILE WRAPPER WHICH CHOOSES BETWEEN STD GAUGE ACTION OR TLSM GAUGE ACTION
-void calc_ipdot_gauge_soloopenacc( __restrict  su3_soa * const tconf_acc,  __restrict su3_soa * const local_staples,__restrict tamat_soa * const tipdot);
+void calc_ipdot_gauge_soloopenacc( 
+        __restrict const  su3_soa * const tconf_acc,  
+        __restrict su3_soa * const local_staples,
+        __restrict tamat_soa * const tipdot);
 
 #ifdef MULTIDEVICE
 void calc_ipdot_gauge_soloopenacc_std_bulk( 
-        __restrict  su3_soa * const tconf_acc, 
+        __restrict const  su3_soa * const tconf_acc, 
         __restrict su3_soa * const local_staples,
         __restrict tamat_soa * const tipdot);
 
 void calc_ipdot_gauge_soloopenacc_tlsm_bulk( 
-        __restrict  su3_soa * const tconf_acc,  
+        __restrict const  su3_soa * const tconf_acc,  
         __restrict su3_soa * const local_staples,
         __restrict tamat_soa * const tipdot);
 
 void calc_ipdot_gauge_soloopenacc_bulk( 
-        __restrict  su3_soa * const tconf_acc,  
+        __restrict const  su3_soa * const tconf_acc,  
         __restrict su3_soa * const local_staples,
         __restrict tamat_soa * const tipdot);
 
 void calc_ipdot_gauge_soloopenacc_std_d3c( 
-        __restrict  su3_soa * const tconf_acc, 
+        __restrict const  su3_soa * const tconf_acc, 
         __restrict su3_soa * const local_staples,
         __restrict tamat_soa * const tipdot,
         int offset3, int thickness3);
 
 void calc_ipdot_gauge_soloopenacc_tlsm_d3c( 
-        __restrict  su3_soa * const tconf_acc,  
+        __restrict const  su3_soa * const tconf_acc,  
         __restrict su3_soa * const local_staples,
         __restrict tamat_soa * const tipdot,
         int offset3, int thickness3);
 
 void calc_ipdot_gauge_soloopenacc_d3c( 
-        __restrict  su3_soa * const tconf_acc,  
+        __restrict const  su3_soa * const tconf_acc,  
         __restrict su3_soa * const local_staples,
         __restrict tamat_soa * const tipdot,
         int offset3, int thickness3);
