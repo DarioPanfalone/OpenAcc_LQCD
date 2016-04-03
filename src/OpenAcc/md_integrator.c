@@ -80,18 +80,17 @@ void initialize_md_global_variables(md_param md_params )
 
 
 #ifdef MULTIDEVICE
-void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc,su3_soa *local_staples,
-        tamat_soa *tipdot,thmat_soa *tmomenta, int omelyan_index){
+void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_new,
+        su3_soa *local_staples, tamat_soa *tipdot,thmat_soa *tmomenta, int omelyan_index)
+{
     MPI_Request send_border_requests[96]; 
     MPI_Request recv_border_requests[96];
     if(verbosity_lv > 3) printf("MPI%02d - In async bloc - Index %d\n",
             devinfo.myrank, omelyan_index);
 
-    printf(" THOU SHALT NOT USE THIS FUNCTION NOW, FOR IT IS BROKEN.\n");
-
-    calc_ipdot_gauge_soloopenacc_d3c(tconf_acc,local_staples,tipdot,
+    calc_ipdot_gauge_soloopenacc_d3c(tconf_acc_old,local_staples,tipdot,
             HALO_WIDTH,GAUGE_HALO); 
-    calc_ipdot_gauge_soloopenacc_d3c(tconf_acc,local_staples,tipdot,
+    calc_ipdot_gauge_soloopenacc_d3c(tconf_acc_old,local_staples,tipdot,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
 
     mom_sum_mult_d3c(tmomenta,tipdot,deltas_Omelyan,omelyan_index,
@@ -101,23 +100,26 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc,su3_soa *local_staples,
 
 
     // this function should have differen in and out for the gauge conf
-    mom_exp_times_conf_soloopenacc_d3c(tconf_acc,tmomenta,
+    mom_exp_times_conf_soloopenacc_d3c(
+            tconf_acc_old, tconf_acc_new, tmomenta,
             deltas_Omelyan,4,
             HALO_WIDTH,GAUGE_HALO);
     // this function should have differen in and out for the gauge conf
-    mom_exp_times_conf_soloopenacc_d3c(tconf_acc,tmomenta,
+    mom_exp_times_conf_soloopenacc_d3c(
+            tconf_acc_old, tconf_acc_new, tmomenta,
             deltas_Omelyan,4,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
 
-    communicate_su3_borders_async(tconf_acc,GAUGE_HALO,
+    communicate_su3_borders_async(tconf_acc_new,GAUGE_HALO,
             send_border_requests,recv_border_requests);
 
-    calc_ipdot_gauge_soloopenacc_bulk(tconf_acc,local_staples,tipdot);
+    calc_ipdot_gauge_soloopenacc_bulk(tconf_acc_old,local_staples,tipdot);
 
     mom_sum_mult_bulk(tmomenta,tipdot,deltas_Omelyan,omelyan_index);
 
     // this function should have differen in and out for the gauge conf
-    mom_exp_times_conf_soloopenacc_bulk(tconf_acc,tmomenta,
+    mom_exp_times_conf_soloopenacc_bulk(
+            tconf_acc_old, tconf_acc_new, tmomenta,
             deltas_Omelyan,4);
 
 
@@ -133,25 +135,28 @@ void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_s
         printf("MPI%02d - Performing Async Gauge substeps\n",
                 devinfo.myrank);
 
-    multistep_2MN_gauge_async_bloc(tconf_acc,local_staples,
-            tipdot,tmomenta,3);
+    // tconf_acc[0:8]   --> old conf
+    // tconf_acc[8:16]  --> new conf
+
+    multistep_2MN_gauge_async_bloc(tconf_acc,&tconf_acc[8],// for async we need 2 confs
+            local_staples, tipdot,tmomenta,3);
 
     for(md=1; md<md_parameters.gauge_scale; md++){
         if(verbosity_lv > 2) printf("MPI%02d - Gauge step %d of %d...\n",
                 devinfo.myrank,md,md_parameters.gauge_scale);
 
-        multistep_2MN_gauge_async_bloc(tconf_acc,local_staples,
-                tipdot,tmomenta,5);
+        multistep_2MN_gauge_async_bloc(&tconf_acc[8],tconf_acc,//for async we need 2 confs
+                local_staples, tipdot,tmomenta,5);
 
-        multistep_2MN_gauge_async_bloc(tconf_acc,local_staples,
-                tipdot,tmomenta,6);
+        multistep_2MN_gauge_async_bloc(tconf_acc,&tconf_acc[8],//for async we need 2 confs
+                local_staples, tipdot,tmomenta,6);
 
     }
     if(verbosity_lv > 2) printf("MPI%02d - Last Gauge step of %d...\n",
             devinfo.myrank,md_parameters.gauge_scale);
 
-    multistep_2MN_gauge_async_bloc(tconf_acc,local_staples,
-            tipdot,tmomenta,5);
+    multistep_2MN_gauge_async_bloc(&tconf_acc[8],tconf_acc, 
+            local_staples, tipdot,tmomenta,5);
 
     // LAST STEP IS NOT ASYNCED
     // Step for the P

@@ -58,7 +58,6 @@
 
 
 
-//#define NORANDOM  // FOR debug, check also update_versatile.c 
 
 int conf_id_iter;
 int verbosity_lv = 5;// 5 should print everything.
@@ -69,9 +68,7 @@ int main(int argc, char* argv[]){
     struct timeval tinit;
     gettimeofday ( &tinit, NULL );
 
-#ifdef NORANDOM
-    printf("WELCOME! NORANDOM MODE. (main()) \n" );
-#endif
+
 
     printf("WELCOME! \n");
     // READ input file.
@@ -80,6 +77,17 @@ int main(int argc, char* argv[]){
 #endif
 
     set_global_vars_and_fermions_from_input_file(argv[1]);
+    if(debug_settings.do_norandom_test){
+        printf("*******************************************\n");
+        printf("      WELCOME. This is a NORANDOM test.    \n");
+        printf("  MOST things will not be random generated,\n");
+        printf("         but read from memory instead.     \n");
+        printf("               CHECK THE CODE!!            \n");
+        printf("ALSO: setting the number of trajectories to 1.\n");
+        mc_params.ntraj = 1;
+
+    }
+
     verbosity_lv = debug_settings.input_vbl;
 
 #ifdef MULTIDEVICE
@@ -128,7 +136,7 @@ int main(int argc, char* argv[]){
     if(init_ferm_params(fermions_parameters)){
         printf("MPI%02d - Finalizing...\n",devinfo.myrank);
 #ifdef MULTIDEVICE
-    MPI_Finalize();
+        MPI_Finalize();
 #endif
         exit(1);
     }
@@ -151,33 +159,33 @@ int main(int argc, char* argv[]){
     //################## INIZIALIZZAZIONE DELLA CONFIGURAZIONE #######################
     // start from saved conf
 
-#ifdef NORANDOM
-    if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
-        // READS ALSO THE conf_id_iter
-        printf("MPI%02d - Stored Gauge Conf conf_norndtest Read : OK\n",devinfo.myrank);
+    if(debug_settings.do_norandom_test){
+        if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
+            // READS ALSO THE conf_id_iter
+            printf("MPI%02d - Stored Gauge Conf conf_norndtest Read : OK\n",devinfo.myrank);
+        }
+        else{
+            // cold start
+            printf("MPI%02d - COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED\
+                    \"conf_norndtest\" MUST BE PRESENT\n",devinfo.myrank);
+            exit(1);
+        }
     }
     else{
-        // cold start
-        printf("MPI%02d - COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED\
-                \"conf_norndtest\" MUST BE PRESENT\n",devinfo.myrank);
-        exit(1);
-    }
+        if(!read_conf_wrapper(conf_acc,mc_params.save_conf_name,
+                    &conf_id_iter,debug_settings.use_ildg)){
+            // READS ALSO THE conf_id_iter
+            printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",
+                    devinfo.myrank, mc_params.save_conf_name);
 
-#else
-    if(!read_conf_wrapper(conf_acc,mc_params.save_conf_name,
-                &conf_id_iter,debug_settings.use_ildg)){
-        // READS ALSO THE conf_id_iter
-        printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",
-                devinfo.myrank, mc_params.save_conf_name);
-
+        }
+        else{
+            generate_Conf_cold(conf_acc,mc_params.eps_gen);
+            printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
+                    devinfo.myrank);
+            conf_id_iter=0;
+        }
     }
-    else{
-        generate_Conf_cold(conf_acc,mc_params.eps_gen);
-        printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
-                devinfo.myrank);
-        conf_id_iter=0;
-    }
-#endif
     //#################################################################################  
 
 
@@ -190,8 +198,13 @@ int main(int argc, char* argv[]){
             max_unitarity_deviation);
 
 
+    int conf_acc_size = 8;
 
-#pragma acc data   copy(conf_acc[0:8]) \
+#ifdef MULTIDEVICE
+    if(devinfo.async_comm_gauge) conf_acc_size = 16; 
+#endif
+
+#pragma acc data   copy(conf_acc[0:conf_acc_size]) \
     create(ipdot_acc[0:8]) create(aux_conf_acc[0:8])\
     create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot])\
     create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot])\
@@ -228,7 +241,7 @@ int main(int argc, char* argv[]){
 
             printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
                     devinfo.myrank, conf_id_iter,rect/GL_SIZE/6.0/3.0/2.0);
-           
+
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
             printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
                     devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
@@ -395,7 +408,7 @@ int main(int argc, char* argv[]){
 
                 int run_condition = 1;
 
-                
+
                 if(devinfo.myrank ==0 ){
                     FILE * test_stop = fopen("stop","r");
                     if(test_stop){
@@ -448,15 +461,15 @@ int main(int argc, char* argv[]){
             //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
 
             if(debug_settings.SaveAllAtEnd){
-            if(mc_params.ntraj > 0 ){
-                save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
-                        debug_settings.use_ildg );
-            }
-            saverand_tofile(mc_params.RandGenStatusFilename);
+                if(mc_params.ntraj > 0 ){
+                    save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
+                            debug_settings.use_ildg );
+                }
+                saverand_tofile(mc_params.RandGenStatusFilename);
             }
             else 
                 printf(
-            "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+                        "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
             //-------------------------------------------------//
 
 

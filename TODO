@@ -11,7 +11,7 @@ Things to do:
 4. Correct execution with MPICC (2 ranks, minilattice) IN PROGRESS
    - checks for segmentation faults and mpi errors: OK
    - check for actual correctness of the code:
-     - TEST PURE GAUGE   (no fermions):     OK (8^4 x 2) (accepts)
+     - TEST PURE GAUGE   (no fermions): OK (8^4 x 2) (accepts)
      - TEST PURE GAUGE on different machines 
            (sbombolator, cudawn7, zassenhaus(using openmpi1.8):  OK)
     - check of nranks read from input file from MPI_Init() WRITTEN
@@ -79,26 +79,27 @@ ASYNC WORK:
    0. Splitting functions in different versions (see Fermions) WRITTEN
       See all functions below [14 functions, to be modified in 
       full, bulk and 'direction 3 custom' (d3c) versions]
-   1. Similar to fermion case - DOES NOT WORK WHEN BULK SIZE > 0
+   1. Similar to fermion case - (DONE)
       ISSUE: see md_integrator.c
       Issue: calc_ipdot_gauge_bulk needs the original configuration
       in the whole local lattice, but it has already been changed on the surface.
-      So, another configuration is needed.
-      Basically calc_ipdot_openacc_bulk() must be called before updating the 
-      conf in the surfaces, otherwise the staples will be calculated with the 
-      modified links, which is not correct.
-      <<<<<<<<<----- IMPLEMENT FIX
+      So, another configuration is needed. (DONE, OK)
 
 DEBUG TOOLS:
 
 Implemented reversibility test, easy to perform with input file.
-Problem:
-1. Moments differences obtained are HUGE
-2. Configuration differences obtained must be checked.
-<<<<<<<------------ TO CHECK, DISCUSS ETC.
+Problems: (OK)
+1. Moments differences obtained are HUGE - (FIXED, OK)
+   Heh, because you have to sum, not to subtract..
+2. Configuration differences obtained are ok, when integration step 
+   is reasonably small. (OK)
+3. Try single node vs multi node results.  <<<<<<<<--------------- TODO
+   a. Tripiccione idea - 0 (random number = 0.5, always)
+   b. Tripiccione idea - 1 (random number dependent on the physical position)
+   c. only if fail, write all random generation on one node.
 
 
-
+   
 
  
 ----------------------------------------------------------------
@@ -222,6 +223,7 @@ OTHER MODIFICATIONS
   
 - NNP and NNM must give errors when they should 
   DONE : now they give -1 if the site is not included in the local+halo lattice.
+  TODO: remove printing of them once we're sure.
   
   FOR MEASURES
   cooling:

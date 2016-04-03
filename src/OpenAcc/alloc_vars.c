@@ -8,17 +8,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../Include/debug.h"
 #include "../Include/fermion_parameters.h"
+#include "../Mpi/multidev.h"
 #include "./action.h"
 #include "./alloc_vars.h"
 #include "./struct_c_def.h"
-
-#ifdef MULTIDEVICE 
-#include "../Mpi/multidev.h"
-#endif
 
 
 #define ALIGN 128
@@ -103,7 +99,12 @@ void mem_alloc()
     }
 #endif
 
-    allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+#ifdef MULTIDEVICE
+    if(devinfo.async_comm_gauge)
+        allocation_check =  posix_memalign((void **)&conf_acc, ALIGN,16*sizeof(su3_soa));
+    else
+#endif
+        allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, conf_acc);
 
 

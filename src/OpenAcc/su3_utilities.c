@@ -348,7 +348,8 @@ void mom_sum_mult_bulk( __restrict thmat_soa * const mom,
 
  
 void mom_exp_times_conf_soloopenacc_bulk( 
-        __restrict su3_soa * const conf,
+        __restrict const su3_soa * const conf_old,
+        __restrict su3_soa * const conf_new,
         __restrict const thmat_soa * const mom,
         double * factor, 
         // questo e' il vettore delta dove sono contenuti 
@@ -380,8 +381,8 @@ void mom_exp_times_conf_soloopenacc_bulk(
 
 	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux[0]);
 	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
-	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
-	    project_on_su3(&conf[dir_link],idxh,&mom_aux[0]);
+	    conf_left_exp_multiply(&conf_old[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
+	    project_on_su3(&conf_new[dir_link],idxh,&mom_aux[0]);
 	  }
 	  
         }  // d0
@@ -491,7 +492,8 @@ void mom_sum_mult_d3c( __restrict thmat_soa * const mom,
 }// closes routine
 
 void mom_exp_times_conf_soloopenacc_d3c( 
-        __restrict su3_soa * const conf,
+        __restrict const su3_soa * const conf_old,
+        __restrict su3_soa * const conf_new,
         __restrict const thmat_soa * const mom,
         double * factor, 
         // questo e' il vettore delta dove sono contenuti 
@@ -524,8 +526,8 @@ void mom_exp_times_conf_soloopenacc_d3c(
 
 	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux[0]);
 	    matrix_exp_openacc(&mom_aux[0],&aux[0],&expo[0]);
-	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
-	    project_on_su3(&conf[dir_link],idxh,&mom_aux[0]);
+	    conf_left_exp_multiply(&conf_old[dir_link],idxh,&expo[0],&aux[0],&mom_aux[0]);
+	    project_on_su3(&conf_new[dir_link],idxh,&mom_aux[0]);
 	  }
 	  
         }  // d0

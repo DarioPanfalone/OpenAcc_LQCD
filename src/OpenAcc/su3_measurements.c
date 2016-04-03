@@ -224,7 +224,7 @@ double calc_diff_force_norm(const __restrict tamat_soa * tipdot,
 };
 
 
-double calc_diff_momenta_norm(const __restrict thmat_soa * tmomenta,  
+double calc_sum_momenta_norm(const __restrict thmat_soa * tmomenta,  
         const __restrict thmat_soa * tmomenta_old)
 {
 
@@ -238,11 +238,11 @@ double calc_diff_momenta_norm(const __restrict thmat_soa * tmomenta,
 #pragma acc kernels present(tmomenta) present(tmomenta_old)
 #pragma acc loop reduction(+:result)
     for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
-            double A = tmomenta[mu].rc00[t]-tmomenta_old[mu].rc00[t];
-            double B = tmomenta[mu].rc11[t]-tmomenta_old[mu].rc11[t];
-            d_complex C = tmomenta[mu].c01[t]-tmomenta_old[mu].c01[t]; 
-            d_complex D = tmomenta[mu].c02[t]-tmomenta_old[mu].c02[t];
-            d_complex E = tmomenta[mu].c12[t]-tmomenta_old[mu].c12[t];
+            double A = tmomenta[mu].rc00[t]+tmomenta_old[mu].rc00[t];
+            double B = tmomenta[mu].rc11[t]+tmomenta_old[mu].rc11[t];
+            d_complex C = tmomenta[mu].c01[t]+tmomenta_old[mu].c01[t]; 
+            d_complex D = tmomenta[mu].c02[t]+tmomenta_old[mu].c02[t];
+            d_complex E = tmomenta[mu].c12[t]+tmomenta_old[mu].c12[t];
             result +=  A*A + B*B + A*B 
                 + creal(C)*creal(C) + cimag(C)*cimag(C) 
                 + creal(D)*creal(D) + cimag(D)*cimag(D) 

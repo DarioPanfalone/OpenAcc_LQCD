@@ -35,7 +35,6 @@ char input_file_str[MAXLINES*MAXLINELENGTH];
 #define TYPE_DOUBLE 1
 #define TYPE_STR 2
 const char * type_strings[]={"(int)", "(double)", "(string)" };
-
 typedef struct par_info_t{
 
     void* par;
@@ -74,6 +73,7 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
 
 
 FILE * helpfile;
+char IGNORE_IT[50];
 
 // just to save it in the conf
 int prepare_string_from_stringarray(char file_lines[MAXLINES][MAXLINELENGTH], 
@@ -230,7 +230,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
 
         int res = 0 ;
 
-        int iline = startline;
+        int iline = startline+1;
 
         while(! res && iline < endline)
         {
@@ -239,44 +239,65 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 found_something = strstr(filelines[iline],par_infos[i].name);
                 if(found_something){ // looks at the beginning of the line.
                     // found parameter
-                    if(0==devinfo.myrank)
-                        printf("  %s\r\t\t\t\t ",par_infos[i].name);
-                    int reads = 0;
-                    char parname[50];
-                    switch(par_infos[i].type){
-                        case TYPE_INT: 
-                            reads = sscanf(filelines[iline],
-                                    "%s %d",parname,(int*)par_infos[i].par);
-                            if(reads == 2) 
-                                if(0==devinfo.myrank)
-                                    printf("%d\n", *((int*)par_infos[i].par));
-                            break;
-                        case TYPE_DOUBLE:
-
-                            reads = sscanf(filelines[iline],
-                                    "%s %lf",parname,(double*) par_infos[i].par);
-                            if(reads == 2)
-                                if(0==devinfo.myrank)
-                                    printf("%e\n", *((double*)par_infos[i].par));
-                            break;
-                        case TYPE_STR: 
-                            reads = sscanf(filelines[iline],
-                                    "%s %s",parname,(char*) par_infos[i].par);
-                            if(reads == 2) 
-                                if(0==devinfo.myrank)
-                                    printf("\"%s\"\n", ((char*)par_infos[i].par));
-                            break;
-                        default: 
-                            if(0==devinfo.myrank)
-                                printf("WARNING, variable type not set in sourcecode.\n");
-                            break;
-
+                    if(par_infos[i].par == IGNORE_IT){
+                        if(0==devinfo.myrank)
+                            printf("WARNING, LINE %-3d: IGNORING %s\n",
+                                    iline+1,par_infos[i].name);
+                        break;
                     }
-                    if(reads == 2)rc[i]++;
-                    else if(0==devinfo.myrank) printf("WARNING, NO VALUE READ!");
-                    break;
+                    else {
+                        if(0==devinfo.myrank)
+                            printf("%-3d  %s\r\t\t\t\t ",iline+1,par_infos[i].name);
+                        int reads = 0;
+                        char parname[50];
+
+                        switch(par_infos[i].type){
+                            case TYPE_INT: 
+                                reads = sscanf(filelines[iline],
+                                        "%s %d",parname,(int*)par_infos[i].par);
+                                if(reads == 2) 
+                                    if(0==devinfo.myrank)
+                                        printf("%d\n", *((int*)par_infos[i].par));
+                                break;
+                            case TYPE_DOUBLE:
+
+                                reads = sscanf(filelines[iline],
+                                        "%s %lf",parname,(double*) par_infos[i].par);
+                                if(reads == 2)
+                                    if(0==devinfo.myrank)
+                                        printf("%e\n", *((double*)par_infos[i].par));
+                                break;
+                            case TYPE_STR: 
+                                reads = sscanf(filelines[iline],
+                                        "%s %s",parname,(char*) par_infos[i].par);
+                                if(reads == 2) 
+                                    if(0==devinfo.myrank)
+                                        printf("\"%s\"\n", ((char*)par_infos[i].par));
+                                break;
+                            default: 
+                                if(0==devinfo.myrank)
+                                    printf("WARNING, variable type not set in sourcecode.\n");
+                                break;
+
+                        }
+                        if(reads == 2)rc[i]++;
+                        else if(0==devinfo.myrank) printf("WARNING, NO VALUE READ!");
+                        break;
+                    }
                 };
             }
+            if(!found_something){
+                char word[50];
+                int reads = sscanf(filelines[iline],"%s", word);
+                if(reads==1){
+                    if(0==devinfo.myrank)
+                    printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
+                    printf("%s\n", filelines[iline]);
+                    exit(1);
+                }
+            }
+
+
             iline++; 
             res = 1;
             for(int i =0; i<npars; i++)
@@ -457,6 +478,7 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     const int save_diagnostics_def = 0;
     const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
     const int do_reversibility_test_def = 0; 
+    const int do_norandom_test_def = 0; 
     // see /Meas
     par_info gmp[]= {
         (par_info){(void*) &(dbg_settings->use_ildg),               TYPE_INT,   "UseILDG"                , 1,(const void*) &useildg_def},
@@ -464,6 +486,7 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
         (par_info){(void*) &(dbg_settings->SaveAllAtEnd),           TYPE_INT,   "SaveAllAtEnd"           , 1,(const void*) &SaveAllAtEnd_def},
         (par_info){(void*) &(dbg_settings->save_diagnostics),       TYPE_INT,   "SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
         (par_info){(void*) &(dbg_settings->do_reversibility_test),  TYPE_INT,   "DoRevTest"              , 1,(const void*) &do_reversibility_test_def},
+        (par_info){(void*) &(dbg_settings->do_norandom_test),       TYPE_INT,   "DoNoRandomTest"         , 1,(const void*) &do_norandom_test_def},
         (par_info){(void*) &(dbg_settings->diagnostics_filename),   TYPE_STR,   "SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
 
 
@@ -507,23 +530,27 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     // notice that pre_init_multidev1D or any relevant function
     // must have been called before, in order to get nranks
     // from MPI_Init()
-#ifdef MULTIDEVICE
     const int single_dev_choice_def = 0;
     const int async_comm_fermion_def = 0;
     const int async_comm_gauge_def   = 0;
-#endif 
 
+#ifndef MULTIDEVICE        
+    const int ignored_def = 1; // ignored, actually, but necessary
+#endif
 
     par_info tp[]= {
 #ifndef MULTIDEVICE        
         (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 0 , NULL  },
+        (par_info){(void*) IGNORE_IT,TYPE_INT,"AsyncFermionComms",1,(const void*) &async_comm_fermion_def},
+        (par_info){(void*) IGNORE_IT,TYPE_INT,"AsyncGaugeComms"  ,1,(const void*) &async_comm_gauge_def  },
+        (par_info){(void*) IGNORE_IT,TYPE_INT,"NProcPerNode",   1,(const void*) &ignored_def},
 #else
+        (par_info){(void*) &(di->single_dev_choice), TYPE_INT,"device_choice"    ,1,(const void*) &single_dev_choice_def},
         (par_info){(void*) &(di->async_comm_fermion),TYPE_INT,"AsyncFermionComms",1,(const void*) &async_comm_fermion_def},
         (par_info){(void*) &(di->async_comm_gauge),  TYPE_INT,"AsyncGaugeComms"  ,1,(const void*) &async_comm_gauge_def  },
-        (par_info){(void*) &(di->single_dev_choice), TYPE_INT,"device_choice"    ,1,(const void*) &single_dev_choice_def},
-            (par_info){(void*) &(di->proc_per_node),TYPE_INT,"NProcPerNode", 0 , NULL},
+        (par_info){(void*) &(di->proc_per_node),TYPE_INT,"NProcPerNode", 0 , NULL},
 #endif
-            (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL}
+        (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL}
     };
 
     // from here on, you should not have to modify anything.
@@ -730,7 +757,10 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         }
         else 
             if(0==devinfo.myrank)
-                printf("\nReading %s...\n", par_macro_groups_names[tagtypes[igroup]]);
+                printf("\nReading %s, lines %d - %d ...\n", 
+                        par_macro_groups_names[tagtypes[igroup]],
+                        startline, endline);
+
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
                 check = read_action_info(&act_params,filelines,startline,endline);
