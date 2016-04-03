@@ -1,22 +1,22 @@
 #ifndef _SETTING_FILE_PARSER_C_
 #define _SETTING_FILE_PARSER_C_
 
-#include "./setting_file_parser.h"
-#include "./common_defines.h"
-#include "./markowchain.h"
-#include "./fermion_parameters.h"
-#include "../OpenAcc/action.h"
-#include "../OpenAcc/md_integrator.h"
-#include "../OpenAcc/backfield.h"
-#include "../OpenAcc/su3_measurements.h"
-#include "../Mpi/multidev.h"
-#include "../OpenAcc/geometry.h"
-#include "../RationalApprox/rationalapprox.h"
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
-
+#include "../Mpi/multidev.h"
+#include "../OpenAcc/action.h"
+#include "../OpenAcc/backfield.h"
+#include "../OpenAcc/geometry.h"
 #include "../OpenAcc/geometry.h" // for MULTIDEVICE to be defined or not
+#include "../OpenAcc/md_integrator.h"
+#include "../OpenAcc/su3_measurements.h"
+#include "../RationalApprox/rationalapprox.h"
+#include "./common_defines.h"
+#include "./debug.h"
+#include "./fermion_parameters.h"
 #include "./hash.h"
+#include "./montecarlo_parameters.h"
+#include "./setting_file_parser.h"
 
 #include <stdio.h>
 #include <strings.h>
@@ -46,7 +46,7 @@ typedef struct par_info_t{
 
 }par_info;
 
-#define NPMGTYPES 9
+#define NPMGTYPES 10
 #define MAXPMG 20
 const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "ActionParameters",         // 0 
@@ -57,7 +57,8 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "GaugeMeasuresSettings",    // 5
     "FermionMeasuresSettings",  // 6
     "DeviceSettings"         ,  // 7
-    "Geometry"                  // 8
+    "Geometry"               ,  // 8
+    "DebugSettings"             // 9
 };
 #define PMG_ACTION        0
 #define PMG_FERMION       1
@@ -68,6 +69,7 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
 #define PMG_FMEAS         6
 #define PMG_DEVICE        7
 #define PMG_GEOMETRY      8
+#define PMG_DEBUG         9
 // last number should be NPMGTYPES - 1 !!
 
 
@@ -119,7 +121,7 @@ void reorder_par_infos(int npar, par_info * par_infos ){
                 // if(0==devinfo.myrank) printf("DEBUG (%d,%d)params %s and %s, match %p \n",i,j,par_infos[j].name,par_infos[i].name, match );
                 if (match){
                     if(0==devinfo.myrank)
-                        printf("Reordering %s and %s\n",par_infos[j].name,par_infos[i].name);
+                        printf("  <<Reordering %s and %s>>\n",par_infos[j].name,par_infos[i].name);
                     par_info tmp = par_infos[i];
                     par_infos[i] = par_infos[j];
                     par_infos[j] = tmp;
@@ -219,6 +221,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
 
         // necessary step if a parameter name is contained 
         // in another parameter name.
+
         reorder_par_infos(npars, par_infos);
 
 
@@ -287,7 +290,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
             for(int i =0; i<npars; i++){
                 if (rc[i]==0){
                     if(0==devinfo.myrank)
-                        printf("Parameter %s not set in input file.",par_infos[i].name);
+                        printf("  (NOTICE) Parameter %s not set in input file.",par_infos[i].name);
                     if(par_infos[i].is_optional==1){
                         if(0==devinfo.myrank)
                             printf(" Parameter is optional. Default value: ");
@@ -314,7 +317,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                     }
                     else{
                         if(0==devinfo.myrank)
-                            printf(" Parameter is NOT optional!\n");
+                            printf("\n\nERROR: Parameter is NOT optional!\n\n");
                         res = 0;
                     }
                 }
@@ -402,58 +405,75 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 
     // see /OpenAcc/md_integrator.h
     const double tlendef = 1.0;
+    const double expmaxeigenv_def = 5.5 ; 
 
     par_info mdp[]={
         (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
         (par_info){(void*) &(mdpar->gauge_scale ), TYPE_INT, "GaugeSubSteps", 0 , NULL},
         (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   , 1 , (const void*) &tlendef},
+        (par_info){(void*) &(mdpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , 0, NULL},
+        (par_info){(void*) &(mdpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
         (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL}};
-
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);
 
 }
-int read_mc_info(mc_param *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /OpenAcc/md_integrator.h
-    const int useildg_def = 1;
     const int seed_def = 0;  // which means time()
     const double epsgen_def = 0.1 ; 
-    const double expmaxeigenv_def = 5.5 ; 
-    const int save_diagnostics_def = 0;
-    const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
     const char RandGenStatusFilename_def[] = "rgstatus.bin"; 
     const double MaxRunTimeS_def = 1.0e9; // 30 years should be enough
     const int MaxConfIdIter_def = 1000000; 
-    const int SaveAllAtEnd_def = 1;
 
     par_info mcp[]={
         (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
         (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             , 0, NULL},
         (par_info){(void*) &(mcpar->storeconfinterval      ),TYPE_INT,   "StoreConfInterval"      , 0, NULL},
         (par_info){(void*) &(mcpar->saveconfinterval),       TYPE_INT,   "SaveConfInterval"       , 0, NULL},
-        (par_info){(void*) &(mcpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , 0, NULL},
         (par_info){(void*) &(mcpar->store_conf_name),        TYPE_STR,   "StoreConfName"          , 0, NULL},
         (par_info){(void*) &(mcpar->save_conf_name),         TYPE_STR,   "SaveConfName"           , 0, NULL},
-        (par_info){(void*) &(mcpar->input_vbl),              TYPE_INT,   "VerbosityLv"            , 0, NULL},
         (par_info){(void*) &(mcpar->MaxConfIdIter),          TYPE_INT,   "MaxConfIdIter"          , 1,(const void*) &MaxConfIdIter_def},
         (par_info){(void*) &(mcpar->RandGenStatusFilename),  TYPE_STR,   "RandGenStatusFilename"  , 1,(const void*) &RandGenStatusFilename_def},
         (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , 1,(const void*) &MaxRunTimeS_def},
-        (par_info){(void*) &(mcpar->use_ildg),               TYPE_INT,   "UseILDG"                , 1,(const void*) &useildg_def},
-        (par_info){(void*) &(mcpar->SaveAllAtEnd),           TYPE_INT,   "SaveAllAtEnd"           , 1,(const void*) &SaveAllAtEnd_def},
         (par_info){(void*) &(mcpar->seed),                   TYPE_INT,   "Seed"                   , 1,(const void*) &seed_def},
-        (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , 1,(const void*) &epsgen_def},
-        (par_info){(void*) &(mcpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
-        (par_info){(void*) &(mcpar->save_diagnostics),       TYPE_INT,   "SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
-        (par_info){(void*) &(mcpar->diagnostics_filename),   TYPE_STR,   "SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
+        (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , 1,(const void*) &epsgen_def}};
 
     // from here on, you should not have to modify anything.
 
     return scan_group_NV(sizeof(mcp)/sizeof(par_info),mcp, filelines, startline, endline);
 
 }
+
+int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+{
+
+    const int useildg_def = 1;
+    const int input_vbl_def = 2;
+    const int SaveAllAtEnd_def = 1;
+    const int save_diagnostics_def = 0;
+    const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
+    const int do_reversibility_test_def = 0; 
+    // see /Meas
+    par_info gmp[]= {
+        (par_info){(void*) &(dbg_settings->use_ildg),               TYPE_INT,   "UseILDG"                , 1,(const void*) &useildg_def},
+        (par_info){(void*) &(dbg_settings->input_vbl),              TYPE_INT,   "VerbosityLv"            , 1,(const void*) &input_vbl_def},
+        (par_info){(void*) &(dbg_settings->SaveAllAtEnd),           TYPE_INT,   "SaveAllAtEnd"           , 1,(const void*) &SaveAllAtEnd_def},
+        (par_info){(void*) &(dbg_settings->save_diagnostics),       TYPE_INT,   "SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
+        (par_info){(void*) &(dbg_settings->do_reversibility_test),  TYPE_INT,   "DoRevTest"              , 1,(const void*) &do_reversibility_test_def},
+        (par_info){(void*) &(dbg_settings->diagnostics_filename),   TYPE_STR,   "SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
+
+
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
+
+}
+
+
+
 int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
@@ -687,7 +707,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     // check if all parameter groups were found
     int check = 1;
     for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-        if(igrouptype != PMG_FERMION )  check *= tagcounts[igrouptype];
+        if(igrouptype != PMG_FERMION  && igrouptype != PMG_DEBUG )  check *= tagcounts[igrouptype];
     if(!check){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
             if (!tagcounts[igrouptype]) if(0==devinfo.myrank)
@@ -704,11 +724,13 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         int startline = tagpositions[igroup];
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
-        if(helpmode) if(0==devinfo.myrank)
+        if(helpmode){
+            if(0==devinfo.myrank)
             fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
+        }
         else 
             if(0==devinfo.myrank)
-                printf("Reading %s...\n", par_macro_groups_names[tagtypes[igroup]]);
+                printf("\nReading %s...\n", par_macro_groups_names[tagtypes[igroup]]);
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
                 check = read_action_info(&act_params,filelines,startline,endline);
@@ -726,7 +748,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 check = read_md_info(&md_parameters,filelines,startline,endline);
                 break; 
             case PMG_MC        : 
-                check = read_mc_info(&mkwch_pars,filelines,startline,endline);
+                check = read_mc_info(&mc_params,filelines,startline,endline);
                 break; 
             case PMG_GMEAS     : 
                 check = read_gaugemeas_info(gauge_outfilename,
@@ -744,6 +766,10 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 check = read_geometry(&geom_par, 
                         filelines,startline,endline);
                 break; 
+            case PMG_DEBUG   : 
+                check = read_debug_info(&debug_settings, 
+                        filelines,startline,endline);
+                break; 
 
         }
         if(check)
@@ -751,6 +777,8 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
         totcheck += check;
     }
+    if(tagcounts[PMG_DEBUG]==0)
+        read_debug_info(&debug_settings,filelines,0,1);// Just to set default values
 
     // check == 1 means at least a parameter was not found.
     if(helpmode) exit(1);
@@ -763,7 +791,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
             printf("Hash of all relevant settings: %s\n", hash_string );
         strcat(gauge_outfilename, hash_string);
         strcat(fm_par.fermionic_outfilename, hash_string);
-        strcat(mkwch_pars.diagnostics_filename,hash_string);
+        strcat(debug_settings.diagnostics_filename,hash_string);
 
     }
     if(totcheck!=0){

@@ -10,13 +10,13 @@
 #include "./fermion_force.h"
 #include "./fermion_force_utilities.h"
 #include "../Include/fermion_parameters.h"
-#include "../Include/markowchain.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./su3_utilities.h"
 #include "./su3_measurements.h"
 #include "./plaquettes.h"
 #include "./action.h"
 #include "../Mpi/multidev.h"
+#include "../Include/debug.h"
 
 #ifndef __GNUC__
 #define TIMING_FERMION_FORCE
@@ -251,7 +251,7 @@ dt_preker_to_postker,devinfo.myrank);
                 devinfo.myrank);
     }
 
-    if(mkwch_pars.save_diagnostics == 1 ){
+    if(debug_settings.save_diagnostics == 1 ){
         double  force_norm, diff_force_norm;
         force_norm = calc_force_norm(tipdot_acc);
         diff_force_norm = calc_diff_force_norm(tipdot_acc,ipdot_f_old);
@@ -259,7 +259,7 @@ dt_preker_to_postker,devinfo.myrank);
 
 
         FILE *foutfile = 
-            fopen(mkwch_pars.diagnostics_filename,"at");
+            fopen(debug_settings.diagnostics_filename,"at");
         fprintf(foutfile,"FFHN %e \tDFFHN %e \t",
                 force_norm,diff_force_norm);
         fclose(foutfile);

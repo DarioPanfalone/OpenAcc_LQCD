@@ -4,7 +4,7 @@
 #include "./fermion_parameters.h"
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/alloc_vars.h"
-#include "./markowchain.h"
+#include "./montecarlo_parameters.h"
 #include "../OpenAcc/md_integrator.h"
 #include <string.h>
 #include <math.h>
@@ -62,25 +62,25 @@ int init_ferm_params(ferm_param *fermion_settings){
     quark->approx_md_mother.exponent_den =   quark->number_of_ps*4;
     quark->approx_li_mother.exponent_den =   quark->number_of_ps*4;
 
-    quark->approx_fi_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/mkwch_pars.expected_max_eigenvalue;
-    quark->approx_md_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/mkwch_pars.expected_max_eigenvalue;
-    quark->approx_li_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/mkwch_pars.expected_max_eigenvalue;
+    quark->approx_fi_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
+    quark->approx_md_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
+    quark->approx_li_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
 
     quark->approx_fi_mother.lambda_max =  1.0;
     quark->approx_md_mother.lambda_max =  1.0;
     quark->approx_li_mother.lambda_max =  1.0;
 
-    quark->approx_fi_mother.error =  mkwch_pars.residue_metro/
-        pow(mkwch_pars.expected_max_eigenvalue,
+    quark->approx_fi_mother.error =  md_parameters.residue_metro/
+        pow(md_parameters.expected_max_eigenvalue,
                 (double) quark->approx_fi_mother.exponent_num/
                 quark->approx_fi_mother.exponent_den );
     quark->approx_md_mother.error =  md_parameters.residue_md/
-        pow(mkwch_pars.expected_max_eigenvalue,
+        pow(md_parameters.expected_max_eigenvalue,
                 (double) quark->approx_md_mother.exponent_num/
                 quark->approx_md_mother.exponent_den );
         
-    quark->approx_li_mother.error =  mkwch_pars.residue_metro/
-        pow(mkwch_pars.expected_max_eigenvalue,
+    quark->approx_li_mother.error =  md_parameters.residue_metro/
+        pow(md_parameters.expected_max_eigenvalue,
                 (double) quark->approx_li_mother.exponent_num/
                 quark->approx_li_mother.exponent_den );
 

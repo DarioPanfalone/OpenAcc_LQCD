@@ -1,7 +1,7 @@
 #include "../Include/setting_file_parser.h"
 #include "../OpenAcc/io.h"
 #include "../Include/fermion_parameters.h"
-#include "../Include/markowchain.h"
+#include "../Include/montecarlo_parameters.h"
 
 int conf_id_iter;
 int verbosity_lv;

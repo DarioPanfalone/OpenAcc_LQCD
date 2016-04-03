@@ -80,7 +80,22 @@ ASYNC WORK:
       See all functions below [14 functions, to be modified in 
       full, bulk and 'direction 3 custom' (d3c) versions]
    1. Similar to fermion case - DOES NOT WORK WHEN BULK SIZE > 0
+      Issue: calc_ipdot_gauge_bulk needs the original configuration
+      in the whole local lattice, but it has already been changed on the surface.
+      So, another configuration is needed.
       <<<<<<<<<<<<<--------------- TO FIX
+
+
+DEBUG TOOLS:
+
+Implemented reversibility test, easy to perform with input file.
+Problem:
+1. Moments differences obtained are HUGE
+2. Configuration differences obtained must be checked.
+<<<<<<<------------ TO CHECK, DISCUSS ETC.
+
+
+
 
  
 ----------------------------------------------------------------

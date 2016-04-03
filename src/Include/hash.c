@@ -3,7 +3,7 @@
 
 #include "./hash.h"
 
-#include "./markowchain.h"
+#include "./montecarlo_parameters.h"
 #include "./fermion_parameters.h"
 #include "../OpenAcc/action.h"
 #include "../OpenAcc/md_integrator.h"
@@ -35,7 +35,7 @@ uint32_t hash_settings_explicit(
         action_param *act_par,
         bf_param *bfpar,
         md_param *mdpar,
-        mc_param *mcpar,
+        mc_params_t *mcpar,
         geom_parameters *gpar
         ){
 
@@ -69,9 +69,8 @@ uint32_t hash_settings_explicit(
     hashfun(&hash,(char*)&(mdpar->gauge_scale),sizeof(int));
     hashfun(&hash,(char*)&(mdpar->t          ),sizeof(double));
     hashfun(&hash,(char*)&(mdpar->residue_md ),sizeof(double));
-    // ONLY RELEVANT montecarlo info
-    hashfun(&hash,(char*)&(mcpar->residue_metro),sizeof(double));
-    hashfun(&hash,(char*)&(mcpar->expected_max_eigenvalue),
+    hashfun(&hash,(char*)&(mdpar->residue_metro),sizeof(double));
+    hashfun(&hash,(char*)&(mdpar->expected_max_eigenvalue),
             sizeof(double));
     // ONLY RELEVANT geometry info
     hashfun(&hash,(char*)&(gpar->gnx),sizeof(int));
@@ -88,11 +87,7 @@ uint32_t hash_settings(){
 
     return hash_settings_explicit(fermions_parameters,NDiffFlavs,
                 &act_params,&backfield_parameters,&md_parameters,
-                &mkwch_pars,&geom_par);
-
-
-
-
+                &mc_params,&geom_par);
 
 
 }

@@ -7,8 +7,8 @@
 #include "./plaquettes.h"
 #include "./rettangoli.h"
 #include "./ipdot_gauge.h"
-#include "../Include/markowchain.h"
 #include "./geometry.h"
+#include "../Include/debug.h"
 
 
 #include "sys/time.h"
@@ -112,14 +112,14 @@ void calc_ipdot_gauge_soloopenacc(
         calc_ipdot_gauge_soloopenacc_tlsm(tconf_acc,local_staples,tipdot);
     }
 
-    if(mkwch_pars.save_diagnostics == 1){
+    if(debug_settings.save_diagnostics == 1){
         double  force_norm, diff_force_norm;
         force_norm = calc_force_norm(tipdot);
         diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old);
         copy_ipdot_into_old(tipdot,ipdot_g_old);
 
         FILE *foutfile = 
-            fopen(mkwch_pars.diagnostics_filename,"at");
+            fopen(debug_settings.diagnostics_filename,"at");
         fprintf(foutfile,"GFHN %e \tDGFHN %e \t",force_norm,diff_force_norm);
         fclose(foutfile);
 

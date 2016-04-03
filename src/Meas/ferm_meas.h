@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include "../OpenAcc/struct_c_def.h"
+#include "../Include/fermion_parameters.h"
 
 
 typedef struct ferm_meas_param_t{

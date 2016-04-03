@@ -65,7 +65,6 @@ void initialize_md_global_variables(md_param md_params )
     iepsh_acc = 0.0 + (epsilon_acc) * 0.5 * 1.0I;
 
     const double lambda=0.1931833275037836; // Omelyan Et Al.
-    //const double lambda=0.1931833; // Omelyan Et Al.
     const double gs=t*0.5/(double) gauge_scale;
 
     deltas_Omelyan[0]= -cimag(ieps_acc) * lambda;
@@ -88,6 +87,7 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc,su3_soa *local_staples,
     if(verbosity_lv > 3) printf("MPI%02d - In async bloc - Index %d\n",
             devinfo.myrank, omelyan_index);
 
+    printf(" THOU SHALT NOT USE THIS FUNCTION NOW, FOR IT IS BROKEN.\n");
 
     calc_ipdot_gauge_soloopenacc_d3c(tconf_acc,local_staples,tipdot,
             HALO_WIDTH,GAUGE_HALO); 
@@ -171,7 +171,6 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
     // Step for the P
     // P' = P - l*dt*dS/dq
     // deltas_Omelyan[3]=-cimag(ieps_acc)*scale*lambda;
-
 
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot); 
 #ifdef DEBUG_MD
@@ -401,9 +400,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             tauxbis_conf_acc, // parkeggio
             tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
 
-
-
     mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
+
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
 #ifdef MULTIDEVICE
@@ -423,6 +421,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
             tauxbis_conf_acc, // parkeggio
             tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
 
 

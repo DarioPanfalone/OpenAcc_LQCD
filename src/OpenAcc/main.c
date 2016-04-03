@@ -16,7 +16,8 @@
 
 #include "../Include/fermion_parameters.h"
 #include "../Include/setting_file_parser.h"
-#include "../Include/markowchain.h"
+#include "../Include/debug.h"
+#include "../Include/montecarlo_parameters.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../RationalApprox/rationalapprox.h"
 #include "./struct_c_def.h"
@@ -79,7 +80,7 @@ int main(int argc, char* argv[]){
 #endif
 
     set_global_vars_and_fermions_from_input_file(argv[1]);
-    verbosity_lv = mkwch_pars.input_vbl;
+    verbosity_lv = debug_settings.input_vbl;
 
 #ifdef MULTIDEVICE
     init_multidev1D(&devinfo);
@@ -108,19 +109,19 @@ int main(int argc, char* argv[]){
     printf("Device Selected : OK \n");
 #endif
 
-    unsigned int myseed_default =  (unsigned int) mkwch_pars.seed; 
+    unsigned int myseed_default =  (unsigned int) mc_params.seed; 
 
 #ifdef MULTIDEVICE
     myseed_default =  (unsigned int) (myseed_default + devinfo.myrank) ;
     char myrank_string[6];
     sprintf(myrank_string,".R%d",devinfo.myrank);
-    strcat(mkwch_pars.RandGenStatusFilename,myrank_string);
+    strcat(mc_params.RandGenStatusFilename,myrank_string);
 #endif
 
 
 
 
-    initrand_fromfile(mkwch_pars.RandGenStatusFilename,myseed_default);
+    initrand_fromfile(mc_params.RandGenStatusFilename,myseed_default);
 
 
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
@@ -151,7 +152,7 @@ int main(int argc, char* argv[]){
     // start from saved conf
 
 #ifdef NORANDOM
-    if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter,mkwch_pars.use_ildg)){
+    if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
         // READS ALSO THE conf_id_iter
         printf("MPI%02d - Stored Gauge Conf conf_norndtest Read : OK\n",devinfo.myrank);
     }
@@ -163,15 +164,15 @@ int main(int argc, char* argv[]){
     }
 
 #else
-    if(!read_conf_wrapper(conf_acc,mkwch_pars.save_conf_name,
-                &conf_id_iter,mkwch_pars.use_ildg)){
+    if(!read_conf_wrapper(conf_acc,mc_params.save_conf_name,
+                &conf_id_iter,debug_settings.use_ildg)){
         // READS ALSO THE conf_id_iter
         printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",
-                devinfo.myrank, mkwch_pars.save_conf_name);
+                devinfo.myrank, mc_params.save_conf_name);
 
     }
     else{
-        generate_Conf_cold(conf_acc,mkwch_pars.eps_gen);
+        generate_Conf_cold(conf_acc,mc_params.eps_gen);
         printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                 devinfo.myrank);
         conf_id_iter=0;
@@ -241,10 +242,10 @@ int main(int argc, char* argv[]){
 
 
 
-            if(mkwch_pars.ntraj==0){ // MEASURES ONLY
+            if(mc_params.ntraj==0){ // MEASURES ONLY
 
                 printf("\n#################################################\n");
-                printf("\tMEASUREMENTS ONLY ON FILE %s\n", mkwch_pars.save_conf_name);
+                printf("\tMEASUREMENTS ONLY ON FILE %s\n", mc_params.save_conf_name);
                 printf("\n#################################################\n");
 
                 //--------- MISURA ROBA FERMIONICA ----------------//
@@ -252,7 +253,7 @@ int main(int argc, char* argv[]){
                 if(devinfo.myrank == 0)  printf("Fermion Measurements: see file %s\n",
                         fm_par.fermionic_outfilename);
                 fermion_measures(conf_acc,fermions_parameters,
-                        &fm_par, mkwch_pars.residue_metro, id_iter_offset) ;
+                        &fm_par, md_parameters.residue_metro, id_iter_offset) ;
 
 
                 //-------------------------------------------------// 
@@ -272,7 +273,7 @@ int main(int argc, char* argv[]){
 
             // THERMALIZATION & METRO    ----   UPDATES //
 
-            for(int id_iter=id_iter_offset;id_iter<(mkwch_pars.ntraj+id_iter_offset);
+            for(int id_iter=id_iter_offset;id_iter<(mc_params.ntraj+id_iter_offset);
                     id_iter++){
                 struct timeval tstart_cycle;
                 gettimeofday(&tstart_cycle, NULL);
@@ -289,7 +290,7 @@ int main(int argc, char* argv[]){
                 if(devinfo.myrank ==0 ){
                     printf("\n#################################################\n");
                     printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
-                            conf_id_iter,mkwch_pars.ntraj+id_iter_offset,
+                            conf_id_iter,mc_params.ntraj+id_iter_offset,
                             geom_par.gnx,geom_par.gny,
                             geom_par.gnz,geom_par.gnt,
                             act_params.beta);
@@ -299,14 +300,14 @@ int main(int argc, char* argv[]){
 
 
                 //--------- CONF UPDATE ----------------//
-                if(id_iter<mkwch_pars.therm_ntraj){
+                if(id_iter<mc_params.therm_ntraj){
                     accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                            mkwch_pars.residue_metro,md_parameters.residue_md,
+                            md_parameters.residue_metro,md_parameters.residue_md,
                             id_iter-id_iter_offset,
                             accettate_therm,0);
                 }else{
                     accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                            mkwch_pars.residue_metro,md_parameters.residue_md,
+                            md_parameters.residue_metro,md_parameters.residue_md,
                             id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
                 }
 
@@ -318,7 +319,7 @@ int main(int argc, char* argv[]){
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
                 fermion_measures(conf_acc,fermions_parameters,
-                        &fm_par, mkwch_pars.residue_metro,id_iter) ;
+                        &fm_par, md_parameters.residue_metro,id_iter) ;
 
 
                 //-------------------------------------------------// 
@@ -339,7 +340,7 @@ int main(int argc, char* argv[]){
                         fprintf(goutfile,"%s",gauge_outfile_header);
                     }
                     if(goutfile){
-                        if(id_iter<mkwch_pars.therm_ntraj){
+                        if(id_iter<mc_params.therm_ntraj){
                             printf("Therm_iter %d",conf_id_iter );
                             printf("Placchetta= %.18lf    ", plq/GL_SIZE/6.0/3.0);
                             printf("Rettangolo= %.18lf\n",rect/GL_SIZE/6.0/3.0/2.0);
@@ -362,31 +363,31 @@ int main(int argc, char* argv[]){
                 //-------------------------------------------------//
 
                 //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
-                if(conf_id_iter%mkwch_pars.storeconfinterval==0){
+                if(conf_id_iter%mc_params.storeconfinterval==0){
                     char tempname[50];
                     char serial[10];
-                    strcpy(tempname,mkwch_pars.store_conf_name);
+                    strcpy(tempname,mc_params.store_conf_name);
                     sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
                     printf("MPI%02d - Storing conf %s.\n",
                             devinfo.myrank, tempname);
                     save_conf_wrapper(conf_acc,tempname,conf_id_iter,
-                            mkwch_pars.use_ildg);
-                    strcpy(tempname,mkwch_pars.RandGenStatusFilename);
+                            debug_settings.use_ildg);
+                    strcpy(tempname,mc_params.RandGenStatusFilename);
                     sprintf(serial,".%05d",conf_id_iter);
                     strcat(tempname,serial);
                     printf("MPI%02d - Storing rng status in %s.\n", 
                             devinfo.myrank , tempname);
                     saverand_tofile(tempname);
                 }
-                if(conf_id_iter%mkwch_pars.saveconfinterval==0){
+                if(conf_id_iter%mc_params.saveconfinterval==0){
                     printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
-                            mkwch_pars.save_conf_name);
-                    save_conf_wrapper(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
-                            mkwch_pars.use_ildg);
+                            mc_params.save_conf_name);
+                    save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
+                            debug_settings.use_ildg);
                     printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
-                            mkwch_pars.RandGenStatusFilename);
-                    saverand_tofile(mkwch_pars.RandGenStatusFilename);
+                            mc_params.RandGenStatusFilename);
+                    saverand_tofile(mc_params.RandGenStatusFilename);
                 }
 
                 //-------------------------------------------------//
@@ -416,9 +417,9 @@ int main(int argc, char* argv[]){
                     double max_expected_duration_with_another_cycle = 
                         total_duration + 2*cycle_duration ; 
 
-                    if(max_expected_duration_with_another_cycle > mkwch_pars.MaxRunTimeS){
+                    if(max_expected_duration_with_another_cycle > mc_params.MaxRunTimeS){
                         printf("Time is running out (%d of %d seconds elapsed),",
-                                (int) total_duration, (int) mkwch_pars.MaxRunTimeS);
+                                (int) total_duration, (int) mc_params.MaxRunTimeS);
                         printf(" shutting down now.\n");
                         //https://www.youtube.com/watch?v=MfGhlVcrc8U
                         // but without that much pathos
@@ -426,10 +427,10 @@ int main(int argc, char* argv[]){
                     }
 
                     // program exits if MaxConfIdIter is reached
-                    if(conf_id_iter >= mkwch_pars.MaxConfIdIter ){
+                    if(conf_id_iter >= mc_params.MaxConfIdIter ){
 
                         printf("%s - MaxConfIdIter=%d reached, job done!",
-                                devinfo.myrankstr, mkwch_pars.MaxConfIdIter);
+                                devinfo.myrankstr, mc_params.MaxConfIdIter);
                         printf("%s - shutting down now.\n", devinfo.myrankstr);
                         run_condition = 0;
                     }
@@ -446,12 +447,12 @@ int main(int argc, char* argv[]){
 
             //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
 
-            if(mkwch_pars.SaveAllAtEnd){
-            if(mkwch_pars.ntraj > 0 ){
-                save_conf_wrapper(conf_acc,mkwch_pars.save_conf_name, conf_id_iter,
-                        mkwch_pars.use_ildg );
+            if(debug_settings.SaveAllAtEnd){
+            if(mc_params.ntraj > 0 ){
+                save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
+                        debug_settings.use_ildg );
             }
-            saverand_tofile(mkwch_pars.RandGenStatusFilename);
+            saverand_tofile(mc_params.RandGenStatusFilename);
             }
             else 
                 printf(

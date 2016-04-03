@@ -18,6 +18,8 @@ typedef struct md_param_t{
     int gauge_scale;   // Update fermions every gauge_scale gauge updates
     double t ;
     double residue_md;
+    double residue_metro;
+    double expected_max_eigenvalue;
 
 } md_param; 
 

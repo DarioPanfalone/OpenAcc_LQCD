@@ -15,7 +15,7 @@
 #include "../Rand/random.h"
 #include "./dbgtools.h"
 #include "../OpenAcc/action.h"
-#include "../Include/markowchain.h"
+#include "../Include/montecarlo_parameters.h"
 
 #include "../Mpi/multidev.h"
 #ifdef MULTIDEVICE

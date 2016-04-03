@@ -3,11 +3,12 @@
 
 #include "../Include/common_defines.h"
 #include "../OpenAcc/struct_c_def.h"
-#include "./su3_measurements.h"
-#include "./su3_utilities.h"
 #include "./plaquettes.h"
 #include "./single_types.h"
+#include "./su3_measurements.h"
+#include "./su3_utilities.h"
 #include "math.h"
+
 #ifndef __GNUC__
 #include <openacc.h>
 #endif
@@ -111,6 +112,27 @@ double calc_momenta_action( const __restrict thmat_soa * const mom,
 }// closes routine
 
 
+double invert_momenta( __restrict thmat_soa * mom){
+    int t,mu;
+
+#pragma acc loop independent
+    for(mu=0; mu < 8 ; mu++){
+#pragma acc kernels present(mom) present(tr_local)
+#pragma acc loop independent
+        for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+            mom[mu].c01[t] = -mom[mu].c01[t] ;
+            mom[mu].c02[t] = -mom[mu].c02[t] ;
+            mom[mu].c12[t] = -mom[mu].c12[t] ;
+            mom[mu].rc00[t]= -mom[mu].rc00[t];
+            mom[mu].rc11[t]= -mom[mu].rc11[t];
+        }  // t
+    }
+
+}// closes routine
+
+
+
+
 double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
 
     double result=0.0;
@@ -165,19 +187,19 @@ double calc_force_norm(const __restrict tamat_soa * tipdot){
 };
 
 double calc_diff_force_norm(const __restrict tamat_soa * tipdot,  
-        const __restrict tamat_soa * tipdot_old){
+        const __restrict tamat_soa * tipdot_old)
+{
 
     int t,mu;
     double result=0.0;
     double total_result=0.0;
 
 
+        for(mu=0; mu < 8; mu++) // CHECK IF WORKS
+        {
 #pragma acc kernels present(tipdot) present(tipdot_old)
 #pragma acc loop reduction(+:result)
     for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
-#pragma acc loop reduction(+:result)
-        for(mu=0; mu < 8; mu++) // CHECK IF WORKS
-        {
             double A = tipdot[mu].ic00[t]-tipdot_old[mu].ic00[t];
             double B = tipdot[mu].ic11[t]-tipdot_old[mu].ic11[t];
             d_complex C = tipdot[mu].c01[t]-tipdot_old[mu].c01[t]; 
@@ -201,19 +223,100 @@ double calc_diff_force_norm(const __restrict tamat_soa * tipdot,
 
 };
 
+
+double calc_diff_momenta_norm(const __restrict thmat_soa * tmomenta,  
+        const __restrict thmat_soa * tmomenta_old)
+{
+
+    int t,mu;
+    double result=0.0;
+    double total_result=0.0;
+
+
+        for(mu=0; mu < 8; mu++) // CHECK IF WORKS
+        {
+#pragma acc kernels present(tmomenta) present(tmomenta_old)
+#pragma acc loop reduction(+:result)
+    for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+            double A = tmomenta[mu].rc00[t]-tmomenta_old[mu].rc00[t];
+            double B = tmomenta[mu].rc11[t]-tmomenta_old[mu].rc11[t];
+            d_complex C = tmomenta[mu].c01[t]-tmomenta_old[mu].c01[t]; 
+            d_complex D = tmomenta[mu].c02[t]-tmomenta_old[mu].c02[t];
+            d_complex E = tmomenta[mu].c12[t]-tmomenta_old[mu].c12[t];
+            result +=  A*A + B*B + A*B 
+                + creal(C)*creal(C) + cimag(C)*cimag(C) 
+                + creal(D)*creal(D) + cimag(D)*cimag(D) 
+                + creal(E)*creal(E) + cimag(E)*cimag(E);
+
+        }
+    }  
+
+#ifdef MULTIDEVICE
+     MPI_Allreduce((void*)&result,(void*)&total_result,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+     total_result = result;
+#endif
+    return sqrt(total_result);
+
+};
+
+
+double calc_diff_su3_soa_norm(const __restrict su3_soa * tconf,  
+        const __restrict su3_soa * tconf_old)
+{
+
+    int t,mu;
+    double result=0.0;
+    double total_result=0.0;
+
+        for(mu=0; mu < 8; mu++) // CHECK IF WORKS
+        {
+#pragma acc kernels present(tconf) present(tconf_old)
+#pragma acc loop reduction(+:result)
+    for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+            d_complex A = tconf[mu].r0.c0[t]-tconf_old[mu].r0.c0[t];
+            d_complex B = tconf[mu].r0.c1[t]-tconf_old[mu].r0.c1[t];
+            d_complex C = tconf[mu].r0.c2[t]-tconf_old[mu].r0.c2[t]; 
+            d_complex D = tconf[mu].r1.c0[t]-tconf_old[mu].r1.c0[t];
+            d_complex E = tconf[mu].r1.c1[t]-tconf_old[mu].r1.c1[t];
+            d_complex F = tconf[mu].r1.c2[t]-tconf_old[mu].r1.c2[t];
+            result += creal(A)*creal(A) + cimag(A)*cimag(A) 
+                + creal(B)*creal(B) + cimag(B)*cimag(B) 
+                + creal(C)*creal(C) + cimag(C)*cimag(C) 
+                + creal(D)*creal(D) + cimag(D)*cimag(D) 
+                + creal(E)*creal(E) + cimag(E)*cimag(E)
+                + creal(F)*creal(F) + cimag(F)*cimag(F);
+
+        }
+    }  
+
+#ifdef MULTIDEVICE
+     MPI_Allreduce((void*)&result,(void*)&total_result,
+             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+     total_result = result;
+#endif
+    return sqrt(total_result);
+
+};
+
+
+
 void copy_ipdot_into_old(
         const __restrict tamat_soa * tipdot,  
-        __restrict tamat_soa * tipdot_old){
+        __restrict tamat_soa * tipdot_old)
+{
 
     // POSSIBLY SOME PROBLEMS HERE
     int t,mu;
 
 #pragma acc kernels present(tipdot) present(tipdot_old)
-#pragma acc loop
-    for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
-#pragma acc loop
+#pragma acc loop independent
         for(mu=0; mu < 8; mu++) // CHECK IF WORKS
         {
+#pragma acc loop independent
+    for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
             tipdot_old[mu].ic00[t] = tipdot[mu].ic00[t];
             tipdot_old[mu].ic11[t] = tipdot[mu].ic11[t];
             tipdot_old[mu].c01[t]  = tipdot[mu].c01[t] ; 
@@ -224,6 +327,33 @@ void copy_ipdot_into_old(
     }  
 
 }
+
+void copy_momenta_into_old(
+        const __restrict thmat_soa * tmomenta,  
+        __restrict thmat_soa * tmomenta_old)
+{
+
+    // POSSIBLY SOME PROBLEMS HERE
+    int t,mu;
+
+#pragma acc kernels present(tmomenta) present(tmomenta_old)
+#pragma acc loop independent
+        for(mu=0; mu < 8; mu++) // CHECK IF WORKS
+        {
+#pragma acc loop independent
+    for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+            tmomenta_old[mu].rc00[t] = tmomenta[mu].rc00[t];
+            tmomenta_old[mu].rc11[t] = tmomenta[mu].rc11[t];
+            tmomenta_old[mu].c01[t]  = tmomenta[mu].c01[t] ; 
+            tmomenta_old[mu].c02[t]  = tmomenta[mu].c02[t] ;
+            tmomenta_old[mu].c12[t]  = tmomenta[mu].c12[t] ;
+
+        }
+    }  
+
+}
+
+
 
 
 #endif

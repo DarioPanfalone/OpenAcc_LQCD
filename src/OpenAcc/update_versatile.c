@@ -3,23 +3,23 @@
 #ifndef UPDATE_VERSATILE_C_
 #define UPDATE_VERSATILE_C_
 
-#include "../Include/common_defines.h"
-#include "./update_versatile.h"
-#include "./random_assignement.h"
-#include "./find_min_max.h"
-#include "./rettangoli.h"
-#include "./alloc_vars.h"
-#include "./stouting.h"
-#include "./md_integrator.h"
-#include "./su3_utilities.h"
-#include "./su3_measurements.h"
-#include "./inverter_multishift_full.h"
 #include "../DbgTools/debug_macros_glvarcheck.h"
-#include "./fermionic_utilities.h"
-#include "./action.h"
-#include "../Rand/random.h"
-#include "../Include/markowchain.h"
+#include "../Include/common_defines.h"
+#include "../Include/debug.h"
 #include "../Mpi/multidev.h"
+#include "../Rand/random.h"
+#include "./action.h"
+#include "./alloc_vars.h"
+#include "./fermionic_utilities.h"
+#include "./find_min_max.h"
+#include "./inverter_multishift_full.h"
+#include "./md_integrator.h"
+#include "./random_assignement.h"
+#include "./rettangoli.h"
+#include "./stouting.h"
+#include "./su3_measurements.h"
+#include "./su3_utilities.h"
+#include "./update_versatile.h"
 
 //#define NORANDOM  // FOR debug, check also main.c 
 #ifdef NORANDOM
@@ -56,9 +56,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
   double dt_preker_to_postker;
   double dt_postker_to_posttrans;
 
-  if(mkwch_pars.save_diagnostics == 1){
+  if(debug_settings.save_diagnostics == 1){
       FILE *foutfile = 
-          fopen(mkwch_pars.diagnostics_filename,"at");
+          fopen(debug_settings.diagnostics_filename,"at");
       fprintf(foutfile,"\nIteration %d \t",id_iter);
       fclose(foutfile);
   }
@@ -104,6 +104,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #else
     generate_Momenta_gauss(momenta);
 #endif
+
+    if(debug_settings.do_reversibility_test)
+        copy_momenta_into_old(momenta,momenta_backup);
 
     printf("MPI%02d - Momenta generated/read : OK \n", devinfo.myrank);
 
@@ -240,13 +243,49 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
     multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
 #ifdef STOUT_FERMIONS
-			      tstout_conf_acc_arr,
+            tstout_conf_acc_arr,
 #endif
-			      auxbis_conf_acc, // globale
-			      aux_conf_acc,fermions_parameters,NDiffFlavs,
-			      ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-			      k_p_shiftferm,momenta,local_sums,res_md);
-    
+            auxbis_conf_acc, // globale
+            aux_conf_acc,fermions_parameters,NDiffFlavs,
+            ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
+            k_p_shiftferm,momenta,local_sums,res_md);
+
+    if(debug_settings.do_reversibility_test){
+
+        printf("MPI%02d: PERFORMING REVERSIBILITY TEST.\n", devinfo.myrank);
+        printf("MPI%02d: Inverting momenta.\n", devinfo.myrank);
+
+        invert_momenta(momenta);
+
+        multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
+#ifdef STOUT_FERMIONS
+                tstout_conf_acc_arr,
+#endif
+                auxbis_conf_acc, // globale
+                aux_conf_acc,fermions_parameters,NDiffFlavs,
+                ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
+                k_p_shiftferm,momenta,local_sums,res_md);
+
+        double conf_error =  calc_diff_su3_soa_norm(tconf_acc,conf_acc_bkp);
+        double momenta_error = calc_diff_momenta_norm(momenta,momenta_backup);
+
+        printf("MPI%02d: Reversibility test: Conf_error: %e , momenta_error %e \n",
+                devinfo.myrank, conf_error, momenta_error);
+        
+
+        printf("MPI%02d: Since a reversibility test is being performed, no need to  go on. Exiting now.\n", 
+                devinfo.myrank);
+
+#ifdef MULTIDEVICE
+        MPI_Finalize();
+#endif
+        mem_free();
+        exit(0);
+
+    }
+
+
+
     if(verbosity_lv > 1) printf("MPI%02d - MOLECULAR DYNAMICS COMPLETED \n", 
             devinfo.myrank);
 
@@ -409,9 +448,10 @@ gettimeofday ( &t3, NULL );
     printf("MPI%02d-\t\tPostKer->PostTrans: %f sec  \n",devinfo.myrank,dt_postker_to_posttrans);
   }
 
-  if(mkwch_pars.save_diagnostics == 1){
+  if(debug_settings.save_diagnostics == 1){
       FILE *foutfile = 
-          fopen(mkwch_pars.diagnostics_filename,"at");
+          fopen(debug_settings.diagnostics_filename,"at");
+
       if(metro==1){
           fprintf(foutfile,"GAS %.18lf GAF %.18lf \t",-action_in,-action_fin);
           fprintf(foutfile,"MAS %.18lf MAF %.18lf \t",action_mom_in,action_mom_fin);

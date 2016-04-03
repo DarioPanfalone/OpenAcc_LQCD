@@ -24,28 +24,38 @@ MuOverPiT       0.24
 BackgroundFieldParameters
 
 MDParameters
-NmdSteps	   5
-GaugeSubSteps  4
+NmdSteps	    1
+GaugeSubSteps   1 
 TrajLength	   1.0
 residue_md      1e-6
+residue_metro       	1e-8
+ExpMaxEigenvalue        6
 
 
 MontecarloParameters
-Ntraj	                1
+Ntraj	                1000
 ThermNtraj	            15
 StoreConfInterval	    20
 SaveConfInterval    	5
-residue_metro       	1e-8
 StoreConfName       	store.conf.ildg44164
 SaveConfName            conf.ildg.44164
 Seed                    12
-ExpMaxEigenvalue        6
+EpsGen                  0.35
+#MaxConfIdIter                 1000000             #(int)
+RandGenStatusFilename         rgstatus.bin        #(string)
+#MaxRunTimeS                   1.000000e+09        #(double)
+
+
+
+
+
+DebugSettings
 VerbosityLv             2
 SaveDiagnostics         0
 UseILDG                 1
-EpsGen                  0.35
 #MaxRunTimeS            6000
 SaveAllAtEnd            1    # only for debug purposes!
+DoRevTest               1
 
 
 GaugeMeasuresSettings
@@ -63,8 +73,8 @@ DoubleInvNVectorsQuarkNumber  1                   #(int)
 DeviceSettings
 device_choice          0
 AsyncFermionComms      1
-AsyncGaugeComms        1
-NRanks                 2
+AsyncGaugeComms        0
+NRanks                 1
 NProcPerNode           4 
 
 Geometry
