@@ -79,8 +79,9 @@ void generate_vec3_soa_gauss(__restrict vec3_soa * const vect){
             int t  = snum_acc(d0,d1,d2,d3);  
 
             // for fake rng, fakeness level == 1
-            int glt1D = t + LNH_SIZEH * devinfo.myrank - LNH_VOL3 * D3_HALO;
+            int glt1D = t + LOC_SIZEH * devinfo.myrank - LNH_VOL3/2 * D3_HALO;
             rng_fake_gl_index = glt1D * 3+1 ;
+
 
             vect->c0[t]=d_complex_gauss(); rng_fake_gl_index++; 
             vect->c1[t]=d_complex_gauss(); rng_fake_gl_index++;
@@ -161,7 +162,7 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom8)
                 int t  = snum_acc(d0,d1,d2,d3); 
 
                 // for fake rng, fakeness level == 1
-                int glt1D = t + LNH_SIZEH * devinfo.myrank - LNH_VOL3 * D3_HALO;
+                int glt1D = t + LOC_SIZEH * devinfo.myrank - LNH_VOL3/2 * D3_HALO;
                 rng_fake_gl_index = glt1D * 8+1 ;
 
                 int i;
