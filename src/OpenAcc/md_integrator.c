@@ -80,9 +80,13 @@ void initialize_md_global_variables(md_param md_params )
 
 
 #ifdef MULTIDEVICE
+
+#if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
 void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_new,
         su3_soa *local_staples, tamat_soa *tipdot,thmat_soa *tmomenta, int omelyan_index)
 {
+
+
     MPI_Request send_border_requests[96]; 
     MPI_Request recv_border_requests[96];
     if(verbosity_lv > 3) printf("MPI%02d - In async bloc - Index %d\n",
@@ -127,9 +131,13 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
     MPI_Waitall(96,recv_border_requests,MPI_STATUSES_IGNORE);
 
 }
+#endif 
+
 
 void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
 {
+
+#if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
     int md;
     if(verbosity_lv>1) 
         printf("MPI%02d - Performing Async Gauge substeps\n",
@@ -165,10 +173,79 @@ void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_s
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
     mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
 
+#else
+    printf("ERROR, Async gauge evolution cannot be performed on accelerators,\n");
+    printf("       if USE_MPI_CUDA_AWARE is not #defined. Exiting now.\n");
+    MPI_Finalize();
+    exit(1);
+#endif 
+
+
 }
 #endif
 
+void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
+        su3_soa *local_staples, tamat_soa *tipdot,thmat_soa *tmomenta, int omelyan_index)
+{
 
+
+    if(verbosity_lv > 3) printf("MPI%02d - In bloc - Index %d\n",
+            devinfo.myrank, omelyan_index);
+
+    // Step for the P
+    // P' = P - l*dt*dS/dq
+    // deltas_Omelyan[3]=-cimag(ieps_acc)*scale*lambda;
+    // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
+    // deltas_Omelyan[6]=-cimag(ieps_acc)*2.0*lambda*scale;
+    calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+
+
+    mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,omelyan_index);
+
+    // Step for the Q
+    // Q' = exp[dt/2 *i P] Q
+    // deltas_Omelyan[4]=cimag(iepsh_acc)*scale;
+    mom_exp_times_conf_soloopenacc( tconf_acc, tmomenta,
+            deltas_Omelyan,4);
+
+#ifdef MULTIDEVICE
+    communicate_su3_borders(tconf_acc,GAUGE_HALO);
+#endif
+
+}
+
+void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
+{
+    int md;
+    if(verbosity_lv>1) 
+        printf("MPI%02d - Performing Async Gauge substeps\n",
+                devinfo.myrank);
+
+    multistep_2MN_gauge_bloc(tconf_acc,local_staples, tipdot,tmomenta,3);
+
+    for(md=1; md<md_parameters.gauge_scale; md++){
+        if(verbosity_lv > 2) printf("MPI%02d - Gauge step %d of %d...\n",
+                devinfo.myrank,md,md_parameters.gauge_scale);
+
+        multistep_2MN_gauge_bloc(tconf_acc,local_staples, tipdot,tmomenta,5);
+
+        multistep_2MN_gauge_bloc(tconf_acc,local_staples, tipdot,tmomenta,6);
+
+    }
+    if(verbosity_lv > 2) printf("MPI%02d - Last Gauge step of %d...\n",
+            devinfo.myrank,md_parameters.gauge_scale);
+
+    multistep_2MN_gauge_bloc(tconf_acc, local_staples, tipdot,tmomenta,5);
+
+    // Step for the P
+    // P' = P - l*dt*dS/dq
+    // deltas_Omelyan[3]=-cimag(ieps_acc)*lambda*scale;
+    calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
+    mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,3);
+
+}
+
+/*
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
 {
     if(verbosity_lv>1) 
@@ -288,6 +365,9 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 
 
 }
+*/
+
+
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         su3_soa  * tconf_acc,
 #ifdef STOUT_FERMIONS
