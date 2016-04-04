@@ -6,11 +6,11 @@
 #endif
 
 #include <stdlib.h>
-#include "./multidev.h"
-#include "./communications.h"
 #include "../OpenAcc/geometry.h"
+#include "./communications.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/single_types.h"
+#include "./multidev.h"
 
 extern int verbosity_lv;
 
@@ -412,7 +412,7 @@ void sendrecv_thmat_soa_borders_1Dcut_async(thmat_soa *lnh_momenta,
   int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
   // NOTICE THERE IS LNH_NXH
 
-#pragma acc host_data use_device(lnh_fermion)
+#pragma acc host_data use_device(lnh_momenta)
   {
       d_complex *c[3] ;
       c[0] = lnh_momenta->c01;
@@ -504,7 +504,7 @@ void sendrecv_tamat_soa_borders_1Dcut(tamat_soa *lnh_ipdot,
   // NOTICE THERE IS LNH_NXH
   MPI_Status status;
 #ifdef USE_MPI_CUDA_AWARE
-#pragma acc host_data use_device(lnh_fermion)
+#pragma acc host_data use_device(lnh_ipdot)
   {
 #endif
       d_complex *c[3] ;
@@ -591,7 +591,7 @@ void sendrecv_tamat_soa_borders_1Dcut(tamat_soa *lnh_ipdot,
 #ifdef USE_MPI_CUDA_AWARE
   }
 #endif
- }
+}
 void sendrecv_tamat_soa_borders_1Dcut_async(tamat_soa *lnh_ipdot, 
         int rankL, int rankR, int thickness,
         MPI_Request* send_border_requests, 
@@ -615,7 +615,7 @@ void sendrecv_tamat_soa_borders_1Dcut_async(tamat_soa *lnh_ipdot,
   int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
   // NOTICE THERE IS LNH_NXH
 
-#pragma acc host_data use_device(lnh_fermion)
+#pragma acc host_data use_device(lnh_ipdot)
   {
       d_complex *c[3] ;
       c[0] = lnh_ipdot->c01;

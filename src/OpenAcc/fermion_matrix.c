@@ -46,13 +46,13 @@ void acc_Deo_unsafe( __restrict const su3_soa * const u,
 {
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent 
+#pragma acc loop independent gang
     for(d3=D3_HALO; d3<D3_HALO+LOC_N3;d3++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent
+#pragma acc loop independent vector
                 for(hd0=0; hd0 < nd0h; hd0++) {
 
                     DEO_DOE_PREAMBLE;
@@ -102,13 +102,13 @@ void acc_Doe_unsafe( __restrict const su3_soa * const u,
 {
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent 
+#pragma acc loop independent gang
     for(d3=D3_HALO; d3<D3_HALO+LOC_N3;d3++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent
+#pragma acc loop independent vector
                 for(hd0=0; hd0 < nd0h; hd0++) {
 
 
@@ -225,13 +225,13 @@ void acc_Deo_bulk( __restrict const su3_soa * const u,
 {
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent 
+#pragma acc loop independent gang
     for(d3=D3_HALO+1; d3<D3_HALO+1+LOC_N3-2;d3++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent
+#pragma acc loop independent vector
                 for(hd0=0; hd0 < nd0h; hd0++) {
 
 
@@ -282,13 +282,13 @@ void acc_Doe_bulk( __restrict const su3_soa * const u,
 {
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent 
+#pragma acc loop independent gang
     for(d3=D3_HALO+1; d3<D3_HALO+1+LOC_N3-2;d3++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent
+#pragma acc loop independent vector
                 for(hd0=0; hd0 < nd0h; hd0++) {
 
 
@@ -345,11 +345,11 @@ void acc_Deo_d3c( __restrict const su3_soa * const u,
     int hd0, d1, d2, d3;
     for(d3=off3; d3<off3+thick3;d3++) {
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent
+#pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent
+#pragma acc loop independent vector
                 for(hd0=0; hd0 < nd0h; hd0++) {
 
 
@@ -401,11 +401,11 @@ void acc_Doe_d3c( __restrict const su3_soa * const u,
     int hd0, d1, d2, d3;
     for(d3=off3; d3<off3+thick3;d3++) {
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
-#pragma acc loop independent
+#pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent
+#pragma acc loop independent gang vector
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent
+#pragma acc loop independent vector
                 for(hd0=0; hd0 < nd0h; hd0++) {
 
 

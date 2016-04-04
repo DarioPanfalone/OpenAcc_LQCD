@@ -117,7 +117,7 @@ double invert_momenta( __restrict thmat_soa * mom){
 
 #pragma acc loop independent
     for(mu=0; mu < 8 ; mu++){
-#pragma acc kernels present(mom) present(tr_local)
+#pragma acc kernels present(mom)
 #pragma acc loop independent
         for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
             mom[mu].c01[t] = -mom[mu].c01[t] ;

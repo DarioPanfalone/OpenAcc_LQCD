@@ -358,7 +358,7 @@ void mom_exp_times_conf_soloopenacc_bulk(
 {
 
   int d0, d1, d2, d3;
-#pragma acc kernels present(mom) present(conf) present(factor)
+#pragma acc kernels present(mom) present(conf_old) present(conf_new) present(factor)
 #pragma acc loop independent gang //gang(nd3)
   for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
@@ -503,7 +503,7 @@ void mom_exp_times_conf_soloopenacc_d3c(
 {
 
   int d0, d1, d2, d3;
-#pragma acc kernels present(mom) present(conf) present(factor)
+#pragma acc kernels present(mom) present(conf_old) present(conf_new) present(factor)
 #pragma acc loop independent 
   for(d3=offset3; d3<offset3+thickness3; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)

@@ -293,7 +293,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                     if(0==devinfo.myrank)
                     printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
                     printf("%s\n", filelines[iline]);
-                    exit(1);
+                    return 1;
                 }
             }
 
@@ -570,7 +570,7 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     if(di->nranks_read != 1){
         printf("ERROR: \'Nranks\' from setting file is %d,", di->nranks_read);
         printf(" but code is not compiled for muiltidevice\n");
-        exit(1);
+        res = 1;
     }
 #endif
 
