@@ -5,34 +5,53 @@
 #include <stdlib.h>
 #include <time.h>
 #include"./RANDOM/dSFMT.c"
+#include "../Include/debug.h"
+#include "../OpenAcc/geometry.h"
 #include"./random.h"
 
 dsfmt_t dsfmt;
 
+int rng_fake_gl_index;
+const int rng_fake_gl_index_max = GL_SIZE * 4 * 18;
+
+extern int verbosity_lv;
+
 // random number generator in (0,1)
 double casuale(void)
-   {   
-     return dsfmt_genrand_open_open(&dsfmt);
-     //return (double)rand()/((double)(RAND_MAX));
-   }
+{ 
+    switch(debug_settings.rng_fakeness_level){
+
+        case 0:
+            return dsfmt_genrand_open_open(&dsfmt);
+            break;
+        case 1:
+            return (double) rng_fake_gl_index / rng_fake_gl_index_max;
+            break;
+        case 2:
+            return 0.5;
+            break;
+        default: 
+            return dsfmt_genrand_open_open(&dsfmt);
+    }
+}
 
 
 // random number initialization
 void initrand(unsigned long s)
-  {
-   if(s==0)
+{
+    if(s==0)
     {
-      time_t t;
-      //      srand((unsigned) time(&t));
-    
-      dsfmt_init_gen_rand(&dsfmt, time(NULL));
+        time_t t;
+        //      srand((unsigned) time(&t));
+
+        dsfmt_init_gen_rand(&dsfmt, time(NULL));
     }
-  else
+    else
     {
-      //      srand(s);
-      dsfmt_init_gen_rand(&dsfmt, s);
+        //      srand(s);
+        dsfmt_init_gen_rand(&dsfmt, s);
     }
-  }
+}
 
 
 
@@ -76,7 +95,7 @@ void saverand_tofile(const char * filename){
     fwrite(&dsfmt, 1,sizeof(dsfmt_t), seedfile);
     fclose(seedfile);
     if(verbosity_lv > 0)
-            printf("RNG status saved in file %s.\n",filename );
+        printf("RNG status saved in file %s.\n",filename );
 
 }
 
@@ -88,22 +107,22 @@ void saverand_tofile(const char * filename){
 // 4 parameters for random SU(2) matrix
 //void su2_rand(double &p0, double &p1, double &p2, double &p3)
 void su2_rand(double *pp)
-  { 
-  double p=2.0;
-  while(p>1.0)
-       {
-       pp[0]=1.0-2.0*casuale();
-       pp[1]=1.0-2.0*casuale();
-       pp[2]=1.0-2.0*casuale();
-       pp[3]=1.0-2.0*casuale();
-       p=sqrt(pp[0]*pp[0]+pp[1]*pp[1]+pp[2]*pp[2]+pp[3]*pp[3]);
-       }
+{ 
+    double p=2.0;
+    while(p>1.0)
+    {
+        pp[0]=1.0-2.0*casuale();
+        pp[1]=1.0-2.0*casuale();
+        pp[2]=1.0-2.0*casuale();
+        pp[3]=1.0-2.0*casuale();
+        p=sqrt(pp[0]*pp[0]+pp[1]*pp[1]+pp[2]*pp[2]+pp[3]*pp[3]);
+    }
 
-  pp[0]/=p;
-  pp[1]/=p;
-  pp[2]/=p;
-  pp[3]/=p;
-  }
+    pp[0]/=p;
+    pp[1]/=p;
+    pp[2]/=p;
+    pp[3]/=p;
+}
 
 
 

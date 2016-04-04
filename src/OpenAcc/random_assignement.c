@@ -2,12 +2,16 @@
 #define RANDOM_ASSIGNEMENT_C_
 
 #include "./geometry.h"
-#include "./su3_utilities.h"
+
+
+#include "../DbgTools/debug_macros_glvarcheck.h"
+#include "../Include/debug.h"
+#include "../Mpi/multidev.h"
+#include "../Rand/random.h"
 #include "./alloc_vars.h"
 #include "./random_assignement.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./single_types.h"
-#include "../Rand/random.h"
+#include "./su3_utilities.h"
 
 #define acc_twopi 2*3.14159265358979323846
 
@@ -74,8 +78,12 @@ void generate_vec3_soa_gauss(__restrict vec3_soa * const vect){
             int  d0 = 2*d0h + ((d1+d2+d3) & 0x1);
             int t  = snum_acc(d0,d1,d2,d3);  
 
-            vect->c0[t]=d_complex_gauss();
-            vect->c1[t]=d_complex_gauss();
+            // for fake rng, fakeness level == 1
+            int glt1D = t + LNH_SIZEH * devinfo.myrank - LNH_VOL3 * D3_HALO;
+            rng_fake_gl_index = glt1D * 3+1 ;
+
+            vect->c0[t]=d_complex_gauss(); rng_fake_gl_index++; 
+            vect->c1[t]=d_complex_gauss(); rng_fake_gl_index++;
             vect->c2[t]=d_complex_gauss();
         }
 #ifdef MULTIDEVICE
@@ -152,10 +160,14 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom8)
                 int  d0 = 2*d0h + ((d1+d2+d3) & 0x1);
                 int t  = snum_acc(d0,d1,d2,d3); 
 
+                // for fake rng, fakeness level == 1
+                int glt1D = t + LNH_SIZEH * devinfo.myrank - LNH_VOL3 * D3_HALO;
+                rng_fake_gl_index = glt1D * 8+1 ;
+
                 int i;
                 for(i=0; i<4; i++)
                 {
-                    two_double_gauss(aux);
+                    two_double_gauss(aux); rng_fake_gl_index++;
                     casuali[2*i]   = aux[0];
                     casuali[2*i+1] = aux[1];
                 }

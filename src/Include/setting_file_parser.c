@@ -479,6 +479,7 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     const char diagnostics_filename_def[] = "md_diagnostics.dat"; 
     const int do_reversibility_test_def = 0; 
     const int do_norandom_test_def = 0; 
+    const int rng_fakeness_level_def = 0 ;
     // see /Meas
     par_info gmp[]= {
         (par_info){(void*) &(dbg_settings->use_ildg),               TYPE_INT,   "UseILDG"                , 1,(const void*) &useildg_def},
@@ -487,6 +488,7 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
         (par_info){(void*) &(dbg_settings->save_diagnostics),       TYPE_INT,   "SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
         (par_info){(void*) &(dbg_settings->do_reversibility_test),  TYPE_INT,   "DoRevTest"              , 1,(const void*) &do_reversibility_test_def},
         (par_info){(void*) &(dbg_settings->do_norandom_test),       TYPE_INT,   "DoNoRandomTest"         , 1,(const void*) &do_norandom_test_def},
+        (par_info){(void*) &(dbg_settings->rng_fakeness_level),     TYPE_INT,   "RngFakenessLevel"       , 1,(const void*) &rng_fakeness_level_def},
         (par_info){(void*) &(dbg_settings->diagnostics_filename),   TYPE_STR,   "SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
 
 

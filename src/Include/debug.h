@@ -10,6 +10,7 @@ typedef struct DEBUG_SETTINGS_T{
     int SaveAllAtEnd;
     int do_reversibility_test;
     int do_norandom_test;
+    int rng_fakeness_level ; 
 
 
 }debug_settings_t;
