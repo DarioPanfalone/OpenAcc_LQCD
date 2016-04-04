@@ -164,6 +164,7 @@ inline void acc_Deo( __restrict const su3_soa * const u,
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_fermion){
 
+#if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
         MPI_Request send_border_requests[6], recv_border_requests[6];
         int ir;
 
@@ -174,10 +175,17 @@ inline void acc_Deo( __restrict const su3_soa * const u,
         acc_Deo_bulk(u, out, in, backfield);
         MPI_Waitall(6,recv_border_requests,MPI_STATUSES_IGNORE);
         MPI_Waitall(6,send_border_requests,MPI_STATUSES_IGNORE);
-
+#else 
+        printf("ERROR:Async transfer involving accelerators require USE_MPI_CUDA_AWARE!\n");
+        printf("EXITING NOW\n");
+        MPI_Finalize();
+        exit(1);
+#endif
     }else{ 
+
         acc_Deo_unsafe(u, out, in, backfield);
         communicate_fermion_borders(out);
+
     }
 #else 
     acc_Deo_unsafe(u, out, in, backfield);
@@ -194,6 +202,7 @@ inline void acc_Doe( __restrict const su3_soa * const u,
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_fermion){
 
+#if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
         MPI_Request send_border_requests[6], recv_border_requests[6];
         int ir;
 
@@ -205,6 +214,12 @@ inline void acc_Doe( __restrict const su3_soa * const u,
         for(ir = 0; ir < 6 ; ir++){
             MPI_Wait(&(recv_border_requests[ir]),MPI_STATUS_IGNORE);
             MPI_Wait(&(send_border_requests[ir]),MPI_STATUS_IGNORE);
+#else 
+        printf("ERROR:Async transfer involving accelerators require USE_MPI_CUDA_AWARE!\n");
+        printf("EXITING NOW\n");
+        MPI_Finalize();
+        exit(1);
+#endif
         }
 
     }else{ 
