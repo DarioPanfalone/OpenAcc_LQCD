@@ -211,16 +211,14 @@ inline void acc_Doe( __restrict const su3_soa * const u,
         communicate_fermion_borders_async(out,send_border_requests,
                 recv_border_requests);
         acc_Doe_bulk(u, out, in, backfield);
-        for(ir = 0; ir < 6 ; ir++){
-            MPI_Wait(&(recv_border_requests[ir]),MPI_STATUS_IGNORE);
-            MPI_Wait(&(send_border_requests[ir]),MPI_STATUS_IGNORE);
+        MPI_Waitall(6,recv_border_requests,MPI_STATUSES_IGNORE);
+        MPI_Waitall(6,send_border_requests,MPI_STATUSES_IGNORE);
 #else 
         printf("ERROR:Async transfer involving accelerators require USE_MPI_CUDA_AWARE!\n");
         printf("EXITING NOW\n");
         MPI_Finalize();
         exit(1);
 #endif
-        }
 
     }else{ 
         acc_Doe_unsafe(u, out, in, backfield);

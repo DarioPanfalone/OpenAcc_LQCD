@@ -8,7 +8,7 @@ Things to do:
      TEST WITH FERMIONS              : OK (8^4) (accepts)
 
 3. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
-4. Correct execution with MPICC (2 ranks, minilattice) IN PROGRESS
+4. Correct execution with MPICC (2 ranks, minilattice) OK
    - checks for segmentation faults and mpi errors: OK
    - check for actual correctness of the code:
      - TEST PURE GAUGE   (no fermions): OK (8^4 x 2) (accepts)
@@ -18,32 +18,70 @@ Things to do:
     - DIFFERENT MPI PROCESSES DON'T AGREE ON ACCEPTING (solved)
        MPI_Bcast was called on a double variable with MPI_INT datatype.
 
-     - dynamical fermions: SUCCESS
-         TEST dirac operator: OK (4^4x2)
-           some #defines were wrong, MULTIDEV instead of MULTIDEVICE
-           moreover the initialization of u1 phases was incorrect,
-           not taking correctly into account the antiperiodicity when
-           considering the negative halo of the first rank.
-         TEST no stouting: Accepts (4^4x2) 
-           - after an acc_Doe() call in fermion force calculation,
-             fermion borders must be communicated.
-           - test no stouging multi device - seems to accept.
-           - acceptance in metropolis test suggests that it's ok.
-             Acceptance on 4^3x8 on single device and on two ranks are in
-             agreement.
-         STOUTING:  OK (4^4x2)
-           - Results seems correct, acceptance is consistent.
-           - Border passing functions made more versatile, 
-             should be efficient now.
+    - dynamical fermions: SUCCESS
+       TEST dirac operator: OK (4^4x2)
+         some #defines were wrong, MULTIDEV instead of MULTIDEVICE
+         moreover the initialization of u1 phases was incorrect,
+         not taking correctly into account the antiperiodicity when
+         considering the negative halo of the first rank.
+       TEST no stouting: Accepts (4^4x2) 
+         - after an acc_Doe() call in fermion force calculation,
+           fermion borders must be communicated.
+         - test no stouging multi device - seems to accept.
+         - acceptance in metropolis test suggests that it's ok.
+           Acceptance on 4^3x8 on single device and on two ranks are in
+           agreement.
+       STOUTING:  OK (4^4x2)
+         - Results seems correct, acceptance is consistent.
+         - Border passing functions made more versatile, 
+           should be efficient now.
+     - SEE ASYNC WORK BELOW
 
-5. Compilation with PGI, no multidev (TO RECHECK) (only pgi15.9)
-6. Correct execution with PGI, no multidev (TO RECHECK)
-    STATUS : Compiles and ~accepts but it's slow AS HELL (3x )
+4.5 ASYNC WORK:
+
+   1. Fermions: Deo and Doe separately, ansync versions:
+      0. Splitting Deo and Doe in different versions (bulk/slices*) DONE
+      NOTE: the bulk version is ok, but it does not make sense to have 
+            TWO functions, one for up surface and one for down surface.
+            One function, more versatile, is fine, which works on slices
+            of custom thickness. No parallelization is done in the direction
+            of the cut.
+      1. calculation of both surfaces and then communication, while
+         calculation in the bulk is performed (slightly inefficient)
+         DONE, ACCEPTS
+      2. calculation of one surface, start communication, calculation on 
+         the other surface, start communication, 
+         then start calculation in the bulk (more efficient)
+      NOTE: for approach 1 and 2 no big gains are expected in scalability 
+            for the fermion part, but something more significant can happen
+            for the gauge part.
+   2. Gauge: 
+      0. Splitting functions in different versions (see Fermions) WRITTEN
+         See all functions below [14 functions, to be modified in 
+         full, bulk and 'direction 3 custom' (d3c) versions]
+      1. Similar to fermion case - (DONE)
+         ISSUE: see md_integrator.c
+         Issue: calc_ipdot_gauge_bulk needs the original configuration
+         in the whole local lattice, but it has already been changed on the surface.
+         So, another configuration is needed. (DONE, OK)
+
+
+5. Compilation with PGI, no multidev (OK)
+6. Correct execution with PGI, no multidev (OK)
+    STATUS : Compiles and ~accepts
     - ACC_DEO, ACC_DOE rewritten.
-    - performance to check.    <<<<-------TODO
-                            
-TODO: 
+    - performance to check: with some 'gang' and 'vector' in the 
+      acc_Deo and acc_Doe functions, the code executes reasonably 
+      fast
+    
 7. Integration MPI-OPENACC
+   a. Compilation : ok 
+   b. Execution: FAIL, NANS EVERYWHERE, MPI CONFIGURATION ERRORS...
+
+  <<<<<<<<<----------- TO FIX
+
+
+TODO
 8. Re-integration of async communications
    in fermion matrix multiplication (discuss thickness-2 trick)
 9. Async communications in gauge substep
@@ -57,34 +95,6 @@ Montecarlo with transposed configurations
 Observables 1 rank vs N ranks
 With OPENACC
 
-ASYNC WORK:
-
-1. Fermions: Deo and Doe separately, ansync versions:
-   0. Splitting Deo and Doe in different versions (bulk/slices*) DONE
-   NOTE: the bulk version is ok, but it does not make sense to have 
-         TWO functions, one for up surface and one for down surface.
-         One function, more versatile, is fine, which works on slices
-         of custom thickness. No parallelization is done in the direction
-         of the cut.
-   1. calculation of both surfaces and then communication, while
-      calculation in the bulk is performed (slightly inefficient)
-      DONE, ACCEPTS
-   2. calculation of one surface, start communication, calculation on 
-      the other surface, start communication, 
-      then start calculation in the bulk (more efficient)
-   NOTE: for approach 1 and 2 no big gains are expected in scalability 
-         for the fermion part, but something more significant can happen
-         for the gauge part.
-2. Gauge: 
-   0. Splitting functions in different versions (see Fermions) WRITTEN
-      See all functions below [14 functions, to be modified in 
-      full, bulk and 'direction 3 custom' (d3c) versions]
-   1. Similar to fermion case - (DONE)
-      ISSUE: see md_integrator.c
-      Issue: calc_ipdot_gauge_bulk needs the original configuration
-      in the whole local lattice, but it has already been changed on the surface.
-      So, another configuration is needed. (DONE, OK)
-
 DEBUG TOOLS:
 
 Implemented reversibility test, easy to perform with input file.
@@ -93,10 +103,10 @@ Problems: (OK)
    Heh, because you have to sum, not to subtract..
 2. Configuration differences obtained are ok, when integration step 
    is reasonably small. (OK)
-3. Try single node vs multi node results.  <<<<<<<<--------------- TODO
+3. Try single node vs multi node results (OK)
    a. Tripiccione idea - 0 (random number = 0.5, always)
    b. Tripiccione idea - 1 (random number dependent on the physical position)
-   c. only if fail, write all random generation on one node.
+   RESULT: REASONABLE AGREEMENT
 
 
    
