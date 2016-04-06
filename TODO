@@ -75,13 +75,16 @@ Things to do:
       fast
     
 7. Integration MPI-OPENACC
-   a. Compilation : ok 
-   b. Execution: FAIL, NANS EVERYWHERE, MPI CONFIGURATION ERRORS...
+   0. Execution of multinode code compiled with gcc on cudawm7: OK
+   1. Compilation : ok 
+   2. Execution: FAIL, NANS EVERYWHERE, MPI CONFIGURATION ERRORS...
+    1. Trying execution of DeoDoe test. Segmentation fault at 
+      Mpi/communications.c:180,  MPI_Barrier(
+)
+       <<<<<<<<<----------- TO FIX
 
-  <<<<<<<<<----------- TO FIX
 
-
-TODO
+TODO - Further
 8. Re-integration of async communications
    in fermion matrix multiplication (discuss thickness-2 trick)
 9. Async communications in gauge substep

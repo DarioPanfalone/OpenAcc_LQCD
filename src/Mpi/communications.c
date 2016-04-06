@@ -177,13 +177,13 @@ void communicate_fermion_borders_hostonly(vec3_soa *lnh_fermion) // WRAPPER
 {
 
     // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
-   return ; // DEBUG
-    MPI_Barrier(MPI_COMM_WORLD);
+    return ;
+    MPI_Barrier(MPI_COMM_WORLD); // DEBUG
 
     sendrecv_vec3soa_borders_1Dcut_hostonly(lnh_fermion,
             devinfo.myrank_L, devinfo.myrank_R, 
             FERMION_HALO);
-    MPI_Barrier(MPI_COMM_WORLD);
+//    MPI_Barrier(MPI_COMM_WORLD); // DEBUG
 }
 
 
