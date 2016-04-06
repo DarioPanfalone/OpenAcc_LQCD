@@ -74,10 +74,11 @@ void print_vec3_soa_wrapper(vec3_soa * const fermion,
     else  send_lnh_subfermion_to_master(fermion,devinfo.myrank);
 
 #else 
-//    recv_loc_subfermion_from_buffer(ferm_rw,fermion,0);
+    recv_loc_subfermion_from_buffer(ferm_rw,fermion,0);
     save_gl_fermion(ferm_rw, nomefile);
 #endif
 
+    printf("MPI%02d - Saved whole fermion...\n", devinfo.myrank);
 
 }
 
@@ -367,6 +368,7 @@ int dbgread_gl3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter )
 void print_vec3_soa(vec3_soa * const fermion, const char* nomefile)
 {
 
+    printf("MPI%02d: Writing vec3_soa %s\n", devinfo.myrank, nomefile);
     FILE *fp;
     fp = fopen(nomefile,"w");
     for(int i = 0 ; i < sizeh ; i++){
@@ -375,6 +377,7 @@ void print_vec3_soa(vec3_soa * const fermion, const char* nomefile)
         fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c2[i]),cimag(fermion->c2[i]));
     }
     fclose(fp);
+    printf("MPI%02d: Written vec3_soa %s\n", devinfo.myrank, nomefile);
 
 }
 

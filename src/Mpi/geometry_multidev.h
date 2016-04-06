@@ -19,29 +19,37 @@
 // AUTOMATIC DEFINITION OF HALOS
 #if NRANKS_D0 == 1 
 #define D0_HALO 0
+#define D0_FERMION_HALO 0
 #else 
 #define D0_HALO HALO_WIDTH
+#define D0_FERMION_HALO FERMION_HALO
 #define MULTIDEVICE
 #endif
 
 #if NRANKS_D1 == 1 
 #define D1_HALO 0
+#define D1_FERMION_HALO 0
 #else 
 #define D1_HALO HALO_WIDTH
+#define D1_FERMION_HALO FERMION_HALO
 #define MULTIDEVICE
 #endif
 
 #if NRANKS_D2 == 1 
 #define D2_HALO 0
+#define D2_FERMION_HALO 0
 #else 
 #define D2_HALO HALO_WIDTH
+#define D2_FERMION_HALO FERMION_HALO
 #define MULTIDEVICE
 #endif
 
 #if NRANKS_D3 == 1 
 #define D3_HALO 0
+#define D3_FERMION_HALO 0
 #else 
 #define D3_HALO HALO_WIDTH
+#define D3_FERMION_HALO FERMION_HALO
 #define MULTIDEVICE
 #endif
 

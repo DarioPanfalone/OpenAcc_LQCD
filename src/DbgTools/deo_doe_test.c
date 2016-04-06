@@ -144,14 +144,16 @@ int main(int argc, char* argv[]){
         print_vec3_soa_wrapper(ferm_chi_acc,fermionname);
     }
 
-//    MPI_Finalize(); // DEBUG
-
-
 
 #ifdef MULTIDEVICE
-    communicate_fermion_borders(ferm_chi_acc);
+    communicate_fermion_borders_hostonly(ferm_chi_acc);
 #endif
+
     print_vec3_soa(ferm_chi_acc,myfermionname);
+
+
+
+
     //#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
     create(ferm_phi_acc[0:1])  copyin(u1_back_phases[0:8*NDiffFlavs]) \
         create(kloc_s[0:1])
@@ -181,10 +183,12 @@ int main(int argc, char* argv[]){
 #pragma acc update host(ferm_phi_acc[0:1])
             print_vec3_soa_wrapper(ferm_phi_acc,fermionname_fulldirac);
             print_vec3_soa(ferm_phi_acc,myfermionname_fulldirac);
+            printf("MPI%02d: Ce l'hai quasi fatta, gino!\n", devinfo.myrank); // GOLIARDIA
         }
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
 #endif
+    printf("il tuo test del cazzo e' QUASI finito, %d %d\n", FERMION_HALO, HALO_WIDTH); // GOLIARDIA
 #ifdef MULTIDEVICE
     MPI_Finalize();
 #endif 

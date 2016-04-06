@@ -78,10 +78,11 @@ Things to do:
    0. Execution of multinode code compiled with gcc on cudawm7: OK
    1. Compilation : ok 
    2. Execution: FAIL, NANS EVERYWHERE, MPI CONFIGURATION ERRORS...
-    1. Trying execution of DeoDoe test. Segmentation fault at 
-      Mpi/communications.c:180,  MPI_Barrier(
-)
-       <<<<<<<<<----------- TO FIX
+    1. Trying execution of DeoDoe test. 
+       Small lattices : Results OK, but segfault at end on MPI_Finalize(). 
+       Big Lattices: Like small lattices. 
+          "Results OK" means 2-node accelerated works like 1-node not accelerated.
+
 
 
 TODO - Further
@@ -116,6 +117,12 @@ Problems: (OK)
 
  
 ----------------------------------------------------------------
+
+
+- linear combination of fermions, restricted to local lattice + 1-thick borders DONE
+  (fermionic_utilities.c)
+   CHECK MONTECARLO AFTER MODIFICATION   <<<<<------- TO DO
+
 - phases in the multinode setup  (DONE, TO CHECK)
 - Kernels that must be restricted to local lattice (conf generation)
   fermionic_utilities (basic linear algebra):

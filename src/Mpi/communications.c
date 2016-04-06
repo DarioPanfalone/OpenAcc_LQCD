@@ -177,13 +177,12 @@ void communicate_fermion_borders_hostonly(vec3_soa *lnh_fermion) // WRAPPER
 {
 
     // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
-    return ;
-    MPI_Barrier(MPI_COMM_WORLD); // DEBUG
+    MPI_Barrier(MPI_COMM_WORLD);
 
     sendrecv_vec3soa_borders_1Dcut_hostonly(lnh_fermion,
             devinfo.myrank_L, devinfo.myrank_R, 
             FERMION_HALO);
-//    MPI_Barrier(MPI_COMM_WORLD); // DEBUG
+    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
@@ -921,7 +920,7 @@ void recv_loc_subfermion_from_rank(global_vec3_soa *gl_soa_ferm,
     MPI_Recv(lnh_ferm, 6*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    //recv_loc_subfermion_from_buffer(gl_soa_ferm, lnh_ferm, target_rank);
+    recv_loc_subfermion_from_buffer(gl_soa_ferm, lnh_ferm, target_rank);
 
 
     FREECHECK(lnh_ferm);
@@ -985,14 +984,6 @@ if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subconf_to_buffer()\n", devinfo.m
 
                     }
 
-    /*
-    //sending the subconfiguration
-    MPI_Send(target_su3_soa, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE, rank, 0, MPI_COMM_WORLD);
-    // In case we remove the third line, this is possibly the thing to do
-    //MPI_Send(target_su3_soa, 2*4*(6*2)*LNH_SIZEH,MPI_DOUBLE, rank, 0, MPI_COMM_WORLD);
-    //Or maybe do multiple sends in a more complicated way
-    // ^^ CHECK
-    */ // COMMENTED FOR TEST
 }
 void recv_loc_subconf_from_buffer(global_su3_soa *gl_soa_conf, 
         su3_soa* lnh_conf, int target_rank)

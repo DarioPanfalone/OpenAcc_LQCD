@@ -184,8 +184,7 @@ inline void acc_Deo( __restrict const su3_soa * const u,
     }else{ 
 
         acc_Deo_unsafe(u, out, in, backfield);
-        communicate_fermion_borders(out);
-
+        communicate_fermion_borders(out); // contains host-device communications
     }
 #else 
     acc_Deo_unsafe(u, out, in, backfield);
@@ -222,7 +221,7 @@ inline void acc_Doe( __restrict const su3_soa * const u,
 
     }else{ 
         acc_Doe_unsafe(u, out, in, backfield);
-        communicate_fermion_borders(out);
+        communicate_fermion_borders(out); // contains host-device communications
     }
 #else 
     acc_Doe_unsafe(u, out, in, backfield);

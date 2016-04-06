@@ -192,7 +192,7 @@ void combine_in1xfactor_plus_in2(
 
 #pragma acc kernels present(in_vect1) present(in_vect2) present(out)
 #pragma acc loop independent 
-  for(int ih=0; ih<sizeh; ih++) {
+  for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
     out->c0[ih]=(in_vect1->c0[ih]*factor)+in_vect2->c0[ih];
     out->c1[ih]=(in_vect1->c1[ih]*factor)+in_vect2->c1[ih];
     out->c2[ih]=(in_vect1->c2[ih]*factor)+in_vect2->c2[ih];
@@ -207,7 +207,7 @@ void multiply_fermion_x_doublefactor(
 
 #pragma acc kernels present(in1)
 #pragma acc loop independent
-  for(int ih=0; ih<sizeh; ih++) {
+  for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
     in1->c0[ih] = factor * (in1->c0[ih]);
     in1->c1[ih] = factor * (in1->c1[ih]);
     in1->c2[ih] = factor * (in1->c2[ih]);
@@ -221,7 +221,7 @@ void combine_add_factor_x_in2_to_in1(
 {
 #pragma acc kernels present(in1) present(in2)
 #pragma acc loop independent
-  for(int ih=0; ih<sizeh; ih++) {
+  for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
     in1->c0[ih] += (factor) *  (in2->c0[ih]);
     in1->c1[ih] += (factor) *  (in2->c1[ih]);
     in1->c2[ih] += (factor) *  (in2->c2[ih]);
@@ -240,7 +240,7 @@ void combine_in1xferm_mass2_minus_in2_minus_in3(
 { // l'ultimo argomento e' l'unico che viene modificato
 #pragma acc kernels present(in_vect1) present(in_vect2) present(in_vect3) present(out)
 #pragma acc loop independent 
-  for(int ih=0; ih<sizeh; ih++) {
+  for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
     out->c0[ih]=(in_vect1->c0[ih]*ferm_mass)-in_vect2->c0[ih]-in_vect3->c0[ih];
     out->c1[ih]=(in_vect1->c1[ih]*ferm_mass)-in_vect2->c1[ih]-in_vect3->c1[ih];
     out->c2[ih]=(in_vect1->c2[ih]*ferm_mass)-in_vect2->c2[ih]-in_vect3->c2[ih];
@@ -256,7 +256,7 @@ void combine_inside_loop( __restrict vec3_soa * const vect_out,
 {
 #pragma acc kernels present(vect_out) present(vect_r) present(vect_s) present(vect_p)
 #pragma acc loop independent 
-  for(int ih=0; ih<sizeh; ih++) {
+  for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
     //out+=omega*p
     vect_out->c0[ih] += (vect_p->c0[ih]*omega);
     vect_out->c1[ih] += (vect_p->c1[ih]*omega);
@@ -275,7 +275,7 @@ void combine_in1xferm_mass_minus_in2(
 {
 #pragma acc kernels present(in_vect1) present(in_vect2)
 #pragma acc loop independent
-  for(int ih=0; ih<sizeh; ih++) {
+  for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
     in_vect2->c0[ih]=(in_vect1->c0[ih]*ferm_mass2)-in_vect2->c0[ih];
     in_vect2->c1[ih]=(in_vect1->c1[ih]*ferm_mass2)-in_vect2->c1[ih];
     in_vect2->c2[ih]=(in_vect1->c2[ih]*ferm_mass2)-in_vect2->c2[ih];
@@ -288,7 +288,7 @@ void combine_in1_minus_in2(  __restrict const vec3_soa * in_vect1,
 {
 #pragma acc kernels present(in_vect1) present(in_vect2) present(out)
 #pragma acc loop independent 
-  for(int ih=0; ih<sizeh; ih++) {
+  for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
     out->c0[ih]=(in_vect1->c0[ih])-in_vect2->c0[ih];
     out->c1[ih]=(in_vect1->c1[ih])-in_vect2->c1[ih];
     out->c2[ih]=(in_vect1->c2[ih])-in_vect2->c2[ih];
@@ -302,7 +302,7 @@ void assign_in_to_out(
   SETINUSE(out);
 #pragma acc kernels present(in_vect1)  present(out)
 #pragma acc loop independent 
-  for(int ih=0; ih<sizeh; ih++) {
+  for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
     out->c0[ih]=(in_vect1->c0[ih]);
     out->c1[ih]=(in_vect1->c1[ih]);
     out->c2[ih]=(in_vect1->c2[ih]);
@@ -341,7 +341,7 @@ void multiple_combine_in1_minus_in2x_factor_back_into_in1(
 #pragma acc loop independent gang
     for (ia=0; ia<maxiter; ia++) {
 #pragma acc loop independent gang vector(512)
-      for (ih=0; ih<sizeh; ih++) {
+      for (ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
 	if (flag[ia] == 1) {
 	  double factor = omegas[ia];
 	  out[ia].c0[ih] -= (factor)*(in[ia].c0[ih]);
@@ -373,7 +373,7 @@ void multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(
   #pragma acc loop independent gang
   for (ia=0; ia<maxiter; ia++) {
     #pragma acc loop independent gang vector(512)
-    for(ih=0; ih<sizeh; ih++) {
+    for(ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
 
       if (flag[ia] == 1) {
 
@@ -407,7 +407,7 @@ void combine_in1_x_fact1_minus_in2_back_into_in2(
 
 
 #pragma acc loop independent gang vector(512)
-    for(ih=0; ih<sizeh; ih++) {
+    for(ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
 
 
         in2->c0[ih] = fact1 * (in1->c0[ih]) - (in2->c0[ih]);
@@ -428,7 +428,7 @@ void combine_in1_minus_in2_allxfact(
 #pragma acc kernels present(in1) present(in2) present(out) 
   {
 #pragma acc loop independent gang vector(512)
-    for(ih=0; ih<sizeh; ih++) {
+    for(ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
         out->c0[ih] = fact * (in1->c0[ih] - in2->c0[ih]);
         out->c1[ih] = fact * (in1->c1[ih] - in2->c1[ih]);
         out->c2[ih] = fact * (in1->c2[ih] - in2->c2[ih]);
