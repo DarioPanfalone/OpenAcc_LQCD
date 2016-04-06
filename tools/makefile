@@ -1,6 +1,6 @@
 
 rationalapprox.o: ../src/RationalApprox/rationalapprox.c ../src/RationalApprox/rationalapprox.h
-	g++ -O3 -c ../src/RationalApprox/rationalapprox.c
+	g++ -O3 -c ../src/RationalApprox/rationalapprox.c -DNOMULTI
 
 normalize_ratapprox.o: normalize_ratapprox.c ../src/RationalApprox/rationalapprox.h
 	g++ -O3 -c normalize_ratapprox.c
