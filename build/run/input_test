@@ -11,13 +11,13 @@ StoutSteps      2
 StoutRho        0.15
  
 #up quark
-FlavourParameters   
-Mass	        0.01 
-Degeneracy	    1
-PseudoFermions	1
-Name	        pippo
-Charge          0.0
-MuOverPiT       0.24
+#FlavourParameters   
+#Mass	        0.01 
+#Degeneracy	    1
+#PseudoFermions	1
+#Name	        pippo
+#Charge          0.0
+#MuOverPiT       0.24
                              
 
 
@@ -25,16 +25,16 @@ BackgroundFieldParameters
 
 
 MDParameters
-NmdSteps	    5
-GaugeSubSteps   4
-TrajLength	   1.0
+NmdSteps	    1
+GaugeSubSteps   1
+TrajLength	    0.05
 residue_md      1e-6
 residue_metro       	1e-8
 ExpMaxEigenvalue        6
 
 
 MontecarloParameters
-Ntraj	                1000
+Ntraj	                1
 ThermNtraj	            15
 StoreConfInterval	    20
 SaveConfInterval    	5
@@ -55,8 +55,8 @@ VerbosityLv             2
 SaveDiagnostics         0
 UseILDG                 1
 #MaxRunTimeS            6000
-SaveAllAtEnd            1    # only for debug purposes!
-DoRevTest               0
+SaveAllAtEnd            0    # only for debug purposes!
+DoRevTest               1
 DoNoRandomTest          0
 
 
@@ -74,7 +74,7 @@ DoubleInvNVectorsQuarkNumber  1                   #(int)
 
 DeviceSettings
 device_choice          0
-AsyncFermionComms      1
+AsyncFermionComms      0
 AsyncGaugeComms        0
 NRanks                 2
 NProcPerNode           4 

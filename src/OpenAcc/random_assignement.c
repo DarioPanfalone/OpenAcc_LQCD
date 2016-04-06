@@ -88,6 +88,7 @@ void generate_vec3_soa_gauss(__restrict vec3_soa * const vect)
             vect->c1[t]=d_complex_gauss(); rng_fake_gl_index++;
             vect->c2[t]=d_complex_gauss();
         }
+
 #ifdef MULTIDEVICE
     communicate_fermion_borders_hostonly(vect);
 #endif

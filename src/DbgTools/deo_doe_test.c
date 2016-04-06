@@ -134,8 +134,11 @@ int main(int argc, char* argv[]){
         generate_vec3_soa_gauss(ferm_chi_acc);
         printf("MPI%02d - Fermion GENERATED : OK\n",devinfo.myrank);
         printf("MPI%02d - Writing file %s.\n",devinfo.myrank, fermionname);
-        print_vec3_soa_wrapper(ferm_chi_acc,fermionname);
+       // print_vec3_soa_wrapper(ferm_chi_acc,fermionname);
     }
+
+    MPI_Finalize(); // DEBUG
+    return 0;       // DEBUG
 
 #ifdef MULTIDEVICE
     communicate_fermion_borders(ferm_chi_acc);

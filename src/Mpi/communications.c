@@ -119,16 +119,6 @@ void sendrecv_vec3soa_borders_1Dcut_hostonly(vec3_soa *lnh_fermion,
    if(verbosity_lv > 5) printf("MPI%02d - sendrecv_vec3soa_borders_1Dcut() \n",
            devinfo.myrank);
 
-/*   // PREAMBLE
-   // This function is written taking the following assumptions:
-   // 1. The domain is divided only along one direction, which is 
-   //  the 'slowest' (strong assumption);
-   // 2. That direction is the T direction (a bit weaker assumption, 
-   //  changing that requires a complete redefinition of the site 
-   //  ordering, which can be, perhaps, easily done by redefining the
-   //  various '*snum' functions in Geometry/geometry.cc, and by 
-   //  writing a tool to 'transpose' the configurations which have
-   //  been written in a 'standard' ordering.*/
 
    //must be done for the three components of the fermion.
 
@@ -167,6 +157,7 @@ void sendrecv_vec3soa_borders_1Dcut_hostonly(vec3_soa *lnh_fermion,
                rankL,recvtag,
                MPI_COMM_WORLD, &status);
    }
+
 }
 
 void communicate_fermion_borders(vec3_soa *lnh_fermion) // WRAPPER
@@ -186,7 +177,9 @@ void communicate_fermion_borders_hostonly(vec3_soa *lnh_fermion) // WRAPPER
 {
 
     // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
+   return ; // DEBUG
     MPI_Barrier(MPI_COMM_WORLD);
+
     sendrecv_vec3soa_borders_1Dcut_hostonly(lnh_fermion,
             devinfo.myrank_L, devinfo.myrank_R, 
             FERMION_HALO);
@@ -386,7 +379,7 @@ void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
   // NOTICE THERE IS LNH_NXH
   MPI_Status status;
 #ifdef USE_MPI_CUDA_AWARE
-#pragma acc host_data use_device(lnh_fermion)
+#pragma acc host_data use_device(lnh_momenta)
   {
 #endif
       d_complex *c[3] ;
