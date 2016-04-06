@@ -8,6 +8,11 @@
 
 
 #include "../OpenAcc/geometry.h" // to know if MULTIDEVICE is defined or not
+
+#ifdef NOMULTI
+#undef MULTIDEVICE
+#endif
+
 #ifdef MULTIDEVICE
 #include <mpi.h>
 #include  "../Mpi/multidev.h"
