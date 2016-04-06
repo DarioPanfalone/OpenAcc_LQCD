@@ -107,6 +107,68 @@ void sendrecv_vec3soa_borders_1Dcut(vec3_soa *lnh_fermion,
   }
 #endif
  }
+
+
+void sendrecv_vec3soa_borders_1Dcut_hostonly(vec3_soa *lnh_fermion,
+        int rankL, int rankR, int thickness)
+{
+   // NOTICE YOU HAVE TO SET MYRANK CORRECTLY TO USE THIS FUNCTION
+  
+  if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)
+     printf("THIS SETUP IS NOT SALAMINO-LIKE!!!\n communication of fermion borders will FAIL!!\n");
+   if(verbosity_lv > 5) printf("MPI%02d - sendrecv_vec3soa_borders_1Dcut() \n",
+           devinfo.myrank);
+
+/*   // PREAMBLE
+   // This function is written taking the following assumptions:
+   // 1. The domain is divided only along one direction, which is 
+   //  the 'slowest' (strong assumption);
+   // 2. That direction is the T direction (a bit weaker assumption, 
+   //  changing that requires a complete redefinition of the site 
+   //  ordering, which can be, perhaps, easily done by redefining the
+   //  various '*snum' functions in Geometry/geometry.cc, and by 
+   //  writing a tool to 'transpose' the configurations which have
+   //  been written in a 'standard' ordering.*/
+
+   //must be done for the three components of the fermion.
+
+   // no. of 'fermion' point in each slab)
+   int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*thickness;
+   int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
+   // NOTICE THERE IS LNH_NXH
+   MPI_Status status;
+   d_complex *c[3] ;
+   c[0] = lnh_fermion->c0;
+   c[1] = lnh_fermion->c1;
+   c[2] = lnh_fermion->c2;
+
+   int ii;
+   for(int ii =0; ii<3; ii++){
+
+       // ASK FOR BACKS FIRST, THEN FACES
+       int sendtag = ii;
+       int recvtag = ii;
+
+       d_complex *tmpc = c[ii];
+       MPI_Sendrecv((void*) &(c[ii][offset_size]),2*slab_sizeh,MPI_DOUBLE,
+               rankL,sendtag,
+               (void*) &(c[ii][sizeh-offset_size]),2*slab_sizeh,MPI_DOUBLE,
+               rankR,recvtag,
+               MPI_COMM_WORLD, &status);
+
+       sendtag = ii+3;
+       recvtag = ii+3;
+
+       MPI_Sendrecv((void*) &(c[ii][sizeh-offset_size-slab_sizeh]),
+               2*slab_sizeh,MPI_DOUBLE,
+               rankR,sendtag,
+               (void*) &(c[ii][offset_size-slab_sizeh]),
+               2*slab_sizeh,MPI_DOUBLE,
+               rankL,recvtag,
+               MPI_COMM_WORLD, &status);
+   }
+}
+
 void communicate_fermion_borders(vec3_soa *lnh_fermion) // WRAPPER
 {
 
@@ -117,6 +179,21 @@ void communicate_fermion_borders(vec3_soa *lnh_fermion) // WRAPPER
             FERMION_HALO);
     MPI_Barrier(MPI_COMM_WORLD);
 }
+
+
+
+void communicate_fermion_borders_hostonly(vec3_soa *lnh_fermion) // WRAPPER
+{
+
+    // NOTICE: GEOMETRY MUST BE SET UP BEFORE!!
+    MPI_Barrier(MPI_COMM_WORLD);
+    sendrecv_vec3soa_borders_1Dcut_hostonly(lnh_fermion,
+            devinfo.myrank_L, devinfo.myrank_R, 
+            FERMION_HALO);
+    MPI_Barrier(MPI_COMM_WORLD);
+}
+
+
 
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
 /*
@@ -253,7 +330,19 @@ void communicate_su3_borders(su3_soa* lnh_conf, int thickness)
     }
 
 }
+void communicate_su3_borders_hostonly(su3_soa* lnh_conf, int thickness)
+{
 
+    for(int c = 0 ; c < 8 ; c++){ // Remember lnh_conf has 8 components
+        sendrecv_vec3soa_borders_1Dcut_hostonly(&(lnh_conf[c].r0),
+            devinfo.myrank_L, devinfo.myrank_R,
+            thickness);
+        sendrecv_vec3soa_borders_1Dcut_hostonly(&(lnh_conf[c].r1),
+            devinfo.myrank_L, devinfo.myrank_R,
+            thickness);
+    }
+
+}
 
 void communicate_gl3_borders(su3_soa* lnh_conf,int thickness)
 {

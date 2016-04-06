@@ -16,6 +16,8 @@
 #include "./dbgtools.h"
 #include "../OpenAcc/action.h"
 #include "../Include/montecarlo_parameters.h"
+#include "../Include/debug.h"
+#include "../OpenAcc/deviceinit.h" 
 
 #include "../Mpi/multidev.h"
 #ifdef MULTIDEVICE
@@ -61,8 +63,8 @@ int main(int argc, char* argv[]){
         exit(1);
     }
     //
-    initrand((unsigned int) mkwch_pars.seed+devinfo.myrank);
-    verbosity_lv = mkwch_pars.input_vbl;
+    initrand((unsigned int) mc_params.seed+devinfo.myrank);
+    verbosity_lv = debug_settings.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     if(init_ferm_params(fermions_parameters))
         printf("Ignoring issues in init_ferm_params,\
@@ -97,23 +99,27 @@ int main(int argc, char* argv[]){
     // Intel XeonPhi
     //acc_device_t my_device_type = acc_device_xeonphi;
     // Select device ID
-    int dev_index = 0;
-    SELECT_INIT_ACC_DEVICE(my_device_type, dev_index);
+    printf("MPI%02d: Selecting device.\n");
+#ifdef MULTIDEVICE
+    select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
+#else
+    select_init_acc_device(my_device_type, devinfo.single_dev_choice);
+#endif
     printf("Device Selected : OK \n");
 #endif
     int conf_id_iter = 0;
-    if(!read_conf_wrapper(conf_acc,mkwch_pars.save_conf_name,
-                &conf_id_iter,mkwch_pars.use_ildg)){
+    if(!read_conf_wrapper(conf_acc,mc_params.save_conf_name,
+                &conf_id_iter,debug_settings.use_ildg)){
         // READS ALSO THE conf_id_iter
         printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",
-                devinfo.myrank, mkwch_pars.save_conf_name);
+                devinfo.myrank, mc_params.save_conf_name);
 
     }
     else{
-        generate_Conf_cold(conf_acc,mkwch_pars.eps_gen);
+        generate_Conf_cold(conf_acc,mc_params.eps_gen);
         printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                 devinfo.myrank);
-        save_conf_wrapper(conf_acc,mkwch_pars.save_conf_name,0,0);
+        save_conf_wrapper(conf_acc,mc_params.save_conf_name,0,0);
         conf_id_iter=0;
     }
 
@@ -166,7 +172,7 @@ int main(int argc, char* argv[]){
             print_vec3_soa(ferm_phi_acc,myfermionname_fulldirac);
         }
 #ifndef __GNUC__
-    SHUTDOWN_ACC_DEVICE(my_device_type);
+    shutdown_acc_device(my_device_type);
 #endif
 #ifdef MULTIDEVICE
     MPI_Finalize();

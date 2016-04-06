@@ -140,7 +140,7 @@ void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_s
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
     int md;
     if(verbosity_lv>1) 
-        printf("MPI%02d - Performing Async Gauge substeps\n",
+        printf("MPI%02d - Performing Gauge substeps - Async communications\n",
                 devinfo.myrank);
 
     // tconf_acc[0:8]   --> old conf
@@ -218,7 +218,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 {
     int md;
     if(verbosity_lv>1) 
-        printf("MPI%02d - Performing Async Gauge substeps\n",
+        printf("MPI%02d - Performing Gauge substeps\n",
                 devinfo.myrank);
 
     multistep_2MN_gauge_bloc(tconf_acc,local_staples, tipdot,tmomenta,3);

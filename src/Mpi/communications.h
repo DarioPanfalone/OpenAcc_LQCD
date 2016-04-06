@@ -10,6 +10,7 @@
 #include <mpi.h>
 // fermion border communications (only FERMION HALO thick)
 void communicate_fermion_borders(vec3_soa *lnh_fermion);
+void communicate_fermion_borders_hostonly(vec3_soa *lnh_fermion);
 
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
 void communicate_fermion_borders_async(vec3_soa *lnh_fermion, 
@@ -24,6 +25,11 @@ void communicate_su3_borders_async(su3_soa* lnh_conf, int thickness,
 
 // gauge conf border communication (only GAUGE_HALO thick)
 void communicate_su3_borders(su3_soa* lnh_conf, int thickness);
+
+// gauge conf border communication (only GAUGE_HALO thick)
+void communicate_su3_borders_hostonly(su3_soa* lnh_conf, int thickness);
+
+
 // communications of gl3 quantities (e.g. Sigma for stouting)
 void communicate_gl3_borders(su3_soa* lnh_conf, int thickness);
 

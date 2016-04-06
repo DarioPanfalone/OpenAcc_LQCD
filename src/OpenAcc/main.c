@@ -60,7 +60,7 @@
 
 
 int conf_id_iter;
-int verbosity_lv = 5;// 5 should print everything.
+int verbosity_lv;
 
 int main(int argc, char* argv[]){
 
@@ -113,7 +113,12 @@ int main(int argc, char* argv[]){
     // Intel XeonPhi
     //acc_device_t my_device_type = acc_device_xeonphi;
     // Select device ID
+    printf("MPI%02d: Selecting device.\n");
+#ifdef MULTIDEVICE
+    select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
+#else
     select_init_acc_device(my_device_type, devinfo.single_dev_choice);
+#endif
     printf("Device Selected : OK \n");
 #endif
 
@@ -198,13 +203,8 @@ int main(int argc, char* argv[]){
             max_unitarity_deviation);
 
 
-    int conf_acc_size = 8;
 
-#ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge) conf_acc_size = 16; 
-#endif
-
-#pragma acc data   copy(conf_acc[0:conf_acc_size]) \
+#pragma acc data  copy(conf_acc[0:conf_acc_size]) \
     create(ipdot_acc[0:8]) create(aux_conf_acc[0:8])\
     create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot])\
     create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot])\
@@ -252,7 +252,8 @@ int main(int argc, char* argv[]){
             dbg_print_su3_soa(conf_acc,confile_dbg,0);
 
 
-
+//            MPI_Finalize(); // DEBUG
+//            return 0 ;      // DEBUG
 
 
             if(mc_params.ntraj==0){ // MEASURES ONLY

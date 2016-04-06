@@ -9,6 +9,8 @@
 
 extern global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 extern global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
+
+extern int conf_acc_size;
 extern su3_soa  * conf_acc; // the gauge configuration.
 extern su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
                                 // if the metro test fails.

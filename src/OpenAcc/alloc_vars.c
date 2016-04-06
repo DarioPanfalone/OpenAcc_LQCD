@@ -20,6 +20,7 @@
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
+int conf_acc_size;
 su3_soa  * conf_acc; // the gauge configuration.
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
 // if the metro test fails.
@@ -77,8 +78,9 @@ void mem_alloc()
 
 
 #define ALLOCCHECK(control_int,var)  if(control_int != 0 ) \
-    printf("\tError in  allocation of %s . \n", #var);\
-    else if(verbosity_lv > 2) printf("\tAllocation of %s : OK , %p\n", #var, var );\
+    printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var);\
+    else if(verbosity_lv > 2) printf("MPI%02d: \tAllocation of %s : OK , %p\n",\
+         devinfo.myrank, #var, var );\
 
     allocation_check =  posix_memalign((void **)&u1_back_phases, ALIGN,
             NDiffFlavs*8*sizeof(double_soa));   
@@ -99,12 +101,12 @@ void mem_alloc()
     }
 #endif
 
+    conf_acc_size = 8;
 #ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge)
-        allocation_check =  posix_memalign((void **)&conf_acc, ALIGN,16*sizeof(su3_soa));
-    else
+    if(devinfo.async_comm_gauge) conf_acc_size *=2 ; 
 #endif
-        allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+    allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 
+            conf_acc_size*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, conf_acc);
 
 

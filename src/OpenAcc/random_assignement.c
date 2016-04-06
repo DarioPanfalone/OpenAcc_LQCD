@@ -67,7 +67,8 @@ d_complex d_complex_gauss(void)
     return num[0] + I*num[1];
 }
 
-void generate_vec3_soa_gauss(__restrict vec3_soa * const vect){
+void generate_vec3_soa_gauss(__restrict vec3_soa * const vect)
+{
 
     int d0h, d1, d2, d3;
 
@@ -88,7 +89,7 @@ void generate_vec3_soa_gauss(__restrict vec3_soa * const vect){
             vect->c2[t]=d_complex_gauss();
         }
 #ifdef MULTIDEVICE
-    communicate_fermion_borders(vect);
+    communicate_fermion_borders_hostonly(vect);
 #endif
 }
 
@@ -205,7 +206,7 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
 
             }
 #ifdef MULTIDEVICE
-    communicate_su3_borders(conf, HALO_WIDTH);
+    communicate_su3_borders_hostonly(conf, HALO_WIDTH);
 #endif
 
 }
