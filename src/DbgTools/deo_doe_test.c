@@ -57,18 +57,23 @@ int main(int argc, char* argv[]){
     // READ input file.
     set_global_vars_and_fermions_from_input_file(argv[1]);
 
-    if(NPS_tot == 0) 
-    {
-        printf("ERROR, at least a fermion flavour is needed.\n");
-        exit(1);
-    }
-    //
     initrand((unsigned int) mc_params.seed+devinfo.myrank);
     verbosity_lv = debug_settings.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     if(init_ferm_params(fermions_parameters))
         printf("Ignoring issues in init_ferm_params,\
                 this is a deo-doe test.\n");
+
+    if(NPS_tot == 0) 
+    {
+        printf("Scusami ma sono handicappato e ho bisogno che metti almeno un fermione nell'input file.\n"); // GOLIARDIA
+        exit(1);
+    }
+    else {
+        printf("buono capo grazie per il fermone! %d\n", NPS_tot); // GOLIARDIA
+    }
+    //
+
 #ifdef MULTIDEVICE
     init_multidev1D(&devinfo);
 #else
@@ -119,7 +124,9 @@ int main(int argc, char* argv[]){
         generate_Conf_cold(conf_acc,mc_params.eps_gen);
         printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                 devinfo.myrank);
-        save_conf_wrapper(conf_acc,mc_params.save_conf_name,0,0);
+        save_conf_wrapper(conf_acc,mc_params.save_conf_name,0,debug_settings.use_ildg);
+        if(debug_settings.use_ildg)
+            printf("MPI%02d: You're using ILDG format.\n", devinfo.myrank);
         conf_id_iter=0;
     }
 
@@ -138,7 +145,6 @@ int main(int argc, char* argv[]){
     }
 
 //    MPI_Finalize(); // DEBUG
-//    return 0;       // DEBUG
 
 
 
@@ -184,6 +190,8 @@ int main(int argc, char* argv[]){
 #endif 
 
     mem_free();
+
+    printf("Bene, il tuo test del cazzo e' finito, sei contento adesso?\n"); // GOLIARDIA
 
     return 0; 
 

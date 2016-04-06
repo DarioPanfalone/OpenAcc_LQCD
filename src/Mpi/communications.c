@@ -921,7 +921,7 @@ void recv_loc_subfermion_from_rank(global_vec3_soa *gl_soa_ferm,
     MPI_Recv(lnh_ferm, 6*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-    recv_loc_subfermion_from_buffer(gl_soa_ferm, lnh_ferm, target_rank);
+    //recv_loc_subfermion_from_buffer(gl_soa_ferm, lnh_ferm, target_rank);
 
 
     FREECHECK(lnh_ferm);

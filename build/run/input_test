@@ -11,13 +11,13 @@ StoutSteps      2
 StoutRho        0.15
  
 #up quark
-#FlavourParameters   
-#Mass	        0.01 
-#Degeneracy	    1
-#PseudoFermions	1
-#Name	        pippo
-#Charge          0.0
-#MuOverPiT       0.24
+FlavourParameters   
+Mass	        0.01 
+Degeneracy	    1
+PseudoFermions	1
+Name	        pippo
+Charge          0.0
+MuOverPiT       0.24
                              
 
 
@@ -53,7 +53,7 @@ RandGenStatusFilename         rgstatus.bin        #(string)
 DebugSettings
 VerbosityLv             2
 SaveDiagnostics         0
-UseILDG                 1
+UseILDG                 0
 #MaxRunTimeS            6000
 SaveAllAtEnd            0    # only for debug purposes!
 DoRevTest               1

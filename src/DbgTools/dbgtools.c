@@ -24,6 +24,7 @@ void save_gl_fermion(global_vec3_soa * const fermion,
         fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c1[i]),cimag(fermion->c1[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c2[i]),cimag(fermion->c2[i]));
     }
+
     fclose(fp);
 
 }
@@ -73,7 +74,7 @@ void print_vec3_soa_wrapper(vec3_soa * const fermion,
     else  send_lnh_subfermion_to_master(fermion,devinfo.myrank);
 
 #else 
-    recv_loc_subfermion_from_buffer(ferm_rw,fermion,0);
+//    recv_loc_subfermion_from_buffer(ferm_rw,fermion,0);
     save_gl_fermion(ferm_rw, nomefile);
 #endif
 
