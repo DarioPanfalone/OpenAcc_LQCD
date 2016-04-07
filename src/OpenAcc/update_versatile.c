@@ -102,13 +102,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         }
         else generate_Momenta_gauss(momenta); // NORMAL, RANDOM
 
-        if(debug_settings.do_reversibility_test)
-            copy_momenta_into_old(momenta,momenta_backup);
-
         printf("MPI%02d - Momenta generated/read : OK \n", devinfo.myrank);
 
         //    read_thmat_soa(momenta,"momenta");
 #pragma acc update device(momenta[0:8])
+        if(debug_settings.do_reversibility_test)
+            copy_momenta_into_old(momenta,momenta_backup);
+
 
 
         for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -265,6 +265,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                     ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
                     k_p_shiftferm,momenta,local_sums,res_md);
 
+#pragma acc update device(conf_acc_bkp[0:8])
             double conf_error =  calc_diff_su3_soa_norm(tconf_acc,conf_acc_bkp);
             // Note: sum instead of difference must be calculated because momenta 
             // were inverted.

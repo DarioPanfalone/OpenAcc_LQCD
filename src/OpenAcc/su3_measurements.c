@@ -112,12 +112,13 @@ double calc_momenta_action( const __restrict thmat_soa * const mom,
 }// closes routine
 
 
-double invert_momenta( __restrict thmat_soa * mom){
+double invert_momenta( __restrict thmat_soa * mom)
+{
     int t,mu;
 
+#pragma acc kernels present(mom)
 #pragma acc loop independent
     for(mu=0; mu < 8 ; mu++){
-#pragma acc kernels present(mom)
 #pragma acc loop independent
         for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
             mom[mu].c01[t] = -mom[mu].c01[t] ;
@@ -133,7 +134,11 @@ double invert_momenta( __restrict thmat_soa * mom){
 
 
 
-double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __restrict su3_soa * const local_plaqs, dcomplex_soa * const tr_local_plaqs){
+double  calc_plaquette_soloopenacc( 
+        __restrict  su3_soa * const tconf_acc, 
+        __restrict su3_soa * const local_plaqs, 
+        dcomplex_soa * const tr_local_plaqs)
+{
 
     double result=0.0;
     double total_result=0.0;
@@ -159,7 +164,8 @@ double  calc_plaquette_soloopenacc( __restrict  su3_soa * const tconf_acc, __res
 
 
 
-double calc_force_norm(const __restrict tamat_soa * tipdot){
+double calc_force_norm(const __restrict tamat_soa * tipdot)
+{
 
     int t,mu;
     double result=0.0;
@@ -247,7 +253,6 @@ double calc_sum_momenta_norm(const __restrict thmat_soa * tmomenta,
                 + creal(C)*creal(C) + cimag(C)*cimag(C) 
                 + creal(D)*creal(D) + cimag(D)*cimag(D) 
                 + creal(E)*creal(E) + cimag(E)*cimag(E);
-
         }
     }  
 

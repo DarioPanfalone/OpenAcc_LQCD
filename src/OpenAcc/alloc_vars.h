@@ -19,6 +19,7 @@ extern su3_soa  * auxbis_conf_acc; // auxiliary
 extern double_soa * u1_back_phases; //Background,staggered,chempot phases
                                     // 8 for each flavour
 extern thmat_soa * momenta;// GAUGE FIELD EVOLUTION
+extern int momenta_backupped;
 extern thmat_soa * momenta_backup;// GAUGE FIELD EVOLUTION - REVERSIBILITY TEST
 extern tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
 extern tamat_soa * ipdot_g_old;// for HMC diagnostics

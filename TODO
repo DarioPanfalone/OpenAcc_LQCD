@@ -79,9 +79,12 @@ Things to do:
    1. Compilation : ok 
    2. Execution: FAIL, NANS EVERYWHERE, MPI CONFIGURATION ERRORS...
     1. Trying execution of DeoDoe test. 
-       Small lattices : Results OK, but segfault at end on MPI_Finalize(). 
+       Small lattices : Results OK, but segfault at end on MPI_Finalize(). <<<---CHECK 
        Big Lattices: Like small lattices. 
           "Results OK" means 2-node accelerated works like 1-node not accelerated.
+    2. pure gauge: ONGOING 
+       trying pure gauge, looking step by step.
+       improved diagnostic tools
 
 
 

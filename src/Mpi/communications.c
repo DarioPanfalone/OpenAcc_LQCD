@@ -364,6 +364,7 @@ void communicate_gl3_borders(su3_soa* lnh_conf,int thickness)
 void sendrecv_thmat_soa_borders_1Dcut(thmat_soa *lnh_momenta,
         int rankL, int rankR, int thickness)
 {
+
    // NOTICE YOU HAVE TO SET MYRANK CORRECTLY TO USE THIS FUNCTION
   
   if(NRANKS_D0 != 1 || NRANKS_D1 != 1 || NRANKS_D2 != 1)

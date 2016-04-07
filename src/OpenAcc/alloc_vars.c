@@ -28,7 +28,9 @@ su3_soa  * aux_conf_acc; // auxiliary
 su3_soa  * auxbis_conf_acc; // auxiliary 
 double_soa * u1_back_phases; //Background,staggered,chempot phases
 // 8 for each flavour
+
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
+int momenta_backupped; 
 thmat_soa * momenta_backup;// GAUGE FIELD EVOLUTION - REVERSIBILITY TEST
 tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
 tamat_soa * ipdot_g_old;// for HMC diagnostics
@@ -125,9 +127,12 @@ void mem_alloc()
     allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  for(int mu=0;mu<8;mu++) SETFREE((&momenta[mu]));  //  -->  4*NSITES
     ALLOCCHECK(allocation_check, momenta ) ;
     if(debug_settings.do_reversibility_test){
+        momenta_backupped = 1;
+
         allocation_check =  posix_memalign((void **)&momenta_backup, ALIGN, 8*sizeof(thmat_soa));  for(int mu=0;mu<8;mu++) SETFREE((&momenta_backup[mu]));  //  -->  4*NSITES
         ALLOCCHECK(allocation_check, momenta_backup ) ;
     }
+    else momenta_backupped = 0;
 
 
     allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_acc[mu])); 

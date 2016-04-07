@@ -183,7 +183,8 @@ void generate_Momenta_gauss(__restrict thmat_soa * const mom8)
     }
 
 #ifdef MULTIDEVICE
-    communicate_thmat_soa_borders(mom8, HALO_WIDTH); 
+//    // should not be necessary to communicate momenta, they are not propagated.
+//    communicate_thmat_soa_borders(mom8, HALO_WIDTH); 
 #endif
 }
 

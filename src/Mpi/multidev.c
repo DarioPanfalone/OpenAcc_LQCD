@@ -16,7 +16,8 @@ dev_info devinfo;
 extern int verbosity_lv;
 
 
-void pre_init_multidev1D(dev_info * mdi){
+void pre_init_multidev1D(dev_info * mdi)
+{
     MPI_Init(NULL,NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &(mdi->myrank));
     MPI_Comm_size(MPI_COMM_WORLD, &(mdi->nranks));
@@ -36,7 +37,8 @@ void pre_init_multidev1D(dev_info * mdi){
 
 }
 
-void init_multidev1D(dev_info * mdi){
+void init_multidev1D(dev_info * mdi)
+{
     mdi->myrank_L = (mdi->myrank + (mdi->nranks-1))%mdi->nranks;//SALAMINO
     mdi->myrank_R = (mdi->myrank + 1 ) % mdi->nranks;       //SALAMINO
     mdi->node_subrank =  mdi->myrank % mdi->proc_per_node;   //SALAMINO
@@ -92,8 +94,10 @@ void init_multidev1D(dev_info * mdi){
 
 
 
-void shutdown_multidev(){
+void shutdown_multidev()
+{
 
+    printf("MPI%02d: Finalizing...\n",devinfo.myrank );
     MPI_Finalize();     
 
 }

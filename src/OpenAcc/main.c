@@ -211,7 +211,9 @@ int main(int argc, char* argv[]){
     create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER])\
     create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])\
     create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER])\
-    create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc)\
+    create(momenta[0:8]) create(momenta_backup[0:8*momenta_backupped])\
+    create(conf_acc_bkp[0:8*momenta_backupped])\
+    copyin(nnp_openacc) copyin(nnm_openacc)\
     create(local_sums[0:2]) create(d_local_sums[0:2])\
     copyin(fermions_parameters[0:NDiffFlavs])\
     copyin(deltas_Omelyan[0:7]) \
@@ -502,6 +504,7 @@ int main(int argc, char* argv[]){
     shutdown_acc_device(my_device_type);
     /////////////////////////////////////////////////////////////////////////////////////////////////
 #endif
+
 
 #ifdef MULTIDEVICE
     shutdown_multidev();

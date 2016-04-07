@@ -25,16 +25,17 @@
 #define MD_INTEGRATOR_C
 
 #include "../Include/common_defines.h"
+#include "../Include/debug.h"
 #include "./struct_c_def.h"
 #include "./fermion_force.h"
 #include "./md_integrator.h"
 #include "./alloc_vars.h"
 #include "./ipdot_gauge.h"
 #include "./su3_utilities.h"
-#include "../Include/common_defines.h"
 #include "../Include/fermion_parameters.h"
 #include "./action.h"
 #include "../Mpi/multidev.h"
+#include "../DbgTools/dbgtools.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
@@ -44,11 +45,7 @@ md_param md_parameters;
 
 double deltas_Omelyan[7];
 
-
-#ifdef DEBUG_MD
-#include "../DbgTools/dbgtools.h"
-int already_printed_debug = 0;
-#endif
+int md_dbg_print_count = 0;
 
 void initialize_md_global_variables(md_param md_params )
 {
@@ -78,13 +75,28 @@ void initialize_md_global_variables(md_param md_params )
 }
 
 
-
 #ifdef MULTIDEVICE
 
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
 void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_new,
         su3_soa *local_staples, tamat_soa *tipdot,thmat_soa *tmomenta, int omelyan_index)
 {
+
+    char conffilename[50];
+    char momfilename[50];
+    char ipdotfilename[50];
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+        sprintf(conffilename,"conf_md_%d_%d",devinfo.myrank, md_dbg_print_count);
+        sprintf(momfilename,"tmomenta_%d_%d",devinfo.myrank, md_dbg_print_count);
+        sprintf(ipdotfilename,"tipdot_%d_%d",devinfo.myrank, md_dbg_print_count);
+        dbg_print_su3_soa(tconf_acc_old,conffilename, 1);
+        print_thmat_soa(tmomenta,momfilename);
+        print_tamat_soa(tipdot,ipdotfilename);
+        md_dbg_print_count++;
+    }
+
+
+
 
 
     MPI_Request send_border_requests[96]; 
@@ -129,6 +141,8 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
 
     MPI_Waitall(96,send_border_requests,MPI_STATUSES_IGNORE);
     MPI_Waitall(96,recv_border_requests,MPI_STATUSES_IGNORE);
+
+
 
 }
 #endif 
@@ -191,6 +205,24 @@ void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
 
     if(verbosity_lv > 3) printf("MPI%02d - In bloc - Index %d\n",
             devinfo.myrank, omelyan_index);
+
+
+    char conffilename[50];
+    char momfilename[50];
+    char ipdotfilename[50];
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+        sprintf(conffilename,"conf_md_%d_%d",devinfo.myrank, md_dbg_print_count);
+        sprintf(momfilename,"tmomenta_%d_%d",devinfo.myrank, md_dbg_print_count);
+        sprintf(ipdotfilename,"tipdot_%d_%d",devinfo.myrank, md_dbg_print_count);
+        dbg_print_su3_soa(tconf_acc,conffilename, 1);
+        print_thmat_soa(tmomenta,momfilename);
+        print_tamat_soa(tipdot,ipdotfilename);
+        md_dbg_print_count++;
+    }
+
+
+
+
 
     // Step for the P
     // P' = P - l*dt*dS/dq
