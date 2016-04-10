@@ -66,11 +66,11 @@ int main(int argc, char* argv[]){
 
     if(NPS_tot == 0) 
     {
-        printf("Scusami ma sono handicappato e ho bisogno che metti almeno un fermione nell'input file.\n"); // GOLIARDIA
+        printf("ERROR: For technical reasons, at least a fermion in the input file is needed\n");
         exit(1);
     }
     else {
-        printf("buono capo grazie per il fermone! %d\n", NPS_tot); // GOLIARDIA
+        printf("N fermions found: %d\n", NPS_tot);
     }
     //
 
@@ -183,19 +183,19 @@ int main(int argc, char* argv[]){
 #pragma acc update host(ferm_phi_acc[0:1])
             print_vec3_soa_wrapper(ferm_phi_acc,fermionname_fulldirac);
             print_vec3_soa(ferm_phi_acc,myfermionname_fulldirac);
-            printf("MPI%02d: Ce l'hai quasi fatta, gino!\n", devinfo.myrank); // GOLIARDIA
+            printf("MPI%02d: End of data region!\n", devinfo.myrank);
         }
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
 #endif
-    printf("il tuo test del cazzo e' QUASI finito, %d %d\n", FERMION_HALO, HALO_WIDTH); // GOLIARDIA
+    printf("MPI%02d: Before MPI_Finalize()...\n",devinfo.myrank);
 #ifdef MULTIDEVICE
     MPI_Finalize();
 #endif 
 
     mem_free();
 
-    printf("Bene, il tuo test del cazzo e' finito, sei contento adesso?\n"); // GOLIARDIA
+    printf("MPI%02d: Test completed.\n",devinfo.myrank);
 
     return 0; 
 
