@@ -45,7 +45,6 @@ md_param md_parameters;
 
 double deltas_Omelyan[7];
 
-int md_dbg_print_count = 0;
 
 void initialize_md_global_variables(md_param md_params )
 {
@@ -101,20 +100,23 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
 
     MPI_Request send_border_requests[96]; 
     MPI_Request recv_border_requests[96];
-    if(verbosity_lv > 3) printf("MPI%02d - In async bloc - Index %d\n",
+    if(verbosity_lv > 2) printf("\tMPI%02d - In async bloc - Index %d\n",
             devinfo.myrank, omelyan_index);
 
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - calc_ipdot_gauge_d3c()\n", devinfo.myrank);
     calc_ipdot_gauge_soloopenacc_d3c(tconf_acc_old,local_staples,tipdot,
             HALO_WIDTH,GAUGE_HALO); 
     calc_ipdot_gauge_soloopenacc_d3c(tconf_acc_old,local_staples,tipdot,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
 
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - mom_sum_mult_d3c()\n", devinfo.myrank);
     mom_sum_mult_d3c(tmomenta,tipdot,deltas_Omelyan,omelyan_index,
             HALO_WIDTH,GAUGE_HALO);
     mom_sum_mult_d3c(tmomenta,tipdot,deltas_Omelyan,omelyan_index,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
 
 
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - mom_exp_times_conf_soloopenacc_d3c()\n",devinfo.myrank);
     // this function should have differen in and out for the gauge conf
     mom_exp_times_conf_soloopenacc_d3c(
             tconf_acc_old, tconf_acc_new, tmomenta,
@@ -125,14 +127,21 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
             tconf_acc_old, tconf_acc_new, tmomenta,
             deltas_Omelyan,4,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
+
+
+    if(verbosity_lv > 2) printf("\tMPI%02d -communicate_su3_borders_async()\n",devinfo.myrank);
 
     communicate_su3_borders_async(tconf_acc_new,GAUGE_HALO,
             send_border_requests,recv_border_requests);
 
+
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - calc_ipdot_gauge_bulk()\n", devinfo.myrank);
     calc_ipdot_gauge_soloopenacc_bulk(tconf_acc_old,local_staples,tipdot);
 
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - mom_sum_mult_bulk()\n", devinfo.myrank);
     mom_sum_mult_bulk(tmomenta,tipdot,deltas_Omelyan,omelyan_index);
 
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - mom_exp_times_conf_soloopenacc_bulk()\n",devinfo.myrank);
     // this function should have differen in and out for the gauge conf
     mom_exp_times_conf_soloopenacc_bulk(
             tconf_acc_old, tconf_acc_new, tmomenta,
@@ -141,6 +150,10 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
 
     MPI_Waitall(96,send_border_requests,MPI_STATUSES_IGNORE);
     MPI_Waitall(96,recv_border_requests,MPI_STATUSES_IGNORE);
+
+    if(verbosity_lv > 2) printf("\tMPI%02d - End of async bloc, index %d\n",
+                devinfo.myrank, omelyan_index);
+
 
 
 
@@ -199,13 +212,12 @@ void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_s
 #endif
 
 void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
-        su3_soa *local_staples, tamat_soa *tipdot,thmat_soa *tmomenta, int omelyan_index)
+        su3_soa *local_staples, tamat_soa *tipdot,thmat_soa *tmomenta,
+        int omelyan_index)
 {
 
-
-    if(verbosity_lv > 3) printf("MPI%02d - In bloc - Index %d\n",
+    if(verbosity_lv > 2) printf("\tMPI%02d - In bloc - Index %d\n",
             devinfo.myrank, omelyan_index);
-
 
     char conffilename[50];
     char momfilename[50];
@@ -214,25 +226,23 @@ void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
         sprintf(conffilename,"conf_md_%d_%d",devinfo.myrank, md_dbg_print_count);
         sprintf(momfilename,"tmomenta_%d_%d",devinfo.myrank, md_dbg_print_count);
         sprintf(ipdotfilename,"tipdot_%d_%d",devinfo.myrank, md_dbg_print_count);
+
         dbg_print_su3_soa(tconf_acc,conffilename, 1);
         print_thmat_soa(tmomenta,momfilename);
         print_tamat_soa(tipdot,ipdotfilename);
         md_dbg_print_count++;
     }
 
-
-
-
-
     // Step for the P
     // P' = P - l*dt*dS/dq
     // deltas_Omelyan[3]=-cimag(ieps_acc)*scale*lambda;
     // deltas_Omelyan[5]=-cimag(ieps_acc)*(1.0-2.0*lambda)*scale;
     // deltas_Omelyan[6]=-cimag(ieps_acc)*2.0*lambda*scale;
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - calc_ipdot_gauge()\n", devinfo.myrank);
     calc_ipdot_gauge_soloopenacc(tconf_acc,local_staples,tipdot);
-
-
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - mom_sum_mult()\n", devinfo.myrank);
     mom_sum_mult(tmomenta,tipdot,deltas_Omelyan,omelyan_index);
+    if(verbosity_lv > 3) printf("\t\tMPI%02d - mom_exp_times_conf_soloopenacc()\n",devinfo.myrank);
 
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
@@ -243,6 +253,9 @@ void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
 #ifdef MULTIDEVICE
     communicate_su3_borders(tconf_acc,GAUGE_HALO);
 #endif
+    if(verbosity_lv > 3) printf("\tMPI%02d - End of bloc, index %d\n",
+                devinfo.myrank, omelyan_index);
+
 
 }
 

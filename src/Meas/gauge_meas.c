@@ -3,6 +3,7 @@
 #ifndef GAUGE_MEAS_C
 #define GAUGE_MEAS_C
 
+#include "../OpenAcc/geometry.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/su3_utilities.h"
 #include "./gauge_meas.h"
@@ -13,6 +14,10 @@
  #ifndef M_PI
   #define M_PI 3.14159265358979323846
  #endif
+#endif
+
+#ifdef MULTIDEVICE
+#include <mpi.h>
 #endif
 
 
@@ -151,6 +156,12 @@ double reduce_loc_top_charge(double_soa * const loc_q)
         result += loc_q[0].d[t];
         result += loc_q[1].d[t];
     }
+
+#ifdef MULTIDEVICE
+  double partial = result;
+  MPI_Allreduce((void*)&partial,(void*)&result,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+
+#endif
     return result;
 }
 

@@ -249,9 +249,9 @@ int main(int argc, char* argv[]){
                     devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
 
 
-            char confile_dbg[50];
-            sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
-            dbg_print_su3_soa(conf_acc,confile_dbg,0);
+            //char confile_dbg[50];
+            //sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
+            //dbg_print_su3_soa(conf_acc,confile_dbg,0);
 
 
 //            MPI_Finalize(); // DEBUG

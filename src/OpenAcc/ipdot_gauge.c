@@ -16,11 +16,8 @@
 
 extern int verbosity_lv;
 
-#ifdef DEBUG_MD
 #include "../Mpi/multidev.h"
 #include "../DbgTools/dbgtools.h"
-int already_printed_staples_debug = 0;
-#endif
 
 
 
@@ -40,16 +37,19 @@ void calc_ipdot_gauge_soloopenacc_std(
     set_su3_soa_to_zero(local_staples);
     calc_loc_staples_nnptrick_all(tconf_acc,local_staples);
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
-#ifdef DEBUG_MD
-    if(!already_printed_staples_debug){
+
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
         char genericfilename[50];
-        sprintf(genericfilename,"staples_0_%s",devinfo.myrankstr);
+        sprintf(genericfilename,"std_staples_%d_%d",
+                devinfo.myrank, md_dbg_print_count);
         dbgprint_gl3_soa(local_staples,genericfilename,1000);
-        sprintf(genericfilename,"tipdot_staples_0_%s",devinfo.myrankstr);
+        sprintf(genericfilename,"std_tipdot_staples_%d_%d",
+                devinfo.myrank, md_dbg_print_count);
         print_tamat_soa(tipdot,genericfilename);
-        already_printed_staples_debug = 1;
     }
-#endif
+
+
+
 
 
 #ifdef TIMING_STAPLES
@@ -80,17 +80,23 @@ void calc_ipdot_gauge_soloopenacc_tlsm(
     calc_loc_improved_staples_typeA_nnptrick_all(tconf_acc,local_staples);
     calc_loc_improved_staples_typeB_nnptrick_all(tconf_acc,local_staples);
     calc_loc_improved_staples_typeC_nnptrick_all(tconf_acc,local_staples);
-#ifdef DEBUG_MD
-    if(!already_printed_staples_debug){
-        char genericfilename[50];
-        sprintf(genericfilename,"impr_staples_0_%s",devinfo.myrankstr);
-        dbgprint_gl3_soa(local_staples,genericfilename,1000);
-        sprintf(genericfilename,"tipdot_improved_staples_0_%s",devinfo.myrankstr);
-        print_tamat_soa(tipdot,genericfilename);
-        already_printed_staples_debug = 1;
-    }
-#endif
+
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
+
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+        char genericfilename[50];
+        sprintf(genericfilename,"impr_staples_%d_%d",
+                devinfo.myrank, md_dbg_print_count);
+        dbgprint_gl3_soa(local_staples,genericfilename,1000);
+        sprintf(genericfilename,"impr_tipdot_staples_%d_%d",
+                devinfo.myrank, md_dbg_print_count);
+        print_tamat_soa(tipdot,genericfilename);
+    }
+
+
+
+
+
 
 #ifdef TIMING_STAPLES
     gettimeofday ( &t2, NULL );
@@ -111,6 +117,8 @@ void calc_ipdot_gauge_soloopenacc(
     if(GAUGE_ACTION==1){
         calc_ipdot_gauge_soloopenacc_tlsm(tconf_acc,local_staples,tipdot);
     }
+
+
 
     if(debug_settings.save_diagnostics == 1){
         double  force_norm, diff_force_norm;
@@ -150,16 +158,16 @@ void calc_ipdot_gauge_soloopenacc_std_bulk(
     set_su3_soa_to_zero_bulk(local_staples);
     calc_loc_staples_nnptrick_all_bulk(tconf_acc,local_staples);
     conf_times_staples_ta_part_bulk(tconf_acc,local_staples,tipdot);
-#ifdef DEBUG_MD
-    if(!already_printed_staples_debug){
+
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
         char genericfilename[50];
-        sprintf(genericfilename,"staples_0_%s_bulk",devinfo.myrankstr);
+        sprintf(genericfilename,"std_staples_%d_%d_bulk",
+                devinfo.myrank, md_dbg_print_count);
         dbgprint_gl3_soa(local_staples,genericfilename,1000);
-        sprintf(genericfilename,"tipdot_staples_0_%s_bulk",devinfo.myrankstr);
+        sprintf(genericfilename,"std_tipdot_staples_%d_%d_bulk",
+                devinfo.myrank, md_dbg_print_count);
         print_tamat_soa(tipdot,genericfilename);
-        already_printed_staples_debug = 1;
     }
-#endif
 
 
 #ifdef TIMING_STAPLES
@@ -190,20 +198,18 @@ void calc_ipdot_gauge_soloopenacc_tlsm_bulk(
     calc_loc_improved_staples_typeA_nnptrick_all_bulk(tconf_acc,local_staples);
     calc_loc_improved_staples_typeB_nnptrick_all_bulk(tconf_acc,local_staples);
     calc_loc_improved_staples_typeC_nnptrick_all_bulk(tconf_acc,local_staples);
-#ifdef DEBUG_MD
-    if(!already_printed_staples_debug){
-        char genericfilename[50];
-        sprintf(genericfilename,"impr_staples_0_%s_bulk",
-                devinfo.myrankstr);
-        dbgprint_gl3_soa(local_staples,genericfilename,1000);
-        sprintf(genericfilename,"tipdot_improved_staples_0_%s_bulk",
-                devinfo.myrankstr);
-        print_tamat_soa(tipdot,genericfilename);
-        already_printed_staples_debug = 1;
-    }
-#endif
+    
     conf_times_staples_ta_part_bulk(tconf_acc,local_staples,tipdot);
 
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+        char genericfilename[50];
+        sprintf(genericfilename,"impr_staples_%d_%d",
+                devinfo.myrank, md_dbg_print_count);
+        dbgprint_gl3_soa(local_staples,genericfilename,1000);
+        sprintf(genericfilename,"impr_tipdot_staples_%d_%d",
+                devinfo.myrank, md_dbg_print_count);
+        print_tamat_soa(tipdot,genericfilename);
+    }
 #ifdef TIMING_STAPLES
     gettimeofday ( &t2, NULL );
     double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
@@ -244,19 +250,17 @@ void calc_ipdot_gauge_soloopenacc_std_d3c(
             offset3,thickness3);
     conf_times_staples_ta_part_d3c(tconf_acc,local_staples,tipdot,
             offset3,thickness3);
-#ifdef DEBUG_MD
-    if(!already_printed_staples_debug){
+    
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
         char genericfilename[50];
-        sprintf(genericfilename,"staples_0_%s_d3c_%d_%d",
-                devinfo.myrankstr,offset3,offset3+thickness3);
+        sprintf(genericfilename,"std_staples_%d_%d_d3c",
+                devinfo.myrank, md_dbg_print_count);
         dbgprint_gl3_soa(local_staples,genericfilename,1000);
-        sprintf(genericfilename,"tipdot_staples_0_%s_d3c_%d_%d",
-                devinfo.myrankstr,offset3,offset3+thickness3);
+        sprintf(genericfilename,"std_tipdot_staples_%d_%d_d3c",
+                devinfo.myrank, md_dbg_print_count);
         print_tamat_soa(tipdot,genericfilename);
-        already_printed_staples_debug = 1;
     }
-#endif
-
+    
 
 #ifdef TIMING_STAPLES
     gettimeofday ( &t2, NULL );
@@ -289,21 +293,22 @@ void calc_ipdot_gauge_soloopenacc_tlsm_d3c(
     calc_loc_improved_staples_typeA_nnptrick_all_d3c(tconf_acc,local_staples,offset3,thickness3);
     calc_loc_improved_staples_typeB_nnptrick_all_d3c(tconf_acc,local_staples,offset3,thickness3);
     calc_loc_improved_staples_typeC_nnptrick_all_d3c(tconf_acc,local_staples,offset3,thickness3);
-#ifdef DEBUG_MD
-    if(!already_printed_staples_debug){
-        char genericfilename[50];
-        sprintf(genericfilename,"impr_staples_0_%s_d3c_%d_%d",
-                devinfo.myrankstr,offset3,offset3+thickness3);
-        dbgprint_gl3_soa(local_staples,genericfilename,1000);
-        sprintf(genericfilename,
-                "tipdot_improved_staples_0_%s_d3c_%d_%d",
-                devinfo.myrankstr,offset3,offset3+thickness3);
-        print_tamat_soa(tipdot,genericfilename);
-        already_printed_staples_debug = 1;
-    }
-#endif
+
     conf_times_staples_ta_part_d3c(tconf_acc,local_staples,tipdot,
             offset3,thickness3);
+
+
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+        char genericfilename[50];
+        sprintf(genericfilename,"impr_staples_%d_%d_d3c",
+                devinfo.myrank, md_dbg_print_count);
+        dbgprint_gl3_soa(local_staples,genericfilename,1000);
+        sprintf(genericfilename,"impr_tipdot_staples_%d_%d_d3c",
+                devinfo.myrank, md_dbg_print_count);
+        print_tamat_soa(tipdot,genericfilename);
+    }
+
+
 
 #ifdef TIMING_STAPLES
     gettimeofday ( &t2, NULL );

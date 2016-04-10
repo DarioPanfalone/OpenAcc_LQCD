@@ -77,14 +77,23 @@ Things to do:
 7. Integration MPI-OPENACC
    0. Execution of multinode code compiled with gcc on cudawm7: OK
    1. Compilation : ok 
-   2. Execution: FAIL, NANS EVERYWHERE, MPI CONFIGURATION ERRORS...
+   2. Execution: OKish (Accepts on 24^3x6 on 2 nodes)
     1. Trying execution of DeoDoe test. 
        Small lattices : Results OK, but segfault at end on MPI_Finalize(). <<<---CHECK 
        Big Lattices: Like small lattices. 
           "Results OK" means 2-node accelerated works like 1-node not accelerated.
-    2. pure gauge: ONGOING 
-       trying pure gauge, looking step by step.
-       improved diagnostic tools
+    2. pure gauge: Seems that gauge conf update in md bloc was not working.
+       Seems to work now.
+    3. Fermions: accepts on a 24^3x6. 
+   THINGS TO DO:
+    a. Understand the MPI_Finalize()-segfault issue.
+    b. Check correctness- compare gnu multinode vs accelerated multinode in detail
+    c. Reversibility
+    d. Observables
+    e. Try a run and compare results (ongoing, actually, will stop because of 
+       segmentation fault)
+    f. CHECK PERFORMANCES
+
 
 
 

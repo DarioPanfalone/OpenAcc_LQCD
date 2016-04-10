@@ -17,6 +17,7 @@ typedef struct DEBUG_SETTINGS_T{
 }debug_settings_t;
 
 extern debug_settings_t debug_settings; 
+extern int md_dbg_print_count;
 
 
 #endif
