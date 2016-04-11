@@ -99,8 +99,9 @@ Things to do:
     e. Try a run and compare results (ongoing, actually, will stop because of 
        segmentation fault)
     f. CHECK PERFORMANCES - added measurements for gauge md blocs.
-         ISSUE: mom_exp_conf_stocazzo is not accelerated correctly - live out from loop 
-         thingy. <<<<<<<<<<<--------------- TO FIX
+        - mom_exp_conf_stocazzo is now accelerated correctly. TIDY UP CODE!!  
+        - performance on a 24^3x6 split in 2 (24^2x6x12) does not seem really good,
+          little or no speedup over a single card. (MEASURE BETTER AND CHECK)
 
    
 TESTS

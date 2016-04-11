@@ -227,18 +227,17 @@ void mom_exp_times_conf_soloopenacc(
           int parity;
           int dir_link;
           int mu;
-	  single_su3 mom_aux;
-	  single_su3 expo;
-	  single_su3 aux;
+          //single_su3 mom_aux, expo, aux;
           idxh = snum_acc(d0,d1,d2,d3);  // r
           parity = (d0+d1+d2+d3) % 2;
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
 
-	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux);
-	    matrix_exp_openacc(&mom_aux,&aux,&expo);
-	    conf_left_exp_multiply(&conf[dir_link],idxh,&expo,&aux,&mom_aux);
-	    project_on_su3(&conf[dir_link],idxh,&mom_aux);
+        alles_zusammen(&mom[dir_link],&conf[dir_link],idxh,factor[id_factor]);
+	    //extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux);
+	    //matrix_exp_openacc(&mom_aux,&aux,&expo);
+	    //conf_left_exp_multiply(&conf[dir_link],idxh,&expo,&aux,&mom_aux);
+	    //project_on_su3(&conf[dir_link],idxh,&mom_aux);
 	  }
 	  
         }  // d0
@@ -371,18 +370,20 @@ void mom_exp_times_conf_soloopenacc_bulk(
           int parity;
           int dir_link;
           int mu;
-	  single_su3 mom_aux;
-	  single_su3 expo;
-	  single_su3 aux;
+	  //single_su3 mom_aux, expo, aux;
           idxh = snum_acc(d0,d1,d2,d3);  // r
           parity = (d0+d1+d2+d3) % 2;
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
 
-	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux);
-	    matrix_exp_openacc(&mom_aux,&aux,&expo);
-	    conf_left_exp_multiply(&conf_old[dir_link],idxh,&expo,&aux,&mom_aux);
-	    project_on_su3(&conf_new[dir_link],idxh,&mom_aux);
+        alles_zusammen_split(&mom[dir_link],
+                &conf_old[dir_link],
+                &conf_new[dir_link],
+                idxh,factor[id_factor]);
+	    //extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux);
+	    //matrix_exp_openacc(&mom_aux,&aux,&expo);
+	    //conf_left_exp_multiply(&conf_old[dir_link],idxh,&expo,&aux,&mom_aux);
+	    //project_on_su3(&conf_new[dir_link],idxh,&mom_aux);
 	  }
 	  
         }  // d0
@@ -516,18 +517,20 @@ void mom_exp_times_conf_soloopenacc_d3c(
           int parity;
           int dir_link;
           int mu;
-	  single_su3 mom_aux;
-	  single_su3 expo;
-	  single_su3 aux;
+	  //single_su3 mom_aux, expo, aux;
           idxh = snum_acc(d0,d1,d2,d3);  // r
           parity = (d0+d1+d2+d3) % 2;
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
 
-	    extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux);
-	    matrix_exp_openacc(&mom_aux,&aux,&expo);
-	    conf_left_exp_multiply(&conf_old[dir_link],idxh,&expo,&aux,&mom_aux);
-	    project_on_su3(&conf_new[dir_link],idxh,&mom_aux);
+        alles_zusammen_split(&mom[dir_link],
+                &conf_old[dir_link],
+                &conf_new[dir_link],
+                idxh,factor[id_factor]);
+	    //extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux);
+	    //matrix_exp_openacc(&mom_aux,&aux,&expo);
+	    //conf_left_exp_multiply(&conf_old[dir_link],idxh,&expo,&aux,&mom_aux);
+	    //project_on_su3(&conf_new[dir_link],idxh,&mom_aux);
 	  }
 	  
         }  // d0
