@@ -359,13 +359,13 @@ void mom_exp_times_conf_soloopenacc_bulk(
 
   int d0, d1, d2, d3;
 #pragma acc kernels present(mom) present(conf_old) present(conf_new) present(factor)
-#pragma acc loop independent gang //gang(nd3)
+#pragma acc loop independent 
   for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
-#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent
     for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent
       for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+#pragma acc loop independent
         for(d0=0; d0 < nd0; d0++) {
           int idxh;
           int parity;
@@ -397,13 +397,13 @@ void set_su3_soa_to_zero_d3c( __restrict su3_soa * const matrix,
 {
   int hd0, d1, d2, d3;
 #pragma acc kernels present(matrix)
-#pragma acc loop independent gang //gang(nd3)
+#pragma acc loop independent gang 
   for(d3=offset3; d3<offset3+thickness3; d3++) {
-#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent gang vector
     for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent gang vector
       for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+#pragma acc loop independent vector 
 	for(hd0=0; hd0 < nd0h; hd0++) {
 	  int d0,idxh;
           d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
@@ -431,13 +431,13 @@ void conf_times_staples_ta_part_d3c(
 
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
-#pragma acc loop independent gang //gang(nd3)
+#pragma acc loop independent gang
   for(d3=offset3; d3<offset3+thickness3; d3++) {
-#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent gang vector
     for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent gang vector
       for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+#pragma acc loop independent vector
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -467,13 +467,13 @@ void mom_sum_mult_d3c( __restrict thmat_soa * const mom,
   // !!!!!!!  factor  is  equal to   -beta/3.0*timestep !!!!!!!!!!!!!!!!
   int d0, d1, d2, d3;
 #pragma acc kernels present(mom) present(ipdot) present(factor)
-#pragma acc loop independent //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent
   for(d3=offset3; d3<offset3+thickness3; d3++) {
-#pragma acc loop independent //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent
     for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent
       for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent //vector(DIM_BLOCK_X)
+#pragma acc loop independent 
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -506,11 +506,11 @@ void mom_exp_times_conf_soloopenacc_d3c(
 #pragma acc kernels present(mom) present(conf_old) present(conf_new) present(factor)
 #pragma acc loop independent 
   for(d3=offset3; d3<offset3+thickness3; d3++) {
-#pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
+#pragma acc loop independent
     for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector //gang(nd1/DIM_BLOCK_Y) vector(DIM_BLOCK_Y)
+#pragma acc loop independent
       for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector //vector(DIM_BLOCK_X)
+#pragma acc loop independent
         for(d0=0; d0 < nd0; d0++) {
           int idxh;
           int parity;

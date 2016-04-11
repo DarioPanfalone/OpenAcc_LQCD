@@ -246,7 +246,7 @@ void generate_vec3_soa_z2noise(__restrict vec3_soa * const vect)
             }
         }
 #ifdef MULTIDEVICE
-    communicate_fermion_borders(vect);
+    communicate_fermion_borders_hostonly(vect);
 #endif
 
 }

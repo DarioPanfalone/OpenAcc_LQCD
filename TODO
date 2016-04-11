@@ -85,6 +85,12 @@ Things to do:
     2. pure gauge: Seems that gauge conf update in md bloc was not working.
        Seems to work now.
     3. Fermions: accepts on a 24^3x6. 
+    4. Re-integration of async communications - DONE
+    5. Async communications in gauge substep - DONE
+    6. Observables
+       - Fixed generation of z2 noise
+       - added MPI_Allreduce in topological charge computation (still cooling TO CHECK)
+
    THINGS TO DO:
     a. Understand the MPI_Finalize()-segfault issue.
     b. Check correctness- compare gnu multinode vs accelerated multinode in detail
@@ -92,17 +98,10 @@ Things to do:
     d. Observables
     e. Try a run and compare results (ongoing, actually, will stop because of 
        segmentation fault)
-    f. CHECK PERFORMANCES
+    f. CHECK PERFORMANCES - added measurements for gauge md blocs.
+         ISSUE: mom_exp_conf_stocazzo is not accelerated correctly - live out from loop 
+         thingy. <<<<<<<<<<<--------------- TO FIX
 
-
-
-
-TODO - Further
-8. Re-integration of async communications
-   in fermion matrix multiplication (discuss thickness-2 trick)
-9. Async communications in gauge substep
-10. Observables
-11. Single precision MD
    
 TESTS
 

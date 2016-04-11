@@ -163,6 +163,7 @@ void fermion_measures( su3_soa * tconf_acc,
     printf("\tMPI%02d: Error in  allocation of %s . \n",devinfo.myrank, #var);\
     else if(verbosity_lv > 2) printf("\tMPI%02d: Allocation of %s : OK , %p\n",\
             devinfo.myrank, #var, var );\
+            fflush(stdout);
 
     allocation_check =  posix_memalign((void **)&rnd_e, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,rnd_e);     
@@ -210,6 +211,7 @@ void fermion_measures( su3_soa * tconf_acc,
         }
         fclose(foutfile);// found file size
     }
+
 
     // cycle on copies
     for(int icopy = 0; icopy < tfm_par->SingleInvNVectors ; icopy++) {
