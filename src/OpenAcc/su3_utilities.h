@@ -47,14 +47,14 @@ void RHO_times_conf_times_staples_ta_part(
         __restrict tamat_soa * const tipdot);
 
 void mom_sum_mult( __restrict thmat_soa * const mom,
-        __restrict const tamat_soa * const ipdot, double * factor,
+        __restrict const tamat_soa * const ipdot, const double * factor,
         int id_factor);
 
 
 void mom_exp_times_conf_soloopenacc(
         __restrict  su3_soa * const tconf_acc,
         __restrict const thmat_soa * const tmomenta, 
-        double * tdelta,  int id_delta);
+        const double * tdelta,  int id_delta);
 
 // reunitarize the conf by brute force
 void unitarize_conf( __restrict su3_soa * const u);
@@ -903,14 +903,14 @@ void conf_times_staples_ta_part_bulk(
 
 void mom_sum_mult_bulk( __restrict thmat_soa * const mom,
 		   const __restrict tamat_soa * const ipdot,
-		   double * factor,
+		   const double * factor,
 		   int id_factor);
 
 void mom_exp_times_conf_soloopenacc_bulk( 
         __restrict const su3_soa * const conf_old,
         __restrict su3_soa * const conf_new,
         __restrict const thmat_soa * const mom,
-        double * factor, 
+        const double * factor, 
         // questo e' il vettore delta dove sono contenuti 
         // tutti i dt richiesti nell'omelyan
         int id_factor);
@@ -926,7 +926,7 @@ void conf_times_staples_ta_part_d3c(
 
 void mom_sum_mult_d3c( __restrict thmat_soa * const mom,
 		   const __restrict tamat_soa * const ipdot,
-		   double * factor,
+		   const double * factor,
 		   int id_factor,
            int offset3, int thickness3);
 
@@ -934,7 +934,7 @@ void mom_exp_times_conf_soloopenacc_d3c(
         __restrict const su3_soa * const conf_old,
         __restrict su3_soa * const conf_new,
         __restrict const thmat_soa * const mom,
-        double * factor, 
+        const double * factor, 
         // questo e' il vettore delta dove sono contenuti 
         // tutti i dt richiesti nell'omelyan
         int id_factor,
