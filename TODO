@@ -100,7 +100,9 @@ Things to do:
        segmentation fault)
     f. CHECK PERFORMANCES - added measurements for gauge md blocs.
         - mom_exp_conf_stocazzo is now accelerated correctly, but THERE ARE ISSUES
-          CHECK
+          CHECK CH exponential, seems to give wrong results in MD.
+          <<<<<<<<<<<<------------------ TODO 
+
         - performance on a 24^3x6 split in 2 (24^2x6x12) does not seem really good,
           little or no speedup over a single card. (MEASURE BETTER AND CHECK)
 
