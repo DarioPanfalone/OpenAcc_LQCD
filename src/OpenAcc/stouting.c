@@ -60,10 +60,6 @@ void stout_isotropic(
         __restrict tamat_soa * const tipdot)       // --> parking variable
 {
 
-    SETREQUESTED(uprime);
-    SETREQUESTED(local_staples);
-    SETREQUESTED(auxiliary);
-    SETREQUESTED(tipdot);
 
     if(verbosity_lv > 1) 
         printf("MPI%02d: Isotropic stouting...\n",devinfo.myrank);
@@ -75,11 +71,9 @@ void stout_isotropic(
     calc_loc_staples_nnptrick_all(u,local_staples);
 
     RHO_times_conf_times_staples_ta_part(u,local_staples,tipdot);
-    SETFREE(local_staples);
 
 
     exp_minus_QA_times_conf(u,tipdot,uprime,auxiliary);
-    SETFREE(tipdot);
 
 
 }
@@ -129,8 +123,6 @@ void exp_minus_QA_times_conf(__restrict const su3_soa * const tu,
         __restrict su3_soa * const exp_aux)
 {
 
-    SETINUSE(exp_aux);
-    SETINUSE(tu_out);
 
     int d0, d1, d2, d3;
 #pragma acc kernels present(tu) present(QA) present(tu_out) present(exp_aux)
@@ -159,7 +151,6 @@ void exp_minus_QA_times_conf(__restrict const su3_soa * const tu,
             }  // d1
         }  // d2
     }  // d3
-    SETFREE(exp_aux);
 
 }// closes routine
 
@@ -526,8 +517,6 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
         __restrict const tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
         __restrict su3_soa   * const TMP  // variabile di parcheggio
         ){
-    SETINUSE(L);
-    SETINUSE(TMP);
 
     // TO CORRECT
 
@@ -1179,8 +1168,6 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
         __restrict su3_soa   * const TMP // variabile di parcheggio
         )
 {
-    SETINUSE(TMP) ;
-    SETINUSE(S);
     int d0, d1, d2, d3, mu, iter;
 
 #pragma acc kernels present(L) present(U) present(nnp_openacc) present(nnm_openacc) present(S) present(QA) present(TMP)
@@ -1302,7 +1289,6 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
         }  // d2
     }  // d3
 
-    SETFREE(TMP);
 }// closes routine
 
 

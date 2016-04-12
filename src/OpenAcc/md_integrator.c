@@ -37,6 +37,8 @@
 #include "../Mpi/multidev.h"
 #include "../DbgTools/dbgtools.h"
 
+#include <sys/time.h>
+
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
 #endif

@@ -16,7 +16,6 @@
 void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix)
 {
     //int hd0, d1, d2, d3;
-    //SETINUSE(matrix);
     //#pragma acc kernels present(matrix)
     //#pragma acc loop independent gang(nd3)
     //  for(d3=0; d3<nd3; d3++) {
@@ -56,7 +55,6 @@ void direct_product_of_fermions_into_auxmat(
         const RationalApprox * const approx,
         int iter)
 {
-    SETINUSE(aux_u);
 
     //LOOP SUI SITI PARI
     int hd0, d1, d2, d3;
@@ -124,7 +122,6 @@ void multiply_conf_times_force_and_take_ta_nophase(
         __restrict const su3_soa * const auxmat, 
         __restrict tamat_soa * const ipdot)
 {
-    SETINUSE(ipdot);
     int hd0,d1,d2,d3,idxh,dir;
 #pragma acc kernels present(u) present(auxmat) present(ipdot) 
 #pragma acc loop independent
@@ -155,7 +152,6 @@ void multiply_backfield_times_force(
         __restrict const su3_soa * const auxmat, 
         __restrict su3_soa * const pseudo_ipdot)
 {
-    SETINUSE(pseudo_ipdot);
 
     int idxh,dirindex;
     int hd0, d1, d2, d3;
@@ -191,7 +187,6 @@ void accumulate_gl3soa_into_gl3soa(
         __restrict su3_soa * const pseudo_ipdot)
 {
 
-    SETINUSE(pseudo_ipdot);
 
     int idxh, dirindex;
     int hd0, d1, d2, d3;

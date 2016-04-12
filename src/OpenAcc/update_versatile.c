@@ -154,8 +154,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
             if(verbosity_lv > 2 ) printf("Rat approx rescale (flav=%d)\n",iflav);
 
-            SETREQUESTED(kloc_p);
-            SETREQUESTED(kloc_s);
             if(debug_settings.do_norandom_test){ // NORANDOM
                 if(read_vec3_soa(kloc_p,"kloc_p_norndtest")){
                     generate_vec3_soa_gauss(kloc_p);
@@ -178,8 +176,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #pragma acc update device(kloc_s[0:1])
             // USING STOUTED GAUGE MATRIX
             //printf("    before min and max eig comp : OK \n");
-            SETREQUESTED(kloc_r);
-            SETREQUESTED(kloc_h);
             find_min_max_eigenvalue_soloopenacc(gconf_as_fermionmatrix,&(fermions_parameters[iflav]),kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig[iflav]);
             if(verbosity_lv > 3 ) printf("    find min and max eig : OK \n");
             RationalApprox *approx_fi = &(fermions_parameters[iflav].approx_fi);

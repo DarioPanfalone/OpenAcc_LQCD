@@ -83,7 +83,6 @@ void calc_loc_staples_nnptrick_all(
         __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_stap )
 {
-    SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
   //          |  1L  ^  1R  |
@@ -167,7 +166,6 @@ void calc_loc_staples_nnptrick_all_bulk(
         __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_stap )
 {
-    SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
   //          |  1L  ^  1R  |
@@ -251,7 +249,6 @@ void calc_loc_staples_nnptrick_all_d3c(
         __restrict su3_soa * const loc_stap,
        int offset, int thickness)
 {
-    SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
   //          |  1L  ^  1R  |
@@ -338,7 +335,6 @@ void calc_loc_staples_nnptrick_all_only_even(
         __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_stap )
 {
-  SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
   //          |  1L  ^  1R  |
@@ -420,7 +416,6 @@ void calc_loc_staples_nnptrick_all_only_odd(
         __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_stap )
 {
-  SETINUSE(loc_stap);
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
   //          |  1L  ^  1R  |

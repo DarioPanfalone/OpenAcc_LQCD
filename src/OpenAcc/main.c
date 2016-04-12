@@ -496,7 +496,6 @@ int main(int argc, char* argv[]){
 
     }// end pragma acc data
 
-    CHECKSTATUS(conf_acc);
 
 
 #ifndef __GNUC__

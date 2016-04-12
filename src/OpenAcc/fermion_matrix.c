@@ -475,7 +475,6 @@ void fermion_matrix_multiplication(
     acc_Doe(u,temp1,in,pars->phases);
     acc_Deo(u,out,temp1,pars->phases);
     combine_in1xferm_mass_minus_in2(in,pars->ferm_mass*pars->ferm_mass,out);// Nuova funzione in OpenAcc/fermionic_utilities.c
-    SETFREE(temp1);
 }
 void fermion_matrix_multiplication_shifted( 
         __restrict const su3_soa * const u, 
@@ -487,7 +486,6 @@ void fermion_matrix_multiplication_shifted(
     acc_Doe(u,temp1,in,pars->phases);
     acc_Deo(u,out,temp1,pars->phases);
     combine_in1xferm_mass_minus_in2(in,pars->ferm_mass*pars->ferm_mass+shift,out);// Nuova funzione in OpenAcc/fermionic_utilities.c
-    SETFREE(temp1);
 
 
 }

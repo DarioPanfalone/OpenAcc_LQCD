@@ -299,7 +299,6 @@ void assign_in_to_out(
         __restrict const vec3_soa * in_vect1,
         __restrict vec3_soa * out)
 {
-  SETINUSE(out);
 #pragma acc kernels present(in_vect1)  present(out)
 #pragma acc loop independent 
   for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
@@ -313,7 +312,6 @@ void assign_in_to_out(
 void set_vec3_soa_to_zero( __restrict vec3_soa* const fermion)
 {
   //  printf(" puntatore incriminato (%p) \n",fermion);
-  SETINUSE((fermion));
 #pragma acc kernels present(fermion)
 #pragma acc loop independent 
    // printf("Setting to zero memory from %p to %p ", fermion->c0 , &(fermion->c0[sizeh-1])+1);

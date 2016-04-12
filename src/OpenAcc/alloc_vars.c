@@ -87,7 +87,6 @@ void mem_alloc()
     allocation_check =  posix_memalign((void **)&u1_back_phases, ALIGN,
             NDiffFlavs*8*sizeof(double_soa));   
     //  --> NDiffFlavs*4*NSITES phases (as many as links)
-    SETFREE(u1_back_phases);
     ALLOCCHECK(allocation_check, u1_back_phases);
 
 
@@ -116,47 +115,47 @@ void mem_alloc()
 
 
     //the double bracket in the setfree macro MUST be there(because of operators precedence)
-    allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_conf_acc[mu])); 
-    allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&auxbis_conf_acc[mu]));
+    allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); 
+    allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, auxbis_conf_acc ) ;
-    allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&conf_acc_bkp[mu])); 
+    allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, conf_acc_bkp) ;
 
 
     // GAUGE EVOLUTION
-    allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  for(int mu=0;mu<8;mu++) SETFREE((&momenta[mu]));  //  -->  4*NSITES
+    allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  
     ALLOCCHECK(allocation_check, momenta ) ;
     if(debug_settings.do_reversibility_test){
         momenta_backupped = 1;
 
-        allocation_check =  posix_memalign((void **)&momenta_backup, ALIGN, 8*sizeof(thmat_soa));  for(int mu=0;mu<8;mu++) SETFREE((&momenta_backup[mu]));  //  -->  4*NSITES
+        allocation_check =  posix_memalign((void **)&momenta_backup, ALIGN, 8*sizeof(thmat_soa));
         ALLOCCHECK(allocation_check, momenta_backup ) ;
     }
     else momenta_backupped = 0;
 
 
-    allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_acc[mu])); 
+    allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, ipdot_acc) ;
-    allocation_check =  posix_memalign((void **)&ipdot_g_old, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_g_old[mu])); 
+    allocation_check =  posix_memalign((void **)&ipdot_g_old, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, ipdot_g_old) ;
-    allocation_check =  posix_memalign((void **)&ipdot_f_old, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&ipdot_f_old[mu])); 
+    allocation_check =  posix_memalign((void **)&ipdot_f_old, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, ipdot_f_old) ;
 
 
 
 #ifdef STOUT_FERMIONS
     // STOUTING
-    allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, act_params.stout_steps*8*sizeof(su3_soa)); for(int mu=0;mu<8*act_params.stout_steps;mu++) SETFREE((&gstout_conf_acc_arr[mu]));
+    allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, act_params.stout_steps*8*sizeof(su3_soa)); 
     gstout_conf_acc = &gstout_conf_acc_arr[8*(act_params.stout_steps-1)];
     ALLOCCHECK(allocation_check,gstout_conf_acc_arr ) ;
-    allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); for(int mu=0;mu<8;mu++) SETFREE((&glocal_staples[mu]));
+    allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check, glocal_staples) ;
-    allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&gipdot[mu])); 
+    allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, gipdot) ;
 
-    allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); for(int mu=0;mu<8;mu++) SETFREE((&aux_th[mu]));   //  -->  4*NSITES
+    allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); 
     ALLOCCHECK(allocation_check, aux_th ) ;
-    allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); for(int mu=0;mu<8;mu++)  SETFREE((&aux_ta[mu])); //  -->  4*NSITES
+    allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, aux_ta ) ;
 
 
@@ -166,32 +165,32 @@ void mem_alloc()
 
 
     // FERMION ALLOCATIONS
-    allocation_check =  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_r);
+    allocation_check =  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_r) ;
-    allocation_check =  posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_h);
+    allocation_check =  posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_h ) ;
-    allocation_check =  posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_s);
+    allocation_check =  posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_s ) ;
-    allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa)); SETFREE(kloc_p);
+    allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_p) ;
-    allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, MAX_APPROX_ORDER* sizeof(vec3_soa)); for(int mu=0;mu<MAX_APPROX_ORDER;mu++) SETFREE((&k_p_shiftferm[mu]));
+    allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, MAX_APPROX_ORDER* sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, k_p_shiftferm) ;
 
 
-    allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); for(int mu=0;mu<NPS_tot;mu++) SETFREE((&ferm_chi_acc[mu]));
+    allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, ferm_chi_acc) ;
-    allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); for(int mu=0;mu<NPS_tot;mu++) SETFREE((&ferm_phi_acc[mu]));
+    allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
     ALLOCCHECK(allocation_check, ferm_phi_acc) ;
-    allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); for(int mu=0;mu<NPS_tot;mu++) SETFREE((&ferm_out_acc[mu]));
+    allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
     ALLOCCHECK(allocation_check, ferm_out_acc) ;
-    allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*MAX_APPROX_ORDER*sizeof(vec3_soa)); for(int mu=0;mu<max_ps*MAX_APPROX_ORDER;mu++) SETFREE((&ferm_shiftmulti_acc[mu]));
+    allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*MAX_APPROX_ORDER*sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, ferm_shiftmulti_acc ) ;
 
 
 
-    allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, 2*sizeof(double_soa)); SETFREE(d_local_sums);
+    allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, 2*sizeof(double_soa)); 
     ALLOCCHECK(allocation_check, d_local_sums) ;
-    allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa)); for(int mu=0;mu<2;mu++) SETFREE((&local_sums[mu]));
+    allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));
     ALLOCCHECK(allocation_check, local_sums) ;
 
 

@@ -10,7 +10,6 @@
 #include "./fermion_force.h"
 #include "./fermion_force_utilities.h"
 #include "../Include/fermion_parameters.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./su3_utilities.h"
 #include "./su3_measurements.h"
 #include "./plaquettes.h"

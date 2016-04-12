@@ -25,11 +25,6 @@ int multishift_invert(__restrict su3_soa * const u,
 		      __restrict vec3_soa * loc_p,
 		      __restrict vec3_soa * shiftferm // multi-ferm [nshift]
 		      ){
-    SETREQUESTED(loc_r);
-    SETREQUESTED(loc_h);
-    SETREQUESTED(loc_s);
-    SETREQUESTED(loc_p);
-    SETREQUESTED(shiftferm);
   /*********************
    * This function takes an input fermion 'in', a rational approximation
    * 'approx' and writes in 'out' a number of fermions, which are the
@@ -205,11 +200,6 @@ int multishift_invert(__restrict su3_soa * const u,
     }
     printf("\n");
   }
-    SETFREE(loc_r);
-    SETFREE(loc_h);
-    SETFREE(loc_s);
-    SETFREE(loc_p);
-    SETFREE(shiftferm);
 
   return cg;
 
@@ -219,7 +209,6 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
 				    const __restrict vec3_soa* const in, // [nshift]
 				    __restrict vec3_soa * const out, // [1] 
 				    const RationalApprox * const approx ){
-    SETINUSE(out);
   int ih;
   int iter=0;
 #pragma acc kernels present(out) present(in) present(in_shifted) present(approx)

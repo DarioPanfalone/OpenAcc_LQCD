@@ -12,8 +12,6 @@
 #include "./su3_utilities.h"
 #include "./struct_c_def.h"
 #include "./single_types.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
-
 
 // reunitarize the conf by brute force
 void unitarize_conf( __restrict su3_soa * const u)
@@ -35,6 +33,7 @@ void unitarize_conf( __restrict su3_soa * const u)
                         int d0 = 2*d0h + ((d1+d2+d3) & 0x1);
                         int t = snum_acc(d0,d1,d2,d3);  
                         loc_unitarize_conf(&u[dirindex],t);
+
                     }
                 }
             }
@@ -72,7 +71,6 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix)
     }
   }
 }
-
 
 //copy matrix in into matrix out, this has to happen on the host
 void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
@@ -134,6 +132,7 @@ void conf_times_staples_ta_part(
   }  // d3
 
 }// closes routine
+
 // tamattamat
 void RHO_times_conf_times_staples_ta_part(
         __restrict const su3_soa * const u,
@@ -141,7 +140,6 @@ void RHO_times_conf_times_staples_ta_part(
         __restrict tamat_soa * const tipdot)
 {
 
-    SETINUSE(tipdot);
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang //gang(nd3)
