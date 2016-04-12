@@ -1,14 +1,11 @@
 #ifndef RANDOM_ASSIGNEMENT_C_
 #define RANDOM_ASSIGNEMENT_C_
 
-#include "./geometry.h"
-
-
-#include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../Include/debug.h"
 #include "../Mpi/multidev.h"
 #include "../Rand/random.h"
 #include "./alloc_vars.h"
+#include "./geometry.h"
 #include "./random_assignement.h"
 #include "./single_types.h"
 #include "./su3_utilities.h"

@@ -25,8 +25,8 @@ BackgroundFieldParameters
 
 
 MDParameters
-NmdSteps	    1
-GaugeSubSteps   1
+NmdSteps	    8
+GaugeSubSteps   5
 TrajLength	    0.05
 residue_md      1e-6
 residue_metro       	1e-8
@@ -34,8 +34,8 @@ ExpMaxEigenvalue        6
 
 
 MontecarloParameters
-Ntraj	                1
-ThermNtraj	            15
+Ntraj	                10
+ThermNtraj	            5
 StoreConfInterval	    20
 SaveConfInterval    	5
 StoreConfName       	store.conf.ildg44164
@@ -55,8 +55,8 @@ VerbosityLv             2
 SaveDiagnostics         0
 UseILDG                 0
 #MaxRunTimeS            6000
-SaveAllAtEnd            0    # only for debug purposes!
-DoRevTest               1
+SaveAllAtEnd            1    # only for debug purposes!
+DoRevTest               0
 DoNoRandomTest          0
 
 

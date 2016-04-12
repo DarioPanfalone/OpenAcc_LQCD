@@ -1,18 +1,16 @@
 #ifndef STOUTING_C
 #define STOUTING_C
 
-#include "./geometry.h"
+#include "../Mpi/multidev.h"
+#include "./action.h"
+#include "./alloc_vars.h"
 #include "./cayley_hamilton.h"
+#include "./geometry.h"
+#include "./plaquettes.h"
+#include "./single_types.h"
+#include "./stouting.h"
 #include "./struct_c_def.h"
 #include "./su3_utilities.h"
-#include "./plaquettes.h"
-#include "./alloc_vars.h"
-#include "./stouting.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
-
-#include "./single_types.h"
-#include "./action.h"
-#include "../Mpi/multidev.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"

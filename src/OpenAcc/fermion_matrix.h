@@ -8,7 +8,6 @@
 #endif
 #include "./fermionic_utilities.h"
 #include "../Include/fermion_parameters.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
 
 
 // if using GCC, there are some problems with __restrict.

@@ -2,8 +2,9 @@
 #define SU3_UTILITIES_H_
 
 #include "../Include/common_defines.h"
-#include "../OpenAcc/struct_c_def.h"
-#include "../OpenAcc/single_types.h"
+#include "./struct_c_def.h"
+#include "./single_types.h"
+#include "./cayley_hamilton.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -723,79 +724,6 @@ static inline void thmat1_plus_tamat2_times_factor_into_thmat1(
   
 }
 
-#pragma acc routine seq
-static inline void extract_mom(
-        const __restrict thmat_soa * const mom,
-        int idx_mom,
-        double delta,
-        single_su3 * M)
-{
-  //COSTRUISCO LA MATRICE M = i*delta*momento
-  //leggo la prima parte
-  // il segno meno sulle componenti M10,M20 e M21 c'e' perche' dopo aver
-  // moltiplicato per 1.0I la matrice diventa anti-hermitiana
-  M->comp[0][0] = mom->rc00[idx_mom] * (delta * 1.0I);
-  M->comp[0][1] = mom->c01[idx_mom] * (delta * 1.0I);
-  M->comp[0][2] = mom->c02[idx_mom] * (delta * 1.0I);
-  M->comp[1][0] = - conj(M->comp[0][1]);
-  M->comp[1][1] = mom->rc11[idx_mom] * (delta * 1.0I);
-  M->comp[1][2] = mom->c12[idx_mom] * (delta * 1.0I);
-  M->comp[2][0] = - conj(M->comp[0][2]);
-  M->comp[2][1] = - conj(M->comp[1][2]);
-  M->comp[2][2] = - M->comp[0][0] - M->comp[1][1];
-}
-
-#pragma acc routine seq
-static inline void matrix_exp_openacc(
-        __restrict const single_su3 * const MOM,
-        __restrict single_su3 * AUX,
-        __restrict single_su3 * RES)
-{
-  // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
-  // first iteration
-  // ris=1+x/5
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES->comp[r][c] = MOM->comp[r][c] * 0.2;
-    RES->comp[r][r] = RES->comp[r][r] + 1.0;
-  }
-  // second iteration
-  // ris=1.0+x/4*(1+x/5)
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      AUX->comp[r][c] = (MOM->comp[r][0] * RES->comp[0][c] 
-              + MOM->comp[r][1] * RES->comp[1][c] 
-              + MOM->comp[r][2] * RES->comp[2][c]) * 0.25;
-    AUX->comp[r][r] = AUX->comp[r][r] + 1.0;
-  }
-  // third iteration
-  // ris=1.0+x/3.0*(1.0+x/4*(1+x/5))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES->comp[r][c] = (MOM->comp[r][0] * AUX->comp[0][c] 
-              + MOM->comp[r][1] * AUX->comp[1][c] 
-              + MOM->comp[r][2] * AUX->comp[2][c]) * ONE_BY_THREE;
-    RES->comp[r][r] = RES->comp[r][r] + 1.0;
-  }
-  // fourth iteration
-  // ris=1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5)))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      AUX->comp[r][c] = (MOM->comp[r][0] * RES->comp[0][c] 
-              + MOM->comp[r][1] * RES->comp[1][c] 
-              + MOM->comp[r][2] * RES->comp[2][c]) * 0.5;
-    AUX->comp[r][r] = AUX->comp[r][r] + 1.0;
-  }
-  // fifth iteration
-  // ris=1.0+x*(1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5))))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES->comp[r][c] = (MOM->comp[r][0] * AUX->comp[0][c] 
-              + MOM->comp[r][1] * AUX->comp[1][c] 
-              + MOM->comp[r][2] * AUX->comp[2][c]);
-    RES->comp[r][r] = RES->comp[r][r] + 1.0;
-  }
-}
 
 #pragma acc routine seq
 static inline void conf_left_exp_multiply(
@@ -836,63 +764,7 @@ static inline void conf_left_exp_multiply(
 }
 
 #pragma acc routine seq
-static inline void project_on_su3(
-        __restrict su3_soa * const cnf,  const int idx_cnf,
-        __restrict single_su3 *  AUX)
-{
-  
-  //normalizzo la prima riga
-  double NORM = creal(AUX->comp[0][0])*creal(AUX->comp[0][0])
-      + cimag(AUX->comp[0][0])*cimag(AUX->comp[0][0]) 
-      + creal(AUX->comp[0][1])*creal(AUX->comp[0][1])
-      + cimag(AUX->comp[0][1])*cimag(AUX->comp[0][1]) 
-      + creal(AUX->comp[0][2])*creal(AUX->comp[0][2])
-      + cimag(AUX->comp[0][2])*cimag(AUX->comp[0][2]);
-  NORM = 1.0/sqrt(NORM);
-
-  for(int c=0;c<3;c++)
-    AUX->comp[0][c] *= NORM;
-
-  //faccio il prodotto scalare con la seconda e sottraggo (ortogonalizzo)
-  d_complex SCAL_PROD = conj(AUX->comp[0][0]) * AUX->comp[1][0] 
-      + conj(AUX->comp[0][1]) * AUX->comp[1][1] 
-      + conj(AUX->comp[0][2]) * AUX->comp[1][2];
-
-  for(int c=0;c<3;c++)
-    AUX->comp[1][c] -= SCAL_PROD * AUX->comp[0][c];  
-
-  //normalizzo la seconda riga
-  NORM = creal(AUX->comp[1][0])*creal(AUX->comp[1][0])
-      + cimag(AUX->comp[1][0])*cimag(AUX->comp[1][0]) 
-      + creal(AUX->comp[1][1])*creal(AUX->comp[1][1]) 
-      + cimag(AUX->comp[1][1])*cimag(AUX->comp[1][1]) 
-      + creal(AUX->comp[1][2])*creal(AUX->comp[1][2])
-      + cimag(AUX->comp[1][2])*cimag(AUX->comp[1][2]);
-  NORM = 1.0/sqrt(NORM);
-
-  AUX->comp[1][0] *= NORM;
-  AUX->comp[1][1] *= NORM;
-  AUX->comp[1][2] *= NORM;
-
-  cnf->r0.c0[idx_cnf] = AUX->comp[0][0];
-  cnf->r0.c1[idx_cnf] = AUX->comp[0][1];
-  cnf->r0.c2[idx_cnf] = AUX->comp[0][2];
-  cnf->r1.c0[idx_cnf] = AUX->comp[1][0];
-  cnf->r1.c1[idx_cnf] = AUX->comp[1][1];
-  cnf->r1.c2[idx_cnf] = AUX->comp[1][2];
-
-  // temporaneo --> poi togliere!!
-  //   cnf->r2.c0[idx_cnf]= conj(AUX->comp[0][1] * AUX->comp[1][2] 
-  //   - AUX->comp[0][2] * AUX->comp[1][1]);
-  //   cnf->r2.c1[idx_cnf]= conj(AUX->comp[0][2] * AUX->comp[1][0] 
-  //   - AUX->comp[0][0] * AUX->comp[1][2]);
-  //   cnf->r2.c2[idx_cnf]= conj(AUX->comp[0][0] * AUX->comp[1][1] 
-  //   - AUX->comp[0][1] * AUX->comp[1][0]);
-  
-}
-
-#pragma acc routine seq
-static inline void alles_zusammen(
+static inline void mom_exp_times_conf_soloopenacc_loc(
         const __restrict thmat_soa * const mom,
         __restrict su3_soa *cnf,
         int idx,
@@ -902,7 +774,19 @@ static inline void alles_zusammen(
   //leggo la prima parte
   // il segno meno sulle componenti M10,M20 e M21 c'e' perche' dopo aver
   // moltiplicato per 1.0I la matrice diventa anti-hermitiana
-  single_su3 MOM, AUX, RES;
+  single_su3 AUX, RES;
+
+  single_tamat QA;
+  QA.ic00 = mom->rc00[idx]*delta;
+  QA.ic11 = mom->rc11[idx]*delta;
+  QA.c01  = mom->c01[idx] *delta*1.0I;
+  QA.c02  = mom->c02[idx] *delta*1.0I;
+  QA.c12  = mom->c12[idx] *delta*1.0I;
+
+  CH_exponential_antihermitian_nissalike(&RES,&QA);
+
+  /*
+  single_su3 MOM;
   MOM.comp[0][0] = mom->rc00[idx] * (delta * 1.0I);
   MOM.comp[0][1] = mom->c01[idx] * (delta * 1.0I);
   MOM.comp[0][2] = mom->c02[idx] * (delta * 1.0I);
@@ -959,9 +843,7 @@ static inline void alles_zusammen(
               + MOM.comp[r][2] * AUX.comp[2][c]);
     RES.comp[r][r] = RES.comp[r][r] + 1.0;
   }
-
-
-
+*/
   
   //Multiply: U_new = exp(i*delta*H) * U_old =>   cnf = RES * cnf 
    single_su3  AUX_RIS;
@@ -1034,7 +916,7 @@ static inline void alles_zusammen(
 }
 
 #pragma acc routine seq
-static inline void alles_zusammen_split(
+static inline void mom_exp_times_conf_soloopenacc_loc_split(
         const __restrict thmat_soa * const mom,
         const __restrict su3_soa *cnf_in,
         __restrict su3_soa *cnf_out,
@@ -1045,7 +927,17 @@ static inline void alles_zusammen_split(
   //leggo la prima parte
   // il segno meno sulle componenti M10,M20 e M21 c'e' perche' dopo aver
   // moltiplicato per 1.0I la matrice diventa anti-hermitiana
-  single_su3 MOM, AUX, RES;
+ single_su3 AUX, RES;
+ single_tamat QA;
+  QA.ic00 = mom->rc00[idx]*delta;
+  QA.ic11 = mom->rc11[idx]*delta;
+  QA.c01  = mom->c01[idx] *delta*1.0I;
+  QA.c02  = mom->c02[idx] *delta*1.0I;
+  QA.c12  = mom->c12[idx] *delta*1.0I;
+
+  CH_exponential_antihermitian_nissalike(&RES,&QA);
+/*
+  single_su3 MOM;
   MOM.comp[0][0] = mom->rc00[idx] * (delta * 1.0I);
   MOM.comp[0][1] = mom->c01[idx] * (delta * 1.0I);
   MOM.comp[0][2] = mom->c02[idx] * (delta * 1.0I);
@@ -1055,7 +947,8 @@ static inline void alles_zusammen_split(
   MOM.comp[2][0] = - conj(MOM.comp[0][2]);
   MOM.comp[2][1] = - conj(MOM.comp[1][2]);
   MOM.comp[2][2] = - MOM.comp[0][0] - MOM.comp[1][1];
-  
+
+
   // EXPONENTIATION
   
   // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
@@ -1102,7 +995,7 @@ static inline void alles_zusammen_split(
               + MOM.comp[r][2] * AUX.comp[2][c]);
     RES.comp[r][r] = RES.comp[r][r] + 1.0;
   }
-
+*/
 
 
   

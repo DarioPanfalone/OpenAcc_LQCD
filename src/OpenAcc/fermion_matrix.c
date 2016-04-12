@@ -8,7 +8,6 @@
 #include "openacc.h"
 #endif
 #include "./fermionic_utilities.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermion_matrix.h"
 #include "./matvecmul.h"
 

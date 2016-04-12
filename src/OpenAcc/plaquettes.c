@@ -4,7 +4,6 @@
 #include "./geometry.h"
 #include "./plaquettes.h"
 #include "./su3_utilities.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
 
 // routine for the computation of the average of the plaquettes computed on the plane mu-nu
 // 1) all the plaquettes on the plane mu-nu are computed and saved locally

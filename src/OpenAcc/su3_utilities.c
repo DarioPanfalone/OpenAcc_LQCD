@@ -231,7 +231,7 @@ void mom_exp_times_conf_soloopenacc(
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
 
-        alles_zusammen(&mom[dir_link],&conf[dir_link],idxh,factor[id_factor]);
+        mom_exp_times_conf_soloopenacc_loc(&mom[dir_link],&conf[dir_link],idxh,factor[id_factor]);
 	    //extract_mom(&mom[dir_link],idxh,factor[id_factor],&mom_aux);
 	    //matrix_exp_openacc(&mom_aux,&aux,&expo);
 	    //conf_left_exp_multiply(&conf[dir_link],idxh,&expo,&aux,&mom_aux);
@@ -374,7 +374,7 @@ void mom_exp_times_conf_soloopenacc_bulk(
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
 
-        alles_zusammen_split(&mom[dir_link],
+        mom_exp_times_conf_soloopenacc_loc_split(&mom[dir_link],
                 &conf_old[dir_link],
                 &conf_new[dir_link],
                 idxh,factor[id_factor]);
@@ -521,7 +521,7 @@ void mom_exp_times_conf_soloopenacc_d3c(
 	  for(mu=0;mu<4;mu++){
 	    dir_link = 2*mu + parity;
 
-        alles_zusammen_split(&mom[dir_link],
+        mom_exp_times_conf_soloopenacc_loc_split(&mom[dir_link],
                 &conf_old[dir_link],
                 &conf_new[dir_link],
                 idxh,factor[id_factor]);

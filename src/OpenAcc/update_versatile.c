@@ -3,7 +3,7 @@
 #ifndef UPDATE_VERSATILE_C_
 #define UPDATE_VERSATILE_C_
 
-#include "../DbgTools/debug_macros_glvarcheck.h"
+#include "../DbgTools/dbgtools.h" // useful only for debug
 #include "../Include/common_defines.h"
 #include "../Include/debug.h"
 #include "../Mpi/multidev.h"
@@ -21,8 +21,6 @@
 #include "./su3_measurements.h"
 #include "./su3_utilities.h"
 #include "./update_versatile.h"
-
-#include "../DbgTools/dbgtools.h" // useful only for debug
 
 #ifdef __GNUC__
 #include "sys/time.h"

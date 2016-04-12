@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../DbgTools/debug_macros_glvarcheck.h"
 #include "../Include/debug.h"
 #include "../Include/fermion_parameters.h"
 #include "../Mpi/multidev.h"

@@ -21,7 +21,6 @@
 #endif
 
 #include "./geometry.h"
-#include "../DbgTools/debug_macros_glvarcheck.h"
 #include "./fermionic_utilities.h"
 
 #include <stdlib.h>
