@@ -785,65 +785,6 @@ static inline void mom_exp_times_conf_soloopenacc_loc(
 
   CH_exponential_antihermitian_nissalike(&RES,&QA);
 
-  /*
-  single_su3 MOM;
-  MOM.comp[0][0] = mom->rc00[idx] * (delta * 1.0I);
-  MOM.comp[0][1] = mom->c01[idx] * (delta * 1.0I);
-  MOM.comp[0][2] = mom->c02[idx] * (delta * 1.0I);
-  MOM.comp[1][0] = - conj(MOM.comp[0][1]);
-  MOM.comp[1][1] = mom->rc11[idx] * (delta * 1.0I);
-  MOM.comp[1][2] = mom->c12[idx] * (delta * 1.0I);
-  MOM.comp[2][0] = - conj(MOM.comp[0][2]);
-  MOM.comp[2][1] = - conj(MOM.comp[1][2]);
-  MOM.comp[2][2] = - MOM.comp[0][0] - MOM.comp[1][1];
-  
-  // EXPONENTIATION
-  
-  // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
-  // first iteration
-  // ris=1+x/5
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES.comp[r][c] = MOM.comp[r][c] * 0.2;
-    RES.comp[r][r] = RES.comp[r][r] + 1.0;
-  }
-  // second iteration
-  // ris=1.0+x/4*(1+x/5)
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      AUX.comp[r][c] = (MOM.comp[r][0] * RES.comp[0][c] 
-              + MOM.comp[r][1] * RES.comp[1][c] 
-              + MOM.comp[r][2] * RES.comp[2][c]) * 0.25;
-    AUX.comp[r][r] = AUX.comp[r][r] + 1.0;
-  }
-  // third iteration
-  // ris=1.0+x/3.0*(1.0+x/4*(1+x/5))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES.comp[r][c] = (MOM.comp[r][0] * AUX.comp[0][c] 
-              + MOM.comp[r][1] * AUX.comp[1][c] 
-              + MOM.comp[r][2] * AUX.comp[2][c]) * ONE_BY_THREE;
-    RES.comp[r][r] = RES.comp[r][r] + 1.0;
-  }
-  // fourth iteration
-  // ris=1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5)))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      AUX.comp[r][c] = (MOM.comp[r][0] * RES.comp[0][c] 
-              + MOM.comp[r][1] * RES.comp[1][c] 
-              + MOM.comp[r][2] * RES.comp[2][c]) * 0.5;
-    AUX.comp[r][r] = AUX.comp[r][r] + 1.0;
-  }
-  // fifth iteration
-  // ris=1.0+x*(1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5))))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES.comp[r][c] = (MOM.comp[r][0] * AUX.comp[0][c] 
-              + MOM.comp[r][1] * AUX.comp[1][c] 
-              + MOM.comp[r][2] * AUX.comp[2][c]);
-    RES.comp[r][r] = RES.comp[r][r] + 1.0;
-  }
-*/
   
   //Multiply: U_new = exp(i*delta*H) * U_old =>   cnf = RES * cnf 
    single_su3  AUX_RIS;
@@ -936,68 +877,6 @@ static inline void mom_exp_times_conf_soloopenacc_loc_split(
   QA.c12  = mom->c12[idx] *delta*1.0I;
 
   CH_exponential_antihermitian_nissalike(&RES,&QA);
-/*
-  single_su3 MOM;
-  MOM.comp[0][0] = mom->rc00[idx] * (delta * 1.0I);
-  MOM.comp[0][1] = mom->c01[idx] * (delta * 1.0I);
-  MOM.comp[0][2] = mom->c02[idx] * (delta * 1.0I);
-  MOM.comp[1][0] = - conj(MOM.comp[0][1]);
-  MOM.comp[1][1] = mom->rc11[idx] * (delta * 1.0I);
-  MOM.comp[1][2] = mom->c12[idx] * (delta * 1.0I);
-  MOM.comp[2][0] = - conj(MOM.comp[0][2]);
-  MOM.comp[2][1] = - conj(MOM.comp[1][2]);
-  MOM.comp[2][2] = - MOM.comp[0][0] - MOM.comp[1][1];
-
-
-  // EXPONENTIATION
-  
-  // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
-  // first iteration
-  // ris=1+x/5
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES.comp[r][c] = MOM.comp[r][c] * 0.2;
-    RES.comp[r][r] = RES.comp[r][r] + 1.0;
-  }
-  // second iteration
-  // ris=1.0+x/4*(1+x/5)
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      AUX.comp[r][c] = (MOM.comp[r][0] * RES.comp[0][c] 
-              + MOM.comp[r][1] * RES.comp[1][c] 
-              + MOM.comp[r][2] * RES.comp[2][c]) * 0.25;
-    AUX.comp[r][r] = AUX.comp[r][r] + 1.0;
-  }
-  // third iteration
-  // ris=1.0+x/3.0*(1.0+x/4*(1+x/5))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES.comp[r][c] = (MOM.comp[r][0] * AUX.comp[0][c] 
-              + MOM.comp[r][1] * AUX.comp[1][c] 
-              + MOM.comp[r][2] * AUX.comp[2][c]) * ONE_BY_THREE;
-    RES.comp[r][r] = RES.comp[r][r] + 1.0;
-  }
-  // fourth iteration
-  // ris=1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5)))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      AUX.comp[r][c] = (MOM.comp[r][0] * RES.comp[0][c] 
-              + MOM.comp[r][1] * RES.comp[1][c] 
-              + MOM.comp[r][2] * RES.comp[2][c]) * 0.5;
-    AUX.comp[r][r] = AUX.comp[r][r] + 1.0;
-  }
-  // fifth iteration
-  // ris=1.0+x*(1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5))))
-  for(int r=0;r<3;r++){
-    for(int c=0;c<3;c++)
-      RES.comp[r][c] = (MOM.comp[r][0] * AUX.comp[0][c] 
-              + MOM.comp[r][1] * AUX.comp[1][c] 
-              + MOM.comp[r][2] * AUX.comp[2][c]);
-    RES.comp[r][r] = RES.comp[r][r] + 1.0;
-  }
-*/
-
-
   
   //Multiply: U_new = exp(i*delta*H) * U_old =>   cnf = RES * cnf 
    single_su3  AUX_RIS;
