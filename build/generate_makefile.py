@@ -3,7 +3,7 @@
 #modify this to change compiler, linker etc options.
 PGIcls = 'COMPILER=pgcc\n\
 COMPILER_FLAGS=-O3 -acc -Minfo=all -v -ta=tesla:cc35,cuda7.0 -DUSE_MPI_CUDA_AWARE\n\
-LINKER_FLAGS=-acc  -Minfo=accel -O3 -v -ta=tesla:cc35,cuda7.0 \n' 
+LINKER_FLAGS=-acc -lmpi -Minfo=all -O3 -v -ta=tesla:cc35,cuda7.0 \n' 
 
 PGIclsSLOW ='COMPILER=pgcc\n\
 COMPILER_FLAGS=-O0 \n\
