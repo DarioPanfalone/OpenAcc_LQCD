@@ -13,15 +13,9 @@ GNUcls = 'COMPILER=gcc\n\
 COMPILER_FLAGS=-O3 -std=gnu99\n\
 LINKER_FLAGS=-lm\n' 
 
-
 MPIcls = 'COMPILER=mpicc\n\
 COMPILER_FLAGS=-O3 -std=gnu99\n\
 LINKER_FLAGS=-lm\n' 
-
-
-PGIcls = 'COMPILER=pgcc\n\
-COMPILER_FLAGS=-O3 -acc -Minfo=accel -v -ta=tesla:cc35,cuda7.0 -DUSE_MPI_CUDA_AWARE\n\
-LINKER_FLAGS=-acc -lmpi -Minfo=accel -O3 -v -ta=tesla:cc35,cuda7.0 \n' 
 
 compiler_linker_settings = ''
 
