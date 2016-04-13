@@ -775,17 +775,17 @@ static inline void mom_exp_times_conf_soloopenacc_loc(
   // il segno meno sulle componenti M10,M20 e M21 c'e' perche' dopo aver
   // moltiplicato per 1.0I la matrice diventa anti-hermitiana
   single_su3 AUX, RES;
-/*
+
   single_tamat QA;
-  QA.ic00 = mom->rc00[idx]*delta;
-  QA.ic11 = mom->rc11[idx]*delta;
-  QA.c01  = mom->c01[idx] *delta*1.0I;
-  QA.c02  = mom->c02[idx] *delta*1.0I;
-  QA.c12  = mom->c12[idx] *delta*1.0I;
+  QA.ic00 = -mom->rc00[idx]*delta;
+  QA.ic11 = -mom->rc11[idx]*delta;
+  QA.c01  = -mom->c01[idx] *delta*1.0I;
+  QA.c02  = -mom->c02[idx] *delta*1.0I;
+  QA.c12  = -mom->c12[idx] *delta*1.0I;
 
   CH_exponential_antihermitian_nissalike(&RES,&QA);
-*/
-  
+
+ /* 
   single_su3 MOM;
   MOM.comp[0][0] = mom->rc00[idx] * (delta * 1.0I);
   MOM.comp[0][1] = mom->c01[idx] * (delta * 1.0I);
@@ -799,7 +799,7 @@ static inline void mom_exp_times_conf_soloopenacc_loc(
 
 
   taylor_exponential_su3(&RES,&MOM,&AUX);
-  
+  */
   //Multiply: U_new = exp(i*delta*H) * U_old =>   cnf = RES * cnf 
    single_su3  AUX_RIS;
 
@@ -883,16 +883,15 @@ static inline void mom_exp_times_conf_soloopenacc_loc_split(
   // il segno meno sulle componenti M10,M20 e M21 c'e' perche' dopo aver
   // moltiplicato per 1.0I la matrice diventa anti-hermitiana
  single_su3 AUX, RES;
-/*
  single_tamat QA;
-  QA.ic00 = mom->rc00[idx]*delta;
-  QA.ic11 = mom->rc11[idx]*delta;
-  QA.c01  = mom->c01[idx] *delta*1.0I;
-  QA.c02  = mom->c02[idx] *delta*1.0I;
-  QA.c12  = mom->c12[idx] *delta*1.0I;
+  QA.ic00 = -mom->rc00[idx]*delta;
+  QA.ic11 = -mom->rc11[idx]*delta;
+  QA.c01  = -mom->c01[idx] *delta*1.0I;
+  QA.c02  = -mom->c02[idx] *delta*1.0I;
+  QA.c12  = -mom->c12[idx] *delta*1.0I;
 
   CH_exponential_antihermitian_nissalike(&RES,&QA);
-*/
+/*
   single_su3 MOM;
   MOM.comp[0][0] = mom->rc00[idx] * (delta * 1.0I);
   MOM.comp[0][1] = mom->c01[idx] * (delta * 1.0I);
@@ -908,7 +907,7 @@ static inline void mom_exp_times_conf_soloopenacc_loc_split(
   // EXPONENTIATION
 
   taylor_exponential_su3(&RES,&MOM,&AUX);
-  
+*/  
   //Multiply: U_new = exp(i*delta*H) * U_old =>   cnf = RES * cnf 
    single_su3  AUX_RIS;
 
