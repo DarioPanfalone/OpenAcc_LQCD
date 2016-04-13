@@ -237,7 +237,8 @@ inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_
 
 #pragma acc routine seq
 static inline void CH_exponential_antihermitian_nissalike(single_su3 * const exp_out,
-							      __restrict single_tamat * const QA){
+							      __restrict single_tamat * const QA)
+{
   // exp( - QA) , where Q=i*QA ==> exp(-QA) = exp(i*Q)
   //        ~~>  QA is anti-hermitian
   //        ~~>  hence Q=i*QA is hermitian
@@ -342,5 +343,57 @@ static inline void CH_exponential_antihermitian_nissalike(single_su3 * const exp
 
 }
 
+
+#pragma acc routine seq
+static inline void taylor_exponential_su3(single_su3* RES,
+        single_su3* MOM, single_su3* AUX)
+{
+  
+  // exp x = 1+x*(1+x/2*(1+x/3*(1+x/4*(1+x/5))))
+  // first iteration
+  // ris=1+x/5
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      RES->comp[r][c] = MOM->comp[r][c] * 0.2;
+    RES->comp[r][r] = RES->comp[r][r] + 1.0;
+  }
+  // second iteration
+  // ris=1.0+x/4*(1+x/5)
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      AUX->comp[r][c] = (MOM->comp[r][0] * RES->comp[0][c] 
+              + MOM->comp[r][1] * RES->comp[1][c] 
+              + MOM->comp[r][2] * RES->comp[2][c]) * 0.25;
+    AUX->comp[r][r] = AUX->comp[r][r] + 1.0;
+  }
+  // third iteration
+  // ris=1.0+x/3.0*(1.0+x/4*(1+x/5))
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      RES->comp[r][c] = (MOM->comp[r][0] * AUX->comp[0][c] 
+              + MOM->comp[r][1] * AUX->comp[1][c] 
+              + MOM->comp[r][2] * AUX->comp[2][c]) * ONE_BY_THREE;
+    RES->comp[r][r] = RES->comp[r][r] + 1.0;
+  }
+  // fourth iteration
+  // ris=1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5)))
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      AUX->comp[r][c] = (MOM->comp[r][0] * RES->comp[0][c] 
+              + MOM->comp[r][1] * RES->comp[1][c] 
+              + MOM->comp[r][2] * RES->comp[2][c]) * 0.5;
+    AUX->comp[r][r] = AUX->comp[r][r] + 1.0;
+  }
+  // fifth iteration
+  // ris=1.0+x*(1.0+x/2.0*(1.0+x/3.0*(1.0+x/4*(1+x/5))))
+  for(int r=0;r<3;r++){
+    for(int c=0;c<3;c++)
+      RES->comp[r][c] = (MOM->comp[r][0] * AUX->comp[0][c] 
+              + MOM->comp[r][1] * AUX->comp[1][c] 
+              + MOM->comp[r][2] * AUX->comp[2][c]);
+    RES->comp[r][r] = RES->comp[r][r] + 1.0;
+  }
+
+}
 
 #endif
