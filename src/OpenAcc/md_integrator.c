@@ -24,18 +24,18 @@
 #ifndef MD_INTEGRATOR_C
 #define MD_INTEGRATOR_C
 
+#include "../DbgTools/dbgtools.h"
 #include "../Include/common_defines.h"
 #include "../Include/debug.h"
-#include "./struct_c_def.h"
-#include "./fermion_force.h"
-#include "./md_integrator.h"
-#include "./alloc_vars.h"
-#include "./ipdot_gauge.h"
-#include "./su3_utilities.h"
 #include "../Include/fermion_parameters.h"
-#include "./action.h"
 #include "../Mpi/multidev.h"
-#include "../DbgTools/dbgtools.h"
+#include "./action.h"
+#include "./alloc_vars.h"
+#include "./fermion_force.h"
+#include "./ipdot_gauge.h"
+#include "./md_integrator.h"
+#include "./struct_c_def.h"
+#include "./su3_utilities.h"
 
 #include <sys/time.h>
 

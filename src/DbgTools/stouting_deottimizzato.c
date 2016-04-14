@@ -1,11 +1,9 @@
 #ifndef DEOTT_STOUTING_C
 #define DEOTT_STOUTING_C
 
-/*
-#include "./cayley_hamilton.c"
-#include "./struct_c_def.c"
-#include "./single_types.c"
-*/
+#include "../OpenAcc/cayley_hamilton.h"
+#include "../OpenAcc/struct_c_def.h"
+#include "../OpenAcc/single_types.h"
 
 
 static inline void DEOTT_conf_left_exp_multiply_to_su3_soa(__restrict su3_soa * const cnf,
@@ -73,7 +71,6 @@ void DEOTT_exp_minus_QA_times_conf(__restrict su3_soa * const tu,
 
     SETFREE(exp_aux);
 }// closes routine
-
 
 
 

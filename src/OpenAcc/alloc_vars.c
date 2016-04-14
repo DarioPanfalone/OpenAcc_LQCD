@@ -240,20 +240,21 @@ inline void mem_free()
     FREECHECK(ipdot_g_old);           
     FREECHECK(ipdot_f_old);           
 
-    //  FREECHECK(ferm_chi_acc);          
-    //  FREECHECK(ferm_phi_acc);          
-    //  FREECHECK(ferm_out_acc);          
-    //    
+    FREECHECK(ferm_chi_acc);          
+    FREECHECK(ferm_phi_acc);          
+    FREECHECK(ferm_out_acc);          
+      
     FREECHECK(ferm_shiftmulti_acc);   
-    //                                
+                                    
     FREECHECK(kloc_r);                
     FREECHECK(kloc_s);                
     FREECHECK(kloc_h);                
     FREECHECK(kloc_p);                
     FREECHECK(k_p_shiftferm);         
-    //                                
+
     FREECHECK(local_sums);            
     FREECHECK(d_local_sums);          
+
 }
 
 #endif

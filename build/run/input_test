@@ -51,7 +51,7 @@ RandGenStatusFilename         rgstatus.bin        #(string)
 
 
 DebugSettings
-VerbosityLv             2
+VerbosityLv             5
 SaveDiagnostics         0
 UseILDG                 0
 #MaxRunTimeS            6000
@@ -76,7 +76,7 @@ DeviceSettings
 device_choice          0
 AsyncFermionComms      0
 AsyncGaugeComms        0
-NRanks                 2
+NRanks                 1
 NProcPerNode           4 
 
 Geometry
