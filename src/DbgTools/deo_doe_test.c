@@ -18,6 +18,7 @@
 #include "../Include/montecarlo_parameters.h"
 #include "../Include/debug.h"
 #include "../OpenAcc/deviceinit.h" 
+#include <sys/time.h>
 
 #include "../Mpi/multidev.h"
 #ifdef MULTIDEVICE
@@ -161,29 +162,55 @@ int main(int argc, char* argv[]){
         copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
         copy(kloc_s[0:1])
         {
-
-            printf("Multiplication by Doe...");
+ 
+            struct timeval t0,t1,t2,t3,t4,t5;
+            int r;
+            printf("Multiplication by Doe, %d times...", mc_params.ntraj);
+            gettimeofday(&t0,NULL);
+            for(r=0; r<mc_params.ntraj; r++)
             acc_Doe(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases);
+            gettimeofday(&t1,NULL);
             printf("Writing file %s.\n", fermionname_doe);
 
 #pragma acc update host(ferm_phi_acc[0:1])
             print_vec3_soa_wrapper(ferm_phi_acc,fermionname_doe);
             print_vec3_soa(ferm_phi_acc,myfermionname_doe);
 
-            printf("Multiplication by Deo...");
+            printf("Multiplication by Deo, %d times...", mc_params.ntraj);
+            gettimeofday(&t2,NULL);
+            for(r=0; r<mc_params.ntraj; r++)
             acc_Deo(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases) ;
+            gettimeofday(&t3,NULL);
             printf("Writing file %s.\n", fermionname_deo);
 #pragma acc update host(ferm_phi_acc[0:1])
             print_vec3_soa_wrapper(ferm_phi_acc,fermionname_deo);
             print_vec3_soa(ferm_phi_acc,myfermionname_deo);
 
-            printf("Multiplication by M^\\dagM+m^2...");
-            fermion_matrix_multiplication(conf_acc, ferm_phi_acc, ferm_chi_acc, kloc_s, &fermions_parameters[0]) ;
+            printf("Multiplication by M^\\dagM+m^2, %d times...", mc_params.ntraj);
+            gettimeofday(&t4,NULL);
+            for(r=0; r<mc_params.ntraj; r++)
+            fermion_matrix_multiplication(conf_acc, ferm_phi_acc, 
+                    ferm_chi_acc, kloc_s, &fermions_parameters[0]) ;
+            gettimeofday(&t5,NULL);
             printf("Writing file %s.\n", fermionname_fulldirac);
 #pragma acc update host(ferm_phi_acc[0:1])
             print_vec3_soa_wrapper(ferm_phi_acc,fermionname_fulldirac);
             print_vec3_soa(ferm_phi_acc,myfermionname_fulldirac);
             printf("MPI%02d: End of data region!\n", devinfo.myrank);
+
+            double dt_doe = (double)(t1.tv_sec - t0.tv_sec) + 
+                ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+            double dt_deo = (double)(t3.tv_sec - t2.tv_sec) + 
+                ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
+            double dt_dirac = (double)(t5.tv_sec - t4.tv_sec) + 
+                ((double)(t5.tv_usec - t4.tv_usec)/1.0e6);
+            printf("Time for 1 application of Doe           : %e\n",
+                    dt_doe/mc_params.ntraj);
+            printf("Time for 1 application of Deo           : %e\n", 
+                    dt_deo/mc_params.ntraj);
+            printf("Time for 1 application of Dirac Operator: %e\n", 
+                    dt_dirac/mc_params.ntraj);
+
         }
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
