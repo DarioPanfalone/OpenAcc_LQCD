@@ -130,7 +130,7 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 #ifdef MULTIDEVICE      
       strcat(tempname,devinfo.myrankstr);           // 
 #endif
-      print_double_soa(fpar[i].phases,tempname);    //
+      // print_double_soa(fpar[i].phases,tempname);    //
   }
 }
 

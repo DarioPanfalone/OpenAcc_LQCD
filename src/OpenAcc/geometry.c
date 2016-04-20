@@ -14,7 +14,7 @@ geom_parameters geom_par;
 void compute_nnp_and_nnm_openacc(void){
   int d0, d1, d2, d3,parity;
 
-
+/*
   char nnfilename[50];
 #ifdef MULTIDEVICE
   sprintf(nnfilename,"nnfile_%s",devinfo.myrankstr);
@@ -23,7 +23,7 @@ void compute_nnp_and_nnm_openacc(void){
 #endif
 
   FILE * nnfile = fopen(nnfilename,"w");
-
+*/
   for(d3=0; d3<nd3; d3++) {
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
@@ -79,6 +79,7 @@ void compute_nnp_and_nnm_openacc(void){
               if(d3p == 0 )  nnp_openacc[idxh][3][parity] = -1;
           }  
 
+/*          
           fprintf(nnfile,"%d %d %d %d    %d    %d   ",d0,d1,d2,d3,parity,idxh);
           int dir;
           for(dir = 0; dir < 4 ;dir ++)
@@ -86,7 +87,7 @@ void compute_nnp_and_nnm_openacc(void){
           for(dir = 0; dir < 4 ;dir ++)
               fprintf(nnfile," %d ", nnp_openacc[idxh][dir][parity]);
           fprintf(nnfile,"\n");
-
+*/
 
 
         }
@@ -94,7 +95,7 @@ void compute_nnp_and_nnm_openacc(void){
     }
   }
 
-  fclose(nnfile);
+//  fclose(nnfile);
 }
 
 void set_geom_glv(geom_parameters* gp){

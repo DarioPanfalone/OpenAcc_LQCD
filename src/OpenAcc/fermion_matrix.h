@@ -39,27 +39,57 @@ void acc_Doe_unsafe( __restrict const su3_soa * const u,
 
 
 
-
+// async on stream 1
 void acc_Deo_bulk( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
         const double_soa * backfield);
 
+// async on stream 1
 void acc_Doe_bulk( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
         const double_soa * backfield);
 
-
+// async on stream 2
 void acc_Deo_d3c( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
         const double_soa * backfield, int off3, int thick3);
 
+// async on stream 2
 void acc_Doe_d3c( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
         const double_soa * backfield, int off3, int thick3);
+
+
+//async on stream 2 
+void acc_Deo_d3p( __restrict const su3_soa * const u, 
+        __restrict vec3_soa * const out, 
+        __restrict const vec3_soa * const in,
+        const double_soa * backfield);
+
+//async on stream 2 
+void acc_Doe_d3p( __restrict const su3_soa * const u,
+        __restrict vec3_soa * const out,
+        __restrict const vec3_soa * const in,
+        const double_soa * backfield);
+
+//async on stream 3 
+void acc_Deo_d3m( __restrict const su3_soa * const u, 
+        __restrict vec3_soa * const out, 
+        __restrict const vec3_soa * const in,
+        const double_soa * backfield);
+
+//async on stream 3 
+void acc_Doe_d3m( __restrict const su3_soa * const u,
+        __restrict vec3_soa * const out,
+        __restrict const vec3_soa * const in,
+        const double_soa * backfield);
+
+
+
 
 
 
