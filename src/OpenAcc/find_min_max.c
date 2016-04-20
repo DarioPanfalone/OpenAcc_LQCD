@@ -5,12 +5,13 @@
 #include "./struct_c_def.h"
 #include "./fermionic_utilities.h"
 #include "./fermion_matrix.h"
+#include <stdio.h>
+#include "./find_min_max.h"
+#include "../Mpi/multidev.h"
+
 #ifndef __GNUC__
  #include "openacc.h"
 #endif
-#include <stdio.h>
-#include "./find_min_max.h"
-
 
 
 extern int verbosity_lv;
@@ -29,7 +30,8 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
   double temp;
   // starting gauss vector p   (deve arrivargli gia' gaussiano)
   norm=sqrt(l2norm2_global(loc_p));
-  if(verbosity_lv>4) printf("(ker_find_max_eigenvalue_openacc) Norm:%lf\n",norm  );
+  if(verbosity_lv>4) printf("MPI%d02: (ker_find_max_eigenvalue_openacc) Norm:%lf\n",
+          norm,devinfo.myrank );
   loop_count=0;
   // loop start
   do{
@@ -50,7 +52,9 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
       old_norm=fabs(old_norm-norm);
       old_norm/=norm;
       loop_count++;
-      if(loop_count %100 == 0 && verbosity_lv > 2)   printf("        iterations of max computat  = %d, norm = %lf, old_norm = %lf\n",loop_count, norm, old_norm);
+      if(loop_count %100 == 0 && verbosity_lv > 2 && 0 == devinfo.myrank )
+          printf("        iterations of max computat  = %d, norm = %lf, old_norm = %lf\n",
+                  loop_count, norm, old_norm);
   } while(old_norm>1.0e-5);    // loop end
   double max=norm;
   return max;
@@ -110,7 +114,7 @@ void find_min_max_eigenvalue_soloopenacc(  __restrict su3_soa * const u,
   minmax[0] = pars->ferm_mass * pars->ferm_mass;
   minmax[1] = ker_find_max_eigenvalue_openacc(u,pars,loc_r,loc_h,loc_p1);
 
-  if(verbosity_lv > 3) printf("    Computed the min and max eigs : [ min= %.18lf; max= %.18lf ]  \n",minmax[0],minmax[1]);
+  if(verbosity_lv > 3 && 0 == devinfo.myrank) printf("    Computed the min and max eigs : [ min= %.18lf; max= %.18lf ]  \n",minmax[0],minmax[1]);
   //  ora il minimo e' messo a m*m, volendo lo si puo' calcolare con la routine seguente.
   //  minmax[0] = ker_find_min_eigenvalue_openacc(u,backfield,pars,loc_r,loc_h,loc_p2,minmax[1]); //--> si potrebbe mettere direttamente mass2
 

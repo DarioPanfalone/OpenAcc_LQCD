@@ -39,12 +39,14 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
 #endif
 #ifdef NORANDOM
-    printf("WELCOME! NORANDOM MODE. (UPDATE_SOLOACC_UNOSTEP_VERSATILE())\n");
+    printf("MIP%02d: WELCOME! NORANDOM MODE. (UPDATE_SOLOACC_UNOSTEP_VERSATILE())\n",
+            devinfo.myrank);
 #endif
 
 
 
-    printf("UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: starting... \n");
+    printf("MPI%02d: UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: starting... \n",
+            devinfo.myrank);
     // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
     int iterazioni = id_iter+1;
     double dt_tot;
@@ -213,7 +215,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
         for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
             for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-                printf("Calculation of chi for fermion %d, copy %d\n", iflav,ips);
+                if(0==devinfo.myrank)
+                    printf("Calculation of chi for fermion %d, copy %d\n", iflav,ips);
 
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
                 // USING STOUTED GAUGE MATRIX

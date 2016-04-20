@@ -155,9 +155,9 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
     int d[4], idxh;
 
     if(verbosity_lv > 2) { 
-        printf("Generating external field (containing staggered phases) ");
-        printf("for flavour %s\n",fermion_parameters->name);
-        printf("Direction mapping  x y z t: %d %d %d %d\n",
+        printf("MPI%02d: Generating external field (containing staggered phases) \
+for flavour %s\n", devinfo.myrank , fermion_parameters->name);
+        if(0== devinfo.myrank ) printf("Direction mapping  x y z t: %d %d %d %d\n",
                 geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap);
 
     }
