@@ -421,6 +421,7 @@ d_complex polyakov_loop3(__restrict const su3_soa * const u)
 
                         parity = (d0+d1+d2+d3) % 2;
                         idxh = snum_acc(d0,d1,d2,d3);  	
+ 
 
                         su3_plk3_su3_soa_multinplace(&loopplk3[parity3],id3h,
                                 &u[3*2+parity],idxh);
