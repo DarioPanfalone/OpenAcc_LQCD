@@ -347,6 +347,8 @@ void fermion_measures( su3_soa * tconf_acc,
     free(rnd_o);
     free(phi_e);
     free(phi_o);
+    free(bnchi_e);
+    free(bnchi_o);
     free(chi_e);
     free(chi_o);
     free(chi2_e);
