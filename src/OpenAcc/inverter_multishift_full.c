@@ -193,7 +193,8 @@ int multishift_invert(__restrict su3_soa * const u,
   }
 
     for(iter=0; iter<approx->approx_order; iter++){
-      printf("MPI%02d: Verifying result, shift %d shift\n", devinfo.myrank, iter);
+        if(verbosity_lv > 4 && 0 == devinfo.myrank)
+            printf("Verifying result, shift %d shift\n", iter);
       assign_in_to_out(&out[iter],loc_p);
       fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
