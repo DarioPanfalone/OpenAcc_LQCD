@@ -30,8 +30,7 @@ double ker_find_max_eigenvalue_openacc(  __restrict su3_soa * const u,
   double temp;
   // starting gauss vector p   (deve arrivargli gia' gaussiano)
   norm=sqrt(l2norm2_global(loc_p));
-  if(verbosity_lv>4) printf("MPI%d02: (ker_find_max_eigenvalue_openacc) Norm:%lf\n",
-          norm,devinfo.myrank );
+  if(verbosity_lv>4) printf("MPI%02d: (ker_find_max_eigenvalue_openacc) Norm:%lf\n",devinfo.myrank,norm );
   loop_count=0;
   // loop start
   do{

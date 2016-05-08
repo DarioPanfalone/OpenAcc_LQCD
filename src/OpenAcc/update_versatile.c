@@ -221,11 +221,14 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
                 // USING STOUTED GAUGE MATRIX
                 multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+                if(0==devinfo.myrank) printf("Inversion performed for fermion %d, copy %d\n", iflav,ips);
                 recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
+                if(0==devinfo.myrank) printf("Calculated chi for fermion %d, copy %d\n", iflav,ips);
+
 
             }
         }// end for iflav
-        if(verbosity_lv > 3) printf(" Computed the fermion CHI : OK \n");
+        if(verbosity_lv > 3) printf("MPI%02d: Computed the fermion CHI : OK \n", devinfo.myrank);
 
         // DILATION OF MOLECULAR DYNAMICS RATIONAL APPROXIMATION
         for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -233,6 +236,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             RationalApprox *approx_md = &(fermions_parameters[iflav].approx_md);
             RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
             rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig[iflav]);
+            printf("MPI%02d: Rescaled Rational Approximation for flavour %d\n", devinfo.myrank, iflav);
 #pragma acc update device(approx_md[0:1])
         }//end for iflav
 

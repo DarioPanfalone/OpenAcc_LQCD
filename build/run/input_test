@@ -50,7 +50,7 @@ RandGenStatusFilename         rgstatus.bin        #(string)
 
 
 
-DebugSettings
+DebugSettings 
 VerbosityLv             5
 SaveDiagnostics         0
 UseILDG                 0
@@ -76,14 +76,14 @@ DeviceSettings
 device_choice          0
 AsyncFermionComms      0
 AsyncGaugeComms        0
-NRanks                 1
+NRanks                 2
 NProcPerNode           4 
 
 Geometry
-nx                     4 
-ny	                   4 
-nz	                   16 
-nt	                   4 
+nx                     8  
+ny	                   8  
+nz	                   8   
+nt	                   8  
 xmap	                1 
 ymap	                2   
 zmap	                3  
