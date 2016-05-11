@@ -540,6 +540,7 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     const int async_comm_fermion_def = 0;
     const int async_comm_gauge_def   = 0;
 
+    int helpmode = (int) (startline == endline);
 #ifndef MULTIDEVICE        
     const int ignored_def = 1; // ignored, actually, but necessary
 #endif
@@ -562,22 +563,23 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
+    if(!helpmode){
 #ifdef MULTIDEVICE
-    if(di->nranks_read != di->nranks){
-        printf("MPI%02d: ERROR: nranks from settings file ", di->myrank);
-        printf("and from MPI_Init() DIFFER!\n");
-        printf("settings: %d , MPI_Init(): %d\n",
-                di->nranks_read, di->nranks);
-        exit(1);
-    }
+        if(di->nranks_read != di->nranks){
+            printf("MPI%02d: ERROR: nranks from settings file ", di->myrank);
+            printf("and from MPI_Init() DIFFER!\n");
+            printf("settings: %d , MPI_Init(): %d\n",
+                    di->nranks_read, di->nranks);
+            res = 1;
+        }
 #else 
-    if(di->nranks_read != 1){
-        printf("ERROR: \'Nranks\' from setting file is %d,", di->nranks_read);
-        printf(" but code is not compiled for muiltidevice\n");
-        res = 1;
-    }
+        if(di->nranks_read != 1){
+            printf("ERROR: \'Nranks\' from setting file is %d,", di->nranks_read);
+            printf(" but code is not compiled for muiltidevice\n");
+            res = 1;
+        }
 #endif
-
+    }
     return res;
 
 }
@@ -725,28 +727,29 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         found_tags = NPMGTYPES;
         for(int ifake_tag = 0; ifake_tag < found_tags; ifake_tag ++){
             tagpositions[ifake_tag] = 0; // so that all scan_group_NV() 
-            // will go into 'help mode'
+                                         // will go into 'help mode'
             tagcounts[ifake_tag] = 1;
             tagtypes[ifake_tag] = ifake_tag ; // so we have a tag for each 
-            // type anyway
+                                              // type anyway
 
         }
         if(0==devinfo.myrank)
-
             helpfile = fopen("template_input", "w");
     }
 
 
     // check if all parameter groups were found
     int check = 1;
-    for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-        if(igrouptype != PMG_FERMION  && igrouptype != PMG_DEBUG )  check *= tagcounts[igrouptype];
-    if(!check){
+    if(!helpmode){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-            if (!tagcounts[igrouptype]) if(0==devinfo.myrank)
-                printf("\"%s\"  parameter group not found!\n",
-                        par_macro_groups_names[igrouptype]);
-        exit(1);
+            if(igrouptype != PMG_FERMION  && igrouptype != PMG_DEBUG )  check *= tagcounts[igrouptype];
+        if(!check){
+            for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
+                if (!tagcounts[igrouptype]) if(0==devinfo.myrank)
+                    printf("\"%s\"  parameter group not found!\n",
+                            par_macro_groups_names[igrouptype]);
+            exit(1);
+        }
     }
 
 
@@ -760,12 +763,13 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         if(helpmode){
             if(0==devinfo.myrank)
             fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
+            printf("Writing %s...\n",  par_macro_groups_names[tagtypes[igroup]]);
         }
-        else 
-            if(0==devinfo.myrank)
-                printf("\nReading %s, lines %d - %d ...\n", 
+        else if(0==devinfo.myrank){
+            printf("\nReading %s, lines %d - %d ...\n", 
                         par_macro_groups_names[tagtypes[igroup]],
                         startline, endline);
+        }
 
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
