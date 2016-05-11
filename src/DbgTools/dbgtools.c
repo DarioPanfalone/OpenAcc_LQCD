@@ -541,7 +541,8 @@ int read_thmat_soa(thmat_soa * ipdot, const char* nomefile)
 void print_double_soa(double_soa * const backfield, const char* nomefile)
 {
 
-    
+   
+    printf("Saving file %s\n", nomefile);
     FILE *fp;
     fp = fopen(nomefile,"w");
     for(int dir = 0 ; dir < 4 ; dir++)
