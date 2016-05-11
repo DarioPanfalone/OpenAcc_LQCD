@@ -89,7 +89,7 @@ int multishift_invert(__restrict su3_soa * const u,
         maxiter = iter+1;
       }
     }
-    if (verbosity_lv > 0 && 0==devinfo.myrank ){
+    if (verbosity_lv > 0 && 0== devinfo.myrank ){
       printf("STARTING CG-M:\nCG\tR");
       for(iter=0; iter<(approx->approx_order); iter++)
           printf("\t%d",iter); printf("\n");
@@ -187,18 +187,24 @@ int multishift_invert(__restrict su3_soa * const u,
   if(verbosity_lv > 0 && 0==devinfo.myrank ) printf("Terminated multishift_invert ( target res = %1.1e,source_norm = %1.1e )\tCG count %d\n", residuo,source_norm,cg);
   // test 
 
-  if(verbosity_lv > 2){
+  if(verbosity_lv > 2 && 0 == devinfo.myrank){
     for(iter=0; iter<approx->approx_order; iter++)printf("\t%d",iter);
     printf("\n");
+  }
 
     for(iter=0; iter<approx->approx_order; iter++){
+        if(verbosity_lv > 4 && 0 == devinfo.myrank)
+            printf("Verifying result, shift %d shift\n", iter);
       assign_in_to_out(&out[iter],loc_p);
       fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
       double  giustoono=l2norm2_global(loc_h)/source_norm;
-      printf("\t%1.1e",sqrt(giustoono)/residuo);
-    }
-    printf("\n");
+  
+  
+      if(verbosity_lv > 2 && 0 == devinfo.myrank){
+          printf("\t%1.1e",sqrt(giustoono)/residuo);
+      } 
+      if(verbosity_lv > 2 && 0 == devinfo.myrank) printf("\n");
   }
 
   return cg;

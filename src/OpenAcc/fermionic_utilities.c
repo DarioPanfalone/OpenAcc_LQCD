@@ -38,7 +38,7 @@ d_complex scal_prod_loc_1Dcut(
     double resI = 0.0;
 
 #pragma acc kernels present(in_vect1) present(in_vect2)
-#pragma acc loop reduction(+:resR) // DEBUG
+#pragma acc loop reduction(+:resR) reduction(+:resI) 
     for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
         d_complex color_sum  =  conj(in_vect1->c0[t]) *  in_vect2->c0[t] ;
         color_sum +=  conj(in_vect1->c1[t]) *  in_vect2->c1[t] ;

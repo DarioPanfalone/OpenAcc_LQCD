@@ -73,6 +73,10 @@ void stout_isotropic(
 
     exp_minus_QA_times_conf(u,tipdot,uprime,auxiliary);
 
+    if(verbosity_lv > 1) 
+        printf("MPI%02d: Isotropic stouting done\n",devinfo.myrank);
+
+
 
 }
 

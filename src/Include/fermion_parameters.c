@@ -118,7 +118,6 @@ int init_ferm_params(ferm_param *fermion_settings){
 void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 {
 
-
     for(int i=0;i<NDiffFlavs;i++){
         fpar[i].phases = &u1_back_phases[i*8];
         init_fermion_backfield(bfpars,&(fpar[i]));

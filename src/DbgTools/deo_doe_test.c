@@ -150,7 +150,7 @@ int main(int argc, char* argv[]){
     communicate_fermion_borders_hostonly(ferm_chi_acc);
 #endif
 
-    print_vec3_soa(ferm_chi_acc,myfermionname);
+//    print_vec3_soa(ferm_chi_acc,myfermionname);
 
 
 
@@ -173,8 +173,8 @@ int main(int argc, char* argv[]){
             printf("Writing file %s.\n", fermionname_doe);
 
 #pragma acc update host(ferm_phi_acc[0:1])
-            print_vec3_soa_wrapper(ferm_phi_acc,fermionname_doe);
-            print_vec3_soa(ferm_phi_acc,myfermionname_doe);
+//            print_vec3_soa_wrapper(ferm_phi_acc,fermionname_doe);
+//            print_vec3_soa(ferm_phi_acc,myfermionname_doe);
 
             printf("Multiplication by Deo, %d times...", mc_params.ntraj);
             gettimeofday(&t2,NULL);
@@ -183,8 +183,8 @@ int main(int argc, char* argv[]){
             gettimeofday(&t3,NULL);
             printf("Writing file %s.\n", fermionname_deo);
 #pragma acc update host(ferm_phi_acc[0:1])
-            print_vec3_soa_wrapper(ferm_phi_acc,fermionname_deo);
-            print_vec3_soa(ferm_phi_acc,myfermionname_deo);
+//            print_vec3_soa_wrapper(ferm_phi_acc,fermionname_deo);
+//            print_vec3_soa(ferm_phi_acc,myfermionname_deo);
 
             printf("Multiplication by M^\\dagM+m^2, %d times...", mc_params.ntraj);
             gettimeofday(&t4,NULL);
@@ -194,8 +194,8 @@ int main(int argc, char* argv[]){
             gettimeofday(&t5,NULL);
             printf("Writing file %s.\n", fermionname_fulldirac);
 #pragma acc update host(ferm_phi_acc[0:1])
-            print_vec3_soa_wrapper(ferm_phi_acc,fermionname_fulldirac);
-            print_vec3_soa(ferm_phi_acc,myfermionname_fulldirac);
+//            print_vec3_soa_wrapper(ferm_phi_acc,fermionname_fulldirac);
+//            print_vec3_soa(ferm_phi_acc,myfermionname_fulldirac);
             printf("MPI%02d: End of data region!\n", devinfo.myrank);
 
             double dt_doe = (double)(t1.tv_sec - t0.tv_sec) + 

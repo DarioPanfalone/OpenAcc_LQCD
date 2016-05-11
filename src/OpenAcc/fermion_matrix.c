@@ -165,15 +165,20 @@ inline void acc_Deo( __restrict const su3_soa * const u,
 
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
         MPI_Request send_border_requests[6], recv_border_requests[6];
-        int ir;
 
-        acc_Deo_d3c(u, out, in, backfield,HALO_WIDTH,1);
-        acc_Deo_d3c(u, out, in, backfield,nd3-HALO_WIDTH-1,1);
+//        acc_Deo_d3c(u, out, in, backfield,HALO_WIDTH,1);
+//        acc_Deo_d3c(u, out, in, backfield,nd3-HALO_WIDTH-1,1);
+        acc_Deo_d3p(u, out, in, backfield);
+        acc_Deo_d3m(u, out, in, backfield);
+
+#pragma acc wait(2)
+#pragma acc wait(3)
         communicate_fermion_borders_async(out,send_border_requests,
                 recv_border_requests);
         acc_Deo_bulk(u, out, in, backfield);
         MPI_Waitall(6,recv_border_requests,MPI_STATUSES_IGNORE);
         MPI_Waitall(6,send_border_requests,MPI_STATUSES_IGNORE);
+#pragma acc wait(1)
 #else 
         printf("ERROR:Async transfer involving accelerators require USE_MPI_CUDA_AWARE!\n");
         printf("EXITING NOW\n");
@@ -202,15 +207,20 @@ inline void acc_Doe( __restrict const su3_soa * const u,
 
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
         MPI_Request send_border_requests[6], recv_border_requests[6];
-        int ir;
 
-        acc_Doe_d3c(u, out, in, backfield,HALO_WIDTH,1);
-        acc_Doe_d3c(u, out, in, backfield,nd3-HALO_WIDTH-1,1);
+//        acc_Doe_d3c(u, out, in, backfield,HALO_WIDTH,1);
+//        acc_Doe_d3c(u, out, in, backfield,nd3-HALO_WIDTH-1,1);
+        acc_Doe_d3p(u, out, in, backfield);
+        acc_Doe_d3m(u, out, in, backfield);
+
+#pragma acc wait(2)
+#pragma acc wait(3)
         communicate_fermion_borders_async(out,send_border_requests,
                 recv_border_requests);
         acc_Doe_bulk(u, out, in, backfield);
         MPI_Waitall(6,recv_border_requests,MPI_STATUSES_IGNORE);
         MPI_Waitall(6,send_border_requests,MPI_STATUSES_IGNORE);
+#pragma acc wait(1)
 #else 
         printf("ERROR:Async transfer involving accelerators require USE_MPI_CUDA_AWARE!\n");
         printf("EXITING NOW\n");
@@ -235,7 +245,7 @@ void acc_Deo_bulk( __restrict const su3_soa * const u,
         const double_soa * backfield)
 {
     int hd0, d1, d2, d3;
-#pragma acc kernels present(u) present(out) present(in) present(backfield)
+#pragma acc kernels present(u) present(out) present(in) present(backfield) async(1)
 #pragma acc loop independent gang
     for(d3=D3_HALO+1; d3<D3_HALO+1+LOC_N3-2;d3++) {
 #pragma acc loop independent gang vector
@@ -292,7 +302,7 @@ void acc_Doe_bulk( __restrict const su3_soa * const u,
         const double_soa * backfield)
 {
     int hd0, d1, d2, d3;
-#pragma acc kernels present(u) present(out) present(in) present(backfield)
+#pragma acc kernels present(u) present(out) present(in) present(backfield) async(1)
 #pragma acc loop independent gang
     for(d3=D3_HALO+1; d3<D3_HALO+1+LOC_N3-2;d3++) {
 #pragma acc loop independent gang vector
@@ -355,7 +365,7 @@ void acc_Deo_d3c( __restrict const su3_soa * const u,
 {
     int hd0, d1, d2, d3;
     for(d3=off3; d3<off3+thick3;d3++) {
-#pragma acc kernels present(u) present(out) present(in) present(backfield)
+#pragma acc kernels present(u) present(out) present(in) present(backfield) async(2)
 #pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector
@@ -411,7 +421,7 @@ void acc_Doe_d3c( __restrict const su3_soa * const u,
 {
     int hd0, d1, d2, d3;
     for(d3=off3; d3<off3+thick3;d3++) {
-#pragma acc kernels present(u) present(out) present(in) present(backfield)
+#pragma acc kernels present(u) present(out) present(in) present(backfield) async(2)
 #pragma acc loop independent gang vector
         for(d2=0; d2<nd2; d2++) {
 #pragma acc loop independent gang vector
@@ -462,6 +472,239 @@ void acc_Doe_d3c( __restrict const su3_soa * const u,
 
                 }}}}
 }
+
+void acc_Deo_d3p( __restrict const su3_soa * const u, 
+        __restrict vec3_soa * const out, 
+        __restrict const vec3_soa * const in,
+        const double_soa * backfield)
+{
+    int hd0, d1, d2;
+    const int d3 = nd3-D3_HALO-1;
+    
+#pragma acc kernels present(u) present(out) present(in) present(backfield) async(2)
+#pragma acc loop independent gang vector
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector
+            for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
+                for(hd0=0; hd0 < nd0h; hd0++) {
+
+
+                    DEO_DOE_PREAMBLE;
+                    // the following depends on the function
+                    // (d0+d1+d2+d3) even
+                    d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
+
+                    d0m = d0 - 1;
+                    d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
+                    d0p = d0 + 1;
+                    d0p *= (((d0p-nd0) >> 31) & 0x1);
+
+#define SUB_RESULT_DEO(matdir, indexm) \
+                    aux = subResult(aux,conjmat_vec_mul_arg( &u[matdir],indexm,\
+                                in,indexm,&backfield[matdir]));  
+                    SUB_RESULT_DEO(1,snum_acc(d0m,d1,d2,d3));
+                    SUB_RESULT_DEO(3,snum_acc(d0,d1m,d2,d3));
+                    SUB_RESULT_DEO(5,snum_acc(d0,d1,d2m,d3));
+                    SUB_RESULT_DEO(7,snum_acc(d0,d1,d2,d3m));
+#undef SUB_RESULT_DEO
+
+                    //////////////////////////////////////////////////////////////
+                    idxh = snum_acc(d0,d1,d2,d3);
+
+#define SUM_RESULT_DEO(matdir, indexp) \
+                    aux   = sumResult(aux, mat_vec_mul_arg(&u[matdir],idxh,\
+                                in,indexp,&backfield[matdir])); 
+                    SUM_RESULT_DEO(0,snum_acc(d0p,d1,d2,d3));
+                    SUM_RESULT_DEO(2,snum_acc(d0,d1p,d2,d3));
+                    SUM_RESULT_DEO(4,snum_acc(d0,d1,d2p,d3));
+                    SUM_RESULT_DEO(6,snum_acc(d0,d1,d2,d3p));
+#undef SUM_RESULT_DEO
+
+                    ///////////////////////////////////////////////////////////// 
+
+                    out->c0[idxh] = (aux.c0)*0.5;
+                    out->c1[idxh] = (aux.c1)*0.5;
+                    out->c2[idxh] = (aux.c2)*0.5;
+
+                }}}
+}
+
+void acc_Doe_d3p( __restrict const su3_soa * const u,
+        __restrict vec3_soa * const out,
+        __restrict const vec3_soa * const in,
+        const double_soa * backfield)
+{
+    int hd0, d1, d2;
+    const int d3 = nd3-D3_HALO-1;
+
+#pragma acc kernels present(u) present(out) present(in) present(backfield) async(2)
+#pragma acc loop independent gang vector
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector
+            for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
+                for(hd0=0; hd0 < nd0h; hd0++) {
+
+
+                    DEO_DOE_PREAMBLE;
+
+                    // The following depends on the function
+                    // (d0+d1+d2+d3) odd
+                    d0 = 2*hd0 + ((d1+d2+d3+1) & 0x1);
+
+                    d0m = d0 - 1;
+                    d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
+                    d0p = d0 + 1;
+                    d0p *= (((d0p-nd0) >> 31) & 0x1);
+
+#define SUB_RESULT_DOE(matdir,index)\
+                    aux = subResult(aux, conjmat_vec_mul_arg( &u[matdir],index,\
+                                in,index,&backfield[matdir]));
+                    SUB_RESULT_DOE(0,snum_acc(d0m,d1,d2,d3));
+                    SUB_RESULT_DOE(2,snum_acc(d0,d1m,d2,d3));
+                    SUB_RESULT_DOE(4,snum_acc(d0,d1,d2m,d3));
+                    SUB_RESULT_DOE(6,snum_acc(d0,d1,d2,d3m));
+#undef SUB_RESULT_DOE        
+
+                    ///////////////////////////////////////////////////////////////////
+
+                    idxh = snum_acc(d0,d1,d2,d3);
+
+#define SUM_RESULT_DOE(matdir,index)\
+                    aux   = sumResult(aux, mat_vec_mul_arg(&u[matdir],idxh,\
+                                in,index,&backfield[matdir]));
+
+                    SUM_RESULT_DOE(1,snum_acc(d0p,d1,d2,d3));
+                    SUM_RESULT_DOE(3,snum_acc(d0,d1p,d2,d3));
+                    SUM_RESULT_DOE(5,snum_acc(d0,d1,d2p,d3));
+                    SUM_RESULT_DOE(7,snum_acc(d0,d1,d2,d3p));
+#undef SUM_RESULT_DOE
+
+                    /////////////////////////////////////////////////////////////////
+
+                    out->c0[idxh] = aux.c0*0.5;
+                    out->c1[idxh] = aux.c1*0.5;
+                    out->c2[idxh] = aux.c2*0.5;
+
+                }}}
+}
+
+void acc_Deo_d3m( __restrict const su3_soa * const u, 
+        __restrict vec3_soa * const out, 
+        __restrict const vec3_soa * const in,
+        const double_soa * backfield)
+{
+    int hd0, d1, d2;
+    const int  d3 = D3_HALO;
+#pragma acc kernels present(u) present(out) present(in) present(backfield) async(3)
+#pragma acc loop independent gang vector
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector
+            for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
+                for(hd0=0; hd0 < nd0h; hd0++) {
+
+
+                    DEO_DOE_PREAMBLE;
+                    // the following depends on the function
+                    // (d0+d1+d2+d3) even
+                    d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
+
+                    d0m = d0 - 1;
+                    d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
+                    d0p = d0 + 1;
+                    d0p *= (((d0p-nd0) >> 31) & 0x1);
+
+#define SUB_RESULT_DEO(matdir, indexm) \
+                    aux = subResult(aux,conjmat_vec_mul_arg( &u[matdir],indexm,\
+                                in,indexm,&backfield[matdir]));  
+                    SUB_RESULT_DEO(1,snum_acc(d0m,d1,d2,d3));
+                    SUB_RESULT_DEO(3,snum_acc(d0,d1m,d2,d3));
+                    SUB_RESULT_DEO(5,snum_acc(d0,d1,d2m,d3));
+                    SUB_RESULT_DEO(7,snum_acc(d0,d1,d2,d3m));
+#undef SUB_RESULT_DEO
+
+                    //////////////////////////////////////////////////////////////
+                    idxh = snum_acc(d0,d1,d2,d3);
+
+#define SUM_RESULT_DEO(matdir, indexp) \
+                    aux   = sumResult(aux, mat_vec_mul_arg(&u[matdir],idxh,\
+                                in,indexp,&backfield[matdir])); 
+                    SUM_RESULT_DEO(0,snum_acc(d0p,d1,d2,d3));
+                    SUM_RESULT_DEO(2,snum_acc(d0,d1p,d2,d3));
+                    SUM_RESULT_DEO(4,snum_acc(d0,d1,d2p,d3));
+                    SUM_RESULT_DEO(6,snum_acc(d0,d1,d2,d3p));
+#undef SUM_RESULT_DEO
+
+                    ///////////////////////////////////////////////////////////// 
+
+                    out->c0[idxh] = (aux.c0)*0.5;
+                    out->c1[idxh] = (aux.c1)*0.5;
+                    out->c2[idxh] = (aux.c2)*0.5;
+
+                }}}
+}
+
+void acc_Doe_d3m( __restrict const su3_soa * const u,
+        __restrict vec3_soa * const out,
+        __restrict const vec3_soa * const in,
+        const double_soa * backfield)
+{
+    int hd0, d1, d2;
+    const int  d3 = D3_HALO;
+#pragma acc kernels present(u) present(out) present(in) present(backfield) async(3)
+#pragma acc loop independent gang vector
+        for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent gang vector
+            for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
+                for(hd0=0; hd0 < nd0h; hd0++) {
+
+
+                    DEO_DOE_PREAMBLE;
+
+                    // The following depends on the function
+                    // (d0+d1+d2+d3) odd
+                    d0 = 2*hd0 + ((d1+d2+d3+1) & 0x1);
+
+                    d0m = d0 - 1;
+                    d0m = d0m + (((d0m >> 31) & 0x1) * nd0);
+                    d0p = d0 + 1;
+                    d0p *= (((d0p-nd0) >> 31) & 0x1);
+
+#define SUB_RESULT_DOE(matdir,index)\
+                    aux = subResult(aux, conjmat_vec_mul_arg( &u[matdir],index,\
+                                in,index,&backfield[matdir]));
+                    SUB_RESULT_DOE(0,snum_acc(d0m,d1,d2,d3));
+                    SUB_RESULT_DOE(2,snum_acc(d0,d1m,d2,d3));
+                    SUB_RESULT_DOE(4,snum_acc(d0,d1,d2m,d3));
+                    SUB_RESULT_DOE(6,snum_acc(d0,d1,d2,d3m));
+#undef SUB_RESULT_DOE        
+
+                    ///////////////////////////////////////////////////////////////////
+
+                    idxh = snum_acc(d0,d1,d2,d3);
+
+#define SUM_RESULT_DOE(matdir,index)\
+                    aux   = sumResult(aux, mat_vec_mul_arg(&u[matdir],idxh,\
+                                in,index,&backfield[matdir]));
+
+                    SUM_RESULT_DOE(1,snum_acc(d0p,d1,d2,d3));
+                    SUM_RESULT_DOE(3,snum_acc(d0,d1p,d2,d3));
+                    SUM_RESULT_DOE(5,snum_acc(d0,d1,d2p,d3));
+                    SUM_RESULT_DOE(7,snum_acc(d0,d1,d2,d3p));
+#undef SUM_RESULT_DOE
+
+                    /////////////////////////////////////////////////////////////////
+
+                    out->c0[idxh] = aux.c0*0.5;
+                    out->c1[idxh] = aux.c1*0.5;
+                    out->c2[idxh] = aux.c2*0.5;
+
+                }}}
+}
+
 
 
 
