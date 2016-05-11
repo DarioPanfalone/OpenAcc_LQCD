@@ -111,7 +111,7 @@ int main(int argc, char* argv[]){
     // Intel XeonPhi
     //acc_device_t my_device_type = acc_device_xeonphi;
     // Select device ID
-    printf("MPI%02d: Selecting device.\n");
+    printf("MPI%02d: Selecting device.\n", devinfo.myrank);
 #ifdef MULTIDEVICE
     select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
 #else
