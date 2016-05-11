@@ -183,33 +183,33 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
             if(par_infos[ipar].is_optional) switch(par_infos[ipar].type){
                 case TYPE_INT:
                     if(0==devinfo.myrank) fprintf(
-                                helpfile,"%-30s%-20d#%s\n",
-                                par_infos[ipar].name,
-                                *((const int *) par_infos[ipar].default_value),
-                                type_strings[par_infos[ipar].type]);
+                            helpfile,"%-30s%-20d#%s\n",
+                            par_infos[ipar].name,
+                            *((const int *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
                     break;
                 case TYPE_DOUBLE:
                     if(0==devinfo.myrank) fprintf(
-                                helpfile,"%-30s%-20e#%s\n",
-                                par_infos[ipar].name,
-                                *((const double *) par_infos[ipar].default_value),
-                                type_strings[par_infos[ipar].type]);
+                            helpfile,"%-30s%-20e#%s\n",
+                            par_infos[ipar].name,
+                            *((const double *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
                     break;
                 case TYPE_STR:
                     if(0==devinfo.myrank) fprintf(
-                                helpfile,"%-30s%-20s#%s\n",
-                                par_infos[ipar].name,
-                                ((const char *) par_infos[ipar].default_value),
-                                type_strings[par_infos[ipar].type]);
+                            helpfile,"%-30s%-20s#%s\n",
+                            par_infos[ipar].name,
+                            ((const char *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
 
 
                     break;
             }
             else 
                 if(0==devinfo.myrank) fprintf(
-                            helpfile,"%-50s#%s\n",
-                            par_infos[ipar].name,
-                            type_strings[par_infos[ipar].type]);
+                        helpfile,"%-50s#%s\n",
+                        par_infos[ipar].name,
+                        type_strings[par_infos[ipar].type]);
 
         }
         return 0;
@@ -291,7 +291,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 int reads = sscanf(filelines[iline],"%s", word);
                 if(reads==1){
                     if(0==devinfo.myrank)
-                    printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
+                        printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
                     printf("%s\n", filelines[iline]);
                     return 1;
                 }
@@ -727,10 +727,10 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         found_tags = NPMGTYPES;
         for(int ifake_tag = 0; ifake_tag < found_tags; ifake_tag ++){
             tagpositions[ifake_tag] = 0; // so that all scan_group_NV() 
-                                         // will go into 'help mode'
+            // will go into 'help mode'
             tagcounts[ifake_tag] = 1;
             tagtypes[ifake_tag] = ifake_tag ; // so we have a tag for each 
-                                              // type anyway
+            // type anyway
 
         }
         if(0==devinfo.myrank)
@@ -761,14 +761,15 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
         if(helpmode){
-            if(0==devinfo.myrank)
-            fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
-            printf("Writing %s...\n",  par_macro_groups_names[tagtypes[igroup]]);
+            if(0==devinfo.myrank){
+                fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
+                printf("Writing %s...\n",  par_macro_groups_names[tagtypes[igroup]]);
+            }
         }
         else if(0==devinfo.myrank){
             printf("\nReading %s, lines %d - %d ...\n", 
-                        par_macro_groups_names[tagtypes[igroup]],
-                        startline, endline);
+                    par_macro_groups_names[tagtypes[igroup]],
+                    startline, endline);
         }
 
         switch(tagtypes[igroup]){
