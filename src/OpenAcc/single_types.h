@@ -39,7 +39,7 @@ typedef struct single_thmat_t {
 } single_thmat;
 
 // 3rd row reconstruction on site
-void static inline rebuild3row(single_su3 *AUX){
+static inline void rebuild3row(single_su3 *AUX){
 
   AUX->comp[2][0] = conj(AUX->comp[0][1] * AUX->comp[1][2] - AUX->comp[0][2] * AUX->comp[1][1]);
   AUX->comp[2][1] = conj(AUX->comp[0][2] * AUX->comp[1][0] - AUX->comp[0][0] * AUX->comp[1][2]);

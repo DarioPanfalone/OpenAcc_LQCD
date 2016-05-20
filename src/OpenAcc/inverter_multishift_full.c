@@ -1,5 +1,5 @@
-#ifndef INVERTER_SHIFT_MULTI_FULL_C_
-#define INVERTER_SHIFT_MULTI_FULL_C_
+#ifndef INVERTER_MULTISHIFT_FULL_C_
+#define INVERTER_MULTISHIFT_FULL_C_
 
 #include "../Include/common_defines.h"
 #include "./struct_c_def.h"
