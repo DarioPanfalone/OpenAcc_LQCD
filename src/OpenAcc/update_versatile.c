@@ -397,6 +397,10 @@ gettimeofday ( &t3, NULL );
       fclose(foutfile);
   }
 
+  for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+      free(minmaxeig[iflav]);
+  free(minmaxeig);
+
 
 
   return acc;
