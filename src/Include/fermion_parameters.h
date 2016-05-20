@@ -3,6 +3,7 @@
 
 #include "../RationalApprox/rationalapprox.h"
 #include "../OpenAcc/struct_c_def.h"
+#include "../OpenAcc/sp_struct_c_def.h"
 #include "../OpenAcc/backfield.h"
 
 typedef struct ferm_param_t{
@@ -18,6 +19,13 @@ typedef struct ferm_param_t{
   double_soa * phases; //this incorporates staggered phases,
                        // external u(1) fields and 
                        // imaginary chemical potential
+
+  float_soa * phases_f;//this incorporates staggered phases,
+                       // external u(1) fields and 
+                       // imaginary chemical potential
+
+
+
 
   RationalApprox approx_fi_mother; // first inv   -> mother
   RationalApprox approx_md_mother; // md approx   -> mother

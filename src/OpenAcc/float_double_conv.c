@@ -2,6 +2,7 @@
 #define FLOAT_DOUBLE_CONV_C
 
 #include "../OpenAcc/struct_c_def.h"
+#include "../OpenAcc/sp_struct_c_def.h"
 #include "../OpenAcc/float_double_conv.h"
 
 ////////////  VEC3_SOA    float <==> double conversions /////////////////////////////

@@ -143,6 +143,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
     double chpotphase = fermion_parameters->ferm_im_chem_pot/geom_par.gnt; 
 
     double_soa * phases = fermion_parameters->phases;
+    float_soa * phases_f = fermion_parameters->phases_f;
 
     int x, y, z, t, parity;
     int d[4], idxh;
@@ -190,6 +191,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.xmap*2+parity].d[idxh]= acc_twopi*arg; 
+                    phases_f[geom_par.xmap*2+parity].d[idxh]= acc_twopi*arg; 
 
 
                     ////////Y-oriented/////////
@@ -207,6 +209,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.ymap*2+parity].d[idxh]=acc_twopi*arg;
+                    phases_f[geom_par.ymap*2+parity].d[idxh]=acc_twopi*arg;
 
                     
                     ////////Z-oriented////////
@@ -224,6 +227,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.zmap*2+parity].d[idxh]=acc_twopi*arg;
+                    phases_f[geom_par.zmap*2+parity].d[idxh]=acc_twopi*arg;
 
 
                     ///////T-oriented////////
@@ -242,6 +246,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.tmap*2+parity].d[idxh]=acc_twopi*arg;
+                    phases_f[geom_par.tmap*2+parity].d[idxh]=acc_twopi*arg;
     } // d3,d2,d1,d0 loops
 
     int dir;
