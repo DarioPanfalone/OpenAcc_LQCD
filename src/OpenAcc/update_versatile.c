@@ -9,8 +9,11 @@
 #include "./find_min_max.h"
 #include "./rettangoli.h"
 #include "./alloc_vars.h"
+#include "./sp_alloc_vars.h"
+#include "./float_double_conv.h"
 #include "./stouting.h"
 #include "./md_integrator.h"
+#include "./sp_md_integrator.h"
 #include "./su3_utilities.h"
 #include "./su3_measurements.h"
 #include "./inverter_multishift_full.h"
@@ -36,6 +39,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
   
 #ifdef STOUT_FERMIONS        
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
+    su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_f_arr_f;
 #endif
 #ifdef NORANDOM
     printf("WELCOME! NORANDOM MODE. (UPDATE_SOLOACC_UNOSTEP_VERSATILE())\n");
@@ -81,8 +85,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     if(verbosity_lv > 1) printf("Backup copy of the initial gauge conf : OK \n");
 
   }
-//#pragma acc data copyin(delta[0:7]) // should not be needed?
-  {
   
     gettimeofday ( &t1, NULL );
 
@@ -224,18 +226,57 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig[iflav]);
 #pragma acc update device(approx_md[0:1])
     }//end for iflav
+   
+
+    
     
     // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
-    multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
+    if(md_parameters.singlePrecMD){
+        printf("SINGLE PRECISION MOLECULAR DYNAMICS...\n");
+
+        // conversion double to float
+
+        su3_soa_f * tconf_acc_f = conf_acc_f;
+
+
+        convert_double_to_float_thmat_soa(momenta,momenta_f);
+        convert_double_to_float_su3_soa(tconf_acc,tconf_acc_f);
+        int ips;
+        for(ips = 0; ips < NPS_tot;ips++)
+            convert_double_to_float_vec3_soa(&ferm_chi_acc[ips],&ferm_chi_acc_f[ips]);
+
+
+        multistep_2MN_SOLOOPENACC_f(ipdot_acc_f,tconf_acc_f,
 #ifdef STOUT_FERMIONS
-			      tstout_conf_acc_arr,
-			      auxbis_conf_acc, // globale
+                tstout_conf_acc_arr_f,
+                auxbis_conf_acc_f, // globale
 #endif
-			      aux_conf_acc,fermions_parameters,NDiffFlavs,
-			      ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-			      k_p_shiftferm,momenta,local_sums,res_md);
-    
-    if(verbosity_lv > 1) printf(" Molecular Dynamics Completed \n");
+                aux_conf_acc_f,fermions_parameters,NDiffFlavs,
+                ferm_chi_acc_f,ferm_shiftmulti_acc_f,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
+                k_p_shiftferm_f,momenta_f,local_sums_f,res_md);
+
+
+        convert_float_to_double_thmat_soa(momenta_f,momenta);
+        convert_float_to_double_su3_soa(tconf_acc_f,tconf_acc);
+
+
+        if(verbosity_lv > 1) printf(" Single Precision Molecular Dynamics Completed \n");
+    } 
+    else{
+
+        printf("DOUBLE PRECISION MOLECULAR DYNAMICS...\n");
+
+        multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
+#ifdef STOUT_FERMIONS
+                tstout_conf_acc_arr,
+                auxbis_conf_acc, // globale
+#endif
+                aux_conf_acc,fermions_parameters,NDiffFlavs,
+                ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
+                k_p_shiftferm,momenta,local_sums,res_md);
+
+        if(verbosity_lv > 1) printf(" Double Precision Molecular Dynamics Completed \n");
+    }
 
 
 #ifdef STOUT_FERMIONS
@@ -338,7 +379,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 	}
     }
     gettimeofday ( &t2, NULL );
-  }// end pragma acc data copyin(delta[0:7])
   
 gettimeofday ( &t3, NULL );
   

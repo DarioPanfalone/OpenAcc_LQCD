@@ -23,7 +23,7 @@
 #define GAUGE_ACT_TLSM
 //#define GAUGE_ACT_WILSON
 
-#define STOUT_FERMIONS
+//#define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 2
 #endif

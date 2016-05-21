@@ -6,7 +6,7 @@
 #include "../OpenAcc/float_double_conv.h"
 
 ////////////  VEC3_SOA    float <==> double conversions /////////////////////////////
-void convert_float_to_double_vec3_soa(__restrict f_vec3_soa * f_var,
+void convert_float_to_double_vec3_soa(__restrict vec3_f_soa * f_var,
 				      __restrict   vec3_soa * d_var){
   int t;
 #pragma acc kernels present(f_var) present(d_var)
@@ -18,7 +18,7 @@ void convert_float_to_double_vec3_soa(__restrict f_vec3_soa * f_var,
   }
 }
 void convert_double_to_float_vec3_soa(__restrict   vec3_soa * d_var,
-				      __restrict f_vec3_soa * f_var){
+				      __restrict vec3_f_soa * f_var){
   int t;
 #pragma acc kernels present(f_var) present(d_var)
 #pragma acc loop independent
@@ -29,14 +29,14 @@ void convert_double_to_float_vec3_soa(__restrict   vec3_soa * d_var,
   }
 }
 ////////////  VEC3    float <==> double conversions /////////////////////////////
-void convert_float_to_double_vec3(__restrict f_vec3 * f_var,
+void convert_float_to_double_vec3(__restrict vec3_f * f_var,
 				  __restrict   vec3 * d_var){
   d_var->c0 = ((double)crealf(f_var->c0)) + ((double)cimagf(f_var->c0))*I;
   d_var->c1 = ((double)crealf(f_var->c1)) + ((double)cimagf(f_var->c1))*I;
   d_var->c2 = ((double)crealf(f_var->c2)) + ((double)cimagf(f_var->c2))*I;
 }
 void convert_double_to_float_vec3(__restrict   vec3 * d_var,
-				  __restrict f_vec3 * f_var){
+				  __restrict vec3_f * f_var){
     f_var->c0 = ((float)creal(d_var->c0)) + ((float)cimag(d_var->c0))*I;
     f_var->c1 = ((float)creal(d_var->c1)) + ((float)cimag(d_var->c1))*I;
     f_var->c2 = ((float)creal(d_var->c2)) + ((float)cimag(d_var->c2))*I;
@@ -82,7 +82,7 @@ void convert_double_to_float_real_soa(__restrict double_soa * d_var,
   }
 }  
 ////////////  SU3_SOA    float <==> double conversions /////////////////////////////
-void convert_float_to_double_su3_soa(__restrict f_su3_soa * f_var,
+void convert_float_to_double_su3_soa(__restrict su3_soa_f * f_var,
 				     __restrict   su3_soa * d_var){
   int t;
 #pragma acc kernels present(f_var) present(d_var)
@@ -102,7 +102,7 @@ void convert_float_to_double_su3_soa(__restrict f_su3_soa * f_var,
   }
 }
 void convert_double_to_float_su3_soa(__restrict   su3_soa * d_var,
-				     __restrict f_su3_soa * f_var){
+				     __restrict su3_soa_f * f_var){
   int t;
 #pragma acc kernels present(f_var) present(d_var)
 #pragma acc loop independent
@@ -121,7 +121,7 @@ void convert_double_to_float_su3_soa(__restrict   su3_soa * d_var,
   }
 }
 ////////////  TAMAT_SOA    float <==> double conversions /////////////////////////////
-void convert_float_to_double_tamat_soa(__restrict f_tamat_soa * f_var,
+void convert_float_to_double_tamat_soa(__restrict tamat_soa_f * f_var,
 				       __restrict   tamat_soa * d_var){
   int t;
 #pragma acc kernels present(f_var) present(d_var)
@@ -135,7 +135,7 @@ void convert_float_to_double_tamat_soa(__restrict f_tamat_soa * f_var,
   }
 }
 void convert_double_to_float_tamat_soa(__restrict   tamat_soa * d_var,
-				       __restrict f_tamat_soa * f_var){
+				       __restrict tamat_soa_f * f_var){
   int t;
 #pragma acc kernels present(f_var) present(d_var)
 #pragma acc loop independent
@@ -148,7 +148,7 @@ void convert_double_to_float_tamat_soa(__restrict   tamat_soa * d_var,
   }
 }
 ////////////  THMAT_SOA    float <==> double conversions /////////////////////////////
-void convert_float_to_double_thmat_soa(__restrict f_thmat_soa * f_var,
+void convert_float_to_double_thmat_soa(__restrict thmat_soa_f * f_var,
 				       __restrict   thmat_soa * d_var){
   int t;
 #pragma acc kernels present(f_var) present(d_var)
@@ -162,7 +162,7 @@ void convert_float_to_double_thmat_soa(__restrict f_thmat_soa * f_var,
   }
 }
 void convert_double_to_float_thmat_soa(__restrict   thmat_soa * d_var,
-				       __restrict f_thmat_soa * f_var){
+				       __restrict thmat_soa_f * f_var){
   int t;
 #pragma acc kernels present(f_var) present(d_var)
 #pragma acc loop independent

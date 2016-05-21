@@ -21,6 +21,7 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "./struct_c_def.h"
 #include "./alloc_vars.h"
+#include "./sp_alloc_vars.h"
 #include "./io.h"
 #include "./fermionic_utilities.h"
 #include "./su3_utilities.h"
@@ -37,6 +38,7 @@
 #include "../Meas/ferm_meas.h"
 #include "./stouting.h"
 #include "./fermion_force.h"
+#include "./md_parameters.h"
 #include "./md_integrator.h"
 #include "./update_versatile.h"
 #include "./cooling.h"
@@ -93,7 +95,9 @@ int main(int argc, char* argv[]){
 
 
     mem_alloc();
-    printf("Allocazione della memoria : OK \n");
+    printf("Allocazione della memoria (double) : OK \n");
+    mem_alloc_f();
+    printf("Allocazione della memoria (float): OK \n");
     compute_nnp_and_nnm_openacc();
     printf("nn computation : OK \n");
     init_all_u1_phases(backfield_parameters,fermions_parameters);
@@ -149,12 +153,28 @@ int main(int argc, char* argv[]){
     copyin(fermions_parameters[0:NDiffFlavs])\
     copyin(deltas_Omelyan[0:7]) \
     copyin(u1_back_phases[0:8*NDiffFlavs])\
-    create(ipdot_g_old[0:8]) create(ipdot_f_old[0:8])
+    create(ipdot_g_old[0:8]) create(ipdot_f_old[0:8])\
+    create(conf_acc_f[0:8]) \
+    create(ipdot_acc_f[0:8]) create(aux_conf_acc_f[0:8])\
+    create(auxbis_conf_acc_f[0:8]) create(ferm_chi_acc_f[0:NPS_tot])\
+    create(ferm_phi_acc_f[0:NPS_tot])  create(ferm_out_acc_f[0:NPS_tot])\
+    create(ferm_shiftmulti_acc_f[0:max_ps*MAX_APPROX_ORDER])\
+    create(kloc_r_f[0:1])  create(kloc_h_f[0:1])  create(kloc_s_f[0:1])\
+    create(kloc_p_f[0:1])  create(k_p_shiftferm_f[0:MAX_APPROX_ORDER])\
+    create(momenta_f[0:8]) \
+    create(local_sums_f[0:2]) create(d_local_sums_f[0:2])\
+    copyin(deltas_Omelyan_f[0:7]) \
+    copyin(u1_back_phases_f[0:8*NDiffFlavs])\
+    create(ipdot_g_old_f[0:8]) create(ipdot_f_old_f[0:8])
+
     {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
         create(gstout_conf_acc_arr[0:(8*act_params.stout_steps)])\
-        create(glocal_staples[0:8]) create(gipdot[0:8]) 
+        create(glocal_staples[0:8]) create(gipdot[0:8])\
+        create(aux_th_f[0:8]) create(aux_ta_f[0:8])\
+        create(gstout_conf_acc_arr_f[0:(8*act_params.stout_steps)])\
+        create(glocal_staples_f[0:8]) create(gipdot_f[0:8]) 
         {
 #endif
 
@@ -382,6 +402,7 @@ int main(int argc, char* argv[]){
 #endif
 
     mem_free();
+    mem_free_f();
 
     return 0;
 }

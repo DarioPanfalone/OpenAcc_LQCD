@@ -6,7 +6,7 @@
 #include "./markowchain.h"
 #include "./fermion_parameters.h"
 #include "../OpenAcc/action.h"
-#include "../OpenAcc/md_integrator.h"
+#include "../OpenAcc/md_parameters.h"
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/su3_measurements.h"
 #include "../OpenAcc/deviceinit.h"
@@ -381,11 +381,13 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 
     // see /OpenAcc/md_integrator.h
     const double tlendef = 1.0;
+    const int singlePrecMDdef = 0;
 
     par_info mdp[]={
         (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
         (par_info){(void*) &(mdpar->gauge_scale ), TYPE_INT, "GaugeSubSteps", 0 , NULL},
         (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   , 1 , (const void*) &tlendef},
+        (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD",1 , (const void*) &singlePrecMDdef},
         (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL}};
 
 

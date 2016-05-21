@@ -3,6 +3,9 @@
 
 #!/usr/bin/python
 
+from os import path
+
+
 fileNames = [\
 'alloc_vars.c',\
 'alloc_vars.h',\
@@ -26,8 +29,30 @@ fileNames = [\
 'md_integrator.h',\
 'plaquettes.c',\
 'plaquettes.h',\
-'random_assignement.c',\
-'random_assignement.h',\
+'rettangoli.c',\
+'rettangoli.h',\
+'single_types.h',\
+'stouting.c',\
+'stouting.h',\
+'struct_c_def.h',\
+'su3_measurements.c',\
+'su3_measurements.h',\
+'su3_utilities.c',\
+'su3_utilities.h']
+
+# files where we can change all 'd_complex' with 'f_complex'
+# without fears
+filesALLDtoF=[\
+'alloc_vars.c',\
+'alloc_vars.h',\
+'cayley_hamilton.h',\
+'fermion_matrix.c',\
+'fermion_matrix.h',\
+'ipdot_gauge.c',\
+'ipdot_gauge.h',\
+'matvecmul.h',\
+'plaquettes.c',\
+'plaquettes.h',\
 'rettangoli.c',\
 'rettangoli.h',\
 'single_types.h',\
@@ -40,12 +65,18 @@ fileNames = [\
 'su3_utilities.h']
 
 
+
+
+
+
+
+
 dpFunctionNames = [] # new function names will just be dp function names + '_f' at the end
 dpVariableNames = [] # new function names will just be dp function names + '_f' at the end
 # as in struct_c_def.h
 dpTypes = ['double_soa','dcomplex_soa','vec3_soa','vec3','su3_soa','thmat_soa','tamat_soa']
 # corresponding types in in sp_struct_c_def.h
-spTypes = ['float_soa','fcomplex_soa','vec3_soa_f','f_vec3','f_su3_soa','f_thmat_soa','f_tamat_soa']
+spTypes = ['float_soa','fcomplex_soa','vec3_f_soa','vec3_f','su3_soa_f','thmat_soa_f','tamat_soa_f']
 
 
 
@@ -57,7 +88,7 @@ dpToSpDict = dict(zip(dpTypes,spTypes))
 
 
 def findFunctionNames(lineRaw):
-    returnTypes=['int','double','void']
+    returnTypes=['int','double','void','d_complex']
     foundFunction = False
     line = lineRaw.strip()
     for returnType in returnTypes:
@@ -130,6 +161,9 @@ for fileName in fileNames:
         findFunctionNames(line)
     f.close()
 
+
+dpFunctionNames.sort(key = len, reverse = True )
+
 functionNamesFile = open('functions_found.txt','w')
 for foundFunction in dpFunctionNames:
     functionNamesFile.write(foundFunction + '\n')
@@ -150,6 +184,8 @@ while foundSomething:
          index += res
 f.close()
 
+dpVariableNames.sort(key = len , reverse = True)
+
 globalVarNamesFile = open('glvar_found.txt','w')
 for foundGlobalVar in dpVariableNames:
     globalVarNamesFile.write(foundGlobalVar + '\n')
@@ -165,6 +201,7 @@ print "Total global variables found: ", len(dpVariableNames)
 # - all function names
 # - all relevant types
 
+ans = '' # answer for 
 for fileName in fileNames:
     f = open(fileName,'r')
     text = f.read()
@@ -188,16 +225,44 @@ for fileName in fileNames:
     for dpVariableName in dpVariableNames:
         newText = newText.replace(dpVariableName,dpVariableName+'_f')
 
-    newFile = open('sp_'+fileName,'w')
-    newFile.write(newText)
-    newFile.close()
+    newText = newText.replace('deltas_Omelyan','deltas_Omelyan_f')
+
+
+    # it may happen that two transformations appear on the same symbol, 
+    # and an '_f_f' is appended instead of just '_f'
+    newText = newText.replace('_f_f','_f')
+
+
+    if fileName in filesALLDtoF:
+        newText = newText.replace('d_complex','f_complex')
+        newText = newText.replace('double','float')
+    
+
+
+
+    newFileName = 'sp_'+fileName
+    writeIt = True
+
+
+    if path.exists(newFileName) and ans != 'a':
+        ans = ''
+        while ans not in ['y','n','a']:
+            print "Overwrite file \'"+newFileName+"\'? (y=yes,n=no,a=yes to all)"
+            ans = raw_input().lower()
+            if ans == 'n':
+                writeIt = False
+    if writeIt : 
+        print "Writing file ", newFileName , " ..."
+        newFile = open(newFileName,'w')
+        newFile.write(newText)
+        newFile.close()
     f.close()
 
 
  
 
 
-
+print "REMEMBER TO ADD \n\ntypedef double complex d_complex\n\nto sp_struct_c_def.h !!"
 
 
 

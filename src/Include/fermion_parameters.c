@@ -4,6 +4,7 @@
 #include "./fermion_parameters.h"
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/sp_alloc_vars.h"
 #include "./markowchain.h"
 #include "../OpenAcc/md_integrator.h"
 #include <string.h>
@@ -119,6 +120,7 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 
   for(int i=0;i<NDiffFlavs;i++){
       fpar[i].phases = &u1_back_phases[i*8];
+      fpar[i].phases_f = &u1_back_phases_f[i*8];
       init_fermion_backfield(bfpars,&(fpar[i]));
       char tempname[50];                            // DEBUG
       strcpy(tempname,"backfield_");                //
