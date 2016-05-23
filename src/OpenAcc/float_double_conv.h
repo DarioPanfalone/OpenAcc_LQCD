@@ -11,10 +11,10 @@
 #endif
 
 ////////////  VEC3_SOA    float <==> double conversions /////////////////////////
-void convert_float_to_double_vec3_soa(__restrict vec3_f_soa * f_var,
+void convert_float_to_double_vec3_soa(__restrict vec3_soa_f * f_var,
 				      __restrict   vec3_soa * d_var);
 void convert_double_to_float_vec3_soa(__restrict   vec3_soa * d_var,
-				      __restrict vec3_f_soa * f_var);
+				      __restrict vec3_soa_f * f_var);
 ////////////  VEC3    float <==> double conversions /////////////////////////////
 void convert_float_to_double_vec3(__restrict vec3_f * f_var,
 				  __restrict   vec3 * d_var);

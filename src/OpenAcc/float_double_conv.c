@@ -6,7 +6,7 @@
 #include "../OpenAcc/float_double_conv.h"
 
 ////////////  VEC3_SOA    float <==> double conversions /////////////////////////////
-void convert_float_to_double_vec3_soa(__restrict vec3_f_soa * f_var,
+void convert_float_to_double_vec3_soa(__restrict vec3_soa_f * f_var,
         __restrict   vec3_soa * d_var){
     int t;
 #pragma acc kernels present(f_var) present(d_var)
@@ -18,7 +18,7 @@ void convert_float_to_double_vec3_soa(__restrict vec3_f_soa * f_var,
     }
 }
 void convert_double_to_float_vec3_soa(__restrict   vec3_soa * d_var,
-        __restrict vec3_f_soa * f_var){
+        __restrict vec3_soa_f * f_var){
     int t;
 #pragma acc kernels present(f_var) present(d_var)
 #pragma acc loop independent

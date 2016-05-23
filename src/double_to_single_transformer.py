@@ -1,8 +1,9 @@
 #!/usr/bin/python2 
 # This script does some work for converting 
 
-from sys import argv
+from sys import argv,exit
 import os 
+import re
 
 
 fileNames = [\
@@ -40,6 +41,7 @@ fileNames = [\
 'OpenAcc/su3_utilities.h',\
 'DbgTools/dbgtools.h',\
 'DbgTools/dbgtools.c',\
+'DbgTools/deo_doe_test.c',\
 'Mpi/communications.h',\
 'Mpi/communications.c',\
 ]
@@ -73,6 +75,7 @@ filesALLDtoF=[\
 'OpenAcc/su3_utilities.h',
 'Mpi/communications.h',\
 'Mpi/communications.c',\
+'DbgTools/deo_doe_test.c',\
 'DbgTools/dbgtools.h',\
 'DbgTools/dbgtools.c',\
 ]
@@ -86,9 +89,14 @@ dpVariableNames = [] # new function names will just be dp function names + '_f' 
 dpTypes = ['double_soa','dcomplex_soa','vec3_soa','vec3','su3_soa','thmat_soa','tamat_soa',\
         'global_vec3_soa','global_su3_soa']
 # corresponding types in in sp_struct_c_def.h
-spTypes = ['float_soa','fcomplex_soa','vec3_f_soa','vec3_f','su3_soa_f','thmat_soa_f',\
-        'tamat_soa_f','global_vec3_f_soa','global_su3_soa_f']
+spTypes = ['float_soa','fcomplex_soa','vec3_soa_f','vec3_f','su3_soa_f','thmat_soa_f',\
+        'tamat_soa_f','global_vec3_soa_f','global_su3_soa_f']
 
+# as in struct_c_def.h
+dpTypes_t = [ dpType + '_t' for dpType in dpTypes]
+spTypes_t = [ spType + '_t' for spType in spTypes]
+dpTypes += dpTypes_t
+spTypes += spTypes_t
 
 
 
@@ -103,76 +111,56 @@ def findFunctionNames(lineRaw):
     foundFunction = False
     line = lineRaw.strip()
     for returnType in returnTypes:
-        initId = line.find(returnType) # looks for '(type)'
-        if initId > 0: # if the type is not found at the beginning of the line...
-            if line[initId-1] not in [' ','*']: # and if the preceding character is not ' '
-                initId = -1                     # or '*', then you actually found nothing!
-        endId = line.find('(')         # looks for '('
-        checkEqualId = line.find('=')  # looks for '='
-        checkCommentId = line.find('//')  # looks for '//'
-        # if the line is in the format '(type) function_name( ****'
-        # we found a function name
-        #foundFunction = initId == 0 and endId != -1 and initId < endId 
-        foundFunction = (initId != -1 and endId != -1 and initId < endId )
-        foundFunction = foundFunction and ( checkEqualId > endId or checkEqualId == -1 )
-        foundFunction = foundFunction and ( checkCommentId > endId or checkCommentId == -1 )
-        if foundFunction:
-            initId +=  len(returnType)
-            dpFunctionName = line[initId:endId] # remove the return type from the string
-            if len(dpFunctionName) > 2 :
-                if dpFunctionName[0]  not in [' ','*']: # if the first character after the
-                                                        # return type is not ' ' or *, 
-                    foundFunction = False               # you found nothing
-            else :
-                foundFunction = False # function name should be at least 3 characters long
-            
-            dpFunctionName = dpFunctionName.strip() # removes spaces before and after
-            if ' ' in dpFunctionName:  # so that this fails if, e.g.,
-                                       # there is 'void static inline' instead of 
-                                       # 'static inline void'
-                print "ERROR in function name! " , dpFunctionName 
-                foundFunction = False
+        # find the name of the function
+        reToMatch = '(?<='+returnType+'[ \*])' # match if preceded by returnType and ' ' or *
+                                          # this re construct requires fixed length
+        reToMatch += '[\s\*]*' # any space or asterisk or nothing (this is in the string )
+        reToMatch += '\w\w*'   # any number >= 1 of characters in azAZ09_
+        reToMatch += '(?=[\s]*[\(])' # match if followed by '('
+        foundSomething = re.search(reToMatch,line)
+        if foundSomething :
+            rawFunctionName = line[foundSomething.start():foundSomething.end()]
+            # the function name should be at the end of this
+            # this second step is necessary because of the limitations of '(?<=...)'
+            # since we can't match 'prefixes' of unknown length
+            funcNameLocation = re.search('\w\w*$',rawFunctionName)
+            # $ = end of rawFunctionName    
+            dpFunctionName = rawFunctionName[funcNameLocation.start():funcNameLocation.end()]
+            if dpFunctionName not in dpFunctionNames and dpFunctionName != 'main':
+                print "Found function " + dpFunctionName
+                dpFunctionNames.append(dpFunctionName)
             break
-    if foundFunction:
-        if dpFunctionName not in dpFunctionNames:
-            print "Found function " + dpFunctionName
-            dpFunctionNames.append(dpFunctionName)
 
 
 
-def findFirstVarName(text):
-    foundVariable = False 
-    foundSoaType = []
-    initId = len(text)
+def findFirstVarName(text): # note: does not work with,e.g. 'int a,b;':
+                            # only ONE varper declaration
+    upperBoundaries = []
     for soaType in dpTypes:
-        initId2 = text.find(soaType)
-        con = initId2 > -1 
-        con = con and (text[initId2+len(soaType):].strip(' *')[0] not in [')',';'])
-        con = con and (text[initId2+len(soaType)+1] in [' ','*'])
-        if con:
-            foundVariable = True
-            if initId2 < initId:
-                initId = initId2
-                foundSoaType = soaType
+        reToMatch = '(?<='+soaType+'[ \*])' # match if preceded by returnType and ' ' or *
+                                          # this re construct requires fixed length
+        reToMatch += '[\s\*]*' # any space or asterisk or nothing (this is in the string )
+        reToMatch += '\w[\s\w]*'   # any number >= 1 of characters in azAZ09_
+        reToMatch += '(?=[\s]*[;])' # match if followed by ';'
+        foundSomething = re.search(reToMatch,text)
+        if foundSomething:
+            rawVarName = text[foundSomething.start():foundSomething.end()]
+            upperBoundaries.append( foundSomething.end())
+            # the function name should be at the end of this
+            # this second step is necessary because of the limitations of '(?<=...)'
+            # since we can't match 'prefixes' of unknown length
+            # this should also remove 'const', '__restrict' i tak dalej
+            varNameLocation = re.search('\w\w*$',rawVarName)
+            # $ = end of rawFunctionName    
+            dpVarName = rawVarName[varNameLocation.start():varNameLocation.end()]
+            if dpVarName not in dpVariableNames: 
+                print "Found Variable (", soaType, ')', dpVarName
+                dpVariableNames.append(dpVarName)
 
-    if foundVariable:
-        stringsToIgnore = [' ','*','const','__restrict']
-        goOn = True 
-        newText = str(text[initId+len(foundSoaType):])
-        while goOn:
-            newText2 = str(newText)
-            for stringToIgnore in stringsToIgnore:
-                if newText2[:len(stringToIgnore)] == stringToIgnore:
-                    newText2 = newText2[len(stringToIgnore):]
-            goOn = not (newText == newText2)
-            newText = newText2
-        foundVariableName = newText.split()[0].strip(',; /')
-        print "Found \'" + foundVariableName + "\'" 
-        dpVariableNames.append(foundVariableName)
-        return text.find(foundVariableName) + len(foundVariableName) 
-
-    else:
+    if len(upperBoundaries) == 0:
         return -1
+    else:
+        return min(upperBoundaries)
 
 
 # collecting all function names
@@ -208,14 +196,15 @@ while foundSomething:
          index += res
 f.close()
 
-dpVariableNames.sort(key = len , reverse = True) # CRUCIAL
 
+dpVariableNames.sort(key = len , reverse = True) # CRUCIAL
 globalVarNamesFile = open('glvar_found.txt','w')
 for foundGlobalVar in dpVariableNames:
     globalVarNamesFile.write(foundGlobalVar + '\n')
 globalVarNamesFile.close()
 
 dpVariableNames.append('phases') # for U1 used in dirac matrix
+dpVariableNames.sort(key = len , reverse = True) # CRUCIAL
 
 print "Total global variables found: ", len(dpVariableNames)
 
@@ -226,18 +215,32 @@ print "Total global variables found: ", len(dpVariableNames)
 # - all relevant types
 
 ans = '' # answer for 'overwrite file
+
 for fileName in fileNames:
     if (len(argv) > 1 and fileName in argv) or len(argv)==1:
         f = open(fileName,'r')
         text = f.read()
         newText = str(text)
+
         # replacing function names
         for dpFunctionName in dpFunctionNames:
-            newText = newText.replace(dpFunctionName, dpFunctionName + '_f')
+            reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                      # non-alphanumeric character
+            reToMatch += dpFunctionName 
+            reToMatch += '((?=\W)|$)' # either followed by the end of the string or a  
+                                      # non-alphanumeric character
+            newText = re.subn(reToMatch, dpFunctionName + '_f', newText)[0]
         # changing relevant (soa-like, arrays) types
         # note : this step could also change function names
-        for dptype in dpToSpDict:
-            newText = newText.replace(dptype,dpToSpDict[dptype])
+        for dpType in dpToSpDict:
+            reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                      # non-alphanumeric character
+            reToMatch += dpType 
+            reToMatch += '((?=\W)|$)' # either followed by the end of the string or a  
+                                      # non-alphanumeric character
+
+            newText = re.subn(reToMatch,dpToSpDict[dpType], newText)[0]
+
         # changing filenames in '#includes'
         for fileName2 in fileNames:
             newText = newText.replace(os.path.basename(fileName2),\
@@ -249,15 +252,24 @@ for fileName in fileNames:
         newText = newText.replace(headerGuard, "SP_"+headerGuard)
         # taking care of global variables
         for dpVariableName in dpVariableNames:
-            newText = newText.replace(dpVariableName,dpVariableName+'_f')
+            reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                      # non-alphanumeric character
+            reToMatch += dpVariableName
+            reToMatch += '((?=\W)|$)' # either followed by the end of the string or a  
+                                      # non-alphanumeric character
+
+            newText = re.subn(reToMatch,dpVariableName + '_f', newText)[0]
+
+
+
     
         newText = newText.replace('deltas_Omelyan','deltas_Omelyan_f')
     
     
         # it may happen that two transformations appear on the same symbol, 
         # and an '_f_f' is appended instead of just '_f'
-        newText = newText.replace('_f_f','_f')
-        newText = newText.replace('_f_f','_f')
+        #newText = newText.replace('_f_f','_f')
+        #newText = newText.replace('_f_f','_f')
     
     
         if fileName in filesALLDtoF:

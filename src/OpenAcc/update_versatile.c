@@ -263,7 +263,9 @@ if(verbosity_lv > 1)
         convert_double_to_float_su3_soa(tconf_acc,tconf_acc_f);
         double plaq_f = calc_plaquette_soloopenacc_f(tconf_acc_f,aux_conf_acc_f,local_sums_f);
         double plaq = calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
-        if(verbosity_lv>3){
+        if(verbosity_lv>1){
+            printf("MPI%02d: DOUBLE->SINGLE PRECISION conversion done.\n", devinfo.myrank);
+        if(verbosity_lv>3)
             printf("MPI%02d: Plaquette (single/double precision): %lf / %lf \n",devinfo.myrank,
                plaq_f, plaq );
         }
@@ -282,12 +284,13 @@ if(verbosity_lv > 1)
                 ferm_chi_acc_f,ferm_shiftmulti_acc_f,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
                 k_p_shiftferm_f,momenta_f,local_sums_f,res_md);
 
+        if(verbosity_lv > 1) printf("MPI%02d: Single Precision Molecular Dynamics Completed \n",devinfo.myrank );
 
         convert_float_to_double_thmat_soa(momenta_f,momenta);
         convert_float_to_double_su3_soa(tconf_acc_f,tconf_acc);
 
+        if(verbosity_lv > 1) printf("MPI%02d: SINGLE -> DOUBLE PRECISION conversion done.\n",devinfo.myrank );
 
-        if(verbosity_lv > 1) printf("MPI%02d: Single Precision Molecular Dynamics Completed \n",devinfo.myrank );
     } 
     else{
 
