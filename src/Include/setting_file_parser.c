@@ -182,33 +182,33 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
             if(par_infos[ipar].is_optional) switch(par_infos[ipar].type){
                 case TYPE_INT:
                     if(0==devinfo.myrank) fprintf(
-                                helpfile,"%-30s%-20d#%s\n",
-                                par_infos[ipar].name,
-                                *((const int *) par_infos[ipar].default_value),
-                                type_strings[par_infos[ipar].type]);
+                            helpfile,"%-30s%-20d#%s\n",
+                            par_infos[ipar].name,
+                            *((const int *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
                     break;
                 case TYPE_DOUBLE:
                     if(0==devinfo.myrank) fprintf(
-                                helpfile,"%-30s%-20e#%s\n",
-                                par_infos[ipar].name,
-                                *((const double *) par_infos[ipar].default_value),
-                                type_strings[par_infos[ipar].type]);
+                            helpfile,"%-30s%-20e#%s\n",
+                            par_infos[ipar].name,
+                            *((const double *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
                     break;
                 case TYPE_STR:
                     if(0==devinfo.myrank) fprintf(
-                                helpfile,"%-30s%-20s#%s\n",
-                                par_infos[ipar].name,
-                                ((const char *) par_infos[ipar].default_value),
-                                type_strings[par_infos[ipar].type]);
+                            helpfile,"%-30s%-20s#%s\n",
+                            par_infos[ipar].name,
+                            ((const char *) par_infos[ipar].default_value),
+                            type_strings[par_infos[ipar].type]);
 
 
                     break;
             }
             else 
                 if(0==devinfo.myrank) fprintf(
-                            helpfile,"%-50s#%s\n",
-                            par_infos[ipar].name,
-                            type_strings[par_infos[ipar].type]);
+                        helpfile,"%-50s#%s\n",
+                        par_infos[ipar].name,
+                        type_strings[par_infos[ipar].type]);
 
         }
         return 0;
@@ -290,7 +290,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 int reads = sscanf(filelines[iline],"%s", word);
                 if(reads==1){
                     if(0==devinfo.myrank)
-                    printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
+                        printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
                     printf("%s\n", filelines[iline]);
                     return 1;
                 }
@@ -563,22 +563,23 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
     // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
+    if(startline!=endline){
 #ifdef MULTIDEVICE
-    if(di->nranks_read != di->nranks){
-        printf("MPI%02d: ERROR: nranks from settings file ", di->myrank);
-        printf("and from MPI_Init() DIFFER!\n");
-        printf("settings: %d , MPI_Init(): %d\n",
-                di->nranks_read, di->nranks);
-        exit(1);
-    }
+        if(di->nranks_read != di->nranks){
+            printf("MPI%02d: ERROR: nranks from settings file ", di->myrank);
+            printf("and from MPI_Init() DIFFER!\n");
+            printf("settings: %d , MPI_Init(): %d\n",
+                    di->nranks_read, di->nranks);
+            res = 1;
+        }
 #else 
-    if(di->nranks_read != 1){
-        printf("ERROR: \'Nranks\' from setting file is %d,", di->nranks_read);
-        printf(" but code is not compiled for muiltidevice\n");
-        res = 1;
-    }
+        if(di->nranks_read != 1){
+            printf("ERROR: \'Nranks\' from setting file is %d,", di->nranks_read);
+            printf(" but code is not compiled for muiltidevice\n");
+            res = 1;
+        }
 #endif
-
+    }
     return res;
 
 }
@@ -760,7 +761,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
         if(helpmode){
             if(0==devinfo.myrank)
-            fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
+                fprintf(helpfile,"\n\n%s\n",  par_macro_groups_names[tagtypes[igroup]]);
         }
         else 
             if(0==devinfo.myrank)
@@ -814,11 +815,15 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
         totcheck += check;
     }
-    if(tagcounts[PMG_DEBUG]==0)
-        read_debug_info(&debug_settings,filelines,0,1);// Just to set default values
-
+    if(tagcounts[PMG_DEBUG]==0 ){
+        if(!helpmode) read_debug_info(&debug_settings,filelines,0,1);// Just to set default values
+        else read_debug_info(&debug_settings,filelines,0,0);// Just to set default values
+    }
     // check == 1 means at least a parameter was not found.
-    if(helpmode) exit(1);
+    if(helpmode){
+        fclose(helpfile);
+        exit(1);
+    }
     if(!helpmode){
 
         uint32_t hash = hash_settings();

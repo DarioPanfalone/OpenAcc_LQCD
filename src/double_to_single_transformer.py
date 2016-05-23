@@ -50,6 +50,10 @@ filesALLDtoF=[\
 'OpenAcc/alloc_vars.c',\
 'OpenAcc/alloc_vars.h',\
 'OpenAcc/cayley_hamilton.h',\
+'OpenAcc/fermion_force.c',\
+'OpenAcc/fermion_force.h',\
+'OpenAcc/fermion_force_utilities.c',\
+'OpenAcc/fermion_force_utilities.h',\
 'OpenAcc/fermion_matrix.c',\
 'OpenAcc/fermion_matrix.h',\
 'OpenAcc/ipdot_gauge.c',\
@@ -91,26 +95,38 @@ spTypes = ['float_soa','fcomplex_soa','vec3_f_soa','vec3_f','su3_soa_f','thmat_s
 
 dpToSpDict = dict(zip(dpTypes,spTypes))
 
-# this function is needed to populate the list 'dpFunctionNames'
+# this function is needed to populate the list 'dpFunctIOnNames'
 
 
 def findFunctionNames(lineRaw):
-    returnTypes=['int','double','void','d_complex']
+    returnTypes=['int','double','void','d_complex','vec3']
     foundFunction = False
     line = lineRaw.strip()
     for returnType in returnTypes:
         initId = line.find(returnType) # looks for '(type)'
+        if initId > 0: # if the type is not found at the beginning of the line...
+            if line[initId-1] not in [' ','*']: # and if the preceding character is not ' '
+                initId = -1                     # or '*', then you actually found nothing!
         endId = line.find('(')         # looks for '('
         checkEqualId = line.find('=')  # looks for '='
         checkCommentId = line.find('//')  # looks for '//'
         # if the line is in the format '(type) function_name( ****'
         # we found a function name
-        foundFunction = initId == 0 and endId != -1 and initId < endId 
+        #foundFunction = initId == 0 and endId != -1 and initId < endId 
+        foundFunction = (initId != -1 and endId != -1 and initId < endId )
         foundFunction = foundFunction and ( checkEqualId > endId or checkEqualId == -1 )
         foundFunction = foundFunction and ( checkCommentId > endId or checkCommentId == -1 )
         if foundFunction:
             initId +=  len(returnType)
-            dpFunctionName = line[initId:endId].strip() # removes spaces before and after
+            dpFunctionName = line[initId:endId] # remove the return type from the string
+            if len(dpFunctionName) > 2 :
+                if dpFunctionName[0]  not in [' ','*']: # if the first character after the
+                                                        # return type is not ' ' or *, 
+                    foundFunction = False               # you found nothing
+            else :
+                foundFunction = False # function name should be at least 3 characters long
+            
+            dpFunctionName = dpFunctionName.strip() # removes spaces before and after
             if ' ' in dpFunctionName:  # so that this fails if, e.g.,
                                        # there is 'void static inline' instead of 
                                        # 'static inline void'
@@ -169,7 +185,8 @@ for fileName in fileNames:
     f.close()
 
 
-dpFunctionNames.sort(key = len, reverse = True )
+dpFunctionNames.sort(key = len, reverse = True ) # CRUCIAL because some function names 
+                                                 # contain other function names
 
 functionNamesFile = open('functions_found.txt','w')
 for foundFunction in dpFunctionNames:
@@ -191,7 +208,7 @@ while foundSomething:
          index += res
 f.close()
 
-dpVariableNames.sort(key = len , reverse = True)
+dpVariableNames.sort(key = len , reverse = True) # CRUCIAL
 
 globalVarNamesFile = open('glvar_found.txt','w')
 for foundGlobalVar in dpVariableNames:
@@ -245,13 +262,18 @@ for fileName in fileNames:
     
         if fileName in filesALLDtoF:
             newText = newText.replace('d_complex','f_complex')
+            newText = newText.replace('MPI_DOUBLE','MPI_FLOAT')
             newText = newText.replace('double','float')
             newText = newText.replace('%lf','%f')
-        
-    
-    
-    
+       
         newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)
+        
+        # adding 'typedef double complex d_complex' in sp_struct_c_def.c
+        if  'struct_c_def.h' in fileName:
+            print "Adding \'typedef double complex d_complex\' to ", newFileName
+            newText = newText.replace('typedef float complex f_complex;',\
+                   'typedef float complex f_complex; typedef double complex d_complex;\n' )
+    
         writeIt = True
         
         if os.path.exists(newFileName) and ans != 'a':
@@ -267,14 +289,6 @@ for fileName in fileNames:
             newFile.write(newText)
             newFile.close()
         f.close()
-
-
- 
-
-
-print "REMEMBER TO ADD \n\ntypedef double complex d_complex\n\nto sp_struct_c_def.h !!"
-
-
 
 
 

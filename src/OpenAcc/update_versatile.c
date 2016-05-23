@@ -251,7 +251,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     
     // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
     if(md_parameters.singlePrecMD){
-        printf("SINGLE PRECISION MOLECULAR DYNAMICS...\n");
+if(verbosity_lv > 1) 
+    printf("MPI%02d: SINGLE PRECISION MOLECULAR DYNAMICS...\n", devinfo.myrank);
 
         // conversion double to float
 
@@ -260,6 +261,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
         convert_double_to_float_thmat_soa(momenta,momenta_f);
         convert_double_to_float_su3_soa(tconf_acc,tconf_acc_f);
+        double plaq_f = calc_plaquette_soloopenacc_f(tconf_acc_f,aux_conf_acc_f,local_sums_f);
+        double plaq = calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+        if(verbosity_lv>3){
+            printf("MPI%02d: Plaquette (single/double precision): %lf / %lf \n",devinfo.myrank,
+               plaq_f, plaq );
+        }
+
         int ips;
         for(ips = 0; ips < NPS_tot;ips++)
             convert_double_to_float_vec3_soa(&ferm_chi_acc[ips],&ferm_chi_acc_f[ips]);
@@ -279,7 +287,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         convert_float_to_double_su3_soa(tconf_acc_f,tconf_acc);
 
 
-        if(verbosity_lv > 1) printf(" Single Precision Molecular Dynamics Completed \n");
+        if(verbosity_lv > 1) printf("MPI%02d: Single Precision Molecular Dynamics Completed \n",devinfo.myrank );
     } 
     else{
 
