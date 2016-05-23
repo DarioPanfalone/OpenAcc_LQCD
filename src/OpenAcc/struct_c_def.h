@@ -11,7 +11,6 @@
 
 
 typedef double complex  d_complex;
-typedef float  complex  f_complex;
 
 typedef struct vec3_soa_t {
     d_complex c0[sizeh];

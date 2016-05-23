@@ -2,31 +2,13 @@
 #define MD_INTEGRATOR_H
 
 #include "./struct_c_def.h"
+#include "./md_parameters.h"
 #include "../Include/fermion_parameters.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
  #define __restrict
 #endif
-
-extern double deltas_Omelyan[7];// must be declared here to copy it in the device in the main
-
-
-typedef struct md_param_t{
-
-    int no_md;// number of MD steps
-    int gauge_scale;   // Update fermions every gauge_scale gauge updates
-    double t ;
-    double residue_md;
-    double residue_metro;
-    double expected_max_eigenvalue;
-
-} md_param; 
-
-extern md_param md_parameters;
-
-void initialize_md_global_variables(md_param );
-
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta);
 
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,

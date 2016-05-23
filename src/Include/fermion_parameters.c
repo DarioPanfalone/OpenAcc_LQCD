@@ -2,19 +2,18 @@
 #define FERMION_PARAMETERS_C_
 
 #include "./fermion_parameters.h"
+#include "../OpenAcc/md_parameters.h"
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/alloc_vars.h"
 #include "./montecarlo_parameters.h"
-#include "../OpenAcc/md_integrator.h"
+#include "../OpenAcc/sp_alloc_vars.h"
 #include <string.h>
 #include <math.h>
 #include "../RationalApprox/rationalapprox.h"
 #include "../DbgTools/dbgtools.h"
 
 #include "../OpenAcc/geometry.h"
-#ifdef MULTIDEVICE
- #include "../Mpi/multidev.h"
-#endif
+#include "../Mpi/multidev.h"
 
 #define ALIGN 128
 #define acc_twopi 2*3.14159265358979323846
@@ -123,6 +122,7 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 
   for(int i=0;i<NDiffFlavs;i++){
       fpar[i].phases = &u1_back_phases[i*8];
+      fpar[i].phases_f = &u1_back_phases_f[i*8];
       init_fermion_backfield(bfpars,&(fpar[i]));
       char tempname[50];                            // DEBUG
       strcpy(tempname,"backfield_");                //
@@ -150,6 +150,7 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
     double chpotphase = fermion_parameters->ferm_im_chem_pot/geom_par.gnt; 
 
     double_soa * phases = fermion_parameters->phases;
+    float_soa * phases_f = fermion_parameters->phases_f;
 
     int x, y, z, t, parity;
     int d[4], idxh;
@@ -215,6 +216,7 @@ for flavour %s\n", devinfo.myrank , fermion_parameters->name);
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.xmap*2+parity].d[idxh]= acc_twopi*arg; 
+                    phases_f[geom_par.xmap*2+parity].d[idxh]= acc_twopi*arg; 
 
 
                     ////////Y-oriented/////////
@@ -232,6 +234,7 @@ for flavour %s\n", devinfo.myrank , fermion_parameters->name);
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.ymap*2+parity].d[idxh]=acc_twopi*arg;
+                    phases_f[geom_par.ymap*2+parity].d[idxh]=acc_twopi*arg;
 
                     
                     ////////Z-oriented////////
@@ -249,6 +252,7 @@ for flavour %s\n", devinfo.myrank , fermion_parameters->name);
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.zmap*2+parity].d[idxh]=acc_twopi*arg;
+                    phases_f[geom_par.zmap*2+parity].d[idxh]=acc_twopi*arg;
 
 
                     ///////T-oriented////////
@@ -267,6 +271,7 @@ for flavour %s\n", devinfo.myrank , fermion_parameters->name);
                     while(arg < -0.5) arg += 1.0;
 
                     phases[geom_par.tmap*2+parity].d[idxh]=acc_twopi*arg;
+                    phases_f[geom_par.tmap*2+parity].d[idxh]=acc_twopi*arg;
     } // d3,d2,d1,d0 loops
 
     int dir;

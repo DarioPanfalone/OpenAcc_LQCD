@@ -1,5 +1,5 @@
-#ifndef DBGTOOLS_OPENACC_C_
-#define DBGTOOLS_OPENACC_C_
+#ifndef DBGTOOLS_C_
+#define DBGTOOLS_C_
 
 #include <complex.h>
 
@@ -12,6 +12,8 @@
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/single_types.h"
 #include "../OpenAcc/io.h"
+#include "../OpenAcc/alloc_vars.h"
+#include "../Mpi/communications.h"
 
 void save_gl_fermion(global_vec3_soa * const fermion, 
         const char* nomefile)

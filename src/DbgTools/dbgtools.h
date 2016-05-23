@@ -1,5 +1,5 @@
-#ifndef DBGTOOLS_OPENACC_H_
-#define DBGTOOLS_OPENACC_H_
+#ifndef DBGTOOLS_H_
+#define DBGTOOLS_H_
 
 #include "../OpenAcc/struct_c_def.h"
 void print_vec3_soa_wrapper(vec3_soa * const fermion,

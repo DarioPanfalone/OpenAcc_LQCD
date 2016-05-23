@@ -28,10 +28,9 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "./action.h"
 #include "./alloc_vars.h"
+#include "./sp_alloc_vars.h"
 #include "./backfield.h"
-#include "./cooling.h"
 #include "./deviceinit.h"
-#include "./fermion_force.h"
 #include "./fermion_matrix.h"
 #include "./fermionic_utilities.h"
 #include "./find_min_max.h"
@@ -40,6 +39,7 @@
 #include "./io.h"
 #include "./ipdot_gauge.h"
 #include "./md_integrator.h"
+#include "./md_parameters.h"
 #include "./random_assignement.h"
 #include "./rettangoli.h"
 #include "./stouting.h"
@@ -47,7 +47,6 @@
 #include "./su3_measurements.h"
 #include "./su3_utilities.h"
 #include "./update_versatile.h"
-
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
@@ -147,12 +146,14 @@ int main(int argc, char* argv[]){
 
 
     mem_alloc();
-    printf("MPI%02d - Allocazione della memoria : OK \n",devinfo.myrank);
+    printf("MPI%02d - Allocazione della memoria (double) : OK \n",devinfo.myrank);
+    mem_alloc_f();
+    printf("MPI%02d - Allocazione della memoria (float) : OK \n",devinfo.myrank);
     compute_nnp_and_nnm_openacc();
     printf("MPI%02d - nn computation : OK \n",devinfo.myrank);
     init_all_u1_phases(backfield_parameters,fermions_parameters);
 
-    printf("MPI%02d - u1_backfield initialization : OK \n",devinfo.myrank);
+    printf("MPI%02d - u1_backfield initialization (float & double): OK \n",devinfo.myrank);
 
     initialize_md_global_variables(md_parameters);
     printf("MPI%02d - init md vars : OK \n",devinfo.myrank);
@@ -216,12 +217,28 @@ int main(int argc, char* argv[]){
     copyin(fermions_parameters[0:NDiffFlavs])\
     copyin(deltas_Omelyan[0:7]) \
     copyin(u1_back_phases[0:8*NDiffFlavs])\
-    create(ipdot_g_old[0:8]) create(ipdot_f_old[0:8])
+    create(ipdot_g_old[0:8]) create(ipdot_f_old[0:8])\
+    create(conf_acc_f[0:8]) \
+    create(ipdot_acc_f[0:8]) create(aux_conf_acc_f[0:8])\
+    create(auxbis_conf_acc_f[0:8]) create(ferm_chi_acc_f[0:NPS_tot])\
+    create(ferm_phi_acc_f[0:NPS_tot])  create(ferm_out_acc_f[0:NPS_tot])\
+    create(ferm_shiftmulti_acc_f[0:max_ps*MAX_APPROX_ORDER])\
+    create(kloc_r_f[0:1])  create(kloc_h_f[0:1])  create(kloc_s_f[0:1])\
+    create(kloc_p_f[0:1])  create(k_p_shiftferm_f[0:MAX_APPROX_ORDER])\
+    create(momenta_f[0:8]) \
+    create(local_sums_f[0:2]) create(d_local_sums_f[0:2])\
+    copyin(deltas_Omelyan_f[0:7]) \
+    copyin(u1_back_phases_f[0:8*NDiffFlavs])\
+    create(ipdot_g_old_f[0:8]) create(ipdot_f_old_f[0:8])
+
     {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
         create(gstout_conf_acc_arr[0:(8*act_params.stout_steps)])\
-        create(glocal_staples[0:8]) create(gipdot[0:8]) 
+        create(glocal_staples[0:8]) create(gipdot[0:8])\
+        create(aux_th_f[0:8]) create(aux_ta_f[0:8])\
+        create(gstout_conf_acc_arr_f[0:(8*act_params.stout_steps)])\
+        create(glocal_staples_f[0:8]) create(gipdot_f[0:8]) 
         {
 #endif
 
@@ -508,6 +525,7 @@ int main(int argc, char* argv[]){
 #endif
 
     mem_free();
+    mem_free_f();
 
     return 0;
 }

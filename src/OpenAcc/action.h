@@ -1,6 +1,8 @@
 #ifndef ACTION_H_
 #define ACTION_H_
 
+#include "../Include/common_defines.h"
+
 typedef struct action_param_t{
 
     double beta;

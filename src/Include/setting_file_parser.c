@@ -5,10 +5,9 @@
 #include "../Meas/gauge_meas.h"
 #include "../Mpi/multidev.h"
 #include "../OpenAcc/action.h"
+#include "../OpenAcc/md_parameters.h"
 #include "../OpenAcc/backfield.h"
-#include "../OpenAcc/geometry.h"
 #include "../OpenAcc/geometry.h" // for MULTIDEVICE to be defined or not
-#include "../OpenAcc/md_integrator.h"
 #include "../OpenAcc/su3_measurements.h"
 #include "../RationalApprox/rationalapprox.h"
 #include "./common_defines.h"
@@ -427,6 +426,7 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     // see /OpenAcc/md_integrator.h
     const double tlendef = 1.0;
     const double expmaxeigenv_def = 5.5 ; 
+    const int singlePrecMDdef = 0;
 
     par_info mdp[]={
         (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
@@ -434,6 +434,7 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   , 1 , (const void*) &tlendef},
         (par_info){(void*) &(mdpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , 0, NULL},
         (par_info){(void*) &(mdpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
+        (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD",1 , (const void*) &singlePrecMDdef},
         (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL}};
 
     // from here on, you should not have to modify anything.

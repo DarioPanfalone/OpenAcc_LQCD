@@ -3,6 +3,7 @@
 #ifndef UPDATE_VERSATILE_C_
 #define UPDATE_VERSATILE_C_
 
+
 #include "../DbgTools/dbgtools.h" // useful only for debug
 #include "../Include/common_defines.h"
 #include "../Include/debug.h"
@@ -10,18 +11,21 @@
 #include "../Rand/random.h"
 #include "./action.h"
 #include "./alloc_vars.h"
+#include "./sp_alloc_vars.h"
 #include "./fermionic_utilities.h"
 #include "./find_min_max.h"
+#include "./float_double_conv.h"
 #include "./inverter_multishift_full.h"
 #include "./io.h"
 #include "./md_integrator.h"
+#include "./sp_md_integrator.h"
 #include "./random_assignement.h"
 #include "./rettangoli.h"
 #include "./stouting.h"
 #include "./su3_measurements.h"
+#include "./sp_su3_measurements.h"
 #include "./su3_utilities.h"
 #include "./update_versatile.h"
-
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
@@ -37,6 +41,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 #ifdef STOUT_FERMIONS        
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
+    su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_f_arr_f;
 #endif
 #ifdef NORANDOM
     printf("MIP%02d: WELCOME! NORANDOM MODE. (UPDATE_SOLOACC_UNOSTEP_VERSATILE())\n",
@@ -238,21 +243,63 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig[iflav]);
             printf("MPI%02d: Rescaled Rational Approximation for flavour %d\n", devinfo.myrank, iflav);
 #pragma acc update device(approx_md[0:1])
-        }//end for iflav
 
-        // MOLECULAR DYNAMICS 
+    }//end for iflav
+   
+
+    
+    
+    // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
+    if(md_parameters.singlePrecMD){
+        printf("SINGLE PRECISION MOLECULAR DYNAMICS...\n");
+
+        // conversion double to float
+
+        su3_soa_f * tconf_acc_f = conf_acc_f;
+
+
+        convert_double_to_float_thmat_soa(momenta,momenta_f);
+        convert_double_to_float_su3_soa(tconf_acc,tconf_acc_f);
+        int ips;
+        for(ips = 0; ips < NPS_tot;ips++)
+            convert_double_to_float_vec3_soa(&ferm_chi_acc[ips],&ferm_chi_acc_f[ips]);
+
+
+        multistep_2MN_SOLOOPENACC_f(ipdot_acc_f,tconf_acc_f,
+#ifdef STOUT_FERMIONS
+                tstout_conf_acc_arr_f,
+#endif
+                auxbis_conf_acc_f, // globale
+                aux_conf_acc_f,fermions_parameters,NDiffFlavs,
+                ferm_chi_acc_f,ferm_shiftmulti_acc_f,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
+                k_p_shiftferm_f,momenta_f,local_sums_f,res_md);
+
+
+        convert_float_to_double_thmat_soa(momenta_f,momenta);
+        convert_float_to_double_su3_soa(tconf_acc_f,tconf_acc);
+
+
+        if(verbosity_lv > 1) printf(" Single Precision Molecular Dynamics Completed \n");
+    } 
+    else{
+
+        printf("DOUBLE PRECISION MOLECULAR DYNAMICS...\n");
+
         multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
 #ifdef STOUT_FERMIONS
                 tstout_conf_acc_arr,
 #endif
-                auxbis_conf_acc, // global
+                auxbis_conf_acc, // globale
                 aux_conf_acc,fermions_parameters,NDiffFlavs,
                 ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
                 k_p_shiftferm,momenta,local_sums,res_md);
 
+
+    }
+
         if(debug_settings.do_reversibility_test){
 
-            printf("MPI%02d: PERFORMING REVERSIBILITY TEST.\n", devinfo.myrank);
+            printf("MPI%02d: PERFORMING REVERSIBILITY TEST, DOUBLE PRECISION.\n", devinfo.myrank);
             printf("MPI%02d: Inverting momenta.\n", devinfo.myrank);
 
             invert_momenta(momenta);
@@ -482,7 +529,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
         fclose(foutfile);
     }
-
+  for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+      free(minmaxeig[iflav]);
+  free(minmaxeig);
 
     return acc;
 
