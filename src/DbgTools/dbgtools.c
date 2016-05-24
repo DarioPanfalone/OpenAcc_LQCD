@@ -136,7 +136,7 @@ void calc_loc_abelian_plaquettes(const double_soa* phases, // 8*
        const int mu, const int nu )
 {
   int d0, d1, d2, d3;
-#pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc kernels present(phases) present(loc_abelian_plaquettes)
 #pragma acc loop independent gang 
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector //gang(nd2/DIM_BLOCK_Z) vector(DIM_BLOCK_Z)
