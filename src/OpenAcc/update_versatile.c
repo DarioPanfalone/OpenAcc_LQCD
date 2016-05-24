@@ -244,69 +244,69 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             printf("MPI%02d: Rescaled Rational Approximation for flavour %d\n", devinfo.myrank, iflav);
 #pragma acc update device(approx_md[0:1])
 
-    }//end for iflav
-   
-
-    
-    
-    // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
-    if(md_parameters.singlePrecMD){
-if(verbosity_lv > 1) 
-    printf("MPI%02d: SINGLE PRECISION MOLECULAR DYNAMICS...\n", devinfo.myrank);
-
-        // conversion double to float
-
-        su3_soa_f * tconf_acc_f = conf_acc_f;
+        }//end for iflav
 
 
-        convert_double_to_float_thmat_soa(momenta,momenta_f);
-        convert_double_to_float_su3_soa(tconf_acc,tconf_acc_f);
-        double plaq_f = calc_plaquette_soloopenacc_f(tconf_acc_f,aux_conf_acc_f,local_sums_f);
-        double plaq = calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
-        if(verbosity_lv>1){
-            printf("MPI%02d: DOUBLE->SINGLE PRECISION conversion done.\n", devinfo.myrank);
-        if(verbosity_lv>3)
-            printf("MPI%02d: Plaquette (single/double precision): %lf / %lf \n",devinfo.myrank,
-               plaq_f, plaq );
+
+
+        // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
+        if(md_parameters.singlePrecMD){
+            if(verbosity_lv > 1) 
+                printf("MPI%02d: SINGLE PRECISION MOLECULAR DYNAMICS...\n", devinfo.myrank);
+
+            // conversion double to float
+
+            su3_soa_f * tconf_acc_f = conf_acc_f;
+
+
+            convert_double_to_float_thmat_soa(momenta,momenta_f);
+            convert_double_to_float_su3_soa(tconf_acc,tconf_acc_f);
+            double plaq_f = calc_plaquette_soloopenacc_f(tconf_acc_f,aux_conf_acc_f,local_sums_f);
+            double plaq = calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
+            if(verbosity_lv>1){
+                printf("MPI%02d: DOUBLE->SINGLE PRECISION conversion done.\n", devinfo.myrank);
+                if(verbosity_lv>3)
+                    printf("MPI%02d: Plaquette (single/double precision): %lf / %lf \n",devinfo.myrank,
+                            plaq_f, plaq );
+            }
+
+            int ips;
+            for(ips = 0; ips < NPS_tot;ips++)
+                convert_double_to_float_vec3_soa(&ferm_chi_acc[ips],&ferm_chi_acc_f[ips]);
+
+
+            multistep_2MN_SOLOOPENACC_f(ipdot_acc_f,tconf_acc_f,
+#ifdef STOUT_FERMIONS
+                    tstout_conf_acc_arr_f,
+#endif
+                    auxbis_conf_acc_f, // globale
+                    aux_conf_acc_f,fermions_parameters,NDiffFlavs,
+                    ferm_chi_acc_f,ferm_shiftmulti_acc_f,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
+                    k_p_shiftferm_f,momenta_f,local_sums_f,res_md);
+
+            if(verbosity_lv > 1) printf("MPI%02d: Single Precision Molecular Dynamics Completed \n",devinfo.myrank );
+
+            convert_float_to_double_thmat_soa(momenta_f,momenta);
+            convert_float_to_double_su3_soa(tconf_acc_f,tconf_acc);
+
+            if(verbosity_lv > 1) printf("MPI%02d: SINGLE -> DOUBLE PRECISION conversion done.\n",devinfo.myrank );
+
+        } 
+        else{
+
+            printf("DOUBLE PRECISION MOLECULAR DYNAMICS...\n");
+
+            multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
+#ifdef STOUT_FERMIONS
+                    tstout_conf_acc_arr,
+#endif
+                    auxbis_conf_acc, // globale
+                    aux_conf_acc,fermions_parameters,NDiffFlavs,
+                    ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
+                    k_p_shiftferm,momenta,local_sums,res_md);
+
+
         }
-
-        int ips;
-        for(ips = 0; ips < NPS_tot;ips++)
-            convert_double_to_float_vec3_soa(&ferm_chi_acc[ips],&ferm_chi_acc_f[ips]);
-
-
-        multistep_2MN_SOLOOPENACC_f(ipdot_acc_f,tconf_acc_f,
-#ifdef STOUT_FERMIONS
-                tstout_conf_acc_arr_f,
-#endif
-                auxbis_conf_acc_f, // globale
-                aux_conf_acc_f,fermions_parameters,NDiffFlavs,
-                ferm_chi_acc_f,ferm_shiftmulti_acc_f,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
-                k_p_shiftferm_f,momenta_f,local_sums_f,res_md);
-
-        if(verbosity_lv > 1) printf("MPI%02d: Single Precision Molecular Dynamics Completed \n",devinfo.myrank );
-
-        convert_float_to_double_thmat_soa(momenta_f,momenta);
-        convert_float_to_double_su3_soa(tconf_acc_f,tconf_acc);
-
-        if(verbosity_lv > 1) printf("MPI%02d: SINGLE -> DOUBLE PRECISION conversion done.\n",devinfo.myrank );
-
-    } 
-    else{
-
-        printf("DOUBLE PRECISION MOLECULAR DYNAMICS...\n");
-
-        multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
-#ifdef STOUT_FERMIONS
-                tstout_conf_acc_arr,
-#endif
-                auxbis_conf_acc, // globale
-                aux_conf_acc,fermions_parameters,NDiffFlavs,
-                ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-                k_p_shiftferm,momenta,local_sums,res_md);
-
-
-    }
 
         if(debug_settings.do_reversibility_test){
 
@@ -540,9 +540,9 @@ if(verbosity_lv > 1)
 
         fclose(foutfile);
     }
-  for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-      free(minmaxeig[iflav]);
-  free(minmaxeig);
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+        free(minmaxeig[iflav]);
+    free(minmaxeig);
 
     return acc;
 

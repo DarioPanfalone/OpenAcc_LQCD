@@ -41,7 +41,6 @@ fileNames = [\
 'OpenAcc/su3_utilities.h',\
 'DbgTools/dbgtools.h',\
 'DbgTools/dbgtools.c',\
-'DbgTools/deo_doe_test.c',\
 'Mpi/communications.h',\
 'Mpi/communications.c',\
 ]
@@ -75,7 +74,6 @@ filesALLDtoF=[\
 'OpenAcc/su3_utilities.h',
 'Mpi/communications.h',\
 'Mpi/communications.c',\
-'DbgTools/deo_doe_test.c',\
 'DbgTools/dbgtools.h',\
 'DbgTools/dbgtools.c',\
 ]

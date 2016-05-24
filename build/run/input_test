@@ -16,12 +16,16 @@ Mass	        0.01
 Degeneracy	    1
 PseudoFermions	1
 Name	        pippo
-Charge          0.0
+Charge          1
 MuOverPiT       0.24
                              
 
 
 BackgroundFieldParameters
+bx              -1.2
+bz              1.5
+by              0.22
+
 
 
 MDParameters
@@ -34,7 +38,7 @@ ExpMaxEigenvalue        6
 
 
 MontecarloParameters
-Ntraj	                10
+Ntraj	                0
 ThermNtraj	            5
 StoreConfInterval	    20
 SaveConfInterval    	5
@@ -80,10 +84,10 @@ NRanks                 2
 NProcPerNode           4 
 
 Geometry
-nx                     8  
-ny	                   8  
-nz	                   8   
-nt	                   8  
+nx                     4  
+ny	                   4  
+nz	                   16  
+nt	                   4  
 xmap	                1 
 ymap	                2   
 zmap	                3  
