@@ -12,8 +12,20 @@
 #define GAUGE_HALO HALO_WIDTH
 //LOCAL lattice dimensions
 
-#include "../../build/lattice_dimensions.h" // contains NRANKS_D[1234]
-                                            // and LOC_N[1234]
+
+// lattice dimensions
+//#define LOC_N0  // #define these with a -D when invoking compiler
+//#define LOC_N1  //  see makefile and generate_makefile.py
+//#define LOC_N2
+//#define LOC_N3
+
+// MULTIDEVICE
+#define NRANKS_D0 1   // Keep 1 - only "salamino" allowed
+#define NRANKS_D1 1   // Keep 1 - only "salamino" allowed
+#define NRANKS_D2 1   // Keep 1 - only "salamino" allowed
+//#define NRANKS_D3 // #define this with a -D when invoking compiler, 
+                    // see makefile and generate_makefile.py
+
 
 ///HALO STRUCTURE (border widths)
 // AUTOMATIC DEFINITION OF HALOS
