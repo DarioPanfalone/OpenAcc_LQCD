@@ -27,9 +27,6 @@ rgen: \n\
 
 
 
-
-
-
 import os.path as path
 from sys import exit,argv,stderr,stdout
 
@@ -232,6 +229,11 @@ class file_node:
             makestring += 'touch ' + self.name + '\n'
         elif '.c' in self.name:
             makestring += '$(COMPILER) -c $(COMPILER_FLAGS) ' +\
+                     ' -DLOC_N0=$(N0)   ' +\
+                     ' -DLOC_N1=$(N1)   ' +\
+                     ' -DLOC_N2=$(N2)   ' +\
+                     ' -DLOC_N3=$(N3)   ' +\
+                     ' -DNRANKS_D3=$(NR3)  ' +\
                     self.name + '\n\n'
         else:
             stderr.write("Filename " + self.name + " not valid.\n")
@@ -333,30 +335,6 @@ if __name__ == '__main__':
             compiler_linker_settings = MPIcls;
             argv.remove('MPI')
             clsset = True
-
-
-
-
-    if not path.exists("lattice_dimensions.h"):
-        stderr.write("generating lattice_dimensions.h\n")
-        f = open("lattice_dimensions.h", 'w')
-        ldim_string = '''
-// lattice dimensions
-#define LOC_N0  8
-#define LOC_N1  8
-#define LOC_N2  8
-#define LOC_N3  8
-
-// MULTIDEVICE
-#define NRANKS_D0 1   // Keep 1 - only "salamino" allowed
-#define NRANKS_D1 1   // Keep 1 - only "salamino" allowed
-#define NRANKS_D2 1   // Keep 1 - only "salamino" allowed
-#define NRANKS_D3 1
-'''
-        f.write(ldim_string)
-        f.close()
-
-
 
 
 
