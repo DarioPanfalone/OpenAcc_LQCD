@@ -22,8 +22,8 @@ compiler_linker_settings = ''
 make_rgen_string ='\n\
 \
 rgen: \n\
-\tcd ../tools/ && $(MAKE) rgen\n\
-\tcp ../tools/rgen ./run/\n'
+\tcd ROOT/tools/ && $(MAKE) rgen\n\
+\tcp ROOT/tools/rgen ./run/\n'
 
 
 
@@ -335,6 +335,11 @@ if __name__ == '__main__':
             compiler_linker_settings = MPIcls;
             argv.remove('MPI')
             clsset = True
+
+    aLocation = path.abspath(argv[1])
+    repoLocation = aLocation[:aLocation.rfind('/src/')]
+
+    make_rgen_string = make_rgen_string.replace('ROOT',repoLocation)
 
 
 
