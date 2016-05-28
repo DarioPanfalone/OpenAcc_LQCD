@@ -12,8 +12,20 @@
 #define GAUGE_HALO HALO_WIDTH
 //LOCAL lattice dimensions
 
-#include "../../build/lattice_dimensions.h" // contains NRANKS_D[1234]
-                                            // and LOC_N[1234]
+
+// lattice dimensions
+//#define LOC_N0  // #define these with a -D when invoking compiler
+//#define LOC_N1  //  see makefile and generate_makefile.py
+//#define LOC_N2
+//#define LOC_N3
+
+// MULTIDEVICE
+#define NRANKS_D0 1   // Keep 1 - only "salamino" allowed
+#define NRANKS_D1 1   // Keep 1 - only "salamino" allowed
+#define NRANKS_D2 1   // Keep 1 - only "salamino" allowed
+//#define NRANKS_D3 // #define this with a -D when invoking compiler, 
+                    // see makefile and generate_makefile.py
+
 
 ///HALO STRUCTURE (border widths)
 // AUTOMATIC DEFINITION OF HALOS
@@ -187,6 +199,7 @@ int d0,d1,d2,d3;
 
 
 
+#pragma acc routine seq
 static inline int gl_to_gl_snum(int gl_0, int gl_1, int gl_2, int gl_3){
 //global coordinates to global 'snum' index
 
@@ -194,6 +207,8 @@ static inline int gl_to_gl_snum(int gl_0, int gl_1, int gl_2, int gl_3){
     return ris/2;// <---  /2 Pay attention to even/odd  (see init_geo) 
 
 }
+
+#pragma acc routine seq
 static inline int snum_acc(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
 // local'n'halo coordinates to lnh 'snum' index
  
@@ -206,6 +221,7 @@ static inline int snum_acc(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
 
 }
 
+#pragma acc routine seq
 static inline int loc_to_lnh_snum(int loc_0, int loc_1, int loc_2, int loc_3){
 //local coordinates to loc'n'halo 'snum'index
     // Actually, the real memory layout is of the LNH type.
@@ -219,6 +235,7 @@ static inline int loc_to_lnh_snum(int loc_0, int loc_1, int loc_2, int loc_3){
     return snum_acc(loc_0,loc_1,loc_2,loc_3);
     // ^^ /2 Pay attention to even/odd  (see init_geo) 
 }
+#pragma acc routine seq
 static inline int lnh_to_gl_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3, vec4int myrank4int){
 
     lnh_0 += LOC_N0 * myrank4int.d0 - D0_HALO; // to global ref frame
@@ -236,6 +253,7 @@ static inline int lnh_to_gl_snum(int lnh_0, int lnh_1, int lnh_2, int lnh_3, vec
     // pay attention to even/odd
 
 }
+#pragma acc routine seq
 static inline int target_lnh_to_gl_snum(int lnh_0, int lnh_1, int lnh_2,
         int lnh_3,
         vec4int target_gl_loc_origin4int ){
@@ -286,6 +304,8 @@ inline int rank_from_0123_rank(int rank_0, int rank_1,
     return rank_0 + ( NRANKS_D0 * (rank_1 + NRANKS_D1 * (rank_2  + NRANKS_D2 * rank_3)));
 
 }
+
+#pragma acc routine seq
 static inline vec4int gl_loc_origin_from_rank(int rank){
     vec4int res, rank4int = xyzt_rank(rank);
     res.d0 = rank4int.d0 * LOC_N0;

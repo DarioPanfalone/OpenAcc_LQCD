@@ -21,6 +21,8 @@ void print_double_soa(double_soa * const backfield, const char* nomefile);
 void print_1double_soa(double_soa * const vettore, const char* nomefile);
 void dbg_print_su3_soa(su3_soa * const conf, const char* nomefile,int conf_id_iter);
 int dbgread_su3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter );
+void calc_loc_abelian_plaquettes(const double_soa* phases,
+        double_soa * loc_abelian_plaquettes, const int mu, const int nu );
 
 
 void dbgprint_gl3_soa(su3_soa * const conf, const char* nomefile,int conf_id_iter);

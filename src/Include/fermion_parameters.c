@@ -26,92 +26,92 @@ ferm_param *fermions_parameters;// set in init.c, from input file
 int init_ferm_params(ferm_param *fermion_settings){
 
     int errorstatus = 0;
-    
-    
-  printf("Initializing fermions...\n");
-    
-  NPS_tot = 0;
-  max_ps = 0;
 
-  // calculation of NPS_tot, max_ps,index_of_the_first_ps; 
-  for(int i=0;i<NDiffFlavs;i++){
-    // compute the total number of ps
-    NPS_tot += fermion_settings[i].number_of_ps;
-    // compute the max number of ps among the various flavs
-    if(fermion_settings[i].number_of_ps>=max_ps) max_ps = fermion_settings[i].number_of_ps;
-    // determine the offset (where does the ps of the flavour i starts?)
-    if(i==0){
-      fermion_settings[i].index_of_the_first_ps=0;
-    }else{
-      fermion_settings[i].index_of_the_first_ps = fermion_settings[i-1].index_of_the_first_ps + fermion_settings[i-1].number_of_ps;
+
+    printf("Initializing fermions...\n");
+
+    NPS_tot = 0;
+    max_ps = 0;
+
+    // calculation of NPS_tot, max_ps,index_of_the_first_ps; 
+    for(int i=0;i<NDiffFlavs;i++){
+        // compute the total number of ps
+        NPS_tot += fermion_settings[i].number_of_ps;
+        // compute the max number of ps among the various flavs
+        if(fermion_settings[i].number_of_ps>=max_ps) max_ps = fermion_settings[i].number_of_ps;
+        // determine the offset (where does the ps of the flavour i starts?)
+        if(i==0){
+            fermion_settings[i].index_of_the_first_ps=0;
+        }else{
+            fermion_settings[i].index_of_the_first_ps = fermion_settings[i-1].index_of_the_first_ps + fermion_settings[i-1].number_of_ps;
+        }
     }
-  }
 
-  printf("NPS_tot = %d \n",NPS_tot);
-  printf("max_ps = %d \n",max_ps);
+    printf("NPS_tot = %d \n",NPS_tot);
+    printf("max_ps = %d \n",max_ps);
 
-  // Rational Approximation related stuff
-  for(int i=0;i<NDiffFlavs;i++){
-    ferm_param *quark = &fermion_settings[i];
-    quark->approx_fi_mother.exponent_num =  +quark->degeneracy;
-    quark->approx_md_mother.exponent_num =  -quark->degeneracy;
-    quark->approx_li_mother.exponent_num =  -quark->degeneracy;
+    // Rational Approximation related stuff
+    for(int i=0;i<NDiffFlavs;i++){
+        ferm_param *quark = &fermion_settings[i];
+        quark->approx_fi_mother.exponent_num =  +quark->degeneracy;
+        quark->approx_md_mother.exponent_num =  -quark->degeneracy;
+        quark->approx_li_mother.exponent_num =  -quark->degeneracy;
 
-    quark->approx_fi_mother.exponent_den =   quark->number_of_ps*8;
-    quark->approx_md_mother.exponent_den =   quark->number_of_ps*4;
-    quark->approx_li_mother.exponent_den =   quark->number_of_ps*4;
+        quark->approx_fi_mother.exponent_den =   quark->number_of_ps*8;
+        quark->approx_md_mother.exponent_den =   quark->number_of_ps*4;
+        quark->approx_li_mother.exponent_den =   quark->number_of_ps*4;
 
-    quark->approx_fi_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
-    quark->approx_md_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
-    quark->approx_li_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
+        quark->approx_fi_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
+        quark->approx_md_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
+        quark->approx_li_mother.lambda_min = quark->ferm_mass*quark->ferm_mass/md_parameters.expected_max_eigenvalue;
 
-    quark->approx_fi_mother.lambda_max =  1.0;
-    quark->approx_md_mother.lambda_max =  1.0;
-    quark->approx_li_mother.lambda_max =  1.0;
+        quark->approx_fi_mother.lambda_max =  1.0;
+        quark->approx_md_mother.lambda_max =  1.0;
+        quark->approx_li_mother.lambda_max =  1.0;
 
-    quark->approx_fi_mother.error =  md_parameters.residue_metro/
-        pow(md_parameters.expected_max_eigenvalue,
-                (double) quark->approx_fi_mother.exponent_num/
-                quark->approx_fi_mother.exponent_den );
-    quark->approx_md_mother.error =  md_parameters.residue_md/
-        pow(md_parameters.expected_max_eigenvalue,
-                (double) quark->approx_md_mother.exponent_num/
-                quark->approx_md_mother.exponent_den );
-        
-    quark->approx_li_mother.error =  md_parameters.residue_metro/
-        pow(md_parameters.expected_max_eigenvalue,
-                (double) quark->approx_li_mother.exponent_num/
-                quark->approx_li_mother.exponent_den );
+        quark->approx_fi_mother.error =  md_parameters.residue_metro/
+            pow(md_parameters.expected_max_eigenvalue,
+                    (double) quark->approx_fi_mother.exponent_num/
+                    quark->approx_fi_mother.exponent_den );
+        quark->approx_md_mother.error =  md_parameters.residue_md/
+            pow(md_parameters.expected_max_eigenvalue,
+                    (double) quark->approx_md_mother.exponent_num/
+                    quark->approx_md_mother.exponent_den );
 
-    quark->approx_fi_mother.gmp_remez_precision = 100;
-    quark->approx_md_mother.gmp_remez_precision = 100;
-    quark->approx_li_mother.gmp_remez_precision = 100;
+        quark->approx_li_mother.error =  md_parameters.residue_metro/
+            pow(md_parameters.expected_max_eigenvalue,
+                    (double) quark->approx_li_mother.exponent_num/
+                    quark->approx_li_mother.exponent_den );
 
-    // copy everything also in the daughter approxs
-    quark->approx_fi.exponent_num =   quark->approx_fi_mother.exponent_num;
-    quark->approx_md.exponent_num =   quark->approx_md_mother.exponent_num;
-    quark->approx_li.exponent_num =   quark->approx_li_mother.exponent_num;
-    quark->approx_fi.exponent_den =   quark->approx_fi_mother.exponent_den;
-    quark->approx_md.exponent_den =   quark->approx_md_mother.exponent_den;
-    quark->approx_li.exponent_den =   quark->approx_li_mother.exponent_den;
-    quark->approx_fi.approx_order =   quark->approx_fi_mother.approx_order;
-    quark->approx_md.approx_order =   quark->approx_md_mother.approx_order;
-    quark->approx_li.approx_order =   quark->approx_li_mother.approx_order;
-    quark->approx_fi.gmp_remez_precision =
-        quark->approx_fi_mother.gmp_remez_precision;
-    quark->approx_md.gmp_remez_precision =   
-        quark->approx_md_mother.gmp_remez_precision;
-    quark->approx_li.gmp_remez_precision =   
-        quark->approx_li_mother.gmp_remez_precision;
+        quark->approx_fi_mother.gmp_remez_precision = 100;
+        quark->approx_md_mother.gmp_remez_precision = 100;
+        quark->approx_li_mother.gmp_remez_precision = 100;
 
-    // READ THE RAT APPROXS FROM THE FILES
-    errorstatus += rationalapprox_read(&(quark->approx_fi_mother));
-    errorstatus += rationalapprox_read(&(quark->approx_md_mother));
-    errorstatus += rationalapprox_read(&(quark->approx_li_mother));
+        // copy everything also in the daughter approxs
+        quark->approx_fi.exponent_num =   quark->approx_fi_mother.exponent_num;
+        quark->approx_md.exponent_num =   quark->approx_md_mother.exponent_num;
+        quark->approx_li.exponent_num =   quark->approx_li_mother.exponent_num;
+        quark->approx_fi.exponent_den =   quark->approx_fi_mother.exponent_den;
+        quark->approx_md.exponent_den =   quark->approx_md_mother.exponent_den;
+        quark->approx_li.exponent_den =   quark->approx_li_mother.exponent_den;
+        quark->approx_fi.approx_order =   quark->approx_fi_mother.approx_order;
+        quark->approx_md.approx_order =   quark->approx_md_mother.approx_order;
+        quark->approx_li.approx_order =   quark->approx_li_mother.approx_order;
+        quark->approx_fi.gmp_remez_precision =
+            quark->approx_fi_mother.gmp_remez_precision;
+        quark->approx_md.gmp_remez_precision =   
+            quark->approx_md_mother.gmp_remez_precision;
+        quark->approx_li.gmp_remez_precision =   
+            quark->approx_li_mother.gmp_remez_precision;
 
-  }
+        // READ THE RAT APPROXS FROM THE FILES
+        errorstatus += rationalapprox_read(&(quark->approx_fi_mother));
+        errorstatus += rationalapprox_read(&(quark->approx_md_mother));
+        errorstatus += rationalapprox_read(&(quark->approx_li_mother));
 
-  return errorstatus;
+    }
+
+    return errorstatus;
 
 }
 
@@ -119,19 +119,17 @@ int init_ferm_params(ferm_param *fermion_settings){
 void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 {
 
-
-  for(int i=0;i<NDiffFlavs;i++){
-      fpar[i].phases = &u1_back_phases[i*8];
-      fpar[i].phases_f = &u1_back_phases_f[i*8];
-      init_fermion_backfield(bfpars,&(fpar[i]));
-      char tempname[50];                            // DEBUG
-      strcpy(tempname,"backfield_");                //
-      strcat(tempname,fpar[i].name);                // 
+    for(int i=0;i<NDiffFlavs;i++){
+        fpar[i].phases = &u1_back_phases[i*8];
+        init_fermion_backfield(bfpars,&(fpar[i]));
+        char tempname[50];                            // DEBUG
+        strcpy(tempname,"backfield_");                //
+        strcat(tempname,fpar[i].name);                // 
 #ifdef MULTIDEVICE      
-      strcat(tempname,devinfo.myrankstr);           // 
+        strcat(tempname,devinfo.myrankstr);           // 
 #endif
-      // print_double_soa(fpar[i].phases,tempname);    //
-  }
+        print_double_soa(fpar[i].phases,tempname);    //
+    }
 }
 
 
@@ -155,39 +153,58 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
     int x, y, z, t, parity;
     int d[4], idxh;
 
-    if(verbosity_lv > 2) { 
-        printf("MPI%02d: Generating external field (containing staggered phases) \
-for flavour %s\n", devinfo.myrank , fermion_parameters->name);
-        if(0== devinfo.myrank ) printf("Direction mapping  x y z t: %d %d %d %d\n",
+    if(verbosity_lv > 2 && 0 == devinfo.myrank ) { 
+        printf("Generating external field (containing staggered phases) ");
+        printf("for flavour %s\n",fermion_parameters->name);
+        printf("Direction mapping  x y z t: %d %d %d %d\n",
                 geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap);
+        printf("EM field quanta: \n\tB: %f %f %f \n\tE: %f %f %f\n",
+                bx_quantum, by_quantum,bz_quantum,ex_quantum,ey_quantum,ez_quantum);
 
     }
+
+#ifdef MULTIDEVICE
+
+    printf("MPI%02d: Origin coordinates: (x=%02d y=%02d z=%02d t=%02d)\n",
+            devinfo.myrank ,  devinfo.origin_0123[geom_par.xmap],
+            devinfo.origin_0123[geom_par.ymap], devinfo.origin_0123[geom_par.zmap],
+            devinfo.origin_0123[geom_par.tmap]);
+
+
+    if(0==devinfo.myrank) printf("Halo Widths: x: %d y: %d z: %d t :%d\n",
+            devinfo.halo_widths0123[geom_par.xmap],
+            devinfo.halo_widths0123[geom_par.ymap],
+            devinfo.halo_widths0123[geom_par.zmap],
+            devinfo.halo_widths0123[geom_par.tmap]);
+
+#endif                  
+
 
     for(d[3]=0; d[3] < nd3; d[3]++) for(d[2]=0; d[2] < nd2; d[2]++)
         for(d[1]=0; d[1] < nd1; d[1]++) for(d[0]=0; d[0] < nd0; d[0]++){
 
-                    idxh = snum_acc(d[0],d[1],d[2],d[3]);
-                   
-                    x = d[geom_par.xmap];int tnx = geom_par.gnx;
-                    y = d[geom_par.ymap];int tny = geom_par.gny;
-                    z = d[geom_par.zmap];int tnz = geom_par.gnz;
-                    t = d[geom_par.tmap];int tnt = geom_par.gnt;
+            idxh = snum_acc(d[0],d[1],d[2],d[3]);
+
+            x = d[geom_par.xmap];int tnx = geom_par.gnx;
+            y = d[geom_par.ymap];int tny = geom_par.gny;
+            z = d[geom_par.zmap];int tnz = geom_par.gnz;
+            t = d[geom_par.tmap];int tnt = geom_par.gnt;
 
 #ifdef MULTIDEVICE
-                    x+= devinfo.origin_0123[geom_par.xmap]
-                        - devinfo.halo_widths0123[geom_par.xmap];  
-                    y+= devinfo.origin_0123[geom_par.ymap]
-                        - devinfo.halo_widths0123[geom_par.ymap];
-                    z+= devinfo.origin_0123[geom_par.zmap]
-                        - devinfo.halo_widths0123[geom_par.zmap];
-                    t+= devinfo.origin_0123[geom_par.tmap]
-                        - devinfo.halo_widths0123[geom_par.tmap];
+            x+= devinfo.origin_0123[geom_par.xmap]
+                - devinfo.halo_widths0123[geom_par.xmap];  
+            y+= devinfo.origin_0123[geom_par.ymap]
+                - devinfo.halo_widths0123[geom_par.ymap];
+            z+= devinfo.origin_0123[geom_par.zmap]
+                - devinfo.halo_widths0123[geom_par.zmap];
+            t+= devinfo.origin_0123[geom_par.tmap]
+                - devinfo.halo_widths0123[geom_par.tmap];
 
-                    if(x>tnx-1)  x-= tnx ; if(x<0)  x+= tnx ; 
-                    if(y>tny-1)  y-= tny ; if(y<0)  y+= tny ; 
-                    if(z>tnz-1)  z-= tnz ; if(z<0)  z+= tnz ; 
-                    if(t>tnt-1)  t-= tnt ; if(t<0)  t+= tnt ; 
- 
+            if(x>tnx-1)  x-= tnx ; if(x<0)  x+= tnx ; 
+            if(y>tny-1)  y-= tny ; if(y<0)  y+= tny ; 
+            if(z>tnz-1)  z-= tnz ; if(z<0)  z+= tnz ; 
+            if(t>tnt-1)  t-= tnt ; if(t<0)  t+= tnt ; 
+
 #endif                  
 
                     parity = (x+y+z+t)%2; 
@@ -275,6 +292,6 @@ for flavour %s\n", devinfo.myrank , fermion_parameters->name);
     } // d3,d2,d1,d0 loops
 
     int dir;
-    
+
 }
 #endif
