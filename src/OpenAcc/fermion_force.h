@@ -36,8 +36,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			       __restrict vec3_soa * tkloc_h, // parking 
 			       __restrict vec3_soa * tkloc_s, // parking 
 			       __restrict vec3_soa * tkloc_p, // parking 
-			       __restrict vec3_soa * tk_p_shiftferm//parking variable [max_approx_order]           
-			       );
+			       __restrict vec3_soa * tk_p_shiftferm,//parking [max_approx_order] 
+                   const int max_cg);
 
 
 

@@ -43,7 +43,7 @@ ferm_meas_params fm_par;
 // vedi tesi LS F.Negro per ragguagli (Appendici)
 void eo_inversion(su3_soa *tconf_acc,
         ferm_param * tfermions_parameters,
-        double res,
+        double res, int max_cg,
         vec3_soa * in_e,     // z2 noise
         vec3_soa * in_o,     // z2 noise
         vec3_soa * out_e,
@@ -67,7 +67,7 @@ void eo_inversion(su3_soa *tconf_acc,
     combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
     ker_invert_openacc(tconf_acc,tfermions_parameters,
             out_e,phi_e,res,trialSolution,
-            tloc_r,tloc_h,tloc_s,tloc_p);
+            tloc_r,tloc_h,tloc_s,tloc_p,max_cg);
     acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
     combine_in1_minus_in2_allxfact(in_o,phi_o,(double)1/tfermions_parameters->ferm_mass,out_o);
 
@@ -134,7 +134,7 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 void fermion_measures( su3_soa * tconf_acc,
         ferm_param * tfermions_parameters,
         ferm_meas_params * tfm_par,
-        double res,
+        double res, int max_cg,
         int conf_id_iter  ){
     vec3_soa * rnd_e,* rnd_o;
     vec3_soa * chi_e,* chi_o; //results of eo_inversion
@@ -268,7 +268,7 @@ void fermion_measures( su3_soa * tconf_acc,
             {
                 // CHIRAL CONDENSATE
                 // (chi_e,chi_o) = M^{-1} (rnd_e,rnd_o)
-                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res,
+                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res, max_cg,   
                         rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,
                         trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
                 chircond_size = scal_prod_global(rnd_e,chi_e)+
@@ -308,7 +308,7 @@ void fermion_measures( su3_soa * tconf_acc,
                     // (chi2_e,chi2_o) = M^{-1} (chi_e,chi_o) = 
                     // = M^{-2} (rnd_e, rnd_o)
                     eo_inversion(conf_to_use,&tfermions_parameters[iflv],
-                            res,chi_e,chi_o,chi2_e,chi2_o,phi_e,phi_o,
+                            res,max_cg,chi_e,chi_o,chi2_e,chi2_o,phi_e,phi_o,
                             trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
 
                     trMinvSq_size = -scal_prod_global(rnd_e,chi2_e)-
@@ -352,7 +352,7 @@ void fermion_measures( su3_soa * tconf_acc,
                     // (chi2_e,chi2_o) = M^{-1} (bnchi_e,bnchi_o) =
                     // = M^{-1} dM/dmu M^{-1} (rnd_e,rnd_o)
                     eo_inversion(conf_to_use,&tfermions_parameters[iflv],
-                            res,bnchi_e,bnchi_o,chi2_e,chi2_o,
+                            res,max_cg,bnchi_e,bnchi_o,chi2_e,chi2_o,
                             phi_e,phi_o,
                             trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
 

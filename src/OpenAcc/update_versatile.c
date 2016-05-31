@@ -33,7 +33,7 @@
 action_param act_params;
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
-        double res_metro, double res_md, int id_iter,int acc,int metro){
+        double res_metro, double res_md, int id_iter,int acc,int metro, int max_cg){
 
 #ifdef STOUT_FERMIONS        
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
@@ -60,7 +60,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         fprintf(foutfile,"\nIteration %d \t",id_iter);
         fclose(foutfile);
     }
-
 
 
     int mu;
@@ -210,6 +209,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             printf("MPI%02d - Initial Action Computed : OK \n", devinfo.myrank);
         }
 
+
+        multishift_invert_iterations = 0 ; 
         // FIRST INV APPROX CALC --> calculation of CHI fermion
 
 
@@ -220,7 +221,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
                 // USING STOUTED GAUGE MATRIX
-                multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+                multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm,max_cg );
                 if(0==devinfo.myrank) printf("Inversion performed for fermion %d, copy %d\n", iflav,ips);
                 recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
                 if(0==devinfo.myrank) printf("Calculated chi for fermion %d, copy %d\n", iflav,ips);
@@ -248,7 +249,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 auxbis_conf_acc, // global
                 aux_conf_acc,fermions_parameters,NDiffFlavs,
                 ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-                k_p_shiftferm,momenta,local_sums,res_md);
+                k_p_shiftferm,momenta,local_sums,res_md, max_cg);
 
         if(debug_settings.do_reversibility_test){
 
@@ -264,7 +265,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                     auxbis_conf_acc, // globale
                     aux_conf_acc,fermions_parameters,NDiffFlavs,
                     ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-                    k_p_shiftferm,momenta,local_sums,res_md);
+                    k_p_shiftferm,momenta,local_sums,res_md, max_cg);
 
 #pragma acc update device(conf_acc_bkp[0:8])
             double conf_error =  calc_diff_su3_soa_norm(tconf_acc,conf_acc_bkp);
@@ -349,7 +350,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                     multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], 
                             &(fermions_parameters[iflav].approx_li),
                             ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro, 
-                            kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm);
+                            kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm, max_cg);
                     recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
                 }
             }
@@ -452,19 +453,19 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
     dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
 
-    if(metro==0){
-        printf("MPI%02d-   FULL UPDATE COMPUTATION TIME NOMETRO - Tot time : %f sec \n",devinfo.myrank,dt_tot);
-        printf("MPI%02d-\t\tPreTrans->Preker  : %f sec  \n",devinfo.myrank,dt_pretrans_to_preker);
-        printf("MPI%02d-\t\tPreKer->PostKer   : %f sec  \n",devinfo.myrank,dt_preker_to_postker);
-        printf("MPI%02d-\t\tPostKer->PostTrans: %f sec  \n",devinfo.myrank,dt_postker_to_posttrans);
-    }
-    if(metro==1){
-        printf("MPI%02d-   FULL UPDATE COMPUTATION TIME SIMETRO - Tot time : %f sec  \n",devinfo.myrank,dt_tot);
-        printf("MPI%02d-\t\tPreTrans->Preker  : %f sec  \n",devinfo.myrank,dt_pretrans_to_preker);
-        printf("MPI%02d-\t\tPreKer->PostKer   : %f sec  \n",devinfo.myrank,dt_preker_to_postker);
-        printf("MPI%02d-\t\tPostKer->PostTrans: %f sec  \n",devinfo.myrank,dt_postker_to_posttrans);
-    }
+    if(0==devinfo.myrank){
 
+        printf("   FULL UPDATE COMPUTATION TIME ");
+            if(metro==0)printf("NO");
+            else printf("SI");
+
+        printf("METRO - Tot time : %f sec \n",dt_tot);
+        printf("\t\tPreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
+        printf("\t\tPreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
+        printf("\t\tPostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
+        printf("\t\tTotal CG-M iterations: %d \n",multishift_invert_iterations);
+
+    }
     if(debug_settings.save_diagnostics == 1){
         FILE *foutfile = 
             fopen(debug_settings.diagnostics_filename,"at");

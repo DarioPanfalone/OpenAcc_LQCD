@@ -6,21 +6,23 @@
 #endif
 
 #include "../Include/common_defines.h"
-#include "../Include/debug.h"
-#include "../Include/montecarlo_parameters.h"
 #include "../Include/setting_file_parser.h"
-#include "../Mpi/multidev.h"
-#include "../OpenAcc/action.h"
+#include "../Include/fermion_parameters.h"
 #include "../OpenAcc/alloc_vars.h"
-#include "../OpenAcc/deviceinit.h" 
 #include "../OpenAcc/inverter_multishift_full.h"
 #include "../OpenAcc/io.h"
-#include "../OpenAcc/md_integrator.h"
 #include "../OpenAcc/random_assignement.h"
 #include "../Rand/random.h"
+#include "../RationalApprox/rationalapprox.h"
 #include "./dbgtools.h"
+#include "../OpenAcc/action.h"
+#include "../Include/montecarlo_parameters.h"
+#include "../Include/debug.h"
+#include "../OpenAcc/deviceinit.h" 
+#include <sys/time.h>
+#include "../OpenAcc/md_integrator.h"
 
-
+#include "../Mpi/multidev.h"
 #ifdef MULTIDEVICE
 #include <mpi.h>
 #endif
@@ -31,23 +33,40 @@
 int id_iter;
 int verbosity_lv;
 
+void init_fake_rational_approx(RationalApprox* rational_approx,
+        double a,double b, int order){
+    // a0=0, an=a, bn=b  
+    
+    rational_approx->exponent_den = 0;
+    rational_approx->exponent_num = 0;
+    rational_approx->approx_order = order;
+    rational_approx->lambda_min = 0.1 ; 
+    rational_approx->lambda_max = 1.0 ;
+    rational_approx->gmp_remez_precision = 0;
+    rational_approx->error = 1.0;
+    rational_approx->RA_a0 = 0; 
+    int i;
+    for(i = 0; i < order; i++){
+        rational_approx->RA_a[i]= a;
+        rational_approx->RA_b[i]= b;
+    }
+}
+
+
+
 int main(int argc, char* argv[]){
 
     const char confname[50] = "test_conf";
     const char fermionname[50] = "test_fermion";
-    const char fermionname_doe[50] = "test_fermion_result_doe2";
-    const char fermionname_deo[50] = "test_fermion_result_deo2";
-    const char fermionname_fulldirac[50] = "test_fermion_result_fulldirac2";
     char myconfname             [50];
     char myfermionname          [50];
-    char myfermionname_doe      [50];
-    char myfermionname_deo      [50];
-    char myfermionname_fulldirac[50];
 
 
     act_params.stout_steps = 0;
     NPS_tot = 1;
 
+
+    // INITIALIZATION
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
 #endif
@@ -90,10 +109,6 @@ int main(int argc, char* argv[]){
     printf("u1_backfield initialization : OK \n");
     sprintf(myconfname             ,"%s_MPI%02d",confname             ,devinfo.myrank);
     sprintf(myfermionname          ,"%s_MPI%02d",fermionname          ,devinfo.myrank);
-    sprintf(myfermionname_doe      ,"%s_MPI%02d",fermionname_doe      ,devinfo.myrank);
-    sprintf(myfermionname_deo      ,"%s_MPI%02d",fermionname_deo      ,devinfo.myrank);
-    sprintf(myfermionname_fulldirac,"%s_MPI%02d",fermionname_fulldirac,devinfo.myrank);
-
 
 
 #ifndef __GNUC__
@@ -150,27 +165,65 @@ int main(int argc, char* argv[]){
     communicate_fermion_borders_hostonly(ferm_chi_acc);
 #endif
 
-    print_vec3_soa(ferm_chi_acc,myfermionname);
+//    print_vec3_soa(ferm_chi_acc,myfermionname);
 
 
+
+    // fake rational approx
+    
+    RationalApprox fakeRationalApprox;
+    double minshift = fermions_parameters->ferm_mass;
+    init_fake_rational_approx(&fakeRationalApprox, 1, minshift*minshift, 15);
+
+    //  
     //#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
     create(ferm_phi_acc[0:1])  copyin(u1_back_phases[0:8*NDiffFlavs]) \
         create(kloc_s[0:1])
 #pragma acc data  copy(conf_acc[0:8]) copy(ferm_chi_acc[0:1])\
         copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
-        copy(kloc_s[0:1])
+        create(kloc_r[0:1]) create(kloc_h[0:1]) create(kloc_s[0:1]) create(kloc_p[0:1]) \
+        create(ferm_shiftmulti_acc[max_ps*MAX_APPROX_ORDER] \
+        create(k_p_shiftferm[max_ps*MAX_APPROX_ORDER] 
         {
+ 
+            struct timeval t0,t1,t2,t3,t4,t5;
+            int r;
+            printf("Multishift Inversion, %d times...", mc_params.ntraj);
+            gettimeofday(&t0,NULL);
+            multishift_invert_iterations = 0;
+            for(r=0; r<mc_params.ntraj; r++)
+            multishift_invert(conf_acc,&fermions_parameters[0],
+                    &fakeRationalApprox,
+                    ferm_shiftmulti_acc,
+                    ferm_chi_acc,
+                    1e-12, // residue to (almost )zero, 
+                           // so that it will hopefully do max_cg iter
+                    kloc_r,
+                    kloc_h,
+                    kloc_s,
+                    kloc_p,
+                    k_p_shiftferm,
+                    md_parameters.max_cg_iterations);
+            gettimeofday(&t1,NULL);
 
-            printf("MPI%02d: Multishift inversion...\n", devinfo.myrank);
-            multishift_invert(conf_acc,fermions_parameters, 
-                    &(fermions_parameters->approx_md_mother),
-                    ferm_shiftmulti_acc,ferm_chi_acc, md_parameters.residue_md,
-                    kloc_r,kloc_h,kloc_s,kloc_p,k_p_shiftferm);
-            printf("MPI%02d: Done\n", devinfo.myrank);
 
+            for(r=0; r<fakeRationalApprox.approx_order; r++){
 
+                char fermionname_shift[50];
+                sprintf(fermionname_shift,"fermion_shift_%d.dat",r);
 
+                // shift fermio names
+                printf("Writing file %s.\n", fermionname_shift);
 
+#pragma acc update host(ferm_phi_acc[0:1]) // update on host the right fermion
+                print_vec3_soa_wrapper(&ferm_shiftmulti_acc[r],fermionname_shift);
+            }
+            printf("MPI%02d: End of data region!\n", devinfo.myrank);
+
+            double dt_cgm = (double)(t1.tv_sec - t0.tv_sec) + 
+                ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+            printf("Time for 1 step of multishift inversion   : %e\n",
+                    dt_cgm/multishift_invert_iterations);
         }
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
@@ -180,7 +233,6 @@ int main(int argc, char* argv[]){
     MPI_Finalize();
 #endif 
 
-    printf("MPI%02d: deallocation...\n",devinfo.myrank);
     mem_free();
 
     printf("MPI%02d: Test completed.\n",devinfo.myrank);

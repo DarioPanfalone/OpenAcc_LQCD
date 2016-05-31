@@ -267,7 +267,8 @@ int main(int argc, char* argv[]){
                 if(devinfo.myrank == 0)  printf("Fermion Measurements: see file %s\n",
                         fm_par.fermionic_outfilename);
                 fermion_measures(conf_acc,fermions_parameters,
-                        &fm_par, md_parameters.residue_metro, id_iter_offset) ;
+                        &fm_par, md_parameters.residue_metro, 
+                        md_parameters.max_cg_iterations, id_iter_offset);
 
 
                 //-------------------------------------------------// 
@@ -318,11 +319,12 @@ int main(int argc, char* argv[]){
                     accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
                             md_parameters.residue_metro,md_parameters.residue_md,
                             id_iter-id_iter_offset,
-                            accettate_therm,0);
+                            accettate_therm,0,md_parameters.max_cg_iterations);
                 }else{
                     accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
                             md_parameters.residue_metro,md_parameters.residue_md,
-                            id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+                            id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
+                            md_parameters.max_cg_iterations);
                 }
 
 
@@ -333,7 +335,9 @@ int main(int argc, char* argv[]){
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
                 fermion_measures(conf_acc,fermions_parameters,
-                        &fm_par, md_parameters.residue_metro,id_iter) ;
+                        &fm_par, md_parameters.residue_metro,
+                        md_parameters.max_cg_iterations,
+                        id_iter) ;
 
 
                 //-------------------------------------------------// 

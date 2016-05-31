@@ -8,7 +8,7 @@
 
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
-        double res_metro, double res_md, int id_iter,int acc,int metro);
+        double res_metro, double res_md, int id_iter,int acc,int metro, int max_cg);
 
 
 #endif

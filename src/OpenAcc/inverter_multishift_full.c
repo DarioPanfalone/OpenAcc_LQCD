@@ -13,6 +13,8 @@
 
 extern int verbosity_lv;
 
+int multishift_invert_iterations ; // global count of CG iterations
+
 int multishift_invert(__restrict su3_soa * const u,
 		      __restrict ferm_param * pars,
 		      RationalApprox * approx,
@@ -23,8 +25,8 @@ int multishift_invert(__restrict su3_soa * const u,
 		      __restrict vec3_soa * loc_h,
 		      __restrict vec3_soa * loc_s,
 		      __restrict vec3_soa * loc_p,
-		      __restrict vec3_soa * shiftferm // multi-ferm [nshift]
-		      ){
+		      __restrict vec3_soa * shiftferm, // multi-ferm [nshift]
+		      const int max_cg){
   /*********************
    * This function takes an input fermion 'in', a rational approximation
    * 'approx' and writes in 'out' a number of fermions, which are the
@@ -175,7 +177,8 @@ int multishift_invert(__restrict su3_soa * const u,
       printf("\n");
       
       }
-    } while(maxiter>0 && cg<max_cg); // end of cg iterations 
+    } while(maxiter>0 && cg<max_cg); // end of cg iterations
+    multishift_invert_iterations += cg ;  
 
     if(cg==max_cg && 0==devinfo.myrank )
       {
@@ -194,11 +197,12 @@ int multishift_invert(__restrict su3_soa * const u,
 
     for(iter=0; iter<approx->approx_order; iter++){
         if(verbosity_lv > 4 && 0 == devinfo.myrank)
-            printf("Verifying result, shift %d shift\n", iter);
+            printf("Verifying result, shift %d\n", iter);
       assign_in_to_out(&out[iter],loc_p);
       fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,approx->RA_b[iter]);
       combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
       double  giustoono=l2norm2_global(loc_h)/source_norm;
+      printf("giostoono %lf\n", giustoono);
   
   
       if(verbosity_lv > 2 && 0 == devinfo.myrank){

@@ -20,6 +20,7 @@ typedef struct md_param_t{
     double residue_md;
     double residue_metro;
     double expected_max_eigenvalue;
+    int max_cg_iterations;
 
 } md_param; 
 
@@ -47,7 +48,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				vec3_soa * tk_p_shiftferm, // parking, [max_nshift]
 				thmat_soa * tmomenta,
 				dcomplex_soa * local_sums,
-				double res);
+				double res, const int max_cg);
 
 
 
