@@ -209,14 +209,16 @@ int main(int argc, char* argv[]){
     create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER])\
     create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])\
     create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER])\
-    create(momenta[0:8]) create(momenta_backup[0:8*momenta_backupped])\
-    create(conf_acc_bkp[0:8*momenta_backupped])\
+    create(momenta[0:8])\
+    create(momenta_backup[0:8*debug_settings.do_reversibility_test])\
+    create(  conf_acc_bkp[0:8*debug_settings.do_reversibility_test])\
     copyin(nnp_openacc) copyin(nnm_openacc)\
     create(local_sums[0:2]) create(d_local_sums[0:2])\
     copyin(fermions_parameters[0:NDiffFlavs])\
     copyin(deltas_Omelyan[0:7]) \
     copyin(u1_back_phases[0:8*NDiffFlavs])\
-    create(ipdot_g_old[0:8]) create(ipdot_f_old[0:8])
+    create(ipdot_g_old[0:8*debug_settings.save_diagnostics])\
+    create(ipdot_f_old[0:8*debug_settings.save_diagnostics])
     {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
