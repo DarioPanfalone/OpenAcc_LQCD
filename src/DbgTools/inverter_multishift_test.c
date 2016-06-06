@@ -182,8 +182,8 @@ int main(int argc, char* argv[]){
 #pragma acc data  copy(conf_acc[0:8]) copy(ferm_chi_acc[0:1])\
         copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
         create(kloc_r[0:1]) create(kloc_h[0:1]) create(kloc_s[0:1]) create(kloc_p[0:1]) \
-        create(ferm_shiftmulti_acc[max_ps*MAX_APPROX_ORDER] \
-        create(k_p_shiftferm[max_ps*MAX_APPROX_ORDER] 
+        create(ferm_shiftmulti_acc[max_ps*MAX_APPROX_ORDER]) \
+        create(k_p_shiftferm[max_ps*MAX_APPROX_ORDER]) 
         {
  
             struct timeval t0,t1,t2,t3,t4,t5;
