@@ -27,7 +27,7 @@
 #include "../OpenAcc/struct_c_def.h"
 #include "./baryon_number_utilities.h"
 #include "./ferm_meas.h"
-#include "./magnetic_susceptibilit_utilities.h"
+#include "./magnetic_susceptibility_utilities.h"
 
 
 #ifdef STOUT_FERMIONS
