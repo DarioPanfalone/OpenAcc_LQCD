@@ -18,6 +18,12 @@ extern bf_param backfield_parameters;
 void calc_u1_phases(double_soa * phases, bf_param bfpars, 
         double chpot,double charge);
 
+void phase_diff_in_place(double_soa * inout, double_soa * sottraendo);
+
+void set_double_soa_to_zero(double_soa * p);
+
+void u1_diff(double_soa * out_re, double_soa * out_im,
+        double_soa * phase_p,double_soa * phase_m );
 
 inline int KSphaseX(int x,int y,int z,int t){return 1;};
 inline int KSphaseY(int x,int y,int z,int t){

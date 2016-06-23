@@ -20,12 +20,15 @@
 #include "../Include/fermion_parameters.h"
 #include "../OpenAcc/alloc_vars.h"
 #include "../OpenAcc/fermion_matrix.h"
+#include "../OpenAcc/field_times_fermion_matrix.h"
 #include "../OpenAcc/fermionic_utilities.h"
 #include "../OpenAcc/inverter_full.h"
 #include "../OpenAcc/random_assignement.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "./baryon_number_utilities.h"
 #include "./ferm_meas.h"
+#include "./magnetic_susceptibilit_utilities.h"
+
 
 #ifdef STOUT_FERMIONS
 #include "../OpenAcc/stouting.h"
@@ -96,9 +99,15 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
         sprintf(strtocat, "%02d.Reff_%-16s%02d.Imff_%-16s",col_count+1,
                 tferm_par[iflv].name,col_count+2,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
+
         sprintf(strtocat, "%02d.ReN_%-17s%02d.ImN_%-17s",col_count+3,
                 tferm_par[iflv].name,col_count+4,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
+
+        sprintf(strtocat, "%02d.ReMag_%-16s%02d.ImMag_%-16s",col_count+3,
+                tferm_par[iflv].name,col_count+4,tferm_par[iflv].name);
+        strcat(fmpar->fermionic_outfile_header,strtocat);
+
         col_count +=4;
         if (fmpar->DoubleInvNVectorsChiral>0){
             sprintf(strtocat, 
@@ -130,7 +139,6 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 
 }
 
-
 void fermion_measures( su3_soa * tconf_acc,
         ferm_param * tfermions_parameters,
         ferm_meas_params * tfm_par,
@@ -138,13 +146,16 @@ void fermion_measures( su3_soa * tconf_acc,
         int conf_id_iter  ){
     vec3_soa * rnd_e,* rnd_o;
     vec3_soa * chi_e,* chi_o; //results of eo_inversion
+    vec3_soa * magchi_e,* magchi_o; //results of eo_inversion
     vec3_soa *bnchi_e,*bnchi_o; //for baryon number calculation 
     vec3_soa *chi2_e,*chi2_o; //results of second eo_inversion, 
-    // for susceptibilities
+                              // for susceptibilities
 
     vec3_soa * phi_e,* phi_o; // parking variables for eo_inverter
     vec3_soa * trial_sol;
     su3_soa * conf_to_use;
+
+    double_soa * fields_magnetization ; // 2 * 8
 
 #ifdef STOUT_FERMIONS
 
@@ -177,6 +188,10 @@ void fermion_measures( su3_soa * tconf_acc,
     ALLOCCHECK(allocation_check,chi_e);     
     allocation_check =  posix_memalign((void **)&chi_o, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,chi_o);     
+    allocation_check =  posix_memalign((void **)&magchi_e, ALIGN, sizeof(vec3_soa));
+    ALLOCCHECK(allocation_check,magchi_e);     
+    allocation_check =  posix_memalign((void **)&magchi_o, ALIGN, sizeof(vec3_soa));
+    ALLOCCHECK(allocation_check,magchi_o);     
     allocation_check =  posix_memalign((void **)&bnchi_e, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,bnchi_e);     
     allocation_check =  posix_memalign((void **)&bnchi_o, ALIGN, sizeof(vec3_soa));
@@ -184,7 +199,14 @@ void fermion_measures( su3_soa * tconf_acc,
     allocation_check =  posix_memalign((void **)&chi2_e, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,chi2_e);     
     allocation_check =  posix_memalign((void **)&chi2_o, ALIGN, sizeof(vec3_soa));
-    ALLOCCHECK(allocation_check,chi2_o);     
+    ALLOCCHECK(allocation_check,chi2_o);    
+
+    allocation_check =  posix_memalign((void **)&fields_magnetization, ALIGN,
+            2*8*sizeof(double_soa));
+    ALLOCCHECK(allocation_check, fields_magnetization);    
+
+
+
 
     allocation_check =  posix_memalign((void **)&trial_sol, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,trial_sol);
@@ -211,6 +233,17 @@ void fermion_measures( su3_soa * tconf_acc,
         }
         fclose(foutfile);// found file size
     }
+
+
+#pragma acc data create(phi_e[0:1]) create(phi_o[0:1])\
+            create(chi_e[0:1]) create(chi_o[0:1])   \
+            create(magchi_e[0:1]) create(magchi_o[0:1])   \
+            create(bnchi_e[0:1]) create(bnchi_o[0:1])   \
+            create(chi2_e[0:1]) create(chi2_o[0:1])   \
+            create(rnd_e[0:1]) create(rnd_o[0:1]) create(trial_sol[0:1]) \
+            create(fields_magnetization[0:16])
+    {
+
 
 
     // cycle on copies
@@ -252,7 +285,11 @@ void fermion_measures( su3_soa * tconf_acc,
             generate_vec3_soa_z2noise(rnd_e);
             generate_vec3_soa_z2noise(rnd_o);
             generate_vec3_soa_gauss(trial_sol);
+#pragma acc update device(rnd_e[0:1]) 
+#pragma acc update device(rnd_o[0:1]) 
+#pragma acc update device(trial_sol[0:1]) 
             d_complex chircond_size = 0.0 + 0.0*I;
+            d_complex magnetization_size = 0.0 + 0.0*I;
             d_complex barnum_size = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
             d_complex trMinvSq_size = 0.0 + 0.0*I; // for connected chiral susc
             d_complex trd2M_dmu2_Minv_size = 0.0 + 0.0*I; //for connected baryon susc,1
@@ -260,17 +297,14 @@ void fermion_measures( su3_soa * tconf_acc,
 
             double factor = tfermions_parameters[iflv].degeneracy*0.25/GL_SIZE;
 
-#pragma acc data create(phi_e[0:1]) create(phi_o[0:1])\
-            create(chi_e[0:1]) create(chi_o[0:1])   \
-            create(bnchi_e[0:1]) create(bnchi_o[0:1])   \
-            create(chi2_e[0:1]) create(chi2_o[0:1])   \
-            copyin(rnd_e[0:1]) copyin(rnd_o[0:1]) copyin(trial_sol[0:1])
-            {
-                // CHIRAL CONDENSATE
+                // FIRST INVERSION
                 // (chi_e,chi_o) = M^{-1} (rnd_e,rnd_o)
                 eo_inversion(conf_to_use,&tfermions_parameters[iflv],res, max_cg,   
                         rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,
                         trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+
+
+                // CHIRAL CONDENSATE
                 chircond_size = scal_prod_global(rnd_e,chi_e)+
                     scal_prod_global(rnd_o,chi_o);
 
@@ -288,9 +322,6 @@ void fermion_measures( su3_soa * tconf_acc,
                         tfermions_parameters[iflv].phases);
 
 
-
-
-
                 // (bnchi_e,bnchi_o) = dM/dmu (chi_e,chi_o) 
                 barnum_size = scal_prod_global(rnd_e,bnchi_e)+
                     scal_prod_global(rnd_o,bnchi_o);
@@ -300,6 +331,33 @@ void fermion_measures( su3_soa * tconf_acc,
                     fprintf(foutfile,"%.16lf\t%.16lf\t",
                             creal(barnum_size*factor),
                             cimag(barnum_size*factor));
+
+                // MAGNETIZATION
+               
+                // NOT EFFICIENT (can be done once for all)
+                idphase_dbz(fields_magnetization,&fields_magnetization[8],
+                        &tfermions_parameters[iflv]);
+#pragma acc update device(fields_magnetization[0:16])
+
+                acc_Deo_wf(conf_to_use,magchi_e,chi_o,tfermions_parameters[iflv].phases,
+                        fields_magnetization,&fields_magnetization[8]);
+                acc_Doe_wf(conf_to_use,magchi_o,chi_e,tfermions_parameters[iflv].phases,
+                        fields_magnetization,&fields_magnetization[8]);
+
+                magnetization_size = scal_prod_global(rnd_e,magchi_e)+
+                    scal_prod_global(rnd_o,magchi_o);
+
+                if(devinfo.myrank == 0)
+                    fprintf(foutfile,"%.16lf\t%.16lf\t",
+                            creal(magnetization_size*factor),
+                            cimag(magnetization_size*factor));
+
+
+
+
+
+
+                
 
                 // SUSCEPTIBILITIES
                 if(icopy < tfm_par->DoubleInvNVectorsChiral ){
@@ -379,7 +437,6 @@ void fermion_measures( su3_soa * tconf_acc,
                         fprintf(foutfile,"%-24s%-24s%-24s%-24s","none",
                                 "none","none","none" );
 
-            }
         }// end of cycle over flavours
 
         if(devinfo.myrank == 0){
@@ -387,6 +444,7 @@ void fermion_measures( su3_soa * tconf_acc,
             fclose(foutfile);
         }
     }// end of cycle over copies
+    }
 
     free(rnd_e);
     free(rnd_o);
@@ -394,6 +452,9 @@ void fermion_measures( su3_soa * tconf_acc,
     free(phi_o);
     free(bnchi_e);
     free(bnchi_o);
+    free(magchi_e);
+    free(magchi_o);
+    free(fields_magnetization);
     free(chi_e);
     free(chi_o);
     free(chi2_e);
@@ -402,6 +463,5 @@ void fermion_measures( su3_soa * tconf_acc,
 
 
 }
-
 
 #endif

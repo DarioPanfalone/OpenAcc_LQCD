@@ -174,6 +174,44 @@ void calc_u1_phases(double_soa * phases,bf_param bf_pars,
 
 }
 
+
+void phase_diff_in_place(double_soa * inout, double_soa * sottraendo){
+    int dir,idxh;
+
+    for(dir=0;dir<8;dir++)
+        for(idxh=0;idxh<sizeh;idxh++)
+            inout[dir].d[idxh] -= sottraendo[dir].d[idxh];
+
+}
+
+void u1_diff(double_soa * out_re, double_soa * out_im,
+        double_soa * phase_p,double_soa * phase_m ){
+
+     int dir,idxh;
+
+    for(dir=0;dir<8;dir++)
+        for(idxh=0;idxh<sizeh;idxh++){
+            out_re[dir].d[idxh] = cos(phase_p[dir].d[idxh]) - cos(phase_m[dir].d[idxh]);
+            out_im[dir].d[idxh] = sin(phase_p[dir].d[idxh]) - sin(phase_m[dir].d[idxh]);
+        }
+    
+}
+
+
+void set_double_soa_to_zero(double_soa * p){
+    int dir,idxh;
+
+    for(dir=0;dir<8;dir++)
+        for(idxh=0;idxh<sizeh;idxh++)
+            p[dir].d[idxh]=0;
+    
+    
+    
+    
+}
+
+
+
 /*
    void init_backfield(double_soa * tu1_back_field_phases,bf_param bf_pars ){
 
