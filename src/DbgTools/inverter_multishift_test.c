@@ -201,9 +201,9 @@ int main(int argc, char* argv[]){
 
             }
 
-            gettimeofday(&t0,NULL);
-            multishift_invert_iterations = 0;
-            for(r=0; r<mc_params.ntraj; r++)
+            for(r=0; r<mc_params.ntraj; r++){
+                gettimeofday(&t0,NULL);
+                multishift_invert_iterations = 0;
                 multishift_invert(conf_acc,&fermions_parameters[0],
                         &fakeRationalApprox,
                         ferm_shiftmulti_acc,
@@ -215,7 +215,14 @@ int main(int argc, char* argv[]){
                         kloc_p,
                         k_p_shiftferm,
                         md_parameters.max_cg_iterations);
-            gettimeofday(&t1,NULL);
+                gettimeofday(&t1,NULL);
+                if(0==devinfo.myrank){
+                    double dt_cgm = (double)(t1.tv_sec - t0.tv_sec) + 
+                        ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+                    printf("Time for 1 step of multishift inversion   : %e\n",
+                            dt_cgm/multishift_invert_iterations);
+                }
+            }
 
             for(r=0; r<fakeRationalApprox.approx_order; r++){
 
@@ -230,10 +237,6 @@ int main(int argc, char* argv[]){
             }
             printf("MPI%02d: End of data region!\n", devinfo.myrank);
 
-            double dt_cgm = (double)(t1.tv_sec - t0.tv_sec) + 
-                ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
-            printf("Time for 1 step of multishift inversion   : %e\n",
-                    dt_cgm/multishift_invert_iterations);
         }
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
