@@ -24,6 +24,8 @@ int dbgread_su3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter );
 void calc_loc_abelian_plaquettes(const double_soa* phases,
         double_soa * loc_abelian_plaquettes, const int mu, const int nu );
 
+void print_all_abelian_plaquettes(const double_soa* phases, const char * filename);
+
 
 void dbgprint_gl3_soa(su3_soa * const conf, const char* nomefile,int conf_id_iter);
 int dbgread_gl3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter );

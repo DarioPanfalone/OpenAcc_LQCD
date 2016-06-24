@@ -129,7 +129,11 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
         strcat(tempname,devinfo.myrankstr);           // 
 #endif
         print_double_soa(fpar[i].phases,tempname);    //
+        strcat(tempname,"plaquettes");                // 
+        print_all_abelian_plaquettes(fpar[i].phases,tempname);
     }
+
+
 }
 
 void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters)

@@ -13,6 +13,8 @@
 #include "../OpenAcc/single_types.h"
 #include "../OpenAcc/io.h"
 
+#define acc_pi 3.14159265358979323846
+
 void save_gl_fermion(global_vec3_soa * const fermion, 
         const char* nomefile)
 {
@@ -168,9 +170,15 @@ void calc_loc_abelian_plaquettes(const double_soa* phases, // 8*
 	  // |       r  (A)  r+mu
 	  // +---> mu
 
-	  loc_abelian_plaquettes[parity].d[idxh] =
-          phases[dir_muA].d[idxh] + phases[dir_nuB].d[idxpmu]+
-          phases[dir_muC].d[idxpnu]+phases[dir_nuD].d[idxh];   
+      double result =
+          phases[dir_muA].d[idxh] + phases[dir_nuB].d[idxpmu]-
+          phases[dir_muC].d[idxpnu]-phases[dir_nuD].d[idxh];   
+      while (result >  acc_pi ) 
+          result -=  2*acc_pi;
+      while (result <= - acc_pi ) 
+          result +=  2*acc_pi;
+
+	  loc_abelian_plaquettes[parity].d[idxh] = result;
 
 	}  // d0
       }  // d1
@@ -179,6 +187,41 @@ void calc_loc_abelian_plaquettes(const double_soa* phases, // 8*
 
 }
 
+
+void print_all_abelian_plaquettes(const double_soa* phases,const char * filename){
+
+
+    printf("Printing abelian plaquettes in file %s ...\n", filename);
+    double_soa * all_plaquettes = malloc(2*6*sizeof(double_soa));
+    int mu,nu,i,j;
+    int pcount = 0;
+
+
+    FILE *fp = fopen(filename, "w");
+    fprintf(fp,"#");
+    for(mu=0;mu<3;mu++) 
+        for(nu=mu+1;nu<4;nu++){
+        calc_loc_abelian_plaquettes(phases, &all_plaquettes[2*pcount], mu, nu);
+        pcount++;
+        fprintf(fp,"%d-%d\t",mu,nu);
+    }
+    fprintf(fp,"\n");
+
+    //EVEN
+    for(i=0;i<sizeh;i++){
+        for(j=0;j<6;j++)
+            fprintf(fp, "%f\t",all_plaquettes[2*j].d[i]);
+        fprintf(fp,"\n");
+    }
+    // ODD
+    for(i=0;i<sizeh;i++){
+        for(j=0;j<6;j++)
+            fprintf(fp, "%f\t",all_plaquettes[2*j+1].d[i]);
+        fprintf(fp,"\n");
+    }
+    fclose(fp);
+
+}
 
 
 
