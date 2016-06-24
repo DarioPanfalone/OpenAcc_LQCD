@@ -304,6 +304,7 @@ void fermion_measures( su3_soa * tconf_acc,
                         trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
 
 
+
                 // CHIRAL CONDENSATE
                 chircond_size = scal_prod_global(rnd_e,chi_e)+
                     scal_prod_global(rnd_o,chi_o);

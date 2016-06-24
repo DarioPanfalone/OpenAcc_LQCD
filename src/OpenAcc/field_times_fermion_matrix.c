@@ -48,7 +48,8 @@ void acc_Deo_wf_unsafe( __restrict const su3_soa * const u,
         __restrict const double_soa* field_im)   // or i dphi/dbz
 {
     int hd0, d1, d2, d3;
-#pragma acc kernels present(u) present(out) present(in) present(phases)
+#pragma acc kernels present(u) present(out) present(in) present(phases)\
+    present(field_re) present(field_im)
 #pragma acc loop independent gang
     for(d3=D3_HALO; d3<D3_HALO+LOC_N3;d3++) {
 #pragma acc loop independent gang vector
@@ -109,7 +110,8 @@ void acc_Doe_wf_unsafe( __restrict const su3_soa * const u,
         __restrict const double_soa* field_im)   // or i dphi/dbz  
 {
     int hd0, d1, d2, d3;
-#pragma acc kernels present(u) present(out) present(in) present(phases)
+#pragma acc kernels present(u) present(out) present(in) present(phases)\
+    present(field_re) present(field_im)
 #pragma acc loop independent gang
     for(d3=D3_HALO; d3<D3_HALO+LOC_N3;d3++) {
 #pragma acc loop independent gang vector
