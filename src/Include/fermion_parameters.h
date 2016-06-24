@@ -18,6 +18,7 @@ typedef struct ferm_param_t{
   double_soa * phases; //this incorporates staggered phases,
                        // external u(1) fields and 
                        // imaginary chemical potential
+  int printed_bf_dbg_info;
 
   RationalApprox approx_fi_mother; // first inv   -> mother
   RationalApprox approx_md_mother; // md approx   -> mother

@@ -343,13 +343,6 @@ void fermion_measures( su3_soa * tconf_acc,
                             creal(magnetization_size*factor),
                             cimag(magnetization_size*factor));
 
-
-
-
-
-
-                
-
                 // SUSCEPTIBILITIES
                 if(icopy < tfm_par->DoubleInvNVectorsChiral ){
 
@@ -435,6 +428,7 @@ void fermion_measures( su3_soa * tconf_acc,
             fclose(foutfile);
         }
     }// end of cycle over copies
+   
     }
 
     free(rnd_e);

@@ -11,6 +11,7 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "./fermion_parameters.h"
 #include "./montecarlo_parameters.h"
+#include "../Include/debug.h"
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
@@ -111,6 +112,7 @@ int init_ferm_params(ferm_param *fermion_settings){
 
     }
 
+    fermion_settings->printed_bf_dbg_info = 0;
     return errorstatus;
 
 }
@@ -122,15 +124,27 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
     for(int i=0;i<NDiffFlavs;i++){
         fpar[i].phases = &u1_back_phases[i*8];
         init_fermion_backfield(bfpars,&(fpar[i]));
-        char tempname[50];                            // DEBUG
-        strcpy(tempname,"backfield_");                //
-        strcat(tempname,fpar[i].name);                // 
+
+        // PRINTING DEBUG INFO
+        if(debug_settings.print_bfield_dbginfo){
+            char tempname[50];                           
+            // phases
+            sprintf(tempname,"backfield_%s_c%d",fpar[i].name,fpar[i].printed_bf_dbg_info);
 #ifdef MULTIDEVICE      
-        strcat(tempname,devinfo.myrankstr);           // 
+            strcat(tempname,devinfo.myrankstr);          
 #endif
-        print_double_soa(fpar[i].phases,tempname);    //
-        strcat(tempname,"plaquettes");                // 
-        print_all_abelian_plaquettes(fpar[i].phases,tempname);
+            print_double_soa(fpar[i].phases,tempname);   
+
+            // plaquettes
+            sprintf(tempname,"abelian_plq_%s_c%d",fpar[i].name,
+                    fpar[i].printed_bf_dbg_info);
+#ifdef MULTIDEVICE      
+            strcat(tempname,devinfo.myrankstr);          
+#endif
+
+            print_all_abelian_plaquettes(fpar[i].phases,tempname);
+            fpar->printed_bf_dbg_info++; 
+        }
     }
 
 

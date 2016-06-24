@@ -483,11 +483,13 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     const int do_norandom_test_def = 0; 
     const int rng_fakeness_level_def = 0 ;
     const int md_dbg_print_max_count_def = 0;
+    const int print_bfield_dbginfo_def = 0;
     // see /Meas
     par_info gmp[]= {
         (par_info){(void*) &(dbg_settings->use_ildg),              TYPE_INT,"UseILDG"                , 1,(const void*) &useildg_def},
         (par_info){(void*) &(dbg_settings->input_vbl),             TYPE_INT,"VerbosityLv"            , 1,(const void*) &input_vbl_def},
         (par_info){(void*) &(dbg_settings->SaveAllAtEnd),          TYPE_INT,"SaveAllAtEnd"           , 1,(const void*) &SaveAllAtEnd_def},
+        (par_info){(void*) &(dbg_settings->print_bfield_dbginfo),  TYPE_INT,"PrintBackFieldDbgInfo"  , 1,(const void*) &print_bfield_dbginfo_def},
         (par_info){(void*) &(dbg_settings->save_diagnostics),      TYPE_INT,"SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
         (par_info){(void*) &(dbg_settings->do_reversibility_test), TYPE_INT,"DoRevTest"              , 1,(const void*) &do_reversibility_test_def},
         (par_info){(void*) &(dbg_settings->do_norandom_test),      TYPE_INT,"DoNoRandomTest"         , 1,(const void*) &do_norandom_test_def},
