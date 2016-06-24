@@ -205,9 +205,6 @@ void set_double_soa_to_zero(double_soa * p){
         for(idxh=0;idxh<sizeh;idxh++)
             p[dir].d[idxh]=0;
     
-    
-    
-    
 }
 
 

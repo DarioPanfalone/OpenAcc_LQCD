@@ -78,16 +78,6 @@ void eo_inversion(su3_soa *tconf_acc,
 }// end eo_inversion
 
 
-d_complex eo_scal_prod_global(vec3_soa * rnd_e,
-        vec3_soa * rnd_o,
-        vec3_soa * chi_e,
-        vec3_soa * chi_o){
-
-    return scal_prod_global(rnd_o,chi_o) + scal_prod_global(rnd_e,chi_e);
-
-}
-
-
 
 
 void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
@@ -104,8 +94,8 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
                 tferm_par[iflv].name,col_count+4,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
 
-        sprintf(strtocat, "%02d.ReMag_%-16s%02d.ImMag_%-16s",col_count+3,
-                tferm_par[iflv].name,col_count+4,tferm_par[iflv].name);
+        sprintf(strtocat, "%02d.ReMag_%-16s%02d.ImMag_%-16s",col_count+5,
+                tferm_par[iflv].name,col_count+6,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
 
         col_count +=4;
