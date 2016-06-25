@@ -26,7 +26,16 @@ su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered
 su3_soa  * aux_conf_acc; // auxiliary 
 su3_soa  * auxbis_conf_acc; // auxiliary 
 double_soa * u1_back_phases; //Background,staggered,chempot phases
-// 8 for each flavour
+                             // 8 for each flavour
+
+double_soa * mag_obs_re;     // Real part of the 'algebra-prefix'
+                             // of magnetization observable 
+                             // 8 for each flavour
+                                                                       
+double_soa * mag_obs_im;     // Imaginary part of the 'algebra-prefix'
+                             // of magnetization observable 
+                             // 8 for each flavour
+
 
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 thmat_soa * momenta_backup;// GAUGE FIELD EVOLUTION - REVERSIBILITY TEST
@@ -86,6 +95,17 @@ void mem_alloc()
             NDiffFlavs*8*sizeof(double_soa));   
     //  --> NDiffFlavs*4*NSITES phases (as many as links)
     ALLOCCHECK(allocation_check, u1_back_phases);
+
+    allocation_check =  posix_memalign((void **)&mag_obs_re, ALIGN,
+            NDiffFlavs*8*sizeof(double_soa));   
+    //  --> NDiffFlavs*4*NSITES phases (as many as links)
+    ALLOCCHECK(allocation_check, mag_obs_re);
+
+    allocation_check =  posix_memalign((void **)&mag_obs_im, ALIGN,
+            NDiffFlavs*8*sizeof(double_soa));   
+    //  --> NDiffFlavs*4*NSITES phases (as many as links)
+    ALLOCCHECK(allocation_check, mag_obs_im);
+
 
 
 
@@ -216,8 +236,10 @@ inline void mem_free()
     }
 #endif
 
-    //  FREECHECK(conf_acc);
-    //  FREECHECK(u1_back_phases);        
+    FREECHECK(conf_acc);
+    FREECHECK(u1_back_phases);        
+    FREECHECK(mag_obs_re);
+    FREECHECK(mag_obs_im);
     FREECHECK(momenta);               
     if(debug_settings.do_reversibility_test){
         FREECHECK(momenta_backup);               

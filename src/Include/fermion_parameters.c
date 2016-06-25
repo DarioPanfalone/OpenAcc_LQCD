@@ -12,6 +12,7 @@
 #include "./fermion_parameters.h"
 #include "./montecarlo_parameters.h"
 #include "../Include/debug.h"
+#include "../Meas/magnetic_susceptibility_utilities.h"
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
@@ -145,6 +146,13 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
             print_all_abelian_plaquettes(fpar[i].phases,tempname);
             fpar->printed_bf_dbg_info++; 
         }
+    
+        
+        fpar[i].mag_re = &mag_obs_re[i*8];
+        fpar[i].mag_im = &mag_obs_im[i*8];
+
+        idphase_dbz(fpar[i].mag_re,fpar[i].mag_im,&fpar[i]);
+    
     }
 
 

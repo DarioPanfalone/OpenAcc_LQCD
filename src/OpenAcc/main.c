@@ -217,6 +217,8 @@ int main(int argc, char* argv[]){
     copyin(fermions_parameters[0:NDiffFlavs])\
     copyin(deltas_Omelyan[0:7]) \
     copyin(u1_back_phases[0:8*NDiffFlavs])\
+    copyin(mag_obs_re[0:8*NDiffFlavs])\
+    copyin(mag_obs_im[0:8*NDiffFlavs])\
     create(ipdot_g_old[0:8*debug_settings.save_diagnostics])\
     create(ipdot_f_old[0:8*debug_settings.save_diagnostics])
     {

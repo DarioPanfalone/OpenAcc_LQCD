@@ -145,8 +145,6 @@ void fermion_measures( su3_soa * tconf_acc,
     vec3_soa * trial_sol;
     su3_soa * conf_to_use;
 
-    double_soa * fields_magnetization ; // 2 * 8
-
 #ifdef STOUT_FERMIONS
 
 
@@ -191,13 +189,6 @@ void fermion_measures( su3_soa * tconf_acc,
     allocation_check =  posix_memalign((void **)&chi2_o, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,chi2_o);    
 
-    allocation_check =  posix_memalign((void **)&fields_magnetization, ALIGN,
-            2*8*sizeof(double_soa));
-    ALLOCCHECK(allocation_check, fields_magnetization);    
-
-
-
-
     allocation_check =  posix_memalign((void **)&trial_sol, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,trial_sol);
 
@@ -230,8 +221,7 @@ void fermion_measures( su3_soa * tconf_acc,
             create(magchi_e[0:1]) create(magchi_o[0:1])   \
             create(bnchi_e[0:1]) create(bnchi_o[0:1])   \
             create(chi2_e[0:1]) create(chi2_o[0:1])   \
-            create(rnd_e[0:1]) create(rnd_o[0:1]) create(trial_sol[0:1]) \
-            create(fields_magnetization[0:16])
+            create(rnd_e[0:1]) create(rnd_o[0:1]) create(trial_sol[0:1]) 
     {
 
 
@@ -325,15 +315,13 @@ void fermion_measures( su3_soa * tconf_acc,
 
                 // MAGNETIZATION
                
-                // NOT EFFICIENT (can be done once for all)
-                idphase_dbz(fields_magnetization,&fields_magnetization[8],
-                        &tfermions_parameters[iflv]);
-#pragma acc update device(fields_magnetization[0:16])
 
                 acc_Deo_wf(conf_to_use,magchi_e,chi_o,tfermions_parameters[iflv].phases,
-                        fields_magnetization,&fields_magnetization[8]);
+                        tfermions_parameters[iflv].mag_re,
+                        tfermions_parameters[iflv].mag_im);
                 acc_Doe_wf(conf_to_use,magchi_o,chi_e,tfermions_parameters[iflv].phases,
-                        fields_magnetization,&fields_magnetization[8]);
+                        tfermions_parameters[iflv].mag_re,
+                        tfermions_parameters[iflv].mag_im);
 
                 magnetization_size = scal_prod_global(rnd_e,magchi_e)+
                     scal_prod_global(rnd_o,magchi_o);
@@ -439,7 +427,6 @@ void fermion_measures( su3_soa * tconf_acc,
     free(bnchi_o);
     free(magchi_e);
     free(magchi_o);
-    free(fields_magnetization);
     free(chi_e);
     free(chi_o);
     free(chi2_e);

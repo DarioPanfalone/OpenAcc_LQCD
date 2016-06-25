@@ -15,15 +15,20 @@ void idphase_dbz(double_soa * idphi_dbz_re, double_soa * idphi_dbz_im, // dphi_d
     bf_param bz1_point  = zero_point;
     bz1_point.bz += 1;
    
-                                      
+
+    // NOTICE: the u1 phases so calculated contain the staggere phases and the 
+    // chemical potential phases    
     calc_u1_phases(idphi_dbz_im,bz1_point ,0,fpar->ferm_charge);// mu = 0 
     // using idphi_dbz_re as temp
     calc_u1_phases(idphi_dbz_re,zero_point,0,fpar->ferm_charge);// mu = 0 
    
-    phase_diff_in_place(idphi_dbz_im,idphi_dbz_re); // in place 
+    // the difference removes the staggered phases and the chemical 
+    // potential phases
+    phase_diff_in_place(idphi_dbz_im,idphi_dbz_re); // in place
+
     set_double_soa_to_zero(idphi_dbz_re); 
 
-    if(debug_settings.print_bfield_dbginfo && fpar->printed_bf_dbg_info < 2 ){
+    if(debug_settings.print_bfield_dbginfo){
         char tempname[50];                           
         // phases
         sprintf(tempname,"du_dbz_%s_c%d",fpar->name,fpar->printed_bf_dbg_info);
@@ -41,7 +46,6 @@ void idphase_dbz(double_soa * idphi_dbz_re, double_soa * idphi_dbz_im, // dphi_d
         print_all_abelian_plaquettes(idphi_dbz_im,tempname);
         fpar->printed_bf_dbg_info++; 
     }
-
 
 }
 

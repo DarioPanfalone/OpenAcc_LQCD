@@ -18,6 +18,15 @@ extern su3_soa  * aux_conf_acc; // auxiliary
 extern su3_soa  * auxbis_conf_acc; // auxiliary 
 extern double_soa * u1_back_phases; //Background,staggered,chempot phases
                                     // 8 for each flavour
+extern double_soa * mag_obs_re;     // Real part of the 'algebra-prefix'
+                                    // of magnetization observable 
+                                    // 8 for each flavour
+
+extern double_soa * mag_obs_im;     // Imaginary part of the 'algebra-prefix'
+                                    // of magnetization observable 
+                                    // 8 for each flavour
+
+
 extern thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 extern int momenta_backupped;
 extern thmat_soa * momenta_backup;// GAUGE FIELD EVOLUTION - REVERSIBILITY TEST

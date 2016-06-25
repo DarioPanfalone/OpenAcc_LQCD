@@ -18,6 +18,11 @@ typedef struct ferm_param_t{
   double_soa * phases; //this incorporates staggered phases,
                        // external u(1) fields and 
                        // imaginary chemical potential
+                      
+  double_soa * mag_re;  // Real and impaginary  parts of the 'algebra-prefix'
+  double_soa * mag_im;  // of magnetization observable 
+                            // 8 for each flavour
+
   int printed_bf_dbg_info;
 
   RationalApprox approx_fi_mother; // first inv   -> mother
