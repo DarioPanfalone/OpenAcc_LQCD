@@ -8,23 +8,29 @@
 #include "../Mpi/multidev.h"
 #include "../Include/debug.h"
 
+#define acc_twopi 2*3.14159265358979323846
+
 void idphase_dbz(double_soa * idphi_dbz_re, double_soa * idphi_dbz_im, // dphi_dbz_re = 0 
         ferm_param *fpar){
 
     bf_param zero_point = (bf_param){0,0,0,0,0,0};
     bf_param bz1_point  = zero_point;
     bz1_point.bz += 1;
-   
+
+    // We exploit linearity of the UNBOUNDED phases in the field parameters.
+    // BOUNDING to -pi +pi BREAKS LINEARITY.
 
     // NOTICE: the u1 phases so calculated contain the staggere phases and the 
-    // chemical potential phases    
-    calc_u1_phases(idphi_dbz_im,bz1_point ,0,fpar->ferm_charge);// mu = 0 
+    // chemical potential phases  [NOT BOUNDED, NOT MULTIPLIED BY 2PI] 
+    calc_u1_phases_unb_no2pi(idphi_dbz_im,bz1_point ,0,fpar->ferm_charge);// mu = 0 
     // using idphi_dbz_re as temp
-    calc_u1_phases(idphi_dbz_re,zero_point,0,fpar->ferm_charge);// mu = 0 
+    calc_u1_phases_unb_no2pi(idphi_dbz_re,zero_point,0,fpar->ferm_charge);// mu = 0 
    
     // the difference removes the staggered phases and the chemical 
     // potential phases
     phase_diff_in_place(idphi_dbz_im,idphi_dbz_re); // in place
+
+    mult_u1_phases(idphi_dbz_im, acc_twopi);
 
     set_double_soa_to_zero(idphi_dbz_re); 
 

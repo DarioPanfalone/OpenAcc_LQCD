@@ -14,7 +14,16 @@ typedef struct bf_param_t{
 
 extern bf_param backfield_parameters;
 
+// phases, unbounded, without multiplication by 2pi 
+void calc_u1_phases_unb_no2pi(double_soa * phases,bf_param bf_pars,
+        double im_chem_pot, double ferm_charge);
 
+// reduces phases to the -1 / +1 range
+void rebound_u1_phases(double_soa * phases);
+
+void mult_u1_phases(double_soa * phases,double factor);
+
+//just wrapper of the three preceeding functions
 void calc_u1_phases(double_soa * phases, bf_param bfpars, 
         double chpot,double charge);
 
