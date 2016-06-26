@@ -97,13 +97,12 @@ void calc_u1_phases_unb_no2pi(double_soa * phases,bf_param bf_pars,
             T = t + 1;
 
             ////////X-oriented////////
+            arg = (z-tnz/2+1)*by_quantum/(tnz*tnx);
             if(X == tnx){
                 // x-oriented links on the boundary
-                arg = (y+1)*tnx*bz_quantum/(tnx*tny);
-                arg+= (t+1)*tnx*ex_quantum/(tnx*tnt);
-                arg-= (z+1)*by_quantum/(tnz*tnx);
+                arg -= (y-tny/2+1)*tnx*bz_quantum/(tnx*tny);
+                arg -= (t-tnt/2+1)*tnx*ex_quantum/(tnx*tnt);
             }
-            else arg = -(z+1)*by_quantum/(tnz*tnx);
 
             arg *= ferm_charge;// only em phase so far
             if(KSphaseX(x,y,z,t) == -1) arg += 0.5;
@@ -114,41 +113,39 @@ void calc_u1_phases_unb_no2pi(double_soa * phases,bf_param bf_pars,
 
 
             ////////Y-oriented/////////
+            arg = (x-tnx/2+1)*bz_quantum/(tnx*tny);
             if(Y == tny){
                 // y-oriented links on the boundary
-                arg = (z+1)*tny*bx_quantum/(tny*tnz);
-                arg+= (t+1)*tny*ey_quantum/(tny*tnt);
-                arg-= (x+1)*bz_quantum/(tnx*tny);
+                arg -= (z-tnz/2+1)*tny*bx_quantum/(tny*tnz);
+                arg -= (t-tnt/2+1)*tny*ey_quantum/(tny*tnt);
             }
-            else arg = -(x+1)*bz_quantum/(tnx*tny);
 
-            arg *= ferm_charge;// only am phase so far
+            arg *= ferm_charge;// only em phase so far
             if(KSphaseY(x,y,z,t) == -1) arg += 0.5;
 
             phases[geom_par.ymap*2+parity].d[idxh]= arg;
 
 
             ////////Z-oriented////////
+            arg = (y-tny/2+1)*bx_quantum/(tny*tnz);
             if(Z == tnz){
                 // z-oriented links on the boundary
-                arg = (t+1)*tnz*ez_quantum/(tnz*tnt);
-                arg += (x+1)*tnz*by_quantum/(tnz*tnx);
-                arg -= (y+1)*bx_quantum/(tny*tnz);
+                arg -= (t-tnt/2+1)*tnz*ez_quantum/(tnz*tnt);
+                arg -= (x-tnx/2+1)*tnz*by_quantum/(tnz*tnx);
             }
-            else arg = -(y+1)*bx_quantum/(tny*tnz);
 
-            arg *= ferm_charge;// only am phase so far
+            arg *= ferm_charge;// only em phase so far
             if(KSphaseZ(x,y,z,t) == -1) arg += 0.5;
 
             phases[geom_par.zmap*2+parity].d[idxh]= arg;
 
 
             ///////T-oriented////////
-            arg = -(z+1)*ez_quantum/(tnz*tnt);
-            arg -= (y+1)*ey_quantum/(tny*tnt);
-            arg -= (x+1)*ex_quantum/(tnx*tnt);
+            arg  = (z-tnz/2+1)*ez_quantum/(tnz*tnt);
+            arg += (y-tny/2+1)*ey_quantum/(tny*tnt);
+            arg += (x-tnx/2+1)*ex_quantum/(tnx*tnt);
 
-            arg *= ferm_charge;// only am phase so far
+            arg *= ferm_charge;// only em phase so far
             if(KSphaseT(x,y,z,t) == -1) arg += 0.5;
             arg += chpotphase*0.5; // it must be multiplied by pi, not 2pi
             if(T == tnt) arg += 0.5;
