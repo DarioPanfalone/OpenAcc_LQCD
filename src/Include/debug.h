@@ -12,6 +12,7 @@ typedef struct DEBUG_SETTINGS_T{
     int do_norandom_test;
     int rng_fakeness_level ; 
     int md_dbg_print_max_count;
+    int print_bfield_dbginfo;
 
 
 }debug_settings_t;

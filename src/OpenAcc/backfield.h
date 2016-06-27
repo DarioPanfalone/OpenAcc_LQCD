@@ -14,9 +14,25 @@ typedef struct bf_param_t{
 
 extern bf_param backfield_parameters;
 
+// phases, unbounded, without multiplication by 2pi 
+void calc_u1_phases_unb_no2pi(double_soa * phases,bf_param bf_pars,
+        double im_chem_pot, double ferm_charge);
 
-//void init_backfield(double_soa * tu1_back_field_phases, bf_param bfpars);
+// reduces phases to the -1 / +1 range
+void rebound_u1_phases(double_soa * phases);
 
+void mult_u1_phases(double_soa * phases,double factor);
+
+//just wrapper of the three preceeding functions
+void calc_u1_phases(double_soa * phases, bf_param bfpars, 
+        double chpot,double charge);
+
+void phase_diff_in_place(double_soa * inout, double_soa * sottraendo);
+
+void set_double_soa_to_zero(double_soa * p);
+
+void u1_diff(double_soa * out_re, double_soa * out_im,
+        double_soa * phase_p,double_soa * phase_m );
 
 inline int KSphaseX(int x,int y,int z,int t){return 1;};
 inline int KSphaseY(int x,int y,int z,int t){

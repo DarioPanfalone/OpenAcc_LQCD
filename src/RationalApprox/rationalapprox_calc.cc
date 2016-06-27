@@ -29,16 +29,22 @@ int main(int argc, char **argv){
 
     double goal_error = atof(argv[1]);
     approx->error = 1;
+    approx->exponent_num = atoi(argv[2]);
+    approx->exponent_den = atoi(argv[3]);
+    approx->gmp_remez_precision = gmp_remez_precision; // The precision that gmp uses
+    approx->lambda_min = atof(argv[4]);
+    approx->lambda_max = 1.0;              // The bounds of the approximation
 
     if(argc == 6 ) approx->approx_order = atoi(argv[5]);
-    else approx->approx_order = 7;
+    else{
+        // empyric formula : order = ln (error)*ln(lambda_min)/19+2
+        // we remove the +2 just to be on the safe side
+        approx->approx_order = log(goal_error)*log(approx->lambda_min)/19; 
+        fprintf(stdout,"Guessed Approx order : %d\n", approx->approx_order);
+
+    }
 
     while(approx->error > goal_error){
-        approx->exponent_num = atoi(argv[2]);
-        approx->exponent_den = atoi(argv[3]);
-        approx->gmp_remez_precision = gmp_remez_precision; // The precision that gmp uses
-        approx->lambda_min = atof(argv[4]);
-        approx->lambda_max = 1.0;              // The bounds of the approximation
 
         // The error from the approximation (the relative error is minimised
         // - if another error minimisation is requried, then line 398 in
@@ -48,14 +54,16 @@ int main(int argc, char **argv){
         // r(x) = norm + sum_{k=1}^{n} res[k] / (x + pole[k])
 
 
-       fflush(stdout);
+        fflush(stdout);
         // Instantiate the Remez class
         AlgRemez remez1(approx->lambda_min,approx->lambda_max,approx->gmp_remez_precision);
         // Generate the required approximation
-        approx->error = remez1.generateApprox(approx->approx_order,approx->approx_order,abs(approx->exponent_num),abs(approx->exponent_den));
-         fprintf(stdout,"\nf(x) = (x)^(%d/%d), approximation on [%e, %e], order %d, error = %e, ",
-                approx->exponent_num, approx->exponent_den,approx->lambda_min,
-                approx->lambda_max, approx->approx_order, approx->error);
+        fprintf(stdout,"\nf(x) = (x)^(%d/%d), approximation on [%e, %e], order %d,...",
+                approx->exponent_num, approx->exponent_den,approx->lambda_min, 
+                approx->lambda_max, approx->approx_order);
+        approx->error = remez1.generateApprox(approx->approx_order,approx->approx_order,
+                abs(approx->exponent_num),abs(approx->exponent_den));
+        fprintf(stdout,"... error = %e, ", approx->error);
 
         // Find the partial fraction expansion of the approximation 
         // to the function x^{y/z} (this only works currently for 

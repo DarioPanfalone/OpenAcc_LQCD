@@ -449,7 +449,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         vec3_soa * tk_p_shiftferm, // parking, [max_nshift]
         thmat_soa * tmomenta,
         dcomplex_soa * local_sums,
-        double res)
+        double res,
+        const int max_cg)
 {
 
 
@@ -458,7 +459,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     // Step for the P
     // P' = P - l*dt*dS/dq
     //    deltas_Omelyan[0]=-cimag(ieps_acc)*lambda;
-    //  DEOTT_fermion_force_soloopenacc(tconf_acc, 
     fermion_force_soloopenacc(tconf_acc, 
 #ifdef STOUT_FERMIONS
             tstout_conf_acc_arr,
@@ -466,7 +466,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             tauxbis_conf_acc, // parkeggio
             tipdot_acc, tfermions_parameters, tNDiffFlavs, 
             ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
-            tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+            tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm,max_cg);
 
     if(verbosity_lv > 4) printf("MPI%02d - Calculated first fermion force/n", 
             devinfo.myrank);
@@ -489,7 +489,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         // Step for the P
         // P' = P - (1-2l)*dt*dS/dq
         // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
-        //    DEOTT_fermion_force_soloopenacc(tconf_acc, 
         fermion_force_soloopenacc(tconf_acc, 
 #ifdef STOUT_FERMIONS
                 tstout_conf_acc_arr,
@@ -497,7 +496,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 tauxbis_conf_acc, // parkeggio
                 tipdot_acc, tfermions_parameters, tNDiffFlavs,
                 ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc,
-                tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+                tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm,max_cg);
 
 
 
@@ -512,17 +511,17 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
 
 
-
         // Step for the P
         // P' = P - 2l*dt*dS/dq
         // deltas_Omelyan[2]=-cimag(ieps_acc)*(2.0*lambda);
-        //    DEOTT_fermion_force_soloopenacc(tconf_acc,
         fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
                 tstout_conf_acc_arr, 
 #endif
                 tauxbis_conf_acc, // parkeggio
-                tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+                tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, 
+                taux_conf_acc, tferm_shiftmulti_acc, 
+                tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm, max_cg);
 
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
     }  
@@ -542,13 +541,14 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
-    //  DEOTT_fermion_force_soloopenacc(tconf_acc,
     fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
             tstout_conf_acc_arr,
 #endif
             tauxbis_conf_acc, // parkeggio
-            tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+            tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, 
+            taux_conf_acc, tferm_shiftmulti_acc, 
+            tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm, max_cg);
 
     mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
 
@@ -564,13 +564,14 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     // Step for the P
     // P' = P - l*dt*dS/dq
     // deltas_Omelyan[0]=-cimag(ieps_acc)*lambda;
-    //DEOTT_fermion_force_soloopenacc(tconf_acc,
     fermion_force_soloopenacc(tconf_acc,
 #ifdef STOUT_FERMIONS
             tstout_conf_acc_arr, 
 #endif
             tauxbis_conf_acc, // parkeggio
-            tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm);
+            tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, 
+            taux_conf_acc, tferm_shiftmulti_acc, 
+            tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm, max_cg);
 
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
 

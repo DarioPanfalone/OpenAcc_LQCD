@@ -3,5 +3,7 @@
 *.ptx
 *.o
 *~
+*.swp
+*.pyc
 *.REMEZ
 run

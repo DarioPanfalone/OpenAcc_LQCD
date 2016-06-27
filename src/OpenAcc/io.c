@@ -79,8 +79,8 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
         CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),5);
         if( nx!=nxt || ny!=nyt || nz!=nzt || (nt != ntt)){
             printf("Error, configuration dimensions not compatible with code.\n");
-            printf("Conf dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nx,ny,nz,nt);
-            printf("Code dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nxt,nyt,nzt,ntt);
+            printf("Code dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nx,ny,nz,nt);
+            printf("Conf dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nxt,nyt,nzt,ntt);
             exit(1);
         }else
 

@@ -26,10 +26,18 @@ su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered
 su3_soa  * aux_conf_acc; // auxiliary 
 su3_soa  * auxbis_conf_acc; // auxiliary 
 double_soa * u1_back_phases; //Background,staggered,chempot phases
-// 8 for each flavour
+                             // 8 for each flavour
+
+double_soa * mag_obs_re;     // Real part of the 'algebra-prefix'
+                             // of magnetization observable 
+                             // 8 for each flavour
+                                                                       
+double_soa * mag_obs_im;     // Imaginary part of the 'algebra-prefix'
+                             // of magnetization observable 
+                             // 8 for each flavour
+
 
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
-int momenta_backupped; 
 thmat_soa * momenta_backup;// GAUGE FIELD EVOLUTION - REVERSIBILITY TEST
 tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
 tamat_soa * ipdot_g_old;// for HMC diagnostics
@@ -88,6 +96,17 @@ void mem_alloc()
     //  --> NDiffFlavs*4*NSITES phases (as many as links)
     ALLOCCHECK(allocation_check, u1_back_phases);
 
+    allocation_check =  posix_memalign((void **)&mag_obs_re, ALIGN,
+            NDiffFlavs*8*sizeof(double_soa));   
+    //  --> NDiffFlavs*4*NSITES phases (as many as links)
+    ALLOCCHECK(allocation_check, mag_obs_re);
+
+    allocation_check =  posix_memalign((void **)&mag_obs_im, ALIGN,
+            NDiffFlavs*8*sizeof(double_soa));   
+    //  --> NDiffFlavs*4*NSITES phases (as many as links)
+    ALLOCCHECK(allocation_check, mag_obs_im);
+
+
 
 
 #ifdef MULTIDEVICE 
@@ -125,21 +144,21 @@ void mem_alloc()
     allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  
     ALLOCCHECK(allocation_check, momenta ) ;
     if(debug_settings.do_reversibility_test){
-        momenta_backupped = 1;
 
         allocation_check =  posix_memalign((void **)&momenta_backup, ALIGN, 8*sizeof(thmat_soa));
         ALLOCCHECK(allocation_check, momenta_backup ) ;
     }
-    else momenta_backupped = 0;
 
 
     allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, ipdot_acc) ;
-    allocation_check =  posix_memalign((void **)&ipdot_g_old, ALIGN, 8*sizeof(tamat_soa)); 
-    ALLOCCHECK(allocation_check, ipdot_g_old) ;
-    allocation_check =  posix_memalign((void **)&ipdot_f_old, ALIGN, 8*sizeof(tamat_soa)); 
-    ALLOCCHECK(allocation_check, ipdot_f_old) ;
 
+    if(debug_settings.save_diagnostics){
+        allocation_check =  posix_memalign((void **)&ipdot_g_old, ALIGN, 8*sizeof(tamat_soa)); 
+        ALLOCCHECK(allocation_check, ipdot_g_old) ;
+        allocation_check =  posix_memalign((void **)&ipdot_f_old, ALIGN, 8*sizeof(tamat_soa)); 
+        ALLOCCHECK(allocation_check, ipdot_f_old) ;
+    }
 
 
 #ifdef STOUT_FERMIONS
@@ -217,8 +236,10 @@ inline void mem_free()
     }
 #endif
 
-    //  FREECHECK(conf_acc);
-    //  FREECHECK(u1_back_phases);        
+    FREECHECK(conf_acc);
+    FREECHECK(u1_back_phases);        
+    FREECHECK(mag_obs_re);
+    FREECHECK(mag_obs_im);
     FREECHECK(momenta);               
     if(debug_settings.do_reversibility_test){
         FREECHECK(momenta_backup);               
@@ -236,9 +257,11 @@ inline void mem_free()
 
 
     FREECHECK(conf_acc_bkp);          
-    FREECHECK(ipdot_acc);           
-    FREECHECK(ipdot_g_old);           
-    FREECHECK(ipdot_f_old);           
+    FREECHECK(ipdot_acc);  
+    if(debug_settings.save_diagnostics){
+        FREECHECK(ipdot_g_old);           
+        FREECHECK(ipdot_f_old);           
+    }
 
     FREECHECK(ferm_chi_acc);          
     FREECHECK(ferm_phi_acc);          

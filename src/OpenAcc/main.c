@@ -210,15 +210,14 @@ int main(int argc, char* argv[]){
     create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER])\
     create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])\
     create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER])\
-    create(momenta[0:8]) create(momenta_backup[0:8*momenta_backupped])\
-    create(conf_acc_bkp[0:8*momenta_backupped])\
+    create(momenta[0:8])\
+    create(momenta_backup[0:8*debug_settings.do_reversibility_test])\
+    create(  conf_acc_bkp[0:8*debug_settings.do_reversibility_test])\
     copyin(nnp_openacc) copyin(nnm_openacc)\
     create(local_sums[0:2]) create(d_local_sums[0:2])\
     copyin(fermions_parameters[0:NDiffFlavs])\
     copyin(deltas_Omelyan[0:7]) \
     copyin(u1_back_phases[0:8*NDiffFlavs])\
-    create(ipdot_g_old[0:8]) create(ipdot_f_old[0:8])\
-    create(conf_acc_f[0:8]) \
     create(ipdot_acc_f[0:8]) create(aux_conf_acc_f[0:8])\
     create(auxbis_conf_acc_f[0:8]) create(ferm_chi_acc_f[0:NPS_tot])\
     create(ferm_phi_acc_f[0:NPS_tot])  create(ferm_out_acc_f[0:NPS_tot])\
@@ -229,8 +228,11 @@ int main(int argc, char* argv[]){
     create(local_sums_f[0:2]) create(d_local_sums_f[0:2])\
     copyin(deltas_Omelyan_f[0:7]) \
     copyin(u1_back_phases_f[0:8*NDiffFlavs])\
-    create(ipdot_g_old_f[0:8]) create(ipdot_f_old_f[0:8])
-
+    create(ipdot_g_old_f[0:8]) create(ipdot_f_old_f[0:8])\
+    copyin(mag_obs_re[0:8*NDiffFlavs])\
+    copyin(mag_obs_im[0:8*NDiffFlavs])\
+    create(ipdot_g_old[0:8*debug_settings.save_diagnostics])\
+    create(ipdot_f_old[0:8*debug_settings.save_diagnostics])
     {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
@@ -284,7 +286,8 @@ int main(int argc, char* argv[]){
                 if(devinfo.myrank == 0)  printf("Fermion Measurements: see file %s\n",
                         fm_par.fermionic_outfilename);
                 fermion_measures(conf_acc,fermions_parameters,
-                        &fm_par, md_parameters.residue_metro, id_iter_offset) ;
+                        &fm_par, md_parameters.residue_metro, 
+                        md_parameters.max_cg_iterations, id_iter_offset);
 
 
                 //-------------------------------------------------// 
@@ -335,11 +338,12 @@ int main(int argc, char* argv[]){
                     accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
                             md_parameters.residue_metro,md_parameters.residue_md,
                             id_iter-id_iter_offset,
-                            accettate_therm,0);
+                            accettate_therm,0,md_parameters.max_cg_iterations);
                 }else{
                     accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
                             md_parameters.residue_metro,md_parameters.residue_md,
-                            id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+                            id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
+                            md_parameters.max_cg_iterations);
                 }
 
 
@@ -350,7 +354,9 @@ int main(int argc, char* argv[]){
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
                 fermion_measures(conf_acc,fermions_parameters,
-                        &fm_par, md_parameters.residue_metro,id_iter) ;
+                        &fm_par, md_parameters.residue_metro,
+                        md_parameters.max_cg_iterations,
+                        id_iter) ;
 
 
                 //-------------------------------------------------// 

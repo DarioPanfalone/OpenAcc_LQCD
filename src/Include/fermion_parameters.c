@@ -1,19 +1,20 @@
 #ifndef FERMION_PARAMETERS_C_
 #define FERMION_PARAMETERS_C_
 
-#include "./fermion_parameters.h"
-#include "../OpenAcc/md_parameters.h"
-#include "../OpenAcc/backfield.h"
-#include "../OpenAcc/alloc_vars.h"
-#include "./montecarlo_parameters.h"
-#include "../OpenAcc/sp_alloc_vars.h"
-#include <string.h>
-#include <math.h>
-#include "../RationalApprox/rationalapprox.h"
 #include "../DbgTools/dbgtools.h"
-
-#include "../OpenAcc/geometry.h"
 #include "../Mpi/multidev.h"
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/backfield.h"
+#include "../OpenAcc/geometry.h"
+#include "../OpenAcc/md_integrator.h"
+#include "../RationalApprox/rationalapprox.h"
+#include "./fermion_parameters.h"
+#include "./montecarlo_parameters.h"
+#include "../Include/debug.h"
+#include "../Meas/magnetic_susceptibility_utilities.h"
+#include <math.h>
+#include <string.h>
+#include <stdio.h>
 
 #define ALIGN 128
 #define acc_twopi 2*3.14159265358979323846
@@ -111,6 +112,7 @@ int init_ferm_params(ferm_param *fermion_settings){
 
     }
 
+    fermion_settings->printed_bf_dbg_info = 0;
     return errorstatus;
 
 }
@@ -122,18 +124,60 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
     for(int i=0;i<NDiffFlavs;i++){
         fpar[i].phases = &u1_back_phases[i*8];
         init_fermion_backfield(bfpars,&(fpar[i]));
-        char tempname[50];                            // DEBUG
-        strcpy(tempname,"backfield_");                //
-        strcat(tempname,fpar[i].name);                // 
+
+        // PRINTING DEBUG INFO
+        if(debug_settings.print_bfield_dbginfo){
+            char tempname[50];                           
+            // phases
+            sprintf(tempname,"backfield_%s_c%d",fpar[i].name,fpar[i].printed_bf_dbg_info);
 #ifdef MULTIDEVICE      
-        strcat(tempname,devinfo.myrankstr);           // 
+            strcat(tempname,devinfo.myrankstr);          
 #endif
-        print_double_soa(fpar[i].phases,tempname);    //
+            print_double_soa(fpar[i].phases,tempname);   
+
+            // plaquettes
+            sprintf(tempname,"abelian_plq_%s_c%d",fpar[i].name,
+                    fpar[i].printed_bf_dbg_info);
+#ifdef MULTIDEVICE      
+            strcat(tempname,devinfo.myrankstr);          
+#endif
+
+            print_all_abelian_plaquettes(fpar[i].phases,tempname);
+            fpar->printed_bf_dbg_info++; 
+        }
+    
+        
+        fpar[i].mag_re = &mag_obs_re[i*8];
+        fpar[i].mag_im = &mag_obs_im[i*8];
+
+        idphase_dbz(fpar[i].mag_re,fpar[i].mag_im,&fpar[i]);
+    
     }
+
+
+}
+
+void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters)
+{
+
+    if(verbosity_lv > 2 && 0 == devinfo.myrank ) { 
+        printf("Generating external field (containing staggered phases) ");
+        printf("for flavour %s\n",fermion_parameters->name);
+    }
+
+
+    calc_u1_phases(fermion_parameters->phases, bf_pars, 
+            fermion_parameters->ferm_im_chem_pot, fermion_parameters->ferm_charge);
+
+
+
 }
 
 
-void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
+/*
+
+   
+   void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
 
     double  ex_quantum = bf_pars.ex;
     double  ey_quantum = bf_pars.ey;
@@ -291,7 +335,11 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters){
                     phases_f[geom_par.tmap*2+parity].d[idxh]=acc_twopi*arg;
     } // d3,d2,d1,d0 loops
 
-    int dir;
 
 }
+
+
+*/
+
+
 #endif

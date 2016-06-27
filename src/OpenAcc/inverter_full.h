@@ -10,7 +10,6 @@
 #endif
 
 
-#define max_cg 10000
 
 #define DEBUG_INVERTER_FULL_OPENACC
 
@@ -24,8 +23,8 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
 			  __restrict vec3_soa * const loc_r,
 			  __restrict vec3_soa * const loc_h,
 			  __restrict vec3_soa * const loc_s,
-			  __restrict vec3_soa * const loc_p
-			  );
+			  __restrict vec3_soa * const loc_p,
+              const int max_cg);
 
 #endif
 

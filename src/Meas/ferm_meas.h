@@ -23,7 +23,7 @@ extern ferm_meas_params fm_par;
 
 void eo_inversion(su3_soa *tconf_acc,
 		  ferm_param * tfermions_parameters,
-                  double res,
+          double res, int max_cg,
 		  vec3_soa * in_e,     // z2 noise
 		  vec3_soa * in_o,     // z2 noise
 		  vec3_soa * out_e,
@@ -47,7 +47,7 @@ void write_fermion_file_header(ferm_meas_params fmpar);
 void fermion_measures( su3_soa * tconf_acc,
 			      ferm_param * tfermions_parameters, 
                   ferm_meas_params * tfm_par,
-                  double res, int conf_id_iter);
+                  double res, int max_cg, int conf_id_iter);
 
 
 #endif

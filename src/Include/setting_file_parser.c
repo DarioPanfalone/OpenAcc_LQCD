@@ -427,6 +427,7 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const double tlendef = 1.0;
     const double expmaxeigenv_def = 5.5 ; 
     const int singlePrecMDdef = 0;
+    const int max_cg_iterations_def = 10000;
 
     par_info mdp[]={
         (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
@@ -435,7 +436,8 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mdpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , 0, NULL},
         (par_info){(void*) &(mdpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
         (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD",1 , (const void*) &singlePrecMDdef},
-        (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL}};
+        (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL},
+        (par_info){(void*) &(mdpar->max_cg_iterations),TYPE_INT, "MaxCGIterations"   , 1 , (const void*) &max_cg_iterations_def}};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);
@@ -482,11 +484,13 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     const int do_norandom_test_def = 0; 
     const int rng_fakeness_level_def = 0 ;
     const int md_dbg_print_max_count_def = 0;
+    const int print_bfield_dbginfo_def = 0;
     // see /Meas
     par_info gmp[]= {
         (par_info){(void*) &(dbg_settings->use_ildg),              TYPE_INT,"UseILDG"                , 1,(const void*) &useildg_def},
         (par_info){(void*) &(dbg_settings->input_vbl),             TYPE_INT,"VerbosityLv"            , 1,(const void*) &input_vbl_def},
         (par_info){(void*) &(dbg_settings->SaveAllAtEnd),          TYPE_INT,"SaveAllAtEnd"           , 1,(const void*) &SaveAllAtEnd_def},
+        (par_info){(void*) &(dbg_settings->print_bfield_dbginfo),  TYPE_INT,"PrintBackFieldDbgInfo"  , 1,(const void*) &print_bfield_dbginfo_def},
         (par_info){(void*) &(dbg_settings->save_diagnostics),      TYPE_INT,"SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
         (par_info){(void*) &(dbg_settings->do_reversibility_test), TYPE_INT,"DoRevTest"              , 1,(const void*) &do_reversibility_test_def},
         (par_info){(void*) &(dbg_settings->do_norandom_test),      TYPE_INT,"DoNoRandomTest"         , 1,(const void*) &do_norandom_test_def},

@@ -10,6 +10,7 @@
  #define __restrict
 #endif
 
+extern int multishift_invert_iterations ; // global count of multishift CG iterations
 
 int multishift_invert(__restrict su3_soa * const u,
 		      __restrict ferm_param * pars,
@@ -21,8 +22,8 @@ int multishift_invert(__restrict su3_soa * const u,
 		      __restrict vec3_soa *  loc_h,
 		      __restrict vec3_soa *  loc_s,
 		      __restrict vec3_soa *  loc_p,
-		      __restrict vec3_soa *  shiftferm // multi-ferm [nshift]
-		      );
+		      __restrict vec3_soa *  shiftferm, // multi-ferm [nshift]
+              const int max_cg);
 
 
 void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted /*multi-fermion*/, 

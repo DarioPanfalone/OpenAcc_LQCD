@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-#define MAX_APPROX_ORDER 18
+#define MAX_APPROX_ORDER 25
 
 extern int verbosity_lv;
 
