@@ -46,6 +46,7 @@ fileNames = [\
 ]
 
 # files where we can change all 'd_complex' with 'f_complex'
+# and also function names
 # without fears
 filesALLDtoF=[\
 'OpenAcc/alloc_vars.c',\
@@ -132,7 +133,7 @@ def findFunctionNames(lineRaw):
 
 
 def findFirstVarName(text): # note: does not work with,e.g. 'int a,b;':
-                            # only ONE varper declaration
+                            # only ONE var per declaration
     upperBoundaries = []
     for soaType in dpTypes:
         reToMatch = '(?<='+soaType+'[ \*])' # match if preceded by returnType and ' ' or *
@@ -275,6 +276,13 @@ for fileName in fileNames:
             newText = newText.replace('MPI_DOUBLE','MPI_FLOAT')
             newText = newText.replace('double','float')
             newText = newText.replace('%lf','%f')
+            newText = newText.replace('conj(','conjf(')
+            newText = newText.replace('creal(','crealf(')
+            newText = newText.replace('cimag(','cimagf(')
+            newText = newText.replace('cos(','cosf(')
+            newText = newText.replace('sin(','sinf(')
+            newText = newText.replace('exp(','expf(')
+
        
         newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)
         

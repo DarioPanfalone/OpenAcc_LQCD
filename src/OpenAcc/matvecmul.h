@@ -157,13 +157,13 @@ static inline vec3 conjmat_vec_mul_arg(
     //  d_complex mat22 = matrix->r2.c2[idx_mat];
 
     //Compute 3rd matrix row from the first two  
-    d_complex mat20 = conj( ( mat01 * mat12 ) - ( mat02 * mat11) );
-    d_complex mat21 = conj( ( mat02 * mat10 ) - ( mat00 * mat12) );
-    d_complex mat22 = conj( ( mat00 * mat11 ) - ( mat01 * mat10) );
+    d_complex cmat20 = ( mat01 * mat12 ) - ( mat02 * mat11) ;
+    d_complex cmat21 = ( mat02 * mat10 ) - ( mat00 * mat12) ;
+    d_complex cmat22 = ( mat00 * mat11 ) - ( mat01 * mat10) ;
 
-    out_vect.c0 = ( conj(mat00) * vec0 ) + ( conj(mat10) * vec1 ) + ( conj(mat20) * vec2 );
-    out_vect.c1 = ( conj(mat01) * vec0 ) + ( conj(mat11) * vec1 ) + ( conj(mat21) * vec2 );
-    out_vect.c2 = ( conj(mat02) * vec0 ) + ( conj(mat12) * vec1 ) + ( conj(mat22) * vec2 );
+    out_vect.c0 = ( conj(mat00) * vec0 ) + ( conj(mat10) * vec1 ) + ( cmat20 * vec2 );
+    out_vect.c1 = ( conj(mat01) * vec0 ) + ( conj(mat11) * vec1 ) + ( cmat21 * vec2 );
+    out_vect.c2 = ( conj(mat02) * vec0 ) + ( conj(mat12) * vec1 ) + ( cmat22 * vec2 );
 
     return out_vect;
 
