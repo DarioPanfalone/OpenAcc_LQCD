@@ -4,7 +4,9 @@
 #include "../DbgTools/dbgtools.h"
 #include "../Mpi/multidev.h"
 #include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/sp_alloc_vars.h"
 #include "../OpenAcc/backfield.h"
+#include "../OpenAcc/sp_backfield.h"
 #include "../OpenAcc/geometry.h"
 #include "../OpenAcc/md_integrator.h"
 #include "../RationalApprox/rationalapprox.h"
@@ -36,6 +38,7 @@ int init_ferm_params(ferm_param *fermion_settings){
 
     // calculation of NPS_tot, max_ps,index_of_the_first_ps; 
     for(int i=0;i<NDiffFlavs;i++){
+        fermion_settings[i].printed_bf_dbg_info = 0;
         // compute the total number of ps
         NPS_tot += fermion_settings[i].number_of_ps;
         // compute the max number of ps among the various flavs
@@ -112,7 +115,7 @@ int init_ferm_params(ferm_param *fermion_settings){
 
     }
 
-    fermion_settings->printed_bf_dbg_info = 0;
+    
     return errorstatus;
 
 }
@@ -123,6 +126,7 @@ void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 
     for(int i=0;i<NDiffFlavs;i++){
         fpar[i].phases = &u1_back_phases[i*8];
+        fpar[i].phases_f = &u1_back_phases_f[i*8];
         init_fermion_backfield(bfpars,&(fpar[i]));
 
         // PRINTING DEBUG INFO
@@ -168,6 +172,11 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters)
 
     calc_u1_phases(fermion_parameters->phases, bf_pars, 
             fermion_parameters->ferm_im_chem_pot, fermion_parameters->ferm_charge);
+
+
+    calc_u1_phases_f(fermion_parameters->phases_f, bf_pars, 
+            fermion_parameters->ferm_im_chem_pot, fermion_parameters->ferm_charge);
+
 
 
 

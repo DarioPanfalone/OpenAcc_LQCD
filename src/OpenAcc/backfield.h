@@ -2,17 +2,7 @@
 #define BACKFIELD_H_
 
 #include "./struct_c_def.h"
-
-// quanti di campo esterno
-
-typedef struct bf_param_t{
-
- double ex,ey,ez,bx,by,bz;
- // maybe you want to add some other strange things, setting and so on
-
-} bf_param;
-
-extern bf_param backfield_parameters;
+#include "./backfield_parameters.h"
 
 // phases, unbounded, without multiplication by 2pi 
 void calc_u1_phases_unb_no2pi(double_soa * phases,bf_param bf_pars,

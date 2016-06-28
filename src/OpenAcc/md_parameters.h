@@ -11,6 +11,7 @@ typedef struct md_param_t{
     double expected_max_eigenvalue;
     int singlePrecMD ; 
     double residue_md;
+    int max_cg_iterations;
 
 } md_param; 
 

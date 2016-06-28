@@ -28,8 +28,7 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "./action.h"
 #include "./alloc_vars.h"
-#include "./sp_alloc_vars.h"
-#include "./backfield.h"
+#include "./backfield_parameters.h"
 #include "./deviceinit.h"
 #include "./fermion_matrix.h"
 #include "./fermionic_utilities.h"
@@ -42,6 +41,7 @@
 #include "./md_parameters.h"
 #include "./random_assignement.h"
 #include "./rettangoli.h"
+#include "./sp_alloc_vars.h"
 #include "./stouting.h"
 #include "./struct_c_def.h"
 #include "./su3_measurements.h"
@@ -218,6 +218,7 @@ int main(int argc, char* argv[]){
     copyin(fermions_parameters[0:NDiffFlavs])\
     copyin(deltas_Omelyan[0:7]) \
     copyin(u1_back_phases[0:8*NDiffFlavs])\
+    create(conf_acc_f[0:8])\
     create(ipdot_acc_f[0:8]) create(aux_conf_acc_f[0:8])\
     create(auxbis_conf_acc_f[0:8]) create(ferm_chi_acc_f[0:NPS_tot])\
     create(ferm_phi_acc_f[0:NPS_tot])  create(ferm_out_acc_f[0:NPS_tot])\

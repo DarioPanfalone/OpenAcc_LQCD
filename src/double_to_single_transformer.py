@@ -9,6 +9,8 @@ import re
 fileNames = [\
 'OpenAcc/alloc_vars.c',\
 'OpenAcc/alloc_vars.h',\
+'OpenAcc/backfield.c',\
+'OpenAcc/backfield.h',\
 'OpenAcc/cayley_hamilton.h',\
 'OpenAcc/fermion_force.c',\
 'OpenAcc/fermion_force.h',\
@@ -51,6 +53,8 @@ fileNames = [\
 filesALLDtoF=[\
 'OpenAcc/alloc_vars.c',\
 'OpenAcc/alloc_vars.h',\
+'OpenAcc/backfield.c',\
+'OpenAcc/backfield.h',\
 'OpenAcc/cayley_hamilton.h',\
 'OpenAcc/fermion_force.c',\
 'OpenAcc/fermion_force.h',\
@@ -85,11 +89,15 @@ filesALLDtoF=[\
 dpFunctionNames = [] # new function names will just be dp function names + '_f' at the end
 dpVariableNames = [] # new function names will just be dp function names + '_f' at the end
 # as in struct_c_def.h
-dpTypes = ['double_soa','dcomplex_soa','vec3_soa','vec3','su3_soa','thmat_soa','tamat_soa',\
-        'global_vec3_soa','global_su3_soa']
+dpTypes = ['double_soa','dcomplex_soa','vec3_soa','vec3',\
+        'su3_soa','thmat_soa','tamat_soa',\
+        'global_vec3_soa','global_su3_soa',\
+        'single_su3' , 'single_tamat', 'single_thmat']
 # corresponding types in in sp_struct_c_def.h
-spTypes = ['float_soa','fcomplex_soa','vec3_soa_f','vec3_f','su3_soa_f','thmat_soa_f',\
-        'tamat_soa_f','global_vec3_soa_f','global_su3_soa_f']
+spTypes = ['float_soa','fcomplex_soa','vec3_soa_f','vec3_f',\
+        'su3_soa_f','thmat_soa_f','tamat_soa_f',\
+        'global_vec3_soa_f','global_su3_soa_f',\
+        'single_su3_f' , 'single_tamat_f', 'single_thmat_f']
 
 # as in struct_c_def.h
 dpTypes_t = [ dpType + '_t' for dpType in dpTypes]
@@ -282,6 +290,21 @@ for fileName in fileNames:
             newText = newText.replace('cos(','cosf(')
             newText = newText.replace('sin(','sinf(')
             newText = newText.replace('exp(','expf(')
+            newText = newText.replace('sqrt(','sqrtf(')
+            newText = newText.replace('pow(','powf(')
+
+            # find number to convert to float
+            reToMatch = '[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?'
+            listend = [0]  # end of each match
+            for m in re.finditer(reToMatch,newText):
+                listend.append(m.end())
+            newText2 = ''
+            for i in range(len(listend)-1):
+                newText2 +=newText[listend[i]:listend[i+1]] + 'f'
+            newText2 += newText[listend[-1]:]
+            newText = newText2
+
+
 
        
         newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)

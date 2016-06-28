@@ -1,6 +1,7 @@
 #ifndef BACKFIELD_C_
 #define BACKFIELD_C_
 
+#include "./backfield_parameters.h"
 #include "./backfield.h"
 #include "./struct_c_def.h"
 #include "../Mpi/multidev.h"
@@ -10,9 +11,10 @@
 #define acc_twopi 2*3.14159265358979323846
 #ifndef __GNUC__
 #include <accelmath.h>
+#else
+#include <math.h>
 #endif
 
-bf_param backfield_parameters;
 
 // phases, unbounded, without multiplication by 2pi 
 void calc_u1_phases_unb_no2pi(double_soa * phases,bf_param bf_pars,

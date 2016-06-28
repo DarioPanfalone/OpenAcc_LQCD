@@ -63,7 +63,7 @@ static inline void CH_exponential_antihermitian_soa_nissalike(
 
   d_complex f0,f1,f2;
   //consider the case in which c1<4*10^-3 apart, as done in MILC [TAKEN FROM NISSA]
-  if(c1<4e-3)
+  if(c1<4.0e-3)
     {
       f0 = (1-c0*c0/720) + (1.0*I)*(-c0*(1-c1*(1-c1/42)/20)/6);
       f1 = (c0*(1-c1*(1-3*c1/112)/15)/24) + (1.0*I)*(1-c1*(1-c1*(1-c1/42)/20)/6-c0*c0/5040);
@@ -252,7 +252,7 @@ static inline void CH_exponential_antihermitian_nissalike(single_su3 * const exp
 
   d_complex f0,f1,f2;
   //consider the case in which c1<4*10^-3 apart, as done in MILC [TAKEN FROM NISSA]
-  if(c1<4e-3)
+  if(c1<4.0e-3)
     {
       f0 = (1-c0*c0/720) + (1.0*I)*(-c0*(1-c1*(1-c1/42)/20)/6);
       f1 = (c0*(1-c1*(1-3*c1/112)/15)/24) + (1.0*I)*(1-c1*(1-c1*(1-c1/42)/20)/6-c0*c0/5040);
