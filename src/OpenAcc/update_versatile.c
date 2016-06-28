@@ -42,7 +42,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 #ifdef STOUT_FERMIONS        
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
-    su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_f_arr_f;
+    su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_arr_f;
 #endif
 #ifdef NORANDOM
     printf("MIP%02d: WELCOME! NORANDOM MODE. (UPDATE_SOLOACC_UNOSTEP_VERSATILE())\n",
