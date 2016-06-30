@@ -4,24 +4,30 @@
 #ifndef __GNUC__
 #include "openacc.h"
 #endif
-
-#include "../Include/common_defines.h"
-#include "../Include/setting_file_parser.h"
-#include "../Include/fermion_parameters.h"
-#include "../OpenAcc/fermion_matrix.h"
-#include "../OpenAcc/alloc_vars.h"
-#include "../OpenAcc/io.h"
-#include "../OpenAcc/random_assignement.h"
-#include "../Rand/random.h"
-#include "./dbgtools.h"
-#include "../OpenAcc/action.h"
-#include "../Include/montecarlo_parameters.h"
-#include "../Include/debug.h"
-#include "../OpenAcc/deviceinit.h" 
 #include <sys/time.h>
 
+
+#include "../Include/common_defines.h"
+#include "../Include/debug.h"
+#include "../Include/fermion_parameters.h"
+#include "../Include/montecarlo_parameters.h"
+#include "../Include/setting_file_parser.h"
 #include "../Mpi/multidev.h"
+#include "../OpenAcc/action.h"
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/deviceinit.h" 
+#include "../OpenAcc/fermion_matrix.h"
+#include "../OpenAcc/float_double_conv.h"
+#include "../OpenAcc/io.h"
+#include "../OpenAcc/random_assignement.h"
+#include "../OpenAcc/sp_alloc_vars.h"
+#include "../OpenAcc/sp_fermion_matrix.h"
+#include "../Rand/random.h"
+#include "./dbgtools.h"
+
 #ifdef MULTIDEVICE
+#include "../Mpi/communications.h"
+#include "../Mpi/sp_communications.h"
 #include <mpi.h>
 #endif
 
@@ -38,11 +44,25 @@ int main(int argc, char* argv[]){
     const char fermionname_doe[50] = "test_fermion_result_doe2";
     const char fermionname_deo[50] = "test_fermion_result_deo2";
     const char fermionname_fulldirac[50] = "test_fermion_result_fulldirac2";
+    const char fermionname_f[50] = "sp_test_fermion";
+    const char fermionname_doe_f[50] = "sp_test_fermion_result_doe2";
+    const char fermionname_deo_f[50] = "sp_test_fermion_result_deo2";
+    const char fermionname_fulldirac_f[50] = "sp_test_fermion_result_fulldirac2";
+
     char myconfname             [50];
     char myfermionname          [50];
     char myfermionname_doe      [50];
     char myfermionname_deo      [50];
     char myfermionname_fulldirac[50];
+
+    //char myconfname_f             [50];
+    char myfermionname_f          [50];
+    char myfermionname_doe_f      [50];
+    char myfermionname_deo_f      [50];
+    char myfermionname_fulldirac_f[50];
+
+
+
 
 
     act_params.stout_steps = 0;
@@ -83,6 +103,7 @@ int main(int argc, char* argv[]){
 #endif
 
     mem_alloc();
+    mem_alloc_f();
     printf("Allocazione della memoria : OK \n");
     compute_nnp_and_nnm_openacc();
     printf("nn computation : OK \n");
@@ -93,6 +114,12 @@ int main(int argc, char* argv[]){
     sprintf(myfermionname_doe      ,"%s_MPI%02d",fermionname_doe      ,devinfo.myrank);
     sprintf(myfermionname_deo      ,"%s_MPI%02d",fermionname_deo      ,devinfo.myrank);
     sprintf(myfermionname_fulldirac,"%s_MPI%02d",fermionname_fulldirac,devinfo.myrank);
+    //sprintf(myconfname_f             ,"%s_MPI%02d",confname             ,devinfo.myrank);
+    sprintf(myfermionname_f          ,"%s_MPI%02d",fermionname_f          ,devinfo.myrank);
+    sprintf(myfermionname_doe_f      ,"%s_MPI%02d",fermionname_doe_f      ,devinfo.myrank);
+    sprintf(myfermionname_deo_f      ,"%s_MPI%02d",fermionname_deo_f      ,devinfo.myrank);
+    sprintf(myfermionname_fulldirac_f,"%s_MPI%02d",fermionname_fulldirac_f,devinfo.myrank);
+
 
 
 
@@ -133,8 +160,6 @@ int main(int argc, char* argv[]){
 
 
     // init fermion
-    //generate_vec3_soa_gauss(ferm_chi_acc);
-    //print_vec3_soa(ferm_chi_acc,"ferm_chi_acc");
     if(!read_vec3_soa_wrapper(ferm_chi_acc,fermionname )){
         printf("MPI%02d - Fermion READ : OK \n",devinfo.myrank);
     }else{
@@ -150,19 +175,23 @@ int main(int argc, char* argv[]){
     communicate_fermion_borders_hostonly(ferm_chi_acc);
 #endif
 
-//    print_vec3_soa(ferm_chi_acc,myfermionname);
-
-
-
 
     //#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
     create(ferm_phi_acc[0:1])  copyin(u1_back_phases[0:8*NDiffFlavs]) \
         create(kloc_s[0:1])
 #pragma acc data  copy(conf_acc[0:8]) copy(ferm_chi_acc[0:1])\
         copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
-        copy(kloc_s[0:1])
+        copy(kloc_s[0:1])\
+        copy(conf_acc_f[0:8]) copy(ferm_chi_acc_f[0:1])\
+        copy(ferm_phi_acc_f[0:1])  copy(u1_back_phases_f[0:8*NDiffFlavs]) \
+        copy(kloc_s_f[0:1])\
+
         {
  
+            // double precision
+            printf("####################\n");
+            printf("# DOUBLE PRECISION #\n");
+            printf("####################\n");
             struct timeval t0,t1,t2,t3,t4,t5;
             int r;
             printf("Multiplication by Doe, %d times...", mc_params.ntraj);
@@ -211,6 +240,66 @@ int main(int argc, char* argv[]){
             printf("Time for 1 application of Dirac Operator: %e\n", 
                     dt_dirac/mc_params.ntraj);
 
+            // conversion to single precision
+            convert_double_to_float_su3_soa(conf_acc,conf_acc_f);
+            convert_double_to_float_vec3_soa(ferm_chi_acc,ferm_chi_acc_f);
+            convert_double_to_float_vec3_soa(ferm_phi_acc,ferm_phi_acc_f);
+
+
+
+
+            // single precision
+            printf("####################\n");
+            printf("# SINGLE PRECISION #\n");
+            printf("####################\n");
+            struct timeval t0_f,t1_f,t2_f,t3_f,t4_f,t5_f;
+            //int r;
+            printf("Multiplication by Doe, %d times...", mc_params.ntraj);
+            gettimeofday(&t0_f,NULL);
+            for(r=0; r<mc_params.ntraj; r++)
+            acc_Doe_f(conf_acc_f, ferm_phi_acc_f, ferm_chi_acc_f, fermions_parameters[0].phases_f);
+            gettimeofday(&t1_f,NULL);
+            printf("Writing file %s.\n", fermionname_doe);
+
+#pragma acc update host(ferm_phi_acc_f[0:1])
+//            print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_doe);
+//            print_vec3_soa_f(ferm_phi_acc_f,myfermionname_doe);
+
+            printf("Multiplication by Deo, %d times...", mc_params.ntraj);
+            gettimeofday(&t2_f,NULL);
+            for(r=0; r<mc_params.ntraj; r++)
+            acc_Deo_f(conf_acc_f, ferm_phi_acc_f, ferm_chi_acc_f, fermions_parameters[0].phases_f) ;
+            gettimeofday(&t3_f,NULL);
+            printf("Writing file %s.\n", fermionname_deo);
+#pragma acc update host(ferm_phi_acc_f[0:1])
+//            print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_deo);
+//            print_vec3_soa_f(ferm_phi_acc_f,myfermionname_deo);
+
+            printf("Multiplication by M^\\dagM+m^2, %d times...", mc_params.ntraj);
+            gettimeofday(&t4_f,NULL);
+            for(r=0; r<mc_params.ntraj; r++)
+            fermion_matrix_multiplication_f(conf_acc_f, ferm_phi_acc_f, 
+                    ferm_chi_acc_f, kloc_s_f, &fermions_parameters[0]) ;
+            gettimeofday(&t5_f,NULL);
+            printf("Writing file %s.\n", fermionname_fulldirac);
+#pragma acc update host(ferm_phi_acc_f[0:1])
+//            print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_fulldirac);
+//            print_vec3_soa_f(ferm_phi_acc_f,myfermionname_fulldirac);
+            printf("MPI%02d: End of data region!\n", devinfo.myrank);
+
+            double dt_doe_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
+                ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
+            double dt_deo_f = (double)(t3_f.tv_sec - t2_f.tv_sec) + 
+                ((double)(t3_f.tv_usec - t2_f.tv_usec)/1.0e6);
+            double dt_dirac_f = (double)(t5_f.tv_sec - t4_f.tv_sec) + 
+                ((double)(t5_f.tv_usec - t4_f.tv_usec)/1.0e6);
+            printf("Time for 1 application of Doe           : %e\n",
+                    dt_doe_f/mc_params.ntraj);
+            printf("Time for 1 application of Deo           : %e\n", 
+                    dt_deo_f/mc_params.ntraj);
+            printf("Time for 1 application of Dirac Operator: %e\n", 
+                    dt_dirac_f/mc_params.ntraj);
+
         }
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
@@ -220,6 +309,7 @@ int main(int argc, char* argv[]){
     MPI_Finalize();
 #endif 
 
+    mem_free_f();
     mem_free();
 
     printf("MPI%02d: Test completed.\n",devinfo.myrank);
