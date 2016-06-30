@@ -4,26 +4,33 @@
 #ifndef __GNUC__
 #include "openacc.h"
 #endif
+#include <sys/time.h>
 
 #include "../Include/common_defines.h"
-#include "../Include/setting_file_parser.h"
+#include "../Include/debug.h"
 #include "../Include/fermion_parameters.h"
+#include "../Include/montecarlo_parameters.h"
+#include "../Include/setting_file_parser.h"
+#include "../Mpi/multidev.h"
+#include "../OpenAcc/action.h"
 #include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/deviceinit.h" 
+#include "../OpenAcc/float_double_conv.h"
 #include "../OpenAcc/inverter_multishift_full.h"
 #include "../OpenAcc/io.h"
+#include "../OpenAcc/md_integrator.h"
 #include "../OpenAcc/random_assignement.h"
+#include "../OpenAcc/sp_alloc_vars.h"
+#include "../OpenAcc/sp_fermion_matrix.h"
+#include "../OpenAcc/sp_inverter_multishift_full.h"
 #include "../Rand/random.h"
 #include "../RationalApprox/rationalapprox.h"
 #include "./dbgtools.h"
-#include "../OpenAcc/action.h"
-#include "../Include/montecarlo_parameters.h"
-#include "../Include/debug.h"
-#include "../OpenAcc/deviceinit.h" 
-#include <sys/time.h>
-#include "../OpenAcc/md_integrator.h"
+#include "./sp_dbgtools.h"
 
-#include "../Mpi/multidev.h"
 #ifdef MULTIDEVICE
+#include "../Mpi/communications.h"
+#include "../Mpi/sp_communications.h"
 #include <mpi.h>
 #endif
 
@@ -104,6 +111,7 @@ int main(int argc, char* argv[]){
 #endif
 
     mem_alloc();
+    mem_alloc_f();
     printf("Allocazione della memoria : OK \n");
     compute_nnp_and_nnm_openacc();
     printf("nn computation : OK \n");
@@ -150,8 +158,6 @@ int main(int argc, char* argv[]){
 
 
     // init fermion
-    //generate_vec3_soa_gauss(ferm_chi_acc);
-    //print_vec3_soa(ferm_chi_acc,"ferm_chi_acc");
     if(!read_vec3_soa_wrapper(ferm_chi_acc,fermionname )){
         printf("MPI%02d - Fermion READ : OK \n",devinfo.myrank);
     }else{
@@ -190,7 +196,14 @@ int main(int argc, char* argv[]){
         copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
         create(kloc_r[0:1]) create(kloc_h[0:1]) create(kloc_s[0:1]) create(kloc_p[0:1]) \
         create(ferm_shiftmulti_acc[max_ps*MAX_APPROX_ORDER]) \
-        create(k_p_shiftferm[max_ps*MAX_APPROX_ORDER] )
+        create(k_p_shiftferm[max_ps*MAX_APPROX_ORDER] )\
+        copy(conf_acc_f[0:8]) copy(ferm_chi_acc_f[0:1])\
+        copy(ferm_phi_acc_f[0:1])  copy(u1_back_phases_f[0:8*NDiffFlavs]) \
+        create(kloc_r_f[0:1]) create(kloc_h_f[0:1])\
+        create(kloc_s_f[0:1]) create(kloc_p_f[0:1]) \
+        create(ferm_shiftmulti_acc_f[max_ps*MAX_APPROX_ORDER]) \
+        create(k_p_shiftferm_f[max_ps*MAX_APPROX_ORDER] )
+
         {
             struct timeval t0,t1,t2,t3,t4,t5;
             int r;
@@ -201,6 +214,10 @@ int main(int argc, char* argv[]){
 
             }
 
+            // double precision
+            printf("####################\n");
+            printf("# DOUBLE PRECISION #\n");
+            printf("####################\n");
             for(r=0; r<mc_params.ntraj; r++){
                 gettimeofday(&t0,NULL);
                 multishift_invert_iterations = 0;
@@ -235,6 +252,64 @@ int main(int argc, char* argv[]){
 #pragma acc update host(ferm_phi_acc[0:1]) // update on host the right fermion
                 print_vec3_soa_wrapper(&ferm_shiftmulti_acc[r],fermionname_shift);
             }
+
+
+            // single precision
+            printf("####################\n");
+            printf("# SINGLE PRECISION #\n");
+            printf("####################\n");
+
+            // conversion to single precision
+            convert_double_to_float_su3_soa(conf_acc,conf_acc_f);
+            convert_double_to_float_vec3_soa(ferm_chi_acc,ferm_chi_acc_f);
+
+            struct timeval t0_f,t1_f,t2_f,t3_f,t4_f,t5_f;
+            for(r=0; r<mc_params.ntraj; r++){
+                gettimeofday(&t0_f,NULL);
+                multishift_invert_iterations = 0;
+                multishift_invert_f(conf_acc_f,&fermions_parameters[0],
+                        &fakeRationalApprox,
+                        ferm_shiftmulti_acc_f,
+                        ferm_chi_acc_f,
+                        md_parameters.residue_metro,
+                        kloc_r_f,
+                        kloc_h_f,
+                        kloc_s_f,
+                        kloc_p_f,
+                        k_p_shiftferm_f,
+                        md_parameters.max_cg_iterations);
+                gettimeofday(&t1_f,NULL);
+                if(0==devinfo.myrank){
+                    double dt_cgm_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
+                        ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
+                    printf("Time for 1 step of multishift inversion   : %e\n",
+                            dt_cgm_f/multishift_invert_iterations);
+                }
+            }
+
+            for(r=0; r<fakeRationalApprox.approx_order; r++){
+
+                char fermionname_shift[50];
+                sprintf(fermionname_shift,"sp_fermion_shift_%d.dat",r);
+
+                // shift fermio names
+                printf("Writing file %s.\n", fermionname_shift);
+
+#pragma acc update host(ferm_phi_acc_f[0:1]) // update on host the right fermion
+                print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
+            }
+
+
+
+
+
+
+
+
+
+
+
+
             printf("MPI%02d: End of data region!\n", devinfo.myrank);
 
         }

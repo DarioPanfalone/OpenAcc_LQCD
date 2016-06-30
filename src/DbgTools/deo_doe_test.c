@@ -24,6 +24,7 @@
 #include "../OpenAcc/sp_fermion_matrix.h"
 #include "../Rand/random.h"
 #include "./dbgtools.h"
+#include "./sp_dbgtools.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
@@ -243,10 +244,6 @@ int main(int argc, char* argv[]){
             // conversion to single precision
             convert_double_to_float_su3_soa(conf_acc,conf_acc_f);
             convert_double_to_float_vec3_soa(ferm_chi_acc,ferm_chi_acc_f);
-            convert_double_to_float_vec3_soa(ferm_phi_acc,ferm_phi_acc_f);
-
-
-
 
             // single precision
             printf("####################\n");
