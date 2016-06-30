@@ -81,16 +81,19 @@ int main(int argc, char* argv[]){
     pre_init_multidev1D(&devinfo);
 #endif
     fflush(stdout);
-    printf("DEODOE test\n");
+    printf("Multishift inverter test\n");
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     printf("WELCOME! \n");
     // READ input file.
     set_global_vars_and_fermions_from_input_file(argv[1]);
 
-    if(argc==3) if(strcmp("BENCHMARK",argv[2])){
-        printf("ENTERING BENCHMARK MODE: using fake rational approximation.\n");
-        benchmark_mode = 1;
+    if(argc==3){ 
+        if(!strcmp("BENCHMARK",argv[2])){
+            printf("ENTERING BENCHMARK MODE: using fake rational approximation.\n");
+            benchmark_mode = 1;
+        }
     }
+    else printf("NOT ENTERING BENCHMARK MODE\n");
 
     initrand((unsigned int) mc_params.seed+devinfo.myrank);
     verbosity_lv = debug_settings.input_vbl;
