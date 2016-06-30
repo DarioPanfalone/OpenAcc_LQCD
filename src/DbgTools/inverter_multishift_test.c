@@ -65,6 +65,7 @@ void init_fake_rational_approx(RationalApprox* rational_approx,
 
 int main(int argc, char* argv[]){
 
+    int benchmark_mode = 0;
     const char confname[50] = "test_conf";
     const char fermionname[50] = "test_fermion";
     char myconfname             [50];
@@ -86,12 +87,24 @@ int main(int argc, char* argv[]){
     // READ input file.
     set_global_vars_and_fermions_from_input_file(argv[1]);
 
+    if(argc==3) if(strcmp("BENCHMARK",argv[2])){
+        printf("ENTERING BENCHMARK MODE: using fake rational approximation.\n");
+        benchmark_mode = 1;
+    }
+
     initrand((unsigned int) mc_params.seed+devinfo.myrank);
     verbosity_lv = debug_settings.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
-    if(init_ferm_params(fermions_parameters))
-        printf("Ignoring issues in init_ferm_params,\
-                this is a multishift inverter test.\n");
+    if(init_ferm_params(fermions_parameters)){
+        if( benchmark_mode )
+            printf("Ignoring issues in init_ferm_params,\
+                    this is a multishift inverter benchmark.\n");
+        else {
+            printf("Issues in init_ferm_params(), exiting now.\n");
+            printf("[Maybe a rational appriximation file is missing?]\n");
+            exit(1);
+        }
+    }
 
     if(NPS_tot == 0) 
     {
@@ -179,12 +192,16 @@ int main(int argc, char* argv[]){
 
     // fake rational approx
 
-    RationalApprox fakeRationalApprox;
     double minshift = fermions_parameters->ferm_mass;
-    init_fake_rational_approx(&fakeRationalApprox, 1, minshift*minshift, 15);
-    if(0==devinfo.myrank){
-        printf("Using fermions_parameters->ferm_mass ^2 as shiftn");
+    RationalApprox * rationalApproxToUse;
+    if(benchmark_mode){
+        rationalApproxToUse = (RationalApprox*) malloc(sizeof(RationalApprox));
+        init_fake_rational_approx(rationalApproxToUse, 1, minshift*minshift, 15);
+        if(0==devinfo.myrank){
+            printf("Using fermions_parameters->ferm_mass ^2 as shiftn");
+        }
     }
+    else rationalApproxToUse = &(fermions_parameters[0].approx_fi_mother);//just choosing one
 
 
 
@@ -222,7 +239,7 @@ int main(int argc, char* argv[]){
                 gettimeofday(&t0,NULL);
                 multishift_invert_iterations = 0;
                 multishift_invert(conf_acc,&fermions_parameters[0],
-                        &fakeRationalApprox,
+                        rationalApproxToUse,
                         ferm_shiftmulti_acc,
                         ferm_chi_acc,
                         md_parameters.residue_metro,
@@ -242,7 +259,7 @@ int main(int argc, char* argv[]){
             }
 
 #pragma acc update host(ferm_shiftmulti_acc[0:fakeRationalApprox.approx_order]) // update on host
-            for(r=0; r<fakeRationalApprox.approx_order; r++){
+            for(r=0; r<rationalApproxToUse->approx_order; r++){
 
                 char fermionname_shift[50];
                 sprintf(fermionname_shift,"fermion_shift_%d.dat",r);
@@ -268,7 +285,7 @@ int main(int argc, char* argv[]){
                 gettimeofday(&t0_f,NULL);
                 multishift_invert_iterations = 0;
                 multishift_invert_f(conf_acc_f,&fermions_parameters[0],
-                        &fakeRationalApprox,
+                        rationalApproxToUse,
                         ferm_shiftmulti_acc_f,
                         ferm_chi_acc_f,
                         md_parameters.residue_metro,
@@ -287,7 +304,7 @@ int main(int argc, char* argv[]){
                 }
             }
 
-            for(r=0; r<fakeRationalApprox.approx_order; r++){
+            for(r=0; r<rationalApproxToUse->approx_order; r++){
 
                 char fermionname_shift[50];
                 sprintf(fermionname_shift,"sp_fermion_shift_%d.dat",r);
@@ -298,16 +315,6 @@ int main(int argc, char* argv[]){
 #pragma acc update host(ferm_shiftmulti_acc_f[0:fakeRationalApprox.approx_order]) // update on host
                 print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
             }
-
-
-
-
-
-
-
-
-
-
 
 
             printf("MPI%02d: End of data region!\n", devinfo.myrank);
@@ -321,9 +328,12 @@ int main(int argc, char* argv[]){
     MPI_Finalize();
 #endif 
 
+    if(benchmark_mode) free(rationalApproxToUse);
+    mem_free_f();
     mem_free();
 
     printf("MPI%02d: Test completed.\n",devinfo.myrank);
+
 
     return 0; 
 
