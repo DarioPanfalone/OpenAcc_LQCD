@@ -53,6 +53,7 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
         su3_soa *local_staples, tamat_soa *tipdot,thmat_soa *tmomenta, int omelyan_index)
 {
 
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_GAUGE_ASYNC_BLOc\n");
     char conffilename[50];
     char momfilename[50];
     char ipdotfilename[50];
@@ -157,6 +158,7 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
 
 void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
 {
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_GAUGE_ASYNC\n");
 
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
     int md;
@@ -209,6 +211,7 @@ void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
         su3_soa *local_staples, tamat_soa *tipdot,thmat_soa *tmomenta,
         int omelyan_index)
 {
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_GAUGE_BLOC\n");
 
     if(verbosity_lv > 2 && 0 == devinfo.myrank) printf("\tMPI%02d - In bloc - Index %d\n",
             devinfo.myrank, omelyan_index);
@@ -279,6 +282,7 @@ void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
 
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
 {
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_GAUGE\n");
     int md;
     if(verbosity_lv>1) 
         printf("MPI%02d - Performing Gauge substeps\n",
@@ -452,6 +456,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         double res,
         const int max_cg)
 {
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_SOLOOPENACC\n");
 
 
     int md;

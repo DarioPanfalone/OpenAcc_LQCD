@@ -122,7 +122,7 @@ int main(int argc, char* argv[]){
 
 
 #ifndef __GNUC__
-    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
+    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////
     // NVIDIA GPUs
     acc_device_t my_device_type = acc_device_nvidia;
     // AMD GPUs
@@ -241,6 +241,7 @@ int main(int argc, char* argv[]){
                 }
             }
 
+#pragma acc update host(ferm_shiftmulti_acc[0:fakeRationalApprox.approx_order]) // update on host
             for(r=0; r<fakeRationalApprox.approx_order; r++){
 
                 char fermionname_shift[50];
@@ -249,7 +250,6 @@ int main(int argc, char* argv[]){
                 // shift fermio names
                 printf("Writing file %s.\n", fermionname_shift);
 
-#pragma acc update host(ferm_phi_acc[0:1]) // update on host the right fermion
                 print_vec3_soa_wrapper(&ferm_shiftmulti_acc[r],fermionname_shift);
             }
 
@@ -295,7 +295,7 @@ int main(int argc, char* argv[]){
                 // shift fermio names
                 printf("Writing file %s.\n", fermionname_shift);
 
-#pragma acc update host(ferm_phi_acc_f[0:1]) // update on host the right fermion
+#pragma acc update host(ferm_shiftmulti_acc_f[0:fakeRationalApprox.approx_order]) // update on host
                 print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
             }
 

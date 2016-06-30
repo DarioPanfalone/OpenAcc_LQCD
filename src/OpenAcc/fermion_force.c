@@ -40,6 +40,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         __restrict const su3_soa * const U,// la var globale e' .... per adesso conf_acc
         __restrict su3_soa * const TMP//la var globale e' aux_conf_acc //PARCHEGGIO??
         ){
+    
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF COMPUTE_SIGMA_FROM_SIGMA_PRIME_BACKINTO_SIGMA_PRIME\n");
 
 
 
@@ -156,6 +158,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         __restrict vec3_soa * tk_p_shiftferm,//parking variable [max_approx_order]
         const int max_cg )
 {
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF FERMION_FORCE_SOLOOPENACC\n");
 
     if(verbosity_lv > 2){
         printf("MPI%02d:\tCalculation of fermion force...\n", 

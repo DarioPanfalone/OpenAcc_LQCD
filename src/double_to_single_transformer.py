@@ -122,7 +122,7 @@ def findFunctionNames(lineRaw):
         reToMatch = '(?<='+returnType+'[ \*])' # match if preceded by returnType and ' ' or *
                                           # this re construct requires fixed length
         reToMatch += '[\s\*]*' # any space or asterisk or nothing (this is in the string )
-        reToMatch += '\w\w*'   # any number >= 1 of characters in azAZ09_
+        reToMatch += '\w+'   # any number >= 1 of characters in azAZ09_
         reToMatch += '(?=[\s]*[\(])' # match if followed by '('
         foundSomething = re.search(reToMatch,line)
         if foundSomething :
@@ -130,7 +130,7 @@ def findFunctionNames(lineRaw):
             # the function name should be at the end of this
             # this second step is necessary because of the limitations of '(?<=...)'
             # since we can't match 'prefixes' of unknown length
-            funcNameLocation = re.search('\w\w*$',rawFunctionName)
+            funcNameLocation = re.search('\w+$',rawFunctionName)
             # $ = end of rawFunctionName    
             dpFunctionName = rawFunctionName[funcNameLocation.start():funcNameLocation.end()]
             if dpFunctionName not in dpFunctionNames and dpFunctionName != 'main':
@@ -279,11 +279,13 @@ for fileName in fileNames:
         #newText = newText.replace('_f_f','_f')
     
     
+        newText = newText.replace('DOUBLE PRECISION VERSION','SINGLE PRECISION VERSION')
         if fileName in filesALLDtoF:
             newText = newText.replace('d_complex','f_complex')
             newText = newText.replace('MPI_DOUBLE','MPI_FLOAT')
             newText = newText.replace('double','float')
             newText = newText.replace('%lf','%f')
+            newText = newText.replace('%.18lf','%f')
             newText = newText.replace('conj(','conjf(')
             newText = newText.replace('creal(','crealf(')
             newText = newText.replace('cimag(','cimagf(')
@@ -292,13 +294,20 @@ for fileName in fileNames:
             newText = newText.replace('exp(','expf(')
             newText = newText.replace('sqrt(','sqrtf(')
             newText = newText.replace('pow(','powf(')
+            
 
             # find number to convert to float
             reToMatch = '[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?'
-            listend = [0]  # end of each match
+            reNotToMatch = '%[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?' # no match for format
+                                                                    # specifiers 
+            listend = [0]  # end  f each match
             for m in re.finditer(reToMatch,newText):
                 listend.append(m.end())
+            for m in re.finditer(reNotToMatch,newText):
+                if m.end() in listend:
+                    listend.remove(m.end())
             newText2 = ''
+       
             for i in range(len(listend)-1):
                 newText2 +=newText[listend[i]:listend[i+1]] + 'f'
             newText2 += newText[listend[-1]:]

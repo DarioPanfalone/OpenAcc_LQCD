@@ -39,7 +39,7 @@ int multishift_invert(__restrict su3_soa * const u,
      * function.
      ****************************/
     // AUXILIARY VARIABLES FOR THE INVERTER 
-    //  printf("INSIDE MULTISHIFT_INVERT \n");
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISHIFT INVERTER\n");
     int  cg;
     //double *zeta_i,*zeta_ii,*zeta_iii,*omegas,*gammas;
     // DYNAMIC ALLOCATION OF THESE SMALL ARRAYS SEEMS TO FAIL.
@@ -220,6 +220,7 @@ void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted 
         const __restrict vec3_soa* const in, // [nshift]
         __restrict vec3_soa * const out, // [1] 
         const RationalApprox * const approx ){
+    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF RECOMBINE_SHIFTED_VEC3_TO_VEC3\n");
     int ih;
     int iter=0;
 #pragma acc kernels present(out) present(in) present(in_shifted) present(approx)
