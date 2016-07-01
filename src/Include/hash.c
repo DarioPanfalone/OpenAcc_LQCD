@@ -70,6 +70,7 @@ uint32_t hash_settings_explicit(
     hashfun(&hash,(char*)&(mdpar->t          ),sizeof(double));
     hashfun(&hash,(char*)&(mdpar->residue_md ),sizeof(double));
     hashfun(&hash,(char*)&(mdpar->residue_metro),sizeof(double));
+    hashfun(&hash,(char*)&(mdpar->singlePrecMD),sizeof(int));
     hashfun(&hash,(char*)&(mdpar->expected_max_eigenvalue),
             sizeof(double));
     // ONLY RELEVANT geometry info
