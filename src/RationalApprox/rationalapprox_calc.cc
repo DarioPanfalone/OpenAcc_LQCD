@@ -38,8 +38,8 @@ int main(int argc, char **argv){
     if(argc == 6 ) approx->approx_order = atoi(argv[5]);
     else{
         // empyric formula : order = ln (error)*ln(lambda_min)/19+2
-        // we remove the +2 just to be on the safe side
-        approx->approx_order = log(goal_error)*log(approx->lambda_min)/19; 
+        // to +2 could be removed just to be on the safe side
+        approx->approx_order = log(goal_error)*log(approx->lambda_min)/19+2; 
         fprintf(stdout,"Guessed Approx order : %d\n", approx->approx_order);
 
     }
