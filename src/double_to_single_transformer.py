@@ -234,7 +234,7 @@ for fileName in fileNames:
             reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
                                       # non-alphanumeric character
             reToMatch += dpFunctionName 
-            reToMatch += '((?=\W)|$)' # either followed by the end of the string or a  
+            reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
                                       # non-alphanumeric character
             newText = re.subn(reToMatch, dpFunctionName + '_f', newText)[0]
         # changing relevant (soa-like, arrays) types
@@ -243,7 +243,7 @@ for fileName in fileNames:
             reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
                                       # non-alphanumeric character
             reToMatch += dpType 
-            reToMatch += '((?=\W)|$)' # either followed by the end of the string or a  
+            reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
                                       # non-alphanumeric character
 
             newText = re.subn(reToMatch,dpToSpDict[dpType], newText)[0]
@@ -262,7 +262,7 @@ for fileName in fileNames:
             reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
                                       # non-alphanumeric character
             reToMatch += dpVariableName
-            reToMatch += '((?=\W)|$)' # either followed by the end of the string or a  
+            reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
                                       # non-alphanumeric character
 
             newText = re.subn(reToMatch,dpVariableName + '_f', newText)[0]
@@ -270,7 +270,6 @@ for fileName in fileNames:
 
 
     
-        newText = newText.replace('deltas_Omelyan','deltas_Omelyan_f')
     
     
         # it may happen that two transformations appear on the same symbol, 
@@ -279,29 +278,40 @@ for fileName in fileNames:
         #newText = newText.replace('_f_f','_f')
     
     
+        newText = newText.replace('deltas_Omelyan','deltas_Omelyan_f')
         newText = newText.replace('DOUBLE PRECISION VERSION','SINGLE PRECISION VERSION')
+        allSubst = []
+        allSubst.append(('d_complex','f_complex'))
+        allSubst.append(('MPI_DOUBLE','MPI_FLOAT'))
+        allSubst.append(('double','float'))
+        allSubst.append(('conj','conjf'))
+        allSubst.append(('creal','crealf'))
+        allSubst.append(('cimag','cimagf'))
+        allSubst.append(('cos','cosf'))
+        allSubst.append(('sin','sinf'))
+        allSubst.append(('exp','expf'))
+        allSubst.append(('sqrt','sqrtf'))
+        allSubst.append(('pow','powf'))
+        allSubst.append(('fabs','fabsf'))
+        allSubst.append(('C_ZERO','C_ZEROF'))
+        allSubst.append(('C_ONE','C_ONEF'))
+        allSubst.append(('RHO','RHOF'))
+        allSubst.append(('ONE_BY_THREE','ONE_BY_THREEF'))
+        allSubst.append(('ONE_BY_SIX','ONE_BY_SIXF'))
+        allSubst = dict(allSubst)
+
+
         if fileName in filesALLDtoF:
-            newText = newText.replace('d_complex','f_complex')
-            newText = newText.replace('MPI_DOUBLE','MPI_FLOAT')
-            newText = newText.replace('double','float')
             newText = newText.replace('%lf','%f')
             newText = newText.replace('%.18lf','%f')
-            newText = newText.replace('conj(','conjf(')
-            newText = newText.replace('creal(','crealf(')
-            newText = newText.replace('cimag(','cimagf(')
-            newText = newText.replace('cos(','cosf(')
-            newText = newText.replace('sin(','sinf(')
-            newText = newText.replace('exp(','expf(')
-            newText = newText.replace('sqrt(','sqrtf(')
-            newText = newText.replace('pow(','powf(')
-            newText = newText.replace('fabs(','fabsf(')
-            newText = newText.replace('C_ZERO','C_ZEROF')
-            newText = newText.replace('C_ONE','C_ONEF')
-            newText = newText.replace('RHO','RHOF')
-            newText = newText.replace('ONE_BY_THREE','ONE_BY_THREEF')
-            newText = newText.replace('ONE_BY_SIX','ONE_BY_SIXF')
+            for subst in allSubst:
+                reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                          # non-alphanumeric character
+                reToMatch += subst
+                reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
+                                      # non-alphanumeric character
 
-            
+                newText = re.subn(reToMatch,allSubst[subst], newText)[0]
 
             # find number to convert to float
             reToMatch = '[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?'

@@ -231,9 +231,9 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
 
         int iline = startline+1;
 
-        while(! res && iline < endline)
+        while(iline < endline )
         {
-            char * found_something;
+            char * found_something = NULL;
             for(int i =0; i<npars; i++){
                 found_something = strstr(filelines[iline],par_infos[i].name);
                 if(found_something){ // looks at the beginning of the line.
