@@ -15,6 +15,7 @@
 #include "../OpenAcc/action.h"
 #include "../OpenAcc/alloc_vars.h"
 #include "../OpenAcc/deviceinit.h" 
+#include "../OpenAcc/find_min_max.h"
 #include "../OpenAcc/float_double_conv.h"
 #include "../OpenAcc/inverter_multishift_full.h"
 #include "../OpenAcc/io.h"
@@ -146,7 +147,7 @@ int main(int argc, char* argv[]){
     // Intel XeonPhi
     //acc_device_t my_device_type = acc_device_xeonphi;
     // Select device ID
-    printf("MPI%02d: Selecting device.\n");
+    printf("MPI%02d: Selecting device.\n",devinfo.myrank );
 #ifdef MULTIDEVICE
     select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
 #else
@@ -197,17 +198,6 @@ int main(int argc, char* argv[]){
 
     double minshift = fermions_parameters->ferm_mass;
     RationalApprox * rationalApproxToUse;
-    if(benchmark_mode){
-        rationalApproxToUse = (RationalApprox*) malloc(sizeof(RationalApprox));
-        init_fake_rational_approx(rationalApproxToUse, 1, minshift*minshift, 15);
-        if(0==devinfo.myrank){
-            printf("Using fermions_parameters->ferm_mass ^2 as shiftn");
-        }
-    }
-    else rationalApproxToUse = &(fermions_parameters[0].approx_fi_mother);//just choosing one
-
-
-
     //  
     //#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
     create(ferm_phi_acc[0:1])  copyin(u1_back_phases[0:8*NDiffFlavs]) \
@@ -225,6 +215,37 @@ int main(int argc, char* argv[]){
         create(k_p_shiftferm_f[max_ps*MAX_APPROX_ORDER] )
 
         {
+            if(benchmark_mode){
+                rationalApproxToUse = (RationalApprox*) malloc(sizeof(RationalApprox));
+                init_fake_rational_approx(rationalApproxToUse, 1, minshift*minshift, 15);
+                if(0==devinfo.myrank){
+                    printf("Using fermions_parameters->ferm_mass ^2 as shift\n");
+                }
+            }
+            else{
+                printf("Using rational approximation for molecular dynamics\n");
+                printf("For the first quark\n");
+                //just choosing one, but rescaling it, but rescaling it first.
+                double minmaxeig[2];
+                generate_vec3_soa_gauss(kloc_p);
+#pragma acc data update device(kloc_p[0:1])
+                find_min_max_eigenvalue_soloopenacc(conf_acc,fermions_parameters,kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
+                printf("Found eigenvalues of dirac operator: %e,  %e\n",
+                        minmaxeig[0],minmaxeig[1]);
+
+
+                printf("Rescaling rational approximation...\n");
+                rescale_rational_approximation(
+                        &(fermions_parameters[0].approx_md_mother),
+                        &(fermions_parameters[0].approx_md),
+                        minmaxeig);
+                rationalApproxToUse = &(fermions_parameters[0].approx_md);//just choosing one
+
+            }
+
+
+
+
             struct timeval t0,t1,t2,t3,t4,t5;
             int r;
             if(0 == devinfo.myrank){
@@ -245,7 +266,7 @@ int main(int argc, char* argv[]){
                         rationalApproxToUse,
                         ferm_shiftmulti_acc,
                         ferm_chi_acc,
-                        md_parameters.residue_metro,
+                        md_parameters.residue_md,
                         kloc_r,
                         kloc_h,
                         kloc_s,
@@ -261,7 +282,7 @@ int main(int argc, char* argv[]){
                 }
             }
 
-#pragma acc update host(ferm_shiftmulti_acc[0:fakeRationalApprox.approx_order]) // update on host
+#pragma acc update host(ferm_shiftmulti_acc[0:rationalApproxToUse->approx_order]) // update on host
             for(r=0; r<rationalApproxToUse->approx_order; r++){
 
                 char fermionname_shift[50];
@@ -291,7 +312,7 @@ int main(int argc, char* argv[]){
                         rationalApproxToUse,
                         ferm_shiftmulti_acc_f,
                         ferm_chi_acc_f,
-                        md_parameters.residue_metro,
+                        md_parameters.residue_md,
                         kloc_r_f,
                         kloc_h_f,
                         kloc_s_f,
@@ -315,7 +336,7 @@ int main(int argc, char* argv[]){
                 // shift fermio names
                 printf("Writing file %s.\n", fermionname_shift);
 
-#pragma acc update host(ferm_shiftmulti_acc_f[0:fakeRationalApprox.approx_order]) // update on host
+#pragma acc update host(ferm_shiftmulti_acc_f[0:rationalApproxToUse->approx_order]) // update on host
                 print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
             }
 
