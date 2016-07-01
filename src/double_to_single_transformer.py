@@ -294,6 +294,13 @@ for fileName in fileNames:
             newText = newText.replace('exp(','expf(')
             newText = newText.replace('sqrt(','sqrtf(')
             newText = newText.replace('pow(','powf(')
+            newText = newText.replace('fabs(','fabsf(')
+            newText = newText.replace('C_ZERO','C_ZEROF')
+            newText = newText.replace('C_ONE','C_ONEF')
+            newText = newText.replace('RHO','RHOF')
+            newText = newText.replace('ONE_BY_THREE','ONE_BY_THREEF')
+            newText = newText.replace('ONE_BY_SIX','ONE_BY_SIXF')
+
             
 
             # find number to convert to float

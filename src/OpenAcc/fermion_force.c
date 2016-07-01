@@ -200,6 +200,13 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         // JUST MULTIPLY BY STAGGERED PHASES,
         // BACK FIELD AND/OR CHEMICAL POTENTIAL 
         multiply_backfield_times_force(&(tfermion_parameters[iflav]),taux_conf_acc,gl3_aux);
+        if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+            char taux_conf_acc_name[50];
+            sprintf(taux_conf_acc_name,
+                    "taux_conf_acc_%s_%d_%d",tfermion_parameters[iflav].name,
+                    devinfo.myrank, md_dbg_print_count);
+            dbg_print_su3_soa(taux_conf_acc,taux_conf_acc_name, 1);
+        }
 
 
     }
@@ -213,6 +220,14 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
         compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
                 aux_th,aux_ta,conf_to_use, taux_conf_acc );
+        if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+            char gl3_aux_name[50];
+            sprintf(gl3_aux_name,
+                    "gl3_aux_name_%dstout_%d_%d",stout_level,
+                    devinfo.myrank, md_dbg_print_count);
+            dbg_print_su3_soa(gl3_aux,gl3_aux_name,1);
+        }
+
     }
     if(act_params.stout_steps > 0 ){
     if(verbosity_lv > 1) 
@@ -222,6 +237,9 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
             aux_th,aux_ta,tconf_acc, taux_conf_acc );
     }
 #endif
+
+
+
 
     multiply_conf_times_force_and_take_ta_nophase(tconf_acc, gl3_aux,
             tipdot_acc);
