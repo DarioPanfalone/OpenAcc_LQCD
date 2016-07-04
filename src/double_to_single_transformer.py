@@ -83,7 +83,15 @@ filesALLDtoF=[\
 'DbgTools/dbgtools.c',\
 ]
 
-
+# protected file lists
+# these files will not be automatically overwritten
+# confirmation will alway be asked singularly
+# Possible reason(s) for including a file in this list:
+# 1. the double precision file has modifications that 
+#    must not be included in the single precision one
+filesNoOverwrite=[\
+'OpenAcc/fermion_force.c',\
+]
 
 
 dpFunctionNames = [] # new function names will just be dp function names + '_f' at the end
@@ -104,8 +112,6 @@ dpTypes_t = [ dpType + '_t' for dpType in dpTypes]
 spTypes_t = [ spType + '_t' for spType in spTypes]
 dpTypes += dpTypes_t
 spTypes += spTypes_t
-
-
 
 
 dpToSpDict = dict(zip(dpTypes,spTypes))
@@ -250,8 +256,12 @@ for fileName in fileNames:
 
         # changing filenames in '#includes'
         for fileName2 in fileNames:
-            newText = newText.replace(os.path.basename(fileName2),\
-                    'sp_'+os.path.basename(fileName2))
+            reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                      # non-alphanumeric character
+            reToMatch += os.path.basename(fileName2) 
+            reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
+                                      # non-alphanumeric character
+            newText = re.subn(reToMatch,'sp_'+os.path.basename(fileName2),newText)[0]
         #taking care of header guards
         headerGuard = os.path.basename(fileName).upper().replace('.','_')
         if headerGuard not in newText:
@@ -343,9 +353,11 @@ for fileName in fileNames:
     
         writeIt = True
         
-        if os.path.exists(newFileName) and ans != 'a':
+        if os.path.exists(newFileName) and ( ans != 'a' or fileName in filesNoOverwrite):
             ans = ''
             while ans not in ['y','n','a']:
+                if fileName in filesNoOverwrite:
+                    print "WARNING: File " + fileName + " is in the 'protected' file list!"
                 print "Overwrite file \'"+newFileName+"\'? (y=yes,n=no,a=yes to all)"
                 ans = raw_input().lower()
                 if ans == 'n':

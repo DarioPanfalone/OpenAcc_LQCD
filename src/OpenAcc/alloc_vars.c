@@ -69,6 +69,9 @@ vec3_soa * kloc_s;  // vettore ausiliario
 vec3_soa * kloc_p;  // vettore ausiliario
 vec3_soa * k_p_shiftferm; // ausiliario [max_nshift=MAX_APPROX_ORDER]
 
+vec3_soa * aux1; // used in fermion force calculation, 
+                 // for single precision acceleration
+
 
 // LOCAL SUMS
 dcomplex_soa * local_sums;
@@ -194,6 +197,11 @@ void mem_alloc()
     allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, MAX_APPROX_ORDER* sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, k_p_shiftferm) ;
 
+    allocation_check =  posix_memalign((void **)&aux1, ALIGN, sizeof(vec3_soa)); 
+    ALLOCCHECK(allocation_check, aux1) ; // used in fermion force calculation, 
+                                         // for single precision acceleration
+
+
 
     allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, NPS_tot * sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, ferm_chi_acc) ;
@@ -269,6 +277,7 @@ inline void mem_free()
       
     FREECHECK(ferm_shiftmulti_acc);   
                                     
+    FREECHECK(aux1);                
     FREECHECK(kloc_r);                
     FREECHECK(kloc_s);                
     FREECHECK(kloc_h);                

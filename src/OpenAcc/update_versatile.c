@@ -252,7 +252,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 
         // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
-        if(md_parameters.singlePrecMD){
+        if(1 == md_parameters.singlePrecMD){
             if(verbosity_lv > 1) 
                 printf("MPI%02d: SINGLE PRECISION MOLECULAR DYNAMICS...\n", devinfo.myrank);
 

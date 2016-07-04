@@ -28,7 +28,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			       __restrict tamat_soa  * tipdot_acc,
 			       __restrict ferm_param * tfermion_parameters,// [nflavs] 
 			       int tNDiffFlavs,
-			       __restrict vec3_soa * ferm_in_acc, // [NPS_tot]         
+			       __restrict const vec3_soa * ferm_in_acc, // [NPS_tot]         
 			       double res,
 			       __restrict su3_soa  * taux_conf_acc,
 			       __restrict vec3_soa * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]           

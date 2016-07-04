@@ -70,7 +70,7 @@ void eo_inversion(su3_soa *tconf_acc,
     combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
     ker_invert_openacc(tconf_acc,tfermions_parameters,
             out_e,phi_e,res,trialSolution,
-            tloc_r,tloc_h,tloc_s,tloc_p,max_cg);
+            tloc_r,tloc_h,tloc_s,tloc_p,max_cg,0);
     acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
     combine_in1_minus_in2_allxfact(in_o,phi_o,(double)1/tfermions_parameters->ferm_mass,out_o);
 

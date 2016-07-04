@@ -427,6 +427,7 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const double tlendef = 1.0;
     const double expmaxeigenv_def = 5.5 ; 
     const int singlePrecMDdef = 0;
+    const int singlePInvAccelDef = 0;
     const int max_cg_iterations_def = 10000;
 
     par_info mdp[]={
@@ -436,11 +437,15 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mdpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , 0, NULL},
         (par_info){(void*) &(mdpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
         (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD",1 , (const void*) &singlePrecMDdef},
+        (par_info){(void*) &(mdpar->singlePInvAccel),TYPE_INT , "singlePInvAccel",1 , (const void*) &singlePInvAccelDef},
         (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL},
         (par_info){(void*) &(mdpar->max_cg_iterations),TYPE_INT, "MaxCGIterations"   , 1 , (const void*) &max_cg_iterations_def}};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);
+    if(1 == mdpar->singlePrecMD && 1 == mdpar->singlePInvAccel) 
+        printf("WARNING: singlePrecMD == 1 and singlePInvAccel == 1 : \n");
+        printf("         the singlePInvAccel flag will be ignored.    \n");
 
 }
 int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)

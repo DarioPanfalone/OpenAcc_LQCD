@@ -58,6 +58,9 @@ extern vec3_soa * kloc_s;  // vettore ausiliario
 extern vec3_soa * kloc_p;  // vettore ausiliario
 extern vec3_soa * k_p_shiftferm; // ausiliario [max_nshift=MAX_APPROX_ORDER]
 
+extern vec3_soa * aux1; // used in fermion force calculation, 
+                 // for single precision acceleration
+
 
 // LOCAL SUMS
 extern dcomplex_soa * local_sums;

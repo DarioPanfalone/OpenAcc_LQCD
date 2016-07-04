@@ -19,14 +19,16 @@
 int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata mai qui dentro
 			  ferm_param *pars,
 			  __restrict vec3_soa * const out,
-			  __restrict vec3_soa * const in, // non viene aggiornato mai qui dentro
+			  __restrict const vec3_soa * const in, // non viene aggiornato mai qui dentro
 			  double res,
 			  __restrict vec3_soa * const trialSolution, // non viene aggiornato mai qui dentro
 			  __restrict vec3_soa * const loc_r,
 			  __restrict vec3_soa * const loc_h,
 			  __restrict vec3_soa * const loc_s,
 			  __restrict vec3_soa * const loc_p,
-              const int  max_cg  ){
+              const int  max_cg,
+              double shift  )
+{
 
   int cg;
   long int i;
@@ -35,7 +37,7 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
 
   assign_in_to_out(trialSolution,out);
 
-  fermion_matrix_multiplication(u,loc_s,out,loc_h,pars);
+  fermion_matrix_multiplication_shifted(u,loc_s,out,loc_h,pars,shift);
 
   combine_in1_minus_in2(in,loc_s,loc_r);
   assign_in_to_out(loc_r,loc_p);
@@ -52,7 +54,7 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
     cg++;    
     // s=(M^dag M)p    alpha=(p,s)
 
-    fermion_matrix_multiplication(u,loc_s,loc_p,loc_h,pars);
+    fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,shift);
     alpha = real_scal_prod_global(loc_p,loc_s);
 
     omega=delta/alpha;     
@@ -83,7 +85,7 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
   if (verbosity_lv > 3  && 0==devinfo.myrank ) printf("\n");
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
 
-  fermion_matrix_multiplication(u,loc_s,out,loc_h,pars);
+  fermion_matrix_multiplication_shifted(u,loc_s,out,loc_h,pars,shift);
   combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
   double  giustoono=l2norm2_global(loc_h)/source_norm;
   if(verbosity_lv > 1 && 0==devinfo.myrank  ){
