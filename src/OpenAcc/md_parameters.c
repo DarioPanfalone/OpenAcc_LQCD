@@ -24,15 +24,21 @@ void initialize_md_global_variables(md_param md_params )
 
     const double lambda=0.1931833275037836; // Omelyan Et Al.
     //const double lambda=0.1931833; // Omelyan Et Al.
-    const double gs=t*0.5/(double) gauge_scale;
+    const double gs= 0.5/(double) gauge_scale;
 
-    deltas_Omelyan[0]= -cimag(ieps_acc) * lambda;
-    deltas_Omelyan[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
-    deltas_Omelyan[2]= -cimag(ieps_acc) * 2.0*lambda;
-    deltas_Omelyan[3]= -cimag(ieps_acc) * gs*lambda * BETA_BY_THREE;
-    deltas_Omelyan[4]=  cimag(iepsh_acc)* gs;
-    deltas_Omelyan[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*BETA_BY_THREE;
-    deltas_Omelyan[6]= -cimag(ieps_acc) * gs*2.0*lambda*BETA_BY_THREE;
+    // used in the 'macro' step
+    deltas_Omelyan[0]= - t/no_md * lambda;
+    deltas_Omelyan[1]= - t/no_md * (1.0-2.0*lambda);
+    deltas_Omelyan[2]= - t/no_md * 2.0*lambda;
+
+    // used in the gauge substeps
+    deltas_Omelyan[3]=   -t/(2*no_md*gauge_scale)*         lambda * BETA_BY_THREE;
+    deltas_Omelyan[4]=0.5*t/(2*no_md*gauge_scale); // this is the only one which enters 
+                                                   // directly the evolution of the links 
+                                                   // and has the + sign,  and 
+                                                   // no beta factor )
+    deltas_Omelyan[5]=   -t/(2*no_md*gauge_scale)*(1.0-2.0*lambda)* BETA_BY_THREE;
+    deltas_Omelyan[6]=   -t/(2*no_md*gauge_scale)*     2.0*lambda * BETA_BY_THREE;
 
     int iomelian;
     for(iomelian=0;iomelian<7;iomelian++)
