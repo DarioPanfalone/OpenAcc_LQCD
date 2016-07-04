@@ -26,13 +26,17 @@ void initialize_md_global_variables(md_param md_params )
     //const double lambda=0.1931833; // Omelyan Et Al.
     const double gs=t*0.5/(double) gauge_scale;
 
-    deltas_Omelyan_f[0] = deltas_Omelyan[0]= -cimag(ieps_acc) * lambda;
-    deltas_Omelyan_f[1] = deltas_Omelyan[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
-    deltas_Omelyan_f[2] = deltas_Omelyan[2]= -cimag(ieps_acc) * 2.0*lambda;
-    deltas_Omelyan_f[3] = deltas_Omelyan[3]= -cimag(ieps_acc) * gs*lambda * BETA_BY_THREE;
-    deltas_Omelyan_f[4] = deltas_Omelyan[4]=  cimag(iepsh_acc)* gs;
-    deltas_Omelyan_f[5] = deltas_Omelyan[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*BETA_BY_THREE;
-    deltas_Omelyan_f[6] = deltas_Omelyan[6]= -cimag(ieps_acc) * gs*2.0*lambda*BETA_BY_THREE;
+    deltas_Omelyan[0]= -cimag(ieps_acc) * lambda;
+    deltas_Omelyan[1]= -cimag(ieps_acc) * (1.0-2.0*lambda);
+    deltas_Omelyan[2]= -cimag(ieps_acc) * 2.0*lambda;
+    deltas_Omelyan[3]= -cimag(ieps_acc) * gs*lambda * BETA_BY_THREE;
+    deltas_Omelyan[4]=  cimag(iepsh_acc)* gs;
+    deltas_Omelyan[5]= -cimag(ieps_acc) * gs*(1.0-2.0*lambda)*BETA_BY_THREE;
+    deltas_Omelyan[6]= -cimag(ieps_acc) * gs*2.0*lambda*BETA_BY_THREE;
+
+    int iomelian;
+    for(iomelian=0;iomelian<7;iomelian++)
+     deltas_Omelyan_f[iomelian]= (float) deltas_Omelyan[iomelian];
 
 }
 
