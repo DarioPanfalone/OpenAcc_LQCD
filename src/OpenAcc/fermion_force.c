@@ -194,6 +194,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
     set_tamat_soa_to_zero(tipdot_acc);
 
     if(md_parameters.singlePInvAccel == 1 && md_parameters.singlePrecMD != 1){
+       if(0==devinfo.myrank && verbosity_lv >2) 
+           printf("Converting gauge conf to single precision...\n");
        conf_to_use_f = conf_acc_f; // USING GLOBAL VARIABLE FOR CONVENIENCE
        convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f);
     }
@@ -219,7 +221,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
                // single inversions on all shifts
                
                int ishift;
-               for(ishift=0;ishift<tfermion_parameters[iflav].approx_md.approx_order;ishift++){
+               for(ishift=0;ishift<tfermion_parameters[iflav].approx_md.approx_order;
+                       ishift++){
 
                    convert_float_to_double_vec3_soa(&ferm_shiftmulti_acc_f[ishift],
                            aux1);// trial sol, hopefully close

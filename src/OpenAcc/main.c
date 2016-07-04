@@ -210,6 +210,7 @@ int main(int argc, char* argv[]){
     create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER])\
     create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])\
     create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER])\
+    create(aux1[0:1])\
     create(momenta[0:8])\
     create(momenta_backup[0:8*debug_settings.do_reversibility_test])\
     create(  conf_acc_bkp[0:8*debug_settings.do_reversibility_test])\
@@ -225,6 +226,7 @@ int main(int argc, char* argv[]){
     create(ferm_shiftmulti_acc_f[0:max_ps*MAX_APPROX_ORDER])\
     create(kloc_r_f[0:1])  create(kloc_h_f[0:1])  create(kloc_s_f[0:1])\
     create(kloc_p_f[0:1])  create(k_p_shiftferm_f[0:MAX_APPROX_ORDER])\
+    create(aux1_f[0:1])\
     create(momenta_f[0:8]) \
     create(local_sums_f[0:2]) create(d_local_sums_f[0:2])\
     copyin(deltas_Omelyan_f[0:7]) \
