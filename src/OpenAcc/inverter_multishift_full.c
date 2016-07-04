@@ -66,7 +66,7 @@ int multishift_invert(__restrict su3_soa * const u,
     assign_in_to_out(in,loc_r);
     assign_in_to_out(loc_r,loc_p);
     delta=l2norm2_global(loc_r);
-    double source_norm = delta;
+    double source_norm = l2norm2_global(in);
     //printf("delta    %.18lf\n",delta);
     omega=1.0;
 
@@ -172,7 +172,7 @@ int multishift_invert(__restrict su3_soa * const u,
             printf("%d\t%1.1e",cg, sqrt(lambda));
             for(iter=0; iter<(approx->approx_order); iter++){
                 if(flag[iter]==0) printf("\t-");
-                else printf("\t%1.1e", sqrt(delta*zeta_i[iter]*zeta_i[iter]) );
+                else printf("\t%1.1e", sqrt(delta*zeta_i[iter]*zeta_i[iter]/source_norm));
             }
             printf("\n");
 

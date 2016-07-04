@@ -218,6 +218,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
                     ferm_shiftmulti_acc_f,aux1_f, realisticTargetRes, 
                     kloc_r_f, kloc_h_f, kloc_s_f, kloc_p_f, k_p_shiftferm_f, max_cg);
 
+
                // single inversions on all shifts
                
                int ishift;
@@ -228,10 +229,12 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
                            aux1);// trial sol, hopefully close
 
                    double bshift = tfermion_parameters[iflav].approx_md.RA_b[ishift];
+                   printf("Shift %d, %f\n", ishift,bshift);
                    ker_invert_openacc(conf_to_use, &tfermion_parameters[iflav],
                         &tferm_shiftmulti_acc[ishift],&(ferm_in_acc[ifps+ips]),res,
                         aux1,// trial solution
                         tkloc_r,tkloc_h,tkloc_s,tkloc_p,max_cg,bshift);
+
 
                    // direct conversion, without 'double precision refining'
                    //convert_float_to_double_vec3_soa(&ferm_shiftmulti_acc_f[ishift],

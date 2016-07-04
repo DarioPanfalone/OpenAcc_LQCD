@@ -44,7 +44,7 @@ int ker_invert_openacc(__restrict su3_soa * const u, // non viene aggiornata mai
 
   delta=l2norm2_global(loc_r);
 
-  double source_norm = delta;
+  double source_norm = l2norm2_global(in);
   // loop over cg iterations
   cg=0;
     if (verbosity_lv > 3 && 0==devinfo.myrank )
