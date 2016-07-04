@@ -209,7 +209,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
                 // USING FLOAT GLOBAL VARIABLES, HOPEFULLY NOT USED ELSEWHERE
                 convert_double_to_float_vec3_soa(&(ferm_in_acc[ifps+ips]),aux1_f);
                 // multishift inverter in single precision
-                float realisticTargetRes = 6e-7f*sqrtf(sizeh);
+                float realisticTargetRes = 8e-7f*sqrtf(sizeh);
 
                 multishift_invert_f(conf_to_use_f, &tfermion_parameters[iflav], 
                     &(tfermion_parameters[iflav].approx_md), 
@@ -229,6 +229,12 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
                         &tferm_shiftmulti_acc[ishift],&(ferm_in_acc[ifps+ips]),res,
                         aux1,// trial solution
                         tkloc_r,tkloc_h,tkloc_s,tkloc_p,max_cg,bshift);
+
+                   // direct conversion, without 'double precision refining'
+                   //convert_float_to_double_vec3_soa(&ferm_shiftmulti_acc_f[ishift],
+                   //        &tferm_shiftmulti_acc[ishift]);// trial sol, hopefully close
+
+
                }
 
             }

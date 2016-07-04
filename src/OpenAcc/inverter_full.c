@@ -16,12 +16,12 @@
 #define DEBUG_INVERTER_FULL_OPENACC
 
 
-int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata mai qui dentro
+int ker_invert_openacc(__restrict su3_soa * const u, // non viene aggiornata mai qui dentro
 			  ferm_param *pars,
 			  __restrict vec3_soa * const out,
 			  __restrict const vec3_soa * const in, // non viene aggiornato mai qui dentro
 			  double res,
-			  __restrict vec3_soa * const trialSolution, // non viene aggiornato mai qui dentro
+			  __restrict vec3_soa * const trialSolution,// non viene aggiornato mai qui dentro
 			  __restrict vec3_soa * const loc_r,
 			  __restrict vec3_soa * const loc_h,
 			  __restrict vec3_soa * const loc_s,
@@ -71,9 +71,9 @@ int ker_invert_openacc(   __restrict su3_soa * const u,  // non viene aggiornata
     combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
 
 
-      if (verbosity_lv > 3 && cg%10==0 && 0==devinfo.myrank  ){
+      if (verbosity_lv > 3 && cg%100==0 && 0==devinfo.myrank  ){
 
-      printf("%d\t%1.1e\r",cg, sqrt(lambda));fflush(stdout);
+      printf("%d\t%1.1e\n",cg, sqrt(lambda/source_norm)/res);fflush(stdout);
       
       }
 
