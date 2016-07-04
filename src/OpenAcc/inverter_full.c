@@ -2,6 +2,7 @@
 #ifndef INVERTER_FULL_C_
 #define INVERTER_FULL_C_
 
+#include "../Include/inverter_tricks.h"
 #include "../Include/common_defines.h"
 #include "./struct_c_def.h"
 #include "./fermionic_utilities.h"

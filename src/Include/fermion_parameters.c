@@ -13,6 +13,7 @@
 #include "./fermion_parameters.h"
 #include "./montecarlo_parameters.h"
 #include "../Include/debug.h"
+#include "../Include/inverter_tricks.h"
 #include "../Meas/magnetic_susceptibility_utilities.h"
 #include <math.h>
 #include <string.h>
@@ -21,12 +22,16 @@
 #define ALIGN 128
 #define acc_twopi 2*3.14159265358979323846
 
+int maxNeededShifts;
+int maxApproxOrder;
 int NDiffFlavs;// set in init.c, from input file
 int NPS_tot;
 int max_ps;
 ferm_param *fermions_parameters;// set in init.c, from input file
 
 int init_ferm_params(ferm_param *fermion_settings){
+    maxNeededShifts = 0;
+    maxApproxOrder = 0;
 
     int errorstatus = 0;
 
@@ -54,6 +59,7 @@ int init_ferm_params(ferm_param *fermion_settings){
     printf("NPS_tot = %d \n",NPS_tot);
     printf("max_ps = %d \n",max_ps);
 
+    int totalMdShifts = 0;
     // Rational Approximation related stuff
     for(int i=0;i<NDiffFlavs;i++){
         ferm_param *quark = &fermion_settings[i];
@@ -113,9 +119,22 @@ int init_ferm_params(ferm_param *fermion_settings){
         errorstatus += rationalapprox_read(&(quark->approx_md_mother));
         errorstatus += rationalapprox_read(&(quark->approx_li_mother));
 
+        // needed to reuse the results from the inversions
+        quark->index_of_the_first_shift = totalMdShifts;
+        totalMdShifts += quark->approx_md.approx_order;i
+        if(maxNeededShifts < quark->approx_fi.approx_order)
+           maxNeededShifts = quark->approx_fi.approx_order;
+        if(maxNeededShifts < quark->approx_md.approx_order)
+           maxNeededShifts = quark->approx_md.approx_order;
+        if(maxNeededShifts < quark->approx_li.approx_order)
+           maxNeededShifts = quark->approx_li.approx_order;
+
     }
 
-    
+    maxApproxOrder = maxNeededShifts;
+    if(inverter_tricks.recycleInvsForce == 1 && maxNeededShifts < totalMdShifts)
+        maxNeededShifts = totalMdShifts;
+
     return errorstatus;
 
 }

@@ -51,12 +51,12 @@ extern thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
 extern vec3_soa * ferm_chi_acc; // questo e' il chi [NPS_tot]
 extern vec3_soa * ferm_phi_acc; // questo e' il phi [NPS_tot]
 extern vec3_soa * ferm_out_acc; // questo e' uno ausiliario [NPS_tot]
-extern vec3_soa * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps*MAX_APPROX_ORDER]
-extern vec3_soa * kloc_r;  // vettore ausiliario
+extern vec3_soa * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [maxNeededShifts]
+extern vec3_sftso kloc_r;  // vettore ausiliario
 extern vec3_soa * kloc_h;  // vettore ausiliario
 extern vec3_soa * kloc_s;  // vettore ausiliario
 extern vec3_soa * kloc_p;  // vettore ausiliario
-extern vec3_soa * k_p_shiftferm; // ausiliario [max_nshift=MAX_APPROX_ORDER]
+extern vec3_soa * k_p_shiftferm; // ausiliario [maxApproxOrder]
 
 extern vec3_soa * aux1; // used in fermion force calculation, 
                  // for single precision acceleration

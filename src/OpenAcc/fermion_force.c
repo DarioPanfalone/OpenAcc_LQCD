@@ -13,6 +13,7 @@
 #include "./fermion_force.h"
 #include "./fermion_force_utilities.h"
 #include "./inverter_multishift_full.h"
+#include "../Include/inverter_tricks.h"
 #include "./md_parameters.h"
 #include "./plaquettes.h"
 #include "./stouting.h"
@@ -193,7 +194,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
     set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
     set_tamat_soa_to_zero(tipdot_acc);
 
-    if(md_parameters.singlePInvAccel == 1 && md_parameters.singlePrecMD != 1){
+    if(inverter_tricks.singlePInvAccelForce == 1 && md_parameters.singlePrecMD != 1){
        if(0==devinfo.myrank && verbosity_lv >2) 
            printf("Converting gauge conf to single precision...\n");
        conf_to_use_f = conf_acc_f; // USING GLOBAL VARIABLE FOR CONVENIENCE
@@ -206,7 +207,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
         for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
 
-            if(md_parameters.singlePInvAccel == 1 && md_parameters.singlePrecMD != 1){
+            if(inverter_tricks.singlePInvAccelForce == 1 && md_parameters.singlePrecMD != 1){
 
                 // USING FLOAT GLOBAL VARIABLES, HOPEFULLY NOT USED ELSEWHERE
                 convert_double_to_float_vec3_soa(&(ferm_in_acc[ifps+ips]),aux1_f);

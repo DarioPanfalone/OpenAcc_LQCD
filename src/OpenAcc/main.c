@@ -18,6 +18,7 @@
 #include "../Include/debug.h"
 #include "../Include/fermion_parameters.h"
 #include "../Include/montecarlo_parameters.h"
+#include "../Include/inverter_tricks.h"
 #include "../Include/setting_file_parser.h"
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"

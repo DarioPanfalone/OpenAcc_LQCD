@@ -62,12 +62,12 @@ thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
 vec3_soa * ferm_chi_acc; // questo e' il chi [NPS_tot]
 vec3_soa * ferm_phi_acc; // questo e' il phi [NPS_tot]
 vec3_soa * ferm_out_acc; // questo e' uno ausiliario [NPS_tot]
-vec3_soa * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [max_ps*MAX_APPROX_ORDER]
+vec3_soa * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [maxNeededShifts]
 vec3_soa * kloc_r;  // vettore ausiliario
 vec3_soa * kloc_h;  // vettore ausiliario
 vec3_soa * kloc_s;  // vettore ausiliario
 vec3_soa * kloc_p;  // vettore ausiliario
-vec3_soa * k_p_shiftferm; // ausiliario [max_nshift=MAX_APPROX_ORDER]
+vec3_soa * k_p_shiftferm; // ausiliario [maxApproxOrder]
 
 vec3_soa * aux1; // used in fermion force calculation, 
                  // for single precision acceleration
@@ -194,7 +194,7 @@ void mem_alloc()
     ALLOCCHECK(allocation_check, kloc_s ) ;
     allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_p) ;
-    allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, MAX_APPROX_ORDER* sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, maxApproxOrder* sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, k_p_shiftferm) ;
 
     allocation_check =  posix_memalign((void **)&aux1, ALIGN, sizeof(vec3_soa)); 
@@ -209,7 +209,7 @@ void mem_alloc()
     ALLOCCHECK(allocation_check, ferm_phi_acc) ;
     allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
     ALLOCCHECK(allocation_check, ferm_out_acc) ;
-    allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, max_ps*MAX_APPROX_ORDER*sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, maxNeededShift*sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, ferm_shiftmulti_acc ) ;
 
 

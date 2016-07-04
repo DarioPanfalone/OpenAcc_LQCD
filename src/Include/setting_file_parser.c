@@ -16,6 +16,7 @@
 #include "./hash.h"
 #include "./montecarlo_parameters.h"
 #include "./setting_file_parser.h"
+#include "./inverter_tricks.h"
 
 #include <stdio.h>
 #include <strings.h>
@@ -44,7 +45,7 @@ typedef struct par_info_t{
 
 }par_info;
 
-#define NPMGTYPES 10
+#define NPMGTYPES 11
 #define MAXPMG 20
 const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "ActionParameters",         // 0 
@@ -56,18 +57,20 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "FermionMeasuresSettings",  // 6
     "DeviceSettings"         ,  // 7
     "Geometry"               ,  // 8
-    "DebugSettings"             // 9
+    "DebugSettings"          ,  // 9
+    "InverterTricks"            // 10
 };
-#define PMG_ACTION        0
-#define PMG_FERMION       1
-#define PMG_BACKGROUND    2
-#define PMG_MD            3
-#define PMG_MC            4
-#define PMG_GMEAS         5
-#define PMG_FMEAS         6
-#define PMG_DEVICE        7
-#define PMG_GEOMETRY      8
-#define PMG_DEBUG         9
+#define PMG_ACTION           0
+#define PMG_FERMION          1
+#define PMG_BACKGROUND       2
+#define PMG_MD               3
+#define PMG_MC               4
+#define PMG_GMEAS            5
+#define PMG_FMEAS            6
+#define PMG_DEVICE           7
+#define PMG_GEOMETRY         8
+#define PMG_DEBUG            9
+#define PMG_INVERTER_TRICKS 10
 // last number should be NPMGTYPES - 1 !!
 
 
@@ -427,7 +430,6 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const double tlendef = 1.0;
     const double expmaxeigenv_def = 5.5 ; 
     const int singlePrecMDdef = 0;
-    const int singlePInvAccelDef = 0;
     const int max_cg_iterations_def = 10000;
 
     par_info mdp[]={
@@ -437,7 +439,6 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mdpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , 0, NULL},
         (par_info){(void*) &(mdpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
         (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD",1 , (const void*) &singlePrecMDdef},
-        (par_info){(void*) &(mdpar->singlePInvAccel),TYPE_INT , "singlePInvAccel",1 , (const void*) &singlePInvAccelDef},
         (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL},
         (par_info){(void*) &(mdpar->max_cg_iterations),TYPE_INT, "MaxCGIterations"   , 1 , (const void*) &max_cg_iterations_def}};
 
@@ -448,6 +449,21 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         printf("         the singlePInvAccel flag will be ignored.    \n");
 
 }
+int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
+
+    const int singlePInvAccelForceDef = 0;
+    const int magicTouchDef = 0;
+    const int recycleInvsForceDef = 0;
+
+    par_info iip[]={
+        (par_info){(void*) &(invinfo->singlePInvAccelForce),TYPE_INT,"singlePInvAccelForce",1 , (const void*) &singlePInvAccelForceDef},
+        (par_info){(void*) &(invinfo->magicTouch),TYPE_INT,"magicTouch",1 , (const void*) &magicTouchDef},
+        (par_info){(void*) &(invinfo->recycleInvsForce),TYPE_INT,"magicTouch",1 , (const void*) &recycleInvsForceDef}
+    }
+    return scan_group_NV(sizeof(iip)/sizeof(par_info),iip, filelines, startline, endline);
+
+}
+
 int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
@@ -510,8 +526,6 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
 
 }
-
-
 
 int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
@@ -821,6 +835,9 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 check = read_debug_info(&debug_settings, 
                         filelines,startline,endline);
                 break; 
+            case PMG_INVERTER_TRICKS   : 
+                check = read_inv_tricks_info(&inverter_tricks, 
+                        filelines,startline,endline);
 
         }
         if(check)

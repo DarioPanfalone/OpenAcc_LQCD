@@ -16,6 +16,7 @@ typedef struct ferm_param_t{
   double ferm_im_chem_pot;
   // automatic from here on
   int index_of_the_first_ps;
+  int index_of_the_first_shift;
   double_soa * phases; //this incorporates staggered phases,
                        // external u(1) fields and 
                        // imaginary chemical potential
@@ -42,7 +43,8 @@ typedef struct ferm_param_t{
 } ferm_param;
 
 
-
+extern int maxNeededShifts;
+extern int maxApproxOrder;
 extern int NDiffFlavs;
 extern int NPS_tot;
 extern int max_ps;

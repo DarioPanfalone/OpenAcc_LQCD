@@ -10,7 +10,6 @@ typedef struct md_param_t{
     double residue_metro;
     double expected_max_eigenvalue;
     int singlePrecMD ; 
-    int singlePInvAccel;
     double residue_md;
     int max_cg_iterations;
 
