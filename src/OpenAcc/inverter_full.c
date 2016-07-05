@@ -2,7 +2,6 @@
 #ifndef INVERTER_FULL_C_
 #define INVERTER_FULL_C_
 
-#include "../Include/inverter_tricks.h"
 #include "../Include/common_defines.h"
 #include "./struct_c_def.h"
 #include "./fermionic_utilities.h"
@@ -34,7 +33,6 @@ int ker_invert_openacc(__restrict su3_soa * const u, // non viene aggiornata mai
   int cg;
   long int i;
   double delta, alpha, lambda, omega, gammag;
-  d_complex aux_comp=0.0+0.0I;
 
   assign_in_to_out(trialSolution,out);
 
