@@ -10,6 +10,7 @@
 #include "../Mpi/multidev.h"
 #include "../Rand/random.h"
 #include "./action.h"
+#include "./inverter_package.h"
 #include "./alloc_vars.h"
 #include "./sp_alloc_vars.h"
 #include "./fermionic_utilities.h"
@@ -142,6 +143,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         }// end for iflav
 #pragma acc update device(ferm_phi_acc[0:NPS_tot])
 
+        gconf_as_fermionmatrix_f = conf_acc_f;
 #ifdef STOUT_FERMIONS 
         // DILATION USING STOUTED DIRAC OPERATOR
         // STOUTING...(ALREADY ON DEVICE)
@@ -149,10 +151,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             stout_wrapper(tconf_acc,tstout_conf_acc_arr);
             gconf_as_fermionmatrix = 
                 &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+
+            convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
         }
         else gconf_as_fermionmatrix = tconf_acc;
 #else
         gconf_as_fermionmatrix = tconf_acc;
+        convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
 #endif
 
         // DILATION OF FIRST_INV RATIONAL APPROXIMATION
@@ -218,6 +223,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
         multishift_invert_iterations = 0 ; 
         // FIRST INV APPROX CALC --> calculation of CHI fermion
+        
+        inverter_package ip;
+        setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,max_approx_order,
+                kloc_r_f,kloc_h_f,kloc_s_f,kloc_r_f);  
+        setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,k_p_shiftferm,max_approx_order,
+                kloc_r,kloc_h,kloc_s,kloc_r);  
+
 
 
         for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
@@ -227,7 +239,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
                 // USING STOUTED GAUGE MATRIX
-                multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], &(fermions_parameters[iflav].approx_fi), ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), res_metro, kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm,max_cg );
+                
+                inverter_multishift_wrapper(ip, &fermions_parameters[iflav], 
+                        &(fermions_parameters[iflav].approx_fi), ferm_shiftmulti_acc,
+                        &(ferm_phi_acc[ps_index]), res_metro,max_cg );
                 if(0==devinfo.myrank) printf("Inversion performed for fermion %d, copy %d\n", iflav,ips);
                 recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
                 if(0==devinfo.myrank) printf("Calculated chi for fermion %d, copy %d\n", iflav,ips);
@@ -307,8 +322,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #endif
                     auxbis_conf_acc_f, // globale
                     aux_conf_acc_f,fermions_parameters,NDiffFlavs,
-                    ferm_chi_acc_f,ferm_shiftmulti_acc_f,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
-                    k_p_shiftferm_f,momenta_f,local_sums_f,res_md,max_cg);
+                    ferm_chi_acc_f,ferm_shiftmulti_acc_f,
+                    ip,
+                    momenta_f,local_sums_f,res_md,max_cg);
 
             if(verbosity_lv > 1) printf("MPI%02d: Single Precision Molecular Dynamics Completed \n",devinfo.myrank );
 
@@ -328,8 +344,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #endif
                     auxbis_conf_acc, // globale
                     aux_conf_acc,fermions_parameters,NDiffFlavs,
-                    ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-                    k_p_shiftferm,momenta,local_sums,res_md,max_cg);
+                    ferm_chi_acc,ferm_shiftmulti_acc,
+                    ip,
+                    momenta,local_sums,res_md,max_cg);
 
 
         }
@@ -346,8 +363,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #endif
                     auxbis_conf_acc, // globale
                     aux_conf_acc,fermions_parameters,NDiffFlavs,
-                    ferm_chi_acc,ferm_shiftmulti_acc,kloc_r,kloc_h,kloc_s,kloc_p,
-                    k_p_shiftferm,momenta,local_sums,res_md, max_cg);
+                    ferm_chi_acc,ferm_shiftmulti_acc,
+                    ip,
+                    momenta,local_sums,res_md, max_cg);
 
 #pragma acc update device(conf_acc_bkp[0:8])
             double conf_error =  calc_diff_su3_soa_norm(tconf_acc,conf_acc_bkp);
@@ -429,10 +447,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
                     int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
                     // USING STOUTED CONF
-                    multishift_invert(gconf_as_fermionmatrix, &fermions_parameters[iflav], 
+                    inverter_multishift_wrapper(ip, &fermions_parameters[iflav], 
                             &(fermions_parameters[iflav].approx_li),
                             ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro, 
-                            kloc_r, kloc_h, kloc_s, kloc_p, k_p_shiftferm, max_cg);
+                            ip, max_cg);
                     recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
                 }
             }

@@ -20,7 +20,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 							   __restrict su3_soa    * const TMP// la var globale e' aux_conf_acc //PARCHEGGIO??
 							   );
 
-void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configurazione qui dentro e' costante e non viene modificata           
+void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
 #ifdef STOUT_FERMIONS        
 			       __restrict su3_soa * tstout_conf_acc_arr,// parking
 #endif
@@ -32,12 +32,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc, // la configur
 			       double res,
 			       __restrict su3_soa  * taux_conf_acc,
 			       __restrict vec3_soa * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]           
-			       __restrict vec3_soa * tkloc_r, // parking 
-			       __restrict vec3_soa * tkloc_h, // parking 
-			       __restrict vec3_soa * tkloc_s, // parking 
-			       __restrict vec3_soa * tkloc_p, // parking 
-			       __restrict vec3_soa * tk_p_shiftferm,//parking [max_approx_order] 
-                   const int max_cg);
+                   inverter_package ipt,
+                   const int max_cg );
 
 
 

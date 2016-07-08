@@ -451,14 +451,14 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 }
 int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
 
-    const int singlePInvAccelForceDef = 0;
-    const int magicTouchDef = 0;
-    const int recycleInvsForceDef = 0;
+    const int singlePInvAccelMultiInvDef = 0;
+    const int magicTouchEveryDef = 20;
+    const int useMixedPrecisionDef = 0;
 
     par_info iip[]={
-        (par_info){(void*) &(invinfo->singlePInvAccelForce),TYPE_INT,"singlePInvAccelForce",1 , (const void*) &singlePInvAccelForceDef},
-        (par_info){(void*) &(invinfo->magicTouch),TYPE_INT,"magicTouch",1 , (const void*) &magicTouchDef},
-        (par_info){(void*) &(invinfo->recycleInvsForce),TYPE_INT,"magicTouch",1 , (const void*) &recycleInvsForceDef}
+        (par_info){(void*) &(invinfo->singlePInvAccelMultiInv),TYPE_INT,"singlePInvAccelMultiInv",1 , (const void*) &singlePInvAccelMultiInvDef},
+        (par_info){(void*) &(invinfo->useMixedPrecision),TYPE_INT,"useMixedPrecision",1 , (const void*) &useMixedPrecisionDef},
+        (par_info){(void*) &(invinfo->magicTouchEvery),TYPE_INT,"magicTouchEvery",1 , (const void*) &magicTouchDef},
     }
     return scan_group_NV(sizeof(iip)/sizeof(par_info),iip, filelines, startline, endline);
 

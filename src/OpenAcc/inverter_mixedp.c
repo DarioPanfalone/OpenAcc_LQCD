@@ -10,6 +10,7 @@
 #include "./sp_fermionic_utilities.h"
 #include "./sp_struct_c_def.h"
 #include "./struct_c_def.h"
+#include "./inverter_package.h"
 
 #ifndef __GNUC__
  #include "openacc.h"
@@ -19,19 +20,11 @@
 #include "../Mpi/multidev.h"
 
 
-int inverter_mixed_precision( __restrict const su3_soa * ud, // non viene aggiornata mai qui dentro
-              __restrict const su3_soa_f * u, // non viene aggiornata mai qui dentro
+int inverter_mixed_precision(inverter_package ip,
 			  ferm_param *pars,
 			  __restrict vec3_soa_f * solution,// single precision output
 			  __restrict const vec3_soa * in, // non viene aggiornato mai qui dentro
 			  double res,
-			  __restrict vec3_soa   * loc_r,
-			  __restrict vec3_soa_f * loc_r_f,   
-			  __restrict vec3_soa_f * loc_h_f,   
-			  __restrict vec3_soa_f * loc_s_f,   
-			  __restrict vec3_soa_f * loc_p_f,   
-			  __restrict vec3_soa   * t1,      //
-			  __restrict vec3_soa   * t2,
               const int  max_cg,
               double shift  )
 {
@@ -40,16 +33,15 @@ int inverter_mixed_precision( __restrict const su3_soa * ud, // non viene aggior
   long int i;
   double delta, alpha, lambda, omega, gammag;
 
-  convert_double_to_float_vec3_soa(in,loc_p_f);
+  convert_double_to_float_vec3_soa(in,ip.loc_p_f);
 
-  assign_in_to_out_f(trialSolution,solution);
 
-  fermion_matrix_multiplication_shifted_f(u,loc_s_f,solution,loc_h_f,pars,shift);
+  fermion_matrix_multiplication_shifted_f(ip.u_f,ip.loc_s_f,solution,ip.loc_h_f,pars,shift);
 
-  combine_in1_minus_in2_f(loc_p_f,loc_s_f,loc_r_f);
-  assign_in_to_out_f(loc_r_f,loc_p_f);
+  combine_in1_minus_in2_f(ip.loc_p_f,ip.loc_s_f,ip.loc_r_f);
+  assign_in_to_out_f(ip.loc_r_f,ip.loc_p_f);
 
-  delta=l2norm2_global_f(loc_r_f);
+  delta=l2norm2_global_f(ip.loc_r_f);
 
   double source_norm = l2norm2_global(in);
   // loop over cg iterations
@@ -61,20 +53,21 @@ int inverter_mixed_precision( __restrict const su3_soa * ud, // non viene aggior
     cg++;    
     // s=(M^dag M)p    alpha=(p,s)
 
-    fermion_matrix_multiplication_shifted_f(u,loc_s_f,loc_p_f,loc_h_f,pars,shift);
-    alpha = real_scal_prod_global_f(loc_p_f,loc_s_f);
+    fermion_matrix_multiplication_shifted_f(ip.u,ip.loc_s_f,ip.loc_p_f,ip.loc_h_f,pars,shift);
+    alpha = real_scal_prod_global_f(ip.loc_p_f,ip.loc_s_f);
 
     omega=delta/alpha;     
     // solution+=omega*p  r-=omega*s
     // lambda=(r,r);
-    combine_in1xfactor_plus_in2_f(loc_p_f,omega,solution,solution);
+    combine_in1xfactor_plus_in2_f(ip.loc_p_f,omega,solution,solution);
 
     if( cg % inverter_tricks.magicTouchEvery == 0 ){
-        // calculation of r from the beginning
-        convert_float_to_double_su3_soa(solution,t1)
-        fermion_matrix_multiplication_shifted(ud,t2,t1,loc_r,pars,shift); // here loc_r= tmp
-        combine_in1_minus_in2_f(ind,t2,loc_r);
-        convert_double_to_float_vec3_soa(loc_r,loc_r_f);
+        // calculation of r from "first principle" in double precision
+        //here loc_r= tmp
+        convert_float_to_double_su3_soa(solution,ip.loc_h)
+        fermion_matrix_multiplication_shifted(ip.u,ip.loc_s,ip.loc_h,ip.loc_r,pars,shift);
+        combine_in1_minus_in2_f(in,ip.loc_s,ip.loc_r);
+        convert_double_to_float_vec3_soa(ip.loc_r,ip.loc_r_f);
 
     }
     else combine_in1xfactor_plus_in2_f(loc_s_f,-omega,loc_r_f,loc_r_f);

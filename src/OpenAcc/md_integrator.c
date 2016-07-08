@@ -38,6 +38,7 @@
 #include "./md_parameters.h"
 #include "./struct_c_def.h"
 #include "./su3_utilities.h"
+#include "./inverter_package.h"
 
 #include <sys/time.h>
 
@@ -446,11 +447,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         int tNDiffFlavs,
         vec3_soa * ferm_in_acc, //[NPS_tot], will be ferm_chi_acc
         vec3_soa * tferm_shiftmulti_acc,// parking variable [max_ps*max_approx_order]
-        vec3_soa * tkloc_r, // parking
-        vec3_soa * tkloc_h, // parking
-        vec3_soa * tkloc_s, // parking
-        vec3_soa * tkloc_p, // parking
-        vec3_soa * tk_p_shiftferm, // parking, [max_nshift]
+        inverter_package ip,
         thmat_soa * tmomenta,
         dcomplex_soa * local_sums,
         double res,
@@ -470,8 +467,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
             tauxbis_conf_acc, // parkeggio
             tipdot_acc, tfermions_parameters, tNDiffFlavs, 
-            ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, tkloc_r,
-            tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm,max_cg);
+            ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
 
     if(verbosity_lv > 4) printf("MPI%02d - Calculated first fermion force/n", 
             devinfo.myrank);
@@ -500,8 +496,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
                 tauxbis_conf_acc, // parkeggio
                 tipdot_acc, tfermions_parameters, tNDiffFlavs,
-                ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc,
-                tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm,max_cg);
+                ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
 
 
 
@@ -524,9 +519,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 tstout_conf_acc_arr, 
 #endif
                 tauxbis_conf_acc, // parkeggio
-                tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, 
-                taux_conf_acc, tferm_shiftmulti_acc, 
-                tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm, max_cg);
+                tipdot_acc, tfermions_parameters, tNDiffFlavs,
+                ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
 
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
     }  
@@ -551,9 +545,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             tstout_conf_acc_arr,
 #endif
             tauxbis_conf_acc, // parkeggio
-            tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, 
-            taux_conf_acc, tferm_shiftmulti_acc, 
-            tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm, max_cg);
+            tipdot_acc, tfermions_parameters, tNDiffFlavs,
+            ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
 
     mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
 
@@ -574,12 +567,10 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             tstout_conf_acc_arr, 
 #endif
             tauxbis_conf_acc, // parkeggio
-            tipdot_acc, tfermions_parameters, tNDiffFlavs, ferm_in_acc, res, 
-            taux_conf_acc, tferm_shiftmulti_acc, 
-            tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm, max_cg);
+            tipdot_acc, tfermions_parameters, tNDiffFlavs,
+            ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
 
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
-
 
 
 }// end multistep_2MN_SOLOOPENACC()

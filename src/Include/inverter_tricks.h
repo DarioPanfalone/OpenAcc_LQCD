@@ -3,9 +3,9 @@
 
 typedef struct inv_tricks_t{
 
-    int singlePInvAccelForce;
-    int magicTouch; 
-    int recycleInvsForce; 
+    int singlePInvAccelMultiInv;
+    int magicTouchEvery;
+    int useMixedPrecision;
 
 
 } inv_tricks;
