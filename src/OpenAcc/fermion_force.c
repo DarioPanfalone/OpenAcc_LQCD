@@ -21,7 +21,7 @@
 #include "./struct_c_def.h"
 #include "./su3_measurements.h"
 #include "./su3_utilities.h"
-#include "./inverter_multishift_wrapper.h"
+#include "./inverter_wrappers.h"
 
 // includes related to single precision acceleration
 // Global variable used for convenience
@@ -30,8 +30,6 @@
 #include "./float_double_conv.h"
 #include "./sp_alloc_vars.h"
 #include "./sp_struct_c_def.h"
-#include "./sp_inverter_multishift_full.h"
-#include "./inverter_full.h"
 
 
 

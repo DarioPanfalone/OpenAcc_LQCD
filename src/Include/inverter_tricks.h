@@ -6,7 +6,7 @@ typedef struct inv_tricks_t{
     int singlePInvAccelMultiInv;
     int magicTouchEvery;
     int useMixedPrecision;
-
+    int restartingEvery;
 
 } inv_tricks;
 

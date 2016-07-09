@@ -17,7 +17,7 @@
 #include "./sp_fermionic_utilities.h"
 #include "./find_min_max.h"
 #include "./float_double_conv.h"
-#include "./inverter_multishift_full.h"
+#include "./inverter_wrappers.h"
 #include "./io.h"
 #include "./md_integrator.h"
 #include "./sp_md_integrator.h"

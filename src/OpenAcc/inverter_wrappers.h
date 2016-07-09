@@ -6,13 +6,22 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "./struct_c_def.h"
 
-void inverter_multishift_wrapper(inverter_package ip,
+
+int inverter_multishift_wrapper(inverter_package ip,
         ferm_param *pars,
         RationalApprox * approx,
         vec3_soa * out,
         vec3_soa * in,
         double res,
         int max_cg);
+
+int inverter_wrapper(inverter_package ip,
+        ferm_param *pars,
+        vec3_soa * out,
+        vec3_soa * in,
+        double res,
+        int max_cg,
+        double shift);
 
 
 #endif

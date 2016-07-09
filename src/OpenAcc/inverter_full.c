@@ -6,99 +6,102 @@
 #include "./struct_c_def.h"
 #include "./fermionic_utilities.h"
 #include "./fermion_matrix.h"
-#ifndef __GNUC__
- #include "openacc.h"
-#endif
 #include "./inverter_full.h"
-
+#include "../Include/inverter_tricks.h"
 #include "../Mpi/multidev.h"
+
+
+#ifndef __GNUC__
+#include "openacc.h"
+#endif
 
 #define DEBUG_INVERTER_FULL_OPENACC
 
 
 int ker_invert_openacc(__restrict su3_soa * const u, // non viene aggiornata mai qui dentro
-			  ferm_param *pars,
-			  __restrict vec3_soa * const out,
-			  __restrict const vec3_soa * const in, // non viene aggiornato mai qui dentro
-			  double res,
-			  __restrict vec3_soa * const trialSolution,// non viene aggiornato mai qui dentro
-			  __restrict vec3_soa * const loc_r,
-			  __restrict vec3_soa * const loc_h,
-			  __restrict vec3_soa * const loc_s,
-			  __restrict vec3_soa * const loc_p,
-              const int  max_cg,
-              double shift  )
+        ferm_param *pars,
+        __restrict vec3_soa * const solution,
+        __restrict const vec3_soa * const in, // non viene aggiornato mai qui dentro
+        double res,
+        __restrict vec3_soa * const loc_r,
+        __restrict vec3_soa * const loc_h,
+        __restrict vec3_soa * const loc_s,
+        __restrict vec3_soa * const loc_p,
+        const int  max_cg,
+        double shift  )
 {
 
-  int cg;
-  long int i;
-  double delta, alpha, lambda, omega, gammag;
+    int cg = 0;
+    long int i;
+    double delta, alpha, lambda, omega, gammag;
 
-  assign_in_to_out(trialSolution,out);
+    double source_norm = l2norm2_global(in);
 
-  fermion_matrix_multiplication_shifted(u,loc_s,out,loc_h,pars,shift);
+    do {
 
-  combine_in1_minus_in2(in,loc_s,loc_r);
-  assign_in_to_out(loc_r,loc_p);
+        fermion_matrix_multiplication_shifted(u,loc_s,solution,loc_h,pars,shift);
 
-  delta=l2norm2_global(loc_r);
+        combine_in1_minus_in2(in,loc_s,loc_r);
+        assign_in_to_out(loc_r,loc_p);
 
-  double source_norm = l2norm2_global(in);
-  // loop over cg iterations
-  cg=0;
-    if (verbosity_lv > 3 && 0==devinfo.myrank )
-      printf("STARTING CG:\nCG\tR\n");
+        delta=l2norm2_global(loc_r);
 
-  do {
-    cg++;    
-    // s=(M^dag M)p    alpha=(p,s)
+        // loop over cg iterations
+        if (verbosity_lv > 3 && 0==devinfo.myrank )
+            printf("STARTING CG:\nCG\tR\n");
 
-    fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,shift);
-    alpha = real_scal_prod_global(loc_p,loc_s);
+        int cg_restarted = 0 ;
+        do {
+            cg++;    
+            cg_restarted++;
+            // s=(M^dag M)p    alpha=(p,s)
 
-    omega=delta/alpha;     
-    // out+=omega*p  r-=omega*s
-    // lambda=(r,r);
+            fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,shift);
+            alpha = real_scal_prod_global(loc_p,loc_s);
 
-    combine_in1xfactor_plus_in2(loc_p,omega,out,out);
-    combine_in1xfactor_plus_in2(loc_s,-omega,loc_r,loc_r);
+            omega=delta/alpha;     
+            // solution+=omega*p  r-=omega*s
+            // lambda=(r,r);
 
-    lambda = l2norm2_global(loc_r);
-    gammag=lambda/delta;
-    delta=lambda;
-    // p=r+gammag*p
-    combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
+            combine_in1xfactor_plus_in2(loc_p,omega,solution,solution);
+            combine_in1xfactor_plus_in2(loc_s,-omega,loc_r,loc_r);
+
+            lambda = l2norm2_global(loc_r);
+            gammag=lambda/delta;
+            delta=lambda;
+            // p=r+gammag*p
+            combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
+
+            if (verbosity_lv > 3 && cg%100==0 && 0==devinfo.myrank  ){
+
+                printf("%d\t%1.1e\n",cg, sqrt(lambda/source_norm)/res);fflush(stdout);
+
+            }
+
+        } while( (sqrt(lambda/source_norm)>res) && 
+                cg_restarted<inverter_tricks.restartingEvery);
+
+    } while( (sqrt(lambda/source_norm)>res) && cg<max_cg);
 
 
-      if (verbosity_lv > 3 && cg%100==0 && 0==devinfo.myrank  ){
-
-      printf("%d\t%1.1e\n",cg, sqrt(lambda/source_norm)/res);fflush(stdout);
-      
-      }
-
-
-
-  } while( (sqrt(lambda/source_norm)>res) && cg<max_cg);
-
-
-  if (verbosity_lv > 3  && 0==devinfo.myrank ) printf("\n");
+    if (verbosity_lv > 3  && 0==devinfo.myrank ) printf("\n");
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
 
-  fermion_matrix_multiplication_shifted(u,loc_s,out,loc_h,pars,shift);
-  combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
-  double  giustoono=l2norm2_global(loc_h)/source_norm;
-  if(verbosity_lv > 1 && 0==devinfo.myrank  ){
-      printf("Terminated invert after   %d    iterations", cg);
-      printf("[res/stop_res=  %e , stop_res=%e ]\n",
-              sqrt(giustoono)/res,res);
-  }
-#endif
-  if(cg==max_cg  && 0==devinfo.myrank )
-    {
-      printf("WARNING: maximum number of iterations reached in invert\n");
+    fermion_matrix_multiplication_shifted(u,loc_s,solution,loc_h,pars,shift);
+    combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
+    double  giustoono=l2norm2_global(loc_h)/source_norm;
+    if(verbosity_lv > 1 && 0==devinfo.myrank  ){
+        printf("Terminated invert after   %d    iterations", cg);
+        printf("[res/stop_res=  %e , stop_res=%e ]\n",
+                sqrt(giustoono)/res,res);
     }
-  
- return cg;
+#endif
+    if(cg==max_cg  && 0==devinfo.myrank )
+    {
+        printf("WARNING: maximum number of iterations reached in invert\n");
+    }
+
+    return cg;
 
 }
 

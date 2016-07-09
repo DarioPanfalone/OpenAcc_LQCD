@@ -33,16 +33,18 @@ void setup_inverter_package_sp(inverter_package * ip,
         vec3_soa_f * loc_r_f,
         vec3_soa_f * loc_h_f,
         vec3_soa_f * loc_s_f,
-        vec3_soa_f * loc_p_f)
+        vec3_soa_f * loc_p_f,
+        vec3_soa_f * out_f)
 {
 
     ip->u_f = (__restrict) u_f;
     ip->ferm_shift_temp_f = ferm_shift_temp_f;
     ip->nshifts = nshifts;
-    ip->loc_r_h = (__restrict) loc_r_h;
-    ip->loc_h_h = (__restrict) loc_h_h;
-    ip->loc_s_h = (__restrict) loc_s_h;
-    ip->loc_p_h = (__restrict) loc_p_h;
+    ip->loc_r_f = (__restrict) loc_r_f;
+    ip->loc_h_f = (__restrict) loc_h_f;
+    ip->loc_s_f = (__restrict) loc_s_f;
+    ip->loc_p_f = (__restrict) loc_p_f;
+    ip->out_f   = (__restrict)   out_f;
     
 }
 

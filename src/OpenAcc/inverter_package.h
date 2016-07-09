@@ -19,6 +19,8 @@ typedef struct inverter_package_t{
     __restrict vec3_soa_f * loc_h_f;            //parking
     __restrict vec3_soa_f * loc_s_f;            //parking
     __restrict vec3_soa_f * loc_p_f;            //parking
+    __restrict vec3_soa_f * out_f;      // for copying the solution in
+                                        // mixed precision inverter
 
 } inverter_package;
 
@@ -39,7 +41,8 @@ void setup_inverter_package_sp(inverter_package * ip,
         vec3_soa_f * loc_r_f,
         vec3_soa_f * loc_h_f,
         vec3_soa_f * loc_s_f,
-        vec3_soa_f * loc_p_f);
+        vec3_soa_f * loc_p_f,
+        vec3_soa_f * out_f);
 
 
 

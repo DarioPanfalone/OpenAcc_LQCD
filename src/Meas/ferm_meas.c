@@ -22,7 +22,9 @@
 #include "../OpenAcc/fermion_matrix.h"
 #include "../OpenAcc/field_times_fermion_matrix.h"
 #include "../OpenAcc/fermionic_utilities.h"
-#include "../OpenAcc/inverter_full.h"
+#include "../OpenAcc/inverter_package.h"
+#include "../OpenAcc/inverter_wrappers.h"
+#include "../OpenAcc/float_double_conv.h"
 #include "../OpenAcc/random_assignement.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "./baryon_number_utilities.h"
@@ -44,7 +46,7 @@
 ferm_meas_params fm_par;
 
 // vedi tesi LS F.Negro per ragguagli (Appendici)
-void eo_inversion(su3_soa *tconf_acc,
+void eo_inversion(inverter_package ip,
         ferm_param * tfermions_parameters,
         double res, int max_cg,
         vec3_soa * in_e,     // z2 noise
@@ -52,25 +54,14 @@ void eo_inversion(su3_soa *tconf_acc,
         vec3_soa * out_e,
         vec3_soa * out_o,
         vec3_soa * phi_e,    // parking variable
-        vec3_soa * phi_o,    // parking variable
-        vec3_soa * trialSolution,       // initial vector for the inversion 
-        vec3_soa * tloc_r,    // parking variable for the inverter      
-        vec3_soa * tloc_h,    // parking variable for the inverter
-        vec3_soa * tloc_s,    // parking variable for the inverter
-        vec3_soa * tloc_p){   // parking variable for the inverter
-
-
-
+        vec3_soa * phi_o){   // parking variable for the inverter
 
     acc_Deo(tconf_acc, phi_e, in_o,tfermions_parameters->phases);
 
 
-
-
     combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
-    ker_invert_openacc(tconf_acc,tfermions_parameters,
-            out_e,phi_e,res,trialSolution,
-            tloc_r,tloc_h,tloc_s,tloc_p,max_cg,0);
+    inverter_wrapper(ip,tfermions_parameters,
+            out_e,phi_e,res,max_cg,0);
     acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
     combine_in1_minus_in2_allxfact(in_o,phi_o,(double)1/tfermions_parameters->ferm_mass,out_o);
 
@@ -144,6 +135,7 @@ void fermion_measures( su3_soa * tconf_acc,
     vec3_soa * phi_e,* phi_o; // parking variables for eo_inverter
     vec3_soa * trial_sol;
     su3_soa * conf_to_use;
+    su3_soa_f * conf_to_use_f;
 
 #ifdef STOUT_FERMIONS
 
@@ -156,6 +148,16 @@ void fermion_measures( su3_soa * tconf_acc,
 #else
     conf_to_use = tconf_acc;
 #endif
+    conf_to_use_f = conf_acc_f;// global variable
+    convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f); 
+
+    // preparing inverter_package with global variables
+    inverter_package ip;
+    setup_inverter_package_dp(&ip,conf_to_use,0,0,kloc_r,kloc_h,kloc_s,kloc_p); 
+    setup_inverter_package_sp(&ip,conf_to_use_f,0,0,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
+            aux1_f); 
+
+
 
     int allocation_check;
 #define ALLOCCHECK(control_int,var)  if(control_int != 0 ) \
@@ -279,9 +281,8 @@ void fermion_measures( su3_soa * tconf_acc,
 
                 // FIRST INVERSION
                 // (chi_e,chi_o) = M^{-1} (rnd_e,rnd_o)
-                eo_inversion(conf_to_use,&tfermions_parameters[iflv],res, max_cg,   
-                        rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o,
-                        trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+                eo_inversion(ip,&tfermions_parameters[iflv],res, max_cg,   
+                        rnd_e,rnd_o,chi_e,chi_o,phi_e,phi_o);
 
 
 
@@ -290,6 +291,7 @@ void fermion_measures( su3_soa * tconf_acc,
                     scal_prod_global(rnd_o,chi_o);
 
                 if(devinfo.myrank == 0)
+
                     fprintf(foutfile,"%.16lf\t%.16lf\t",
                             creal(chircond_size*factor),
                             cimag(chircond_size*factor));
@@ -337,9 +339,8 @@ void fermion_measures( su3_soa * tconf_acc,
                     // CHIRAL SUSCEPTIBILITY
                     // (chi2_e,chi2_o) = M^{-1} (chi_e,chi_o) = 
                     // = M^{-2} (rnd_e, rnd_o)
-                    eo_inversion(conf_to_use,&tfermions_parameters[iflv],
-                            res,max_cg,chi_e,chi_o,chi2_e,chi2_o,phi_e,phi_o,
-                            trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+                    eo_inversion(ip,&tfermions_parameters[iflv],
+                            res,max_cg,chi_e,chi_o,chi2_e,chi2_o,phi_e,phi_o);
 
                     trMinvSq_size = -scal_prod_global(rnd_e,chi2_e)-
                         scal_prod_global(rnd_o,chi2_o); 
@@ -381,10 +382,9 @@ void fermion_measures( su3_soa * tconf_acc,
 
                     // (chi2_e,chi2_o) = M^{-1} (bnchi_e,bnchi_o) =
                     // = M^{-1} dM/dmu M^{-1} (rnd_e,rnd_o)
-                    eo_inversion(conf_to_use,&tfermions_parameters[iflv],
+                    eo_inversion(ip,&tfermions_parameters[iflv],
                             res,max_cg,bnchi_e,bnchi_o,chi2_e,chi2_o,
-                            phi_e,phi_o,
-                            trial_sol,kloc_r,kloc_h,kloc_s,kloc_p);
+                            phi_e,phi_o);
 
                     // (bnchi_e, * ) = dM/dmu (* , chi2_o)
                     dM_dmu_eo[geom_par.tmap](conf_to_use,bnchi_e,chi2_o,
