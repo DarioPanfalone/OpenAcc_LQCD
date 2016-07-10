@@ -4,7 +4,7 @@
 
 #include "./struct_c_def.h"
 #include "../Include/fermion_parameters.h"
-
+#include "./inverter_package.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

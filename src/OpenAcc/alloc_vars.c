@@ -209,7 +209,7 @@ void mem_alloc()
     ALLOCCHECK(allocation_check, ferm_phi_acc) ;
     allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, NPS_tot * sizeof(vec3_soa));
     ALLOCCHECK(allocation_check, ferm_out_acc) ;
-    allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, maxNeededShift*sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, maxNeededShifts*sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, ferm_shiftmulti_acc ) ;
 
 

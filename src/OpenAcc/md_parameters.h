@@ -12,6 +12,7 @@ typedef struct md_param_t{
     int singlePrecMD ; 
     double residue_md;
     int max_cg_iterations;
+    int recycleInvsForce;
 
 } md_param; 
 

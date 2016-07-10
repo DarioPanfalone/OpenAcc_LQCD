@@ -6,6 +6,7 @@
 #include "./fermion_matrix.h"
 #include "./inverter_multishift_full.h"
 #include "./inverter_full.h"
+#include "./inverter_wrappers.h"
 
 #include "../Mpi/multidev.h"
 
@@ -13,13 +14,12 @@
 
 extern int verbosity_lv;
 
-int multishift_invert_iterations ; // global count of CG iterations
 
-int multishift_invert(__restrict su3_soa * const u,
+int multishift_invert(__restrict const su3_soa * u,
         __restrict ferm_param * pars,
         RationalApprox * approx,
         __restrict vec3_soa * out, // multi-fermion [nshifts]
-        __restrict const vec3_soa * const in, // single ferm
+        __restrict const vec3_soa * in, // single ferm
         double residuo,
         __restrict vec3_soa * loc_r,
         __restrict vec3_soa * loc_h,
@@ -216,10 +216,10 @@ int multishift_invert(__restrict su3_soa * const u,
 
 }
 
-void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* const in_shifted /*multi-fermion*/, 
-        const __restrict vec3_soa* const in, // [nshift]
-        __restrict vec3_soa * const out, // [1] 
-        const RationalApprox * const approx ){
+void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* in_shifted /*multi-fermion*/, 
+        const __restrict vec3_soa* in, // [nshift]
+        __restrict vec3_soa * out, // [1] 
+        const RationalApprox * approx ){
     if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF RECOMBINE_SHIFTED_VEC3_TO_VEC3\n");
     int ih;
     int iter=0;

@@ -353,6 +353,7 @@ for fileName in fileNames:
     
         writeIt = True
         
+
         if os.path.exists(newFileName) and ( ans != 'a' or fileName in filesNoOverwrite):
             ans = ''
             while ans not in ['y','n','a']:

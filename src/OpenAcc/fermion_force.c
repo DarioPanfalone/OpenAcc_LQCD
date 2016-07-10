@@ -191,30 +191,31 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
     set_su3_soa_to_zero(gl3_aux); // pseudo ipdot
     set_tamat_soa_to_zero(tipdot_acc);
 
-    inverter_package ip = ipt;
-    ip.u = conf_to_use;
+    ipt.u = conf_to_use;
 
-    if(inverter_tricks.singlePInvAccelForce == 1 && md_parameters.singlePrecMD != 1){
+    if(1 == inverter_tricks.singlePInvAccelMultiInv && 1 != md_parameters.singlePrecMD ){
        if(0==devinfo.myrank && verbosity_lv >2) 
            printf("Converting gauge conf to single precision...\n");
        conf_to_use_f = conf_acc_f; // USING GLOBAL VARIABLE FOR CONVENIENCE
        convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f);
-       ip.u_f = conf_to_use_f;
+       ipt.u_f = conf_to_use_f;
     }
     else
-       setup_inverter_package_sp(&ip,0,0,0,0,0);
-
+       setup_inverter_package_sp(&ipt,0,0,0,0,0,0,0,0);// passed to this function by copy
+                                                       // this instruction has effect only here
+                                                       // in this scope  
 
     for(int iflav = 0; iflav < tNDiffFlavs; iflav++) {
         set_su3_soa_to_zero(taux_conf_acc);
         int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
         for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
 
-            inverter_multishift_wrapper(ip,&tfermion_parameters[iflav],
+            inverter_multishift_wrapper(ipt,&tfermion_parameters[iflav],
                      &(tfermion_parameters[iflav].approx_md),
-                     tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, max_cg)      
+                     tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, max_cg);
 
-            ker_openacc_compute_fermion_force(conf_to_use, taux_conf_acc, tferm_shiftmulti_acc, ip.loc_s, ip.loc_h, &(tfermion_parameters[iflav]));
+            ker_openacc_compute_fermion_force(ipt.u, taux_conf_acc, tferm_shiftmulti_acc,
+                    ipt.loc_s, ipt.loc_h, &(tfermion_parameters[iflav]));
 
         }
 

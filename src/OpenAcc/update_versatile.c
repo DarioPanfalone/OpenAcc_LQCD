@@ -18,6 +18,7 @@
 #include "./find_min_max.h"
 #include "./float_double_conv.h"
 #include "./inverter_wrappers.h"
+#include "./inverter_multishift_full.h"
 #include "./io.h"
 #include "./md_integrator.h"
 #include "./sp_md_integrator.h"
@@ -225,9 +226,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         // FIRST INV APPROX CALC --> calculation of CHI fermion
         
         inverter_package ip;
-        setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,max_approx_order,
-                kloc_r_f,kloc_h_f,kloc_s_f,kloc_r_f);  
-        setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,k_p_shiftferm,max_approx_order,
+        setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,maxApproxOrder,
+                kloc_r_f,kloc_h_f,kloc_s_f,kloc_r_f,aux1_f);  
+        setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,k_p_shiftferm,maxApproxOrder,
                 kloc_r,kloc_h,kloc_s,kloc_r);  
 
 
@@ -449,8 +450,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                     // USING STOUTED CONF
                     inverter_multishift_wrapper(ip, &fermions_parameters[iflav], 
                             &(fermions_parameters[iflav].approx_li),
-                            ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro, 
-                            ip, max_cg);
+                            ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro,max_cg);
                     recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
                 }
             }

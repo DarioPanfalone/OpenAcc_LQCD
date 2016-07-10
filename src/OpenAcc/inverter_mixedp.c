@@ -53,7 +53,7 @@ int inverter_mixed_precision(inverter_package ip,
     cg++;    
     // s=(M^dag M)p    alpha=(p,s)
 
-    fermion_matrix_multiplication_shifted_f(ip.u,ip.loc_s_f,ip.loc_p_f,ip.loc_h_f,pars,shift);
+    fermion_matrix_multiplication_shifted_f(ip.u_f,ip.loc_s_f,ip.loc_p_f,ip.loc_h_f,pars,shift);
     alpha = real_scal_prod_global_f(ip.loc_p_f,ip.loc_s_f);
 
     omega=delta/alpha;     
@@ -64,19 +64,19 @@ int inverter_mixed_precision(inverter_package ip,
     if( cg % inverter_tricks.magicTouchEvery == 0 ){
         // calculation of r from "first principle" in double precision
         //here loc_r= tmp
-        convert_float_to_double_su3_soa(solution,ip.loc_h)
+        convert_float_to_double_vec3_soa(solution,ip.loc_h);
         fermion_matrix_multiplication_shifted(ip.u,ip.loc_s,ip.loc_h,ip.loc_r,pars,shift);
-        combine_in1_minus_in2_f(in,ip.loc_s,ip.loc_r);
+        combine_in1_minus_in2(in,ip.loc_s,ip.loc_r);
         convert_double_to_float_vec3_soa(ip.loc_r,ip.loc_r_f);
 
     }
-    else combine_in1xfactor_plus_in2_f(loc_s_f,-omega,loc_r_f,loc_r_f);
+    else combine_in1xfactor_plus_in2_f(ip.loc_s_f,-omega,ip.loc_r_f,ip.loc_r_f);
 
-    lambda = l2norm2_global_f(loc_r_f);
+    lambda = l2norm2_global_f(ip.loc_r_f);
     gammag=lambda/delta;
     delta=lambda;
     // p=r+gammag*p
-    combine_in1xfactor_plus_in2_f(loc_p_f,gammag,loc_r_f,loc_p_f);
+    combine_in1xfactor_plus_in2_f(ip.loc_p_f,gammag,ip.loc_r_f,ip.loc_p_f);
 
 
       if (verbosity_lv > 3 && cg%100==0 && 0==devinfo.myrank  ){
@@ -92,10 +92,11 @@ int inverter_mixed_precision(inverter_package ip,
 
   if (verbosity_lv > 3  && 0==devinfo.myrank ) printf("\n");
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
-
-  fermion_matrix_multiplication_shifted_f(u,loc_s_f,solution,loc_h_f,pars,shift);
-  combine_in1_minus_in2_f(in,loc_s_f,loc_h_f); // r = s - y  
-  double  giustoono=l2norm2_global_f(loc_h_f)/source_norm;
+  // s = M x
+  fermion_matrix_multiplication_shifted_f(ip.u_f,ip.loc_s_f,solution,ip.loc_h_f,pars,shift);
+  convert_double_to_float_vec3_soa(in,ip.loc_p_f);  // y = in 
+  combine_in1_minus_in2_f(ip.loc_p_f,ip.loc_s_f,ip.loc_h_f); // r = s - y  
+  double  giustoono=l2norm2_global_f(ip.loc_h_f)/source_norm;
   if(verbosity_lv > 1 && 0==devinfo.myrank  ){
       printf("Terminated invert after   %d    iterations", cg);
       printf("[res/stop_res=  %e , stop_res=%e ]\n",

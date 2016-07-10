@@ -2,19 +2,20 @@
 #define FERMION_PARAMETERS_C_
 
 #include "../DbgTools/dbgtools.h"
-#include "../Mpi/multidev.h"
-#include "../OpenAcc/alloc_vars.h"
-#include "../OpenAcc/sp_alloc_vars.h"
-#include "../OpenAcc/backfield.h"
-#include "../OpenAcc/sp_backfield.h"
-#include "../OpenAcc/geometry.h"
-#include "../OpenAcc/md_integrator.h"
-#include "../RationalApprox/rationalapprox.h"
-#include "./fermion_parameters.h"
-#include "./montecarlo_parameters.h"
 #include "../Include/debug.h"
 #include "../Include/inverter_tricks.h"
 #include "../Meas/magnetic_susceptibility_utilities.h"
+#include "../Mpi/multidev.h"
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/backfield.h"
+#include "../OpenAcc/geometry.h"
+#include "../OpenAcc/md_integrator.h"
+#include "../OpenAcc/md_parameters.h"
+#include "../OpenAcc/sp_alloc_vars.h"
+#include "../OpenAcc/sp_backfield.h"
+#include "../RationalApprox/rationalapprox.h"
+#include "./fermion_parameters.h"
+#include "./montecarlo_parameters.h"
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
@@ -121,7 +122,7 @@ int init_ferm_params(ferm_param *fermion_settings){
 
         // needed to reuse the results from the inversions
         quark->index_of_the_first_shift = totalMdShifts;
-        totalMdShifts += quark->approx_md.approx_order;i
+        totalMdShifts += quark->approx_md.approx_order;
         if(maxNeededShifts < quark->approx_fi.approx_order)
            maxNeededShifts = quark->approx_fi.approx_order;
         if(maxNeededShifts < quark->approx_md.approx_order)
@@ -132,8 +133,16 @@ int init_ferm_params(ferm_param *fermion_settings){
     }
 
     maxApproxOrder = maxNeededShifts;
-    if(inverter_tricks.recycleInvsForce == 1 && maxNeededShifts < totalMdShifts)
+    if(1 == md_parameters.recycleInvsForce && maxNeededShifts < totalMdShifts)
         maxNeededShifts = totalMdShifts;
+
+    if(0==devinfo.myrank && verbosity_lv > 3){
+        printf("MaxApproxOrder found/#define'd: %d / %d\n",maxApproxOrder, MAX_APPROX_ORDER);
+        printf("MaxNeededShifts: %d ",maxNeededShifts);
+        if(1 == md_parameters.recycleInvsForce)
+            printf("(md_parameters.recycleInvsForce = 1)");
+        printf("\n");
+    }
 
     return errorstatus;
 

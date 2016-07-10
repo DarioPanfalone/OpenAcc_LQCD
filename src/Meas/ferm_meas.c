@@ -12,13 +12,13 @@
 
 
 
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "../Include/common_defines.h"
 #include "../Include/fermion_parameters.h"
 #include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/sp_alloc_vars.h"
 #include "../OpenAcc/fermion_matrix.h"
 #include "../OpenAcc/field_times_fermion_matrix.h"
 #include "../OpenAcc/fermionic_utilities.h"
@@ -56,13 +56,13 @@ void eo_inversion(inverter_package ip,
         vec3_soa * phi_e,    // parking variable
         vec3_soa * phi_o){   // parking variable for the inverter
 
-    acc_Deo(tconf_acc, phi_e, in_o,tfermions_parameters->phases);
+    acc_Deo(ip.u, phi_e, in_o,tfermions_parameters->phases);
 
 
     combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
     inverter_wrapper(ip,tfermions_parameters,
             out_e,phi_e,res,max_cg,0);
-    acc_Doe(tconf_acc, phi_o, out_e,tfermions_parameters->phases);
+    acc_Doe(ip.u, phi_o, out_e,tfermions_parameters->phases);
     combine_in1_minus_in2_allxfact(in_o,phi_o,(double)1/tfermions_parameters->ferm_mass,out_o);
 
 

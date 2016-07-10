@@ -431,6 +431,7 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const double expmaxeigenv_def = 5.5 ; 
     const int singlePrecMDdef = 0;
     const int max_cg_iterations_def = 10000;
+    const int recycleInvsForceDef = 0;
 
     par_info mdp[]={
         (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
@@ -440,13 +441,11 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mdpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
         (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD",1 , (const void*) &singlePrecMDdef},
         (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL},
-        (par_info){(void*) &(mdpar->max_cg_iterations),TYPE_INT, "MaxCGIterations"   , 1 , (const void*) &max_cg_iterations_def}};
+        (par_info){(void*) &(mdpar->max_cg_iterations),TYPE_INT, "MaxCGIterations"   , 1 , (const void*) &max_cg_iterations_def},
+        (par_info){(void*) &(mdpar->recycleInvsForce),TYPE_INT, "recycleInvsForce" , 1 , (const void*) &recycleInvsForceDef}};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);
-    if(1 == mdpar->singlePrecMD && 1 == mdpar->singlePInvAccel) 
-        printf("WARNING: singlePrecMD == 1 and singlePInvAccel == 1 : \n");
-        printf("         the singlePInvAccel flag will be ignored.    \n");
 
 }
 int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
@@ -454,12 +453,13 @@ int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELEN
     const int singlePInvAccelMultiInvDef = 0;
     const int magicTouchEveryDef = 20;
     const int useMixedPrecisionDef = 0;
+    const int restartingEveryDef = 10000;
 
     par_info iip[]={
         (par_info){(void*) &(invinfo->singlePInvAccelMultiInv),TYPE_INT,"singlePInvAccelMultiInv",1 , (const void*) &singlePInvAccelMultiInvDef},
         (par_info){(void*) &(invinfo->useMixedPrecision),TYPE_INT,"useMixedPrecision",1 , (const void*) &useMixedPrecisionDef},
-        (par_info){(void*) &(invinfo->magicTouchEvery),TYPE_INT,"magicTouchEvery",1 , (const void*) &magicTouchDef},
-    }
+        (par_info){(void*) &(invinfo->restartingEvery),TYPE_INT,"restartingEvery",1 , (const void*) &restartingEveryDef},
+        (par_info){(void*) &(invinfo->magicTouchEvery),TYPE_INT,"magicTouchEvery",1 , (const void*) &magicTouchEveryDef}};
     return scan_group_NV(sizeof(iip)/sizeof(par_info),iip, filelines, startline, endline);
 
 }

@@ -4,11 +4,16 @@
 #include "./struct_c_def.h"
 #include  "./sp_struct_c_def.h"
 
+#ifdef __GNUC__
+ #define __restrict
+#endif
+
 
 typedef struct inverter_package_t{
 
     const __restrict su3_soa * u;
     const __restrict su3_soa_f * u_f;
+    __restrict vec3_soa * ferm_shift_temp;  //parking
     __restrict vec3_soa_f * ferm_shift_temp_f;  //parking
     int nshifts;
     __restrict vec3_soa * loc_r;            //parking

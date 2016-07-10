@@ -13,21 +13,16 @@
 #include "./sp_fermion_force.h"
 #include "./sp_fermion_force_utilities.h"
 #include "./sp_inverter_multishift_full.h"
+#include "../Include/inverter_tricks.h"
+#include "./inverter_package.h"
 #include "./md_parameters.h"
 #include "./sp_plaquettes.h"
 #include "./sp_stouting.h"
 #include "./sp_struct_c_def.h"
 #include "./sp_su3_measurements.h"
 #include "./sp_su3_utilities.h"
-
-// includes related to single precision acceleration
-// Global variable used for convenience
-#include "./sp_alloc_vars.h"
-#include "./float_double_conv.h"
-#include "./sp_alloc_vars.h"
-#include "./sp_struct_c_def.h"
 #include "./sp_inverter_multishift_full.h"
-#include "./sp_inverter_full.h"
+
 
 
 
@@ -159,11 +154,7 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
 			       float res,
 			       __restrict su3_soa_f  * taux_conf_acc,
 			       __restrict vec3_soa_f * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]           
-			       __restrict vec3_soa_f * tkloc_r, // parking 
-			       __restrict vec3_soa_f * tkloc_h, // parking 
-			       __restrict vec3_soa_f * tkloc_s, // parking 
-			       __restrict vec3_soa_f * tkloc_p, // parking 
-                   __restrict vec3_soa_f * tk_p_shiftferm,//parking [max_approx_order] 
+                   inverter_package ipt,
                    const int max_cg )
 {
     if(verbosity_lv > 3) printf("SINGLE PRECISION VERSION OF FERMION_FORCE_SOLOOPENACC\n");
@@ -192,19 +183,20 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
     set_su3_soa_to_zero_f(gl3_aux); // pseudo ipdot
     set_tamat_soa_to_zero_f(tipdot_acc);
 
-
-
     for(int iflav = 0; iflav < tNDiffFlavs; iflav++) {
         set_su3_soa_to_zero_f(taux_conf_acc);
         int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
         for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
 
-            multishift_invert_f(conf_to_use, &tfermion_parameters[iflav], 
-                    &(tfermion_parameters[iflav].approx_md), 
-                    tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, 
-                    tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm, max_cg);
 
-            ker_openacc_compute_fermion_force_f(conf_to_use, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
+            // modified from converted 
+            multishift_invert_f(conf_to_use,&tfermion_parameters[iflav],
+                     &(tfermion_parameters[iflav].approx_md),
+                     tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res,
+                     ipt.loc_r_f, ipt.loc_h_f, ipt.loc_s_f, ipt.loc_p_f,
+                     ipt.ferm_shift_temp_f, max_cg);
+
+            ker_openacc_compute_fermion_force_f(conf_to_use, taux_conf_acc, tferm_shiftmulti_acc, ipt.loc_s_f, ipt.loc_h_f, &(tfermion_parameters[iflav]));
 
         }
 
@@ -254,8 +246,6 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
 
     multiply_conf_times_force_and_take_ta_nophase_f(tconf_acc, gl3_aux,
             tipdot_acc);
-
-
 
     /*
 #pragma acc update host(tipdot_acc[0:8])
@@ -302,154 +292,5 @@ dt_preker_to_postker,devinfo.myrank);
 
 }
 
-/*
-//STANDARD VERSION OF THE FERMIONIC FORCE
-void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
-        // la configurazione qui dentro e' costante e non viene modificata
-#ifdef STOUT_FERMIONS        
-        __restrict su3_soa_f * tstout_conf_acc_arr,// parking
-#endif
-        __restrict su3_soa_f * gl3_aux, // gl(3) parking
-        __restrict tamat_soa_f  * tipdot_acc,
-        __restrict ferm_param * tfermion_parameters,// [nflavs] 
-        int tNDiffFlavs,
-        __restrict vec3_soa_f * ferm_in_acc, // [NPS_tot]         
-        float res,
-        __restrict su3_soa_f  * taux_conf_acc,
-        __restrict vec3_soa_f * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]           
-        __restrict vec3_soa_f * tkloc_r, // parking 
-        __restrict vec3_soa_f * tkloc_h, // parking 
-        __restrict vec3_soa_f * tkloc_s, // parking 
-        __restrict vec3_soa_f * tkloc_p, // parking 
-        __restrict vec3_soa_f * tk_p_shiftferm,//parking variable [max_approx_order]
-        const int max_cg )
-{
-    if(verbosity_lv > 3) printf("SINGLE PRECISION VERSION OF FERMION_FORCE_SOLOOPENACC\n");
-
-    if(verbosity_lv > 2){
-        printf("MPI%02d:\tCalculation of fermion force...\n", 
-                devinfo.myrank);
-    }
-
-#ifdef TIMING_FERMION_FORCE
-    struct timeval t1,t2;
-    gettimeofday ( &t1, NULL );
-#endif
-
-    __restrict su3_soa_f * conf_to_use; // CONF TO USE IN CALCULATION OF 
-    // FERMION FORCE
-#ifdef STOUT_FERMIONS
-    stout_wrapper_f(tconf_acc,tstout_conf_acc_arr);// calcolo 
-    if(act_params.stout_steps > 0) 
-        conf_to_use =  
-            &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
-    else conf_to_use = tconf_acc;
-#else
-    conf_to_use = tconf_acc;
-#endif
-    set_su3_soa_to_zero_f(gl3_aux); // pseudo ipdot
-    set_tamat_soa_to_zero_f(tipdot_acc);
-
-
-
-    for(int iflav = 0; iflav < tNDiffFlavs; iflav++) {
-        set_su3_soa_to_zero_f(taux_conf_acc);
-        int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
-        for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
-
-            multishift_invert_f(conf_to_use, &tfermion_parameters[iflav], 
-                    &(tfermion_parameters[iflav].approx_md), 
-                    tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, 
-                    tkloc_r, tkloc_h, tkloc_s, tkloc_p, tk_p_shiftferm, max_cg);
-
-            ker_openacc_compute_fermion_force_f(conf_to_use, taux_conf_acc, tferm_shiftmulti_acc, tkloc_s, tkloc_h, &(tfermion_parameters[iflav]));
-
-        }
-
-        // JUST MULTIPLY BY STAGGERED PHASES,
-        // BACK FIELD AND/OR CHEMICAL POTENTIAL 
-        multiply_backfield_times_force_f(&(tfermion_parameters[iflav]),taux_conf_acc,gl3_aux);
-        if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
-            char taux_conf_acc_name[50];
-            sprintf(taux_conf_acc_name,
-                    "taux_conf_acc_%s_%d_%d",tfermion_parameters[iflav].name,
-                    devinfo.myrank, md_dbg_print_count);
-            dbg_print_su3_soa_f(taux_conf_acc,taux_conf_acc_name, 1);
-        }
-
-
-    }
-#ifdef STOUT_FERMIONS
-
-    for(int stout_level = act_params.stout_steps ; stout_level > 1 ; 
-            stout_level--){
-        if(verbosity_lv > 1) 
-            printf("MPI%02d:\t\tSigma' to Sigma [lvl %d to lvl %d]\n",
-                    devinfo.myrank, stout_level,stout_level-1);
-        conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
-        compute_sigma_from_sigma_prime_backinto_sigma_prime_f(gl3_aux,
-                aux_th_f,aux_ta_f,conf_to_use, taux_conf_acc );
-        if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
-            char gl3_aux_name[50];
-            sprintf(gl3_aux_name,
-                    "gl3_aux_name_%dstout_%d_%d",stout_level,
-                    devinfo.myrank, md_dbg_print_count);
-            dbg_print_su3_soa_f(gl3_aux,gl3_aux_name,1);
-        }
-
-    }
-    if(act_params.stout_steps > 0 ){
-    if(verbosity_lv > 1) 
-        printf("MPI%02d:\t\tSigma' to Sigma [lvl 1 to lvl 0]\n",
-                devinfo.myrank);
-    compute_sigma_from_sigma_prime_backinto_sigma_prime_f(gl3_aux,
-            aux_th_f,aux_ta_f,tconf_acc, taux_conf_acc );
-    }
-#endif
-
-
-
-
-    multiply_conf_times_force_and_take_ta_nophase_f(tconf_acc, gl3_aux,
-            tipdot_acc);
-
-
-
- 
-
-#ifdef TIMING_FERMION_FORCE
-    gettimeofday ( &t2, NULL );
-    float dt_preker_to_postker = (float)(t2.tv_sec - t1.tv_sec) + ((float)(t2.tv_usec - t1.tv_usec)/1.0e6f);
-    printf("MPI%02d\t\t\
-FULL FERMION FORCE COMPUTATION  PreKer->PostKer :%f sec  \n",
-dt_preker_to_postker,devinfo.myrank);
-#endif
-    if(verbosity_lv > 0){
-        printf("MPI%02d:\t\tCompleted fermion force openacc\n",
-                devinfo.myrank);
-    }
-
-    if(debug_settings.save_diagnostics == 1 ){
-        float  force_norm, diff_force_norm;
-        force_norm = calc_force_norm_f(tipdot_acc);
-        diff_force_norm = calc_diff_force_norm_f(tipdot_acc,ipdot_f_old_f);
-        copy_ipdot_into_old_f(tipdot_acc,ipdot_f_old_f);
-
-
-        FILE *foutfile = 
-            fopen(debug_settings.diagnostics_filename,"at");
-        fprintf(foutfile,"FFHN %e \tDFFHN %e \t",
-                force_norm,diff_force_norm);
-        fclose(foutfile);
-
-        if(verbosity_lv > 1)
-            printf("MPI%02d:\
-\t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n",
-                    devinfo.myrank, force_norm, diff_force_norm);
-    } 
-
-
-}
-*/
 
 #endif
