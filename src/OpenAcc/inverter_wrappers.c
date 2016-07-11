@@ -32,6 +32,7 @@ int inverter_multishift_wrapper(inverter_package ip,
     int total_iterations = 0;
 
     if(inverter_tricks.singlePInvAccelMultiInv){
+        printf("Inverter multishift wrapper: using SINGLE precision multi shift inverter\n");
 
         convert_double_to_float_vec3_soa(in,aux1_f);
         // multishift inverter in single precision
@@ -50,17 +51,23 @@ int inverter_multishift_wrapper(inverter_package ip,
             printf("Shift %d, %f\n", ishift,bshift);
 
             // this step may be inefficient (but it is needed)
-            convert_float_to_double_vec3_soa(&(ferm_shiftmulti_acc_f[ishift]),aux1);
+            convert_float_to_double_vec3_soa(&(ferm_shiftmulti_acc_f[ishift]),
+                    &(out[ishift]));
 
-            total_iterations += inverter_wrapper(ip,pars,aux1,
+            total_iterations += inverter_wrapper(ip,pars,&(out[ishift]),
                         in,res,max_cg,bshift);
 
         }
 
     }
-    else total_iterations += multishift_invert(ip.u,pars,approx,out,in,res,
-            ip.loc_r,ip.loc_h,ip.loc_s,ip.loc_p,ip.ferm_shift_temp,max_cg);
+    else{ 
+    
+        printf("Inverter multishift wrapper: using DOUBLE precision multi shift inverter\n");
 
+        total_iterations += multishift_invert(ip.u,pars,approx,out,in,res,
+                ip.loc_r,ip.loc_h,ip.loc_s,ip.loc_p,ip.ferm_shift_temp,max_cg);
+
+    }
     return total_iterations;
 
 }

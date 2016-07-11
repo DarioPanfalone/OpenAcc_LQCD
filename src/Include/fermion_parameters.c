@@ -122,13 +122,13 @@ int init_ferm_params(ferm_param *fermion_settings){
 
         // needed to reuse the results from the inversions
         quark->index_of_the_first_shift = totalMdShifts;
-        totalMdShifts += quark->approx_md.approx_order;
-        if(maxNeededShifts < quark->approx_fi.approx_order)
-           maxNeededShifts = quark->approx_fi.approx_order;
-        if(maxNeededShifts < quark->approx_md.approx_order)
-           maxNeededShifts = quark->approx_md.approx_order;
-        if(maxNeededShifts < quark->approx_li.approx_order)
-           maxNeededShifts = quark->approx_li.approx_order;
+        totalMdShifts += quark->approx_md_mother.approx_order;
+        if(maxNeededShifts < quark->approx_fi_mother.approx_order)
+           maxNeededShifts = quark->approx_fi_mother.approx_order;
+        if(maxNeededShifts < quark->approx_md_mother.approx_order)
+           maxNeededShifts = quark->approx_md_mother.approx_order;
+        if(maxNeededShifts < quark->approx_li_mother.approx_order)
+           maxNeededShifts = quark->approx_li_mother.approx_order;
 
     }
 
@@ -142,6 +142,7 @@ int init_ferm_params(ferm_param *fermion_settings){
         if(1 == md_parameters.recycleInvsForce)
             printf("(md_parameters.recycleInvsForce = 1)");
         printf("\n");
+        printf("totalMdShifts: %d \n",totalMdShifts);
     }
 
     return errorstatus;

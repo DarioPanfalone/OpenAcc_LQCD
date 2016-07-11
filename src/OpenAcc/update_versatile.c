@@ -227,9 +227,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         
         inverter_package ip;
         setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,maxApproxOrder,
-                kloc_r_f,kloc_h_f,kloc_s_f,kloc_r_f,aux1_f);  
-        setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,k_p_shiftferm,maxApproxOrder,
-                kloc_r,kloc_h,kloc_s,kloc_r);  
+                kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
+        setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  maxApproxOrder,
+                kloc_r,  kloc_h,  kloc_s,  kloc_p);  
 
 
 
@@ -265,9 +265,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         }//end for iflav
 
 
-
+        
 
         // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
+        struct timeval md_start, md_end;
+        gettimeofday(&md_start,NULL);
         if(1 == md_parameters.singlePrecMD){
             if(verbosity_lv > 1) 
                 printf("MPI%02d: SINGLE PRECISION MOLECULAR DYNAMICS...\n", devinfo.myrank);
@@ -351,6 +353,17 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 
         }
+        gettimeofday(&md_end,NULL);
+
+
+        if(devinfo.myrank == 0){
+
+             double mdtime = (double)(md_end.tv_sec - md_start.tv_sec) + 
+                 ((double)(md_end.tv_usec - md_start.tv_usec)/1.0e6);
+             printf("MPI%02d:Time neede for moledular dynamics: %f s\n",devinfo.myrank,mdtime);
+
+        }
+
         if(debug_settings.do_reversibility_test){
 
             printf("MPI%02d: PERFORMING REVERSIBILITY TEST, DOUBLE PRECISION.\n", devinfo.myrank);

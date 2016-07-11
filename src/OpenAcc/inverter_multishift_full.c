@@ -50,7 +50,14 @@ int multishift_invert(__restrict const su3_soa * u,
     double gammas[MAX_APPROX_ORDER];
     int flag[MAX_APPROX_ORDER];
 
-    //  printf("in pointer: %p\n", in);
+
+    printf("out : %p\n",out );               // DEBUG 
+    printf("in : %p\n",in );                
+    printf("loc_r : %p\n",loc_r );           // DEBUG     
+    printf("loc_h : %p\n",loc_h );           // DEBUG     
+    printf("loc_s : %p\n",loc_s );           // DEBUG     
+    printf("loc_p : %p\n",loc_p );           // DEBUG     
+    printf("shiftferm : %p\n", shiftferm);   // DEBUG             
 
 
     int iter;
@@ -68,6 +75,7 @@ int multishift_invert(__restrict const su3_soa * u,
     delta=l2norm2_global(loc_r);
     double source_norm = l2norm2_global(in);
     //printf("delta    %.18lf\n",delta);
+    //printf("source norm    %.18lf\n",source_norm);
     omega=1.0;
 
     //printf("Re in->c0[0]: %f\n"    ,creal(in->c0[0]) );

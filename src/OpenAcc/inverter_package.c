@@ -4,6 +4,8 @@
 #include "./sp_struct_c_def.h"
 #include "./struct_c_def.h"
 #include "./inverter_package.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -28,7 +30,20 @@ void setup_inverter_package_dp(inverter_package * ip,
     ip->loc_h =  loc_h;
     ip->loc_s =  loc_s;
     ip->loc_p =  loc_p;
-    
+
+    vec3_soa * allptrs[] = {loc_r,loc_h,loc_s, loc_p,ferm_shift_temp};
+    int nptrs = sizeof(allptrs)/sizeof(vec3_soa*);
+    int i,j;
+    // check 
+    for(i=0;i<nptrs;i++) for(j=i+1;j<nptrs;j++)
+        if(allptrs[i] == allptrs[j] && 0 != allptrs[i]){
+            printf("BAD SETUP OF INVERTER PACKAGE! (%s:%d)\n", __FILE__, __LINE__);
+            printf("Pointer %p used twice (%d == %d).\n",allptrs[i],i,j);
+            exit(1);
+        }
+
+
+
 }
 
 void setup_inverter_package_sp(inverter_package * ip, 
@@ -50,7 +65,19 @@ void setup_inverter_package_sp(inverter_package * ip,
     ip->loc_s_f =  loc_s_f;
     ip->loc_p_f =  loc_p_f;
     ip->out_f   =    out_f;
+
+    vec3_soa_f * allptrs[] = {loc_r_f,loc_h_f,loc_s_f, loc_p_f,ferm_shift_temp_f, out_f};
     
+    int nptrs = sizeof(allptrs)/sizeof(vec3_soa_f*);
+    int i,j;
+    // check 
+    for(i=0;i<nptrs;i++) for(j=i+1;j<nptrs;j++)
+        if(allptrs[i] == allptrs[j] && 0 != allptrs[i]){
+            printf("BAD SETUP OF INVERTER PACKAGE! (%s:%d)\n", __FILE__, __LINE__);
+            printf("Pointer %p used twice (%d == %d).\n",allptrs[i],i,j);
+            exit(1);
+        }
+
 }
 
 
