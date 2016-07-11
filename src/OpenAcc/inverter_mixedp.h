@@ -14,7 +14,7 @@
 
 int inverter_mixed_precision( inverter_package ip,
         ferm_param *pars,
-        __restrict vec3_soa_f * solution,// single precision output
+        __restrict vec3_soa * solution,// single precision output
         __restrict const vec3_soa * in, // non viene aggiornato mai qui dentro
         double res,
         const int  max_cg,

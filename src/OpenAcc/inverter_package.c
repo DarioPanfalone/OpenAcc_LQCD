@@ -42,8 +42,6 @@ void setup_inverter_package_dp(inverter_package * ip,
             exit(1);
         }
 
-
-
 }
 
 void setup_inverter_package_sp(inverter_package * ip, 

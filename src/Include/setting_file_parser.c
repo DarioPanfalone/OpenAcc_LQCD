@@ -451,15 +451,15 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
 int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
 
     const int singlePInvAccelMultiInvDef = 0;
-    const int magicTouchEveryDef = 20;
     const int useMixedPrecisionDef = 0;
     const int restartingEveryDef = 10000;
+    const double mixedPrecisionDeltaDef = 0.1; 
 
     par_info iip[]={
         (par_info){(void*) &(invinfo->singlePInvAccelMultiInv),TYPE_INT,"singlePInvAccelMultiInv",1 , (const void*) &singlePInvAccelMultiInvDef},
         (par_info){(void*) &(invinfo->useMixedPrecision),TYPE_INT,"useMixedPrecision",1 , (const void*) &useMixedPrecisionDef},
         (par_info){(void*) &(invinfo->restartingEvery),TYPE_INT,"restartingEvery",1 , (const void*) &restartingEveryDef},
-        (par_info){(void*) &(invinfo->magicTouchEvery),TYPE_INT,"magicTouchEvery",1 , (const void*) &magicTouchEveryDef}};
+        (par_info){(void*) &(invinfo->mixedPrecisionDelta), TYPE_DOUBLE, "mixedPrecisionDelta", 1 ,(const void*)&mixedPrecisionDeltaDef}};
     return scan_group_NV(sizeof(iip)/sizeof(par_info),iip, filelines, startline, endline);
 
 }
