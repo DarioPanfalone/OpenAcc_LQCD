@@ -27,9 +27,9 @@ void combine_add_in2_into_in1_mixed_precision(
 #pragma acc kernels present(in1) present(in2)
 #pragma acc loop independent
   for(int ih=LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih < LNH_SIZEH-LNH_VOL3/2*(D3_HALO-D3_FERMION_HALO); ih++) {
-    in1->c0[ih] += (double)in2->c0[ih];
-    in1->c1[ih] += (double)in2->c1[ih];
-    in1->c2[ih] += (double)in2->c2[ih];
+    in1->c0[ih] += (double)creal(in2->c0[ih])+ I* (double) cimag(in2->c0[ih]);
+    in1->c1[ih] += (double)creal(in2->c1[ih])+ I* (double) cimag(in2->c1[ih]);
+    in1->c2[ih] += (double)creal(in2->c2[ih])+ I* (double) cimag(in2->c2[ih]);
   }
 
 }
@@ -52,6 +52,9 @@ int inverter_mixed_precision(inverter_package ip,
   double delta, alpha, lambda, omega, gammag;
   double lastMaxResNorm=0;
   double source_norm = l2norm2_global(in);
+  
+  int printevery = 10000;
+  for(int q=0;q<verbosity_lv;q++) printevery /= 4;
   if (verbosity_lv > 3 && 0==devinfo.myrank )
   { 
       printf("source_norm: %e, ",source_norm);
@@ -59,6 +62,12 @@ int inverter_mixed_precision(inverter_package ip,
       printf("target residue = %e\n", res*res*source_norm);
   }
 
+  su3_soa_f * u = ip.u_f;
+  __restrict vec3_soa_f * loc_r = ip.loc_r_f ;
+  __restrict vec3_soa_f * loc_h = ip.loc_h_f ;
+  __restrict vec3_soa_f * loc_s = ip.loc_s_f ;
+  __restrict vec3_soa_f * loc_p = ip.loc_p_f ;
+  __restrict vec3_soa_f * out = ip.out_f ;
 
   //// r = in  - M * solution
   // s = M * solution
@@ -67,29 +76,33 @@ int inverter_mixed_precision(inverter_package ip,
   combine_in1_minus_in2(in,ip.loc_s,ip.loc_r);
   
   // \hat{r} = (float)r
-  convert_double_to_float_vec3_soa(ip.loc_r,ip.loc_r_f);
-  // \hat{x} = 0 // 
-  set_vec3_soa_to_zero_f(ip.out_f);
+  convert_double_to_float_vec3_soa(ip.loc_r,loc_r);
 
   // starting with CG, Single precision
-  assign_in_to_out_f(ip.loc_r_f,ip.loc_p_f);
-  delta=l2norm2_global_f(ip.loc_r_f);
+  assign_in_to_out_f(loc_r,loc_p);
+  
+  delta=l2norm2_global_f(loc_r);
+
+
+  // \hat{x} = 0 // 
+  set_vec3_soa_to_zero_f(out);
 
   // loop over cg iterations
   cg=0;
     if (verbosity_lv > 3 && 0==devinfo.myrank )
-      printf("STARTING CG:\nCG\tR\n");
+      printf("STARTING CG:\nCG\tR - mixed precision\n");
 
   do {
     cg++;    
     // s=(M^dag M)p    alpha=(p,s)
-    fermion_matrix_multiplication_shifted_f(ip.u_f,ip.loc_s_f,ip.loc_p_f,ip.loc_h_f,pars,shift);
-    alpha = real_scal_prod_global_f(ip.loc_p_f,ip.loc_s_f);
+    fermion_matrix_multiplication_shifted_f(u,loc_s,loc_p,loc_h,pars,shift);
+    alpha = real_scal_prod_global_f(loc_p,loc_s);
 
     omega=delta/alpha;     
     // solution+=omega*p  r-=omega*s
     // lambda=(r,r);
-    combine_in1xfactor_plus_in2_f(ip.loc_p_f,omega,ip.out_f,ip.out_f);
+    
+    combine_in1xfactor_plus_in2_f(loc_p,omega,out,out);
   
     // calculation of loc_r_f
     // EITHER THIS WAY 
@@ -97,7 +110,7 @@ int inverter_mixed_precision(inverter_package ip,
     // the double precision magic touch
     if(delta < inverter_tricks.mixedPrecisionDelta * lastMaxResNorm){
         // adding the partial solution back to the full solution
-        combine_add_in2_into_in1_mixed_precision(solution,ip.out_f);
+        combine_add_in2_into_in1_mixed_precision(solution,out);
         //// r = in  - M * solution
         // s = M * solution
         fermion_matrix_multiplication_shifted(ip.u,ip.loc_s,solution,ip.loc_h,pars,shift);
@@ -105,33 +118,29 @@ int inverter_mixed_precision(inverter_package ip,
         combine_in1_minus_in2(in,ip.loc_s,ip.loc_r);
 
         // \hat{r} = (float)r
-        //convert_double_to_float_vec3_soa(ip.loc_r,ip.loc_r_f);
+        convert_double_to_float_vec3_soa(ip.loc_r,loc_r);
 
         // \hat{x} = 0 // 
-        set_vec3_soa_to_zero_f(ip.out_f);
+        set_vec3_soa_to_zero_f(out);
 
         lastMaxResNorm=0;
-        if(0==devinfo.myrank && verbosity_lv > 4){
-            printf("Iteration %d, Inverter Mixed Precision: performed magic touch\n", cg);
-            printf("Iteration %d, residue norm: %e (no mt)\n",cg,l2norm2_global_f(ip.loc_r_f));
-            printf("Iteration %d, residue norm: %e (mt)\n",cg,l2norm2_global(ip.loc_r));
+        if(0==devinfo.myrank && cg%printevery==0 ){
+            printf("Iteration %d, Inverter Mixed Precision: \"magic touch\",", cg);
+            printf("residue norm: %e\n",l2norm2_global_f(ip.loc_r_f));
         }
 
 
     // OR THIS WAY
-    }else combine_in1xfactor_plus_in2_f(ip.loc_s_f,-omega,ip.loc_r_f,ip.loc_r_f);
+    }else combine_in1xfactor_plus_in2_f(loc_s,-omega,loc_r,loc_r);
 
     
-    lambda = l2norm2_global_f(ip.loc_r_f);
+    lambda = l2norm2_global_f(loc_r);
     gammag=lambda/delta;
     delta=lambda;
-    if(0==devinfo.myrank && verbosity_lv > 4){
-        printf("Iteration %d, residue norm (no magic touch): %e\n",cg,delta);
-    }
 
 
     // p=r+gammag*p
-    combine_in1xfactor_plus_in2_f(ip.loc_p_f,gammag,ip.loc_r_f,ip.loc_p_f);
+    combine_in1xfactor_plus_in2_f(loc_p,gammag,loc_r,loc_p);
 
 
 
@@ -145,7 +154,7 @@ int inverter_mixed_precision(inverter_package ip,
 
   } while( (sqrt(lambda/source_norm)>res) && cg<max_cg);
 
-  combine_add_in2_into_in1_mixed_precision(solution,ip.out_f);
+  combine_add_in2_into_in1_mixed_precision(solution,out);
 
   if (verbosity_lv > 3  && 0==devinfo.myrank ) printf("\n");
 #if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))

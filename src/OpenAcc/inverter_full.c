@@ -42,7 +42,9 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
         fermion_matrix_multiplication_shifted(u,loc_s,solution,loc_h,pars,shift);
 
         combine_in1_minus_in2(in,loc_s,loc_r);
+ 
         assign_in_to_out(loc_r,loc_p);
+
 
         delta=l2norm2_global(loc_r);
 

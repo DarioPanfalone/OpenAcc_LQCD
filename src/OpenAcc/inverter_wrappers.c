@@ -91,18 +91,13 @@ int inverter_wrapper(inverter_package ip,
     if(mixedPInvTargetRes<res)
         mixedPInvTargetRes = res;
 
-    vec3_soa_f * out_f = ip.out_f;
 
     if(inverter_tricks.useMixedPrecision)
         total_iterations += 
             inverter_mixed_precision(ip,pars,out,
                     in,mixedPInvTargetRes,max_cg,shift);
-
-    if(2 != inverter_tricks.useMixedPrecision)
-    total_iterations += ker_invert_openacc(ip.u, pars,
-            out,in,res,ip.loc_r,ip.loc_h,ip.loc_s,ip.loc_p,max_cg,shift);
-
-
+    
+    else total_iterations += ker_invert_openacc(ip.u, pars,out,in,res,ip.loc_r,ip.loc_h,ip.loc_s,ip.loc_p,max_cg,shift);
    return total_iterations; 
 }
 

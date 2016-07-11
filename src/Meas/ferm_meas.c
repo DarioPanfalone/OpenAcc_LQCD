@@ -153,8 +153,8 @@ void fermion_measures( su3_soa * tconf_acc,
 
     // preparing inverter_package with global variables
     inverter_package ip;
-    setup_inverter_package_dp(&ip,conf_to_use,0,0,kloc_r,kloc_h,kloc_s,kloc_p); 
-    setup_inverter_package_sp(&ip,conf_to_use_f,0,0,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
+    setup_inverter_package_dp(&ip,conf_to_use,ferm_shiftmulti_acc,1,kloc_r,kloc_h,kloc_s,kloc_p); 
+    setup_inverter_package_sp(&ip,conf_to_use_f,ferm_shiftmulti_acc_f,1,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
             aux1_f); 
 
 

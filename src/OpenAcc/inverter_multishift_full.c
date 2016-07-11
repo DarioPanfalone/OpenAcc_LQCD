@@ -51,15 +51,6 @@ int multishift_invert(__restrict const su3_soa * u,
     int flag[MAX_APPROX_ORDER];
 
 
-    printf("out : %p\n",out );               // DEBUG 
-    printf("in : %p\n",in );                
-    printf("loc_r : %p\n",loc_r );           // DEBUG     
-    printf("loc_h : %p\n",loc_h );           // DEBUG     
-    printf("loc_s : %p\n",loc_s );           // DEBUG     
-    printf("loc_p : %p\n",loc_p );           // DEBUG     
-    printf("shiftferm : %p\n", shiftferm);   // DEBUG             
-
-
     int iter;
     double alpha, delta, lambda, omega, omega_save, gammag, fact;
     alpha=0.0;
