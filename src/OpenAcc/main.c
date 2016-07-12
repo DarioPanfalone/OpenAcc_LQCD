@@ -208,9 +208,9 @@ int main(int argc, char* argv[]){
     create(ipdot_acc[0:8]) create(aux_conf_acc[0:8])\
     create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot])\
     create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot])\
-    create(ferm_shiftmulti_acc[0:max_ps*MAX_APPROX_ORDER])\
+    create(ferm_shiftmulti_acc[0:maxNeededShifts])\
     create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])\
-    create(kloc_p[0:1])  create(k_p_shiftferm[0:MAX_APPROX_ORDER])\
+    create(kloc_p[0:1])  create(k_p_shiftferm[0:maxApproxOrder])\
     create(aux1[0:1])\
     create(momenta[0:8])\
     create(momenta_backup[0:8*debug_settings.do_reversibility_test])\
@@ -224,9 +224,9 @@ int main(int argc, char* argv[]){
     create(ipdot_acc_f[0:8]) create(aux_conf_acc_f[0:8])\
     create(auxbis_conf_acc_f[0:8]) create(ferm_chi_acc_f[0:NPS_tot])\
     create(ferm_phi_acc_f[0:NPS_tot])  create(ferm_out_acc_f[0:NPS_tot])\
-    create(ferm_shiftmulti_acc_f[0:max_ps*MAX_APPROX_ORDER])\
+    create(ferm_shiftmulti_acc_f[0:maxNeededShifts])\
     create(kloc_r_f[0:1])  create(kloc_h_f[0:1])  create(kloc_s_f[0:1])\
-    create(kloc_p_f[0:1])  create(k_p_shiftferm_f[0:MAX_APPROX_ORDER])\
+    create(kloc_p_f[0:1])  create(k_p_shiftferm_f[0:maxApproxOrder])\
     create(aux1_f[0:1])\
     create(momenta_f[0:8]) \
     create(local_sums_f[0:2]) create(d_local_sums_f[0:2])\

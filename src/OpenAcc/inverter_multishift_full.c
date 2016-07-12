@@ -7,6 +7,7 @@
 #include "./inverter_multishift_full.h"
 #include "./inverter_full.h"
 #include "./inverter_wrappers.h"
+#include <stdlib.h>
 
 #include "../Mpi/multidev.h"
 
@@ -50,9 +51,11 @@ int multishift_invert(__restrict const su3_soa * u,
     double gammas[MAX_APPROX_ORDER];
     int flag[MAX_APPROX_ORDER];
 
-
+    struct timeval t0,t1,t2,t3;
     int iter;
     double alpha, delta, lambda, omega, omega_save, gammag, fact;
+    
+    gettimeofday(&t0, NULL);
     alpha=0.0;
     // trial solution out = 0, set all flag to 1                                                                                                           
     for(iter=0; iter<(approx->approx_order); iter++){
@@ -94,7 +97,8 @@ int multishift_invert(__restrict const su3_soa * u,
         printf("STARTING CG-M:\nCG\tR");
         for(iter=0; iter<(approx->approx_order); iter++)
             printf("\t%d",iter); printf("\n");
-    } 
+    }
+    gettimeofday(&t1, NULL);
     do {      // loop over cg iterations
         cg++;
 
@@ -177,6 +181,7 @@ int multishift_invert(__restrict const su3_soa * u,
 
         }
     } while(maxiter>0 && cg<max_cg); // end of cg iterations
+    gettimeofday(&t2, NULL);
     multishift_invert_iterations += cg ;  
 
     if(cg==max_cg && 0==devinfo.myrank )
@@ -210,6 +215,20 @@ int multishift_invert(__restrict const su3_soa * u,
         if(verbosity_lv > 5 && 0 == devinfo.myrank) printf("\n");
     }
     if(verbosity_lv > 2 && 0 == devinfo.myrank) printf("\n");
+    gettimeofday(&t3, NULL);
+    // timing calculation
+    double  preloops_time = (double)(t1.tv_sec - t0.tv_sec) + 
+            ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+    double     loops_time = (double)(t2.tv_sec - t1.tv_sec) + 
+            ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
+    double postloops_time = (double)(t3.tv_sec - t2.tv_sec) + 
+            ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
+
+
+    printf("Inverter Multishift timings:\n");
+    printf("Timing PreLoops : %f \n",preloops_time );
+    printf("Timing Loops    : %f / %d (%f per iteration)\n",loops_time,cg,loops_time/cg);
+    printf("Timing PostLoops: %f\n",postloops_time);
 
     return cg;
 
