@@ -167,7 +167,8 @@ int main(int argc, char* argv[]){
         generate_Conf_cold(conf_acc,mc_params.eps_gen);
         printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                 devinfo.myrank);
-        save_conf_wrapper(conf_acc,mc_params.save_conf_name,0,debug_settings.use_ildg);
+        if(debug_settings.SaveAllAtEnd)
+            save_conf_wrapper(conf_acc,mc_params.save_conf_name,0,debug_settings.use_ildg);
         if(debug_settings.use_ildg)
             printf("MPI%02d: You're using ILDG format.\n", devinfo.myrank);
         conf_id_iter=0;
@@ -281,7 +282,8 @@ int main(int argc, char* argv[]){
                             dt_cgm/multishift_invert_iterations);
                 }
             }
-
+           
+            if(debug_settings.SaveAllAtEnd){
 #pragma acc update host(ferm_shiftmulti_acc[0:rationalApproxToUse->approx_order]) // update on host
             for(r=0; r<rationalApproxToUse->approx_order; r++){
 
@@ -293,6 +295,7 @@ int main(int argc, char* argv[]){
 
                 print_vec3_soa_wrapper(&ferm_shiftmulti_acc[r],fermionname_shift);
             }
+	    }
 
 
             // single precision
@@ -324,21 +327,24 @@ int main(int argc, char* argv[]){
                     double dt_cgm_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
                         ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
                     printf("Time for 1 step of multishift inversion   : %e\n",
-                            dt_cgm_f/multishift_invert_iterations);
-                }
-            }
+				    dt_cgm_f/multishift_invert_iterations);
+		}
+	    }
 
-            for(r=0; r<rationalApproxToUse->approx_order; r++){
 
-                char fermionname_shift[50];
-                sprintf(fermionname_shift,"sp_fermion_shift_%d.dat",r);
-
-                // shift fermio names
-                printf("Writing file %s.\n", fermionname_shift);
-
+	    if(debug_settings.SaveAllAtEnd){
 #pragma acc update host(ferm_shiftmulti_acc_f[0:rationalApproxToUse->approx_order]) // update on host
-                print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
-            }
+		    for(r=0; r<rationalApproxToUse->approx_order; r++){
+
+			    char fermionname_shift[50];
+			    sprintf(fermionname_shift,"sp_fermion_shift_%d.dat",r);
+
+			    // shift fermio names
+			    printf("Writing file %s.\n", fermionname_shift);
+
+			    print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
+		    }
+	    }
 
 
             printf("MPI%02d: End of data region!\n", devinfo.myrank);
