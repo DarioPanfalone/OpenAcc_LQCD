@@ -432,6 +432,7 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const int singlePrecMDdef = 0;
     const int max_cg_iterations_def = 10000;
     const int recycleInvsForceDef = 0;
+    const int extrapolateInvsForceDef = 0;
 
     par_info mdp[]={
         (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
@@ -442,7 +443,8 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD",1 , (const void*) &singlePrecMDdef},
         (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL},
         (par_info){(void*) &(mdpar->max_cg_iterations),TYPE_INT, "MaxCGIterations"   , 1 , (const void*) &max_cg_iterations_def},
-        (par_info){(void*) &(mdpar->recycleInvsForce),TYPE_INT, "recycleInvsForce" , 1 , (const void*) &recycleInvsForceDef}};
+        (par_info){(void*) &(mdpar->recycleInvsForce),TYPE_INT, "recycleInvsForce" , 1 , (const void*) &recycleInvsForceDef},
+        (par_info){(void*) &(mdpar->extrapolateInvsForce),TYPE_INT, "extrapolateInvsForce" , 1 , (const void*) &extrapolateInvsForceDef}};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);

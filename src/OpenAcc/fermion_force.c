@@ -193,15 +193,15 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
 
     ipt.u = conf_to_use;
 
-    if(1 == inverter_tricks.singlePInvAccelMultiInv && 1 != md_parameters.singlePrecMD ){
+    if(1 == inverter_tricks.singlePInvAccelMultiInv || 
+            1 == md_parameters.recycleInvsForce){
        if(0==devinfo.myrank && verbosity_lv >2) 
            printf("Converting gauge conf to single precision...\n");
        conf_to_use_f = conf_acc_f; // USING GLOBAL VARIABLE FOR CONVENIENCE
        convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f);
        ipt.u_f = conf_to_use_f;
     }
-    else
-       setup_inverter_package_sp(&ipt,0,0,0,0,0,0,0,0);// passed to this function by copy
+    else setup_inverter_package_sp(&ipt,0,0,0,0,0,0,0,0);// passed to this function by copy
                                                        // this instruction has effect only here
                                                        // in this scope  
 
@@ -210,14 +210,28 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         int ifps = tfermion_parameters[iflav].index_of_the_first_ps;
         for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
 
-            inverter_multishift_wrapper(ipt,&tfermion_parameters[iflav],
-                     &(tfermion_parameters[iflav].approx_md),
-                     tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res, max_cg);
+            if(1==md_parameters.recycleInvsForce && nMdInversionPerformed >= 2 ){
+                int fshift_index = tfermion_parameters[iflav].index_of_the_first_shift;
+                int md_approx_order = tfermion_parameters[iflav].approx_md.approx_order;
+                
+                int ishift;
+                for(ishift =0; ishift < md_approx_order; ishift++){
+                    double shift = tfermion_parameters[iflav].approx_md.RA_b[ishift];
+                    int shiftindex = fshift_index + ips * md_approx_order + ishift;
+                    inverter_wrapper(ipt, &tfermion_parameters[iflav],
+                            &tferm_shiftmulti_acc[shiftindex],&ferm_in_acc[ifps+ips],
+                            res, max_cg, shift, CONVERGENCE_NONCRITICAL);
+                }
+            } else inverter_multishift_wrapper(ipt,&tfermion_parameters[iflav],
+                     &tfermion_parameters[iflav].approx_md,
+                     tferm_shiftmulti_acc, &ferm_in_acc[ifps+ips], res, max_cg,
+                     CONVERGENCE_NONCRITICAL);
 
             ker_openacc_compute_fermion_force(ipt.u, taux_conf_acc, tferm_shiftmulti_acc,
                     ipt.loc_s, ipt.loc_h, &(tfermion_parameters[iflav]));
 
         }
+
 
         // JUST MULTIPLY BY STAGGERED PHASES,
         // BACK FIELD AND/OR CHEMICAL POTENTIAL 
@@ -232,6 +246,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
 
 
     }
+    nMdInversionPerformed++;
 #ifdef STOUT_FERMIONS
 
     for(int stout_level = act_params.stout_steps ; stout_level > 1 ; 

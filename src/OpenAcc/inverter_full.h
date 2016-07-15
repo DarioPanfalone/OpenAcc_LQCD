@@ -9,6 +9,9 @@
  #define __restrict
 #endif
 
+#define INVERTER_SUCCESS 1
+#define INVERTER_FAILURE 0
+
 
 
 #define DEBUG_INVERTER_FULL_OPENACC
@@ -24,7 +27,9 @@ int ker_invert_openacc(   __restrict const su3_soa * u,  // non viene aggiornata
 			  __restrict vec3_soa * loc_s,
 			  __restrict vec3_soa * loc_p,
               const int max_cg,
-              double shift);
+              double shift,
+              int * cg_return );
+
 
 #endif
 

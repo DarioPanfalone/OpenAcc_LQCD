@@ -118,6 +118,11 @@ void combine_in1_minus_in2_allxfact(
         __restrict vec3_soa * const out );
 
 
+// nPrecCalculations even(odd) : next trial 
+// written in the first(second) half of the vector     
+void calc_new_trialsol_for_inversion_in_force(int halfLen,
+        __restrict vec3_soa * inout,
+        int nPrecCalculations);
 
 
 

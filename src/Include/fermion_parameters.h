@@ -48,6 +48,7 @@ extern int maxApproxOrder;
 extern int NDiffFlavs;
 extern int NPS_tot;
 extern int max_ps;
+extern int totalMdShifts;
 extern ferm_param *fermions_parameters;
 
 

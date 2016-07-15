@@ -2,6 +2,7 @@
 #define MD_PARAMETERS_H
 
 
+
 typedef struct md_param_t{
 
     int no_md;// number of MD steps
@@ -13,6 +14,7 @@ typedef struct md_param_t{
     double residue_md;
     int max_cg_iterations;
     int recycleInvsForce;
+    int extrapolateInvsForce;
 
 } md_param; 
 
@@ -21,7 +23,10 @@ extern float deltas_Omelyan_f[7];// must be declared here to copy it in the devi
 
 void initialize_md_global_variables(md_param);
 
-
+extern int nMdInversionPerformed;// used to recycle inversion results
+                                 // after first force calculations are done
 extern md_param md_parameters;
 
 #endif
+
+

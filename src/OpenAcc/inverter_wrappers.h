@@ -6,7 +6,14 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "./struct_c_def.h"
 
+
+
+#define CONVERGENCE_CRITICAL 1
+#define CONVERGENCE_NONCRITICAL 0
+
 extern int multishift_invert_iterations ; // global count of multishift CG iterations
+
+void convergence_messages(int conv_importance, int inverter_status);
 
 int inverter_multishift_wrapper(inverter_package ip,
         ferm_param *pars,
@@ -14,7 +21,8 @@ int inverter_multishift_wrapper(inverter_package ip,
         vec3_soa * out,
         const vec3_soa * in,
         double res,
-        int max_cg);
+        int max_cg,
+        int convergence_importance);
 
 int inverter_wrapper(inverter_package ip,
         ferm_param *pars,
@@ -22,7 +30,8 @@ int inverter_wrapper(inverter_package ip,
         const vec3_soa * in,
         double res,
         int max_cg,
-        double shift);
+        double shift,
+        int convergence_importance);
 
 
 #endif

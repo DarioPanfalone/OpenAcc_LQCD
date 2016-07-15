@@ -7,9 +7,13 @@
 #include "./inverter_multishift_full.h"
 #include "./inverter_full.h"
 #include "./inverter_wrappers.h"
+#include "../Mpi/multidev.h"
+
+#ifdef __GNUC__
+#include "sys/time.h"
+#endif
 #include <stdlib.h>
 
-#include "../Mpi/multidev.h"
 
 #define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
 
@@ -27,7 +31,9 @@ int multishift_invert(__restrict const su3_soa * u,
         __restrict vec3_soa * loc_s,
         __restrict vec3_soa * loc_p,
         __restrict vec3_soa * shiftferm, // multi-ferm [nshift]
-        const int max_cg){
+        const int max_cg,
+        int * cg_return )
+{
     /*********************
      * This function takes an input fermion 'in', a rational approximation
      * 'approx' and writes in 'out' a number of fermions, which are the
@@ -201,6 +207,7 @@ int multishift_invert(__restrict const su3_soa * u,
     }
 
     printf("Relative Res:");
+    int check=1;
     for(iter=0; iter<approx->approx_order; iter++){
         if(verbosity_lv > 5 && 0 == devinfo.myrank)
             printf("Verifying result, shift %d\n", iter);
@@ -208,6 +215,10 @@ int multishift_invert(__restrict const su3_soa * u,
         fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,approx->RA_b[iter]);
         combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
         double  giustoono=l2norm2_global(loc_h)/source_norm;
+        int check_iter;
+        if (giustoono <= 1 ) check_iter =1;
+        else check_iter =0;
+        check *= check_iter;
 
         if(verbosity_lv > 2 && 0 == devinfo.myrank){
             printf("\t%1.1e",sqrt(giustoono)/residuo);
@@ -230,7 +241,11 @@ int multishift_invert(__restrict const su3_soa * u,
     printf("Timing Loops    : %f / %d (%f per iteration)\n",loops_time,cg,loops_time/cg);
     printf("Timing PostLoops: %f\n",postloops_time);
 
-    return cg;
+    *cg_return = cg;
+
+    if(1==check) return INVERTER_SUCCESS;
+    else return INVERTER_FAILURE;
+
 
 }
 

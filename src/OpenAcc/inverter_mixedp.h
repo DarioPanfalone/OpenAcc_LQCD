@@ -18,7 +18,8 @@ int inverter_mixed_precision( inverter_package ip,
         __restrict const vec3_soa * in, // non viene aggiornato mai qui dentro
         double res,
         const int  max_cg,
-        double shift  );
+        double shift,
+        int * cg_return);
 
 
 

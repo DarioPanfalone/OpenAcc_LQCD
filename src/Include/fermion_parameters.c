@@ -28,6 +28,7 @@ int maxApproxOrder;
 int NDiffFlavs;// set in init.c, from input file
 int NPS_tot;
 int max_ps;
+int totalMdShifts;
 ferm_param *fermions_parameters;// set in init.c, from input file
 
 int init_ferm_params(ferm_param *fermion_settings){
@@ -60,7 +61,7 @@ int init_ferm_params(ferm_param *fermion_settings){
     printf("NPS_tot = %d \n",NPS_tot);
     printf("max_ps = %d \n",max_ps);
 
-    int totalMdShifts = 0;
+    totalMdShifts = 0;
     // Rational Approximation related stuff
     for(int i=0;i<NDiffFlavs;i++){
         ferm_param *quark = &fermion_settings[i];
@@ -122,7 +123,8 @@ int init_ferm_params(ferm_param *fermion_settings){
 
         // needed to reuse the results from the inversions
         quark->index_of_the_first_shift = totalMdShifts;
-        totalMdShifts += quark->approx_md_mother.approx_order;
+        totalMdShifts += quark->approx_md_mother.approx_order * quark->number_of_ps;
+     
         if(maxNeededShifts < quark->approx_fi_mother.approx_order)
            maxNeededShifts = quark->approx_fi_mother.approx_order;
         if(maxNeededShifts < quark->approx_md_mother.approx_order)
@@ -133,8 +135,8 @@ int init_ferm_params(ferm_param *fermion_settings){
     }
 
     maxApproxOrder = maxNeededShifts;
-    if(1 == md_parameters.recycleInvsForce && maxNeededShifts < totalMdShifts)
-        maxNeededShifts = totalMdShifts;
+    if(1 == md_parameters.recycleInvsForce && maxNeededShifts < totalMdShifts*2)
+        maxNeededShifts = totalMdShifts*2;
 
     if(0==devinfo.myrank && verbosity_lv > 3){
         printf("MaxApproxOrder found/#define'd: %d / %d\n",maxApproxOrder, MAX_APPROX_ORDER);

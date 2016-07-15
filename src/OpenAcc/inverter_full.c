@@ -28,7 +28,8 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
         __restrict vec3_soa * loc_s,
         __restrict vec3_soa * loc_p,
         const int  max_cg,
-        double shift  )
+        double shift,
+        int * cg_return )
 {
 
     int cg = 0;
@@ -103,7 +104,10 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
         printf("WARNING: maximum number of iterations reached in invert\n");
     }
 
-    return cg;
+    *cg_return = cg;
+    if (sqrt(giustoono) <= res)
+      return INVERTER_SUCCESS;
+    else return INVERTER_FAILURE;
 
 }
 

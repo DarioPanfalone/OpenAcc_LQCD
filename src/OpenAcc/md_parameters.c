@@ -46,6 +46,8 @@ void initialize_md_global_variables(md_param md_params )
 
 }
 
+int nMdInversionPerformed;// used to recycle inversion results
+                              // after first force calculation are done
 md_param md_parameters;
 
 #endif

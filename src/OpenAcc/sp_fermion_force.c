@@ -15,6 +15,7 @@
 #include "./sp_inverter_multishift_full.h"
 #include "../Include/inverter_tricks.h"
 #include "./inverter_package.h"
+#include "./inverter_wrappers.h"
 #include "./md_parameters.h"
 #include "./sp_plaquettes.h"
 #include "./sp_stouting.h"
@@ -22,6 +23,7 @@
 #include "./sp_su3_measurements.h"
 #include "./sp_su3_utilities.h"
 #include "./sp_inverter_multishift_full.h"
+#include "./sp_inverter_full.h"
 
 
 
@@ -190,11 +192,28 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
 
 
             // modified from converted 
-            multishift_invert_f(conf_to_use,&tfermion_parameters[iflav],
+            int converged, cg_return;
+
+            if(1==md_parameters.recycleInvsForce && nMdInversionPerformed >= 2){
+                int fshift_index = tfermion_parameters[iflav].index_of_the_first_shift;
+                int md_approx_order = tfermion_parameters[iflav].approx_md.approx_order;
+                
+                int ishift;
+                for(ishift =0; ishift < md_approx_order; ishift++){
+                    double shift = tfermion_parameters[iflav].approx_md.RA_b[ishift];
+                    int shiftindex = fshift_index + ips * md_approx_order + ishift;
+                    ker_invert_openacc_f(conf_to_use,&tfermion_parameters[iflav],
+                            &tferm_shiftmulti_acc[shiftindex],
+                            &ferm_in_acc[ifps+ips], res,
+                            ipt.loc_r_f, ipt.loc_h_f, ipt.loc_s_f, ipt.loc_p_f,
+                            max_cg, shift, &cg_return);
+                }
+            }else converged = multishift_invert_f(conf_to_use,&tfermion_parameters[iflav],
                      &(tfermion_parameters[iflav].approx_md),
                      tferm_shiftmulti_acc, &(ferm_in_acc[ifps+ips]), res,
                      ipt.loc_r_f, ipt.loc_h_f, ipt.loc_s_f, ipt.loc_p_f,
-                     ipt.ferm_shift_temp_f, max_cg);
+                     ipt.ferm_shift_temp_f, max_cg, &cg_return);
+            convergence_messages(CONVERGENCE_NONCRITICAL, converged);
 
             ker_openacc_compute_fermion_force_f(conf_to_use, taux_conf_acc, tferm_shiftmulti_acc, ipt.loc_s_f, ipt.loc_h_f, &(tfermion_parameters[iflav]));
 
@@ -213,6 +232,7 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
 
 
     }
+    nMdInversionPerformed++;
 #ifdef STOUT_FERMIONS
 
     for(int stout_level = act_params.stout_steps ; stout_level > 1 ; 

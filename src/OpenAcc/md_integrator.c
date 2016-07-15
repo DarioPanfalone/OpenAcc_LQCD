@@ -33,6 +33,7 @@
 #include "./action.h"
 #include "./alloc_vars.h"
 #include "./fermion_force.h"
+#include "./fermionic_utilities.h"
 #include "./ipdot_gauge.h"
 #include "./md_integrator.h"
 #include "./md_parameters.h"
@@ -455,6 +456,9 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 {
     if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_SOLOOPENACC\n");
 
+    vec3_soa * invOuts = tferm_shiftmulti_acc;
+    nMdInversionPerformed = 0; // used to recycle inversion results
+                                   // after first force calculation is done
 
     int md;
 
@@ -467,7 +471,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
             tauxbis_conf_acc, // parkeggio
             tipdot_acc, tfermions_parameters, tNDiffFlavs, 
-            ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
+            ferm_in_acc, res, taux_conf_acc, invOuts, ip,max_cg);
 
     if(verbosity_lv > 4) printf("MPI%02d - Calculated first fermion force/n", 
             devinfo.myrank);
@@ -476,6 +480,9 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
 
     for(md=1; md<md_parameters.no_md; md++){
+
+        if(md_parameters.extrapolateInvsForce)
+            invOuts = &tferm_shiftmulti_acc[totalMdShifts];
 
         printf("\n\nMPI%02d\t\tRUNNING MD STEP %d OF %d...\n",
                 devinfo.myrank, md, md_parameters.no_md);
@@ -496,8 +503,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
                 tauxbis_conf_acc, // parkeggio
                 tipdot_acc, tfermions_parameters, tNDiffFlavs,
-                ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
-
+                ferm_in_acc, res, taux_conf_acc, invOuts,
+                ip,max_cg);
 
 
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,1);
@@ -510,7 +517,12 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif           
             multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
 
-
+        if(md_parameters.extrapolateInvsForce){
+            calc_new_trialsol_for_inversion_in_force(totalMdShifts,tferm_shiftmulti_acc,
+                    nMdInversionPerformed); // nMdInversionPerformed even - trial sol 
+                                            // in the first half of the vector
+            invOuts = tferm_shiftmulti_acc;
+        }        
         // Step for the P
         // P' = P - 2l*dt*dS/dq
         // deltas_Omelyan[2]=-cimag(ieps_acc)*(2.0*lambda);
@@ -520,9 +532,19 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
                 tauxbis_conf_acc, // parkeggio
                 tipdot_acc, tfermions_parameters, tNDiffFlavs,
-                ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
+                ferm_in_acc, res, taux_conf_acc, invOuts, ip,max_cg);
 
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
+
+
+        if(md_parameters.extrapolateInvsForce){
+            calc_new_trialsol_for_inversion_in_force(totalMdShifts,tferm_shiftmulti_acc,
+                    nMdInversionPerformed); // nMdInversionPerformed odd - trial sol 
+                                            // in the second half of the vector
+            invOuts = &tferm_shiftmulti_acc[totalMdShifts];
+        }        
+
+
     }  
 
     printf("\n\nMPI%02d\t\tRUNNING LAST MD STEP OF %d...\n",
@@ -546,7 +568,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
             tauxbis_conf_acc, // parkeggio
             tipdot_acc, tfermions_parameters, tNDiffFlavs,
-            ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
+            ferm_in_acc, res, taux_conf_acc, invOuts, 
+            ip,max_cg);
 
     mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
 
@@ -559,6 +582,13 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
         multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
 
+    if(md_parameters.extrapolateInvsForce){
+        calc_new_trialsol_for_inversion_in_force(totalMdShifts,tferm_shiftmulti_acc,
+                nMdInversionPerformed); // nMdInversionPerformed even - trial sol 
+                                        // in the first half of the vector
+        invOuts = tferm_shiftmulti_acc;
+    }        
+
     // Step for the P
     // P' = P - l*dt*dS/dq
     // deltas_Omelyan[0]=-cimag(ieps_acc)*lambda;
@@ -568,7 +598,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
             tauxbis_conf_acc, // parkeggio
             tipdot_acc, tfermions_parameters, tNDiffFlavs,
-            ferm_in_acc, res, taux_conf_acc, tferm_shiftmulti_acc, ip,max_cg);
+            ferm_in_acc, res, taux_conf_acc, invOuts, ip,max_cg);
 
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
 

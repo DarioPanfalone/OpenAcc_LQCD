@@ -20,6 +20,26 @@
 
 
 
+
+void convergence_messages(int conv_importance, int inverter_status){
+
+        if(INVERTER_FAILURE == inverter_status ){
+            if(CONVERGENCE_CRITICAL == conv_importance){
+                if(0==devinfo.myrank){
+                    printf("\n\n\t\tERROR : inverter failed to converge in a critical region of the code. Exiting now!!\n\n");
+                }
+                exit(1);
+            }
+            if(0==devinfo.myrank){
+                printf("\n\t\tWARNING : inverter failed to converge.\n");
+                }
+        }
+
+
+}
+
+
+
 int multishift_invert_iterations ; // global count of CG iterations
 
 int inverter_multishift_wrapper(inverter_package ip,
@@ -28,9 +48,12 @@ int inverter_multishift_wrapper(inverter_package ip,
         vec3_soa * out,
         const vec3_soa * in,
         double res,
-        int max_cg)
+        int max_cg,
+        int convergence_importance )
 {
     int total_iterations = 0;
+    int cg_return;
+    int temp_conv_check;
 
     if(inverter_tricks.singlePInvAccelMultiInv){
 
@@ -43,9 +66,15 @@ int inverter_multishift_wrapper(inverter_package ip,
         if(0 == devinfo.myrank && verbosity_lv > 3)
            printf("Multishift inverter, single precision, target res %e\n",
                    singlePMultiInvTargetRes);
-        total_iterations += multishift_invert_f(ip.u_f,pars,approx, 
+        temp_conv_check = multishift_invert_f(ip.u_f,pars,approx, 
                 ferm_shiftmulti_acc_f,aux1_f, singlePMultiInvTargetRes, 
-                ip.loc_r_f, ip.loc_h_f, ip.loc_s_f, ip.loc_p_f, ip.ferm_shift_temp_f, max_cg);
+                ip.loc_r_f, ip.loc_h_f, ip.loc_s_f, ip.loc_p_f, ip.ferm_shift_temp_f, 
+                max_cg, &cg_return);
+
+        convergence_messages(convergence_importance, temp_conv_check);
+        total_iterations += cg_return;
+
+
 
         // single inversions  
         int ishift;
@@ -59,9 +88,11 @@ int inverter_multishift_wrapper(inverter_package ip,
                     &(out[ishift]));
 
 
-            total_iterations += inverter_wrapper(ip,pars,&(out[ishift]),
-                        in,res,max_cg,bshift);
+            temp_conv_check = inverter_wrapper(ip,pars,&(out[ishift]),
+                        in,res,max_cg,bshift,convergence_importance);
 
+            convergence_messages(convergence_importance, temp_conv_check);
+            total_iterations += cg_return;
         }
 
     }
@@ -70,9 +101,14 @@ int inverter_multishift_wrapper(inverter_package ip,
         if(0 == devinfo.myrank && verbosity_lv > 3)
            printf("Multishift inverter, DOUBLE precision, target res %e\n",res);
 
-        total_iterations += multishift_invert(ip.u,pars,approx,out,in,res,
-                ip.loc_r,ip.loc_h,ip.loc_s,ip.loc_p,ip.ferm_shift_temp,max_cg);
+        temp_conv_check = multishift_invert(ip.u,pars,approx,out,in,res,
+                ip.loc_r,ip.loc_h,ip.loc_s,ip.loc_p,ip.ferm_shift_temp,max_cg,
+                &cg_return);
 
+        convergence_messages(convergence_importance, temp_conv_check);
+        total_iterations += cg_return;
+        
+        
     }
     return total_iterations;
 
@@ -84,20 +120,25 @@ int inverter_wrapper(inverter_package ip,
         const vec3_soa * in,
         double res,
         int max_cg,
-        double shift){
+        double shift,
+        int convergence_importance)
+{
 
     int total_iterations = 0;
-    float mixedPInvTargetRes = 8e-10f*sqrtf(sizeh);
-    if(mixedPInvTargetRes<res)
-        mixedPInvTargetRes = res;
+    int cg_return;
+    int temp_conv_check;
 
 
     if(inverter_tricks.useMixedPrecision)
-        total_iterations += 
-            inverter_mixed_precision(ip,pars,out,
-                    in,mixedPInvTargetRes,max_cg,shift);
-    
-    else total_iterations += ker_invert_openacc(ip.u, pars,out,in,res,ip.loc_r,ip.loc_h,ip.loc_s,ip.loc_p,max_cg,shift);
+        temp_conv_check = inverter_mixed_precision(ip,pars,out,
+                    in,res,max_cg,shift,&cg_return);
+    else temp_conv_check = ker_invert_openacc(ip.u, pars,out,in,res,
+            ip.loc_r,ip.loc_h,ip.loc_s,ip.loc_p,max_cg,shift,&cg_return);
+
+    convergence_messages(convergence_importance, temp_conv_check);
+
+    total_iterations += cg_return;
+
    return total_iterations; 
 }
 

@@ -249,6 +249,7 @@ int main(int argc, char* argv[]){
 
             struct timeval t0,t1,t2,t3,t4,t5;
             int r;
+            int cg_return;
             if(0 == devinfo.myrank){
                 printf("Multishift Inversion, %d times, with residue %e, shift %e\n",
                         mc_params.ntraj,md_parameters.residue_metro, minshift*minshift );
@@ -273,7 +274,8 @@ int main(int argc, char* argv[]){
                         kloc_s,
                         kloc_p,
                         k_p_shiftferm,
-                        md_parameters.max_cg_iterations);
+                        md_parameters.max_cg_iterations,
+                        &cg_return);
                 gettimeofday(&t1,NULL);
                 if(0==devinfo.myrank){
                     double dt_cgm = (double)(t1.tv_sec - t0.tv_sec) + 
@@ -321,7 +323,8 @@ int main(int argc, char* argv[]){
                         kloc_s_f,
                         kloc_p_f,
                         k_p_shiftferm_f,
-                        md_parameters.max_cg_iterations);
+                        md_parameters.max_cg_iterations,
+                        &cg_return);
                 gettimeofday(&t1_f,NULL);
                 if(0==devinfo.myrank){
                     double dt_cgm_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 

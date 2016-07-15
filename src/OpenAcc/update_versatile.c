@@ -29,6 +29,7 @@
 #include "./sp_su3_measurements.h"
 #include "./su3_utilities.h"
 #include "./update_versatile.h"
+
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
@@ -241,7 +242,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
             inverter_multishift_wrapper(ip, &fermions_parameters[iflav], 
                     &(fermions_parameters[iflav].approx_fi), ferm_shiftmulti_acc,
-                    &(ferm_phi_acc[ps_index]), res_metro,max_cg );
+                    &(ferm_phi_acc[ps_index]), res_metro,max_cg, CONVERGENCE_CRITICAL);
             if(0==devinfo.myrank) printf("Inversion performed for fermion %d, copy %d\n", iflav,ips);
             recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_phi_acc[ps_index]), &(ferm_chi_acc[ps_index]),&(fermions_parameters[iflav].approx_fi));
             if(0==devinfo.myrank) printf("Calculated chi for fermion %d, copy %d\n", iflav,ips);
@@ -360,6 +361,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         multishift_iterations_before_md;
 
 
+
+
     if(devinfo.myrank == 0){
 
         double mdtime = (double)(md_end.tv_sec - md_start.tv_sec) + 
@@ -461,11 +464,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         }
 
         // LAST INV APPROX CALC 
-        setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,maxApproxOrder,
-                kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
+        convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
         setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  maxApproxOrder,
                 kloc_r,  kloc_h,  kloc_s,  kloc_p);  
-        convert_double_to_float_su3_soa(ip.u,ip.u_f);
+        setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,maxApproxOrder,
+                kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
 
         for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
             for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
@@ -473,7 +476,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 // USING STOUTED CONF
                 inverter_multishift_wrapper(ip, &fermions_parameters[iflav], 
                         &(fermions_parameters[iflav].approx_li),
-                        ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro,max_cg);
+                        ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), res_metro,max_cg,
+                        CONVERGENCE_CRITICAL);
                 recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
             }
         }

@@ -23,7 +23,8 @@ int multishift_invert(__restrict const su3_soa * u,
 		      __restrict vec3_soa *  loc_s,
 		      __restrict vec3_soa *  loc_p,
 		      __restrict vec3_soa *  shiftferm, // multi-ferm [nshift]
-              const int max_cg);
+              const int max_cg,
+              int * cg_return);
 
 
 void recombine_shifted_vec3_to_vec3(const __restrict vec3_soa* in_shifted /*multi-fermion*/, 

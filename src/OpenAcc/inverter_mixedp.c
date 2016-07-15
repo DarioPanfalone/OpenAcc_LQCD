@@ -44,7 +44,8 @@ int inverter_mixed_precision(inverter_package ip,
 			  __restrict const vec3_soa * in, // non viene aggiornato mai qui dentro
 			  double res,
               const int  max_cg,
-              double shift  )
+              double shift,
+              int * cg_return)
 {
 
   int cg;
@@ -62,7 +63,7 @@ int inverter_mixed_precision(inverter_package ip,
       printf("target residue = %e\n", res*res*source_norm);
   }
 
-  su3_soa_f * u = ip.u_f;
+  const su3_soa_f * u = ip.u_f;
   __restrict vec3_soa_f * loc_r = ip.loc_r_f ;
   __restrict vec3_soa_f * loc_h = ip.loc_h_f ;
   __restrict vec3_soa_f * loc_s = ip.loc_s_f ;
@@ -173,7 +174,10 @@ int inverter_mixed_precision(inverter_package ip,
       printf("WARNING: maximum number of iterations reached in invert\n");
     }
   
- return cg;
+    *cg_return = cg;
+    if (sqrt(giustoono) <= res)
+      return INVERTER_SUCCESS;
+    else return INVERTER_FAILURE;
 
 }
 
