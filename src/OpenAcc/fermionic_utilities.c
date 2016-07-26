@@ -331,7 +331,7 @@ void multiple_combine_in1_minus_in2x_factor_back_into_in1(
 {
     int ia, ih;
 
-#pragma acc kernels present(in) present(out) copyin(omegas[0:maxiter]) copyin(flag[0:maxiter])
+#pragma acc kernels present(in) present(out) copyin(omegas[0:maxiter]) copyin(flag[0:maxiter]) async(4) 
     {
 #pragma acc cache(omegas[0:maxiter])
 #pragma acc cache(flag[0:maxiter])

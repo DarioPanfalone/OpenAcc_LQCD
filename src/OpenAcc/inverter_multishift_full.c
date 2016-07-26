@@ -137,7 +137,7 @@ int multishift_invert(__restrict const su3_soa * u,
         }
 
         //multiple_combine_in1_minus_in2x_factor_back_into_in1(vec3_soa *out,vec3_soa *in,int maxiter,int *flag,double *omegas)
-        multiple_combine_in1_minus_in2x_factor_back_into_in1(out,shiftferm,maxiter,flag,omegas);
+        multiple_combine_in1_minus_in2x_factor_back_into_in1(out,shiftferm,maxiter,flag,omegas); // async(4)
 
         // r+=omega*s; lambda=(r,r)
         combine_add_factor_x_in2_to_in1(loc_r,loc_s,omega);
@@ -152,6 +152,8 @@ int multishift_invert(__restrict const su3_soa * u,
                 gammas[iter]=gammag*zeta_iii[iter]*omegas[iter]/(zeta_ii[iter]*omega);
             }
         }
+
+#pragma acc wait(4)
 
         //multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(vec3_soa *in1, int maxiter,int *flag,double *gammas,vec3_soa *in2,double *zeta_iii )
         multiple1_combine_in1_x_fact1_plus_in2_x_fact2_back_into_in1(shiftferm,maxiter,flag,gammas,loc_r,zeta_iii);
