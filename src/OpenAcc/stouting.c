@@ -27,7 +27,7 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
 
     if(verbosity_lv > 1) 
         printf("MPI%02d:Stouting gauge conf %d times.\n",
-               devinfo.myrank, act_params.stout_steps);
+                devinfo.myrank, act_params.stout_steps);
 
     if(act_params.stout_steps > 0){
         stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, 
@@ -853,6 +853,7 @@ static inline void RIGHT_miABGC_absent_stag_phases(
         __restrict const thmat_soa * const LG, const int idxG,
         __restrict su3_soa * const RES, const int idxRES)
 {
+
     // Cosa calcoliamo in questa routine:
     //  RES +=  UA * dag(UB) * ((-RHO*I)*LG) * dag(UC)
 
@@ -1190,7 +1191,6 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
 
                         // in questa routine faccio RES = PEZZO1
                         compute_sigma_local_PEZZO1(&L[dir_mu],&U[dir_mu],&S[dir_mu],&QA[dir_mu],&TMP[dir_mu],indice);
-
 #pragma acc loop seq
                         for(iter=0; iter<3; iter++){
                             int nu;
@@ -1200,6 +1200,7 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
                             else if (mu==3) { nu = iter; }
                             else { //error
                             }
+
 
                             const int idxh = snum_acc(d0,d1,d2,d3);  // r
                             const int parity = (d0+d1+d2+d3) % 2;
@@ -1246,7 +1247,6 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
                                     &U[dir_nu_3R],       idxh,    // C
                                     &L[dir_mu_2R],       idx_pnu, // G
                                     &S[dir_link],        idxh);
-
                             const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
                             const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
 
@@ -1282,7 +1282,6 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
                                     &L[dir_nu_1L],       idx_pmu_mnu, // F
                                     &S[dir_link],        idxh);
                         }  // iter
-
 
                     } // mu
 

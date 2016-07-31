@@ -77,40 +77,37 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
     int col_count=2;
     for(int iflv=0;iflv<NDiffFlavs;iflv++){
         char strtocat[200];
-        sprintf(strtocat, "%02d.Reff_%-16s%02d.Imff_%-16s",col_count+1,
-                tferm_par[iflv].name,col_count+2,tferm_par[iflv].name);
+        sprintf(strtocat, "%02d.Reff_%-16s%02d.Imff_%-16s",++col_count,
+                tferm_par[iflv].name,++col_count,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
 
-        sprintf(strtocat, "%02d.ReN_%-17s%02d.ImN_%-17s",col_count+3,
-                tferm_par[iflv].name,col_count+4,tferm_par[iflv].name);
+        sprintf(strtocat, "%02d.ReN_%-17s%02d.ImN_%-17s",++col_count,
+                tferm_par[iflv].name,++col_count,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
 
-        sprintf(strtocat, "%02d.ReMag_%-16s%02d.ImMag_%-16s",col_count+5,
-                tferm_par[iflv].name,col_count+6,tferm_par[iflv].name);
+        sprintf(strtocat, "%02d.ReMag_%-16s%02d.ImMag_%-16s",++col_count,
+                tferm_par[iflv].name,++col_count,tferm_par[iflv].name);
         strcat(fmpar->fermionic_outfile_header,strtocat);
 
-        col_count +=4;
         if (fmpar->DoubleInvNVectorsChiral>0){
             sprintf(strtocat, 
                     "%02d.ReChSuscConn_%-7s%02d.ImChSuscConn_%-7s",
-                    col_count+1,tferm_par[iflv].name,
-                    col_count+2,tferm_par[iflv].name);
+                    ++col_count,tferm_par[iflv].name,
+                    ++col_count,tferm_par[iflv].name);
             strcat(fmpar->fermionic_outfile_header,strtocat);
-            col_count+=2;
         }
         if (fmpar->DoubleInvNVectorsQuarkNumber>0){
             // Actually, the first connected piece does not need a second inversion
             sprintf(strtocat, 
                     "%02d.ReQNSuscConn1_%-6s%02d.ImQNSuscConn1_%-6s",
-                    col_count+1,tferm_par[iflv].name,
-                    col_count+2,tferm_par[iflv].name);
+                    ++col_count,tferm_par[iflv].name,
+                    ++col_count,tferm_par[iflv].name);
             strcat(fmpar->fermionic_outfile_header,strtocat);
             sprintf(strtocat, 
                     "%02d.ReQNSuscConn2_%-7s%02d.ImQNSuscConn2_%-7s",
-                    col_count+3,tferm_par[iflv].name,
-                    col_count+4,tferm_par[iflv].name);
+                    ++col_count,tferm_par[iflv].name,
+                    ++col_count,tferm_par[iflv].name);
             strcat(fmpar->fermionic_outfile_header,strtocat);
-            col_count+=4;
 
         }
 
@@ -150,12 +147,6 @@ void fermion_measures( su3_soa * tconf_acc,
 #endif
     conf_to_use_f = conf_acc_f;// global variable
     convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f); 
-
-    // preparing inverter_package with global variables
-    inverter_package ip;
-    setup_inverter_package_dp(&ip,conf_to_use,ferm_shiftmulti_acc,1,kloc_r,kloc_h,kloc_s,kloc_p); 
-    setup_inverter_package_sp(&ip,conf_to_use_f,ferm_shiftmulti_acc_f,1,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,
-            aux1_f); 
 
 
 
@@ -278,6 +269,13 @@ void fermion_measures( su3_soa * tconf_acc,
             d_complex trdM_dmuMinv_sq_size = 0.0 + 0.0*I; //for connected baryon susc,2
 
             double factor = tfermions_parameters[iflv].degeneracy*0.25/GL_SIZE;
+            // preparing inverter_package with global variables
+            inverter_package ip;
+            setup_inverter_package_dp(&ip,conf_to_use,ferm_shiftmulti_acc,1,kloc_r,kloc_h,
+                    kloc_s,kloc_p); 
+            setup_inverter_package_sp(&ip,conf_to_use_f,ferm_shiftmulti_acc_f,1,kloc_r_f,
+                    kloc_h_f,kloc_s_f,kloc_p_f,aux1_f); 
+
 
                 // FIRST INVERSION
                 // (chi_e,chi_o) = M^{-1} (rnd_e,rnd_o)

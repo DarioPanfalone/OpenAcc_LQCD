@@ -37,6 +37,19 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
     double delta, alpha, lambda, omega, gammag;
 
     double source_norm = l2norm2_global(in);
+    if(verbosity_lv>5) printf("source norm:%f\n",source_norm);
+
+
+    if(verbosity_lv > 4 ){
+        printf("MPI%02d: max_cg  %d, restarting every %d, shift %f\n", devinfo.myrank,
+                max_cg,inverter_tricks.restartingEvery,shift);
+#pragma acc update host(u[0:1])
+        printf("MPI%02d: u[sizeh/2]: %f\n", devinfo.myrank, creal(u[0].r0.c0[sizeh/2]));
+#pragma acc update host(solution[0:1])
+        printf("MPI%02d: solution[sizeh/2]: %f\n", devinfo.myrank, creal(solution[0].c0[sizeh/2]));
+#pragma acc update host(in[0:1])
+        printf("MPI%02d: in[sizeh/2]: %f\n", devinfo.myrank, creal(in[0].c0[sizeh/2]));
+    }
 
     do {
 
@@ -48,6 +61,7 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
 
 
         delta=l2norm2_global(loc_r);
+        if(verbosity_lv>5) printf("Delta:%f",delta);
 
         // loop over cg iterations
         if (verbosity_lv > 3 && 0==devinfo.myrank )
@@ -61,8 +75,10 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
 
             fermion_matrix_multiplication_shifted(u,loc_s,loc_p,loc_h,pars,shift);
             alpha = real_scal_prod_global(loc_p,loc_s);
+            if(verbosity_lv>5) printf("alpha:%e\n",alpha);
 
             omega=delta/alpha;     
+            if(verbosity_lv>5) printf("omega:%e\n",omega);
             // solution+=omega*p  r-=omega*s
             // lambda=(r,r);
 
@@ -70,8 +86,10 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
             combine_in1xfactor_plus_in2(loc_s,-omega,loc_r,loc_r);
 
             lambda = l2norm2_global(loc_r);
+            if(verbosity_lv>5) printf("lambda:%e\n",lambda);
             gammag=lambda/delta;
             delta=lambda;
+            if(verbosity_lv>5) printf("Delta:%e\n",delta);
             // p=r+gammag*p
             combine_in1xfactor_plus_in2(loc_p,gammag,loc_r,loc_p);
 
@@ -83,6 +101,8 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
 
         } while( (sqrt(lambda/source_norm)>res) && 
                 cg_restarted<inverter_tricks.restartingEvery);
+        if(0==devinfo.myrank && verbosity_lv >4)
+            printf("Exited inner cycle in inverter\n");
 
     } while( (sqrt(lambda/source_norm)>res) && cg<max_cg);
 

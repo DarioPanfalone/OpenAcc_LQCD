@@ -56,7 +56,6 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         __restrict const su3_soa * const U,// la var globale e' .... per adesso conf_acc
         __restrict su3_soa * const TMP//la var globale e' aux_conf_acc //PARCHEGGIO??
         ){
-    
     if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF COMPUTE_SIGMA_FROM_SIGMA_PRIME_BACKINTO_SIGMA_PRIME\n");
 
 
@@ -141,6 +140,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Sigma[new]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
     }
 
+
+
 #ifdef MULTIDEVICE
         communicate_gl3_borders(Sigma,1);
 #endif
@@ -211,6 +212,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
 
             if(1==md_parameters.recycleInvsForce && nMdInversionPerformed >= 2 ){
+                if(0==devinfo.myrank && verbosity_lv > 3) 
+                    printf("Recycling old results for force calculation.\n");
                 int fshift_index = tfermion_parameters[iflav].index_of_the_first_shift;
                 int md_approx_order = tfermion_parameters[iflav].approx_md.approx_order;
                 
@@ -226,7 +229,6 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
                      &tfermion_parameters[iflav].approx_md,
                      tferm_shiftmulti_acc, &ferm_in_acc[ifps+ips], res, max_cg,
                      CONVERGENCE_NONCRITICAL);
-
             ker_openacc_compute_fermion_force(ipt.u, taux_conf_acc, tferm_shiftmulti_acc,
                     ipt.loc_s, ipt.loc_h, &(tfermion_parameters[iflav]));
 
@@ -266,6 +268,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         }
 
     }
+
     if(act_params.stout_steps > 0 ){
     if(verbosity_lv > 1) 
         printf("MPI%02d:\t\tSigma' to Sigma [lvl 1 to lvl 0]\n",
@@ -273,6 +276,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
     compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
             aux_th,aux_ta,tconf_acc, taux_conf_acc );
     }
+
 #endif
 
 
