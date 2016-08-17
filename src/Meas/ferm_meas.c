@@ -60,6 +60,7 @@ void eo_inversion(inverter_package ip,
 
 
     combine_in1_x_fact1_minus_in2_back_into_in2(in_e, tfermions_parameters->ferm_mass , phi_e);
+    set_vec3_soa_to_zero(out_e);
     inverter_wrapper(ip,tfermions_parameters,
             out_e,phi_e,res,max_cg,0,CONVERGENCE_CRITICAL);
     acc_Doe(ip.u, phi_o, out_e,tfermions_parameters->phases);

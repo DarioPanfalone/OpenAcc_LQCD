@@ -54,7 +54,6 @@ void setup_inverter_package_sp(inverter_package * ip,
         vec3_soa_f * loc_p_f,
         vec3_soa_f * out_f)
 {
-
     ip->u_f =  u_f;
     ip->ferm_shift_temp_f = ferm_shift_temp_f;
     ip->nshifts = nshifts;
@@ -63,7 +62,6 @@ void setup_inverter_package_sp(inverter_package * ip,
     ip->loc_s_f =  loc_s_f;
     ip->loc_p_f =  loc_p_f;
     ip->out_f   =    out_f;
-
     vec3_soa_f * allptrs[] = {loc_r_f,loc_h_f,loc_s_f, loc_p_f,ferm_shift_temp_f, out_f};
     
     int nptrs = sizeof(allptrs)/sizeof(vec3_soa_f*);

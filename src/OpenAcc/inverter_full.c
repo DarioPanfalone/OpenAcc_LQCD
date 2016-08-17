@@ -37,7 +37,12 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
     double delta, alpha, lambda, omega, gammag;
 
     double source_norm = l2norm2_global(in);
-    if(verbosity_lv>5) printf("source norm:%f\n",source_norm);
+    if(verbosity_lv>5){
+        printf("source nor_:%f\n",source_norm);
+        printf("MPI%02d - ker_invert_openacc - pointers: u=%p,sol=%p,in=%p\n",devinfo.myrank,
+                u,solution,in);
+    }
+
 
 
     if(verbosity_lv > 4 ){

@@ -29,7 +29,7 @@ void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarit
     double rmax = 0;
 
 #pragma acc kernels present(u)
-#pragma acc loop reduction(+:r) 
+#pragma acc loop reduction(+:r) reduction(max:rmax)
     for(int idx = 0; idx < sizeh ; idx++){
         for(int dir = 0; dir < 8 ; dir++){
             single_su3 m;
@@ -38,11 +38,11 @@ void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarit
 
             d_complex err = 1 - detSu3(&m);
             r += creal(err * conj(err));
-            //     rmax = fmax(rmax,creal(err * conj(err)));
+            rmax = fmax(rmax,creal(err * conj(err)));
 
         }
     }
-    printf("Warning: max unitarity deviation NOT calculated (%s:%d)\n",
+    printf("Warning: check max unitarity deviation calculation (%s:%d)\n",
             __FILE__,__LINE__);
     //adding them again
     *avg_unitarity_deviation = r/(sizeh*8);
@@ -60,7 +60,7 @@ void check_unitarity_host( __restrict su3_soa * const u, double * max_unitarity_
     double rmax = 0;
 
     for(int dir = 0; dir < 8 ; dir++){
-        for(int idx = 0; idx < sizeh ; idx++){
+    for(int idx = 0; idx < sizeh ; idx++){
             single_su3 m;
             single_su3_from_su3_soa(&u[dir],idx,&m);
             rebuild3row(&m);
@@ -78,6 +78,67 @@ void check_unitarity_host( __restrict su3_soa * const u, double * max_unitarity_
 
 
 }
+
+void check_unitarity_device_loc( __restrict su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
+
+
+    // removing stag phases
+
+
+    double r = 0;
+    double rmax = 0;
+
+#pragma acc kernels present(u)
+#pragma acc loop reduction(+:r) reduction(max:rmax)
+    for(int idx = (LNH_SIZEH-LOC_SIZEH)/2; idx < (LNH_SIZEH+LOC_SIZEH)/2 ; idx++){
+        for(int dir = 0; dir < 8 ; dir++){
+            single_su3 m;
+            single_su3_from_su3_soa(&u[dir],idx,&m);
+            rebuild3row(&m);
+
+            d_complex err = 1 - detSu3(&m);
+            r += creal(err * conj(err));
+            rmax = fmax(rmax,creal(err * conj(err)));
+
+        }
+    }
+    printf("Warning: check max unitarity deviation calculation (%s:%d)\n",
+            __FILE__,__LINE__);
+    //adding them again
+    *avg_unitarity_deviation = r/(sizeh*8);
+    *max_unitarity_deviation = rmax;
+
+
+}
+void check_unitarity_host_loc( __restrict su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
+
+
+    // removing stag phases
+
+
+    double r = 0;
+    double rmax = 0;
+
+    for(int dir = 0; dir < 8 ; dir++){
+    for(int idx = (LNH_SIZEH-LOC_SIZEH)/2; idx < (LNH_SIZEH+LOC_SIZEH)/2 ; idx++){
+            single_su3 m;
+            single_su3_from_su3_soa(&u[dir],idx,&m);
+            rebuild3row(&m);
+
+            d_complex err = 1 - detSu3(&m);
+            r += creal(err * conj(err));
+            rmax = fmax(rmax,creal(err * conj(err)));
+
+        }
+    }
+    //adding them again
+
+    *avg_unitarity_deviation = r/(sizeh*8);
+    *max_unitarity_deviation = rmax;
+
+
+}
+
 
 
 double calc_momenta_action( const __restrict thmat_soa * const mom,

@@ -357,11 +357,15 @@ int main(int argc, char* argv[]){
 
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
+                check_unitarity_device(conf_acc,&max_unitarity_deviation,
+                        &avg_unitarity_deviation);
+                printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
+                        devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
+
                 fermion_measures(conf_acc,fermions_parameters,
                         &fm_par, md_parameters.residue_metro,
                         md_parameters.max_cg_iterations,
                         id_iter) ;
-
 
                 //-------------------------------------------------// 
                 //--------- MISURA ROBA DI GAUGE ------------------//
