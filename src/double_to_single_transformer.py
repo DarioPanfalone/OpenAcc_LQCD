@@ -385,7 +385,8 @@ for fileName in fileNamesToChange:
                     writeIt = False;
 
 
-            if writeIt: 
+            if writeIt:
+                print "Writing file ", newFile, "..."
                 newFile = open(newFileName,'w')
                 newFile.write(newText)
                 newFile.close()
