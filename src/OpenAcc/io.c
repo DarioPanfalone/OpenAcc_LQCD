@@ -472,7 +472,7 @@ void print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile
     fwrite(pad,1,missing_bytes,fp);
 
     // writing input file in the conf
-    // the string 'input_file_str' should be initialized in ../Include/init.c
+    // the string 'input_file_str' should be initialized in ../Include/setting_file_parser.c
     len = strlen(input_file_str);
     len64 = len;
     if(verbosity_lv > 3) printf("Writing input file into the conf: %" PRIu64 "\n", len64);
