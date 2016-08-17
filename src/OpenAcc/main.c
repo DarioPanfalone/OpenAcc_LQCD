@@ -335,7 +335,7 @@ int main(int argc, char* argv[]){
                         printf("JarzynskiMode, iteration %d/%d (%d to go this run)\n",
                             id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
                     }
-                    bfpar new_backfield_parameters = backfield_parameters;
+                    bf_param new_backfield_parameters = backfield_parameters;
                     new_backfield_parameters.bz = backfield_parameters.bz + 
                         (double) id_iter/mc_params.MaxConfIdIter;
                      
