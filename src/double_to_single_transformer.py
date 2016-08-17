@@ -176,6 +176,7 @@ def findFirstVarName(text): # note: does not work with,e.g. 'int a,b;':
         return min(upperBoundaries)
 
 
+
 # collecting all function names
 for fileName in fileNames:
     print "----------\nChecking file" , fileName , '\n-----------'
@@ -227,10 +228,31 @@ print "Total global variables found: ", len(dpVariableNames)
 # - all function names
 # - all relevant types
 
-ans = '' # answer for 'overwrite file
+ans = '' # answer for 'overwrite file?'
 
-for fileName in fileNames:
+
+fileNamesToChange = list(set(fileNames)-set(filesNoOverwrite))
+fileNamesToChange += filesNoOverwrite
+
+changedFiles = []
+
+for fileName in fileNamesToChange:
     if (len(argv) > 1 and fileName in argv) or len(argv)==1:
+
+        
+        newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)
+        writeIt = True
+        if os.path.exists(newFileName) and ( ans != 'a' or fileName in filesNoOverwrite):
+            ans = ''
+            while ans not in ['y','n','a']:
+                if fileName in filesNoOverwrite:
+                    print "\nWARNING: File " + fileName + " is in the 'protected' file list!"
+                print "Overwrite file \'"+newFileName+"\'? (y=yes,n=no,a=yes to all)"
+                ans = raw_input().lower()
+                if ans == 'n':
+                    writeIt = False
+
+
         f = open(fileName,'r')
         text = f.read()
         newText = str(text)
@@ -343,7 +365,6 @@ for fileName in fileNames:
 
 
        
-        newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)
         
         # adding 'typedef double complex d_complex' in sp_struct_c_def.c
         if  'struct_c_def.h' in fileName:
@@ -351,29 +372,29 @@ for fileName in fileNames:
             newText = newText.replace('typedef float complex f_complex;',\
                    'typedef float complex f_complex; typedef double complex d_complex;\n' )
     
-        writeIt = True
-        
-
-        if os.path.exists(newFileName) and ( ans != 'a' or fileName in filesNoOverwrite):
-            ans = ''
-            while ans not in ['y','n','a']:
-                if fileName in filesNoOverwrite:
-                    print "WARNING: File " + fileName + " is in the 'protected' file list!"
-                print "Overwrite file \'"+newFileName+"\'? (y=yes,n=no,a=yes to all)"
-                ans = raw_input().lower()
-                if ans == 'n':
-                    writeIt = False
         if writeIt : 
-            print "Writing file ", newFileName , " ..."
-            newFile = open(newFileName,'w')
-            newFile.write(newText)
-            newFile.close()
+            print "Checking if ", newFileName, " must be modified..."
+            oldFile = open(newFileName,'r')
+            oldText = oldFile.read()
+            oldFile.close()
+            if newText != oldText:
+                print "... file must be modified. Writing file ", newFileName , " ..."
+                newFile = open(newFileName,'w')
+                newFile.write(newText)
+                newFile.close()
+                changedFiles.append(newFileName)
+            else:
+                print "File ", newFileName, " has no changes and won't be touched."
         f.close()
 
 
 
      
-
+print "\n\nRESUME: Changed files:"
+for changedFile in changedFiles:
+    print changedFile
+if len(changedFiles) == 0 :
+    print "None!"
 
 
 
