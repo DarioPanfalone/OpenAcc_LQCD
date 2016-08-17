@@ -212,6 +212,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         for(int ips = 0 ; ips < tfermion_parameters[iflav].number_of_ps ; ips++){
 
             if(1==md_parameters.recycleInvsForce && nMdInversionPerformed >= 2 ){
+                printf("ERROR, not implemented correctly! %s : %d",__FILE__,__LINE__); exit(1);
                 if(0==devinfo.myrank && verbosity_lv > 3) 
                     printf("Recycling old results for force calculation.\n");
                 int fshift_index = tfermion_parameters[iflav].index_of_the_first_shift;

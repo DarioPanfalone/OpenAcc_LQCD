@@ -195,6 +195,7 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
             int converged, cg_return;
 
             if(1==md_parameters.recycleInvsForce && nMdInversionPerformed >= 2){
+                printf("ERROR, not implemented correctly! %s : %d",__FILE__,__LINE__); exit(1);
                 int fshift_index = tfermion_parameters[iflav].index_of_the_first_shift;
                 int md_approx_order = tfermion_parameters[iflav].approx_md.approx_order;
                 

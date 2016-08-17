@@ -447,7 +447,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         ferm_param * tfermions_parameters,// [nflavs]
         int tNDiffFlavs,
         vec3_soa * ferm_in_acc, //[NPS_tot], will be ferm_chi_acc
-        vec3_soa * tferm_shiftmulti_acc,// parking variable [max_ps*max_approx_order]
+        vec3_soa * tferm_shiftmulti_acc,// parking variable [maxNeededShifts]
         inverter_package ip,
         thmat_soa * tmomenta,
         dcomplex_soa * local_sums,
@@ -458,7 +458,10 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 
     vec3_soa * invOuts = tferm_shiftmulti_acc;
     nMdInversionPerformed = 0; // used to recycle inversion results
-                                   // after first force calculation is done
+                               // after first force calculation is done
+    int ishift;
+    for(ishift =0; ishift < maxNeededShifts; ishift++)
+        set_vec3_soa_to_zero(&tferm_shiftmulti_acc[ishift]);
 
     int md;
 
@@ -481,8 +484,10 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 
     for(md=1; md<md_parameters.no_md; md++){
 
-        if(md_parameters.extrapolateInvsForce)
+        if(md_parameters.extrapolateInvsForce){
+            printf("ERROR, not implemented correctly! %s : %d",__FILE__,__LINE__); exit(1);
             invOuts = &tferm_shiftmulti_acc[totalMdShifts];
+        }
 
         printf("\n\nMPI%02d\t\tRUNNING MD STEP %d OF %d...\n",
                 devinfo.myrank, md, md_parameters.no_md);
@@ -518,6 +523,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
 
         if(md_parameters.extrapolateInvsForce){
+            printf("ERROR, not implemented correctly! %s : %d",__FILE__,__LINE__); exit(1);
             calc_new_trialsol_for_inversion_in_force(totalMdShifts,tferm_shiftmulti_acc,
                     nMdInversionPerformed); // nMdInversionPerformed even - trial sol 
                                             // in the first half of the vector
@@ -538,6 +544,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 
 
         if(md_parameters.extrapolateInvsForce){
+            printf("ERROR, not implemented correctly! %s : %d",__FILE__,__LINE__); exit(1);
             calc_new_trialsol_for_inversion_in_force(totalMdShifts,tferm_shiftmulti_acc,
                     nMdInversionPerformed); // nMdInversionPerformed odd - trial sol 
                                             // in the second half of the vector
@@ -582,7 +589,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 #endif
         multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
 
-    if(md_parameters.extrapolateInvsForce){
+    if(md_parameters.extrapolateInvsForce){ 
+        printf("ERROR, not implemented correctly! %s : %d",__FILE__,__LINE__); exit(1);
         calc_new_trialsol_for_inversion_in_force(totalMdShifts,tferm_shiftmulti_acc,
                 nMdInversionPerformed); // nMdInversionPerformed even - trial sol 
                                         // in the first half of the vector
