@@ -1,6 +1,6 @@
 
 
-#include "./setting_file_parser.h"
+#include "../Include/setting_file_parser.h"
 #include "../Mpi/multidev.h"
 
 #include "stdio.h"

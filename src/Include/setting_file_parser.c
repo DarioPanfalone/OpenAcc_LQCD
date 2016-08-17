@@ -39,7 +39,7 @@ typedef struct par_info_t{
 
     void* par;
     int type;
-    char* name;
+    const char* name;
     int is_optional;
     const void* default_value;
 
@@ -474,7 +474,8 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
     const double epsgen_def = 0.1 ; 
     const char RandGenStatusFilename_def[] = "rgstatus.bin"; 
     const double MaxRunTimeS_def = 1.0e9; // 30 years should be enough
-    const int MaxConfIdIter_def = 1000000; 
+    const int MaxConfIdIter_def = 1000000;
+    const int JarzynskiMode_def = 0;
 
     par_info mcp[]={
         (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
@@ -487,7 +488,9 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
         (par_info){(void*) &(mcpar->RandGenStatusFilename),  TYPE_STR,   "RandGenStatusFilename"  , 1,(const void*) &RandGenStatusFilename_def},
         (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , 1,(const void*) &MaxRunTimeS_def},
         (par_info){(void*) &(mcpar->seed),                   TYPE_INT,   "Seed"                   , 1,(const void*) &seed_def},
-        (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , 1,(const void*) &epsgen_def}};
+        (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , 1,(const void*) &epsgen_def},
+        (par_info){(void*) &(mcpar->JarzynskiMode),             TYPE_DOUBLE,   "JarzynskiMode"                 , 1,(const void*) &JarzynskiMode_def}
+    };
 
     // from here on, you should not have to modify anything.
 

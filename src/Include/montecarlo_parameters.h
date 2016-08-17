@@ -13,6 +13,7 @@ typedef struct MC_PARAM_T{
     char save_conf_name[200];
     int seed;
     double eps_gen;
+    int JarzynskiMode;
 } mc_params_t;
 
 extern mc_params_t mc_params;

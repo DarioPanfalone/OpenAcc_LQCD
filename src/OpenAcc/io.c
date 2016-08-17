@@ -325,7 +325,7 @@ int read_su3_soa_ildg_binary(
             exit(1);
         }
     }else *conf_id_iter = 1;
-
+    
     // read ildg-binary-data (su3 gauge conf)
     if(verbosity_lv>2)
         printf("Reading ildg-binary-data...\n");
