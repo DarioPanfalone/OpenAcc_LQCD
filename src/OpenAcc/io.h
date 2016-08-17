@@ -1,6 +1,7 @@
 #ifndef IO_H_
 #define IO_H_
 
+#include <stdio.h>
 #include "./struct_c_def.h"
 #include "./alloc_vars.h"
 

@@ -68,24 +68,12 @@ int main(int argc, char* argv[]){
 
 
 
-    printf("WELCOME! \n");
     // READ input file.
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
 #endif
 
     set_global_vars_and_fermions_from_input_file(argv[1]);
-    if(debug_settings.do_norandom_test){
-        printf("*******************************************\n");
-        printf("      WELCOME. This is a NORANDOM test.    \n");
-        printf("  MOST things will not be random generated,\n");
-        printf("         but read from memory instead.     \n");
-        printf("               CHECK THE CODE!!            \n");
-        printf("ALSO: setting the number of trajectories to 1.\n");
-        mc_params.ntraj = 1;
-
-    }
-
     verbosity_lv = debug_settings.input_vbl;
 
 #ifdef MULTIDEVICE
@@ -94,6 +82,30 @@ int main(int argc, char* argv[]){
     devinfo.myrank = 0;
     devinfo.nranks = 1;
 #endif
+
+
+    if(0==devinfo.myrank){
+        if(1 == mc_params.JarzynskiMode){
+            printf("********************************************\n");
+            printf("                JARZYNSKI MODE              \n");
+            printf(" check which parameter corresponds to what! \n");
+            printf("********************************************\n");
+
+
+        }
+        if(debug_settings.do_norandom_test){
+            printf("*******************************************\n");
+            printf("      WELCOME. This is a NORANDOM test.    \n");
+            printf("  MOST things will not be random generated,\n");
+            printf("         but read from memory instead.     \n");
+            printf("               CHECK THE CODE!!            \n");
+            printf("ALSO: setting the number of trajectories to 1.\n");
+            mc_params.ntraj = 1;
+
+        }
+    }
+
+
 
 
     if(verbosity_lv > 2) 
@@ -191,6 +203,7 @@ int main(int argc, char* argv[]){
             conf_id_iter=0;
         }
     }
+
     //#################################################################################  
 
 
@@ -279,7 +292,7 @@ int main(int argc, char* argv[]){
 //            return 0 ;      // DEBUG
 
 
-            if(mc_params.ntraj==0){ // MEASURES ONLY
+            if(0 == mc_params.ntraj && 0 == mc_params.JarzynskiMode ){ // MEASURES ONLY
 
                 printf("\n#################################################\n");
                 printf("\tMEASUREMENTS ONLY ON FILE %s\n", mc_params.save_conf_name);
@@ -287,7 +300,7 @@ int main(int argc, char* argv[]){
 
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
-                if(devinfo.myrank == 0)  printf("Fermion Measurements: see file %s\n",
+                if(0 == devinfo.myrank)  printf("Fermion Measurements: see file %s\n",
                         fm_par.fermionic_outfilename);
                 fermion_measures(conf_acc,fermions_parameters,
                         &fm_par, md_parameters.residue_metro, 
@@ -296,7 +309,7 @@ int main(int argc, char* argv[]){
 
                 //-------------------------------------------------// 
                 //--------- MISURA ROBA DI GAUGE ------------------//
-                if(devinfo.myrank == 0 ) printf("Misure di Gauge:\n");
+                if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
                 plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
                 poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
@@ -313,6 +326,24 @@ int main(int argc, char* argv[]){
 
             for(int id_iter=id_iter_offset;id_iter<(mc_params.ntraj+id_iter_offset);
                     id_iter++){
+
+                if(0 == mc_params.JarzynskiMode ){
+                    if(0==devinfo.myrank){
+                        printf("\n\nJarzynskiMode - From bz=%d to bz=%d+1 in %d steps.\n",
+                                backfield_parameters.bz , backfield_parameters.bz, 
+                                mc_params.MaxConfIdIter);
+                        printf("JarzynskiMode, iteration %d/%d (%d to go this run)\n",
+                            id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
+                    }
+                    bfpar new_backfield_parameters = backfield_parameters;
+                    new_backfield_parameters.bz = backfield_parameters.bz + 
+                        (double) id_iter/mc_params.MaxConfIdIter;
+                     
+                    init_all_u1_phases(new_backfield_parameters,fermions_parameters);
+
+                }
+
+
                 struct timeval tstart_cycle;
                 gettimeofday(&tstart_cycle, NULL);
 
