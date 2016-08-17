@@ -251,140 +251,145 @@ for fileName in fileNamesToChange:
                 ans = raw_input().lower()
                 if ans == 'n':
                     writeIt = False
-
-
-        f = open(fileName,'r')
-        text = f.read()
-        newText = str(text)
-
-        # replacing function names
-        for dpFunctionName in dpFunctionNames:
-            reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
-                                      # non-alphanumeric character
-            reToMatch += dpFunctionName 
-            reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
-                                      # non-alphanumeric character
-            newText = re.subn(reToMatch, dpFunctionName + '_f', newText)[0]
-        # changing relevant (soa-like, arrays) types
-        # note : this step could also change function names
-        for dpType in dpToSpDict:
-            reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
-                                      # non-alphanumeric character
-            reToMatch += dpType 
-            reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
-                                      # non-alphanumeric character
-
-            newText = re.subn(reToMatch,dpToSpDict[dpType], newText)[0]
-
-        # changing filenames in '#includes'
-        for fileName2 in fileNames:
-            reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
-                                      # non-alphanumeric character
-            reToMatch += os.path.basename(fileName2) 
-            reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
-                                      # non-alphanumeric character
-            newText = re.subn(reToMatch,'sp_'+os.path.basename(fileName2),newText)[0]
-        #taking care of header guards
-        headerGuard = os.path.basename(fileName).upper().replace('.','_')
-        if headerGuard not in newText:
-            print "Warning, header guard \'" + headerGuard + "\' not found in file " + fileName
-        newText = newText.replace(headerGuard, "SP_"+headerGuard)
-        # taking care of global variables
-        for dpVariableName in dpVariableNames:
-            reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
-                                      # non-alphanumeric character
-            reToMatch += dpVariableName
-            reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
-                                      # non-alphanumeric character
-
-            newText = re.subn(reToMatch,dpVariableName + '_f', newText)[0]
-
-
-
+        
+        if writeIt:
+        
+            f = open(fileName,'r')
+            text = f.read()
+            newText = str(text)
     
-    
-    
-        # it may happen that two transformations appear on the same symbol, 
-        # and an '_f_f' is appended instead of just '_f'
-        #newText = newText.replace('_f_f','_f')
-        #newText = newText.replace('_f_f','_f')
-    
-    
-        newText = newText.replace('deltas_Omelyan','deltas_Omelyan_f')
-        newText = newText.replace('DOUBLE PRECISION VERSION','SINGLE PRECISION VERSION')
-        allSubst = []
-        allSubst.append(('d_complex','f_complex'))
-        allSubst.append(('MPI_DOUBLE','MPI_FLOAT'))
-        allSubst.append(('double','float'))
-        allSubst.append(('conj','conjf'))
-        allSubst.append(('creal','crealf'))
-        allSubst.append(('cimag','cimagf'))
-        allSubst.append(('cos','cosf'))
-        allSubst.append(('sin','sinf'))
-        allSubst.append(('exp','expf'))
-        allSubst.append(('sqrt','sqrtf'))
-        allSubst.append(('pow','powf'))
-        allSubst.append(('fabs','fabsf'))
-        allSubst.append(('C_ZERO','C_ZEROF'))
-        allSubst.append(('C_ONE','C_ONEF'))
-        allSubst.append(('RHO','RHOF'))
-        allSubst.append(('ONE_BY_THREE','ONE_BY_THREEF'))
-        allSubst.append(('ONE_BY_SIX','ONE_BY_SIXF'))
-        allSubst = dict(allSubst)
-
-
-        if fileName in filesALLDtoF:
-            newText = newText.replace('%lf','%f')
-            newText = newText.replace('%.18lf','%f')
-            for subst in allSubst:
+            # replacing function names
+            for dpFunctionName in dpFunctionNames:
                 reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
                                           # non-alphanumeric character
-                reToMatch += subst
+                reToMatch += dpFunctionName 
                 reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
-                                      # non-alphanumeric character
-
-                newText = re.subn(reToMatch,allSubst[subst], newText)[0]
-
-            # find number to convert to float
-            reToMatch = '[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?'
-            reNotToMatch = '%[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?' # no match for format
-                                                                    # specifiers 
-            listend = [0]  # end  f each match
-            for m in re.finditer(reToMatch,newText):
-                listend.append(m.end())
-            for m in re.finditer(reNotToMatch,newText):
-                if m.end() in listend:
-                    listend.remove(m.end())
-            newText2 = ''
-       
-            for i in range(len(listend)-1):
-                newText2 +=newText[listend[i]:listend[i+1]] + 'f'
-            newText2 += newText[listend[-1]:]
-            newText = newText2
-
-
-
-       
-        
-        # adding 'typedef double complex d_complex' in sp_struct_c_def.c
-        if  'struct_c_def.h' in fileName:
-            print "Adding \'typedef double complex d_complex\' to ", newFileName
-            newText = newText.replace('typedef float complex f_complex;',\
-                   'typedef float complex f_complex; typedef double complex d_complex;\n' )
+                                          # non-alphanumeric character
+                newText = re.subn(reToMatch, dpFunctionName + '_f', newText)[0]
+            # changing relevant (soa-like, arrays) types
+            # note : this step could also change function names
+            for dpType in dpToSpDict:
+                reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                          # non-alphanumeric character
+                reToMatch += dpType 
+                reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
+                                          # non-alphanumeric character
     
-        if writeIt : 
-            print "Checking if ", newFileName, " must be modified..."
-            oldFile = open(newFileName,'r')
-            oldText = oldFile.read()
-            oldFile.close()
-            if newText != oldText:
-                print "... file must be modified. Writing file ", newFileName , " ..."
+                newText = re.subn(reToMatch,dpToSpDict[dpType], newText)[0]
+    
+            # changing filenames in '#includes'
+            for fileName2 in fileNames:
+                reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                          # non-alphanumeric character
+                reToMatch += os.path.basename(fileName2) 
+                reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
+                                          # non-alphanumeric character
+                newText = re.subn(reToMatch,'sp_'+os.path.basename(fileName2),newText)[0]
+            #taking care of header guards
+            headerGuard = os.path.basename(fileName).upper().replace('.','_')
+            if headerGuard not in newText:
+                print "Warning, header guard \'" + headerGuard + "\' not found in file " + fileName
+            newText = newText.replace(headerGuard, "SP_"+headerGuard)
+            # taking care of global variables
+            for dpVariableName in dpVariableNames:
+                reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                          # non-alphanumeric character
+                reToMatch += dpVariableName
+                reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
+                                          # non-alphanumeric character
+    
+                newText = re.subn(reToMatch,dpVariableName + '_f', newText)[0]
+    
+    
+    
+        
+        
+        
+            # it may happen that two transformations appear on the same symbol, 
+            # and an '_f_f' is appended instead of just '_f'
+            #newText = newText.replace('_f_f','_f')
+            #newText = newText.replace('_f_f','_f')
+        
+        
+            newText = newText.replace('deltas_Omelyan','deltas_Omelyan_f')
+            newText = newText.replace('DOUBLE PRECISION VERSION','SINGLE PRECISION VERSION')
+            allSubst = []
+            allSubst.append(('d_complex','f_complex'))
+            allSubst.append(('MPI_DOUBLE','MPI_FLOAT'))
+            allSubst.append(('double','float'))
+            allSubst.append(('conj','conjf'))
+            allSubst.append(('creal','crealf'))
+            allSubst.append(('cimag','cimagf'))
+            allSubst.append(('cos','cosf'))
+            allSubst.append(('sin','sinf'))
+            allSubst.append(('exp','expf'))
+            allSubst.append(('sqrt','sqrtf'))
+            allSubst.append(('pow','powf'))
+            allSubst.append(('fabs','fabsf'))
+            allSubst.append(('C_ZERO','C_ZEROF'))
+            allSubst.append(('C_ONE','C_ONEF'))
+            allSubst.append(('RHO','RHOF'))
+            allSubst.append(('ONE_BY_THREE','ONE_BY_THREEF'))
+            allSubst.append(('ONE_BY_SIX','ONE_BY_SIXF'))
+            allSubst = dict(allSubst)
+    
+    
+            if fileName in filesALLDtoF:
+                newText = newText.replace('%lf','%f')
+                newText = newText.replace('%.18lf','%f')
+                for subst in allSubst:
+                    reToMatch = '((?<=\W)|^)' # either preceded by the beginning of the string or a 
+                                              # non-alphanumeric character
+                    reToMatch += subst
+                    reToMatch += '(?=(\W|$))' # either followed by the end of the string or a  
+                                          # non-alphanumeric character
+    
+                    newText = re.subn(reToMatch,allSubst[subst], newText)[0]
+    
+                # find number to convert to float
+                reToMatch = '[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?'
+                reNotToMatch = '%[-+]?[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?' # no match for format
+                                                                        # specifiers 
+                listend = [0]  # end  f each match
+                for m in re.finditer(reToMatch,newText):
+                    listend.append(m.end())
+                for m in re.finditer(reNotToMatch,newText):
+                    if m.end() in listend:
+                        listend.remove(m.end())
+                newText2 = ''
+           
+                for i in range(len(listend)-1):
+                    newText2 +=newText[listend[i]:listend[i+1]] + 'f'
+                newText2 += newText[listend[-1]:]
+                newText = newText2
+    
+    
+    
+           
+            
+            # adding 'typedef double complex d_complex' in sp_struct_c_def.c
+            if  'struct_c_def.h' in fileName:
+                print "Adding \'typedef double complex d_complex\' to ", newFileName
+                newText = newText.replace('typedef float complex f_complex;',\
+                       'typedef float complex f_complex; typedef double complex d_complex;\n' )
+        
+            if os.path.exists(newFileName):
+                print "Checking if ", newFileName, " must be modified..."
+                oldFile = open(newFileName,'r')
+                oldText = oldFile.read()
+                oldFile.close()
+                if newText != oldText:
+                    print "... file must be modified. Writing file ", newFileName , " ..."
+                else:
+                    print "File ", newFileName, " has no changes and won't be touched."
+                    writeIt = False;
+
+
+            if writeIt: 
                 newFile = open(newFileName,'w')
                 newFile.write(newText)
                 newFile.close()
                 changedFiles.append(newFileName)
-            else:
-                print "File ", newFileName, " has no changes and won't be touched."
         f.close()
 
 
