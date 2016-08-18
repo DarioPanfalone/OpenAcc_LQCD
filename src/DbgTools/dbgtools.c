@@ -140,6 +140,56 @@ void calc_loc_abelian_plaquettes(const double_soa* phases, // 8*
        const int mu, const int nu )
 {
   int d0, d1, d2, d3;
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+    for(d2=0; d2<nd2; d2++) {
+      for(d1=0; d1<nd1; d1++) {
+          for(d0=0; d0 < nd0; d0++) {
+	  int idxh,idxpmu,idxpnu;
+	  int parity;
+	  int dir_muA,dir_nuB;
+	  int dir_muC,dir_nuD;
+
+	  idxh = snum_acc(d0,d1,d2,d3);  // r 
+	  parity = (d0+d1+d2+d3) % 2;
+
+	  dir_muA = 2*mu +  parity;
+	  dir_muC = 2*mu + !parity;
+	  idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+	    
+	  dir_nuB = 2*nu + !parity;
+	  dir_nuD = 2*nu +  parity;
+	  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+	  //       r+nu (C)  r+mu+nu
+	  //          +<---+
+	  // nu       |    ^
+	  // ^    (D) V    | (B)
+	  // |        +--->+
+	  // |       r  (A)  r+mu
+	  // +---> mu
+
+      double result =
+          phases[dir_muA].d[idxh] + phases[dir_nuB].d[idxpmu]-
+          phases[dir_muC].d[idxpnu]-phases[dir_nuD].d[idxh];   
+      while (result >  acc_pi ) 
+          result -=  2*acc_pi;
+      while (result <= - acc_pi ) 
+          result +=  2*acc_pi;
+
+	  loc_abelian_plaquettes[parity].d[idxh] = result;
+
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
+
+}
+
+
+void calc_loc_abelian_plaquettes_device(const double_soa* phases, // 8*
+        double_soa * loc_abelian_plaquettes,// 2*
+       const int mu, const int nu )
+{
+  int d0, d1, d2, d3;
 #pragma acc kernels present(phases) present(loc_abelian_plaquettes)
 #pragma acc loop independent gang 
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
@@ -188,6 +238,7 @@ void calc_loc_abelian_plaquettes(const double_soa* phases, // 8*
   }  // d3
 
 }
+
 
 
 void print_all_abelian_plaquettes(const double_soa* phases,const char * filename){

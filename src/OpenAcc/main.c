@@ -340,6 +340,8 @@ int main(int argc, char* argv[]){
                         (double) id_iter/mc_params.MaxConfIdIter;
                      
                     init_all_u1_phases(new_backfield_parameters,fermions_parameters);
+#pragma acc update device(u1_back_phases[0:8*NDiffFlavs])
+#pragma acc update device(u1_back_phases_f[0:8*NDiffFlavs])
 
                 }
 
