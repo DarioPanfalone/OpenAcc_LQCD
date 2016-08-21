@@ -489,7 +489,7 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
         (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , 1,(const void*) &MaxRunTimeS_def},
         (par_info){(void*) &(mcpar->seed),                   TYPE_INT,   "Seed"                   , 1,(const void*) &seed_def},
         (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , 1,(const void*) &epsgen_def},
-        (par_info){(void*) &(mcpar->JarzynskiMode),             TYPE_DOUBLE,   "JarzynskiMode"                 , 1,(const void*) &JarzynskiMode_def}
+        (par_info){(void*) &(mcpar->JarzynskiMode),             TYPE_INT,   "JarzynskiMode"                 , 1,(const void*) &JarzynskiMode_def}
     };
 
     // from here on, you should not have to modify anything.
