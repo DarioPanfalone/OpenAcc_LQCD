@@ -332,7 +332,7 @@ int main(int argc, char* argv[]){
 
                 if(1 == mc_params.JarzynskiMode ){
                     if(0==devinfo.myrank){
-                        printf("\n\nJarzynskiMode - From bz=%d to bz=%d+1 in %d steps.\n",
+                        printf("\n\nJarzynskiMode - From bz=%f to bz=%f+1 in %d steps.\n",
                                 backfield_parameters.bz , backfield_parameters.bz, 
                                 mc_params.MaxConfIdIter);
                         printf("JarzynskiMode, iteration %d/%d (%d to go this run)\n",
