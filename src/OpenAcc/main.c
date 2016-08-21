@@ -499,7 +499,7 @@ int main(int argc, char* argv[]){
                         (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
                         (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
 
-                    if(0==devinfo.myrank) printf("Tot time : %f sec (with measurements)\n");
+                    if(0==devinfo.myrank) printf("Tot time : %f sec (with measurements)\n", cycle_duration);
 
 
                     double total_duration = (double) 
