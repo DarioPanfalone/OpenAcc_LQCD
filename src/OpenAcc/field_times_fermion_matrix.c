@@ -39,13 +39,47 @@ d3p *= (((d3p-nd3) >> 31) & 0x1);\
 #define CLOSE4CYCLES }}}}
 
 
-// 'wf = with a field (for magnetic susceptibility)'
+// 'wf = with a field' (for magnetic susceptibility)
+/*****************************************************
+ * NOTE: here is treated the case of an Abelian field.
+ * The Abelian field will be present in the action in the
+ * usual way, that is, as a phase which multiplies the 
+ * SU(3) links:
+ *
+ * e^{i_phase(x)_\mu} U(x)_\mu \delta_{x+\hat{\mu},y} - h.c.
+ * 
+ * (where h.c. stands for the term where also the delta is 
+ * "transposed).
+ * The following represent the version of the Doe and Deo 
+ * operators, composed of the links (su3 * phase), where the links
+ * are multiplied by an external, complex, field.
+ *
+ * IMPORTANT EXAMPLE
+ * They CAN be used to represent, e.g. \partial M / \partial b,
+ * BUT the external field added must be IMAGINARY PURE, that is
+ * the derivative of I*PHASE, not the derivative of PHASE only.
+ * Notice that indeed the derivative would be 
+ *
+ * i (dphase(x)_\mu / db) e^{i_phase(x)_\mu} U(x)_\mu \delta_{x+\hat{\mu},y} 
+ * + i dphase(x)_\mu / db e^{-i_phase(x)_\mu} U^\dagger(x)_\mu \delta_{y+\hat{\mu},x} 
+ *
+ * THE SIGN is PLUS. The last expression can be obviously rewritten as 
+ *
+ * i (dphase(x)_\mu / db) e^{i_phase(x)_\mu} U(x)_\mu \delta_{x+\hat{\mu},y} - h.c.
+ *
+ * The following functions take as input :
+ * - the SU(3) links
+ * - the abelian phase
+ * - the derivative of I*phase with respect to the field parameters (e.g. b_z): this 
+ *   is a complex field.
+ *
+ * *********************************************************************************/
 void acc_Deo_wf_unsafe( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
         const double_soa * phases,
         __restrict const double_soa* field_re,   // e.g. e^(i phi_1 ) - e^(i phi_2),
-        __restrict const double_soa* field_im)   // or i dphi/dbz
+        __restrict const double_soa* field_im)   // or I dphi/dbz : notice the I
 {
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(phases)\
@@ -107,7 +141,7 @@ void acc_Doe_wf_unsafe( __restrict const su3_soa * const u,
         __restrict const vec3_soa * const in,
         const double_soa * phases,
         __restrict const double_soa* field_re,   // e.g. e^(i phi_1 ) - e^(i phi_2),
-        __restrict const double_soa* field_im)   // or i dphi/dbz  
+        __restrict const double_soa* field_im)   // or I * dphi/dbz  : notice the I
 {
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(phases)\
