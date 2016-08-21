@@ -330,8 +330,13 @@ void fermion_measures( su3_soa * tconf_acc,
                         tfermions_parameters[iflv].mag_re,
                         tfermions_parameters[iflv].mag_im);
 
-                magnetization_size = scal_prod_global(rnd_e,magchi_e)+
+                magnetization_size = - scal_prod_global(rnd_e,magchi_e) -
                     scal_prod_global(rnd_o,magchi_o);
+
+                // Notice: 
+                // the minus sign comes from the fact that G = U - TS - MH/beta = 1/beta ln Z 
+                // (right) 
+                // and the results of the scalar product are dG/dH
 
                 if(devinfo.myrank == 0)
                     fprintf(foutfile,"%.16lf\t%.16lf\t",
