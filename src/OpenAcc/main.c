@@ -327,7 +327,10 @@ int main(int argc, char* argv[]){
             for(int id_iter=id_iter_offset;id_iter<(mc_params.ntraj+id_iter_offset);
                     id_iter++){
 
-                if(0 == mc_params.JarzynskiMode ){
+                struct timeval tstart_cycle;
+                gettimeofday(&tstart_cycle, NULL);
+
+                if(1 == mc_params.JarzynskiMode ){
                     if(0==devinfo.myrank){
                         printf("\n\nJarzynskiMode - From bz=%d to bz=%d+1 in %d steps.\n",
                                 backfield_parameters.bz , backfield_parameters.bz, 
@@ -345,9 +348,6 @@ int main(int argc, char* argv[]){
 
                 }
 
-
-                struct timeval tstart_cycle;
-                gettimeofday(&tstart_cycle, NULL);
 
                 check_unitarity_device(conf_acc,&max_unitarity_deviation,
                         &avg_unitarity_deviation);
@@ -381,6 +381,15 @@ int main(int argc, char* argv[]){
                             md_parameters.residue_metro,md_parameters.residue_md,
                             id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
                             md_parameters.max_cg_iterations);
+                    if(0==devinfo.myrank){
+                        int iterations = id_iter-id_iter_offset-accettate_therm +1;
+                        double acceptance = (double) accettate_metro / iterations;
+                        double acc_err = 
+                            sqrt(accettate_metro*(iterations-accettate_metro)/iterations)
+                            /iterations;
+                        printf("Estimated acceptance for this run: %f +- %f\n",acceptance,
+                                acc_err);
+                    }
                 }
 
 
@@ -489,6 +498,10 @@ int main(int argc, char* argv[]){
                     double cycle_duration = (double) 
                         (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
                         (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
+
+                    if(0==devinfo.myrank) printf("Tot time : %f sec (with measurements)\n");
+
+
                     double total_duration = (double) 
                         (tend_cycle.tv_sec - tinit.tv_sec)+
                         (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
