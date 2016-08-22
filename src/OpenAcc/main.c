@@ -331,17 +331,20 @@ int main(int argc, char* argv[]){
                 gettimeofday(&tstart_cycle, NULL);
 
                 if(1 == mc_params.JarzynskiMode ){
+                    
+                    bf_param new_backfield_parameters = backfield_parameters;
+                    new_backfield_parameters.bz = backfield_parameters.bz + 
+                        (double) id_iter/mc_params.MaxConfIdIter;
+ 
                     if(0==devinfo.myrank){
                         printf("\n\nJarzynskiMode - From bz=%f to bz=%f+1 in %d steps.\n",
                                 backfield_parameters.bz , backfield_parameters.bz, 
                                 mc_params.MaxConfIdIter);
-                        printf("JarzynskiMode, iteration %d/%d (%d to go this run)\n",
+                        printf("JarzynskiMode, iteration %d/%d (%d max for this run)\n",
                             id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
+                        printf("JarzynskiMode - current bz value : %f\n", new_backfield_parameters.bz);
                     }
-                    bf_param new_backfield_parameters = backfield_parameters;
-                    new_backfield_parameters.bz = backfield_parameters.bz + 
-                        (double) id_iter/mc_params.MaxConfIdIter;
-                     
+                    
                     init_all_u1_phases(new_backfield_parameters,fermions_parameters);
 #pragma acc update device(u1_back_phases[0:8*NDiffFlavs])
 #pragma acc update device(u1_back_phases_f[0:8*NDiffFlavs])
