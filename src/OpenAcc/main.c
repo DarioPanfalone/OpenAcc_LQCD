@@ -521,7 +521,7 @@ int main(int argc, char* argv[]){
                     }
 
                     // program exits if MaxConfIdIter is reached
-                    if(conf_id_iter >= mc_params.MaxConfIdIter ){
+                    if(conf_id_iter > mc_params.MaxConfIdIter ){
 
                         printf("%s - MaxConfIdIter=%d reached, job done!",
                                 devinfo.myrankstr, mc_params.MaxConfIdIter);
