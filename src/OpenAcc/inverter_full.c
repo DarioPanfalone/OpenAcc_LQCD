@@ -15,8 +15,7 @@
 #include "openacc.h"
 #endif
 
-#define DEBUG_INVERTER_FULL_OPENACC
-
+#define SAFETY_MARGIN 0.95
 
 int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai qui dentro
         ferm_param *pars,
@@ -104,7 +103,7 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
 
             }
 
-        } while( (sqrt(lambda/source_norm)>res) && 
+        } while( (sqrt(lambda/source_norm)>res*SAFETY_MARGIN) && 
                 cg_restarted<inverter_tricks.restartingEvery);
         if(0==devinfo.myrank && verbosity_lv >4)
             printf("Exited inner cycle in inverter\n");
@@ -113,7 +112,6 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
 
 
     if (verbosity_lv > 3  && 0==devinfo.myrank ) printf("\n");
-#if ((defined DEBUG_MODE) || (defined DEBUG_INVERTER_FULL_OPENACC))
 
     fermion_matrix_multiplication_shifted(u,loc_s,solution,loc_h,pars,shift);
     combine_in1_minus_in2(in,loc_s,loc_h); // r = s - y  
@@ -123,7 +121,6 @@ int ker_invert_openacc(__restrict const su3_soa * u, // non viene aggiornata mai
         printf("[res/stop_res=  %e , stop_res=%e ]\n",
                 sqrt(giustoono)/res,res);
     }
-#endif
     if(cg==max_cg  && 0==devinfo.myrank )
     {
         printf("WARNING: maximum number of iterations reached in invert\n");

@@ -37,6 +37,7 @@ void combine_add_in2_into_in1_mixed_precision(
 
 // based on https://arxiv.org/pdf/0911.3191v2.pdf, pg.20
 
+#define SAFETY_MARGIN 0.9
 
 int inverter_mixed_precision(inverter_package ip,
 			  ferm_param *pars,
@@ -153,7 +154,7 @@ int inverter_mixed_precision(inverter_package ip,
 
 
 
-  } while( (sqrt(lambda/source_norm)>res) && cg<max_cg);
+  } while( (sqrt(lambda/source_norm)>res*SAFETY_MARGIN) && cg<max_cg);
 
   combine_add_in2_into_in1_mixed_precision(solution,out);
 

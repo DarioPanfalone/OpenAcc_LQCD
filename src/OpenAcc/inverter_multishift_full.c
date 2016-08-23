@@ -15,7 +15,7 @@
 #include <stdlib.h>
 
 
-#define DEBUG_INVERTER_SHIFT_MULTI_FULL_OPENACC
+#define SAFETY_MARGIN 0.95 
 
 extern int verbosity_lv;
 
@@ -162,7 +162,7 @@ int multishift_invert(__restrict const su3_soa * u,
         for(iter=0; iter<(approx->approx_order); iter++){
             if(flag[iter]==1){
                 fact=sqrt(delta*zeta_ii[iter]*zeta_ii[iter]/source_norm);
-                if(fact<residuo) flag[iter]=0;
+                if(fact<residuo*SAFETY_MARGIN) flag[iter]=0;
                 else maxiter = iter+1;// modifying maxiter
                 zeta_i[iter]=zeta_ii[iter];
                 zeta_ii[iter]=zeta_iii[iter];
