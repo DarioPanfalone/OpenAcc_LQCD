@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
 
 
     if(0==devinfo.myrank){
-        if(1 == mc_params.JarzynskiMode){
+        if(0 != mc_params.JarzynskiMode){
             printf("********************************************\n");
             printf("                JARZYNSKI MODE              \n");
             printf(" check which parameter corresponds to what! \n");
@@ -288,8 +288,8 @@ int main(int argc, char* argv[]){
             //dbg_print_su3_soa(conf_acc,confile_dbg,0);
 
 
-//            MPI_Finalize(); // DEBUG
-//            return 0 ;      // DEBUG
+            //            MPI_Finalize(); // DEBUG
+            //            return 0 ;      // DEBUG
 
 
             if(0 == mc_params.ntraj && 0 == mc_params.JarzynskiMode ){ // MEASURES ONLY
@@ -330,21 +330,39 @@ int main(int argc, char* argv[]){
                 struct timeval tstart_cycle;
                 gettimeofday(&tstart_cycle, NULL);
 
-                if(1 == mc_params.JarzynskiMode ){
-                    
+                if(0 != mc_params.JarzynskiMode ){
+
                     bf_param new_backfield_parameters = backfield_parameters;
-                    new_backfield_parameters.bz = backfield_parameters.bz + 
-                        (double) id_iter/mc_params.MaxConfIdIter;
- 
+
+                    // DIRECT MODE 
+                    if(1 == mc_params.JarzynskiMode)
+                        new_backfield_parameters.bz = backfield_parameters.bz + 
+                            (double) id_iter/mc_params.MaxConfIdIter;
+                    // REVERSE MODE
+                    if(-1 == mc_params.JarzynskiMode)
+                        new_backfield_parameters.bz = backfield_parameters.bz -
+                            (double) id_iter/mc_params.MaxConfIdIter;
+
+
+
+
                     if(0==devinfo.myrank){
-                        printf("\n\nJarzynskiMode - From bz=%f to bz=%f+1 in %d steps.\n",
+                       
+                    if(1 == mc_params.JarzynskiMode)
+                        printf("\n\nJarzynskiMode - DIRECT - From bz=%f to bz=%f+1 in %d steps.\n",
                                 backfield_parameters.bz , backfield_parameters.bz, 
                                 mc_params.MaxConfIdIter);
+                    if(-1 == mc_params.JarzynskiMode)
+                        printf("\n\nJarzynskiMode - REVERSE - From bz=%f to bz=%f-1 in %d steps.\n",
+                                backfield_parameters.bz , backfield_parameters.bz, 
+                                mc_params.MaxConfIdIter);
+
+
                         printf("JarzynskiMode, iteration %d/%d (%d max for this run)\n",
-                            id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
+                                id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
                         printf("JarzynskiMode - current bz value : %f\n", new_backfield_parameters.bz);
                     }
-                    
+
                     init_all_u1_phases(new_backfield_parameters,fermions_parameters);
 #pragma acc update device(u1_back_phases[0:8*NDiffFlavs])
 #pragma acc update device(u1_back_phases_f[0:8*NDiffFlavs])
