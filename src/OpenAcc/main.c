@@ -428,7 +428,7 @@ int main(int argc, char* argv[]){
                 fermion_measures(conf_acc,fermions_parameters,
                         &fm_par, md_parameters.residue_metro,
                         md_parameters.max_cg_iterations,
-                        id_iter) ;
+                        conf_id_iter) ;
 
                 //-------------------------------------------------// 
                 //--------- MISURA ROBA DI GAUGE ------------------//
