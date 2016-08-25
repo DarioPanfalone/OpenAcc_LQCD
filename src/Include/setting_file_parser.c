@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <strings.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include <inttypes.h>
 #include <stdint.h>
@@ -40,8 +41,8 @@ typedef struct par_info_t{
     void* par;
     int type;
     const char* name;
-    int is_optional;
     const void* default_value;
+    const char* comment;
 
 }par_info;
 
@@ -181,37 +182,28 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {   
     if(startline >= endline){ // goes into 'help mode'
-        for(int ipar = 0;ipar< npars ; ipar++){
-            if(par_infos[ipar].is_optional) switch(par_infos[ipar].type){
+        if(0==devinfo.myrank)for(int ipar = 0;ipar< npars ; ipar++){
+            // printing name
+            fprintf(helpfile,"%-30s",par_infos[ipar].name);
+           
+            // printing default value (if present)
+            if(par_infos[ipar].default_value) switch(par_infos[ipar].type){
                 case TYPE_INT:
-                    if(0==devinfo.myrank) fprintf(
-                            helpfile,"%-30s%-20d#%s\n",
-                            par_infos[ipar].name,
-                            *((const int *) par_infos[ipar].default_value),
-                            type_strings[par_infos[ipar].type]);
+                    fprintf(helpfile,"%-20d",*((const int *) par_infos[ipar].default_value ));
                     break;
                 case TYPE_DOUBLE:
-                    if(0==devinfo.myrank) fprintf(
-                            helpfile,"%-30s%-20e#%s\n",
-                            par_infos[ipar].name,
-                            *((const double *) par_infos[ipar].default_value),
-                            type_strings[par_infos[ipar].type]);
+                    fprintf(helpfile,"%-20e",*((const double *) par_infos[ipar].default_value));
                     break;
                 case TYPE_STR:
-                    if(0==devinfo.myrank) fprintf(
-                            helpfile,"%-30s%-20s#%s\n",
-                            par_infos[ipar].name,
-                            ((const char *) par_infos[ipar].default_value),
-                            type_strings[par_infos[ipar].type]);
-
-
+                    fprintf(helpfile,"%-20s",((const char *) par_infos[ipar].default_value));
                     break;
             }
-            else 
-                if(0==devinfo.myrank) fprintf(
-                        helpfile,"%-50s#%s\n",
-                        par_infos[ipar].name,
-                        type_strings[par_infos[ipar].type]);
+            else fprintf(helpfile,"%-20s","(set yours!)");
+
+            // printing type
+            fprintf(helpfile,"#%s\n",type_strings[par_infos[ipar].type]);
+            if(par_infos[ipar].comment)
+                fprintf(helpfile,"%s\n\n",par_infos[ipar].comment);
 
         }
         return 0;
@@ -314,7 +306,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 if (rc[i]==0){
                     if(0==devinfo.myrank)
                         printf("  (NOTICE) Parameter %s not set in input file.",par_infos[i].name);
-                    if(par_infos[i].is_optional==1){
+                    if(par_infos[i].default_value){
                         if(0==devinfo.myrank)
                             printf(" Parameter is optional. Default value: ");
                         switch(par_infos[i].type){
@@ -363,12 +355,12 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
     // see /Include/fermion_parameters.h
 
     par_info fp[]={
-        (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          , 0 , NULL},
-        (par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , "Degeneracy"    , 0 , NULL},
-        (par_info){(void*) &(flpar->number_of_ps    ),TYPE_INT   , "PseudoFermions", 0 , NULL},
-        (par_info){(void*) &(flpar->name            ),TYPE_STR   , "Name"          , 0 , NULL},
-        (par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, "Charge"        , 0 , NULL},
-        (par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, "MuOverPiT"     , 0 , NULL}};
+        (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          , NULL,NULL},
+        (par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , "Degeneracy"    , NULL,NULL},
+        (par_info){(void*) &(flpar->number_of_ps    ),TYPE_INT   , "PseudoFermions", NULL,NULL},
+        (par_info){(void*) &(flpar->name            ),TYPE_STR   , "Name"          , NULL,NULL},
+        (par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, "Charge"        , NULL,NULL},
+        (par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, "MuOverPiT"     , NULL,NULL}};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(fp)/sizeof(par_info),fp, filelines, startline, endline);
@@ -381,9 +373,9 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
     const double stout_rho_def = RHO;
 
     par_info ap[]={
-        (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      , 0 , NULL},
-        (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps", 0 , NULL},
-        (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  , 1 , (const void*) &stout_rho_def}};
+        (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      , NULL,NULL},
+        (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps", NULL,NULL},
+        (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  , (const void*) &stout_rho_def,NULL}};
 
 
     // from here on, you should not have to modify anything.
@@ -412,12 +404,12 @@ int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH],
     // see /OpenAcc/backfield.h
     const double default_value = 0.0;
     par_info bfp[]={
-        (par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, "ex", 1 ,(const void*) &default_value  },
-        (par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, "ey", 1 ,(const void*) &default_value  },
-        (par_info){(void*) &(bfpar->ez ),TYPE_DOUBLE, "ez", 1 ,(const void*) &default_value  },
-        (par_info){(void*) &(bfpar->bx ),TYPE_DOUBLE, "bx", 1 ,(const void*) &default_value  },
-        (par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, "by", 1 ,(const void*) &default_value  },
-        (par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, "bz", 1 ,(const void*) &default_value  }};
+        (par_info){(void*) &(bfpar->ex ),TYPE_DOUBLE, "ex", (const void*) &default_value  ,NULL},
+        (par_info){(void*) &(bfpar->ey ),TYPE_DOUBLE, "ey", (const void*) &default_value  ,NULL},
+        (par_info){(void*) &(bfpar->ez ),TYPE_DOUBLE, "ez", (const void*) &default_value  ,NULL},
+        (par_info){(void*) &(bfpar->bx ),TYPE_DOUBLE, "bx", (const void*) &default_value  ,NULL},
+        (par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, "by", (const void*) &default_value  ,NULL},
+        (par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, "bz", (const void*) &default_value  ,NULL}};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(bfp)/sizeof(par_info),bfp, filelines, startline, endline);
@@ -433,18 +425,24 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
     const int max_cg_iterations_def = 10000;
     const int recycleInvsForceDef = 0;
     const int extrapolateInvsForceDef = 0;
+    
+    const char singlePrecMD_comment[] = "#For volumes large as or larger than about 24^4 double precision MD is needed. ";
+    const char residue_md_comment[] = "#If using single precision MD, the residue can't reliably be set to less than 1e-4" ;
+    const char recycleInvsForce_comment[] = "# For chronological inverters - not implemented - keep 0 or remove";
+    const char extrapolateInvsForce_comment[] = "# For chronological inverters - not implemented - keep 0 or remove";
+    const char expmaxeigenv_comment[] = "# 5.5 is ok for 2 stout, with less stouting this number must be higher. " ; 
 
     par_info mdp[]={
-        (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , 0 , NULL},
-        (par_info){(void*) &(mdpar->gauge_scale ), TYPE_INT, "GaugeSubSteps", 0 , NULL},
-        (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   , 1 , (const void*) &tlendef},
-        (par_info){(void*) &(mdpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , 0, NULL},
-        (par_info){(void*) &(mdpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , 1,(const void*) &expmaxeigenv_def},
-        (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD",1 , (const void*) &singlePrecMDdef},
-        (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , 0 , NULL},
-        (par_info){(void*) &(mdpar->max_cg_iterations),TYPE_INT, "MaxCGIterations"   , 1 , (const void*) &max_cg_iterations_def},
-        (par_info){(void*) &(mdpar->recycleInvsForce),TYPE_INT, "recycleInvsForce" , 1 , (const void*) &recycleInvsForceDef},
-        (par_info){(void*) &(mdpar->extrapolateInvsForce),TYPE_INT, "extrapolateInvsForce" , 1 , (const void*) &extrapolateInvsForceDef}};
+        (par_info){(void*) &(mdpar->no_md ),       TYPE_INT, "NmdSteps"     , NULL,NULL},
+        (par_info){(void*) &(mdpar->gauge_scale ), TYPE_INT, "GaugeSubSteps", NULL,NULL},
+        (par_info){(void*) &(mdpar->t ),        TYPE_DOUBLE, "TrajLength"   , (const void*) &tlendef,NULL},
+        (par_info){(void*) &(mdpar->residue_metro),       TYPE_DOUBLE,   "residue_metro"          , NULL,NULL},
+        (par_info){(void*) &(mdpar->expected_max_eigenvalue),TYPE_DOUBLE,"ExpMaxEigenvalue"       , (const void*) &expmaxeigenv_def,expmaxeigenv_comment},
+        (par_info){(void*) &(mdpar->singlePrecMD),TYPE_INT , "SinglePrecMD", (const void*) &singlePrecMDdef,singlePrecMD_comment},
+        (par_info){(void*) &(mdpar->residue_md),TYPE_DOUBLE, "residue_md"   , NULL,residue_md_comment},
+        (par_info){(void*) &(mdpar->max_cg_iterations),TYPE_INT, "MaxCGIterations" , (const void*) &max_cg_iterations_def,NULL},
+        (par_info){(void*) &(mdpar->recycleInvsForce),TYPE_INT, "recycleInvsForce" , (const void*) &recycleInvsForceDef,recycleInvsForce_comment},
+        (par_info){(void*) &(mdpar->extrapolateInvsForce),TYPE_INT, "extrapolateInvsForce", (const void*) &extrapolateInvsForceDef,extrapolateInvsForce_comment}};
 
     // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);
@@ -457,11 +455,13 @@ int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELEN
     const int restartingEveryDef = 10000;
     const double mixedPrecisionDeltaDef = 0.1; 
 
+    const char singlePInvAccelMultiInv_comment[] = "# At present, multishift inverter is faster. Keep 0 or delete.";
+
     par_info iip[]={
-        (par_info){(void*) &(invinfo->singlePInvAccelMultiInv),TYPE_INT,"singlePInvAccelMultiInv",1 , (const void*) &singlePInvAccelMultiInvDef},
-        (par_info){(void*) &(invinfo->useMixedPrecision),TYPE_INT,"useMixedPrecision",1 , (const void*) &useMixedPrecisionDef},
-        (par_info){(void*) &(invinfo->restartingEvery),TYPE_INT,"restartingEvery",1 , (const void*) &restartingEveryDef},
-        (par_info){(void*) &(invinfo->mixedPrecisionDelta), TYPE_DOUBLE, "mixedPrecisionDelta", 1 ,(const void*)&mixedPrecisionDeltaDef}};
+        (par_info){(void*) &(invinfo->singlePInvAccelMultiInv),TYPE_INT,"singlePInvAccelMultiInv", (const void*) &singlePInvAccelMultiInvDef,singlePInvAccelMultiInv_comment},
+        (par_info){(void*) &(invinfo->useMixedPrecision),TYPE_INT,"useMixedPrecision", (const void*) &useMixedPrecisionDef,NULL},
+        (par_info){(void*) &(invinfo->restartingEvery),TYPE_INT,"restartingEvery", (const void*) &restartingEveryDef,NULL},
+        (par_info){(void*) &(invinfo->mixedPrecisionDelta), TYPE_DOUBLE, "mixedPrecisionDelta", (const void*)&mixedPrecisionDeltaDef,NULL}};
     return scan_group_NV(sizeof(iip)/sizeof(par_info),iip, filelines, startline, endline);
 
 }
@@ -477,19 +477,33 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
     const int MaxConfIdIter_def = 1000000;
     const int JarzynskiMode_def = 0;
 
+    const char JarzynskiMode_comment[]="#0 - normal operation,\n#1 - from bz(as set in input file) to bz+1\n#-1 - from bz to bz-1";
+    const char MaxConfIdIter_comment[]="#In Jarzynski mode, this number will be taken as the number of steps\n#to go from the starting value of bz to the last.";
+    const char therm_ntraj_comment[] = 
+        "# When starting from the identity links, metropolis test will likely fail for a few trajectories.\n#Set this number to a few to allow the run to thermalise.";
+    const char eps_gen_comment[] = "#The level of randomness in creating a new random gauge conf";
+    const char store_conf_name_comment[] = "#This is the prefix of the filenames of the gauge conf files which will be saved (with an index).";
+    const char save_conf_name_comment[] = "#This is the name of the starting gauge conf file. THIS FILE WILL BE OVERWRITTEN.";
+    const char seed_comment[] = 
+        "# set this to 42 \n\
+#(https://en.wikipedia.org/wiki/Phrases_from_The_Hitchhiker\%27s_Guide_to_the_Galaxy#Answer_to_the_Ultimate_Question_of_Life.2C_the_Universe.2C_and_Everything_.2842.29)";
+    const char RandGenStatusFilename_comment[] = "# The status of the random number generator will be saved in a file named like this (plus suffixes).\n\
+# In correspondence of every stored gauge conf, the random number generator statuses will be saved for each MPI rank.\n\
+# With these files, the gauge conf and the right setting file (like this one) reproducibility should be assured.";
+
     par_info mcp[]={
-        (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , 0, NULL},
-        (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             , 0, NULL},
-        (par_info){(void*) &(mcpar->storeconfinterval      ),TYPE_INT,   "StoreConfInterval"      , 0, NULL},
-        (par_info){(void*) &(mcpar->saveconfinterval),       TYPE_INT,   "SaveConfInterval"       , 0, NULL},
-        (par_info){(void*) &(mcpar->store_conf_name),        TYPE_STR,   "StoreConfName"          , 0, NULL},
-        (par_info){(void*) &(mcpar->save_conf_name),         TYPE_STR,   "SaveConfName"           , 0, NULL},
-        (par_info){(void*) &(mcpar->MaxConfIdIter),          TYPE_INT,   "MaxConfIdIter"          , 1,(const void*) &MaxConfIdIter_def},
-        (par_info){(void*) &(mcpar->RandGenStatusFilename),  TYPE_STR,   "RandGenStatusFilename"  , 1,(const void*) &RandGenStatusFilename_def},
-        (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , 1,(const void*) &MaxRunTimeS_def},
-        (par_info){(void*) &(mcpar->seed),                   TYPE_INT,   "Seed"                   , 1,(const void*) &seed_def},
-        (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , 1,(const void*) &epsgen_def},
-        (par_info){(void*) &(mcpar->JarzynskiMode),             TYPE_INT,   "JarzynskiMode"                 , 1,(const void*) &JarzynskiMode_def}
+        (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , NULL,NULL},
+        (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             , NULL,therm_ntraj_comment},
+        (par_info){(void*) &(mcpar->storeconfinterval      ),TYPE_INT,   "StoreConfInterval"      , NULL,NULL},
+        (par_info){(void*) &(mcpar->saveconfinterval),       TYPE_INT,   "SaveConfInterval"       , NULL,NULL},
+        (par_info){(void*) &(mcpar->store_conf_name),        TYPE_STR,   "StoreConfName"          , NULL,store_conf_name_comment},
+        (par_info){(void*) &(mcpar->save_conf_name),         TYPE_STR,   "SaveConfName"           , NULL,save_conf_name_comment},
+        (par_info){(void*) &(mcpar->MaxConfIdIter),          TYPE_INT,   "MaxConfIdIter"          , (const void*) &MaxConfIdIter_def,MaxConfIdIter_comment},
+        (par_info){(void*) &(mcpar->RandGenStatusFilename),  TYPE_STR,   "RandGenStatusFilename"  , (const void*) &RandGenStatusFilename_def,RandGenStatusFilename_comment},
+        (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , (const void*) &MaxRunTimeS_def,NULL},
+        (par_info){(void*) &(mcpar->seed),                   TYPE_INT,   "Seed"                   , (const void*) &seed_def,seed_comment},
+        (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , (const void*) &epsgen_def,eps_gen_comment},
+        (par_info){(void*) &(mcpar->JarzynskiMode),             TYPE_INT,   "JarzynskiMode"       , (const void*) &JarzynskiMode_def,JarzynskiMode_comment}
     };
 
     // from here on, you should not have to modify anything.
@@ -511,18 +525,21 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     const int rng_fakeness_level_def = 0 ;
     const int md_dbg_print_max_count_def = 0;
     const int print_bfield_dbginfo_def = 0;
+
+    const char SaveAllAtEnd_comment[] = "# Set this to 0 if you want the program not to save its state at the end\n\
+# (or it may overwrite some files and you won't be able to reproduce bugs/do other things)";
     // see /Meas
     par_info gmp[]= {
-        (par_info){(void*) &(dbg_settings->use_ildg),              TYPE_INT,"UseILDG"                , 1,(const void*) &useildg_def},
-        (par_info){(void*) &(dbg_settings->input_vbl),             TYPE_INT,"VerbosityLv"            , 1,(const void*) &input_vbl_def},
-        (par_info){(void*) &(dbg_settings->SaveAllAtEnd),          TYPE_INT,"SaveAllAtEnd"           , 1,(const void*) &SaveAllAtEnd_def},
-        (par_info){(void*) &(dbg_settings->print_bfield_dbginfo),  TYPE_INT,"PrintBackFieldDbgInfo"  , 1,(const void*) &print_bfield_dbginfo_def},
-        (par_info){(void*) &(dbg_settings->save_diagnostics),      TYPE_INT,"SaveDiagnostics"        , 1,(const void*) &save_diagnostics_def},
-        (par_info){(void*) &(dbg_settings->do_reversibility_test), TYPE_INT,"DoRevTest"              , 1,(const void*) &do_reversibility_test_def},
-        (par_info){(void*) &(dbg_settings->do_norandom_test),      TYPE_INT,"DoNoRandomTest"         , 1,(const void*) &do_norandom_test_def},
-        (par_info){(void*) &(dbg_settings->rng_fakeness_level),    TYPE_INT,"RngFakenessLevel"       , 1,(const void*) &rng_fakeness_level_def},
-        (par_info){(void*) &(dbg_settings->md_dbg_print_max_count),TYPE_INT,"MDDbgPrintMaxCount"     , 1,(const void*) &md_dbg_print_max_count_def},
-        (par_info){(void*) &(dbg_settings->diagnostics_filename),  TYPE_STR,"SaveDiagnosticsFilename", 1,(const void*) &diagnostics_filename_def}};
+        (par_info){(void*) &(dbg_settings->use_ildg),              TYPE_INT,"UseILDG"                , (const void*) &useildg_def,NULL},
+        (par_info){(void*) &(dbg_settings->input_vbl),             TYPE_INT,"VerbosityLv"            , (const void*) &input_vbl_def,NULL},
+        (par_info){(void*) &(dbg_settings->SaveAllAtEnd),          TYPE_INT,"SaveAllAtEnd"           , (const void*) &SaveAllAtEnd_def,SaveAllAtEnd_comment},
+        (par_info){(void*) &(dbg_settings->print_bfield_dbginfo),  TYPE_INT,"PrintBackFieldDbgInfo"  , (const void*) &print_bfield_dbginfo_def,NULL},
+        (par_info){(void*) &(dbg_settings->save_diagnostics),      TYPE_INT,"SaveDiagnostics"        , (const void*) &save_diagnostics_def,NULL},
+        (par_info){(void*) &(dbg_settings->do_reversibility_test), TYPE_INT,"DoRevTest"              , (const void*) &do_reversibility_test_def,NULL},
+        (par_info){(void*) &(dbg_settings->do_norandom_test),      TYPE_INT,"DoNoRandomTest"         , (const void*) &do_norandom_test_def,NULL},
+        (par_info){(void*) &(dbg_settings->rng_fakeness_level),    TYPE_INT,"RngFakenessLevel"       , (const void*) &rng_fakeness_level_def,NULL},
+        (par_info){(void*) &(dbg_settings->md_dbg_print_max_count),TYPE_INT,"MDDbgPrintMaxCount"     , (const void*) &md_dbg_print_max_count_def,NULL},
+        (par_info){(void*) &(dbg_settings->diagnostics_filename),  TYPE_STR,"SaveDiagnosticsFilename", (const void*) &diagnostics_filename_def,NULL}};
 
 
 
@@ -537,7 +554,7 @@ int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH
 
     // see /Meas
     par_info gmp[]= {
-        (par_info){(void*) outfilename ,TYPE_STR, "GaugeOutfilename", 0 , NULL}};
+        (par_info){(void*) outfilename ,TYPE_STR, "GaugeOutfilename", NULL, NULL}};
 
 
     // from here on, you should not have to modify anything.
@@ -549,10 +566,10 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
 
     const int doubleinv_def = 0;
     par_info fmp[]={
-        (par_info){(void*) &(fmpars->fermionic_outfilename),TYPE_STR,"FermionicOutfilename", 0 , NULL},
-        (par_info){(void*) &(fmpars->SingleInvNVectors),TYPE_INT,    "SingleInvNVectors"   , 0, NULL },
-        (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),TYPE_INT,    "DoubleInvNVectorsChiral", 1, (const void*) &doubleinv_def  },
-        (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,    "DoubleInvNVectorsQuarkNumber", 1, (const void*) &doubleinv_def   }};
+        (par_info){(void*) &(fmpars->fermionic_outfilename),       TYPE_STR,"FermionicOutfilename",        NULL ,                       NULL},
+        (par_info){(void*) &(fmpars->SingleInvNVectors),           TYPE_INT,"SingleInvNVectors"   ,        NULL ,                       NULL},
+        (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),     TYPE_INT,"DoubleInvNVectorsChiral",     (const void*) &doubleinv_def,NULL},
+        (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,"DoubleInvNVectorsQuarkNumber",(const void*) &doubleinv_def,NULL}};
 
 
     // from here on, you should not have to modify anything.
@@ -573,21 +590,23 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
 #ifndef MULTIDEVICE        
     const int ignored_def = 1; // ignored, actually, but necessary
 #endif
+    
+    const char nranks_read_comment[] = "# NRanks has been set at make time with the NR3 variable.";
+
 
     par_info tp[]= {
 #ifndef MULTIDEVICE        
-        (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice", 0 , NULL  },
-        (par_info){(void*) IGNORE_IT,TYPE_INT,"AsyncFermionComms",1,(const void*) &async_comm_fermion_def},
-        (par_info){(void*) IGNORE_IT,TYPE_INT,"AsyncGaugeComms"  ,1,(const void*) &async_comm_gauge_def  },
-        (par_info){(void*) IGNORE_IT,TYPE_INT,"NProcPerNode",   1,(const void*) &ignored_def},
+        (par_info){(void*) &(di->single_dev_choice),TYPE_INT,"device_choice",    NULL,                                 NULL},
+        (par_info){(void*) IGNORE_IT,               TYPE_INT,"AsyncFermionComms",(const void*) &async_comm_fermion_def,NULL},
+        (par_info){(void*) IGNORE_IT,               TYPE_INT,"AsyncGaugeComms",  (const void*) &async_comm_gauge_def,  NULL},
+        (par_info){(void*) IGNORE_IT,               TYPE_INT,"NProcPerNode",     (const void*) &ignored_def,           NULL},
 #else
-        (par_info){(void*) &(di->single_dev_choice), TYPE_INT,"device_choice"    ,1,(const void*) &single_dev_choice_def},
-        (par_info){(void*) &(di->async_comm_fermion),TYPE_INT,"AsyncFermionComms",1,(const void*) &async_comm_fermion_def},
-        (par_info){(void*) &(di->async_comm_gauge),  TYPE_INT,"AsyncGaugeComms"  ,1,(const void*) &async_comm_gauge_def  },
-        (par_info){(void*) &(di->proc_per_node),TYPE_INT,"NProcPerNode", 0 , NULL},
+        (par_info){(void*) &(di->single_dev_choice), TYPE_INT,"device_choice",    (const void*) &single_dev_choice_def, NULL},
+        (par_info){(void*) &(di->async_comm_fermion),TYPE_INT,"AsyncFermionComms",(const void*) &async_comm_fermion_def,NULL},
+        (par_info){(void*) &(di->async_comm_gauge),  TYPE_INT,"AsyncGaugeComms",  (const void*) &async_comm_gauge_def  ,NULL},
+        (par_info){(void*) &(di->proc_per_node),     TYPE_INT,"NProcPerNode",     NULL, NULL},
 #endif
-        (par_info){(void*) &(di->nranks_read),TYPE_INT,"NRanks", 0 , NULL}
-    };
+        (par_info){(void*) &(di->nranks_read),       TYPE_INT,"NRanks",           NULL, nranks_read_comment}};
 
     // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
@@ -626,15 +645,18 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
     const int zmap_def = 2;
     const int tmap_def = 3;
 
+    const char dimensions_comment[] = "# Lattice dimensions have been fixed at make time through N0,N1,N2,N3 and NR3.";
+    const char dimension_mapping_content[] = "#Notice that only the dimension mapped as 3 will be parallelized";
+
     par_info gp[]={
-        (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx"  ,1,(const void*) &nx_def  },
-        (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny"  ,1,(const void*) &ny_def  },
-        (par_info){(void*) &(gpar->gnz ),TYPE_INT,  "nz"  ,1,(const void*) &nz_def  },
-        (par_info){(void*) &(gpar->gnt ),TYPE_INT,  "nt"  ,1,(const void*) &nt_def  },
-        (par_info){(void*) &(gpar->xmap ),TYPE_INT, "xmap",1,(const void*) &xmap_def},
-        (par_info){(void*) &(gpar->ymap ),TYPE_INT, "ymap",1,(const void*) &ymap_def},
-        (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap",1,(const void*) &zmap_def},
-        (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap",1,(const void*) &tmap_def}};
+        (par_info){(void*) &(gpar->gnx ),TYPE_INT,  "nx"  ,(const void*) &nx_def  ,NULL},
+        (par_info){(void*) &(gpar->gny ),TYPE_INT,  "ny"  ,(const void*) &ny_def  ,NULL},
+        (par_info){(void*) &(gpar->gnz ),TYPE_INT,  "nz"  ,(const void*) &nz_def  ,NULL},
+        (par_info){(void*) &(gpar->gnt ),TYPE_INT,  "nt"  ,(const void*) &nt_def  ,dimensions_comment},
+        (par_info){(void*) &(gpar->xmap ),TYPE_INT, "xmap",(const void*) &xmap_def,NULL},
+        (par_info){(void*) &(gpar->ymap ),TYPE_INT, "ymap",(const void*) &ymap_def,NULL},
+        (par_info){(void*) &(gpar->zmap ),TYPE_INT, "zmap",(const void*) &zmap_def,NULL},
+        (par_info){(void*) &(gpar->tmap ),TYPE_INT, "tmap",(const void*) &tmap_def,dimension_mapping_content}};
 
     int res = scan_group_NV(sizeof(gp)/sizeof(par_info),gp, filelines, startline, endline);
 
@@ -660,11 +682,12 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
                 printf("       Either modify the input file, or recompile,\n");
                 printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
                         gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
-                printf("(code)  nx=%dx%d\tny=%dx%d\tnz=%dx%d\tnt=%dx%d\n",
-                        gpar->nd[gpar->xmap], gpar->nranks[gpar->xmap],
-                        gpar->nd[gpar->ymap], gpar->nranks[gpar->ymap],
-                        gpar->nd[gpar->zmap], gpar->nranks[gpar->zmap],
-                        gpar->nd[gpar->tmap], gpar->nranks[gpar->tmap]);
+                printf("With this mapping, the following lattice is expected:\n");
+                printf(" nx %d ny %d nz %d nt %d ",
+                        (gpar->nd[gpar->xmap]-(gpar->nranks[gpar->xmap]>1?2*HALO_WIDTH:0))*gpar->nranks[gpar->xmap],
+                        (gpar->nd[gpar->ymap]-(gpar->nranks[gpar->ymap]>1?2*HALO_WIDTH:0))*gpar->nranks[gpar->ymap],
+                        (gpar->nd[gpar->zmap]-(gpar->nranks[gpar->zmap]>1?2*HALO_WIDTH:0))*gpar->nranks[gpar->zmap],
+                        (gpar->nd[gpar->tmap]-(gpar->nranks[gpar->tmap]>1?2*HALO_WIDTH:0))*gpar->nranks[gpar->tmap]);
             }
             res = 1;
         }
