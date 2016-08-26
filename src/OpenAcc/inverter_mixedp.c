@@ -126,7 +126,7 @@ int inverter_mixed_precision(inverter_package ip,
         set_vec3_soa_to_zero_f(out);
 
         lastMaxResNorm=0;
-        if(0==devinfo.myrank && cg%printevery==0 ){
+        if(0==devinfo.myrank ){
             printf("Iteration %d, Inverter Mixed Precision: \"magic touch\",", cg);
             printf("residue norm: %e\n",l2norm2_global_f(ip.loc_r_f));
         }
@@ -135,6 +135,10 @@ int inverter_mixed_precision(inverter_package ip,
     // OR THIS WAY
     }else combine_in1xfactor_plus_in2_f(loc_s,-omega,loc_r,loc_r);
 
+        if(0==devinfo.myrank && cg%printevery==0 ){
+            printf("Iteration %d, Inverter Mixed Precision: \"magic touch\",", cg);
+            printf("residue norm: %e\n",l2norm2_global_f(ip.loc_r_f));
+        }
     
     lambda = l2norm2_global_f(loc_r);
     gammag=lambda/delta;
