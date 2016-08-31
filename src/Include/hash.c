@@ -78,6 +78,8 @@ uint32_t hash_settings_explicit(
     hashfun(&hash,(char*)&(gpar->gny),sizeof(int));
     hashfun(&hash,(char*)&(gpar->gnz),sizeof(int));
     hashfun(&hash,(char*)&(gpar->gnt),sizeof(int));
+    // ONLY RELEVANT mcpar info
+    hashfun(&hash,(char*)&(mcpar->JarzynskiMode),sizeof(int));
 
     return hash;
 
