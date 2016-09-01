@@ -406,7 +406,7 @@ int main(int argc, char* argv[]){
                         int iterations = id_iter-id_iter_offset-accettate_therm +1;
                         double acceptance = (double) accettate_metro / iterations;
                         double acc_err = 
-                            sqrt(accettate_metro*(iterations-accettate_metro)/iterations)
+                            sqrt((double)accettate_metro*(iterations-accettate_metro)/iterations)
                             /iterations;
                         printf("Estimated acceptance for this run: %f +- %f\n",acceptance,
                                 acc_err);
