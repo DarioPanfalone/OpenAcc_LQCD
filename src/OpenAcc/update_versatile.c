@@ -66,7 +66,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     if(debug_settings.save_diagnostics == 1){
         FILE *foutfile = 
             fopen(debug_settings.diagnostics_filename,"at");
-        fprintf(foutfile,"\nIteration %d \t",id_iter);
+        fprintf(foutfile,"\nIteration %d \n",id_iter);
         fclose(foutfile);
     }
 
