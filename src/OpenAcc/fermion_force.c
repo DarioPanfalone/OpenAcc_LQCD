@@ -316,16 +316,18 @@ dt_preker_to_postker,devinfo.myrank);
         copy_ipdot_into_old(tipdot_acc,ipdot_f_old);
 
 
-        FILE *foutfile = 
-            fopen(debug_settings.diagnostics_filename,"at");
-        fprintf(foutfile,"FFHN %e \tDFFHN %e \t",
-                force_norm,diff_force_norm);
-        fclose(foutfile);
+        if(0 == devinfo.myrank){
+            FILE *foutfile = 
+                fopen(debug_settings.diagnostics_filename,"at");
+            fprintf(foutfile,"FFHN %e\nDFFHN %e\n",
+                    force_norm,diff_force_norm);
+            fclose(foutfile);
 
-        if(verbosity_lv > 1)
-            printf("MPI%02d:\
-\t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n",
-                    devinfo.myrank, force_norm, diff_force_norm);
+            if(verbosity_lv > 1)
+                printf("MPI%02d:\
+                        \t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n",
+                        devinfo.myrank, force_norm, diff_force_norm);
+        }
     } 
 
 

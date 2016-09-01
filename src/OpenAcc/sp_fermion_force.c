@@ -297,17 +297,19 @@ dt_preker_to_postker,devinfo.myrank);
         diff_force_norm = calc_diff_force_norm_f(tipdot_acc,ipdot_f_old_f);
         copy_ipdot_into_old_f(tipdot_acc,ipdot_f_old_f);
 
+        if(0 == devinfo.myrank){
 
-        FILE *foutfile = 
-            fopen(debug_settings.diagnostics_filename,"at");
-        fprintf(foutfile,"FFHN %e \tDFFHN %e \t",
-                force_norm,diff_force_norm);
-        fclose(foutfile);
+            FILE *foutfile = 
+                fopen(debug_settings.diagnostics_filename,"at");
+            fprintf(foutfile,"FFHN %e\nDFFHN %e\n",
+                    force_norm,diff_force_norm);
+            fclose(foutfile);
 
-        if(verbosity_lv > 1)
-            printf("MPI%02d:\
-\t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n",
-                    devinfo.myrank, force_norm, diff_force_norm);
+            if(verbosity_lv > 1)
+                printf("MPI%02d:\
+                        \t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n",
+                        devinfo.myrank, force_norm, diff_force_norm);
+        }
     } 
 
 

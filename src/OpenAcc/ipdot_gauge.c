@@ -126,16 +126,19 @@ void calc_ipdot_gauge_soloopenacc(
         diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old);
         copy_ipdot_into_old(tipdot,ipdot_g_old);
 
-        FILE *foutfile = 
-            fopen(debug_settings.diagnostics_filename,"at");
-        fprintf(foutfile,"GFHN %e \tDGFHN %e \t",force_norm,diff_force_norm);
-        fclose(foutfile);
+
+        if(0 == devinfo.myrank){
+            FILE *foutfile = 
+                fopen(debug_settings.diagnostics_filename,"at");
+            fprintf(foutfile,"GFHN %e\nDGFHN %e\n",force_norm,diff_force_norm);
+            fclose(foutfile);
 
 
 
-        if(verbosity_lv > 1)
-            printf("\t\t\tGauge Force Half Norm: %e, Diff with previous: %e \n", 
-                    force_norm, diff_force_norm);
+            if(verbosity_lv > 1)
+                printf("\t\t\tGauge Force Half Norm: %e, Diff with previous: %e \n", 
+                        force_norm, diff_force_norm);
+        }
     } 
 
 

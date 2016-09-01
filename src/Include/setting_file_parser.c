@@ -877,30 +877,61 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
         if(!helpmode) read_debug_info(&debug_settings,filelines,0,1);// Just to set default values
         else read_debug_info(&debug_settings,filelines,0,0);// Just to set default values
     }
+
+
+
     // check == 1 means at least a parameter was not found.
-    if(helpmode){
-        fclose(helpfile);
-        exit(1);
-    }
-    if(!helpmode){
+    if(totcheck!=0 || helpmode ){
+        
+        if(helpmode) fclose(helpfile);
 
-        uint32_t hash = hash_settings();
-        char hash_string[32];
-        sprintf(hash_string,"%" PRIu32, hash);
-        if(0==devinfo.myrank)
-            printf("Hash of all relevant settings: %s\n", hash_string );
-        strcat(gauge_outfilename, hash_string);
-        strcat(fm_par.fermionic_outfilename, hash_string);
-        strcat(debug_settings.diagnostics_filename,hash_string);
-
-    }
-    if(totcheck!=0){
-
-        if(0==devinfo.myrank)
+        if(0==devinfo.myrank && totcheck )
             printf("There are errors in some groups, exiting.\n")   ;
         exit(1);
 
     }
+    else{
+
+        uint32_t hash = hash_settings();
+        char hash_string[32];
+        char input_to_rename_filename[200];
+        sprintf(hash_string,"%" PRIu32, hash);
+
+        strcat(gauge_outfilename, hash_string);
+        strcat(fm_par.fermionic_outfilename, hash_string);
+        strcat(debug_settings.diagnostics_filename,hash_string);
+
+        if(0==devinfo.myrank){
+            printf("Hash of all relevant settings: %s\n", hash_string );
+
+            strcpy(input_to_rename_filename, input_filename);
+            strcat(input_to_rename_filename, hash_string );
+            
+            FILE * input2 = fopen(input_filename,"r");
+            FILE * input_renamed = fopen(input_to_rename_filename,"w"); 
+            printf("Creating copy of run configuration file (%s) \nwith hash appended in the name (%s)...\n", input_filename, input_to_rename_filename);
+            char ch;
+            while(( ch = fgetc(input2) ) != EOF)
+                fputc(ch, input_renamed);
+
+            fclose(input2);
+            fclose(input_renamed);
+
+        }
+
+
+    }
+
+
+        if(0==devinfo.myrank){
+
+
+
+        }
+    
+    
+    
+    
 
 
 }

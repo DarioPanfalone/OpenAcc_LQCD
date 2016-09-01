@@ -237,7 +237,7 @@ fileNamesToChange += filesNoOverwrite
 changedFiles = []
 
 for fileName in fileNamesToChange:
-    if (len(argv) > 1 and fileName in argv) or len(argv)==1:
+    if (len(argv) > 1 and fileName in argv) or (len(argv)==1 and fileName not in filesNoOverwrite):
 
         
         newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)
