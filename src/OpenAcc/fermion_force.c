@@ -310,24 +310,32 @@ dt_preker_to_postker,devinfo.myrank);
     }
 
     if(debug_settings.save_diagnostics == 1 ){
+
         double  force_norm, diff_force_norm;
-        force_norm = calc_force_norm(tipdot_acc);
-        diff_force_norm = calc_diff_force_norm(tipdot_acc,ipdot_f_old);
-        copy_ipdot_into_old(tipdot_acc,ipdot_f_old);
+        if((md_diag_count_fermion % debug_settings.md_diag_print_every) == 0)
+            copy_ipdot_into_old(tipdot_acc,ipdot_f_old);
+
+        if((md_diag_count_fermion % debug_settings.md_diag_print_every) == 1){
+            force_norm = calc_force_norm(tipdot_acc);
+            diff_force_norm = calc_diff_force_norm(tipdot_acc,ipdot_f_old);
 
 
-        if(0 == devinfo.myrank){
-            FILE *foutfile = 
-                fopen(debug_settings.diagnostics_filename,"at");
-            fprintf(foutfile,"FFHN %e\nDFFHN %e\n",
-                    force_norm,diff_force_norm);
-            fclose(foutfile);
+            if(0 == devinfo.myrank){
+                FILE *foutfile = 
+                    fopen(debug_settings.diagnostics_filename,"at");
+                fprintf(foutfile,"%d\tFFHN %e\n%d\tDFFHN %e\n",
+                        md_diag_count_fermion, force_norm,
+                        md_diag_count_fermion, diff_force_norm);
+                fclose(foutfile);
 
-            if(verbosity_lv > 1)
-                printf("MPI%02d:\
-                        \t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n",
-                        devinfo.myrank, force_norm, diff_force_norm);
+                if(verbosity_lv > 1)
+                    printf("MPI%02d:\
+                            \t\t\tFermion Force Half Norm: %e, Diff with previous:%e\n",
+                            devinfo.myrank, force_norm, diff_force_norm);
+            }
         }
+
+        md_diag_count_fermion++;
     } 
 
 

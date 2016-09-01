@@ -525,6 +525,7 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     const int rng_fakeness_level_def = 0 ;
     const int md_dbg_print_max_count_def = 0;
     const int print_bfield_dbginfo_def = 0;
+    const int md_diag_print_every_def = 10000;
 
     const char SaveAllAtEnd_comment[] = "# Set this to 0 if you want the program not to save its state at the end\n\
 # (or it may overwrite some files and you won't be able to reproduce bugs/do other things)";
@@ -539,7 +540,10 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
         (par_info){(void*) &(dbg_settings->do_norandom_test),      TYPE_INT,"DoNoRandomTest"         , (const void*) &do_norandom_test_def,NULL},
         (par_info){(void*) &(dbg_settings->rng_fakeness_level),    TYPE_INT,"RngFakenessLevel"       , (const void*) &rng_fakeness_level_def,NULL},
         (par_info){(void*) &(dbg_settings->md_dbg_print_max_count),TYPE_INT,"MDDbgPrintMaxCount"     , (const void*) &md_dbg_print_max_count_def,NULL},
-        (par_info){(void*) &(dbg_settings->diagnostics_filename),  TYPE_STR,"SaveDiagnosticsFilename", (const void*) &diagnostics_filename_def,NULL}};
+        (par_info){(void*) &(dbg_settings->diagnostics_filename),  TYPE_STR,"SaveDiagnosticsFilename", (const void*) &diagnostics_filename_def,NULL},
+        (par_info){(void*) &(dbg_settings->md_diag_print_every) ,  TYPE_INT,"PrintDiagInfoEvery",      (const void*) &md_diag_print_every_def,NULL},
+            
+    };
 
 
 

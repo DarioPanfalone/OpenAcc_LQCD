@@ -121,24 +121,36 @@ void calc_ipdot_gauge_soloopenacc(
 
 
     if(debug_settings.save_diagnostics == 1){
+
+
         double  force_norm, diff_force_norm;
-        force_norm = calc_force_norm(tipdot);
-        diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old);
-        copy_ipdot_into_old(tipdot,ipdot_g_old);
 
+        if((md_diag_count_gauge % debug_settings.md_diag_print_every) == 0)
+            copy_ipdot_into_old(tipdot,ipdot_g_old);
 
-        if(0 == devinfo.myrank){
-            FILE *foutfile = 
-                fopen(debug_settings.diagnostics_filename,"at");
-            fprintf(foutfile,"GFHN %e\nDGFHN %e\n",force_norm,diff_force_norm);
-            fclose(foutfile);
+        if((md_diag_count_gauge % debug_settings.md_diag_print_every) == 1){
 
 
 
-            if(verbosity_lv > 1)
-                printf("\t\t\tGauge Force Half Norm: %e, Diff with previous: %e \n", 
-                        force_norm, diff_force_norm);
+            force_norm = calc_force_norm(tipdot);
+            diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old);
+
+
+            if(0 == devinfo.myrank){
+                FILE *foutfile = 
+                    fopen(debug_settings.diagnostics_filename,"at");
+                fprintf(foutfile,"%d\tGFHN %e\n%d\tDGFHN %e\n",
+                        md_diag_count_gauge, force_norm,
+                        md_diag_count_gauge, diff_force_norm);
+                fclose(foutfile);
+
+                if(verbosity_lv > 1)
+                    printf("\t\t\tGauge Force Half Norm: %e, Diff with previous: %e \n", 
+                            force_norm, diff_force_norm);
+            }
         }
+
+        md_diag_count_gauge++;
     } 
 
 
