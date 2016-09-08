@@ -59,9 +59,9 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
     int iterazioni = id_iter+1;
     double dt_tot;
-    double dt_pretrans_to_preker;
-    double dt_preker_to_postker;
-    double dt_postker_to_posttrans;
+    double dt_saveoldconf;
+    double dt_mdsetup;
+    double dt_metropolis;
 
     if(debug_settings.save_diagnostics == 1){
         FILE *foutfile = 
@@ -83,9 +83,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     double delta_S;
     double action_in,action_fin,action_mom_in,action_mom_fin,action_ferm_in,action_ferm_fin;
 
-    struct timeval t0, t1,t2,t3;
-    gettimeofday ( &t0, NULL );
-
+    struct timeval t_start, t_saved,t_end;
+    gettimeofday ( &t_start, NULL ); 
     if(metro==1){
         // store old conf   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
         set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
@@ -95,7 +94,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 
 
-    gettimeofday ( &t1, NULL );
+    gettimeofday ( &t_saved, NULL );
 
     // ESTRAZIONI RANDOM
     if(debug_settings.do_norandom_test){ // NORANDOM
@@ -360,13 +359,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     int multishift_iterations_md = multishift_iterations_after_md - 
         multishift_iterations_before_md;
 
+    double mdtime = (double)(md_end.tv_sec - md_start.tv_sec) + 
+        ((double)(md_end.tv_usec - md_start.tv_usec)/1.0e6);
 
 
 
     if(devinfo.myrank == 0){
 
-        double mdtime = (double)(md_end.tv_sec - md_start.tv_sec) + 
-            ((double)(md_end.tv_usec - md_start.tv_usec)/1.0e6);
         printf("MPI%02d:Time needed for moledular dynamics: %f s, ",devinfo.myrank,mdtime);
         printf("total CG-M iterations during MD: %d\n",multishift_iterations_md );
     }
@@ -547,77 +546,89 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             }
         }
     }
-    gettimeofday ( &t2, NULL );
 
-gettimeofday ( &t3, NULL );
-
-if(metro==1){
-    if(accettata==1){
-        acc++;
-        printf("MPI%02d,ACCEPTED   ---> [acc/iter] = [%i/%i] \n",
-                devinfo.myrank,acc,iterazioni);
-        // configuration accepted   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
-        set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
-    }else{
-        printf("MPI%02d,REJECTED   ---> [acc/iter] = [%i/%i] \n",
-                devinfo.myrank,acc,iterazioni);
-        // configuration rejected   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
-        set_su3_soa_to_su3_soa(conf_acc_bkp,tconf_acc);
-#pragma acc update device(tconf_acc[0:8])
-        // sul device aggiorniamo la conf rimettendo quella del passo precedente
-    }
-}
-
-
-if(metro==0){// accetta sempre in fase di termalizzazione
-    acc++;
-}
-
-
-dt_tot = (double)(t3.tv_sec - t0.tv_sec) + ((double)(t3.tv_usec - t0.tv_usec)/1.0e6);
-dt_pretrans_to_preker = (double)(t1.tv_sec - t0.tv_sec) + ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
-dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
-dt_postker_to_posttrans = (double)(t3.tv_sec - t2.tv_sec) + ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
-
-if(0==devinfo.myrank){
-
-    printf("   FULL UPDATE COMPUTATION TIME ");
-    if(metro==0)printf("NO");
-    else printf("SI");
-
-    printf("METRO - Tot time : %f sec \n",dt_tot);
-    printf("\t\tPreTrans->Preker  : %f sec  \n",dt_pretrans_to_preker);
-    printf("\t\tPreKer->PostKer   : %f sec  \n",dt_preker_to_postker);
-    printf("\t\tPostKer->PostTrans: %f sec  \n",dt_postker_to_posttrans);
-    printf("\t\tTotal CG-M iterations: %d \n",multishift_invert_iterations);
-    printf("\t\t      CG-M iterations [MD]: %d \n",multishift_iterations_md);
-    printf("\t\t      CG-M iterations:[FI]: %d \n",multishift_iterations_before_md);
-    printf("\t\t      CG-M iterations:[LI]: %d \n",multishift_invert_iterations-
-            multishift_iterations_after_md);
-
-}
-if(debug_settings.save_diagnostics == 1){
-    FILE *foutfile = 
-        fopen(debug_settings.diagnostics_filename,"at");
 
     if(metro==1){
-        fprintf(foutfile,"GAS %.18lf GAF %.18lf \t",-action_in,-action_fin);
-        fprintf(foutfile,"MAS %.18lf MAF %.18lf \t",action_mom_in,action_mom_fin);
-        fprintf(foutfile,"FAS %.18lf FAF %.18lf \t",action_ferm_in,action_ferm_fin);
-        fprintf(foutfile," D %.18lf",delta_S);
-    }else{
+        if(accettata==1){
+            acc++;
+            printf("MPI%02d,ACCEPTED   ---> [acc/iter] = [%i/%i] \n",
+                    devinfo.myrank,acc,iterazioni);
+            // configuration accepted   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
+            set_su3_soa_to_su3_soa(tconf_acc,conf_acc_bkp);
+        }else{
+            printf("MPI%02d,REJECTED   ---> [acc/iter] = [%i/%i] \n",
+                    devinfo.myrank,acc,iterazioni);
+            // configuration rejected   set_su3_soa_to_su3_soa(arg1,arg2) ===>   arg2=arg1;
+            set_su3_soa_to_su3_soa(conf_acc_bkp,tconf_acc);
+#pragma acc update device(tconf_acc[0:8])
+            // sul device aggiorniamo la conf rimettendo quella del passo precedente
+        }
+    }
+    gettimeofday ( &t_end, NULL );
 
-        fprintf(foutfile," THERM_ITERATION ");
 
+    if(metro==0){// accetta sempre in fase di termalizzazione
+        acc++;
     }
 
-    fclose(foutfile);
-}
-for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
-free(minmaxeig[iflav]);
-free(minmaxeig);
 
-return acc;
+    dt_tot = (double)(t_end.tv_sec - t_start.tv_sec) + ((double)(t_end.tv_usec - t_start.tv_usec)/1.0e6);
+    dt_saveoldconf = (double)(t_saved.tv_sec - t_start.tv_sec) + ((double)(t_saved.tv_usec - t_start.tv_usec)/1.0e6);
+    dt_mdsetup = (double)(md_start.tv_sec - t_saved.tv_sec) + ((double)(md_start.tv_usec - t_saved.tv_usec)/1.0e6);
+    dt_metropolis = (double)(t_end.tv_sec - md_end.tv_sec) + ((double)(t_end.tv_usec - md_end.tv_usec)/1.0e6);
+
+    if(0==devinfo.myrank){
+
+        printf("   FULL UPDATE COMPUTATION TIME ");
+        if(metro==0)printf("NO");
+        else printf("SI");
+
+        printf("METRO - Tot Update time : %f sec \n",dt_tot);
+        printf("\t\tTime to save old conf    : %f sec\n",dt_saveoldconf);
+        printf("\t\tTime for MD setup        : %f sec\n",dt_mdsetup);
+        printf("\t\tTime for MD              : %f sec\n",mdtime);
+        printf("\t\tTime for Metropolis test : %f sec\n",dt_metropolis);
+        printf("\t\tTotal CG-M iterations    : %d\n",multishift_invert_iterations);
+        printf("\t\t      CG-M iterations[MD]: %d\n",multishift_iterations_md);
+        printf("\t\t      CG-M iterations[FI]: %d\n",multishift_iterations_before_md);
+        printf("\t\t      CG-M iterations[LI]: %d\n",multishift_invert_iterations-
+                multishift_iterations_after_md);
+
+    }
+    if(debug_settings.save_diagnostics == 1){
+        FILE *foutfile = 
+            fopen(debug_settings.diagnostics_filename,"at");
+
+        if(metro==1){
+            fprintf(foutfile,"GAS %.18lf GAF %.18lf \t",-action_in,-action_fin);
+            fprintf(foutfile,"MAS %.18lf MAF %.18lf \t",action_mom_in,action_mom_fin);
+            fprintf(foutfile,"FAS %.18lf FAF %.18lf \t",action_ferm_in,action_ferm_fin);
+            fprintf(foutfile," D %.18lf",delta_S);
+        }else{
+
+            fprintf(foutfile," THERM_ITERATION ");
+
+        }
+        fprintf(foutfile,"TOTUPDATETIME  %f \n",dt_tot);
+        fprintf(foutfile,"OLDCONFSAVETIME  %f \n",dt_saveoldconf);
+        fprintf(foutfile,"MDSETUPTIME    %f \n",dt_mdsetup);
+        fprintf(foutfile,"MDTIME %f \n",mdtime);
+        fprintf(foutfile,"METROTIME %f \n",dt_metropolis);
+        fprintf(foutfile,"CG-M-iters[TOT] %d \n",multishift_invert_iterations);
+        fprintf(foutfile,"CG-M-iters[MD]  %d \n",multishift_iterations_md);
+        fprintf(foutfile,"CG-M-iters[FI]  %d \n",multishift_iterations_before_md);
+        fprintf(foutfile,"CG-M-iters[LI]  %d \n",multishift_invert_iterations-
+                multishift_iterations_after_md);
+
+
+
+        fclose(foutfile);
+    }
+    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+        free(minmaxeig[iflav]);
+    free(minmaxeig);
+
+    return acc;
 
 }
 
