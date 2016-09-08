@@ -32,6 +32,9 @@
 #include <mpi.h>
 #endif
 
+
+#include "../Include/stringify.h"
+
 //double casuale(void);
 
 
@@ -74,6 +77,7 @@ int main(int argc, char* argv[]){
 #endif
     fflush(stdout);
     printf("DEODOE test\n");
+    printf("commit: %s\n", xstr(COMMIT_HASH) );
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     printf("WELCOME! \n");
     // READ input file.

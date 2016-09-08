@@ -234,6 +234,7 @@ class file_node:
                      ' -DLOC_N2=$(N2)   ' +\
                      ' -DLOC_N3=$(N3)   ' +\
                      ' -DNRANKS_D3=$(NR3)  ' +\
+                     ' -DCOMMIT_HASH=$(COMMIT_HASH)  ' +\
                     self.name + '\n\n'
         else:
             stderr.write("Filename " + self.name + " not valid.\n")

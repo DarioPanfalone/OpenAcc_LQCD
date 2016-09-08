@@ -53,25 +53,40 @@
 #endif
 
 
+#include "../Include/stringify.h"
+
+// double level macro, necessary to stringify
+// https://gcc.gnu.org/onlinedocs/cpp/Stringification.html
+#define xstr(s) str(s) 
+#define str(s) #s 
 
 
 
+ 
 
 int conf_id_iter;
 int verbosity_lv;
 
 int main(int argc, char* argv[]){
 
-#define  start_opt 0 // 0 --> COLD START; 1 --> START FROM SAVED CONF
     struct timeval tinit;
     gettimeofday ( &tinit, NULL );
-
-
 
     // READ input file.
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
 #endif
+
+    if(0==devinfo.myrank){
+            printf("****************************************************\n");
+            printf("          PRE INIT - READING SETTING  FILE          \n");
+            printf("     check which parameter corresponds to what! \n");
+            printf("commit: %s\n", xstr(COMMIT_HASH) );
+            printf("****************************************************\n");
+    }
+
+
+
 
     set_global_vars_and_fermions_from_input_file(argv[1]);
     verbosity_lv = debug_settings.input_vbl;
@@ -86,20 +101,25 @@ int main(int argc, char* argv[]){
 
     if(0==devinfo.myrank){
         if(0 != mc_params.JarzynskiMode){
-            printf("********************************************\n");
-            printf("                JARZYNSKI MODE              \n");
-            printf(" check which parameter corresponds to what! \n");
-            printf("********************************************\n");
+            printf("****************************************************\n");
+            printf("                   JARZYNSKI MODE              \n");
+            printf("     check which parameter corresponds to what! \n");
+            printf("****************************************************\n");
 
 
+        }else {
+            printf("****************************************************\n");
+            printf("                    NORMAL MODE                \n");
+            printf("****************************************************\n");
         }
         if(debug_settings.do_norandom_test){
-            printf("*******************************************\n");
-            printf("      WELCOME. This is a NORANDOM test.    \n");
-            printf("  MOST things will not be random generated,\n");
-            printf("         but read from memory instead.     \n");
-            printf("               CHECK THE CODE!!            \n");
-            printf("ALSO: setting the number of trajectories to 1.\n");
+            printf("****************************************************\n");
+            printf("         WELCOME. This is a NORANDOM test.    \n");
+            printf("     MOST things will not be random generated,\n");
+            printf("            but read from memory instead.     \n");
+            printf("                  CHECK THE CODE!!            \n");
+            printf("   ALSO: setting the number of trajectories to 1.\n");
+            printf("****************************************************\n");
             mc_params.ntraj = 1;
 
         }

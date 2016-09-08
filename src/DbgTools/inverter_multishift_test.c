@@ -37,6 +37,7 @@
 
 //double casuale(void);
 
+#include "../Include/stringify.h"
 
 int id_iter;
 int verbosity_lv;
@@ -83,6 +84,7 @@ int main(int argc, char* argv[]){
 #endif
     fflush(stdout);
     printf("Multishift inverter test\n");
+    printf("commit: %s\n", xstr(COMMIT_HASH) );
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     printf("WELCOME! \n");
     // READ input file.

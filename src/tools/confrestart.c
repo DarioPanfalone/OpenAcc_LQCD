@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "../Include/stringify.h"
+
 int verbosity_lv;
 
 int main(int argc, char ** argv){
@@ -29,5 +31,6 @@ int main(int argc, char ** argv){
     print_su3_soa_ildg_binary(conf,argv[2],new_conf_id_iter);
 
     free(conf);
+    printf("(commit: %s)\n", xstr(COMMIT_HASH) );
 
 }
