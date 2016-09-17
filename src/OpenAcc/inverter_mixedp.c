@@ -50,13 +50,14 @@ int inverter_mixed_precision(inverter_package ip,
 {
 
   int cg;
+  int magicTouchCount = 0 ;
   long int i;
   double delta, alpha, lambda, omega, gammag;
   double lastMaxResNorm=0;
   double source_norm = l2norm2_global(in);
   
   int printevery = 10000;
-  for(int q=0;q<verbosity_lv;q++) printevery /= 4;
+  for(int q=0;q<verbosity_lv;q++) printevery /= 2;
   if (verbosity_lv > 3 && 0==devinfo.myrank )
   { 
       printf("source_norm: %e, ",source_norm);
@@ -95,6 +96,7 @@ int inverter_mixed_precision(inverter_package ip,
       printf("STARTING CG:\nCG\tR - mixed precision\n");
 
   do {
+    
     cg++;    
     // s=(M^dag M)p    alpha=(p,s)
     fermion_matrix_multiplication_shifted_f(u,loc_s,loc_p,loc_h,pars,shift);
@@ -126,18 +128,16 @@ int inverter_mixed_precision(inverter_package ip,
         set_vec3_soa_to_zero_f(out);
 
         lastMaxResNorm=0;
-        if(0==devinfo.myrank ){
-            printf("Iteration %d, Inverter Mixed Precision: \"magic touch\",", cg);
-            printf("residue norm: %e\n",l2norm2_global_f(ip.loc_r_f));
-        }
+        magicTouchCount++;
 
 
     // OR THIS WAY
     }else combine_in1xfactor_plus_in2_f(loc_s,-omega,loc_r,loc_r);
 
         if(0==devinfo.myrank && cg%printevery==0 ){
-            printf("Iteration %d, Inverter Mixed Precision: \"magic touch\",", cg);
-            printf("residue norm: %e\n",l2norm2_global_f(ip.loc_r_f));
+            printf("Iteration %d, Inverter Mixed Precision:", cg);
+            printf("residue norm: %1.3e ",l2norm2_global_f(ip.loc_r_f));
+            printf("(%d \"magic touches\" until now)\n", magicTouchCount);
         }
     
     lambda = l2norm2_global_f(loc_r);
@@ -147,16 +147,6 @@ int inverter_mixed_precision(inverter_package ip,
 
     // p=r+gammag*p
     combine_in1xfactor_plus_in2_f(loc_p,gammag,loc_r,loc_p);
-
-
-
-    if (verbosity_lv > 3 && cg%100==0 && 0==devinfo.myrank  ){
-
-        printf("%d\t%1.1e\n",cg, sqrt(lambda/source_norm)/res);fflush(stdout);
-      
-    }
-
-
 
   } while( (sqrt(lambda/source_norm)>res*SAFETY_MARGIN) && cg<max_cg);
 

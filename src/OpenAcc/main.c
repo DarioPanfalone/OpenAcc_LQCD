@@ -344,6 +344,7 @@ int main(int argc, char* argv[]){
 
             // THERMALIZATION & METRO    ----   UPDATES //
 
+            double max_cycle_duration = 0;
             for(int id_iter=id_iter_offset;id_iter<(mc_params.ntraj+id_iter_offset);
                     id_iter++){
 
@@ -539,6 +540,7 @@ int main(int argc, char* argv[]){
                     double cycle_duration = (double) 
                         (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
                         (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
+                    max_cycle_duration = (cycle_duration>max_cycle_duration) ? cycle_duration :max_cycle_duration;
 
                     if(0==devinfo.myrank){
                         printf("Tot time : %f sec (with measurements)\n", cycle_duration);
@@ -557,12 +559,16 @@ int main(int argc, char* argv[]){
                         (tend_cycle.tv_sec - tinit.tv_sec)+
                         (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
                     double max_expected_duration_with_another_cycle = 
-                        total_duration + 2*cycle_duration ; 
+                        total_duration + 2*max_cycle_duration ; 
 
                     if(max_expected_duration_with_another_cycle > mc_params.MaxRunTimeS){
                         printf("Time is running out (%d of %d seconds elapsed),",
                                 (int) total_duration, (int) mc_params.MaxRunTimeS);
                         printf(" shutting down now.\n");
+                        printf("Total max expected duration: %d seconds",
+                                      max_expected_duration_with_another_cycle);
+                        printf("(%d elapsed now, %d*2 maximum expected)\n",total_duration,
+                                     max_cycle_duration);
                         //https://www.youtube.com/watch?v=MfGhlVcrc8U
                         // but without that much pathos
                         run_condition = 0;
