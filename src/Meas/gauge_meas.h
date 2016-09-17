@@ -423,7 +423,7 @@ static inline void combine_fourleaves_to_get_loc_q(__restrict su3_soa * const Qm
 
 }
 
-
+/*
 
 void compute_local_topological_charge(  __restrict su3_soa * const u,
 					__restrict su3_soa * const quadri,
@@ -436,7 +436,7 @@ double compute_topological_charge(__restrict su3_soa * const u,
 				  __restrict su3_soa * const quadri,
 				  double_soa * const loc_q);
 
-
+*/
 
 
 #endif

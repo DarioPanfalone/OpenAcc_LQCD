@@ -609,8 +609,8 @@ int main(int argc, char* argv[]){
 
 
             plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
-            printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/GL_SIZE/6.0/3.0,topoch);
+            //topoch = compute_topological_charge(conf_acc,aux_conf_acc,d_local_sums);
+           // printf("COOL 0  Placchetta= %.18lf  TopCh= %.18lf \n",plq/GL_SIZE/6.0/3.0,topoch);
 
             //               // You might want to put this inside the loop
             //               for(int icool=0;icool<5000;icool++){
