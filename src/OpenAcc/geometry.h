@@ -31,6 +31,7 @@
 
 typedef struct geom_parameters_t{
 
+    int initialized_check;
     int gnx,gny,gnz,gnt; // equal to the dimensions of the configuration
     // map of physical directions onto logical directions
     int xmap,ymap,zmap,tmap;// tmap is the "antiperiodic direction" for 
@@ -50,6 +51,7 @@ typedef struct geom_parameters_t{
 
 extern geom_parameters geom_par;
 
+
 // TABLES FOR THE NEAREST NEIGHBOURS       
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            
 //                            starting from the site "site_half" (from 0 to sizeh) of parity "par"         
@@ -59,7 +61,7 @@ extern geom_parameters geom_par;
 int nnp_openacc[sizeh][4][2];
 int nnm_openacc[sizeh][4][2];
 
-void set_geom_glv(geom_parameters* gp);
+int set_geom_glv(geom_parameters* gp);
 void compute_nnp_and_nnm_openacc(void);
 
 #endif

@@ -664,52 +664,8 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 
     int res = scan_group_NV(sizeof(gp)/sizeof(par_info),gp, filelines, startline, endline);
 
-    set_geom_glv(gpar);
+    if (1 == set_geom_glv(gpar) ) res = 1 ;
 
-    if(startline<endline){
-
-        int expnx =(gpar->nd[gpar->xmap]-2*gpar->halos[gpar->xmap])*
-            gpar->nranks[gpar->xmap]; 
-        int expny =(gpar->nd[gpar->ymap]-2*gpar->halos[gpar->ymap])*
-            gpar->nranks[gpar->ymap]; 
-        int expnz =(gpar->nd[gpar->zmap]-2*gpar->halos[gpar->zmap])*
-            gpar->nranks[gpar->zmap]; 
-        int expnt =(gpar->nd[gpar->tmap]-2*gpar->halos[gpar->tmap])*
-            gpar->nranks[gpar->tmap]; 
-
-        if(gpar->gnx != expnx || gpar->gny != expny ||
-                gpar->gnz != expnz  || gpar->gnt != expnt ){ 
-
-            if(0==devinfo.myrank){
-                printf("Error, input file lattice dimensions are not compatible\n");
-                printf("       with the lattice dimensions written in geometry.h.\n");
-                printf("       Either modify the input file, or recompile,\n");
-                printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
-                        gpar->gnx,gpar->gny,gpar->gnz,gpar->gnt);
-                printf("With this mapping, the following lattice is expected:\n");
-                printf(" nx %d ny %d nz %d nt %d ",
-                        (gpar->nd[gpar->xmap]-(gpar->nranks[gpar->xmap]>1?2*HALO_WIDTH:0))*gpar->nranks[gpar->xmap],
-                        (gpar->nd[gpar->ymap]-(gpar->nranks[gpar->ymap]>1?2*HALO_WIDTH:0))*gpar->nranks[gpar->ymap],
-                        (gpar->nd[gpar->zmap]-(gpar->nranks[gpar->zmap]>1?2*HALO_WIDTH:0))*gpar->nranks[gpar->zmap],
-                        (gpar->nd[gpar->tmap]-(gpar->nranks[gpar->tmap]>1?2*HALO_WIDTH:0))*gpar->nranks[gpar->tmap]);
-            }
-            res = 1;
-        }
-        int maps[4] = {gpar->xmap,gpar->ymap,gpar->zmap,gpar->tmap};
-        int stop = 0;
-        int imap,jmap;
-        for(imap = 0 ; imap<3; imap++) for(jmap = imap+1 ; jmap<4; jmap++)
-            stop = stop || (maps[imap] == maps[jmap]);
-
-        if(stop){
-
-            if(0==devinfo.myrank)
-                printf("ERROR: found two equal direction mappings (%s:%d)\n",
-                        __FILE__,__LINE__);
-            res = 1;
-
-        }
-    }
     return res;
 
 }

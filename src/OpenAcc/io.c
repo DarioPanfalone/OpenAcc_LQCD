@@ -199,6 +199,14 @@ int read_su3_soa_ildg_binary(
         global_su3_soa * conf,
         const char* nomefile,int * conf_id_iter )
 {
+
+    if(geom_par.initialized_check == 0){
+        printf("ERROR: GEOMETRY MUST BE INITIALIZED!\n");
+        printf("ERROR: in %s at line %d\n",__FILE__, __LINE__);
+        exit(1);
+    } 
+
+
     FILE *fg;int reads;
     char header[1000];
     *conf_id_iter = 1000 ; // random number
@@ -335,7 +343,6 @@ int read_su3_soa_ildg_binary(
     off_t ibd_start = ildg_header_ends_positions[ildg_binary_data_index];
     fseeko(fg,ibd_start,SEEK_SET);
     int xl,yl,zl,tl,dir;//local coordinates
-    set_geom_glv(&geom_par);// should be already done
 
     for(tl=0;tl<nt;tl++)for(zl=0;zl<nz;zl++)
         for(yl=0;yl<ny;yl++) for(xl=0;xl<nx;xl++)
@@ -398,6 +405,14 @@ int read_su3_soa_ildg_binary(
 void print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
         int conf_id_iter)
 {
+
+    if(geom_par.initialized_check == 0){
+        printf("ERROR: GEOMETRY MUST BE INITIALIZED!\n");
+        printf("ERROR: in %s at line %d\n",__FILE__, __LINE__);
+        exit(1);
+    } 
+
+
     printf("Writing ildg conf...\n");
     int writes; FILE *fp;
     fp = fopen(nomefile,"w");
@@ -498,7 +513,6 @@ void print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile
     fwrite(&ildg_binary_data_header,sizeof(ILDG_header),1,fp);
 
     int x,y,z,t,dir;
-    set_geom_glv(&geom_par);// should be already done
     for(t=0;t<nt;t++) for(z=0;z<nz;z++)
         for(y=0;y<ny;y++) for(x=0;x<nx;x++)
         {

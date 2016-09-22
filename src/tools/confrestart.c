@@ -16,18 +16,24 @@ int main(int argc, char ** argv){
     int conf_id_iter;
     int new_conf_id_iter = 0;
 
-    geom_par.gnx = GL_N0;
-    geom_par.gny = GL_N1;
-    geom_par.gnz = GL_N2;
-    geom_par.gnt = GL_N3;
-
-
-    printf("CODE dimensions: \n");
-
+    printf("HARDCODED LATTICE DIMENSIONS:\n");
     printf("GL_N0: %d\n", GL_N0) ; 
     printf("GL_N1: %d\n", GL_N1) ; 
     printf("GL_N2: %d\n", GL_N2) ; 
     printf("GL_N3: %d\n", GL_N3) ; 
+
+
+    geom_par.gnx = GL_N0 ;
+    geom_par.gny = GL_N1 ;
+    geom_par.gnz = GL_N2 ;
+    geom_par.gnt = GL_N3 ;
+
+    geom_par.xmap = 0 ;
+    geom_par.ymap = 1 ;
+    geom_par.zmap = 2 ;
+    geom_par.tmap = 3 ;
+
+    set_geom_glv(&geom_par);
 
 
 
@@ -36,7 +42,7 @@ int main(int argc, char ** argv){
            
     printf("conf_id_iter is %d.\n", conf_id_iter);
 
-    printf("Writing conf in file %s with conf_id_iter = %d", argv[2], new_conf_id_iter);
+    printf("Writing conf in file %s with conf_id_iter = %d\n", argv[2], new_conf_id_iter);
     print_su3_soa_ildg_binary(conf,argv[2],new_conf_id_iter);
 
     free(conf);

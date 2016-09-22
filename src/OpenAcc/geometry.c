@@ -4,12 +4,10 @@
 #include "./geometry.h"
 #include "stdio.h"
 
-#ifdef MULTIDEVICE
 #include "../Mpi/multidev.h"
-#endif 
 
 
-geom_parameters geom_par;
+geom_parameters geom_par = {.initialized_check = 0};
 
 void compute_nnp_and_nnm_openacc(void){
   int d0, d1, d2, d3,parity;
@@ -98,8 +96,13 @@ void compute_nnp_and_nnm_openacc(void){
 //  fclose(nnfile);
 }
 
-void set_geom_glv(geom_parameters* gp){
 
+int set_geom_glv(geom_parameters* gp){
+    gp->initialized_check = 1;
+
+    int res = 0;
+
+    // hardcoded
     gp->nd[0]= nd0; gp->nd[1] = nd1; gp->nd[2] = nd2; gp->nd[3] = nd3;
 
     gp->nloc[0]=  LOC_N0; gp->nloc[1] = LOC_N1; 
@@ -108,21 +111,67 @@ void set_geom_glv(geom_parameters* gp){
     gp->vol3s[0] = vol4/nd0; gp->vol3s[1] = vol4/nd1;
     gp->vol3s[2] = vol4/nd2; gp->vol3s[3] = vol4/nd3;
 
+    gp->halos[0] = D0_HALO; 
+    gp->halos[1] = D1_HALO; 
+    gp->halos[2] = D2_HALO; 
+    gp->halos[3] = D3_HALO;
+
+    gp->nranks[0] = NRANKS_D0; gp->nranks[1] = NRANKS_D1; 
+    gp->nranks[2] = NRANKS_D2; gp->nranks[3] = NRANKS_D3;
+ 
+    // read from input file
     gp->xyztmap[0] = gp->xmap;  gp->xyztmap[1] = gp->ymap;
     gp->xyztmap[2] = gp->zmap;  gp->xyztmap[3] = gp->tmap;
 
     gp->d0123map[gp->xmap] = 0;   gp->d0123map[gp->ymap] = 1;
     gp->d0123map[gp->zmap] = 2;   gp->d0123map[gp->tmap] = 3;
 
-    gp->nranks[0] = NRANKS_D0; gp->nranks[1] = NRANKS_D1; 
-    gp->nranks[2] = NRANKS_D2; gp->nranks[3] = NRANKS_D3;
- 
+    // consistency checks
 
 
-    gp->halos[0] = D0_HALO; 
-    gp->halos[1] = D1_HALO; 
-    gp->halos[2] = D2_HALO; 
-    gp->halos[3] = D3_HALO;
+    int expnx =(gp->nd[gp->xmap]-2*gp->halos[gp->xmap])*
+        gp->nranks[gp->xmap]; 
+    int expny =(gp->nd[gp->ymap]-2*gp->halos[gp->ymap])*
+        gp->nranks[gp->ymap]; 
+    int expnz =(gp->nd[gp->zmap]-2*gp->halos[gp->zmap])*
+        gp->nranks[gp->zmap]; 
+    int expnt =(gp->nd[gp->tmap]-2*gp->halos[gp->tmap])*
+        gp->nranks[gp->tmap]; 
+
+    if(gp->gnx != expnx || gp->gny != expny ||
+            gp->gnz != expnz  || gp->gnt != expnt ){ 
+
+        if(0==devinfo.myrank){
+            printf("Error, input file lattice dimensions are not compatible\n");
+            printf("       with the lattice dimensions written in geometry.h.\n");
+            printf("       Either modify the input file, or recompile,\n");
+            printf("(input) nx=%d\tny=%d\tnz=%d\tnt=%d\n",
+                    gp->gnx,gp->gny,gp->gnz,gp->gnt);
+            printf("With this mapping, the following lattice is expected:\n");
+            printf(" nx %d ny %d nz %d nt %d ",
+                    (gp->nd[gp->xmap]-(gp->nranks[gp->xmap]>1?2*HALO_WIDTH:0))*gp->nranks[gp->xmap],
+                    (gp->nd[gp->ymap]-(gp->nranks[gp->ymap]>1?2*HALO_WIDTH:0))*gp->nranks[gp->ymap],
+                    (gp->nd[gp->zmap]-(gp->nranks[gp->zmap]>1?2*HALO_WIDTH:0))*gp->nranks[gp->zmap],
+                    (gp->nd[gp->tmap]-(gp->nranks[gp->tmap]>1?2*HALO_WIDTH:0))*gp->nranks[gp->tmap]);
+        }
+       res = 1;
+    }
+    int maps[4] = {gp->xmap,gp->ymap,gp->zmap,gp->tmap};
+    int stop = 0;
+    int imap,jmap;
+    for(imap = 0 ; imap<3; imap++) for(jmap = imap+1 ; jmap<4; jmap++)
+        stop = stop || (maps[imap] == maps[jmap]);
+
+    if(stop){
+
+        if(0==devinfo.myrank)
+            printf("ERROR: found two equal direction mappings (%s:%d)\n",
+                    __FILE__,__LINE__);
+        res = 1;
+
+    }
+
+    return res;
 
 }
 
