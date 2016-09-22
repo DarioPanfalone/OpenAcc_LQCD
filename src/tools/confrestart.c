@@ -22,6 +22,15 @@ int main(int argc, char ** argv){
     geom_par.gnt = GL_N3;
 
 
+    printf("CODE dimensions: \n");
+
+    printf("GL_N0: %d\n", GL_N0) ; 
+    printf("GL_N1: %d\n", GL_N1) ; 
+    printf("GL_N2: %d\n", GL_N2) ; 
+    printf("GL_N3: %d\n", GL_N3) ; 
+
+
+
     printf("Reading conf %s...\n", argv[1]);
     read_su3_soa_ildg_binary(conf,argv[1],&conf_id_iter);
            

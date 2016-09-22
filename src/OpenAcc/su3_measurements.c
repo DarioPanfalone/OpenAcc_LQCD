@@ -19,7 +19,7 @@
 
 
 
-void check_unitarity_device( __restrict su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
+void check_unitarity_device( __restrict const su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
 
 
     // removing stag phases

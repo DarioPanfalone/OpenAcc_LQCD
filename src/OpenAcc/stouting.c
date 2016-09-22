@@ -11,6 +11,7 @@
 #include "./stouting.h"
 #include "./struct_c_def.h"
 #include "./su3_utilities.h"
+#include "./su3_measurements.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"

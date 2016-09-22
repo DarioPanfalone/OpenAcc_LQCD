@@ -4,16 +4,21 @@
 \section{Directory content}
 
 \begin{itemize}
-    \item \texttt{src}: the code.
-    \item tools: various utilities, for example to generate the rational
-        approximations and test them (at present the only thing, but this
+    \item \texttt{src}: the code, for the main program and for some tools.
+    \item tools: code and makefile for various utilities, for example to 
+generate the rational
+        approximations and test them (at present the only thing), but this
         folder could contain tools to convert configurations from a format to
         another and things like that), 
     \item scripts: basically, collections of commands that you would have to
-        type too many times.
+        type too many times. Scripts here are provided for convenience, but are 
+        not maintained.
     \item \verb|saved_approxs|: saved rational approximations, for your 
-        convenience. 
-    \item build: the place where build happens. 
+        convenience. Not maintained.
+    \item build: the place where build happens. It is advisable to create you 
+own build directory, possibly aptly named with the lattice dimensions and 
+number of MPI ranks, since different lattice geometries require different 
+builds.
     \item build/run: the place where your program should run. Try to put here
         all the things your program needs (rational approximation files,
         start configurations, files where data should be appended and so on.)
@@ -22,10 +27,11 @@
 
 
 
-
-
 \section{Compilation}
 \label{compilation}
+\subsection{Generating the single precision part of the code}
+(to write)
+\subsection{Creating the makefile}
 If you don't have a makefile, or if you changed the dependence
 structure in your code, you have to create a makefile first. NO FEAR! The 
 \verb|generate_makefile.py| utility will do it for you.
@@ -44,23 +50,54 @@ Please specify one compiler: either PGISLOW, GNU or PGI
 As you see, it will tell you to choose a compiler. Try, for example
 \begin{verbatim}
 [OPENACCREPO/build]~>./generate_makefile.py GNU ../src/OpenAcc/main.c \
-../src/Include/checkinput.c > makefile
+../src/tools/checkinput.c > makefile
 \end{verbatim}
 and a makefile will be generated, using gcc and -O3 optimization
 (for more informations, look into \verb|generate_makefile.py|). 
 
-Then just  type
+Note that you can call the \verb|generate_makefile.py| utility from any 
+location, and specify the main files using absolute paths. This is handy in 
+case of multiple build locations (for different geometries, for example).
 
+
+\subsection{The actual compilation}
+
+A peculiarity of this code is that, because of design decisions driven by 
+performance reasons, the lattice geometry must be konwn at compile time (and 
+if you change them, you need to \verb|make clean| and recompile). At \verb|make|
+time, it is \emph{necessary} to  specify the dimensions of the local lattice, 
+and the number of ranks in the 4th dimensions (the only one which can be 
+parallelized, since we adopted the \emph{salamino} setup). It is also 
+\verb|nice| to specify the hash of the commit of the code, so that any 
+executable produced will show it and you will be able to understand which 
+version of the source code was used. Example:
 \begin{verbatim}
-make main
+make N0=32 N1=32 N2=32 N3=8 NR3=4 COMMIT_HASH=$(git rev-parse HEAD) main
 \end{verbatim}
 Or, if you want to make all necessary things:
 \begin{verbatim}
-make all
+make N0=32 N1=32 N2=32 N3=8 NR3=4 COMMIT_HASH=$(git rev-parse HEAD) 
 \end{verbatim}
 this will \emph{make} all the ``main'' files you passed to 
 \verb|generate_makefile.py|, plus \verb|rgen|, the executable needed to 
-generate the files of the rational approximations. 
+generate the files of the rational approximations (this is because the first 
+target in the makefile, which is \verb|all|, includes all the files you 
+specified when creating the makefile in the first place).\\
+Notice that the \verb|make| process, if started from scratch, can take several 
+minutes (with some versions of the PGI compiler, up to about one hour!).
+
+\subsection{Important notice}
+
+When compiling for another geometry, \emph{you need} to execute 
+\verb|make clean| first, otherwise only the recently changed files  (if 
+any) will be 
+compiled with the new geometry, which is different from the one for the rest of 
+the files. While 
+the linker may to everything without raising any error, the results will be a 
+mess. Clean everything first!\\
+
+For this reason it is advisable to have different directories for different 
+geometries.
 
 \subsection{Remarks} 
 You may need to do this on the right machine, with the right modules.
@@ -70,6 +107,7 @@ you have to type
 ../scripts/vai_su_cudawn?.sh    # choose 6 or 7
 module load pgi                 # last version
 module load cuda                # last version
+module load openmpi             # if needed 
 \end{verbatim}
 
 
@@ -141,11 +179,25 @@ The kind of file needed are usually the rational approximations and
 the starting gauge configuration file (unless you want to start from
 a random configuration).
 
-\subsection{Input file}
-The format of the input file is pretty self explanatory. If you try
-to run \verb|./main| without arguments, it will produce a template, but
-you can also look to \verb|/buld/run/input_openacc| and take inspiration from 
-it. Various remarks on its content:
+\subsection{``Setting'' file}
+The format of the setting file is pretty self explanatory. If you try
+to run \verb|./main| without arguments, it will produce a template, with the 
+default values for optional parameters, and comments. You may also cheat, and 
+copy from other setting files, but notice that different versions of the program 
+may require setting files having different entries.
+
+In general, the setting file can contain comments, escaped with '\#'. It is mad 
+up of a number of parameter groups whose beginning is indicated by a parameter 
+group name (see below). Each parameter group contains various parameter lines, 
+each composed of the parameter name and the parameter value.
+
+The order of the parameter groups in the file is not important, and the order 
+of the parameter lines in each group is not important. If a parameter name is 
+misspelled, if any unrecognized text is found or if a non-optional parameter 
+is not found, the parser will continue to read the whole file, tell you all 
+the errors, and terminate the program.
+
+Various remarks on the content of the setting file:
 
 \begin{itemize}
     \item{Theory: \verb|ActionParameters|.}
@@ -161,11 +213,16 @@ it. Various remarks on its content:
         sign problem). 
     \item{Theory: \verb|BackgroundFieldParameters|.}
         An electromagnetic field. Notice that while the magnetic field is real, only 
-        a purely imaginary electric field is allowed (because of another sign problem).
+        a purely imaginary electric field is allowed (because of another sign 
+problem). All the parameters here are optional and their default value is zero.
     \item{Simulation: \verb|MDParameters|.} You can specify the number of steps, 
-        the number of gauge substeps for each step, the length of the trajectory, and 
-        the norm (not squared) of the target residue for matrix inversion during 
-        molecular dynamics evolution. While the other two parameters should be kept as 
+        the number of gauge substeps for each step, the length of the 
+        trajectory, the norm (not squared) of the target residue for matrix 
+        inversion during molecular dynamics evolution, if you want to use 
+        the single precision version, and the target residue for matrix 
+inversion in the pre-MD and post-MD operations (generation of the $\chi$ 
+fermions and final action computation respectively). While the other two 
+parameters should be kept as 
         low as possible to optimize simulation time, the length of the trajectory 
         should be kept equal to $1$ but for bugfixing purposes.
 
@@ -189,9 +246,7 @@ name
     be saved once every this number of trajectories. For safety, set 1, for 
 speed, 
     you can increase it.
-\item \verb|UseILDG|: if this flag is set to $1$, the gauge configuration file 
-    I/O will be done using ILDG format. The default value is 1, 
-so ILDG activated.
+
 \item Thing related to random initialization. \verb|RandGenStatusFilename| is 
 used to specify the name of a file where the random number generator status 
 will be stored. At present, it is optional and the default value is 
@@ -200,11 +255,15 @@ instead use to initialise the random number generator. If \verb|Seed| is zero,
 the function \verb|time()| will be used. Notice that after a successful run 
 the file will be generated, and will be read on the next run, while \verb|Seed| 
 will be ignored.
+\item \verb|JarzynskiMode|: setting this to 1 or -1 will turn on Jarzynski 
+mode. This is an experimental feature (see below). By default, this option is 
+inactive, and the parameter is set to 0.
 \end{itemize}
 You can also set the \verb|Seed| of the simulation, 
 a parameter 
 \verb|EpsGen| defining the randomness in cold gauge conf generation, and the 
 verbosity level \verb|VerbosityLv|. 
+
 
     \item{Measures: \verb|GaugeMeasuresSettings|.} Now, only the name of the 
         file for the {\bf basic} gauge measures is specified (plaquette, 
@@ -230,12 +289,63 @@ ask for \verb|SingleInvNVectors| to be smaller than
 \verb|DoubleInvNVectorsChiral| or \verb|DoubleInvNVectorsQuarkNumber|.
     
     
-    \item{Device: \verb|DeviceSettings|.} At present, just the choice of the 
-        device in case of running on a GPU.
+    \item{Device: \verb|DeviceSettings|.}  Here you can set the number of 
+mpi ranks (one or more), which must be equal to  the one set at compilation 
+time. Rank 0 (or the whole program, in the case of a single process) will run 
+on the device speficied by \verb|device_choice|. The other ranks, will chose 
+different gpus according to the scheme
+\begin{verbatim}
+ d = 
+\end{verbatim}
+
+
+\textbf{Notice: } set this to 0 when using slurm as a job scheduler. In any 
+case, ask the sysadmin about this.\\
+When running on multiple 
     \item{\verb|Geometry|} Here the lattice dimensions are listed and the 
         direction mapping too. Unfortunately, the lattice dimensions cannot be set in 
         this way; as in the case of \verb|StoutRho| they are read just to check the 
-        intention of the user and suggest recompilation.  
+        intention of the user and suggest recompilation. \\
+        Note that only one dimension can be parallelized, and for performance 
+reasons it must be the one relative to the most extern index in the arrays, 
+that is the fourth one. With the ``map'' parameters, you can choose which 
+physical directions correspond to each logical direction. By default, the 
+       
+        
+        
+   \item{Algorithmic optimizations: \verb|InverterTicks|. }
+   These actually refer to the single shift inverter: very little is doable for 
+the multishift one.
+   \begin{itemize}
+    \item \verb|singlePInvAccelMultiInv| : don't touch this, multishift 
+inverter is still faster (keep 0 or delete).
+ \item \verb|useMixedPrecision|: in single inversions, this should provide a 
+substantial boost. Default is 0, by now.
+ \item \verb|restartingEvery| : restarting of the inversion algorithm takes 
+place every how-many-you-decide steps. Default 10000.
+ \item \verb|mixedPrecisionDelta| : in the mixed precision CG algorithm, the 
+residue must be calculated in double precision at some points. In practice, it 
+is recalculated in double precision when its magnitude varies of a factor, 
+which is specified here. Default : 0.1.
+
+   \end{itemize}
+
+   
+   
+        
+        
+    \item{Debug: \verb|DebugSettings|.}
+    \begin{itemize}
+    \item \verb|UseILDG|: if this flag is set to $1$, the gauge configuration 
+file  I/O will be done using ILDG format. The default value is 1, so ILDG 
+activated.
+    \item \verb|SaveAllAtEnd|: In case you want to reproduce a bug, you want to 
+start from the same gauge configuration and from the same state of the random 
+number generator(s). Setting this option to 0 will make the program not 
+overwrite the gauge configuration file and the random generator status file(s). 
+The default value is 1, of course.
+    \item 
+\end{itemize}
 \end{itemize}
 
 
@@ -335,7 +445,8 @@ reasonable to add some work that has been done on this tools in the released
 code.
 \subsection{ NORANDOM Mode}
 If you need your run to be reproducible for a whole molecular dynamics 
-trajectory and want the random number generation not used, use 
+trajectory, you don't trust the random number generatorand don't want to use 
+it, you can use
 \verb|#define NORANDOM|. It may also be useful to shorten the length of the 
 trajectory (to improve acceptance).
 At present random number generation is used in:
@@ -360,8 +471,10 @@ files with \verb|make|).
 \subsection{The DbgTools directory}
 In this directory you can find various \emph{skeletons} for many testing needs:
 \begin{itemize}
-    \item Test for $D_{eo}$ and $D_{oe}$, the Dirac 
-        operator (\verb|deo_doe_test.c|).
+    \item Tests and benchmarks for $D_{eo}$ and $D_{oe}$, the Dirac 
+        operator (\verb|deo_doe_test.c|), in single an double precision.
+    \item Test and benchmarks for the multishift inverter in single and double 
+precision.
     \item Tests for some functions involved in stouting
     \item (to be continued)
 \end{itemize}

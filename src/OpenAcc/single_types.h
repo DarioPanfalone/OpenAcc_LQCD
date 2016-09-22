@@ -115,7 +115,7 @@ static inline void gl3_to_thmat(single_su3 * in , single_thmat * out){
 }
 
 //extraction from soas
-static inline void single_su3_from_su3_soa( __restrict su3_soa * const mat, const int idx_mat,						  single_su3 * Omat){
+static inline void single_su3_from_su3_soa( __restrict const su3_soa * const mat, const int idx_mat,						  single_su3 * Omat){
   Omat->comp[0][0] = mat->r0.c0[idx_mat];
   Omat->comp[0][1] = mat->r0.c1[idx_mat];
   Omat->comp[0][2] = mat->r0.c2[idx_mat];
@@ -124,7 +124,7 @@ static inline void single_su3_from_su3_soa( __restrict su3_soa * const mat, cons
   Omat->comp[1][2] = mat->r1.c2[idx_mat];
 
 }
-static inline void single_su3_from_global_su3_soa( __restrict global_su3_soa * const mat, const int idx_mat,						  single_su3 * Omat){
+static inline void single_su3_from_global_su3_soa( __restrict const global_su3_soa * const mat, const int idx_mat,						  single_su3 * Omat){
   Omat->comp[0][0] = mat->r0.c0[idx_mat];
   Omat->comp[0][1] = mat->r0.c1[idx_mat];
   Omat->comp[0][2] = mat->r0.c2[idx_mat];
@@ -133,14 +133,14 @@ static inline void single_su3_from_global_su3_soa( __restrict global_su3_soa * c
   Omat->comp[1][2] = mat->r1.c2[idx_mat];
 
 }
-static inline void single_gl3_from_su3_soa( __restrict su3_soa * const mat, const int idx_mat, single_su3 * Omat){
+static inline void single_gl3_from_su3_soa( __restrict const su3_soa * const mat, const int idx_mat, single_su3 * Omat){
     single_su3_from_su3_soa(mat,idx_mat,Omat);
     Omat->comp[2][0] = mat->r2.c0[idx_mat];
     Omat->comp[2][1] = mat->r2.c1[idx_mat];
     Omat->comp[2][2] = mat->r2.c2[idx_mat];
 
 }
-static inline void single_tamat_from_tamat_soa(__restrict tamat_soa * in, int idx, single_tamat * out){
+static inline void single_tamat_from_tamat_soa(__restrict const tamat_soa * in, int idx, single_tamat * out){
 
     out->ic00 = in->ic00[idx];
     out->ic11 = in->ic11[idx];
@@ -149,7 +149,7 @@ static inline void single_tamat_from_tamat_soa(__restrict tamat_soa * in, int id
     out->c12 = in->c12[idx];
 
 }
-static inline void single_thmat_from_thmat_soa(__restrict thmat_soa * in, int idx, single_thmat * out){
+static inline void single_thmat_from_thmat_soa(__restrict const thmat_soa * in, int idx, single_thmat * out){
 
     out->rc00 = in->rc00[idx];
     out->rc11 = in->rc11[idx];
