@@ -566,9 +566,9 @@ int main(int argc, char* argv[]){
                                 (int) total_duration, (int) mc_params.MaxRunTimeS);
                         printf(" shutting down now.\n");
                         printf("Total max expected duration: %d seconds",
-                                      max_expected_duration_with_another_cycle);
-                        printf("(%d elapsed now, %d*2 maximum expected)\n",total_duration,
-                                     max_cycle_duration);
+                                      (int) max_expected_duration_with_another_cycle);
+                        printf("(%d elapsed now, %d*2 maximum expected)\n",(int) total_duration,
+                                     (int) max_cycle_duration);
                         //https://www.youtube.com/watch?v=MfGhlVcrc8U
                         // but without that much pathos
                         run_condition = 0;
