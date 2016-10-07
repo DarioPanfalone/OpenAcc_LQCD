@@ -441,7 +441,40 @@ int main(int argc, char* argv[]){
 
                 //--------- MISURA ROBA FERMIONICA ----------------//
                 //
-                check_unitarity_device(conf_acc,&max_unitarity_deviation,
+
+
+                if(0 != mc_params.JarzynskiMode ){ // HALFWAY MEASUREMENTS FOR JARZYNSKI
+
+                    bf_param new_backfield_parameters = backfield_parameters;
+
+                    // DIRECT MODE 
+                    if(1 == mc_params.JarzynskiMode)
+                        new_backfield_parameters.bz = backfield_parameters.bz + 
+                            (double) (id_iter+0.5)/mc_params.MaxConfIdIter;
+                    // REVERSE MODE
+                    if(-1 == mc_params.JarzynskiMode)
+                        new_backfield_parameters.bz = backfield_parameters.bz -
+                            (double) (id_iter+0.5)/mc_params.MaxConfIdIter;
+
+
+
+
+                    if(0==devinfo.myrank){
+                       
+                        printf("JarzynskiMode, iteration %d/%d (%d max for this run) - MEASUREMENTS AT HALFWAY \n",
+                                id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
+                        printf("JarzynskiMode - current bz value : %f (HALFWAY)\n", new_backfield_parameters.bz);
+                    }
+
+                    init_all_u1_phases(new_backfield_parameters,fermions_parameters);
+#pragma acc update device(u1_back_phases[0:8*NDiffFlavs])
+#pragma acc update device(u1_back_phases_f[0:8*NDiffFlavs])
+
+                }
+
+
+
+    check_unitarity_device(conf_acc,&max_unitarity_deviation,
                         &avg_unitarity_deviation);
                 printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
                         devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
