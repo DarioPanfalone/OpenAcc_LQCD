@@ -235,6 +235,7 @@ int main(int argc, char* argv[]){
     printf("\tMPI%02d: Max_unitarity_deviation on host: %e\n", devinfo.myrank,
             max_unitarity_deviation);
 
+    double fermionMeasureTiming=0 ;// default value
 
 
 #pragma acc data  copy(conf_acc[0:conf_acc_size]) \
@@ -479,10 +480,21 @@ int main(int argc, char* argv[]){
                 printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
                         devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
 
-                fermion_measures(conf_acc,fermions_parameters,
+                if(conf_id_iter % fm_par.measEvery == 0 )
+                {
+                   struct timeval tf0, tf1;
+                   gettimeofday(&tf0, NULL);
+                   fermion_measures(conf_acc,fermions_parameters,
                         &fm_par, md_parameters.residue_metro,
                         md_parameters.max_cg_iterations,
                         conf_id_iter) ;
+                   gettimeofday(&tf1, NULL);
+                        
+                   fermionMeasureTiming = 
+                   (double) (tf1.tv_sec - tf0.tv_sec)+
+                        (double)(tf1.tv_usec - tf0.tv_usec)/1.0e6;
+
+                }
 
                 //-------------------------------------------------// 
                 //--------- MISURA ROBA DI GAUGE ------------------//
@@ -582,6 +594,8 @@ int main(int argc, char* argv[]){
                                 fopen(debug_settings.diagnostics_filename,"at");
 
                             fprintf(foutfile,"TOTTIME  %f \n",cycle_duration);
+                            if(conf_id_iter % fm_par.measEvery == 0 )
+                                fprintf(foutfile,"FERMMEASTIME  %f \n",fermionMeasureTiming);
                             fclose(foutfile);
                         }
 
@@ -593,6 +607,11 @@ int main(int argc, char* argv[]){
                         (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
                     double max_expected_duration_with_another_cycle = 
                         total_duration + 2*max_cycle_duration ; 
+
+                    if(conf_id_iter+1 % fm_par.measEvery == 0 )
+                        max_expected_duration_with_another_cycle += fermionMeasureTiming;
+                    // just to be sure
+
 
                     if(max_expected_duration_with_another_cycle > mc_params.MaxRunTimeS){
                         printf("Time is running out (%d of %d seconds elapsed),",

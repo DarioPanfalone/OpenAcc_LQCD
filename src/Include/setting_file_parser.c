@@ -569,8 +569,10 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
 {
 
     const int doubleinv_def = 0;
+    const int measEvery_def = 1;
     par_info fmp[]={
         (par_info){(void*) &(fmpars->fermionic_outfilename),       TYPE_STR,"FermionicOutfilename",        NULL ,                       NULL},
+        (par_info){(void*) &(fmpars->measEvery),                   TYPE_INT,"MeasEvery"           ,(const void*) &measEvery_def,        NULL},
         (par_info){(void*) &(fmpars->SingleInvNVectors),           TYPE_INT,"SingleInvNVectors"   ,        NULL ,                       NULL},
         (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),     TYPE_INT,"DoubleInvNVectorsChiral",     (const void*) &doubleinv_def,NULL},
         (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,"DoubleInvNVectorsQuarkNumber",(const void*) &doubleinv_def,NULL}};

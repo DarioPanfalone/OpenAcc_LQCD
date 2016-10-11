@@ -9,6 +9,7 @@
 #include "../OpenAcc/md_integrator.h"
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/geometry.h"
+#include "../Meas/ferm_meas.h"
 
 #include <stdint.h>
 
@@ -36,8 +37,9 @@ uint32_t hash_settings_explicit(
         bf_param *bfpar,
         md_param *mdpar,
         mc_params_t *mcpar,
-        geom_parameters *gpar
-        ){
+        geom_parameters *gpar,
+        ferm_meas_params *fmpar)
+{
 
 
     uint32_t hash=0;
@@ -80,6 +82,11 @@ uint32_t hash_settings_explicit(
     hashfun(&hash,(char*)&(gpar->gnt),sizeof(int));
     // ONLY RELEVANT mcpar info
     hashfun(&hash,(char*)&(mcpar->JarzynskiMode),sizeof(int));
+    // ONLY RELEVANT fermion measurements info
+    hashfun(&hash,(char*)&(fmpar->measEvery),sizeof(int));
+    hashfun(&hash,(char*)&(fmpar->SingleInvNVectors),sizeof(int));
+    hashfun(&hash,(char*)&(fmpar->DoubleInvNVectorsChiral),sizeof(int));
+    hashfun(&hash,(char*)&(fmpar->DoubleInvNVectorsQuarkNumber),sizeof(int));
 
     return hash;
 
@@ -90,7 +97,7 @@ uint32_t hash_settings(){
 
     return hash_settings_explicit(fermions_parameters,NDiffFlavs,
                 &act_params,&backfield_parameters,&md_parameters,
-                &mc_params,&geom_par);
+                &mc_params,&geom_par,&fm_par);
 
 
 }

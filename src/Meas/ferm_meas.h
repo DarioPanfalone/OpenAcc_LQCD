@@ -11,6 +11,7 @@
 
 typedef struct ferm_meas_param_t{
 
+    int measEvery;
     char fermionic_outfilename[50];
     char fermionic_outfile_header[1000];
     int SingleInvNVectors, DoubleInvNVectorsChiral;
