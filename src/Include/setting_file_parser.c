@@ -570,9 +570,17 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
 
     const int doubleinv_def = 0;
     const int measEvery_def = 1;
+    const char measEvery_comment[] = "#Fermionic measurements will be performed once very MeasEvery times.";
+    const double expMeasLoadRatio_def = 0.3;
+    const char expMeasLoadRatio_comment[] ="\
+#The expected duration of a batch measurements, compared to one update.\n\
+#It is recommended that you set this number to an adequate value when MeasEvery is not set to one.\n\
+# Note: this value is used (and useful) only for the first time measurements are taken.";
+
     par_info fmp[]={
         (par_info){(void*) &(fmpars->fermionic_outfilename),       TYPE_STR,"FermionicOutfilename",        NULL ,                       NULL},
-        (par_info){(void*) &(fmpars->measEvery),                   TYPE_INT,"MeasEvery"           ,(const void*) &measEvery_def,        NULL},
+        (par_info){(void*) &(fmpars->expMeasLoadRatio),         TYPE_DOUBLE,"expMeasLoadRatio",            (const void*) &expMeasLoadRatio_def, expMeasLoadRatio_comment},
+        (par_info){(void*) &(fmpars->measEvery),                   TYPE_INT,"MeasEvery"           ,(const void*) &measEvery_def,measEvery_comment},
         (par_info){(void*) &(fmpars->SingleInvNVectors),           TYPE_INT,"SingleInvNVectors"   ,        NULL ,                       NULL},
         (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),     TYPE_INT,"DoubleInvNVectorsChiral",     (const void*) &doubleinv_def,NULL},
         (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,"DoubleInvNVectorsQuarkNumber",(const void*) &doubleinv_def,NULL}};
@@ -666,7 +674,8 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 
     int res = scan_group_NV(sizeof(gp)/sizeof(par_info),gp, filelines, startline, endline);
 
-    if (1 == set_geom_glv(gpar) ) res = 1 ;
+    if(startline < endline)
+        if (1 == set_geom_glv(gpar) ) res = 1 ;
 
     return res;
 

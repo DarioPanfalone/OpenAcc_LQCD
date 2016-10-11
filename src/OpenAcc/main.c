@@ -606,10 +606,15 @@ int main(int argc, char* argv[]){
                         (tend_cycle.tv_sec - tinit.tv_sec)+
                         (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
                     double max_expected_duration_with_another_cycle = 
-                        total_duration + 2*max_cycle_duration ; 
+                        total_duration + 2*max_cycle_duration ;
+
+                    
+                    if(fermionMeasureTiming > 0)
+                        fm_par.expMeasLoadRatio = fermionMeasureTiming / cycle_duration;
 
                     if(conf_id_iter+1 % fm_par.measEvery == 0 )
-                        max_expected_duration_with_another_cycle += fermionMeasureTiming;
+                        max_expected_duration_with_another_cycle += 
+                            max_cycle_duration*fm_par.expMeasLoadRatio;
                     // just to be sure
 
 
@@ -619,7 +624,7 @@ int main(int argc, char* argv[]){
                         printf(" shutting down now.\n");
                         printf("Total max expected duration: %d seconds",
                                       (int) max_expected_duration_with_another_cycle);
-                        printf("(%d elapsed now, %d*2 maximum expected)\n",(int) total_duration,
+                        printf("(%d elapsed now, 2 * %d maximum expected)\n",(int) total_duration,
                                      (int) max_cycle_duration);
                         //https://www.youtube.com/watch?v=MfGhlVcrc8U
                         // but without that much pathos
