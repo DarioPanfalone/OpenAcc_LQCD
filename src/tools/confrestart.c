@@ -3,7 +3,9 @@
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/geometry.h"
 #include "../Mpi/geometry_multidev.h"
+#ifdef __GNUC__
 #include <stdlib.h>
+#endif
 #include <stdio.h>
 
 #include "../Include/stringify.h"
