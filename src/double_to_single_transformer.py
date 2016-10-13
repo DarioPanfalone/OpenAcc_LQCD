@@ -5,6 +5,10 @@ from sys import argv,exit
 import os 
 import re
 
+autoMode = False
+if 'autoMode' in argv :
+    autoMode = True
+    argv.remove('autoMode')
 
 fileNames = [\
 'OpenAcc/alloc_vars.c',\
@@ -229,6 +233,9 @@ print "Total global variables found: ", len(dpVariableNames)
 # - all relevant types
 
 ans = '' # answer for 'overwrite file?'
+
+if autoMode:
+    ans = 'a'
 
 
 fileNamesToChange = list(set(fileNames)-set(filesNoOverwrite))

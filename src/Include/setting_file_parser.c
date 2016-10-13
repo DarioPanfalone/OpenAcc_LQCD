@@ -17,6 +17,7 @@
 #include "./montecarlo_parameters.h"
 #include "./setting_file_parser.h"
 #include "./inverter_tricks.h"
+#include "../tests_and_benchmarks/test_and_benchmarks.h"
 
 #include <stdio.h>
 #include <strings.h>
@@ -46,7 +47,7 @@ typedef struct par_info_t{
 
 }par_info;
 
-#define NPMGTYPES 11
+#define NPMGTYPES 12
 #define MAXPMG 20
 const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "ActionParameters",         // 0 
@@ -59,7 +60,8 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "DeviceSettings"         ,  // 7
     "Geometry"               ,  // 8
     "DebugSettings"          ,  // 9
-    "InverterTricks"            // 10
+    "InverterTricks"         ,  // 10
+    "TestSettings"              // 11
 };
 #define PMG_ACTION           0
 #define PMG_FERMION          1
@@ -72,7 +74,8 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
 #define PMG_GEOMETRY         8
 #define PMG_DEBUG            9
 #define PMG_INVERTER_TRICKS 10
-// last number should be NPMGTYPES - 1 !!
+#define PMG_TESTS           11
+// last number must be NPMGTYPES - 1 !!
 
 
 FILE * helpfile;
@@ -163,7 +166,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         for(int itype =0; itype <ntagstofind; itype++){
             found_something = strstr(filelines[iline],strtofind[itype]);
             if(found_something){
-                //printf("Found group %s on line %d\n",strtofind[itype], iline);
+                printf("Found group %s on line %d\n",strtofind[itype], iline);
                 taglines[nres] = iline;
                 tagtypes[nres] = itype;
                 nres++;
@@ -285,6 +288,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 int reads = sscanf(filelines[iline],"%s", word);
                 if(reads==1){
                     if(0==devinfo.myrank)
+                        printf("DIOPORCO\n") ; // GOLIARDIA
                         printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
                     printf("%s\n", filelines[iline]);
                     return 1;
@@ -681,6 +685,41 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
 
 }
 
+int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+{
+
+    int helpmode = (int) (startline == endline);
+
+    const int saveResults_def = 0;
+    const char saveResults_comment[] = "\
+# set to 1 if you want to save all results (the results of Deo Doe or the result of \n\
+# individual shifts)\n";
+
+    const char fakeShift_comment[]="\
+# tHe shift (equal for all terms) in the fake rational approximations in benchmarkMode for CG-M.";
+    const char benchMarkMode_comment[]="\
+# In benchmark mode, a fake rationan approximation will be used in CG-M.\n";
+
+    par_info tp[]= {
+        (par_info){(void*) &(ti->deoDoeIterations),       TYPE_INT,"DeoDoeIterations",NULL, NULL},
+        (par_info){(void*) &(ti->multiShiftInverterRepetitions),TYPE_INT,"MultiShiftInverterRepetitions",NULL, NULL},
+        (par_info){(void*) &(ti->fakeShift),TYPE_DOUBLE,"FakeShift",NULL,fakeShift_comment},
+        (par_info){(void*) &(ti->benchmarkMode),TYPE_INT,"BenchmarkMode",NULL,benchMarkMode_comment},
+        (par_info){(void*) &(ti->saveResults),TYPE_INT,"SaveResults",(const void*) &saveResults_def,saveResults_comment},
+    
+    };
+
+    // from here on, you should not have to modify anything.
+    int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
+
+    if(!res) ti->parametersAreSet = 1; 
+
+    return res;
+
+}
+
+
+
 
 void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 {
@@ -703,9 +742,9 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES];
     int found_tags = 0;
     fermions_parameters = NULL;
-    if (! helpmode){
+    if (! helpmode){//reading input file 
         char *readcheck = filelines[0];
-        while(readcheck != NULL){
+        while(readcheck != NULL){ // saving input file in array of lines
             readcheck = fgets(filelines[lines_read],MAXLINELENGTH,input);
             if(readcheck != NULL) lines_read++;
         }
@@ -713,6 +752,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
         if(0==devinfo.myrank)
             printf("lines read: %d\n", lines_read);
+
 
         int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str);
 
@@ -722,11 +762,8 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
         // erasing comments 
         erase_comments(filelines,lines_read);
-        //for(int dbgline = 0 ; dbgline < lines_read; dbgline++) // DBG
-        //  printf("%d %s",dbgline, filelines[dbgline]);
 
         //scanning for macro parameter families
-
         found_tags = scan_group_V(NPMGTYPES,par_macro_groups_names,
                 tagcounts,
                 tagpositions,tagtypes,MAXPMG,
@@ -761,11 +798,12 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     }
 
 
-    // check if all parameter groups were found
+    // check if all parameter groups were found (neglecting optional goups)
     int check = 1;
     if(!helpmode){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-            if(igrouptype != PMG_FERMION  && igrouptype != PMG_DEBUG )  check *= tagcounts[igrouptype];
+            if(igrouptype != PMG_FERMION  && igrouptype != PMG_DEBUG 
+             && igrouptype != PMG_TESTS )  check *= tagcounts[igrouptype];
         if(!check){
             for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
                 if (!tagcounts[igrouptype]) if(0==devinfo.myrank)
@@ -837,7 +875,15 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
             case PMG_INVERTER_TRICKS   : 
                 check = read_inv_tricks_info(&inverter_tricks, 
                         filelines,startline,endline);
-
+                break;
+            case PMG_TESTS:
+                check = read_test_setting(&test_settings,
+                        filelines,startline,endline);
+                break;
+            default:
+                printf("TAG TYPE NOT RECOGNIZED\n");
+                exit(1);
+                break;
         }
         if(check)
             if(0==devinfo.myrank)

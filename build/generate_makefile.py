@@ -27,6 +27,22 @@ rgen: \n\
 
 
 
+ldimfileName = "lattice_dimensions.txt"
+ldim_string="\n\
+N0:=`grep N0 lattice_dimensions.txt| awk '{print $$2}'`\n\
+N1:=`grep N1 lattice_dimensions.txt| awk '{print $$2}'`\n\
+N2:=`grep N2 lattice_dimensions.txt| awk '{print $$2}'`\n\
+N3:=`grep N3 lattice_dimensions.txt| awk '{print $$2}'`\n\
+NR3:=`grep NR3 lattice_dimensions.txt| awk '{print $$2}'`\n\n"
+
+lattice_dimensions_text="\
+N0    8\n\
+N1    8\n\
+N2    8\n\
+N3    8\n\
+NR3   1\n"
+
+
 import os.path as path
 from sys import exit,argv,stderr,stdout
 
@@ -224,7 +240,8 @@ class file_node:
 
         for dependence in self.direct_dependences:
             makestring += ' ' + dependence
-        makestring += '\n\t'
+        makestring += ' lattice_dimensions.txt \n\t' # if lattice dimensions are changed, 
+                                                    # everything must be recompiled
         if '.h' in self.name:
             makestring += 'touch ' + self.name + '\n'
         elif '.c' in self.name:
@@ -257,6 +274,13 @@ class file_node:
 
 
 def generate_makefile_from_main(inputfiles):
+
+    if not path.exists(ldimfileName):
+        stderr.write("File " + ldimfileName + " does not exist, creating it\n")
+        ldimfile = open(ldimfileName,'w')
+        ldimfile.write(lattice_dimensions_text)
+        ldimfile.close()
+
 
     res = ''
     res += compiler_linker_settings + '\n'
@@ -350,6 +374,7 @@ if __name__ == '__main__':
     makeall += ' rgen\n'
 
 
+    stdout.write(ldim_string)
     stdout.write(makeall)
     stdout.write(makeclean)
     stdout.write(makemains)

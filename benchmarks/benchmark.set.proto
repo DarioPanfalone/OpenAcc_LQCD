@@ -1,0 +1,100 @@
+
+
+ActionParameters
+Beta                          3.75       #(double)
+StoutSteps                    2        #(int)
+StoutRho                      1.500000e-01        #(double)
+
+
+BackgroundFieldParameters
+
+
+MDParameters
+NmdSteps                      18        #(int)
+GaugeSubSteps                 4        #(int)
+TrajLength                    1.000000e+00        #(double)
+residue_metro                 1e-8        #(double)
+ExpMaxEigenvalue              5.500000e+00        #(double)
+SinglePrecMD                  0                   #(int)
+residue_md                    1e-4        #(double)
+MaxCGIterations               10000               #(int)
+
+
+MontecarloParameters
+Ntraj                         1        #(int)
+ThermNtraj                    0        #(int)
+StoreConfInterval             5        #(int)
+SaveConfInterval              5        #(int)
+StoreConfName                 gaugeconf_store        #(string)
+SaveConfName                  gaugeconf_save        #(string)
+MaxConfIdIter                 1000000             #(int)
+RandGenStatusFilename         rgstatus.bin        #(string)
+MaxRunTimeS                   1.000000e+09        #(double)
+Seed                          42                   #(int)
+EpsGen                        1.000000e-01        #(double)
+
+
+GaugeMeasuresSettings
+GaugeOutfilename              gauge.dat        #(string)
+
+
+FermionMeasuresSettings
+FermionicOutfilename          fermion.dat        #(string)
+SingleInvNVectors             1        #(int)
+DoubleInvNVectorsChiral       0                   #(int)
+DoubleInvNVectorsQuarkNumber  0                   #(int)
+
+
+DeviceSettings
+device_choice                 0        #(int)
+AsyncFermionComms             0                   #(int)
+AsyncGaugeComms               0                   #(int)
+NProcPerNode                  1                   #(int)
+NRanks                        SEDNRANKS        #(int)
+# NRanks has been set at make time with the NR3 variable.
+
+
+
+Geometry
+nx                            SEDL                  #(int)
+ny                            SEDL                  #(int)
+nz                            SEDL                  #(int)
+nt                            SEDT                  #(int)
+# Lattice dimensions have been fixed at make time through N0,N1,N2,N3 and NR3.
+
+xmap                          0                   #(int)
+ymap                          1                   #(int)
+zmap                          2                   #(int)
+tmap                          3                   #(int)
+#Notice that only the dimension mapped as 3 will be parallelized
+
+
+
+DebugSettings
+UseILDG                       1                   #(int)
+VerbosityLv                   2                   #(int)
+SaveAllAtEnd                  0                   #(int)
+PrintBackFieldDbgInfo         0                   #(int)
+SaveDiagnostics               1                   #(int)
+DoRevTest                     0                   #(int)
+DoNoRandomTest                0                   #(int)
+RngFakenessLevel              0                   #(int)
+MDDbgPrintMaxCount            0                   #(int)
+SaveDiagnosticsFilename       md_diagnostics.dat  #(string)
+PrintDiagInfoEvery            10000               #(int)
+
+
+InverterTricks
+useMixedPrecision             1                   #(int)
+restartingEvery               10000               #(int)
+mixedPrecisionDelta           1.000000e-01        #(double)
+
+
+TestSettings
+DeoDoeIterations              1000        #(int)
+MultiShiftInverterRepetitions 10        #(int)
+FakeShift                     1e-14        #(double)
+BenchmarkMode                 1        #(int)
+SaveResults                   0                   #(int)
+
+
