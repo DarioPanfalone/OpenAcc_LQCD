@@ -13,7 +13,7 @@ NR3=1
 all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set
 
 ../build/makefile: ../build/lattice_dimensions.txt
-	cd ../src && ./double_to_single_transformer.py autoMode && cd ../build && echo 'LATTICE DIMENSIONS:'  &&  echo PORCODIO && cat ../build/lattice_dimensions.txt && \
+	cd ../src && ./double_to_single_transformer.py autoMode && cd ../build && echo 'LATTICE DIMENSIONS:'  &&  cat ../build/lattice_dimensions.txt && \
 	./generate_makefile.py ../src/OpenAcc/main.c ../src/tests_and_benchmarks/deo_doe_test.c ../src/tests_and_benchmarks/inverter_multishift_test.c ../src/tools/checkinput.c  ../src/tools/confrestart.c $(CHOICE) > ../build/makefile 
 	
 run:
