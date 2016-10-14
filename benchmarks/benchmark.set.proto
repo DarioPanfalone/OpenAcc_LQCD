@@ -56,10 +56,10 @@ NRanks                        SEDNRANKS        #(int)
 
 
 Geometry
-nx                            SEDL                  #(int)
-ny                            SEDL                  #(int)
-nz                            SEDL                  #(int)
-nt                            SEDT                  #(int)
+nx                            SEDNX                  #(int)
+ny                            SEDNY                  #(int)
+nz                            SEDNZ                  #(int)
+nt                            SEDNT                  #(int)
 # Lattice dimensions have been fixed at make time through N0,N1,N2,N3 and NR3.
 
 xmap                          0                   #(int)

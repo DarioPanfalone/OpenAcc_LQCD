@@ -16,6 +16,27 @@ typedef struct test_info_t{
 
 } test_info;
 
+typedef struct gaugeMdTimes_t{
+
+    double calcIpdotTimeBorder;
+    double momSumMultTimeBorder;
+    double momExpTimesConfTimeBorder;
+
+    double calcIpdotTimeBulk;
+    double momSumMultTimeBulk;
+    double momExpTimesConfTimeBulk;
+
+    double communicationsStartTime;
+    double communicationsTime;
+
+    int    count;
+
+} gaugeMdTimeContainer;
+
+
+extern gaugeMdTimeContainer gauge_mdtimes;
+extern gaugeMdTimeContainer gauge_mdtimes0;
+
 extern test_info  test_settings;
 
 

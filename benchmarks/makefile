@@ -1,64 +1,76 @@
 
 
-CHOICE=GNU # or PGI, or MPI
+
 
 # DIMENSIONS OF THE LOCAL LATTICE
-L=32
-T=8
-
+N0:=$(shell grep N0 make_settings.set | awk '{print $$2}')
+N1:=$(shell grep N1 make_settings.set | awk '{print $$2}')
+N2:=$(shell grep N2 make_settings.set | awk '{print $$2}')
+N3:=$(shell grep N3 make_settings.set | awk '{print $$2}')
 # NUMBER OF RANKS
-NR3=1
+NR3:=$(shell grep NR3 make_settings.set | awk '{print $$2}')
+
+# COMPILER CHOICE: PGI, GNU or MPI
+COMPILER:=$(shell grep COMPILER make_settings.set | awk '{print $$2}')
 
 
-all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set run/rgen
+ROOTDIR=~/OPENACCREPO
 
-../build/makefile: ../build/lattice_dimensions.txt
-	cd ../src && ./double_to_single_transformer.py autoMode && cd ../build && echo 'LATTICE DIMENSIONS:'  &&  cat ../build/lattice_dimensions.txt && \
-	./generate_makefile.py ../src/OpenAcc/main.c ../src/tests_and_benchmarks/deo_doe_test.c ../src/tests_and_benchmarks/inverter_multishift_test.c ../src/tools/checkinput.c  ../src/tools/confrestart.c $(CHOICE) > ../build/makefile 
+
+
+
+all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set run/rgen make_settings.set
+
+make_settings.set:
+	$(error The file make_settings.set must be present.)
+
+
+lattice_dimensions.txt:
+	grep "N0\|N1\|N2\|N3\|NR3" make_settings.set > lattice_dimensions.txt
+
+
+makefile: make_settings.set lattice_dimensions.txt
+	cd $(ROOTDIR)/src && ./double_to_single_transformer.py autoMode && cd - && echo 'MAKE SETTINGS:'  &&  cat make_settings.set && \
+	$(ROOTDIR)/build/generate_makefile.py $(ROOTDIR)/src/OpenAcc/main.c $(ROOTDIR)/src/tests_and_benchmarks/deo_doe_test.c $(ROOTDIR)/src/tests_and_benchmarks/inverter_multishift_test.c $(ROOTDIR)/src/tools/checkinput.c  $(ROOTDIR)/src/tools/confrestart.c $(COMPILER) > ./makefile 
 	
 run:
 	if [ ! -d run ] ; then mkdir run ; fi
 
-../build/lattice_dimensions.txt:
-	echo -e N0 $(L) "\n"N1 $(L) "\n"N2 $(L) "\n"N3 $(T) "\n"NR3 $(NR3) > ../build/lattice_dimensions.txt
+rgen run/rgen : makefile run
+	make COMMIT_HASH=$(COMMIT_HASH) rgen
+
+main run/main: makefile run
+	make COMMIT_HASH=$(COMMIT_HASH) main -j32
+
+deo_doe_test run/deo_doe_test: makefile run
+	make COMMIT_HASH=$(COMMIT_HASH) deo_doe_test -j32
+
+inverter_multishift_test run/inverter_multishift_test: makefile run
+	make COMMIT_HASH=$(COMMIT_HASH) inverter_multishift_test -j32
 
 
-
-
-run/rgen : ../build/makefile run
-	cd ../build && make COMMIT_HASH=$(COMMIT_HASH) rgen &&cp run/rgen ../benchmarks/run && cd ../benchmarks
-
-run/main: ../build/makefile run
-	cd ../build && make COMMIT_HASH=$(COMMIT_HASH) main -j32 &&cp run/main ../benchmarks/run && cd ../benchmarks
-
-run/deo_doe_test: ../build/makefile run
-	cd ../build && make COMMIT_HASH=$(COMMIT_HASH) deo_doe_test -j32 && cp deo_doe_test ../benchmarks/run && cd ../benchmarks
-
-run/inverter_multishift_test: ../build/makefile run
-	cd ../build && make COMMIT_HASH=$(COMMIT_HASH) inverter_multishift_test -j32 && cp inverter_multishift_test ../benchmarks/run && cd ../benchmarks
-
-
-run/benchmark.set: benchmark.set.proto fermion_parameters.set run
-	cat fermion_parameters.set > run/benchmark.set && sed 's/SEDNRANKS/'$(NR3)'/' benchmark.set.proto | sed 's/SEDL/'$(L)'/' | sed 's/SEDT/'$(T)'/' >> run/benchmark.set 
+run/benchmark.set: run/benchmark.puregauge.set fermion_parameters.set run
+	cat fermion_parameters.set > run/benchmark.set && cat run/benchmark.puregauge.set >> run/benchmark.set 
 
 run/benchmark.puregauge.set: benchmark.set.proto run
 
-	sed 's/SEDNRANKS/'$(NR3)'/' benchmark.set.proto | sed 's/SEDL/'$(L)'/' | sed 's/SEDT/'$(T)'/' > run/benchmark.puregauge.set 
+	sed 's/SEDNRANKS/'$(NR3)'/' benchmark.set.proto | sed 's/SEDNX/'$(N0)'/' |\
+	   	sed 's/SEDNY/'$(N1)'/' | sed 's/SEDNZ/'$(N2)'/' | sed 's/SEDNT/'$$(($(N3)*$(NR3)))'/' > run/benchmark.puregauge.set 
 
 
 test: testdeodoe testmultishift testmain testmainpg
 
 testdeodoe: run/deo_doe_test run/benchmark.set
-	cd run && ./deo_doe_test ./benchmark.set | tee  deo_doe_test_output.txt
+	cd run && mpirun -n $(NR3) ./deo_doe_test ./benchmark.set | tee -a  deo_doe_test_output.txt
 
 testmultishift: run/inverter_multishift_test run/benchmark.set
-	cd run && ./inverter_multishift_test ./benchmark.set | tee  inverter_multishift_test_output.txt
+	cd run && mpirun -n $(NR3) ./inverter_multishift_test ./benchmark.set | tee -a  inverter_multishift_test_output.txt
 
 testmainpg: run/main run/benchmark.puregauge.set
-	cd run && ./main ./benchmark.puregauge.set | tee  puregauge_output.txt
+	cd run && mpirun -n $(NR3) ./main ./benchmark.puregauge.set | tee -a  puregauge_output.txt
 
 testmain: run/main run/benchmark.set run/rgen
-	cd run && ./main ./benchmark.set | tee  full_md_output.txt
+	cd run && mpirun -n $(NR3) ./main ./benchmark.set | tee -a  full_md_output.txt
 
 clean: 
-	cd run && rm -f main rgen deo_doe_test inverter_multishift_test benchmark.set benchmark.puregauge.set && cd ..
+	cd run && rm -f main rgen deo_doe_test inverter_multishift_test benchmark.set benchmark.puregauge.set 	&& cd ..

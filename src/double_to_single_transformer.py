@@ -10,6 +10,13 @@ if 'autoMode' in argv :
     autoMode = True
     argv.remove('autoMode')
 
+checkEverythingAnyway = False
+
+if 'recheck' in argv :
+    checkEverythingAnyway = True
+    argv.remove('recheck')
+
+
 fileNames = [\
 'OpenAcc/alloc_vars.c',\
 'OpenAcc/alloc_vars.h',\
@@ -244,11 +251,21 @@ fileNamesToChange += filesNoOverwrite
 changedFiles = []
 
 for fileName in fileNamesToChange:
+    # notice: if autoMode was in argv, it was previously removed 
+    # so the case len(argv)>1 is the case when there are filenames passed as arguments 
+    # and the case len(argv)==1 is the one without filenames passed as arguments
     if (len(argv) > 1 and fileName in argv) or (len(argv)==1 and fileName not in filesNoOverwrite):
-
         
         newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)
         writeIt = True
+
+        if os.path.exists(newFileName):
+            doubleFileModTime = os.path.getmtime(fileName)
+            singleFileModTime = os.path.getmtime(newFileName)
+            if singleFileModTime > doubleFileModTime and not checkEverythingAnyway:
+                print "File ", newFileName, " is newer than ",fileName," and won't be touched."
+                writeIt = False
+
         if os.path.exists(newFileName) and ( ans != 'a' or fileName in filesNoOverwrite):
             ans = ''
             while ans not in ['y','n','a']:
@@ -258,7 +275,9 @@ for fileName in fileNamesToChange:
                 ans = raw_input().lower()
                 if ans == 'n':
                     writeIt = False
-        
+
+
+
         if writeIt:
         
             f = open(fileName,'r')
@@ -381,6 +400,7 @@ for fileName in fileNamesToChange:
                        'typedef float complex f_complex; typedef double complex d_complex;\n' )
         
             if os.path.exists(newFileName):
+
                 print "Checking if ", newFileName, " must be modified..."
                 oldFile = open(newFileName,'r')
                 oldText = oldFile.read()
@@ -389,7 +409,17 @@ for fileName in fileNamesToChange:
                     print "... file must be modified. Writing file ", newFileName , " ..."
                 else:
                     print "File ", newFileName, " has no changes and won't be touched."
-                    writeIt = False;
+                    writeIt = False
+                
+                
+                
+
+
+
+
+
+
+
 
 
             if writeIt:

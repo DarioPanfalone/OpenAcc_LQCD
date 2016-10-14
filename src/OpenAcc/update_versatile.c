@@ -28,6 +28,7 @@
 #include "./su3_measurements.h"
 #include "./sp_su3_measurements.h"
 #include "./su3_utilities.h"
+#include "../tests_and_benchmarks/test_and_benchmarks.h"
 #include "./update_versatile.h"
 
 #ifdef __GNUC__
@@ -62,6 +63,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     double dt_saveoldconf;
     double dt_mdsetup;
     double dt_metropolis;
+    gauge_mdtimes = gauge_mdtimes0;
+    
 
     if(debug_settings.save_diagnostics == 1){
         FILE *foutfile = 
@@ -595,7 +598,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 multishift_iterations_after_md);
 
     }
-    if(debug_settings.save_diagnostics == 1){
+    if(1 == debug_settings.save_diagnostics && 0 == devinfo.myrank){
         FILE *foutfile = 
             fopen(debug_settings.diagnostics_filename,"at");
 
@@ -603,7 +606,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             fprintf(foutfile,"GAS %.18lf GAF %.18lf \t",-action_in,-action_fin);
             fprintf(foutfile,"MAS %.18lf MAF %.18lf \t",action_mom_in,action_mom_fin);
             fprintf(foutfile,"FAS %.18lf FAF %.18lf \t",action_ferm_in,action_ferm_fin);
-            fprintf(foutfile," D %.18lf",delta_S);
+            fprintf(foutfile," D %.18lf\n",delta_S);
         }else{
 
             fprintf(foutfile," THERM_ITERATION ");
@@ -619,7 +622,15 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         fprintf(foutfile,"CG-M-iters[FI]  %d \n",multishift_iterations_before_md);
         fprintf(foutfile,"CG-M-iters[LI]  %d \n",multishift_invert_iterations-
                 multishift_iterations_after_md);
-
+       
+        fprintf(foutfile,"GIPDSTIME %e\n",gauge_mdtimes.calcIpdotTimeBorder      / gauge_mdtimes.count );
+        fprintf(foutfile,"GIPDBTIME %e\n",gauge_mdtimes.calcIpdotTimeBulk        / gauge_mdtimes.count );
+        fprintf(foutfile,"GMSMSTIME %e\n",gauge_mdtimes.momSumMultTimeBorder     / gauge_mdtimes.count );
+        fprintf(foutfile,"GMSMBTIME %e\n",gauge_mdtimes.momSumMultTimeBulk       / gauge_mdtimes.count );
+        fprintf(foutfile,"GMETSTIME %e\n",gauge_mdtimes.momExpTimesConfTimeBorder/ gauge_mdtimes.count );
+        fprintf(foutfile,"GMETBTIME %e\n",gauge_mdtimes.momExpTimesConfTimeBulk  / gauge_mdtimes.count );
+        fprintf(foutfile,"GCOSTTIME %e\n",gauge_mdtimes.communicationsStartTime  / gauge_mdtimes.count );
+        fprintf(foutfile,"GCOMMTIME %e\n",gauge_mdtimes.communicationsTime       / gauge_mdtimes.count );
 
 
         fclose(foutfile);

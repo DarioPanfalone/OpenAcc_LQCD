@@ -29,11 +29,11 @@ rgen: \n\
 
 ldimfileName = "lattice_dimensions.txt"
 ldim_string="\n\
-N0:=`grep N0 lattice_dimensions.txt| awk '{print $$2}'`\n\
-N1:=`grep N1 lattice_dimensions.txt| awk '{print $$2}'`\n\
-N2:=`grep N2 lattice_dimensions.txt| awk '{print $$2}'`\n\
-N3:=`grep N3 lattice_dimensions.txt| awk '{print $$2}'`\n\
-NR3:=`grep NR3 lattice_dimensions.txt| awk '{print $$2}'`\n\n"
+N0:=$(shell grep N0 lattice_dimensions.txt| awk '{print $$2}')\n\
+N1:=$(shell grep N1 lattice_dimensions.txt| awk '{print $$2}')\n\
+N2:=$(shell grep N2 lattice_dimensions.txt| awk '{print $$2}')\n\
+N3:=$(shell grep N3 lattice_dimensions.txt| awk '{print $$2}')\n\
+NR3:=$(shell grep NR3 lattice_dimensions.txt| awk '{print $$2}')\n\n"
 
 lattice_dimensions_text="\
 N0    8\n\

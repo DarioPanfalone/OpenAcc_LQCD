@@ -40,6 +40,8 @@
 #include "./struct_c_def.h"
 #include "./su3_utilities.h"
 #include "./inverter_package.h"
+#include "../tests_and_benchmarks/test_and_benchmarks.h"
+
 
 #include <sys/time.h>
 
@@ -136,15 +138,31 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
     if(verbosity_lv > 2 && 0 == devinfo.myrank) printf("\tMPI%02d - End of async bloc, index %d\n",
                 devinfo.myrank, omelyan_index);
 
+
+
+
+    // DIAGNOSTICS - PERFORMANCE MEASUREMENTS
+    int di;
+    for(di = 0 ; di<7; di++)
+        dt[di] = (double)(t[di+1].tv_sec - t[di].tv_sec) +
+            ((double)(t[di+1].tv_usec - t[di].tv_usec)/1.0e6);
+
+    dtcom =  (double)(t[8].tv_sec - t[3].tv_sec) +
+        ((double)(t[8].tv_usec - t[3].tv_usec)/1.0e6);
+
+    gauge_mdtimes.calcIpdotTimeBorder      += dt[0];
+    gauge_mdtimes.calcIpdotTimeBulk        += dt[4];
+    gauge_mdtimes.momSumMultTimeBorder     += dt[1];
+    gauge_mdtimes.momSumMultTimeBulk       += dt[5];
+    gauge_mdtimes.momExpTimesConfTimeBorder+= dt[2];
+    gauge_mdtimes.momExpTimesConfTimeBulk  += dt[6];
+    gauge_mdtimes.communicationsStartTime  += dt[3];
+    gauge_mdtimes.communicationsTime       += dtcom;
+    gauge_mdtimes.count++ ;
+
+
+
     if(verbosity_lv > 2 && 0 == devinfo.myrank){
-        int di;
-        for(di = 0 ; di<7; di++)
-            dt[di] = (double)(t[di+1].tv_sec - t[di].tv_sec) +
-                ((double)(t[di+1].tv_usec - t[di].tv_usec)/1.0e6);
-
-        dtcom =  (double)(t[8].tv_sec - t[3].tv_sec) +
-            ((double)(t[8].tv_usec - t[3].tv_usec)/1.0e6);
-
         printf("\t|          Function              \t|Border\t|Bulk\t|\n");
         printf("\t| Calc ipdot                     \t|%e|%e|\n",dt[0],dt[4] );
         printf("\t| Mom sum mult                   \t|%e|%e|\n",dt[1],dt[5] );
@@ -263,15 +281,24 @@ void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
     if(verbosity_lv > 3) printf("\tMPI%02d - End of bloc, index %d\n",
                 devinfo.myrank, omelyan_index);
 
+    
+    
+    // DIAGNOSTICS - PERFORMANCE MEASUREMENTS
+    int di;
+    for(di = 0 ; di<3; di++)
+        dt[di] = (double)(t[di+1].tv_sec - t[di].tv_sec) +
+            ((double)(t[di+1].tv_usec - t[di].tv_usec)/1.0e6);
+
+    dtcom =  (double)(t[4].tv_sec - t[3].tv_sec) +
+        ((double)(t[4].tv_usec - t[3].tv_usec)/1.0e6);
+
+    gauge_mdtimes.calcIpdotTimeBulk        += dt[0];
+    gauge_mdtimes.momSumMultTimeBulk       += dt[1];
+    gauge_mdtimes.momExpTimesConfTimeBulk  += dt[2];
+    gauge_mdtimes.communicationsTime       += dtcom;
+    gauge_mdtimes.count++ ;
+
     if(verbosity_lv > 2 && 0 == devinfo.myrank){
-        int di;
-        for(di = 0 ; di<3; di++)
-            dt[di] = (double)(t[di+1].tv_sec - t[di].tv_sec) +
-                ((double)(t[di+1].tv_usec - t[di].tv_usec)/1.0e6);
-
-        dtcom =  (double)(t[4].tv_sec - t[3].tv_sec) +
-            ((double)(t[4].tv_usec - t[3].tv_usec)/1.0e6);
-
         printf("\t|          Function              \t|Bulk\t|\n");
         printf("\t| Calc ipdot                     \t|%e|\n",dt[0] );
         printf("\t| Mom sum mult                   \t|%e|\n",dt[1] );
