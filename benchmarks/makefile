@@ -20,7 +20,7 @@ run:
 	if [ ! -d run ] ; then mkdir run ; fi
 
 ../build/lattice_dimensions.txt:
-	echo N0 $(L) "\n"N1 $(L) "\n"N2 $(L) "\n"N3 $(T) "\n"NR3 $(NR3) > ../build/lattice_dimensions.txt
+	echo -e N0 $(L) "\n"N1 $(L) "\n"N2 $(L) "\n"N3 $(T) "\n"NR3 $(NR3) > ../build/lattice_dimensions.txt
 
 run/rgen run/main: ../build/makefile run
 	cd ../build && make COMMIT_HASH=$(COMMIT_HASH) main &&cp run/main run/rgen ../benchmarks/run && cd ../benchmarks
