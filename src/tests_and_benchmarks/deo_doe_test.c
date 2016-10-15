@@ -124,6 +124,25 @@ int main(int argc, char* argv[]){
     devinfo.nranks = 1;
 #endif
 
+#ifndef __GNUC__
+    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
+    // NVIDIA GPUs
+    acc_device_t my_device_type = acc_device_nvidia;
+    // AMD GPUs
+    // acc_device_t my_device_type = acc_device_radeon;
+    // Intel XeonPhi
+    //acc_device_t my_device_type = acc_device_xeonphi;
+    // Select device ID
+    printf("MPI%02d: Selecting device.\n", devinfo.myrank);
+#ifdef MULTIDEVICE
+    select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
+#else
+    select_init_acc_device(my_device_type, devinfo.single_dev_choice);
+#endif
+    printf("MPI%02d: Device Selected : OK \n", devinfo.myrank );
+#endif
+
+
     mem_alloc_core();
     mem_alloc_extended();
     mem_alloc_core_f();
@@ -150,23 +169,10 @@ int main(int argc, char* argv[]){
     sprintf(myfermionname_deo_f      ,"%s_MPI%02d",fermionname_deo_f      ,devinfo.myrank);
     sprintf(myfermionname_fulldirac_f,"%s_MPI%02d",fermionname_fulldirac_f,devinfo.myrank);
 
-#ifndef __GNUC__
-    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
-    // NVIDIA GPUs
-    acc_device_t my_device_type = acc_device_nvidia;
-    // AMD GPUs
-    // acc_device_t my_device_type = acc_device_radeon;
-    // Intel XeonPhi
-    //acc_device_t my_device_type = acc_device_xeonphi;
-    // Select device ID
-    printf("MPI%02d: Selecting device.\n", devinfo.myrank);
-#ifdef MULTIDEVICE
-    select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
-#else
-    select_init_acc_device(my_device_type, devinfo.single_dev_choice);
-#endif
-    printf("MPI%02d: Device Selected : OK \n", devinfo.myrank );
-#endif
+
+
+
+    // INITIALIZING GAUGE CONFIGURATION
     int conf_id_iter = 0;
     if(!read_conf_wrapper(conf_acc,mc_params.save_conf_name,
                 &conf_id_iter,debug_settings.use_ildg)){

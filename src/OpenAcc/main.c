@@ -48,6 +48,7 @@
 #include "./su3_measurements.h"
 #include "./su3_utilities.h"
 #include "./update_versatile.h"
+#include "./alloc_settings.h"
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
@@ -195,12 +196,12 @@ int main(int argc, char* argv[]){
 #pragma acc enter data copyin(nnm_openacc)
     printf("MPI%02d - nn computation : OK \n",devinfo.myrank);
     init_all_u1_phases(backfield_parameters,fermions_parameters);
-#pragma acc data update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
-#pragma acc data update device(mag_obs_re[0:8*alloc_info.NDiffFlavs])
-#pragma acc data update device(mag_obs_im[0:8*alloc_info.NDiffFlavs])
+#pragma acc update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
+#pragma acc update device(mag_obs_re[0:8*alloc_info.NDiffFlavs])
+#pragma acc update device(mag_obs_im[0:8*alloc_info.NDiffFlavs])
 
     if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
-#pragma acc data update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
+#pragma acc update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
     }
 
     printf("MPI%02d - u1_backfield initialization (float & double): OK \n",devinfo.myrank);
@@ -241,7 +242,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-#pragma acc data update device(conf_acc[0:8])
+#pragma acc update device(conf_acc[0:8])
     //#################################################################################  
 
 

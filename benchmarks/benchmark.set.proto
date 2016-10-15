@@ -49,7 +49,7 @@ DeviceSettings
 device_choice                 0        #(int)
 AsyncFermionComms             0                   #(int)
 AsyncGaugeComms               0                   #(int)
-NProcPerNode                  1                   #(int)
+NProcPerNode                  SEDNODEDIM    #(int)
 NRanks                        SEDNRANKS        #(int)
 # NRanks has been set at make time with the NR3 variable.
 

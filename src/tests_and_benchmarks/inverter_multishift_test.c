@@ -135,6 +135,26 @@ int main(int argc, char* argv[]){
     devinfo.nranks = 1;
 #endif
 
+#ifndef __GNUC__
+    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////
+    // NVIDIA GPUs
+    acc_device_t my_device_type = acc_device_nvidia;
+    // AMD GPUs
+    // acc_device_t my_device_type = acc_device_radeon;
+    // Intel XeonPhi
+    //acc_device_t my_device_type = acc_device_xeonphi;
+    // Select device ID
+#ifdef MULTIDEVICE
+    printf("MPI%02d: Selecting device.\n",devinfo.myrank, devinfo.myrank%devinfo.proc_per_node );
+    select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
+#else
+    printf("MPI%02d: Selecting device %d.\n",devinfo.myrank, devinfo.single_dev_choice );
+    select_init_acc_device(my_device_type, devinfo.single_dev_choice);
+#endif
+    printf("Device Selected : OK \n");
+#endif
+
+
     mem_alloc_core();
     mem_alloc_extended();
     mem_alloc_core_f();
@@ -145,30 +165,16 @@ int main(int argc, char* argv[]){
 #pragma acc enter data copyin(nnm_openacc)
     printf("nn computation : OK \n");
     init_all_u1_phases(backfield_parameters,fermions_parameters);
-#pragma acc data update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
-#pragma acc data update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
+#pragma acc update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
+#pragma acc update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
     printf("u1_backfield initialization : OK \n");
     sprintf(myconfname             ,"%s_MPI%02d",confname             ,devinfo.myrank);
     sprintf(myfermionname          ,"%s_MPI%02d",fermionname          ,devinfo.myrank);
 
 
-#ifndef __GNUC__
-    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////
-    // NVIDIA GPUs
-    acc_device_t my_device_type = acc_device_nvidia;
-    // AMD GPUs
-    // acc_device_t my_device_type = acc_device_radeon;
-    // Intel XeonPhi
-    //acc_device_t my_device_type = acc_device_xeonphi;
-    // Select device ID
-    printf("MPI%02d: Selecting device.\n",devinfo.myrank );
-#ifdef MULTIDEVICE
-    select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
-#else
-    select_init_acc_device(my_device_type, devinfo.single_dev_choice);
-#endif
-    printf("Device Selected : OK \n");
-#endif
+
+
+    // INITIALIZING GAUGE CONFIGURATION
     int conf_id_iter = 0;
     if(!read_conf_wrapper(conf_acc,mc_params.save_conf_name,
                 &conf_id_iter,debug_settings.use_ildg)){
@@ -187,7 +193,7 @@ int main(int argc, char* argv[]){
             printf("MPI%02d: You're using ILDG format.\n", devinfo.myrank);
         conf_id_iter=0;
     }
-#pragma acc data update device(conf_acc[0:8])
+#pragma acc update device(conf_acc[0:8])
 
 
     // init fermion
@@ -205,7 +211,7 @@ int main(int argc, char* argv[]){
 #ifdef MULTIDEVICE
     communicate_fermion_borders_hostonly(ferm_chi_acc);
 #endif
-#pragma acc data update device(ferm_chi_acc[0:1])
+#pragma acc update device(ferm_chi_acc[0:1])
 
     //    print_vec3_soa(ferm_chi_acc,myfermionname);
 
@@ -240,7 +246,7 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
         //just choosing one, but rescaling it, but rescaling it first.
         double minmaxeig[2];
         generate_vec3_soa_gauss(kloc_p);
-#pragma acc data update device(kloc_p[0:1])
+#pragma acc update device(kloc_p[0:1])
         find_min_max_eigenvalue_soloopenacc(conf_acc,fermions_parameters,kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
         printf("Found eigenvalues of dirac operator: %e,  %e\n",
                 minmaxeig[0],minmaxeig[1]);

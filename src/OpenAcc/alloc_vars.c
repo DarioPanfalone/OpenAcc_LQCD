@@ -115,7 +115,7 @@ void mem_alloc_core(){
             alloc_info.NDiffFlavs*8*sizeof(double_soa));   
     //  --> alloc_info.NDiffFlavs*4*NSITES phases (as many as links)
     ALLOCCHECK(allocation_check, u1_back_phases);
-#pragma acc enter data create([0:alloc_info.NDiffFlavs*8])
+#pragma acc enter data create(u1_back_phases[0:alloc_info.NDiffFlavs*8])
 
     alloc_info.conf_acc_size = 8;
 #ifdef MULTIDEVICE
@@ -293,16 +293,16 @@ inline void mem_free_core()
     FREECHECK(kloc_p);                
 #pragma acc exit data delete(kloc_p)
     FREECHECK(aux1);                
-#pragma acc data delete(aux1);                
+#pragma acc exit data delete(aux1)                
 
 
 
 
     FREECHECK(u1_back_phases);        
-#pragma acc data delete(u1_back_phases);        
+#pragma acc exit data delete(u1_back_phases)        
 
     FREECHECK(conf_acc);
-#pragma acc data delete(conf_acc);
+#pragma acc exit data delete(conf_acc)
 
 
 }
@@ -325,62 +325,62 @@ inline void mem_free_extended()
 #endif
 
     FREECHECK(mag_obs_re);
-#pragma acc data delete(mag_obs_re);
+#pragma acc exit data delete(mag_obs_re)
     FREECHECK(mag_obs_im);
-#pragma acc data delete(mag_obs_im);
+#pragma acc exit data delete(mag_obs_im)
     FREECHECK(momenta);               
-#pragma acc data delete(momenta);               
+#pragma acc exit data delete(momenta)               
     if(alloc_info.revTestAllocations){
         FREECHECK(momenta_backup);               
-#pragma acc data delete(momenta_backup);               
+#pragma acc exit data delete(momenta_backup)               
     }
     FREECHECK(aux_conf_acc);          
-#pragma acc data delete(aux_conf_acc);          
+#pragma acc exit data delete(aux_conf_acc)          
     FREECHECK(auxbis_conf_acc);       
-#pragma acc data delete(auxbis_conf_acc);       
+#pragma acc exit data delete(auxbis_conf_acc)       
 
 #ifdef STOUT_FERMIONS               
     FREECHECK(gstout_conf_acc_arr);   
-#pragma acc data delete(gstout_conf_acc_arr);   
+#pragma acc exit data delete(gstout_conf_acc_arr)   
     FREECHECK(glocal_staples);        
-#pragma acc data delete(glocal_staples);        
+#pragma acc exit data delete(glocal_staples)        
     FREECHECK(gipdot);              
-#pragma acc data delete(gipdot);              
+#pragma acc exit data delete(gipdot)              
     FREECHECK(aux_ta);                
-#pragma acc data delete(aux_ta);                
+#pragma acc exit data delete(aux_ta)                
     FREECHECK(aux_th);                
-#pragma acc data delete(aux_th);                
+#pragma acc exit data delete(aux_th)                
 #endif                              
 
 
     FREECHECK(conf_acc_bkp);          
-#pragma acc data delete(conf_acc_bkp);          
+#pragma acc exit data delete(conf_acc_bkp)          
     FREECHECK(ipdot_acc);  
-#pragma acc data delete(ipdot_acc);  
+#pragma acc exit data delete(ipdot_acc)  
     if(alloc_info.diagnosticsAllocations){
         FREECHECK(ipdot_g_old);           
-#pragma acc data delete(ipdot_g_old);           
+#pragma acc exit data delete(ipdot_g_old)           
         FREECHECK(ipdot_f_old);           
-#pragma acc data delete(ipdot_f_old);           
+#pragma acc exit data delete(ipdot_f_old)           
     }
 
     FREECHECK(ferm_chi_acc);          
-#pragma acc data delete(ferm_chi_acc);          
+#pragma acc exit data delete(ferm_chi_acc)          
     FREECHECK(ferm_phi_acc);          
-#pragma acc data delete(ferm_phi_acc);          
+#pragma acc exit data delete(ferm_phi_acc)          
     FREECHECK(ferm_out_acc);          
-#pragma acc data delete(ferm_out_acc);          
+#pragma acc exit data delete(ferm_out_acc)          
       
     FREECHECK(ferm_shiftmulti_acc);   
-#pragma acc data delete(ferm_shiftmulti_acc);   
+#pragma acc exit data delete(ferm_shiftmulti_acc)   
                                     
     FREECHECK(k_p_shiftferm);         
-#pragma acc data delete(k_p_shiftferm);         
+#pragma acc exit data delete(k_p_shiftferm)         
 
     FREECHECK(local_sums);            
-#pragma acc data delete(local_sums);            
+#pragma acc exit data delete(local_sums)            
     FREECHECK(d_local_sums);          
-#pragma acc data delete(d_local_sums);          
+#pragma acc exit data delete(d_local_sums)          
 
 }
 

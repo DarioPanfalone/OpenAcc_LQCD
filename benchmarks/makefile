@@ -9,12 +9,14 @@ N2:=$(shell grep N2 make_settings.set | awk '{print $$2}')
 N3:=$(shell grep N3 make_settings.set | awk '{print $$2}')
 # NUMBER OF RANKS
 NR3:=$(shell grep NR3 make_settings.set | awk '{print $$2}')
+# NUMBER OF RANKS PER NODE
+NODEDIM:=$(shell grep NODEDIM make_settings.set | awk '{print $$2}')
 
 # COMPILER CHOICE: PGI, GNU or MPI
 COMPILER:=$(shell grep COMPILER make_settings.set | awk '{print $$2}')
 
 
-ROOTDIR=~/OPENACCREPO
+ROOTDIR=~/BISOPENACCREPO
 
 
 
@@ -55,7 +57,7 @@ run/benchmark.set: run/benchmark.puregauge.set fermion_parameters.set run
 run/benchmark.puregauge.set: benchmark.set.proto run
 
 	sed 's/SEDNRANKS/'$(NR3)'/' benchmark.set.proto | sed 's/SEDNX/'$(N0)'/' |\
-	   	sed 's/SEDNY/'$(N1)'/' | sed 's/SEDNZ/'$(N2)'/' | sed 's/SEDNT/'$$(($(N3)*$(NR3)))'/' > run/benchmark.puregauge.set 
+	   	sed 's/SEDNY/'$(N1)'/' | sed 's/SEDNZ/'$(N2)'/' | sed 's/SEDNODEDIM/'$(NODEDIM)'/' |  sed 's/SEDNT/'$$(($(N3)*$(NR3)))'/' > run/benchmark.puregauge.set 
 
 
 test: testdeodoe testmultishift testmain testmainpg
