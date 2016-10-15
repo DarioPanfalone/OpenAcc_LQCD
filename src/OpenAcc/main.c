@@ -687,6 +687,25 @@ create(glocal_staples_f[0:8]) create(gipdot_f[0:8])
     //-------------------------------------------------//
 
 
+    printf("MPI%02d: Double precision free [CORE]\n", devinfo.myrank);
+    mem_free_core();
+    printf("MPI%02d: Double precision free [EXTENDED]\n", devinfo.myrank);
+    mem_free_extended();
+
+
+    if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
+        printf("MPI%02d: Single precision free [CORE]\n", devinfo.myrank);
+        mem_free_core_f();
+    }
+    if( md_parameters.singlePrecMD){
+        printf("MPI%02d: Signle precision free [EXTENDED]\n", devinfo.myrank);
+        mem_free_extended_f();
+    }
+
+    printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);
+#pragma acc exit data delete(nnp_openacc)
+#pragma acc exit data delete(nnm_openacc)
+
 #ifndef __GNUC__
     //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
     shutdown_acc_device(my_device_type);
@@ -697,12 +716,6 @@ create(glocal_staples_f[0:8]) create(gipdot_f[0:8])
 #ifdef MULTIDEVICE
     shutdown_multidev();
 #endif
-
-    mem_free_core();
-    mem_free_extended();
-    mem_free_core_f();
-    mem_free_extended_f();
-
 
     return 0;
 }

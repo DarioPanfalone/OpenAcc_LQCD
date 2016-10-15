@@ -365,6 +365,13 @@ copy(kloc_s_f[0:1])
                 dt_dirac_f/test_settings.deoDoeIterations);
     }
 
+    printf("MPI%02d: Test completed.\n",devinfo.myrank);
+    
+    mem_free_extended_f();
+    mem_free_core_f();
+    mem_free_extended();
+    mem_free_core();
+
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
 #endif
@@ -373,12 +380,6 @@ copy(kloc_s_f[0:1])
     MPI_Finalize();
 #endif 
 
-    mem_free_extended_f();
-    mem_free_core_f();
-    mem_free_extended();
-    mem_free_core();
-
-    printf("MPI%02d: Test completed.\n",devinfo.myrank);
 
     return 0; 
 

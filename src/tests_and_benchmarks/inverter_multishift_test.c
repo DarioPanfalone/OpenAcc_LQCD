@@ -375,6 +375,15 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
     }
 
 
+    if(test_settings.benchmarkMode) free(rationalApproxToUse);
+
+    mem_free_extended_f();
+    mem_free_core_f();
+    mem_free_extended();
+    mem_free_core();
+
+    printf("MPI%02d: Test completed.\n",devinfo.myrank);
+
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
 #endif
@@ -383,13 +392,8 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
     MPI_Finalize();
 #endif 
 
-    if(test_settings.benchmarkMode) free(rationalApproxToUse);
-    mem_free_extended_f();
-    mem_free_core_f();
-    mem_free_extended();
-    mem_free_core();
 
-    printf("MPI%02d: Test completed.\n",devinfo.myrank);
+
 
 
     return 0; 

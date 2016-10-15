@@ -86,10 +86,8 @@ int inverter_mixed_precision(inverter_package ip,
   
   delta=l2norm2_global_f(loc_r);
 
-  printf("CHE MUORI QUI?\n");//GOLIARDIA
   // \hat{x} = 0 // 
   set_vec3_soa_to_zero_f(out);
-  printf(" O CHE MUORI QUI?\n");//GOLIARDIA
 
   // loop over cg iterations
   cg=0;
