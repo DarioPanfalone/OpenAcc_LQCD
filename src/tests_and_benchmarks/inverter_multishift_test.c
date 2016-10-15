@@ -199,6 +199,7 @@ int main(int argc, char* argv[]){
 
 
 
+
     // fake rational approx
 
     RationalApprox * rationalApproxToUse;
@@ -209,15 +210,14 @@ int main(int argc, char* argv[]){
 #pragma acc data  copy(conf_acc[0:8]) copy(ferm_chi_acc[0:1])\
         copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
         create(kloc_r[0:1]) create(kloc_h[0:1]) create(kloc_s[0:1]) create(kloc_p[0:1]) \
-        create(ferm_shiftmulti_acc[max_ps*MAX_APPROX_ORDER]) \
-        create(k_p_shiftferm[max_ps*MAX_APPROX_ORDER] )\
+        create(ferm_shiftmulti_acc[0:maxNeededShifts]) \
         copy(conf_acc_f[0:8]) copy(ferm_chi_acc_f[0:1])\
         copy(ferm_phi_acc_f[0:1])  copy(u1_back_phases_f[0:8*NDiffFlavs]) \
         create(kloc_r_f[0:1]) create(kloc_h_f[0:1])\
         create(kloc_s_f[0:1]) create(kloc_p_f[0:1]) \
-        create(ferm_shiftmulti_acc_f[max_ps*MAX_APPROX_ORDER]) \
-        create(k_p_shiftferm_f[max_ps*MAX_APPROX_ORDER] )
-
+        create(ferm_shiftmulti_acc_f[0:maxNeededShifts]) \
+        create(k_p_shiftferm[0:maxApproxOrder] )\
+        create(k_p_shiftferm_f[0:maxApproxOrder] )
         {
             if(test_settings.benchmarkMode){
                 rationalApproxToUse = (RationalApprox*) malloc(sizeof(RationalApprox));
@@ -260,9 +260,11 @@ int main(int argc, char* argv[]){
             }
 
             // double precision
+            if(0 == devinfo.myrank){
             printf("####################\n");
             printf("# DOUBLE PRECISION #\n");
             printf("####################\n");
+            }
             for(r=0; r<test_settings.multiShiftInverterRepetitions; r++){
                 gettimeofday(&t0,NULL);
                 multishift_invert_iterations = 0;
@@ -282,6 +284,7 @@ int main(int argc, char* argv[]){
                 if(0==devinfo.myrank){
                     double dt_cgm = (double)(t1.tv_sec - t0.tv_sec) + 
                         ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+                    if(0 == devinfo.myrank)
                     printf("Time for 1 step of multishift inversion   : %e\n",
                             dt_cgm/multishift_invert_iterations);
                 }
@@ -295,7 +298,8 @@ int main(int argc, char* argv[]){
                     sprintf(fermionname_shift,"fermion_shift_%d.dat",r);
 
                     // shift fermio names
-                    printf("Writing file %s.\n", fermionname_shift);
+                    if(0 == devinfo.myrank)
+                        printf("Writing file %s.\n", fermionname_shift);
 
                     print_vec3_soa_wrapper(&ferm_shiftmulti_acc[r],fermionname_shift);
                 }
@@ -303,10 +307,11 @@ int main(int argc, char* argv[]){
 
 
             // single precision
+            if(0 == devinfo.myrank){
             printf("####################\n");
             printf("# SINGLE PRECISION #\n");
             printf("####################\n");
-
+            }
             // conversion to single precision
             convert_double_to_float_su3_soa(conf_acc,conf_acc_f);
             convert_double_to_float_vec3_soa(ferm_chi_acc,ferm_chi_acc_f);
@@ -331,6 +336,7 @@ int main(int argc, char* argv[]){
                 if(0==devinfo.myrank){
                     double dt_cgm_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
                         ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
+                    if(0 == devinfo.myrank)
                     printf("Time for 1 step of multishift inversion   : %e\n",
                             dt_cgm_f/multishift_invert_iterations);
                 }
@@ -345,6 +351,7 @@ int main(int argc, char* argv[]){
                     sprintf(fermionname_shift,"sp_fermion_shift_%d.dat",r);
 
                     // shift fermio names
+                    if(0 == devinfo.myrank)
                     printf("Writing file %s.\n", fermionname_shift);
 
                     print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
