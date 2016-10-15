@@ -93,6 +93,7 @@ void compute_nnp_and_nnm_openacc(void){
     }
   }
 
+
 //  fclose(nnfile);
 }
 

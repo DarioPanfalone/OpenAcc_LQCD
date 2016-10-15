@@ -18,6 +18,7 @@
 #include "./setting_file_parser.h"
 #include "./inverter_tricks.h"
 #include "../tests_and_benchmarks/test_and_benchmarks.h"
+#include "../OpenAcc/alloc_settings.h"
 
 #include <stdio.h>
 #include <strings.h>
@@ -770,9 +771,9 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 filelines,0,lines_read );
 
         // see global var in /Include/fermion_parameters.
-        // setting NDiffFlavs first
-        NDiffFlavs = tagcounts[PMG_FERMION];
-        if(NDiffFlavs==0)
+        // setting alloc_info.NDiffFlavs first
+        alloc_info.NDiffFlavs = tagcounts[PMG_FERMION];
+        if(alloc_info.NDiffFlavs==0)
         {
             fermions_parameters = NULL;
             if(0==devinfo.myrank){
@@ -780,7 +781,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 printf("SIMULATING PURE GAUGE THEORY...\n");
             }
         }
-        else fermions_parameters = (ferm_param*) malloc(NDiffFlavs*sizeof(ferm_param));
+        else fermions_parameters = (ferm_param*) malloc(alloc_info.NDiffFlavs*sizeof(ferm_param));
     }
     else
     {   // goes into help mode

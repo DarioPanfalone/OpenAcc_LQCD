@@ -43,10 +43,6 @@ typedef struct ferm_param_t{
 } ferm_param;
 
 
-extern int maxNeededShifts;
-extern int maxApproxOrder;
-extern int NDiffFlavs;
-extern int NPS_tot;
 extern int max_ps;
 extern int totalMdShifts;
 extern ferm_param *fermions_parameters;

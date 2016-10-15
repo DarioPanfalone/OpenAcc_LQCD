@@ -44,6 +44,11 @@ void initialize_md_global_variables(md_param md_params )
     for(iomelian=0;iomelian<7;iomelian++)
      deltas_Omelyan_f[iomelian]= (float) deltas_Omelyan[iomelian];
 
+
+#pragma acc enter data copyin(deltas_Omelyan[0:7])
+#pragma acc enter data copyin(deltas_Omelyan_f[0:7])
+
+
 }
 
 int nMdInversionPerformed;// used to recycle inversion results

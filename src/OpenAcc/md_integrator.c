@@ -41,6 +41,7 @@
 #include "./su3_utilities.h"
 #include "./inverter_package.h"
 #include "../tests_and_benchmarks/test_and_benchmarks.h"
+#include "./alloc_settings.h"
 
 
 #include <sys/time.h>
@@ -487,7 +488,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     nMdInversionPerformed = 0; // used to recycle inversion results
                                // after first force calculation is done
     int ishift;
-    for(ishift =0; ishift < maxNeededShifts; ishift++)
+    for(ishift =0; ishift < alloc_info.maxNeededShifts; ishift++)
         set_vec3_soa_to_zero(&tferm_shiftmulti_acc[ishift]);
 
     int md;

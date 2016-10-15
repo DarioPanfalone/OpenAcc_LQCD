@@ -29,6 +29,7 @@
 #include "../DbgTools/dbgtools.h"
 #include "../DbgTools/sp_dbgtools.h"
 #include "./test_and_benchmarks.h"
+#include "../OpenAcc/alloc_settings.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]){
 
 
     act_params.stout_steps = 0;
-    NPS_tot = 1;
+    alloc_info.NPS_tot = 1;
 
 
     // INITIALIZATION
@@ -104,23 +105,26 @@ int main(int argc, char* argv[]){
     verbosity_lv = debug_settings.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     if(init_ferm_params(fermions_parameters)){
-        if( test_settings.benchmarkMode )
-            printf("Ignoring issues in init_ferm_params,\
+        if( test_settings.benchmarkMode ){
+            printf("Issues in init_ferm_params, even if\
                     this is a multishift inverter benchmark.\n");
+            exit(1);
+        }
         else {
             printf("Issues in init_ferm_params(), exiting now.\n");
             printf("[Maybe a rational appriximation file is missing?]\n");
             exit(1);
         }
     }
+#pragma acc enter data copyin(fermions_parameters[0:alloc_info.NDiffFlavs])
 
-    if(NPS_tot == 0) 
+    if(alloc_info.NPS_tot == 0) 
     {
         printf("ERROR: For technical reasons, at least a fermion in the input file is needed\n");
         exit(1);
     }
     else {
-        printf("N fermions found: %d\n", NPS_tot);
+        printf("N fermions found: %d\n", alloc_info.NPS_tot);
     }
     //
 
@@ -131,12 +135,18 @@ int main(int argc, char* argv[]){
     devinfo.nranks = 1;
 #endif
 
-    mem_alloc();
-    mem_alloc_f();
+    mem_alloc_core();
+    mem_alloc_extended();
+    mem_alloc_core_f();
+    mem_alloc_extended_f();
     printf("Allocazione della memoria : OK \n");
     compute_nnp_and_nnm_openacc();
+#pragma acc enter data copyin(nnp_openacc)
+#pragma acc enter data copyin(nnm_openacc)
     printf("nn computation : OK \n");
     init_all_u1_phases(backfield_parameters,fermions_parameters);
+#pragma acc data update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
+#pragma acc data update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
     printf("u1_backfield initialization : OK \n");
     sprintf(myconfname             ,"%s_MPI%02d",confname             ,devinfo.myrank);
     sprintf(myfermionname          ,"%s_MPI%02d",fermionname          ,devinfo.myrank);
@@ -177,6 +187,7 @@ int main(int argc, char* argv[]){
             printf("MPI%02d: You're using ILDG format.\n", devinfo.myrank);
         conf_id_iter=0;
     }
+#pragma acc data update device(conf_acc[0:8])
 
 
     // init fermion
@@ -194,6 +205,7 @@ int main(int argc, char* argv[]){
 #ifdef MULTIDEVICE
     communicate_fermion_borders_hostonly(ferm_chi_acc);
 #endif
+#pragma acc data update device(ferm_chi_acc[0:1])
 
     //    print_vec3_soa(ferm_chi_acc,myfermionname);
 
@@ -203,165 +215,160 @@ int main(int argc, char* argv[]){
     // fake rational approx
 
     RationalApprox * rationalApproxToUse;
-    //  
-    //#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
-    create(ferm_phi_acc[0:1])  copyin(u1_back_phases[0:8*NDiffFlavs]) \
-        create(kloc_s[0:1])
+    /*
 #pragma acc data  copy(conf_acc[0:8]) copy(ferm_chi_acc[0:1])\
-        copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
-        create(kloc_r[0:1]) create(kloc_h[0:1]) create(kloc_s[0:1]) create(kloc_p[0:1]) \
-        create(ferm_shiftmulti_acc[0:maxNeededShifts]) \
-        copy(conf_acc_f[0:8]) copy(ferm_chi_acc_f[0:1])\
-        copy(ferm_phi_acc_f[0:1])  copy(u1_back_phases_f[0:8*NDiffFlavs]) \
-        create(kloc_r_f[0:1]) create(kloc_h_f[0:1])\
-        create(kloc_s_f[0:1]) create(kloc_p_f[0:1]) \
-        create(ferm_shiftmulti_acc_f[0:maxNeededShifts]) \
-        create(k_p_shiftferm[0:maxApproxOrder] )\
-        create(k_p_shiftferm_f[0:maxApproxOrder] )
-        {
-            if(test_settings.benchmarkMode){
-                rationalApproxToUse = (RationalApprox*) malloc(sizeof(RationalApprox));
-                init_fake_rational_approx(rationalApproxToUse, 1,
-                        test_settings.fakeShift, 15);
-            }
-            else{
-                printf("Using rational approximation for molecular dynamics\n");
-                printf("For the first quark\n");
-                //just choosing one, but rescaling it, but rescaling it first.
-                double minmaxeig[2];
-                generate_vec3_soa_gauss(kloc_p);
+copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*alloc_info.NDiffFlavs]) \
+create(kloc_r[0:1]) create(kloc_h[0:1]) create(kloc_s[0:1]) create(kloc_p[0:1]) \
+create(ferm_shiftmulti_acc[0:alloc_info.maxNeededShifts]) \
+copy(conf_acc_f[0:8]) copy(ferm_chi_acc_f[0:1])\
+copy(ferm_phi_acc_f[0:1])  copy(u1_back_phases_f[0:8*alloc_info.NDiffFlavs]) \
+create(kloc_r_f[0:1]) create(kloc_h_f[0:1])\
+create(kloc_s_f[0:1]) create(kloc_p_f[0:1]) \
+create(ferm_shiftmulti_acc_f[0:alloc_info.maxNeededShifts]) \
+create(k_p_shiftferm[0:alloc_info.maxApproxOrder] )\
+create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
+{
+*/
+    if(test_settings.benchmarkMode){
+        rationalApproxToUse = (RationalApprox*) malloc(sizeof(RationalApprox));
+        init_fake_rational_approx(rationalApproxToUse, 1,
+                test_settings.fakeShift, 15);
+    }
+    else{
+        printf("Using rational approximation for molecular dynamics\n");
+        printf("For the first quark\n");
+        //just choosing one, but rescaling it, but rescaling it first.
+        double minmaxeig[2];
+        generate_vec3_soa_gauss(kloc_p);
 #pragma acc data update device(kloc_p[0:1])
-                find_min_max_eigenvalue_soloopenacc(conf_acc,fermions_parameters,kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
-                printf("Found eigenvalues of dirac operator: %e,  %e\n",
-                        minmaxeig[0],minmaxeig[1]);
+        find_min_max_eigenvalue_soloopenacc(conf_acc,fermions_parameters,kloc_r,kloc_h,kloc_p,kloc_s,minmaxeig);
+        printf("Found eigenvalues of dirac operator: %e,  %e\n",
+                minmaxeig[0],minmaxeig[1]);
 
 
-                printf("Rescaling rational approximation...\n");
-                rescale_rational_approximation(
-                        &(fermions_parameters[0].approx_md_mother),
-                        &(fermions_parameters[0].approx_md),
-                        minmaxeig);
-                rationalApproxToUse = &(fermions_parameters[0].approx_md);//just choosing one
+        printf("Rescaling rational approximation...\n");
+        rescale_rational_approximation(
+                &(fermions_parameters[0].approx_md_mother),
+                &(fermions_parameters[0].approx_md),
+                minmaxeig);
+        rationalApproxToUse = &(fermions_parameters[0].approx_md);//just choosing one
 
-            }
-
-
+    }
 
 
-            struct timeval t0,t1,t2,t3,t4,t5;
-            int r;
-            int cg_return;
-            if(0 == devinfo.myrank){
-                printf("Multishift Inversion, %d times, with residue %e, shift %e\n",
-                        test_settings.multiShiftInverterRepetitions,md_parameters.residue_metro,
-                        test_settings.fakeShift );
-                printf("max_cg_iterations: %d\n", md_parameters.max_cg_iterations);
-
-            }
-
-            // double precision
-            if(0 == devinfo.myrank){
-            printf("####################\n");
-            printf("# DOUBLE PRECISION #\n");
-            printf("####################\n");
-            }
-            for(r=0; r<test_settings.multiShiftInverterRepetitions; r++){
-                gettimeofday(&t0,NULL);
-                multishift_invert_iterations = 0;
-                multishift_invert(conf_acc,&fermions_parameters[0],
-                        rationalApproxToUse,
-                        ferm_shiftmulti_acc,
-                        ferm_chi_acc,
-                        md_parameters.residue_md,
-                        kloc_r,
-                        kloc_h,
-                        kloc_s,
-                        kloc_p,
-                        k_p_shiftferm,
-                        md_parameters.max_cg_iterations,
-                        &cg_return);
-                gettimeofday(&t1,NULL);
-                if(0==devinfo.myrank){
-                    double dt_cgm = (double)(t1.tv_sec - t0.tv_sec) + 
-                        ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
-                    if(0 == devinfo.myrank)
-                    printf("Time for 1 step of multishift inversion   : %e\n",
-                            dt_cgm/multishift_invert_iterations);
-                }
-            }
-
-            if(test_settings.saveResults){
-#pragma acc update host(ferm_shiftmulti_acc[0:rationalApproxToUse->approx_order]) // update on host
-                for(r=0; r<rationalApproxToUse->approx_order; r++){
-
-                    char fermionname_shift[50];
-                    sprintf(fermionname_shift,"fermion_shift_%d.dat",r);
-
-                    // shift fermio names
-                    if(0 == devinfo.myrank)
-                        printf("Writing file %s.\n", fermionname_shift);
-
-                    print_vec3_soa_wrapper(&ferm_shiftmulti_acc[r],fermionname_shift);
-                }
-            }
 
 
-            // single precision
-            if(0 == devinfo.myrank){
-            printf("####################\n");
-            printf("# SINGLE PRECISION #\n");
-            printf("####################\n");
-            }
-            // conversion to single precision
-            convert_double_to_float_su3_soa(conf_acc,conf_acc_f);
-            convert_double_to_float_vec3_soa(ferm_chi_acc,ferm_chi_acc_f);
+    struct timeval t0,t1,t2,t3,t4,t5;
+    int r;
+    int cg_return;
+    if(0 == devinfo.myrank){
+        printf("Multishift Inversion, %d times, with residue %e, shift %e\n",
+                test_settings.multiShiftInverterRepetitions,md_parameters.residue_metro,
+                test_settings.fakeShift );
+        printf("max_cg_iterations: %d\n", md_parameters.max_cg_iterations);
 
-            struct timeval t0_f,t1_f,t2_f,t3_f,t4_f,t5_f;
-            for(r=0; r<test_settings.multiShiftInverterRepetitions; r++){
-                gettimeofday(&t0_f,NULL);
-                multishift_invert_iterations = 0;
-                multishift_invert_f(conf_acc_f,&fermions_parameters[0],
-                        rationalApproxToUse,
-                        ferm_shiftmulti_acc_f,
-                        ferm_chi_acc_f,
-                        md_parameters.residue_md,
-                        kloc_r_f,
-                        kloc_h_f,
-                        kloc_s_f,
-                        kloc_p_f,
-                        k_p_shiftferm_f,
-                        md_parameters.max_cg_iterations,
-                        &cg_return);
-                gettimeofday(&t1_f,NULL);
-                if(0==devinfo.myrank){
-                    double dt_cgm_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
-                        ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
-                    if(0 == devinfo.myrank)
-                    printf("Time for 1 step of multishift inversion   : %e\n",
-                            dt_cgm_f/multishift_invert_iterations);
-                }
-            }
+    }
 
-
-            if(test_settings.saveResults){
-#pragma acc update host(ferm_shiftmulti_acc_f[0:rationalApproxToUse->approx_order]) // update on host
-                for(r=0; r<rationalApproxToUse->approx_order; r++){
-
-                    char fermionname_shift[50];
-                    sprintf(fermionname_shift,"sp_fermion_shift_%d.dat",r);
-
-                    // shift fermio names
-                    if(0 == devinfo.myrank)
-                    printf("Writing file %s.\n", fermionname_shift);
-
-                    print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
-                }
-            }
-
-
-            printf("MPI%02d: End of data region!\n", devinfo.myrank);
-
+    // double precision
+    if(0 == devinfo.myrank){
+        printf("####################\n");
+        printf("# DOUBLE PRECISION #\n");
+        printf("####################\n");
+    }
+    for(r=0; r<test_settings.multiShiftInverterRepetitions; r++){
+        gettimeofday(&t0,NULL);
+        multishift_invert_iterations = 0;
+        multishift_invert(conf_acc,&fermions_parameters[0],
+                rationalApproxToUse,
+                ferm_shiftmulti_acc,
+                ferm_chi_acc,
+                md_parameters.residue_md,
+                kloc_r,
+                kloc_h,
+                kloc_s,
+                kloc_p,
+                k_p_shiftferm,
+                md_parameters.max_cg_iterations,
+                &cg_return);
+        gettimeofday(&t1,NULL);
+        if(0==devinfo.myrank){
+            double dt_cgm = (double)(t1.tv_sec - t0.tv_sec) + 
+                ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+            if(0 == devinfo.myrank)
+                printf("Time for 1 step of multishift inversion   : %e\n",
+                        dt_cgm/multishift_invert_iterations);
         }
+    }
+
+    if(test_settings.saveResults){
+#pragma acc update host(ferm_shiftmulti_acc[0:rationalApproxToUse->approx_order]) // update on host
+        for(r=0; r<rationalApproxToUse->approx_order; r++){
+
+            char fermionname_shift[50];
+            sprintf(fermionname_shift,"fermion_shift_%d.dat",r);
+
+            // shift fermio names
+            if(0 == devinfo.myrank)
+                printf("Writing file %s.\n", fermionname_shift);
+
+            print_vec3_soa_wrapper(&ferm_shiftmulti_acc[r],fermionname_shift);
+        }
+    }
+
+
+    // single precision
+    if(0 == devinfo.myrank){
+        printf("####################\n");
+        printf("# SINGLE PRECISION #\n");
+        printf("####################\n");
+    }
+    // conversion to single precision
+    convert_double_to_float_su3_soa(conf_acc,conf_acc_f);
+    convert_double_to_float_vec3_soa(ferm_chi_acc,ferm_chi_acc_f);
+
+    struct timeval t0_f,t1_f,t2_f,t3_f,t4_f,t5_f;
+    for(r=0; r<test_settings.multiShiftInverterRepetitions; r++){
+        gettimeofday(&t0_f,NULL);
+        multishift_invert_iterations = 0;
+        multishift_invert_f(conf_acc_f,&fermions_parameters[0],
+                rationalApproxToUse,
+                ferm_shiftmulti_acc_f,
+                ferm_chi_acc_f,
+                md_parameters.residue_md,
+                kloc_r_f,
+                kloc_h_f,
+                kloc_s_f,
+                kloc_p_f,
+                k_p_shiftferm_f,
+                md_parameters.max_cg_iterations,
+                &cg_return);
+        gettimeofday(&t1_f,NULL);
+        if(0==devinfo.myrank){
+            double dt_cgm_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
+                ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
+            if(0 == devinfo.myrank)
+                printf("Time for 1 step of multishift inversion   : %e\n",
+                        dt_cgm_f/multishift_invert_iterations);
+        }
+    }
+
+
+    if(test_settings.saveResults){
+#pragma acc update host(ferm_shiftmulti_acc_f[0:rationalApproxToUse->approx_order]) // update on host
+        for(r=0; r<rationalApproxToUse->approx_order; r++){
+
+            char fermionname_shift[50];
+            sprintf(fermionname_shift,"sp_fermion_shift_%d.dat",r);
+
+            // shift fermio names
+            if(0 == devinfo.myrank)
+                printf("Writing file %s.\n", fermionname_shift);
+
+            print_vec3_soa_wrapper_f(&ferm_shiftmulti_acc_f[r],fermionname_shift);
+        }
+    }
+
+
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
 #endif
@@ -371,8 +378,10 @@ int main(int argc, char* argv[]){
 #endif 
 
     if(test_settings.benchmarkMode) free(rationalApproxToUse);
-    mem_free_f();
-    mem_free();
+    mem_free_extended_f();
+    mem_free_core_f();
+    mem_free_extended();
+    mem_free_core();
 
     printf("MPI%02d: Test completed.\n",devinfo.myrank);
 

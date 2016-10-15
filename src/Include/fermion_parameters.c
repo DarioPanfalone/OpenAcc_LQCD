@@ -16,38 +16,36 @@
 #include "../RationalApprox/rationalapprox.h"
 #include "./fermion_parameters.h"
 #include "./montecarlo_parameters.h"
+#include "../OpenAcc/alloc_settings.h"
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
 
+
 #define ALIGN 128
 #define acc_twopi 2*3.14159265358979323846
 
-int maxNeededShifts;
-int maxApproxOrder;
-int NDiffFlavs;// set in init.c, from input file
-int NPS_tot;
 int max_ps;
 int totalMdShifts;
 ferm_param *fermions_parameters;// set in init.c, from input file
 
 int init_ferm_params(ferm_param *fermion_settings){
-    maxNeededShifts = 0;
-    maxApproxOrder = 0;
+    alloc_info.maxNeededShifts = 0;
+    alloc_info.maxApproxOrder = 0;
 
     int errorstatus = 0;
 
 
     printf("Initializing fermions...\n");
 
-    NPS_tot = 0;
+    alloc_info.NPS_tot = 0;
     max_ps = 0;
 
-    // calculation of NPS_tot, max_ps,index_of_the_first_ps; 
-    for(int i=0;i<NDiffFlavs;i++){
+    // calculation of alloc_info.NPS_tot, max_ps,index_of_the_first_ps; 
+    for(int i=0;i<alloc_info.NDiffFlavs;i++){
         fermion_settings[i].printed_bf_dbg_info = 0;
         // compute the total number of ps
-        NPS_tot += fermion_settings[i].number_of_ps;
+        alloc_info.NPS_tot += fermion_settings[i].number_of_ps;
         // compute the max number of ps among the various flavs
         if(fermion_settings[i].number_of_ps>=max_ps) max_ps = fermion_settings[i].number_of_ps;
         // determine the offset (where does the ps of the flavour i starts?)
@@ -58,12 +56,12 @@ int init_ferm_params(ferm_param *fermion_settings){
         }
     }
 
-    printf("NPS_tot = %d \n",NPS_tot);
+    printf("alloc_info.NPS_tot = %d \n",alloc_info.NPS_tot);
     printf("max_ps = %d \n",max_ps);
 
     totalMdShifts = 0;
     // Rational Approximation related stuff
-    for(int i=0;i<NDiffFlavs;i++){
+    for(int i=0;i<alloc_info.NDiffFlavs;i++){
         ferm_param *quark = &fermion_settings[i];
         quark->approx_fi_mother.exponent_num =  +quark->degeneracy;
         quark->approx_md_mother.exponent_num =  -quark->degeneracy;
@@ -125,22 +123,22 @@ int init_ferm_params(ferm_param *fermion_settings){
         quark->index_of_the_first_shift = totalMdShifts;
         totalMdShifts += quark->approx_md_mother.approx_order * quark->number_of_ps;
      
-        if(maxNeededShifts < quark->approx_fi_mother.approx_order)
-           maxNeededShifts = quark->approx_fi_mother.approx_order;
-        if(maxNeededShifts < quark->approx_md_mother.approx_order)
-           maxNeededShifts = quark->approx_md_mother.approx_order;
-        if(maxNeededShifts < quark->approx_li_mother.approx_order)
-           maxNeededShifts = quark->approx_li_mother.approx_order;
+        if(alloc_info.maxNeededShifts < quark->approx_fi_mother.approx_order)
+           alloc_info.maxNeededShifts = quark->approx_fi_mother.approx_order;
+        if(alloc_info.maxNeededShifts < quark->approx_md_mother.approx_order)
+           alloc_info.maxNeededShifts = quark->approx_md_mother.approx_order;
+        if(alloc_info.maxNeededShifts < quark->approx_li_mother.approx_order)
+           alloc_info.maxNeededShifts = quark->approx_li_mother.approx_order;
 
     }
 
-    maxApproxOrder = maxNeededShifts;
-    if(1 == md_parameters.recycleInvsForce && maxNeededShifts < totalMdShifts*2)
-        maxNeededShifts = totalMdShifts*2;
+    alloc_info.maxApproxOrder = alloc_info.maxNeededShifts;
+    if(1 == md_parameters.recycleInvsForce && alloc_info.maxNeededShifts < totalMdShifts*2)
+        alloc_info.maxNeededShifts = totalMdShifts*2;
 
     if(0==devinfo.myrank && verbosity_lv > 3){
-        printf("MaxApproxOrder found/#define'd: %d / %d\n",maxApproxOrder, MAX_APPROX_ORDER);
-        printf("MaxNeededShifts: %d ",maxNeededShifts);
+        printf("MaxApproxOrder found/#define'd: %d / %d\n",alloc_info.maxApproxOrder, MAX_APPROX_ORDER);
+        printf("MaxNeededShifts: %d ",alloc_info.maxNeededShifts);
         if(1 == md_parameters.recycleInvsForce)
             printf("(md_parameters.recycleInvsForce = 1)");
         printf("\n");
@@ -155,7 +153,7 @@ int init_ferm_params(ferm_param *fermion_settings){
 void init_all_u1_phases(bf_param bfpars, ferm_param *fpar  )
 {
 
-    for(int i=0;i<NDiffFlavs;i++){
+    for(int i=0;i<alloc_info.NDiffFlavs;i++){
         fpar[i].phases = &u1_back_phases[i*8];
         fpar[i].phases_f = &u1_back_phases_f[i*8];
         init_fermion_backfield(bfpars,&(fpar[i]));

@@ -9,6 +9,7 @@
 #include "../OpenAcc/md_integrator.h"
 #include "../OpenAcc/backfield.h"
 #include "../OpenAcc/geometry.h"
+#include "../OpenAcc/alloc_settings.h"
 #include "../Meas/ferm_meas.h"
 
 #include <stdint.h>
@@ -95,7 +96,7 @@ uint32_t hash_settings_explicit(
 
 uint32_t hash_settings(){
 
-    return hash_settings_explicit(fermions_parameters,NDiffFlavs,
+    return hash_settings_explicit(fermions_parameters,alloc_info.NDiffFlavs,
                 &act_params,&backfield_parameters,&md_parameters,
                 &mc_params,&geom_par,&fm_par);
 

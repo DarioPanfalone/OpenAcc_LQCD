@@ -28,9 +28,10 @@
 #include "../OpenAcc/random_assignement.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "./baryon_number_utilities.h"
+#include "../OpenAcc/alloc_settings.h"
 #include "./ferm_meas.h"
 #include "./magnetic_susceptibility_utilities.h"
-
+#include "../Include/inverter_tricks.h"
 
 #ifdef STOUT_FERMIONS
 #include "../OpenAcc/stouting.h"
@@ -76,7 +77,7 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 
     strcpy(fmpar->fermionic_outfile_header,"#conf\ticopy\t");
     int col_count=2;
-    for(int iflv=0;iflv<NDiffFlavs;iflv++){
+    for(int iflv=0;iflv<alloc_info.NDiffFlavs;iflv++){
         char strtocat[200];
         sprintf(strtocat, "%02d.Reff_%-18s%02d.Imff_%-18s",col_count,
                 tferm_par[iflv].name,col_count+1,tferm_par[iflv].name);
@@ -152,9 +153,10 @@ void fermion_measures( su3_soa * tconf_acc,
 #else
     conf_to_use = tconf_acc;
 #endif
-    conf_to_use_f = conf_acc_f;// global variable
-    convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f); 
-
+    if(inverter_tricks.useMixedPrecision){ 
+        conf_to_use_f = conf_acc_f;// global variable
+        convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f); 
+    }
 
 
     int allocation_check;
@@ -248,7 +250,7 @@ void fermion_measures( su3_soa * tconf_acc,
 
 
         // cycle on flavours
-        for(int iflv=0; iflv < NDiffFlavs ; iflv++){
+        for(int iflv=0; iflv < alloc_info.NDiffFlavs ; iflv++){
 
             if(verbosity_lv > 1 && devinfo.myrank == 0){
                 printf("MPI%02d: Performing %d of %d chiral measures for quark %s",
@@ -279,9 +281,11 @@ void fermion_measures( su3_soa * tconf_acc,
             // preparing inverter_package with global variables
             inverter_package ip;
             setup_inverter_package_dp(&ip,conf_to_use,ferm_shiftmulti_acc,1,kloc_r,kloc_h,
-                    kloc_s,kloc_p); 
-            setup_inverter_package_sp(&ip,conf_to_use_f,ferm_shiftmulti_acc_f,1,kloc_r_f,
-                    kloc_h_f,kloc_s_f,kloc_p_f,aux1_f); 
+                    kloc_s,kloc_p);
+
+            if(inverter_tricks.useMixedPrecision) 
+                setup_inverter_package_sp(&ip,conf_to_use_f,ferm_shiftmulti_acc_f,1,
+                        kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f); 
 
 
                 // FIRST INVERSION

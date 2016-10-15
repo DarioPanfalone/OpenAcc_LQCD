@@ -29,6 +29,7 @@
 #include "./sp_su3_measurements.h"
 #include "./su3_utilities.h"
 #include "../tests_and_benchmarks/test_and_benchmarks.h"
+#include "./alloc_settings.h"
 #include "./update_versatile.h"
 
 #ifdef __GNUC__
@@ -76,8 +77,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     int mu;
     double **minmaxeig; 
-    minmaxeig = (double**)malloc(NDiffFlavs*sizeof(double*));
-    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+    minmaxeig = (double**)malloc(alloc_info.NDiffFlavs*sizeof(double*));
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++)
         minmaxeig[iflav] = (double*) malloc(2*sizeof(double));
 
     double p1;
@@ -119,7 +120,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 
 
-    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
         for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
             int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
 
@@ -143,7 +144,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             }
         }
     }// end for iflav
-#pragma acc update device(ferm_phi_acc[0:NPS_tot])
+#pragma acc update device(ferm_phi_acc[0:alloc_info.NPS_tot])
 
     gconf_as_fermionmatrix_f = conf_acc_f;
 #ifdef STOUT_FERMIONS 
@@ -163,7 +164,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #endif
 
     // DILATION OF FIRST_INV RATIONAL APPROXIMATION
-    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
         if(verbosity_lv > 2 ) printf("Rat approx rescale (flav=%d)\n",iflav);
 
         if(debug_settings.do_norandom_test){ // NORANDOM
@@ -211,7 +212,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         action_mom_in = 0.0;
         for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
         action_ferm_in=0;
-        for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+        for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
             for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
 
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
@@ -227,14 +228,14 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // FIRST INV APPROX CALC --> calculation of CHI fermion
 
     inverter_package ip;
-    setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,maxApproxOrder,
+    setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,alloc_info.maxApproxOrder,
             kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
-    setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  maxApproxOrder,
+    setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  alloc_info.maxApproxOrder,
             kloc_r,  kloc_h,  kloc_s,  kloc_p);  
 
 
 
-    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
         for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
             if(0==devinfo.myrank)
                 printf("Calculation of chi for fermion %d, copy %d\n", iflav,ips);
@@ -255,7 +256,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     if(verbosity_lv > 3) printf("MPI%02d: Computed the fermion CHI : OK \n", devinfo.myrank);
 
     // DILATION OF MOLECULAR DYNAMICS RATIONAL APPROXIMATION
-    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
         // recovering eigenvalues from approx_fi
         RationalApprox *approx_md = &(fermions_parameters[iflav].approx_md);
         RationalApprox *approx_md_mother = &(fermions_parameters[iflav].approx_md_mother);
@@ -299,7 +300,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double act_ferm_check_f = 0;
         double act_ferm_check = 0; // should not be necessary
         int ips;
-        for(ips = 0; ips < NPS_tot;ips++){
+        for(ips = 0; ips < alloc_info.NPS_tot;ips++){
             printf("Converting ferm_chi_acc[%d]...\n",ips);
             convert_double_to_float_vec3_soa(&ferm_chi_acc[ips],&ferm_chi_acc_f[ips]);
             act_ferm_check += real_scal_prod_global(&ferm_phi_acc[ips],
@@ -326,7 +327,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 tstout_conf_acc_arr_f,
 #endif
                 auxbis_conf_acc_f, // globale
-                aux_conf_acc_f,fermions_parameters,NDiffFlavs,
+                aux_conf_acc_f,fermions_parameters,alloc_info.NDiffFlavs,
                 ferm_chi_acc_f,ferm_shiftmulti_acc_f,
                 ip,
                 momenta_f,local_sums_f,res_md,max_cg);
@@ -348,7 +349,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 tstout_conf_acc_arr,
 #endif
                 auxbis_conf_acc, // globale
-                aux_conf_acc,fermions_parameters,NDiffFlavs,
+                aux_conf_acc,fermions_parameters,alloc_info.NDiffFlavs,
                 ferm_chi_acc,ferm_shiftmulti_acc,
                 ip,
                 momenta,local_sums,res_md,max_cg);
@@ -385,7 +386,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 tstout_conf_acc_arr,
 #endif
                 auxbis_conf_acc, // globale
-                aux_conf_acc,fermions_parameters,NDiffFlavs,
+                aux_conf_acc,fermions_parameters,alloc_info.NDiffFlavs,
                 ferm_chi_acc,ferm_shiftmulti_acc,
                 ip,
                 momenta,local_sums,res_md, max_cg);
@@ -410,7 +411,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef MULTIDEVICE
         MPI_Finalize();
 #endif
-        mem_free();
+        mem_free_core();
+        mem_free_extended();
         exit(0);
 
     }
@@ -435,7 +437,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     if(metro==1){
         // DILATION OF LAST_INV RATIONAL APPROX
-        for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+        for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
             // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
             if(debug_settings.do_norandom_test){ // NORANDOM
                 if(read_vec3_soa(kloc_p,"kloc_p_norndtest")){
@@ -467,12 +469,12 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
         // LAST INV APPROX CALC 
         convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
-        setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  maxApproxOrder,
+        setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  alloc_info.maxApproxOrder,
                 kloc_r,  kloc_h,  kloc_s,  kloc_p);  
-        setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,maxApproxOrder,
+        setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,alloc_info.maxApproxOrder,
                 kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
 
-        for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+        for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
             for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
                 // USING STOUTED CONF
@@ -497,7 +499,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         for(mu =0;mu<8;mu++)    action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
 
         action_ferm_fin=0;
-        for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++){
+        for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
             for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
                 action_ferm_fin += real_scal_prod_global(&ferm_chi_acc[ps_index],&ferm_phi_acc[ps_index]);
@@ -635,7 +637,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
         fclose(foutfile);
     }
-    for(int iflav = 0 ; iflav < NDiffFlavs ; iflav++)
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++)
         free(minmaxeig[iflav]);
     free(minmaxeig);
 

@@ -7,10 +7,12 @@
 
 // used in the dynamical allocation of structures
 
+
+
+
 extern global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 extern global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
 
-extern int conf_acc_size;
 extern su3_soa  * conf_acc; // the gauge configuration.
 extern su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
                                 // if the metro test fails.
@@ -66,8 +68,10 @@ extern vec3_soa * aux1; // used in fermion force calculation,
 extern dcomplex_soa * local_sums;
 extern double_soa * d_local_sums;
 
-void mem_alloc();
+void mem_alloc_core();
+void mem_alloc_extended();
 
-void mem_free();
+void mem_free_core();
+void mem_free_extended();
 
 #endif

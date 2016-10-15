@@ -161,7 +161,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
 			       __restrict const vec3_soa * ferm_in_acc, // [NPS_tot]         
 			       double res,
 			       __restrict su3_soa  * taux_conf_acc,
-			       __restrict vec3_soa * tferm_shiftmulti_acc,//parking variable [max_ps*max_approx_order]           
+			       __restrict vec3_soa * tferm_shiftmulti_acc,//parking variable [maxNeededShifts]           
                    inverter_package ipt,
                    const int max_cg )
 {

@@ -26,6 +26,7 @@
 #include "../DbgTools/dbgtools.h"
 #include "../DbgTools/sp_dbgtools.h"
 #include "./test_and_benchmarks.h"
+#include "../OpenAcc/alloc_settings.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
@@ -71,39 +72,48 @@ int main(int argc, char* argv[]){
 
 
     act_params.stout_steps = 0;
-    NPS_tot = 1;
+    alloc_info.NPS_tot = 1;
 
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
 #endif
-    fflush(stdout);
-    printf("DEODOE test\n");
-    printf("commit: %s\n", xstr(COMMIT_HASH) );
-    // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
-    printf("WELCOME! \n");
+    if(0 == devinfo.myrank){
+        fflush(stdout);
+        printf("DEODOE test\n");
+        printf("commit: %s\n", xstr(COMMIT_HASH) );
+        // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
+        printf("WELCOME! \n");
+    }
     // READ input file.
+    //
     set_global_vars_and_fermions_from_input_file(argv[1]);
 
+
     if(! test_settings.parametersAreSet){
-        printf("ERROR : Test parameters are not set in %s. Is a proper TestSetting section present?\n", argv[1]);
-        printf("Exiting now!\n");
+        if(0 == devinfo.myrank){
+            printf("ERROR : Test parameters are not set in %s. Is a proper TestSetting section present?\n", argv[1]);
+            printf("Exiting now!\n");
+        }
         exit(1);
     }
-initrand((unsigned int) mc_params.seed+devinfo.myrank);
+    initrand((unsigned int) mc_params.seed+devinfo.myrank);
     verbosity_lv = debug_settings.input_vbl;
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
-    if(init_ferm_params(fermions_parameters))
+    if(init_ferm_params(fermions_parameters) && (0==devinfo.myrank))
         printf("Ignoring issues in init_ferm_params,\
                 this is a deo-doe test.\n");
 
-    if(NPS_tot == 0) 
+    if(alloc_info.NPS_tot == 0) 
     {
-        printf("ERROR: For technical reasons, at least a fermion in the input file is needed\n");
-        printf("       (namely, the allocation of external U(1) phases.\n");
+        if(0 == devinfo.myrank){
+            printf("ERROR: For technical reasons, at least a fermion in the input file is needed\n");
+            printf("       (namely, the allocation of external U(1) phases.\n");
+        }
         exit(1);
     }
     else {
-        printf("N fermions found: %d\n", NPS_tot);
+        if(0 == devinfo.myrank)
+            printf("N fermions found: %d\n", alloc_info.NPS_tot);
     }
     //
 
@@ -114,12 +124,20 @@ initrand((unsigned int) mc_params.seed+devinfo.myrank);
     devinfo.nranks = 1;
 #endif
 
-    mem_alloc();
-    mem_alloc_f();
+    mem_alloc_core();
+    mem_alloc_extended();
+    mem_alloc_core_f();
+    mem_alloc_extended_f();
+
     printf("Allocazione della memoria : OK \n");
     compute_nnp_and_nnm_openacc();
+#pragma acc enter data copyin(nnp_openacc)
+#pragma acc enter data copyin(nnm_openacc)
+
     printf("nn computation : OK \n");
     init_all_u1_phases(backfield_parameters,fermions_parameters);
+#pragma acc data update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
+#pragma acc data update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
     printf("u1_backfield initialization : OK \n");
     sprintf(myconfname             ,"%s_MPI%02d",confname             ,devinfo.myrank);
     sprintf(myfermionname          ,"%s_MPI%02d",fermionname          ,devinfo.myrank);
@@ -132,9 +150,6 @@ initrand((unsigned int) mc_params.seed+devinfo.myrank);
     sprintf(myfermionname_deo_f      ,"%s_MPI%02d",fermionname_deo_f      ,devinfo.myrank);
     sprintf(myfermionname_fulldirac_f,"%s_MPI%02d",fermionname_fulldirac_f,devinfo.myrank);
 
-
-
-
 #ifndef __GNUC__
     //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
     // NVIDIA GPUs
@@ -144,13 +159,13 @@ initrand((unsigned int) mc_params.seed+devinfo.myrank);
     // Intel XeonPhi
     //acc_device_t my_device_type = acc_device_xeonphi;
     // Select device ID
-    printf("MPI%02d: Selecting device.\n");
+    printf("MPI%02d: Selecting device.\n", devinfo.myrank);
 #ifdef MULTIDEVICE
     select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
 #else
     select_init_acc_device(my_device_type, devinfo.single_dev_choice);
 #endif
-    printf("Device Selected : OK \n");
+    printf("MPI%02d: Device Selected : OK \n", devinfo.myrank );
 #endif
     int conf_id_iter = 0;
     if(!read_conf_wrapper(conf_acc,mc_params.save_conf_name,
@@ -169,6 +184,7 @@ initrand((unsigned int) mc_params.seed+devinfo.myrank);
             printf("MPI%02d: You're using ILDG format.\n", devinfo.myrank);
         conf_id_iter=0;
     }
+#pragma acc data update device(conf_acc[0:8])
 
 
     // init fermion
@@ -186,144 +202,163 @@ initrand((unsigned int) mc_params.seed+devinfo.myrank);
 #ifdef MULTIDEVICE
     communicate_fermion_borders_hostonly(ferm_chi_acc);
 #endif
+#pragma acc data update device(ferm_chi_acc[0:1])
 
 
-    //#pragma acc data  copyin(conf_acc[0:8]) copyin(ferm_chi_acc[0:1])\
-    create(ferm_phi_acc[0:1])  copyin(u1_back_phases[0:8*NDiffFlavs]) \
-        create(kloc_s[0:1])
+
+    /*
 #pragma acc data  copy(conf_acc[0:8]) copy(ferm_chi_acc[0:1])\
-        copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*NDiffFlavs]) \
-        copy(kloc_s[0:1])\
-        copy(conf_acc_f[0:8]) copy(ferm_chi_acc_f[0:1])\
-        copy(ferm_phi_acc_f[0:1])  copy(u1_back_phases_f[0:8*NDiffFlavs]) \
-        copy(kloc_s_f[0:1])
-        {
+copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*alloc_info.NDiffFlavs]) \
+copy(kloc_s[0:1])\
+copy(conf_acc_f[0:8]) copy(ferm_chi_acc_f[0:1])\
+copy(ferm_phi_acc_f[0:1])  copy(u1_back_phases_f[0:8*alloc_info.NDiffFlavs]) \
+copy(kloc_s_f[0:1])
+{
+*/
+    // double precision
+    if(0 == devinfo.myrank){
+        printf("####################\n");
+        printf("# DOUBLE PRECISION #\n");
+        printf("####################\n");
+    }
+    struct timeval t0,t1,t2,t3,t4,t5;
+    int r;
+    if(0 == devinfo.myrank)
+        printf("Multiplication by Doe, %d times...\n", test_settings.deoDoeIterations);
+    gettimeofday(&t0,NULL);
+    for(r=0; r<test_settings.deoDoeIterations; r++)
+        acc_Doe(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases);
+    gettimeofday(&t1,NULL);
 
-            // double precision
-            printf("####################\n");
-            printf("# DOUBLE PRECISION #\n");
-            printf("####################\n");
-            struct timeval t0,t1,t2,t3,t4,t5;
-            int r;
-            printf("Multiplication by Doe, %d times...\n", test_settings.deoDoeIterations);
-            gettimeofday(&t0,NULL);
-            for(r=0; r<test_settings.deoDoeIterations; r++)
-                acc_Doe(conf_acc, ferm_phi_acc, ferm_chi_acc, fermions_parameters[0].phases);
-            gettimeofday(&t1,NULL);
-
-            if(test_settings.saveResults){
-                printf("Writing file %s.\n", fermionname_doe);
+    if(test_settings.saveResults){
+        if(0 == devinfo.myrank)
+            printf("Writing file %s.\n", fermionname_doe);
 #pragma acc update host(ferm_phi_acc[0:1])
-                print_vec3_soa_wrapper(ferm_phi_acc,fermionname_doe);
-                print_vec3_soa(ferm_phi_acc,myfermionname_doe);
-            }
+        print_vec3_soa_wrapper(ferm_phi_acc,fermionname_doe);
+        print_vec3_soa(ferm_phi_acc,myfermionname_doe);
+    }
 
-            printf("Multiplication by Deo, %d times...\n", test_settings.deoDoeIterations);
-            gettimeofday(&t2,NULL);
-            for(r=0; r<test_settings.deoDoeIterations; r++)
-                acc_Deo(conf_acc, ferm_phi_acc, ferm_chi_acc,fermions_parameters[0].phases);
-            gettimeofday(&t3,NULL);
+    if(0 == devinfo.myrank)
+        printf("Multiplication by Deo, %d times...\n", test_settings.deoDoeIterations);
+    gettimeofday(&t2,NULL);
+    for(r=0; r<test_settings.deoDoeIterations; r++)
+        acc_Deo(conf_acc, ferm_phi_acc, ferm_chi_acc,fermions_parameters[0].phases);
+    gettimeofday(&t3,NULL);
 
-            if(test_settings.saveResults){
-                printf("Writing file %s.\n", fermionname_deo);
+    if(test_settings.saveResults){
+        if(0 == devinfo.myrank)
+            printf("Writing file %s.\n", fermionname_deo);
 #pragma acc update host(ferm_phi_acc[0:1])
-                print_vec3_soa_wrapper(ferm_phi_acc,fermionname_deo);
-                print_vec3_soa(ferm_phi_acc,myfermionname_deo);
-            }
+        print_vec3_soa_wrapper(ferm_phi_acc,fermionname_deo);
+        print_vec3_soa(ferm_phi_acc,myfermionname_deo);
+    }
 
-            printf("Multiplication by M^\\dagM+m^2, %d times...\n", test_settings.deoDoeIterations);
-            gettimeofday(&t4,NULL);
-            for(r=0; r<test_settings.deoDoeIterations; r++)
-                fermion_matrix_multiplication(conf_acc, ferm_phi_acc, 
-                        ferm_chi_acc, kloc_s, &fermions_parameters[0]) ;
-            gettimeofday(&t5,NULL);
+    if(0 == devinfo.myrank)
+        printf("Multiplication by M^\\dagM+m^2, %d times...\n", test_settings.deoDoeIterations);
+    gettimeofday(&t4,NULL);
+    for(r=0; r<test_settings.deoDoeIterations; r++)
+        fermion_matrix_multiplication(conf_acc, ferm_phi_acc, 
+                ferm_chi_acc, kloc_s, &fermions_parameters[0]) ;
+    gettimeofday(&t5,NULL);
 
-            if(test_settings.saveResults){
-                printf("Writing file %s.\n", fermionname_fulldirac);
+    if(test_settings.saveResults){
+        if(0 == devinfo.myrank)
+            printf("Writing file %s.\n", fermionname_fulldirac);
 #pragma acc update host(ferm_phi_acc[0:1])
-                print_vec3_soa_wrapper(ferm_phi_acc,fermionname_fulldirac);
-                print_vec3_soa(ferm_phi_acc,myfermionname_fulldirac);
-            }
+        print_vec3_soa_wrapper(ferm_phi_acc,fermionname_fulldirac);
+        print_vec3_soa(ferm_phi_acc,myfermionname_fulldirac);
+    }
 
-            double dt_doe = (double)(t1.tv_sec - t0.tv_sec) + 
-                ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
-            double dt_deo = (double)(t3.tv_sec - t2.tv_sec) + 
-                ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
-            double dt_dirac = (double)(t5.tv_sec - t4.tv_sec) + 
-                ((double)(t5.tv_usec - t4.tv_usec)/1.0e6);
-            printf("Time for 1 application of Doe           : %e\n",
-                    dt_doe/test_settings.deoDoeIterations);
-            printf("Time for 1 application of Deo           : %e\n", 
-                    dt_deo/test_settings.deoDoeIterations);
-            printf("Time for 1 application of Dirac Operator: %e\n", 
-                    dt_dirac/test_settings.deoDoeIterations);
+    double dt_doe = (double)(t1.tv_sec - t0.tv_sec) + 
+        ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
+    double dt_deo = (double)(t3.tv_sec - t2.tv_sec) + 
+        ((double)(t3.tv_usec - t2.tv_usec)/1.0e6);
+    double dt_dirac = (double)(t5.tv_sec - t4.tv_sec) + 
+        ((double)(t5.tv_usec - t4.tv_usec)/1.0e6);
 
-            // conversion to single precision
-            convert_double_to_float_su3_soa(conf_acc,conf_acc_f);
-            convert_double_to_float_vec3_soa(ferm_chi_acc,ferm_chi_acc_f);
+    if(0 == devinfo.myrank){
+        printf("Time for 1 application of Doe           : %e\n",
+                dt_doe/test_settings.deoDoeIterations);
+        printf("Time for 1 application of Deo           : %e\n", 
+                dt_deo/test_settings.deoDoeIterations);
+        printf("Time for 1 application of Dirac Operator: %e\n", 
+                dt_dirac/test_settings.deoDoeIterations);
+    }
+    // conversion to single precision
+    convert_double_to_float_su3_soa(conf_acc,conf_acc_f);
+    convert_double_to_float_vec3_soa(ferm_chi_acc,ferm_chi_acc_f);
 
-            // single precision
-            printf("####################\n");
-            printf("# SINGLE PRECISION #\n");
-            printf("####################\n");
-            struct timeval t0_f,t1_f,t2_f,t3_f,t4_f,t5_f;
-            //int r;
-            printf("Multiplication by Doe, %d times...\n", test_settings.deoDoeIterations);
-            gettimeofday(&t0_f,NULL);
-            for(r=0; r<test_settings.deoDoeIterations; r++)
-                acc_Doe_f(conf_acc_f, ferm_phi_acc_f, ferm_chi_acc_f, fermions_parameters[0].phases_f);
-            gettimeofday(&t1_f,NULL);
+    // single precision
+    if(0 == devinfo.myrank){
+        printf("####################\n");
+        printf("# SINGLE PRECISION #\n");
+        printf("####################\n");
+    }
+    struct timeval t0_f,t1_f,t2_f,t3_f,t4_f,t5_f;
+    //int r;
+    if(0 == devinfo.myrank)
+        printf("Multiplication by Doe, %d times...\n", test_settings.deoDoeIterations);
+    gettimeofday(&t0_f,NULL);
+    for(r=0; r<test_settings.deoDoeIterations; r++)
+        acc_Doe_f(conf_acc_f, ferm_phi_acc_f, ferm_chi_acc_f, fermions_parameters[0].phases_f);
+    gettimeofday(&t1_f,NULL);
 
 
-            if(test_settings.saveResults){
-                printf("Writing file %s.\n", fermionname_doe);
+    if(test_settings.saveResults){
+        if(0 == devinfo.myrank)
+            printf("Writing file %s.\n", fermionname_doe);
 #pragma acc update host(ferm_phi_acc_f[0:1])
-                print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_doe);
-                print_vec3_soa_f(ferm_phi_acc_f,myfermionname_doe);
-            }
+        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_doe);
+        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_doe);
+    }
 
-            printf("Multiplication by Deo, %d times...\n", test_settings.deoDoeIterations);
-            gettimeofday(&t2_f,NULL);
-            for(r=0; r<test_settings.deoDoeIterations; r++)
-                acc_Deo_f(conf_acc_f, ferm_phi_acc_f, ferm_chi_acc_f, fermions_parameters[0].phases_f) ;
-            gettimeofday(&t3_f,NULL);
+    if(0 == devinfo.myrank)
+        printf("Multiplication by Deo, %d times...\n", test_settings.deoDoeIterations);
+    gettimeofday(&t2_f,NULL);
+    for(r=0; r<test_settings.deoDoeIterations; r++)
+        acc_Deo_f(conf_acc_f, ferm_phi_acc_f, ferm_chi_acc_f, fermions_parameters[0].phases_f) ;
+    gettimeofday(&t3_f,NULL);
 
-            if(test_settings.saveResults){
-                printf("Writing file %s.\n", fermionname_deo);
+    if(test_settings.saveResults){
+        if(0 == devinfo.myrank)
+            printf("Writing file %s.\n", fermionname_deo);
 #pragma acc update host(ferm_phi_acc_f[0:1])
-                print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_deo);
-                print_vec3_soa_f(ferm_phi_acc_f,myfermionname_deo);
-            }
+        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_deo);
+        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_deo);
+    }
 
-            printf("Multiplication by M^\\dagM+m^2, %d times...\n", test_settings.deoDoeIterations);
-            gettimeofday(&t4_f,NULL);
-            for(r=0; r<test_settings.deoDoeIterations; r++)
-                fermion_matrix_multiplication_f(conf_acc_f, ferm_phi_acc_f, 
-                        ferm_chi_acc_f, kloc_s_f, &fermions_parameters[0]) ;
-            gettimeofday(&t5_f,NULL);
+    if(0 == devinfo.myrank)
+        printf("Multiplication by M^\\dagM+m^2, %d times...\n", test_settings.deoDoeIterations);
+    gettimeofday(&t4_f,NULL);
+    for(r=0; r<test_settings.deoDoeIterations; r++)
+        fermion_matrix_multiplication_f(conf_acc_f, ferm_phi_acc_f, 
+                ferm_chi_acc_f, kloc_s_f, &fermions_parameters[0]) ;
+    gettimeofday(&t5_f,NULL);
 
-            if(test_settings.saveResults){
-                printf("Writing file %s.\n", fermionname_fulldirac);
+    if(test_settings.saveResults){
+        if(0 == devinfo.myrank)
+            printf("Writing file %s.\n", fermionname_fulldirac);
 #pragma acc update host(ferm_phi_acc_f[0:1])
-                print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_fulldirac);
-                print_vec3_soa_f(ferm_phi_acc_f,myfermionname_fulldirac);
-            }
+        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_fulldirac);
+        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_fulldirac);
+    }
 
-            double dt_doe_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
-                ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
-            double dt_deo_f = (double)(t3_f.tv_sec - t2_f.tv_sec) + 
-                ((double)(t3_f.tv_usec - t2_f.tv_usec)/1.0e6);
-            double dt_dirac_f = (double)(t5_f.tv_sec - t4_f.tv_sec) + 
-                ((double)(t5_f.tv_usec - t4_f.tv_usec)/1.0e6);
-            printf("Time for 1 application of Doe           : %e\n",
-                    dt_doe_f/test_settings.deoDoeIterations);
-            printf("Time for 1 application of Deo           : %e\n", 
-                    dt_deo_f/test_settings.deoDoeIterations);
-            printf("Time for 1 application of Dirac Operator: %e\n", 
-                    dt_dirac_f/test_settings.deoDoeIterations);
+    double dt_doe_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
+        ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
+    double dt_deo_f = (double)(t3_f.tv_sec - t2_f.tv_sec) + 
+        ((double)(t3_f.tv_usec - t2_f.tv_usec)/1.0e6);
+    double dt_dirac_f = (double)(t5_f.tv_sec - t4_f.tv_sec) + 
+        ((double)(t5_f.tv_usec - t4_f.tv_usec)/1.0e6);
 
-            printf("MPI%02d: End of data region!\n", devinfo.myrank);
-        }
+    if(0 == devinfo.myrank){
+        printf("Time for 1 application of Doe           : %e\n",
+                dt_doe_f/test_settings.deoDoeIterations);
+        printf("Time for 1 application of Deo           : %e\n", 
+                dt_deo_f/test_settings.deoDoeIterations);
+        printf("Time for 1 application of Dirac Operator: %e\n", 
+                dt_dirac_f/test_settings.deoDoeIterations);
+    }
+
 #ifndef __GNUC__
     shutdown_acc_device(my_device_type);
 #endif
@@ -332,8 +367,10 @@ initrand((unsigned int) mc_params.seed+devinfo.myrank);
     MPI_Finalize();
 #endif 
 
-    mem_free_f();
-    mem_free();
+    mem_free_extended_f();
+    mem_free_core_f();
+    mem_free_extended();
+    mem_free_core();
 
     printf("MPI%02d: Test completed.\n",devinfo.myrank);
 
