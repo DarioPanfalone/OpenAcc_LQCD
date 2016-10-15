@@ -203,8 +203,10 @@ void init_fermion_backfield(bf_param bf_pars, ferm_param *fermion_parameters)
             fermion_parameters->ferm_im_chem_pot, fermion_parameters->ferm_charge);
 
 
-    calc_u1_phases_f(fermion_parameters->phases_f, bf_pars, 
-            fermion_parameters->ferm_im_chem_pot, fermion_parameters->ferm_charge);
+
+    if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD)
+        calc_u1_phases_f(fermion_parameters->phases_f, bf_pars, 
+                fermion_parameters->ferm_im_chem_pot, fermion_parameters->ferm_charge);
 
 
 

@@ -28,11 +28,6 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
         __restrict su3_soa * tstout_conf_acc_arr)
 {
     double max_unitarity_deviation,avg_unitarity_deviation;
-    if(verbosity_lv > 4){
-        check_unitarity_device(tconf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
-        printf("MPI%02d:(Stout wrapper,0) Avg_unitarity_deviation : %e\n", devinfo.myrank,avg_unitarity_deviation);
-        printf("MPI%02d:(Stout wrapper,0) Max_unitarity_deviation : %e\n", devinfo.myrank,max_unitarity_deviation);
-    }
 
     if(verbosity_lv > 1) 
         printf("MPI%02d:Stouting gauge conf %d times.\n",
@@ -46,8 +41,10 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
 #endif
         if(verbosity_lv > 4){
             check_unitarity_device(tstout_conf_acc_arr,&max_unitarity_deviation,&avg_unitarity_deviation);
-            printf("MPI%02d:(Stout wrapper,1) Avg_unitarity_deviation : %e\n", devinfo.myrank,avg_unitarity_deviation);
-            printf("MPI%02d:(Stout wrapper,1) Max_unitarity_deviation : %e\n", devinfo.myrank,max_unitarity_deviation);
+            printf("MPI%02d:(Stout wrapper,1/%d) Avg_unitarity_deviation : %e\n",
+                    devinfo.myrank,act_params.stout_steps,avg_unitarity_deviation);
+            printf("MPI%02d:(Stout wrapper,1/%d) Max_unitarity_deviation : %e\n",
+                    devinfo.myrank,act_params.stout_steps,max_unitarity_deviation);
         }
 
         for(int stoutlevel=1;stoutlevel < act_params.stout_steps;
@@ -64,12 +61,18 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
                 check_unitarity_device(&tstout_conf_acc_arr[8*(stoutlevel-1)],
                         &max_unitarity_deviation,&avg_unitarity_deviation);
 
-                printf("MPI%02d:(Stout wrapper,%d) Avg_unitarity_deviation : %e\n",stoutlevel, devinfo.myrank,avg_unitarity_deviation);
-                printf("MPI%02d:(Stout wrapper,%d) Max_unitarity_deviation : %e\n",stoutlevel, devinfo.myrank,max_unitarity_deviation);
+                printf("MPI%02d:(Stout wrapper,%d/%d) Avg_unitarity_deviation : %e\n",
+                        devinfo.myrank, stoutlevel+1,act_params.stout_steps, 
+                        avg_unitarity_deviation);
+                printf("MPI%02d:(Stout wrapper,%d/%d) Max_unitarity_deviation : %e\n",
+                        devinfo.myrank, stoutlevel+1,act_params.stout_steps, 
+                        max_unitarity_deviation);
             }
 
         }
     }
+
+
 }
 
 #endif

@@ -179,13 +179,17 @@ int main(int argc, char* argv[]){
 
     mem_alloc_core();
     mem_alloc_extended();
-    printf("MPI%02d - Allocazione della memoria (double) : OK \n",devinfo.myrank);
-    if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD)
+  
+    printf("\n   MPI%02d - Allocazione della memoria (double) : OK \n\n\n",devinfo.myrank);
+    if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
         mem_alloc_core_f();
+        printf("\n  MPI%02d - Allocazione della memoria (float) [CORE]: OK \n\n\n",devinfo.myrank);
+    }
 
-    if( md_parameters.singlePrecMD)
+    if( md_parameters.singlePrecMD){
         mem_alloc_extended_f();
-    printf("MPI%02d - Allocazione della memoria (float) : OK \n",devinfo.myrank);
+        printf("\n  MPI%02d - Allocazione della memoria (float) [EXTENDED]: OK \n\n\n",devinfo.myrank);
+    }
     compute_nnp_and_nnm_openacc();
 #pragma acc enter data copyin(nnp_openacc)
 #pragma acc enter data copyin(nnm_openacc)

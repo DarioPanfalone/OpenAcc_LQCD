@@ -155,12 +155,14 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
 
-        convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
+        if(md_parameters.singlePrecMD)
+            convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
     }
     else gconf_as_fermionmatrix = tconf_acc;
 #else
     gconf_as_fermionmatrix = tconf_acc;
-    convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
+    if(md_parameters.singlePrecMD)
+        convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
 #endif
 
     // DILATION OF FIRST_INV RATIONAL APPROXIMATION
@@ -467,13 +469,15 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #pragma acc update device(approx_li[0:1])
         }
 
-        // LAST INV APPROX CALC 
-        convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
+       // LAST INV APPROX CALC 
+       
         setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  alloc_info.maxApproxOrder,
                 kloc_r,  kloc_h,  kloc_s,  kloc_p);  
-        setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,alloc_info.maxApproxOrder,
-                kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
-
+        if(md_parameters.singlePrecMD){
+            convert_double_to_float_su3_soa(gconf_as_fermionmatrix,
+                    gconf_as_fermionmatrix_f);
+            setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,
+                    alloc_info.maxApproxOrder,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);        }
         for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
             for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;

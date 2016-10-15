@@ -103,6 +103,14 @@ void mem_alloc_core(){
     ALLOCCHECK(allocation_check, kloc_p) ;
 #pragma acc enter data create(kloc_p[0:1])
 
+    allocation_check =  posix_memalign((void **)&aux1, ALIGN, sizeof(vec3_soa)); 
+    ALLOCCHECK(allocation_check, aux1) ; // used in fermion force calculation, 
+                                         // for single precision acceleration
+#pragma acc enter data create(aux1[0:1])
+
+
+
+
     allocation_check =  posix_memalign((void **)&u1_back_phases, ALIGN,
             alloc_info.NDiffFlavs*8*sizeof(double_soa));   
     //  --> alloc_info.NDiffFlavs*4*NSITES phases (as many as links)
@@ -164,10 +172,9 @@ void mem_alloc_extended()
     ALLOCCHECK(allocation_check, auxbis_conf_acc ) ;
 #pragma acc enter data create(auxbis_conf_acc[0:8])
 
-
-    if(alloc_info.revTestAllocations){
-        allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
+    allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
         ALLOCCHECK(allocation_check, conf_acc_bkp) ;
+    if(alloc_info.revTestAllocations){
 #pragma acc enter data create(conf_acc_bkp[0:8])
     }
 
@@ -189,6 +196,8 @@ void mem_alloc_extended()
     allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, ipdot_acc) ;
 #pragma acc enter data create(ipdot_acc[0:8])
+
+    alloc_info.diagnosticsAllocations = debug_settings.save_diagnostics;
 
     if(alloc_info.diagnosticsAllocations){
         allocation_check =  posix_memalign((void **)&ipdot_g_old, ALIGN, 8*sizeof(tamat_soa)); 
@@ -234,11 +243,6 @@ void mem_alloc_extended()
     allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, alloc_info.maxApproxOrder* sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, k_p_shiftferm) ;
 #pragma acc enter data create(k_p_shiftferm[0:alloc_info.maxApproxOrder])
-
-    allocation_check =  posix_memalign((void **)&aux1, ALIGN, sizeof(vec3_soa)); 
-    ALLOCCHECK(allocation_check, aux1) ; // used in fermion force calculation, 
-                                         // for single precision acceleration
-#pragma acc enter data create(aux1[0:1])
 
 
     allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, alloc_info.NPS_tot * sizeof(vec3_soa)); 
@@ -288,6 +292,11 @@ inline void mem_free_core()
 #pragma acc exit data delete(kloc_h)
     FREECHECK(kloc_p);                
 #pragma acc exit data delete(kloc_p)
+    FREECHECK(aux1);                
+#pragma acc data delete(aux1);                
+
+
+
 
     FREECHECK(u1_back_phases);        
 #pragma acc data delete(u1_back_phases);        
@@ -365,8 +374,6 @@ inline void mem_free_extended()
     FREECHECK(ferm_shiftmulti_acc);   
 #pragma acc data delete(ferm_shiftmulti_acc);   
                                     
-    FREECHECK(aux1);                
-#pragma acc data delete(aux1);                
     FREECHECK(k_p_shiftferm);         
 #pragma acc data delete(k_p_shiftferm);         
 

@@ -309,6 +309,7 @@ dt_preker_to_postker,devinfo.myrank);
                 devinfo.myrank);
     }
 
+
     if(debug_settings.save_diagnostics == 1 ){
 
         double  force_norm, diff_force_norm;
