@@ -27,7 +27,7 @@ make_settings.set:
 	$(error The file make_settings.set must be present.)
 
 
-lattice_dimensions.txt:
+lattice_dimensions.txt: make_settings.set
 	grep "N0\|N1\|N2\|N3\|NR3" make_settings.set > lattice_dimensions.txt
 
 
