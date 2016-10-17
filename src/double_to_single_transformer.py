@@ -395,9 +395,8 @@ for fileName in fileNamesToChange:
             
             # adding 'typedef double complex d_complex' in sp_struct_c_def.c
             if  'struct_c_def.h' in fileName:
-                print "Adding \'typedef double complex d_complex\' to ", newFileName
-                newText = newText.replace('typedef float complex f_complex;',\
-                       'typedef float complex f_complex; typedef double complex d_complex;\n' )
+                print "Adding \'typedef float complex f_complex\' to ", newFileName
+                newText = newText.replace('//TYPEDEF_FLOAT_COMPLEX','typedef float complex f_complex;' )
         
             if os.path.exists(newFileName):
 

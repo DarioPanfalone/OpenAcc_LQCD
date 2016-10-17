@@ -9,8 +9,9 @@
  #define __restrict
 #endif
 
+#include "./double_complex.h"
 
-typedef double complex d_complex;
+//TYPEDEF_FLOAT_COMPLEX  //leave this there for double_to_songle_transformer.py
 
 typedef struct vec3_soa_t {
     d_complex c0[sizeh];
