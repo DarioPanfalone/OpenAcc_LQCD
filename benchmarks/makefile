@@ -1,24 +1,16 @@
 
-
-
-
 # DIMENSIONS OF THE LOCAL LATTICE
-N0:=$(shell grep N0 make_settings.set | awk '{print $$2}')
-N1:=$(shell grep N1 make_settings.set | awk '{print $$2}')
-N2:=$(shell grep N2 make_settings.set | awk '{print $$2}')
-N3:=$(shell grep N3 make_settings.set | awk '{print $$2}')
+N0:=$(shell grep LOC_N0 make_settings.set | awk '{print $$2}')
+N1:=$(shell grep LOC_N1 make_settings.set | awk '{print $$2}')
+N2:=$(shell grep LOC_N2 make_settings.set | awk '{print $$2}')
+N3:=$(shell grep LOC_N3 make_settings.set | awk '{print $$2}')
 # NUMBER OF RANKS
-NR3:=$(shell grep NR3 make_settings.set | awk '{print $$2}')
+NR3:=$(shell grep NRANKS_D3 make_settings.set | awk '{print $$2}')
 # NUMBER OF RANKS PER NODE
 NODEDIM:=$(shell grep NODEDIM make_settings.set | awk '{print $$2}')
 
 # COMPILER CHOICE: PGI, GNU or MPI
 COMPILER:=$(shell grep COMPILER make_settings.set | awk '{print $$2}')
-
-
-ROOTDIR=~/BISOPENACCREPO
-
-
 
 
 all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set run/rgen make_settings.set
@@ -27,11 +19,12 @@ make_settings.set:
 	$(error The file make_settings.set must be present.)
 
 
-lattice_dimensions.txt: make_settings.set
-	grep "N0\|N1\|N2\|N3\|NR3" make_settings.set > lattice_dimensions.txt
+geom_defines.txt: make_settings.set
+	grep "LOC_N0\|LOC_N1\|LOC_N2\|LOC_N3\|NRANKS_D3\|DEODOE\|IMPSTAP\|STAP\|SIGMA" make_settings.set > geom_defines.txt
 
 
-makefile: make_settings.set lattice_dimensions.txt
+makefile: make_settings.set geom_defines.txt
+	$(warning 'REMEMBER TO SPECIFY ROOTDIR')
 	cd $(ROOTDIR)/src && ./double_to_single_transformer.py autoMode && cd - && echo 'MAKE SETTINGS:'  &&  cat make_settings.set && \
 	$(ROOTDIR)/build/generate_makefile.py $(ROOTDIR)/src/OpenAcc/main.c $(ROOTDIR)/src/tests_and_benchmarks/deo_doe_test.c $(ROOTDIR)/src/tests_and_benchmarks/inverter_multishift_test.c $(ROOTDIR)/src/tools/checkinput.c  $(ROOTDIR)/src/tools/confrestart.c $(COMPILER) > ./makefile 
 	

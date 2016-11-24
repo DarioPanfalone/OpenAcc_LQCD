@@ -1,4 +1,7 @@
 #!/usr/bin/python
+import os.path as path
+from sys import exit,argv,stderr,stdout
+
 
 #modify this to change compiler, linker etc options.
 PGIcls = 'COMPILER=pgcc\n\
@@ -25,27 +28,22 @@ rgen: \n\
 \tcd ROOT/tools/ && $(MAKE) rgen\n\
 \tcp ROOT/tools/rgen ./run/\n'
 
+defineStrings = [ 'LOC_N0','LOC_N1','LOC_N2','LOC_N3','NRANKS_D3',\
+        'DEODOETILE0','DEODOETILE1','DEODOETILE2','DEODOEGANG3',\
+        'IMPSTAPTILE2','IMPSTAPTILE1','IMPSTAPTILE0','IMPSTAPGANG3',\
+        'STAPTILE2','STAPTILE1','STAPTILE0','STAPGANG3',\
+        'SIGMATILE2','SIGMATILE1','SIGMATILE0','SIGMAGANG3' ]
 
 
-ldimfileName = "lattice_dimensions.txt"
-ldim_string="\n\
-N0:=$(shell grep N0 lattice_dimensions.txt| awk '{print $$2}')\n\
-N1:=$(shell grep N1 lattice_dimensions.txt| awk '{print $$2}')\n\
-N2:=$(shell grep N2 lattice_dimensions.txt| awk '{print $$2}')\n\
-N3:=$(shell grep N3 lattice_dimensions.txt| awk '{print $$2}')\n\
-NR3:=$(shell grep NR3 lattice_dimensions.txt| awk '{print $$2}')\n\n"
+geomDefinesFileName = "geom_defines.txt"
 
-lattice_dimensions_text="\
-N0    8\n\
-N1    8\n\
-N2    8\n\
-N3    8\n\
-NR3   1\n"
+def geomDefineGetterFromFile():
+    geomDefineGetterString = ''
+    for defineString in defineStrings:
+        geomDefineGetterString += "%s:=$(shell grep -E \"^\\s*%s\\s+\" %s | awk '{print $$2}')\n" % \
+        (defineString,defineString,geomDefinesFileName)
 
-
-import os.path as path
-from sys import exit,argv,stderr,stdout
-
+    return geomDefineGetterString
 
 # General philosophy: build a graph of files, with directed links, 
 # which depics the dependences in the code as described with #includes.
@@ -229,34 +227,32 @@ class file_node:
 
 
     def generate_make_string(self):
-        makestring = ''
+        makeString = ''
         if '.h' in self.name:
-            makestring += self.name + " :"
+            makeString += self.name + " :"
         elif '.c' in self.name:
-            makestring += path.basename(self.name)[:-2] + '.o : ' + self.name
+            makeString += path.basename(self.name)[:-2] + '.o : ' + self.name
         else:
             stderr.write("Filename " + self.name + " not valid.\n")
             return ''
 
         for dependence in self.direct_dependences:
-            makestring += ' ' + dependence
-        makestring += ' lattice_dimensions.txt \n\t' # if lattice dimensions are changed, 
+            makeString += ' ' + dependence
+        makeString += ' ' +  geomDefinesFileName + ' \n\t' # if lattice dimensions are changed, 
                                                     # everything must be recompiled
         if '.h' in self.name:
-            makestring += 'touch ' + self.name + '\n'
+            makeString += 'touch ' + self.name + '\n'
         elif '.c' in self.name:
-            makestring += '$(COMPILER) -c $(COMPILER_FLAGS) ' +\
-                     ' -DLOC_N0=$(N0)   ' +\
-                     ' -DLOC_N1=$(N1)   ' +\
-                     ' -DLOC_N2=$(N2)   ' +\
-                     ' -DLOC_N3=$(N3)   ' +\
-                     ' -DNRANKS_D3=$(NR3)  ' +\
-                     ' -DCOMMIT_HASH=$(COMMIT_HASH)  ' +\
-                    self.name + '\n\n'
+            makeString += '$(COMPILER) -c $(COMPILER_FLAGS)  -DCOMMIT_HASH=$(COMMIT_HASH)  '
+            
+            for defineString in defineStrings:
+                makeString += ' -D'+defineString+'=$('+defineString+') '
+
+            makeString += self.name + '\n\n'
         else:
             stderr.write("Filename " + self.name + " not valid.\n")
             return ''
-        return makestring
+        return makeString
 
     def generate_linker_string(self):
         linkstring = ''
@@ -275,11 +271,8 @@ class file_node:
 
 def generate_makefile_from_main(inputfiles):
 
-    if not path.exists(ldimfileName):
-        stderr.write("File " + ldimfileName + " does not exist, creating it\n")
-        ldimfile = open(ldimfileName,'w')
-        ldimfile.write(lattice_dimensions_text)
-        ldimfile.close()
+    if not path.exists(geomDefinesFileName):
+        stderr.write("File " + geomDefinesFileName + " does not exist, see " + geomDefinesFileName + "_template\n")
 
 
     res = ''
@@ -299,8 +292,8 @@ def generate_makefile_from_main(inputfiles):
         if '.c' in filename:
             common_linking_string += ' ' + path.basename(filename)[:-2] + '.o'
         node = allnodesdict[filename]
-        makestring = node.generate_make_string()
-        res += makestring
+        makeString = node.generate_make_string()
+        res += makeString
         
     for filename in main_files:
         res += allnodesdict[filename].generate_linker_string()
@@ -374,7 +367,7 @@ if __name__ == '__main__':
     makeall += ' rgen\n'
 
 
-    stdout.write(ldim_string)
+    stdout.write(geomDefineGetterFromFile())
     stdout.write(makeall)
     stdout.write(makeclean)
     stdout.write(makemains)

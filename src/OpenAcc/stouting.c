@@ -1201,13 +1201,11 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
     int d0, d1, d2, d3, mu, iter;
 
 #pragma acc kernels present(L) present(U) present(nnp_openacc) present(nnm_openacc) present(S) present(QA) present(TMP)
-#pragma acc loop independent gang
+#pragma acc loop independent gang(SIGMAGANG3)
     for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent gang vector(4)
+#pragma acc loop independent vector tile(SIGMATILE2,SIGMATILE1,SIGMATILE0)
         for(d2=0; d2<nd2; d2++) {
-#pragma acc loop independent gang vector(4)
             for(d1=0; d1<nd1; d1++) {
-#pragma acc loop independent vector(32)
                 for(d0=0; d0 < nd0; d0++) {
 #pragma acc loop seq
                     for(mu=0; mu<4; mu++){
