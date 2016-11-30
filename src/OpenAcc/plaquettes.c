@@ -19,9 +19,11 @@ double calc_loc_plaquettes_nnptrick(
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
           for(d0=0; d0 < nd0; d0++) {
 	  int idxh,idxpmu,idxpnu;
 	  int parity;
@@ -96,9 +98,11 @@ void calc_loc_staples_nnptrick_all(
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
 	for(d0=0; d0 < nd0; d0++) {
 
      #pragma acc loop seq 
