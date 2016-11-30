@@ -1,7 +1,7 @@
 #ifndef IPDOT_GAUGE_C
 #define IPDOT_GAUGE_C
 
-#include "struct_c_def.h"
+#include "./struct_c_def.h"
 #include "./su3_utilities.h"
 #include "./su3_measurements.h"
 #include "./plaquettes.h"

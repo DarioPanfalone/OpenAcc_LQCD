@@ -312,10 +312,10 @@ copy(kloc_s_f[0:1])
 
     if(test_settings.saveResults){
         if(0 == devinfo.myrank)
-            printf("Writing file %s.\n", fermionname_doe);
+            printf("Writing file %s.\n", fermionname_doe_f);
 #pragma acc update host(ferm_phi_acc_f[0:1])
-        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_doe);
-        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_doe);
+        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_doe_f);
+        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_doe_f);
     }
 
     if(0 == devinfo.myrank)
@@ -327,10 +327,10 @@ copy(kloc_s_f[0:1])
 
     if(test_settings.saveResults){
         if(0 == devinfo.myrank)
-            printf("Writing file %s.\n", fermionname_deo);
+            printf("Writing file %s.\n", fermionname_deo_f);
 #pragma acc update host(ferm_phi_acc_f[0:1])
-        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_deo);
-        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_deo);
+        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_deo_f);
+        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_deo_f);
     }
 
     if(0 == devinfo.myrank)
@@ -343,10 +343,10 @@ copy(kloc_s_f[0:1])
 
     if(test_settings.saveResults){
         if(0 == devinfo.myrank)
-            printf("Writing file %s.\n", fermionname_fulldirac);
+            printf("Writing file %s.\n", fermionname_fulldirac_f);
 #pragma acc update host(ferm_phi_acc_f[0:1])
-        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_fulldirac);
-        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_fulldirac);
+        print_vec3_soa_wrapper_f(ferm_phi_acc_f,fermionname_fulldirac_f);
+        print_vec3_soa_f(ferm_phi_acc_f,myfermionname_fulldirac_f);
     }
 
     double dt_doe_f = (double)(t1_f.tv_sec - t0_f.tv_sec) + 
