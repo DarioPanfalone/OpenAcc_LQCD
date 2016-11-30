@@ -1,7 +1,7 @@
 #ifndef IPDOT_GAUGE_H
 #define IPDOT_GAUGE_H
 
-#include "struct_c_def.h"
+#include "./struct_c_def.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
