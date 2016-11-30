@@ -23,9 +23,11 @@ void unitarize_conf( __restrict su3_soa * const u)
     for(dirindex = 0 ; dirindex < 8 ; dirindex++){
 #pragma acc loop independent worker
         for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) { 
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector
             for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector
                 for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
                     for(d0h=0; d0h < nd0h; d0h++) {
                         // I take the size to be even, but it's the same
                         int d0 = 2*d0h + ((d1+d2+d3) & 0x1);
@@ -47,9 +49,11 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix)
 #pragma acc kernels present(matrix)
 #pragma acc loop independent gang
   for(d3=0; d3<nd3; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
 	for(hd0=0; hd0 < nd0h; hd0++) {
 	  int d0,idxh;
           d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
@@ -104,9 +108,11 @@ void conf_times_staples_ta_part(
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -138,9 +144,11 @@ void RHO_times_conf_times_staples_ta_part(
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -171,9 +179,11 @@ void mom_sum_mult( __restrict thmat_soa * const mom,
 #pragma acc kernels present(mom) present(ipdot) present(factor)
 #pragma acc loop independent gang
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -205,9 +215,11 @@ void mom_exp_times_conf_soloopenacc(
 #pragma acc kernels present(mom) present(conf) present(factor)
 #pragma acc loop independent gang
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
         for(d0=0; d0 < nd0; d0++) {
           int idxh;
           int parity;
@@ -241,9 +253,11 @@ void set_su3_soa_to_zero_bulk( __restrict su3_soa * const matrix)
 #pragma acc kernels present(matrix)
 #pragma acc loop independent gang
   for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
 	for(hd0=0; hd0 < nd0h; hd0++) {
 	  int d0,idxh;
           d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
@@ -272,9 +286,11 @@ void conf_times_staples_ta_part_bulk(
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang
   for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -305,9 +321,11 @@ void mom_sum_mult_bulk( __restrict thmat_soa * const mom,
 #pragma acc kernels present(mom) present(ipdot) present(factor)
 #pragma acc loop independent gang
   for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -340,9 +358,11 @@ void mom_exp_times_conf_soloopenacc_bulk(
 #pragma acc kernels present(mom) present(conf_old) present(conf_new) present(factor)
 #pragma acc loop independent gang 
   for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
         for(d0=0; d0 < nd0; d0++) {
           int idxh;
           int parity;
@@ -378,9 +398,11 @@ void set_su3_soa_to_zero_d3c( __restrict su3_soa * const matrix,
 #pragma acc kernels present(matrix)
 #pragma acc loop independent gang 
   for(d3=offset3; d3<offset3+thickness3; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
 	for(hd0=0; hd0 < nd0h; hd0++) {
 	  int d0,idxh;
           d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
@@ -410,9 +432,11 @@ void conf_times_staples_ta_part_d3c(
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang
   for(d3=offset3; d3<offset3+thickness3; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -444,9 +468,11 @@ void mom_sum_mult_d3c( __restrict thmat_soa * const mom,
 #pragma acc kernels present(mom) present(ipdot) present(factor)
 #pragma acc loop independent gang
   for(d3=offset3; d3<offset3+thickness3; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
 	for(d0=0; d0 < nd0; d0++) {
 	  int idxh;
 	  int parity;
@@ -479,9 +505,11 @@ void mom_exp_times_conf_soloopenacc_d3c(
 #pragma acc kernels present(mom) present(conf_old) present(conf_new) present(factor)
 #pragma acc loop independent gang 
   for(d3=offset3; d3<offset3+thickness3; d3++) {
-#pragma acc loop independent vector tile(*,*,*)
+#pragma acc loop independent vector 
     for(d2=0; d2<nd2; d2++) {
+#pragma acc loop independent vector 
       for(d1=0; d1<nd1; d1++) {
+#pragma acc loop independent vector 
         for(d0=0; d0 < nd0; d0++) {
           int idxh;
           int parity;
