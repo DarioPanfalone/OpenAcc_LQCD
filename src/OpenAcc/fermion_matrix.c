@@ -18,7 +18,7 @@
 
 
 #define DEO_DOE_PREAMBLE\
-    int d0, d0m, d1m, d2m, d3m, d0p, d1p, d2p, d3p, idxh, matdir,dirindex;\
+    int d0, d0m, d1m, d2m, d3m, d0p, d1p, d2p, d3p, idxh;\
 vec3 aux=(vec3) {0,0,0};\
 d1m = d1 - 1;\
 d1m = d1m + (((d1m >> 31) & 0x1) * nd1);\
@@ -39,10 +39,10 @@ d3p *= (((d3p-nd3) >> 31) & 0x1);\
 
 
 void acc_Deo_unsafe( __restrict const su3_soa * const u, 
-        __restrict vec3_soa * const out, 
-        __restrict const vec3_soa * const in,
-        const double_soa * backfield)
-{
+                     __restrict vec3_soa * const out, 
+                     __restrict const vec3_soa * const in,
+                     __restrict const double_soa * const backfield) {
+
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
 #pragma acc loop independent gang(DEODOEGANG3)
@@ -93,10 +93,10 @@ void acc_Deo_unsafe( __restrict const su3_soa * const u,
 }
 
 void acc_Doe_unsafe( __restrict const su3_soa * const u,
-        __restrict vec3_soa * const out,
-        __restrict const vec3_soa * const in,
-        const double_soa * backfield)
-{
+                     __restrict vec3_soa * const out,
+                     __restrict const vec3_soa * const in,
+                     __restrict const double_soa * const backfield) {
+
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(backfield)
 #pragma acc loop independent gang(DEODOEGANG3)
@@ -151,10 +151,9 @@ void acc_Doe_unsafe( __restrict const su3_soa * const u,
 }
 
 inline void acc_Deo( __restrict const su3_soa * const u, 
-        __restrict vec3_soa * const out, 
-        __restrict const vec3_soa * const in,
-        const double_soa * backfield)
-{
+                     __restrict vec3_soa * const out, 
+                     __restrict const vec3_soa * const in,
+                     __restrict const double_soa * const backfield) {
 
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_fermion){
@@ -193,10 +192,9 @@ inline void acc_Deo( __restrict const su3_soa * const u,
 }
 
 inline void acc_Doe( __restrict const su3_soa * const u,
-        __restrict vec3_soa * const out,
-        __restrict const vec3_soa * const in,
-        const double_soa * backfield)
-{
+                     __restrict vec3_soa * const out,
+                     __restrict const vec3_soa * const in,
+                     __restrict const double_soa * const backfield) {
 
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_fermion){
@@ -236,10 +234,10 @@ inline void acc_Doe( __restrict const su3_soa * const u,
 
 
 void acc_Deo_bulk( __restrict const su3_soa * const u, 
-        __restrict vec3_soa * const out, 
-        __restrict const vec3_soa * const in,
-        const double_soa * backfield)
-{
+                   __restrict vec3_soa * const out, 
+                   __restrict const vec3_soa * const in,
+                   __restrict const double_soa * const backfield) {
+
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(backfield) async(1)
 #pragma acc loop independent gang(DEODOEGANG3)
@@ -291,10 +289,10 @@ void acc_Deo_bulk( __restrict const su3_soa * const u,
 }
 
 void acc_Doe_bulk( __restrict const su3_soa * const u,
-        __restrict vec3_soa * const out,
-        __restrict const vec3_soa * const in,
-        const double_soa * backfield)
-{
+                   __restrict vec3_soa * const out,
+                   __restrict const vec3_soa * const in,
+                   __restrict const double_soa * const backfield) {
+
     int hd0, d1, d2, d3;
 #pragma acc kernels present(u) present(out) present(in) present(backfield) async(1)
 #pragma acc loop independent gang(DEODOEGANG3)
@@ -353,7 +351,7 @@ void acc_Doe_bulk( __restrict const su3_soa * const u,
 void acc_Deo_d3c( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        const double_soa * backfield, int off3, int thick3)
+        __restrict const double_soa * const backfield, int off3, int thick3)
 {
     int hd0, d1, d2, d3;
     for(d3=off3; d3<off3+thick3;d3++) {
@@ -362,7 +360,6 @@ void acc_Deo_d3c( __restrict const su3_soa * const u,
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(hd0=0; hd0 < nd0h; hd0++) {
-
 
                     DEO_DOE_PREAMBLE;
                     // the following depends on the function
@@ -407,7 +404,7 @@ void acc_Deo_d3c( __restrict const su3_soa * const u,
 void acc_Doe_d3c( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        const double_soa * backfield, int off3, int thick3)
+        __restrict const double_soa * const backfield, int off3, int thick3)
 {
     int hd0, d1, d2, d3;
     for(d3=off3; d3<off3+thick3;d3++) {
@@ -464,7 +461,7 @@ void acc_Doe_d3c( __restrict const su3_soa * const u,
 void acc_Deo_d3p( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        const double_soa * backfield)
+        __restrict const double_soa * const backfield)
 {
     int hd0, d1, d2;
     const int d3 = nd3-D3_HALO-1;
@@ -519,7 +516,7 @@ void acc_Deo_d3p( __restrict const su3_soa * const u,
 void acc_Doe_d3p( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        const double_soa * backfield)
+        __restrict const double_soa * const backfield)
 {
     int hd0, d1, d2;
     const int d3 = nd3-D3_HALO-1;
@@ -577,7 +574,7 @@ void acc_Doe_d3p( __restrict const su3_soa * const u,
 void acc_Deo_d3m( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
-        const double_soa * backfield)
+        __restrict const double_soa * const backfield)
 {
     int hd0, d1, d2;
     const int  d3 = D3_HALO;
@@ -631,7 +628,7 @@ void acc_Deo_d3m( __restrict const su3_soa * const u,
 void acc_Doe_d3m( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
-        const double_soa * backfield)
+        __restrict const double_soa * const backfield)
 {
     int hd0, d1, d2;
     const int  d3 = D3_HALO;
@@ -692,23 +689,26 @@ void fermion_matrix_multiplication(
         __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out,  
         __restrict const vec3_soa * const in, 
-        __restrict vec3_soa * const temp1, ferm_param *pars)
-{
-    acc_Doe(u,temp1,in,pars->phases);
-    acc_Deo(u,out,temp1,pars->phases);
+        __restrict vec3_soa * const temp1, 
+        ferm_param *pars) {
+
+    acc_Doe(u, temp1, in, pars->phases);
+    acc_Deo(u, out, temp1, pars->phases);
     combine_in1xferm_mass_minus_in2(in,pars->ferm_mass*pars->ferm_mass,out);// Nuova funzione in OpenAcc/fermionic_utilities.c
+
 }
+
 void fermion_matrix_multiplication_shifted( 
         __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in, 
-        __restrict vec3_soa * const temp1, ferm_param *pars, 
-        double shift)
-{
-    acc_Doe(u,temp1,in,pars->phases);
-    acc_Deo(u,out,temp1,pars->phases);
-    combine_in1xferm_mass_minus_in2(in,pars->ferm_mass*pars->ferm_mass+shift,out);// Nuova funzione in OpenAcc/fermionic_utilities.c
+        __restrict vec3_soa * const temp1, 
+        ferm_param *pars, 
+        double shift) {
 
+    acc_Doe(u, temp1, in, pars->phases);
+    acc_Deo(u, out, temp1, pars->phases);
+    combine_in1xferm_mass_minus_in2(in,pars->ferm_mass*pars->ferm_mass+shift,out);// Nuova funzione in OpenAcc/fermionic_utilities.c
 
 }
 
