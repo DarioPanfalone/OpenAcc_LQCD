@@ -3,25 +3,6 @@ import os.path as path
 from sys import exit,argv,stderr,stdout
 
 
-#modify this to change compiler, linker etc options.
-PGIcls = 'COMPILER=pgcc\n\
-COMPILER_FLAGS=-O3 -acc -Minfo=all -v -ta=tesla:cc35,cuda7.5 -DUSE_MPI_CUDA_AWARE -I${MPIINC}\n\
-LINKER_FLAGS=-acc -lmpi -Minfo=all -O3 -v -ta=tesla:cc35,cuda7.5 -L${MPILIB}\n' 
-
-PGIclsSLOW ='COMPILER=pgcc\n\
-COMPILER_FLAGS=-O0 \n\
-LINKER_FLAGS=-O0 -lmpi\n' 
-
-GNUcls = 'COMPILER=gcc\n\
-COMPILER_FLAGS=-O3 -std=gnu99\n\
-LINKER_FLAGS=-lm\n' 
-
-MPIcls = 'COMPILER=mpicc\n\
-COMPILER_FLAGS=-O3 -std=gnu99\n\
-LINKER_FLAGS=-lm\n' 
-
-compiler_linker_settings = ''
-
 make_rgen_string ='\n\
 \
 rgen: \n\
@@ -38,7 +19,7 @@ defineStrings = [ 'LOC_N0','LOC_N1','LOC_N2','LOC_N3','NRANKS_D3',\
 geomDefinesFileName = "geom_defines.txt"
 
 def geomDefineGetterFromFile():
-    geomDefineGetterString = ''
+    geomDefineGetterString = '$(info Reading lattice dimensions and block sizes from geom_defines.txt...)'
     for defineString in defineStrings:
         geomDefineGetterString += "%s:=$(shell grep -E \"^\\s*%s\\s+\" %s | awk '{print $$2}')\n" % \
         (defineString,defineString,geomDefinesFileName)
@@ -276,7 +257,6 @@ def generate_makefile_from_main(inputfiles):
 
 
     res = ''
-    res += compiler_linker_settings + '\n'
 
     common_linking_string = ''
     
@@ -317,43 +297,6 @@ def generate_makefile_from_main(inputfiles):
 
 if __name__ == '__main__':
 
-    if 'PGISLOW' not in argv and 'GNU' not in argv and 'PGI' not in argv and 'MPI' not in argv:
-        stderr.write("Please specify one compiler: either PGISLOW, GNU, PGI or MPI\n")
-        exit(1)
-
-    clsset = False
-    if 'PGISLOW' in argv : 
-        compiler_linker_settings = PGIclsSLOW;
-        argv.remove('PGISLOW')
-        clsset = True
-    if 'GNU' in argv :
-        if clsset :
-            stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
-            argv.remove('GNU')
-            exit(1)
-        else:
-            compiler_linker_settings = GNUcls;
-            argv.remove('GNU')
-            clsset = True
-    if 'PGI' in argv :
-        if clsset :
-            stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
-            argv.remove('PGI')
-            exit(1)
-        else:
-            compiler_linker_settings = PGIcls;
-            argv.remove('PGI')
-            clsset = True
-    if 'MPI' in argv :
-        if clsset :
-            stderr.write("Please specify one compiler: either PGISLOW, GNU or PGI\n")
-            argv.remove('MPI')
-            exit(1)
-        else:
-            compiler_linker_settings = MPIcls;
-            argv.remove('MPI')
-            clsset = True
-
     aLocation = path.abspath(argv[1])
     repoLocation = aLocation[:aLocation.rfind('/src/')]
 
@@ -367,7 +310,10 @@ if __name__ == '__main__':
     makeall += ' rgen\n'
 
 
+    makefileBase = open("compiler_setting_library.txt").read()
+
     stdout.write(geomDefineGetterFromFile())
+    stdout.write(makefileBase)    
     stdout.write(makeall)
     stdout.write(makeclean)
     stdout.write(makemains)
