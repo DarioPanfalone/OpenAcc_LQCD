@@ -1,0 +1,57 @@
+
+####################################################################################
+PGICOMPILER=pgcc
+PGICOMPILER_FLAGS=-O3 -acc -Minfo=all -v -ta=tesla:cc35,cuda7.5 -DUSE_MPI_CUDA_AWARE -I${MPIINC}
+PGILINKER_FLAGS=-acc -lmpi -Minfo=all -O3 -v -ta=tesla:cc35,cuda7.5 -L${MPILIB} 
+
+PGISLOWCOMPILER=pgcc
+PGISLOWCOMPILER_FLAGS=-O0
+PGISLOWLINKER_FLAGS=-O0 -lmpi
+
+GNUCOMPILER=gcc
+GNUCOMPILER_FLAGS=-O3 -std=gnu99
+GNULINKER_FLAGS=-lm
+
+MPICOMPILER=mpicc
+MPICOMPILER_FLAGS=-O3 -std=gnu99
+MPILINKER_FLAGS=-lm
+
+####################################################################################
+
+$(info Setting COMPILER, COMPILER_FLAGS and LINKER_FLAGS.)
+
+ifndef MODE
+$(error MODE not set!)
+endif
+
+ifeq ($(MODE), PGI)
+  $(info MODE set to PGI)
+  COMPILER=$(PGICOMPILER)
+  COMPILER_FLAGS=$(PGICOMPILER_FLAGS)
+  LINKER_FLAGS=$(PGILINKER_FLAGS)
+else ifeq ($(MODE), PGISLOW)
+  $(info MODE set to PGISLOW)
+  COMPILER=$(PGISLOWCOMPILER)
+  COMPILER_FLAGS=$(PGISLOWCOMPILER_FLAGS)
+  LINKER_FLAGS=$(PGISLOWLINKER_FLAGS)
+else ifeq ($(MODE), GNU)
+  $(info MODE set to GNU)
+  COMPILER=$(GNUCOMPILER)
+  COMPILER_FLAGS=$(GNUCOMPILER_FLAGS)
+  LINKER_FLAGS=$(GNULINKER_FLAGS)
+  ifneq ($(NRANKS_D3), 1)
+    $(error With MODE==GNU NRANKS_D3 must be 1.)  
+  else
+    $(info DAJE)
+  endif
+else ifeq ($(MODE), MPI)
+  $(info MODE set to MPI)
+  COMPILER=$(MPICOMPILER)
+  COMPILER_FLAGS=$(MPICOMPILER_FLAGS)
+  LINKER_FLAGS=$(MPILINKER_FLAGS)
+else 
+  $(error MODE '$(MODE)' not recognized)
+endif
+
+
+####################################################################################
