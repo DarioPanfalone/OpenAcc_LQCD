@@ -15,12 +15,15 @@ defineStrings = [ 'LOC_N0','LOC_N1','LOC_N2','LOC_N3','NRANKS_D3',\
         'STAPTILE2','STAPTILE1','STAPTILE0','STAPGANG3',\
         'SIGMATILE2','SIGMATILE1','SIGMATILE0','SIGMAGANG3' ]
 
+compilerStrings = [ 'COMPILER' ]
 
 geomDefinesFileName = "geom_defines.txt"
 
 def geomDefineGetterFromFile():
-    geomDefineGetterString = '$(info Reading lattice dimensions and block sizes from geom_defines.txt...)'
-    for defineString in defineStrings:
+    geomDefineGetterString = \
+            '$(info Reading lattice dimensions, block sizes  and compiler from '+\
+            geomDefinesFileName + '...)'
+    for defineString in defineStrings + compilerStrings:
         geomDefineGetterString += "%s:=$(shell grep -E \"^\\s*%s\\s+\" %s | awk '{print $$2}')\n" % \
         (defineString,defineString,geomDefinesFileName)
 
@@ -224,7 +227,7 @@ class file_node:
         if '.h' in self.name:
             makeString += 'touch ' + self.name + '\n'
         elif '.c' in self.name:
-            makeString += '$(COMPILER) -c $(COMPILER_FLAGS)  -DCOMMIT_HASH=$(COMMIT_HASH)  '
+            makeString += '$(CC) -c $(CC_FLAGS)  -DCOMMIT_HASH=$(COMMIT_HASH)  '
             
             for defineString in defineStrings:
                 makeString += ' -D'+defineString+'=$('+defineString+') '
@@ -244,7 +247,7 @@ class file_node:
         for filename in self.all_dependences_c:
             allobjects += ' ' + path.basename(filename)[:-2] + '.o'
         linkstring += allobjects + '\n'
-        linkstring +='\t$(COMPILER) -o '+ exename + ' ' + allobjects +' $(LINKER_FLAGS)\n'
+        linkstring +='\t$(CC) -o '+ exename + ' ' + allobjects +' $(LINKER_FLAGS)\n'
         linkstring +='\tif ! [ -d run ] ; then mkdir run; fi ; cp ' 
         linkstring += exename + ' run/\n\n' 
         return linkstring
@@ -310,7 +313,7 @@ if __name__ == '__main__':
     makeall += ' rgen\n'
 
 
-    makefileBase = open("compiler_setting_library.txt").read()
+    makefileBase = open("compiler_settings_library.txt").read()
 
     stdout.write(geomDefineGetterFromFile())
     stdout.write(makefileBase)    
