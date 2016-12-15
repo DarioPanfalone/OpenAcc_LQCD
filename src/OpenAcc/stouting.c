@@ -1199,7 +1199,7 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
 #pragma acc kernels present(L) present(U) present(nnp_openacc) present(nnm_openacc) present(S) present(QA) present(TMP)
 #pragma acc loop independent gang(SIGMAGANG3)
     for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(SIGMATILE0,SIGMATILE1,SIGMAGILE2)
+#pragma acc loop independent vector tile(SIGMATILE0,SIGMATILE1,SIGMATILE2)
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(d0=0; d0 < nd0; d0++) {
