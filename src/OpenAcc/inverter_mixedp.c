@@ -133,15 +133,20 @@ int inverter_mixed_precision(inverter_package ip,
     // OR THIS WAY
     }else combine_in1xfactor_plus_in2_f(loc_s,-omega,loc_r,loc_r);
 
-        if(0==devinfo.myrank && cg%printevery==0 ){
-            printf("Iteration %d, Inverter Mixed Precision:", cg);
-            printf("residue norm: %1.3e ",l2norm2_global_f(ip.loc_r_f));
-            printf("(%d \"magic touches\" until now)\n", magicTouchCount);
-        }
-    
+
+
     lambda = l2norm2_global_f(loc_r);
     gammag=lambda/delta;
     delta=lambda;
+
+    if(0==devinfo.myrank && cg%printevery==0 )
+    {
+        printf("Iteration %d, Inverter Mixed Precision:", cg);
+        printf("residue norm: %1.3e ",lambda);
+        printf("(%d \"magic touches\" until now)\n", magicTouchCount);
+    }
+
+
 
 
     // p=r+gammag*p
