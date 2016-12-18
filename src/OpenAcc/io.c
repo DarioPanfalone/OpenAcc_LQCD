@@ -20,6 +20,9 @@
 #include "../Include/common_defines.h"
 #include "./single_types.h"
 #include "../Include/setting_file_parser.h"
+#include "./action.h"
+#include "./alloc_settings.h"
+#include "../Include/fermion_parameters.h"
 
 
 void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int conf_id_iter){
@@ -38,9 +41,9 @@ void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int c
     int nt = geom_par.gnt;
 
 
-
-
-    fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
+    fprintf(fp,"%d %d %d %d %f %f %d %d\n",nx,ny,nz,nt, 
+      act_params.beta,fermions_parameters[0].ferm_mass,alloc_info.NDiffFlavs,
+      conf_id_iter);
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < GL_SIZEH ; i++){
             // rebuilding the 3rd row
@@ -49,10 +52,15 @@ void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int c
             rebuild3row(&aux);
 
 
-            for(int r=0; r < 3 ; r++)
+            for(int r=0; r < 3 ; r++){
                 for(int c=0; c < 3 ; c++) 
-                    fprintf(fp, "%.18lf %.18lf\n",
+                    fprintf(fp, "(%.18lf %.18lf)  ",
                             creal(aux.comp[r][c]),cimag(aux.comp[r][c])); 
+	   
+                fprintf(fp, "\n");
+                
+            }
+            fprintf(fp, "\n");
         }
     }
     fclose(fp);
@@ -74,9 +82,16 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
         int nz = geom_par.gnz;
         int nt = geom_par.gnt;
 
+        
         int nxt,nyt,nzt,ntt;
+
+        int boh;
+        double tmpbeta, tmpmass;
+
         int minus_det_count = 0;
-        CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),5);
+        CHECKREAD(fscanf(fp,"%d %d %d %d %f %f %d %d\n",
+                             &nxt,&nyt,&nzt,&ntt,
+                           &tmpbeta,&tmpmass,&boh,conf_id_iter),8);
         if( nx!=nxt || ny!=nyt || nz!=nzt || (nt != ntt)){
             printf("Error, configuration dimensions not compatible with code.\n");
             printf("Code dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nx,ny,nz,nt);
@@ -89,15 +104,15 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
                 double re,im;
                 single_su3 m;double det;
                 //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[0][0]=conf[q].r0.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[0][1]=conf[q].r0.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[0][2]=conf[q].r0.c2[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[1][0]=conf[q].r1.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[1][1]=conf[q].r1.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[1][2]=conf[q].r1.c2[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][0]=conf[q].r2.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf) ",&re,&im),2);m.comp[0][0]=conf[q].r0.c0[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf) ",&re,&im),2);m.comp[0][1]=conf[q].r0.c1[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf)\n",&re,&im),2);m.comp[0][2]=conf[q].r0.c2[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf) ",&re,&im),2);m.comp[1][0]=conf[q].r1.c0[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf) ",&re,&im),2);m.comp[1][1]=conf[q].r1.c1[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf)\n",&re,&im),2);m.comp[1][2]=conf[q].r1.c2[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf) ",&re,&im),2);m.comp[2][0]=conf[q].r2.c0[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf) ",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
+                CHECKREAD(fscanf(fp, "(%lf,%lf)\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
                 det = detSu3(&m);
                 if(fabs(1+det) < 0.005 ){ // DEBUG, the limit should be FAR stricter.
                     if(verbosity_lv > 5)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
