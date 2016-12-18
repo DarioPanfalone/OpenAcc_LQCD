@@ -84,10 +84,7 @@ double ker_find_min_eigenvalue_openacc(  __restrict su3_soa * const u,
     assign_in_to_out(loc_p,loc_r);
     old_norm=norm;
     // p=DeoDoe r 
-//    acc_Doe(u,loc_h,loc_p,backfield);
-//    acc_Deo(u,loc_p,loc_h,pars,backfield);
-//    // p=max r - (M^dag M)r 
-//    combine_add_factor_x_in2_to_in1(loc_p,loc_r,delta);
+    // p=max r - (M^dag M)r 
     fermion_matrix_multiplication_shifted(u,loc_p,loc_r,loc_h,pars,delta-m2);
     norm=sqrt(l2norm2_global(loc_p));
     old_norm=fabs(old_norm-norm);
