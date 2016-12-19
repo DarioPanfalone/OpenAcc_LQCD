@@ -15,7 +15,7 @@ defineStrings = [ 'LOC_N0','LOC_N1','LOC_N2','LOC_N3','NRANKS_D3',\
         'STAPTILE2','STAPTILE1','STAPTILE0','STAPGANG3',\
         'SIGMATILE2','SIGMATILE1','SIGMATILE0','SIGMAGANG3' ]
 
-compilerStrings = [ 'COMPILER' ]
+compilerStrings = [ 'COMPILER','ARCH' ]
 
 geomDefinesFileName = "geom_defines.txt"
 

@@ -1,66 +1,67 @@
 
 ####################################################################################
-PGICC=pgcc
-PGICC_FLAGS=-O3 -acc -Minfo=all -v -ta=tesla:cc35,cuda7.5 -DUSE_MPI_CUDA_AWARE -I${MPIINC}
-PGILINKER_FLAGS=-acc -lmpi -Minfo=all -O3 -v -ta=tesla:cc35,cuda7.5 -L${MPILIB} 
-
-PGISLOWCC=pgcc
-PGISLOWCC_FLAGS=-O0
-PGISLOWLINKER_FLAGS=-O0 -lmpi
-
-PGIHASWELLCC=pgcc
-PGIHASWELLCC_FLAGS=-O3 -acc -Minfo=all -Mvect=levels:5 -v -ta=multicore -tp=haswell -DUSE_MPI_CUDA_AWARE -I${MPIINC}
-PGIHASWELLLINKER_FLAGS=-O3 -acc -Minfo=all -Mvect=levels:5 -v -ta=multicore -tp=haswell -L${MPILIB} -lmpi
-
-GNUCC=gcc
-GNUCC_FLAGS=-O3 -std=gnu99
-GNULINKER_FLAGS=-lm
-
-MPICC=mpicc
-MPICC_FLAGS=-O3 -std=gnu99
-MPILINKER_FLAGS=-lm
-
-####################################################################################
 
 $(info Setting CC, CC_FLAGS and LINKER_FLAGS.)
 
 ifndef COMPILER
-$(error COMPILER not set!)
+  $(error COMPILER not set!)
 endif
 
+ifndef ARCH
+  $(info ARCH not set! COMPILING WITH -O0 FLAGS!!!)
+endif
+
+####################################################################################
+
 ifeq ($(COMPILER), PGI)
+
   $(info COMPILER set to PGI)
-  CC=$(PGICC)
-  CC_FLAGS=$(PGICC_FLAGS)
-  LINKER_FLAGS=$(PGILINKER_FLAGS)
-else ifeq ($(COMPILER), PGISLOW)
-  $(info COMPILER set to PGISLOW)
-  CC=$(PGISLOWCC)
-  CC_FLAGS=$(PGISLOWCC_FLAGS)
-  LINKER_FLAGS=$(PGISLOWLINKER_FLAGS)
-else ifeq ($(COMPILER), PGIHASWELL)
-  $(info COMPILER set to PGIHASWELL)
-  CC=$(PGIHASWELLCC)
-  CC_FLAGS=$(PGIHASWELLCC_FLAGS)
-  LINKER_FLAGS=$(PGIHASWELLLINKER_FLAGS)
-else ifeq ($(COMPILER), GNU)
-  $(info COMPILER set to GNU)
-  CC=$(GNUCC)
-  CC_FLAGS=$(GNUCC_FLAGS)
-  LINKER_FLAGS=$(GNULINKER_FLAGS)
+  CC=pgcc
+
+  ifeq ($(ARCH), CC35)
+    $(info ARCH set to CC35)
+    CC_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda7.5 -DUSE_MPI_CUDA_AWARE -I${MPIINC}
+    LINKER_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda7.5 -lmpi -L${MPILIB}
+  else ifeq ($(ARCH), CC60)
+    $(info ARCH set to CC60)
+    CC_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda7.5 -DUSE_MPI_CUDA_AWARE -I${MPIINC}
+    LINKER_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda7.5 -lmpi -L${MPILIB}
+  else ifeq ($(ARCH), HASWELL)
+    $(info ARCH set to HASWELL)
+    CC_FLAGS=-acc=noautopar -v -O3 -Minfo=all -Mvect=levels:5 -ta=multicore -tp=haswell -DUSE_MPI_CUDA_AWARE -I${MPIINC}
+    LINKER_FLAGS=-acc=noautopar -v -O3 -Minfo=all -Mvect=levels:5 -ta=multicore -tp=haswell -L${MPILIB} -lmpi
+  else ifeq ($(ARCH), AMD)
+    $(info ARCH set to AMD)
+    CC_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=radeon:hawaii -DUSE_MPI_CUDA_AWARE -I${MPIINC} 
+    LINKER_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=radeon:hawaii -L${MPILIB} -lmpi
+  else 
+    $(info ARCH unset or not recognized!)
+    CC_FLAGS=-O0
+    LINKER_FLAGS=-O0 -lmpi
+
+else ifeq ($(COMPILER), GCC)
+
+  $(info COMPILER set to GCC)
+  CC=gcc
+  CC_FLAGS=-O3 -std=gnu99
+  LINKER_FLAGS=-lm
+
   ifneq ($(NRANKS_D3), 1)
     $(error With COMPILER==GNU NRANKS_D3 must be 1.)  
   else
     $(info DAJE)
   endif
+
 else ifeq ($(COMPILER), MPI)
+
   $(info COMPILER set to MPI)
-  CC=$(MPICC)
-  CC_FLAGS=$(MPICC_FLAGS)
-  LINKER_FLAGS=$(MPILINKER_FLAGS)
+  CC=mpicc
+  CC_FLAGS=-O3 -std=gnu99
+  LINKER_FLAGS=-lm
+
 else 
   $(error COMPILER '$(COMPILER)' not recognized)
 endif
 
-
 ####################################################################################
+

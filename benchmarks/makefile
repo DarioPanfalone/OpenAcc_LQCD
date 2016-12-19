@@ -9,9 +9,10 @@ NR3:=$(shell grep NRANKS_D3 make_settings.set | awk '{print $$2}')
 # NUMBER OF RANKS PER NODE to be written in input files
 NODEDIM:=$(shell grep NODEDIM make_settings.set | awk '{print $$2}')
 
-# COMPILER CHOICE: PGI, GNU or MPI
+# COMPILER CHOICE: PGI / GNU
+# ARCH CHOICE: CC35 / CC60 / AMD / HASWELL
 COMPILER:=$(shell grep COMPILER make_settings.set | awk '{print $$2}')
-
+ARCH:=$(shell grep ARCH make_settings.set | awk '{print $$2}')
 
 all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set run/rgen make_settings.set
 
@@ -20,7 +21,7 @@ make_settings.set:
 
 
 geom_defines.txt: make_settings.set
-	grep "LOC_N0\|LOC_N1\|LOC_N2\|LOC_N3\|NRANKS_D3\|DEODOE\|IMPSTAP\|STAP\|SIGMA\|COMPILER" make_settings.set > geom_defines.txt
+	grep "LOC_N0\|LOC_N1\|LOC_N2\|LOC_N3\|NRANKS_D3\|DEODOE\|IMPSTAP\|STAP\|SIGMA\|COMPILER\|ARCH" make_settings.set > geom_defines.txt
 
 compiler_settings_library.txt: $(ROOTDIR)/build/compiler_settings_library.txt
 	cp $(ROOTDIR)/build/compiler_settings_library.txt ./
