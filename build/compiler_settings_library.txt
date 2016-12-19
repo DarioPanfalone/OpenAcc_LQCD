@@ -38,6 +38,7 @@ ifeq ($(COMPILER), PGI)
     $(info ARCH unset or not recognized!)
     CC_FLAGS=-O0
     LINKER_FLAGS=-O0 -lmpi
+  endif
 
 else ifeq ($(COMPILER), GCC)
 
