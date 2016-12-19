@@ -9,9 +9,10 @@ NR3:=$(shell grep NRANKS_D3 make_settings.set | awk '{print $$2}')
 # NUMBER OF RANKS PER NODE to be written in input files
 NODEDIM:=$(shell grep NODEDIM make_settings.set | awk '{print $$2}')
 
-# COMPILER CHOICE: PGI, GNU or MPI
+# COMPILER CHOICE: PGI / GNU
+# ARCH CHOICE: CC35 / CC60 / AMD / HASWELL
 COMPILER:=$(shell grep COMPILER make_settings.set | awk '{print $$2}')
-
+ARCH:=$(shell grep ARCH make_settings.set | awk '{print $$2}')
 
 all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set run/rgen make_settings.set test_blocks_dirac_operator.sh test_blocks_puregauge.sh dirac_blocks.txt puregauge_blocks.txt
 
@@ -20,7 +21,7 @@ make_settings.set:
 
 
 geom_defines.txt: make_settings.set
-	grep "LOC_N0\|LOC_N1\|LOC_N2\|LOC_N3\|NRANKS_D3\|DEODOE\|IMPSTAP\|STAP\|SIGMA\|COMPILER" make_settings.set > geom_defines.txt
+	grep "LOC_N0\|LOC_N1\|LOC_N2\|LOC_N3\|NRANKS_D3\|DEODOE\|IMPSTAP\|STAP\|SIGMA\|COMPILER\|ARCH" make_settings.set > geom_defines.txt
 
 compiler_settings_library.txt: $(ROOTDIR)/build/compiler_settings_library.txt
 	cp $(ROOTDIR)/build/compiler_settings_library.txt ./
@@ -29,7 +30,7 @@ compiler_settings_library.txt: $(ROOTDIR)/build/compiler_settings_library.txt
 makefile: make_settings.set geom_defines.txt compiler_settings_library.txt
 	$(warning 'REMEMBER TO SPECIFY ROOTDIR')
 	cd $(ROOTDIR)/src && ./double_to_single_transformer.py autoMode && cd - && echo 'MAKE SETTINGS:'  &&  cat make_settings.set && \
-	$(ROOTDIR)/build/generate_makefile.py $(ROOTDIR)/src/OpenAcc/main.c $(ROOTDIR)/src/tests_and_benchmarks/deo_doe_test.c $(ROOTDIR)/src/tests_and_benchmarks/inverter_multishift_test.c $(ROOTDIR)/src/tools/checkinput.c  $(ROOTDIR)/src/tools/confrestart.c > ./makefile 
+	$(ROOTDIR)/build/generate_makefile.py $(ROOTDIR)/src/OpenAcc/main.c $(ROOTDIR)/src/tests_and_benchmarks/deo_doe_test.c $(ROOTDIR)/src/tests_and_benchmarks/inverter_multishift_test.c $(ROOTDIR)/src/tools/checkinput.c  $(ROOTDIR)/src/tools/confrestart.c  $(ROOTDIR)/src/tools/confconverter.c > ./makefile 
 	
 run:
 	if [ ! -d run ] ; then mkdir run ; fi
