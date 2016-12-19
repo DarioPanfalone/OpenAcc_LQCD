@@ -13,7 +13,7 @@ NODEDIM:=$(shell grep NODEDIM make_settings.set | awk '{print $$2}')
 COMPILER:=$(shell grep COMPILER make_settings.set | awk '{print $$2}')
 
 
-all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set run/rgen make_settings.set
+all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set run/rgen make_settings.set test_blocks_dirac_operator.sh test_blocks_puregauge.sh dirac_blocks.txt puregauge_blocks.txt
 
 make_settings.set:
 	$(error The file make_settings.set must be present.)
@@ -58,6 +58,19 @@ benchmark.set.proto :
 run/benchmark.puregauge.set: benchmark.set.proto run
 	sed 's/SEDNRANKS/'$(NR3)'/' benchmark.set.proto | sed 's/SEDNX/'$(N0)'/' |\
 	   	sed 's/SEDNY/'$(N1)'/' | sed 's/SEDNZ/'$(N2)'/' | sed 's/SEDNODEDIM/'$(NODEDIM)'/' |  sed 's/SEDNT/'$$(($(N3)*$(NR3)))'/' > run/benchmark.puregauge.set 
+
+
+test_blocks_dirac_operator.sh:
+	cp $(ROOTDIR)/benchmarks/test_blocks_dirac_operator.sh ./ 
+
+test_blocks_puregauge.sh:
+	cp $(ROOTDIR)/benchmarks/test_blocks_puregauge.sh ./
+
+dirac_blocks.txt:
+	cp $(ROOTDIR)/benchmarks/dirac_blocks.txt.example ./dirac_blocks.txt
+
+puregauge_blocks.txt:
+	cp $(ROOTDIR)/benchmarks/puregauge_blocks.txt.example ./puregauge_blocks.txt
 
 
 test: testdeodoe testmultishift testmain testmainpg

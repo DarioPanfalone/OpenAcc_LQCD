@@ -20,6 +20,7 @@
 #include "../Include/montecarlo_parameters.h"
 #include "../Include/inverter_tricks.h"
 #include "../Include/setting_file_parser.h"
+#include "../Include/tell_geom_defines.c"
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
 #include "../Meas/polyakov.h"
@@ -98,6 +99,7 @@ int main(int argc, char* argv[]){
     devinfo.myrank = 0;
     devinfo.nranks = 1;
 #endif
+    if(0==devinfo.myrank) print_geom_defines();
 
 
     if(0==devinfo.myrank){

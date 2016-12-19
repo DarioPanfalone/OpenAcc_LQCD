@@ -12,6 +12,7 @@
 #include "../Include/fermion_parameters.h"
 #include "../Include/montecarlo_parameters.h"
 #include "../Include/setting_file_parser.h"
+#include "../Include/tell_geom_defines.c"
 #include "../Mpi/multidev.h"
 #include "../OpenAcc/action.h"
 #include "../OpenAcc/alloc_vars.h"
@@ -124,6 +125,7 @@ int main(int argc, char* argv[]){
     devinfo.nranks = 1;
 #endif
 
+    if(0==devinfo.myrank) print_geom_defines();
 #ifndef __GNUC__
     //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
     // NVIDIA GPUs
