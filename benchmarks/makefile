@@ -30,7 +30,7 @@ compiler_settings_library.txt: $(ROOTDIR)/build/compiler_settings_library.txt
 makefile: make_settings.set geom_defines.txt compiler_settings_library.txt
 	$(warning 'REMEMBER TO SPECIFY ROOTDIR')
 	cd $(ROOTDIR)/src && ./double_to_single_transformer.py autoMode && cd - && echo 'MAKE SETTINGS:'  &&  cat make_settings.set && \
-	$(ROOTDIR)/build/generate_makefile.py $(ROOTDIR)/src/OpenAcc/main.c $(ROOTDIR)/src/tests_and_benchmarks/deo_doe_test.c $(ROOTDIR)/src/tests_and_benchmarks/inverter_multishift_test.c $(ROOTDIR)/src/tools/checkinput.c  $(ROOTDIR)/src/tools/confrestart.c > ./makefile 
+	$(ROOTDIR)/build/generate_makefile.py $(ROOTDIR)/src/OpenAcc/main.c $(ROOTDIR)/src/tests_and_benchmarks/deo_doe_test.c $(ROOTDIR)/src/tests_and_benchmarks/inverter_multishift_test.c $(ROOTDIR)/src/tools/checkinput.c  $(ROOTDIR)/src/tools/confrestart.c  $(ROOTDIR)/src/tools/confconverter.c > ./makefile 
 	
 run:
 	if [ ! -d run ] ; then mkdir run ; fi
