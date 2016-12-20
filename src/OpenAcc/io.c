@@ -25,7 +25,8 @@
 #include "../Include/fermion_parameters.h"
 
 
-void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int conf_id_iter){
+void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,
+        int conf_id_iter,double_soa *back_phases){
 
     FILE *fp;
     fp = fopen(nomefile,"w");
@@ -35,6 +36,11 @@ void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int c
     }
 
 
+
+    if (back_phases != NULL){
+        printf("This function works correctly if the field passed as argument contains\n");
+        printf("ONLY STAGGERED PHASES\n");
+    }
     int nx = geom_par.gnx;
     int ny = geom_par.gny;
     int nz = geom_par.gnz;
@@ -42,8 +48,11 @@ void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int c
 
 
     fprintf(fp,"%d %d %d %d %lf %lf %d %d\n",nx,ny,nz,nt, 
-      act_params.beta,fermions_parameters[0].ferm_mass,alloc_info.NDiffFlavs,
-      conf_id_iter);
+            act_params.beta,fermions_parameters[0].ferm_mass,alloc_info.NDiffFlavs,
+            conf_id_iter);
+    int expected_stag_phases_minuses_count = nx*ny*nz*nt*3/2;
+    int stag_phases_minuses_count = 0;
+
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < GL_SIZEH ; i++){
             // rebuilding the 3rd row
@@ -52,16 +61,34 @@ void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int c
             rebuild3row(&aux);
 
 
+            int stag_phase = 1 ;
+            if (back_phases != NULL) if(fabs( back_phases[q].d[i]) > 0.001 ) {
+                stag_phase = -1;
+                stag_phases_minuses_count ++;
+            }
+
+
             for(int r=0; r < 3 ; r++){
                 for(int c=0; c < 3 ; c++) 
                     fprintf(fp, "(%.18lf, %.18lf)  ",
-                            creal(aux.comp[r][c]),cimag(aux.comp[r][c])); 
-	   
+                            stag_phase*creal(aux.comp[r][c]),
+                            stag_phase*cimag(aux.comp[r][c])); 
+
                 fprintf(fp, "\n");
-                
+
             }
             fprintf(fp, "\n");
         }
+    }
+    if (back_phases != NULL){
+        printf("Written %d matrices with -1 determinant, of expected %d.\n",
+                stag_phases_minuses_count, expected_stag_phases_minuses_count );
+
+        if(stag_phases_minuses_count != expected_stag_phases_minuses_count) {
+            printf("WRONG NUMBER OF DET=-1 MATRICES.\n");
+            exit(1);
+        }
+
     }
     fclose(fp);
 }
@@ -82,7 +109,7 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
         int nz = geom_par.gnz;
         int nt = geom_par.gnt;
 
-        
+
         int nxt,nyt,nzt,ntt;
 
         int boh;
@@ -90,8 +117,8 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
 
         int minus_det_count = 0;
         CHECKREAD(fscanf(fp,"%d %d %d %d %lf %lf %d %d\n",
-                             &nxt,&nyt,&nzt,&ntt,
-                           &tmpbeta,&tmpmass,&boh,conf_id_iter),8);
+                    &nxt,&nyt,&nzt,&ntt,
+                    &tmpbeta,&tmpmass,&boh,conf_id_iter),8);
         if( nx!=nxt || ny!=nyt || nz!=nzt || (nt != ntt)){
             printf("Error, configuration dimensions not compatible with code.\n");
             printf("Code dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nx,ny,nz,nt);
@@ -99,44 +126,44 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
             exit(1);
         }else
 
-        for(int q = 0 ; q < 8 ; q++){
-            for(int i = 0 ; i < GL_SIZEH ; i++){
-                double re,im;
-                single_su3 m;double det;
-                //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[0][0]=conf[q].r0.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[0][1]=conf[q].r0.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[0][2]=conf[q].r0.c2[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[1][0]=conf[q].r1.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[1][1]=conf[q].r1.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[1][2]=conf[q].r1.c2[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[2][0]=conf[q].r2.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
-                det = detSu3(&m);
-                if(fabs(1+det) < 0.005 ){ // DEBUG, the limit should be FAR stricter.
-                    if(verbosity_lv > 5)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
-                    minus_det_count ++;
-                    conf[q].r0.c0[i] = -conf[q].r0.c0[i];
-                    conf[q].r0.c1[i] = -conf[q].r0.c1[i];
-                    conf[q].r0.c2[i] = -conf[q].r0.c2[i];
-                    conf[q].r1.c0[i] = -conf[q].r1.c0[i];
-                    conf[q].r1.c1[i] = -conf[q].r1.c1[i];
-                    conf[q].r1.c2[i] = -conf[q].r1.c2[i];
-                    conf[q].r2.c0[i] = -conf[q].r2.c0[i];
-                    conf[q].r2.c1[i] = -conf[q].r2.c1[i];
-                    conf[q].r2.c2[i] = -conf[q].r2.c2[i];
+            for(int q = 0 ; q < 8 ; q++){
+                for(int i = 0 ; i < GL_SIZEH ; i++){
+                    double re,im;
+                    single_su3 m;double det;
+                    //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
+                    CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[0][0]=conf[q].r0.c0[i] = re + im * I;
+                    CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[0][1]=conf[q].r0.c1[i] = re + im * I;
+                    CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[0][2]=conf[q].r0.c2[i] = re + im * I;
+                    CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[1][0]=conf[q].r1.c0[i] = re + im * I;
+                    CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[1][1]=conf[q].r1.c1[i] = re + im * I;
+                    CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[1][2]=conf[q].r1.c2[i] = re + im * I;
+                    CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[2][0]=conf[q].r2.c0[i] = re + im * I;
+                    CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
+                    CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
+                    det = detSu3(&m);
+                    if(fabs(1+det) < 0.005 ){ // DEBUG, the limit should be FAR stricter.
+                        if(verbosity_lv > 5)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
+                        minus_det_count ++;
+                        conf[q].r0.c0[i] = -conf[q].r0.c0[i];
+                        conf[q].r0.c1[i] = -conf[q].r0.c1[i];
+                        conf[q].r0.c2[i] = -conf[q].r0.c2[i];
+                        conf[q].r1.c0[i] = -conf[q].r1.c0[i];
+                        conf[q].r1.c1[i] = -conf[q].r1.c1[i];
+                        conf[q].r1.c2[i] = -conf[q].r1.c2[i];
+                        conf[q].r2.c0[i] = -conf[q].r2.c0[i];
+                        conf[q].r2.c1[i] = -conf[q].r2.c1[i];
+                        conf[q].r2.c2[i] = -conf[q].r2.c2[i];
 
-                }else if (fabs(fabs(det)-1.0)>0.005 ){  // DEBUG, SAME HERE
-                    printf("Non unitary matrix read, Det M =  %.18lf\n",det);
-                    double pippo =  fabs(det)-1.0;
-                    printf("Diff %f,    ", pippo);
-                    pippo = fabs(pippo);
-                    printf("Diff %f\n", pippo);
+                    }else if (fabs(fabs(det)-1.0)>0.005 ){  // DEBUG, SAME HERE
+                        printf("Non unitary matrix read, Det M =  %.18lf\n",det);
+                        double pippo =  fabs(det)-1.0;
+                        printf("Diff %f,    ", pippo);
+                        pippo = fabs(pippo);
+                        printf("Diff %f\n", pippo);
+                    }
+
                 }
-
             }
-        }
 
         if(minus_det_count !=0 ) {
             printf("Conf read has some matrices with determinant = -1.\n");
@@ -290,7 +317,7 @@ int read_su3_soa_ildg_binary(
             (off_t)(ildg_headers[i].data_length%8==0?0:8-ildg_headers[i].data_length%8);
         // note _FILE_OFFSET_BITS 64 
         off_t mod_data_length =  ildg_headers[i].data_length + missing_bytes ;
-//        printf("%"PRIu64" vs %"PRIu64"\n", (uint64_t) mod_data_length, ildg_headers[i].data_length);
+        //        printf("%"PRIu64" vs %"PRIu64"\n", (uint64_t) mod_data_length, ildg_headers[i].data_length);
 
         // going to the next record  
         fseeko(fg,mod_data_length,SEEK_CUR);
@@ -348,7 +375,7 @@ int read_su3_soa_ildg_binary(
             exit(1);
         }
     }else *conf_id_iter = 1;
-    
+
     // read ildg-binary-data (su3 gauge conf)
     if(verbosity_lv>2)
         printf("Reading ildg-binary-data...\n");
@@ -370,8 +397,8 @@ int read_su3_soa_ildg_binary(
 
             int parity = (xl+yl+zl+tl)%2;// parity = (d0+d1+d2+d3)%2;
 
-//            printf("d0 %d d1 %d d2 %d d3 %d\n", d[0],d[1],d[2],d[3]);//DEBUG
-//            printf("x  %d y  %d z  %d t  %d\n", xs[0],xs[1],xs[2],xs[3]);//DEBUG
+            //            printf("d0 %d d1 %d d2 %d d3 %d\n", d[0],d[1],d[2],d[3]);//DEBUG
+            //            printf("x  %d y  %d z  %d t  %d\n", xs[0],xs[1],xs[2],xs[3]);//DEBUG
 
 
             int x = xl,y = yl ,z = zl, t = tl;

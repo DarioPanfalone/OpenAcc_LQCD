@@ -14,7 +14,10 @@
 
 
 
-void print_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int conf_id_iter);
+void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,
+        int conf_id_iter,double_soa *back_phases);
+
+
 void print_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,
         int conf_id_iter);
 
@@ -37,7 +40,7 @@ inline void save_conf(global_su3_soa * const conf, const char* nomefile,
         print_su3_soa_ildg_binary(conf,nomefile,conf_id_iter);
     }
     else 
-        print_su3_soa_ASCII(conf,nomefile,conf_id_iter);
+        print_su3_soa_ASCII(conf,nomefile,conf_id_iter,NULL);
 
 }
 

@@ -19,7 +19,9 @@ int verbosity_lv;
 #include "../OpenAcc/action.h"
 #include "../Include/fermion_parameters.h"
 #include "../OpenAcc/alloc_settings.h"
-
+#include "../OpenAcc/alloc_vars.h"
+#include "../OpenAcc/backfield.h"
+#include "../OpenAcc/backfield_parameters.h"
 
 int main(int argc, char ** argv){
 
@@ -82,11 +84,22 @@ int main(int argc, char ** argv){
 
     
     act_params.beta = 0.0;
+    // allocating one fermion for convenience
     fermions_parameters = malloc(sizeof(ferm_param));
     fermions_parameters[0].ferm_mass = 0.0;
-    alloc_info.NDiffFlavs = 0;
+    fermions_parameters[0].ferm_charge = 0.0;
+    alloc_info.NDiffFlavs = 1;
+
+    // setting EM field to zero
+    backfield_parameters.ex = backfield_parameters.ey = backfield_parameters.ez = 0;
+    backfield_parameters.bx = backfield_parameters.by = backfield_parameters.bz = 0;
+
+    // allocating and preparing staggered phases field
+    posix_memalign((void **)&u1_back_phases, 128,8*sizeof(double_soa));
+    calc_u1_phases(u1_back_phases,backfield_parameters,0,0);
 
 
+    
     printf("conf_id_iter is %d.\n", conf_id_iter);
 
     printf("Writing conf in file %s \n", argv[2]);\
@@ -94,7 +107,7 @@ int main(int argc, char ** argv){
     if(TOILDG == mode)
         print_su3_soa_ildg_binary(conf,argv[2],conf_id_iter);
     else if (TOASCII == mode )
-        print_su3_soa_ASCII(conf,argv[2],conf_id_iter);
+        print_su3_soa_ASCII(conf,argv[2],conf_id_iter,u1_back_phases);
 
     free(conf);
     free(fermions_parameters);
