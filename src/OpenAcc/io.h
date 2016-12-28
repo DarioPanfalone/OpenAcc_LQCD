@@ -28,7 +28,7 @@ inline int save_conf(global_su3_soa * const conf, const char* nomefile,
     if(devinfo.myrank != 0){
         printf("MPI%02d: Rank is not allowed to use this function!\n",devinfo.myrank );
         printf("ERROR: %s:%d\n",__FILE__, __LINE__);
-        MPI_Abort(MPI_COMM_WORLD);
+        MPI_Abort(MPI_COMM_WORLD,1);
     }
 #endif 
 
