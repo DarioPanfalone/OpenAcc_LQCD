@@ -24,14 +24,21 @@
 #include "./alloc_settings.h"
 #include "../Include/fermion_parameters.h"
 
+#define CHECKREAD_V2(expr,should_read) \
+{int read = expr ;if(read != should_read) { \
+        printf("%s:%d, Error, not read expected number of entries : %d read vs %d should_read\n.", __FILE__, __LINE__ , read,should_read);\
+        return 2;}}\
 
-void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int conf_id_iter){
+
+
+
+int print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int conf_id_iter){
 
     FILE *fp;
     fp = fopen(nomefile,"w");
     if(! fp ){
         printf("ERROR, %s unreadable.\n",nomefile);
-        exit(1);
+        return 2;
     }
 
 
@@ -64,6 +71,7 @@ void print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,int c
         }
     }
     fclose(fp);
+    return 0;
 }
 int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id_iter ){
 
@@ -89,14 +97,14 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
         double tmpbeta, tmpmass;
 
         int minus_det_count = 0;
-        CHECKREAD(fscanf(fp,"%d %d %d %d %lf %lf %d %d\n",
+        CHECKREAD_V2(fscanf(fp,"%d %d %d %d %lf %lf %d %d\n",
                              &nxt,&nyt,&nzt,&ntt,
                            &tmpbeta,&tmpmass,&boh,conf_id_iter),8);
         if( nx!=nxt || ny!=nyt || nz!=nzt || (nt != ntt)){
             printf("Error, configuration dimensions not compatible with code.\n");
             printf("Code dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nx,ny,nz,nt);
             printf("Conf dimensions: d0 %d,d1 %d,d2 %d, d3 %d\n",nxt,nyt,nzt,ntt);
-            exit(1);
+            return 2;
         }else
 
         for(int q = 0 ; q < 8 ; q++){
@@ -104,15 +112,15 @@ int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id
                 double re,im;
                 single_su3 m;double det;
                 //      fscanf(fp, "%.18lf\t%.18lf\n",&re,&im);
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[0][0]=conf[q].r0.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[0][1]=conf[q].r0.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[0][2]=conf[q].r0.c2[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[1][0]=conf[q].r1.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[1][1]=conf[q].r1.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[1][2]=conf[q].r1.c2[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[2][0]=conf[q].r2.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[0][0]=conf[q].r0.c0[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[0][1]=conf[q].r0.c1[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[0][2]=conf[q].r0.c2[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[1][0]=conf[q].r1.c0[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[1][1]=conf[q].r1.c1[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[1][2]=conf[q].r1.c2[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[2][0]=conf[q].r2.c0[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf) ",&re,&im),2);m.comp[2][1]=conf[q].r2.c1[i] = re + im * I;
+                CHECKREAD_V2(fscanf(fp, "(%lf, %lf)\n",&re,&im),2);m.comp[2][2]=conf[q].r2.c2[i] = re + im * I;
                 det = detSu3(&m);
                 if(fabs(1+det) < 0.005 ){ // DEBUG, the limit should be FAR stricter.
                     if(verbosity_lv > 5)  printf("Warning in read_su3_soa_ASCII(), Det M = -1.\n");
@@ -218,7 +226,7 @@ int read_su3_soa_ildg_binary(
     if(geom_par.initialized_check == 0){
         printf("ERROR: GEOMETRY MUST BE INITIALIZED!\n");
         printf("ERROR: in %s at line %d\n",__FILE__, __LINE__);
-        exit(1);
+        return 2;
     } 
 
 
@@ -259,7 +267,7 @@ int read_su3_soa_ildg_binary(
         reads = fread(&ildg_headers[i],sizeof(ILDG_header),1,fg);
         if(reads!= 1 ){
             printf("Error in reading file: %s ,%d\n",__FILE__,__LINE__);
-            exit(1);
+            return 2;
         }
 
         ildg_header_ends_positions[i] = ftello(fg);
@@ -309,7 +317,7 @@ int read_su3_soa_ildg_binary(
     reads = fread(ildg_format_str,1,ildg_headers[ildg_format_index].data_length,fg);
     if(reads!= ildg_headers[ildg_format_index].data_length){
         printf("Error in reading file: %s ,%d\n",__FILE__,__LINE__);
-        exit(1);
+        return 2;
     }
     char * strfnx = strstr(ildg_format_str,"<lx>");
     char * strfny = strstr(ildg_format_str,"<ly>");
@@ -329,13 +337,13 @@ int read_su3_soa_ildg_binary(
         printf("Error, %s:%d : lx,ly,lz or lt not found in \"ildg-format\"\n",
                 __FILE__,__LINE__);
         printf("Please check. Exiting now.\n");
-        exit(1);
+        return 2;
     }
     // check lattice dimensions
     if((geom_par.gnx!=nx_r)||(geom_par.gny!=ny_r)||
             (geom_par.gnz!=nz_r)||(geom_par.gnt!=nt_r)){
         printf("Error, Configuration dimensions not compatible with input file.\n");
-        exit(1);
+        return 2;
     }
 
 
@@ -345,7 +353,7 @@ int read_su3_soa_ildg_binary(
         reads = fscanf(fg,"%d",conf_id_iter);
         if(reads!= 1){
             printf("Error in reading file: %s ,%d\n",__FILE__,__LINE__);
-            exit(1);
+            return 2;
         }
     }else *conf_id_iter = 1;
     
@@ -390,7 +398,7 @@ int read_su3_soa_ildg_binary(
                 if(reads!= 18){
                     printf("Error in reading file: %s ,%d, idxh: %d, dir %d , reads %d\n",
                             __FILE__,__LINE__, idxh, dir,reads );
-                    exit(1);
+                    return 2;
                 }
 
                 // check enddiannes
@@ -417,14 +425,14 @@ int read_su3_soa_ildg_binary(
 
 }
 
-void print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
+int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
         int conf_id_iter)
 {
 
     if(geom_par.initialized_check == 0){
         printf("ERROR: GEOMETRY MUST BE INITIALIZED!\n");
         printf("ERROR: in %s at line %d\n",__FILE__, __LINE__);
-        exit(1);
+        return 2;
     } 
 
 
@@ -433,7 +441,7 @@ void print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile
     fp = fopen(nomefile,"w");
     if(! fp ){
         printf("ERROR, %s unreadable.\n",nomefile);
-        exit(1);
+        return 2;
     }
 
     int nx = geom_par.gnx;
@@ -564,12 +572,12 @@ void print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile
                     writes =  fwrite((void*)&re,sizeof(double),1,fp);
                     if(writes!= 1){
                         printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
-                        exit(1);
+                        return 2;
                     }
                     writes =  fwrite((void*)&im,sizeof(double),1,fp);
                     if(writes!= 1){
                         printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
-                        exit(1);
+                        return 2;
                     }
 
                 }
@@ -587,7 +595,7 @@ void print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile
     fclose(fp);
 
 
-    return ;
+    return  0;
 }
 
 

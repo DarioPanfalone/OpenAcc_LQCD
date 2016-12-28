@@ -14,13 +14,13 @@
 
 
 
-void print_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int conf_id_iter);
-void print_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,
+int print_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int conf_id_iter);
+int print_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,
         int conf_id_iter);
 
 
 //WRAPPER
-inline void save_conf(global_su3_soa * const conf, const char* nomefile,
+inline int save_conf(global_su3_soa * const conf, const char* nomefile,
         int conf_id_iter, int use_ildg)
 {
 
@@ -28,16 +28,15 @@ inline void save_conf(global_su3_soa * const conf, const char* nomefile,
     if(devinfo.myrank != 0){
         printf("MPI%02d: Rank is not allowed to use this function!\n",devinfo.myrank );
         printf("ERROR: %s:%d\n",__FILE__, __LINE__);
-        exit(1);
+        MPI_Abort(MPI_COMM_WORLD);
     }
 #endif 
 
     if(use_ildg){
         printf("Using ILDG format.\n");
-        print_su3_soa_ildg_binary(conf,nomefile,conf_id_iter);
+        return print_su3_soa_ildg_binary(conf,nomefile,conf_id_iter);
     }
-    else 
-        print_su3_soa_ASCII(conf,nomefile,conf_id_iter);
+    else return print_su3_soa_ASCII(conf,nomefile,conf_id_iter);
 
 }
 
@@ -48,6 +47,7 @@ inline void save_conf_wrapper(su3_soa* conf, const char* nomefile,
  {
 
     printf("MPI%02d - Saving whole configuration...\n", devinfo.myrank);
+    int writeOutcome;
 
 #ifdef MULTIDEVICE
 
@@ -56,14 +56,22 @@ inline void save_conf_wrapper(su3_soa* conf, const char* nomefile,
         for(irank = 1 ; irank < devinfo.nranks; irank++)
             recv_loc_subconf_from_rank(conf_rw,irank,irank);
         recv_loc_subconf_from_buffer(conf_rw,conf,0);
-        save_conf(conf_rw, nomefile,conf_id_iter, use_ildg);
+        writeOutcome = save_conf(conf_rw, nomefile,conf_id_iter, use_ildg);
     }
     else  send_lnh_subconf_to_master(conf,devinfo.myrank);
+    MPI_Bcast((void*) &writeOutcome,1,MPI_INT,0,MPI_COMM_WORLD);
 
+    if(0 != writeOutcome){
+        MPI_Finalize();
+    }
 #else 
     recv_loc_subconf_from_buffer(conf_rw,conf,0);
-    save_conf(conf_rw, nomefile,conf_id_iter, use_ildg);
+    writeOutcome = save_conf(conf_rw, nomefile,conf_id_iter, use_ildg);
 #endif
+    if(0 != writeOutcome){ 
+        printf("MPI%02d: Something went wrong in saving conf. Terminating.\n",devinfo.myrank );
+        exit(1);
+    }
 
 
 }
@@ -143,10 +151,18 @@ inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,
             printf("MPI%02d - no conf received!\n",devinfo.myrank );
     }
 
+
+    if(2 == error) MPI_Finalize();
+
 #else 
     error = read_conf(conf_rw, nomefile,conf_id_iter, use_ildg);
-    if(!error)  send_lnh_subconf_to_buffer(conf_rw,conf,0);
+    if(0 == error) send_lnh_subconf_to_buffer(conf_rw,conf,0);
 #endif
+    if(2 == error){
+        printf("MPI%02d: Configuration exists, but errors in reading it. Terminating now.\n",
+                devinfo.myrank);
+        exit(1);
+    }
 
     return error;
 
