@@ -2,6 +2,7 @@
 #define IO_H_
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "./struct_c_def.h"
 #include "./alloc_vars.h"
 
