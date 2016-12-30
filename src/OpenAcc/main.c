@@ -93,19 +93,25 @@ int main(int argc, char* argv[]){
     }
 
 
-
-
-    set_global_vars_and_fermions_from_input_file(argv[1]);
-    verbosity_lv = debug_settings.input_vbl;
+    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]);
 
 #ifdef MULTIDEVICE
-    init_multidev1D(&devinfo);
+    if(input_file_read_check){
+        printf("MPI%02d: input file reading failed, finalize...\n",devinfo.myrank);
+        MPI_Finalize();
+        printf("MPI%02d: finalized!\n",devinfo.myrank);
+    }else init_multidev1D(&devinfo);
 #else
     devinfo.myrank = 0;
     devinfo.nranks = 1;
 #endif
-    if(0==devinfo.myrank) print_geom_defines();
 
+    if(input_file_read_check){
+        printf("MPI%02d: input file reading failed, aborting...\n",devinfo.myrank);
+        exit(1);
+    }
+    if(0==devinfo.myrank) print_geom_defines();
+    verbosity_lv = debug_settings.input_vbl;
 
     if(0==devinfo.myrank){
         if(0 != mc_params.JarzynskiMode){

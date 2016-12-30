@@ -6,7 +6,7 @@
 
 extern char input_file_str[MAXLINES*MAXLINELENGTH];
 
-void set_global_vars_and_fermions_from_input_file(const char* input_filename);
+int set_global_vars_and_fermions_from_input_file(const char* input_filename);
 
 #endif
 

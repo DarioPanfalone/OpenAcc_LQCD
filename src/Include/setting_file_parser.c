@@ -394,7 +394,7 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
                 printf("  Either modify the input file, or recompile changing RHO\n");
                 printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
             }
-            exit(1);
+            res = 1;
 
         }
 
@@ -721,7 +721,7 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
 
 
 
-void set_global_vars_and_fermions_from_input_file(const char* input_filename)
+int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 {
 
     // Opening filenames and reading it
@@ -730,8 +730,8 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     FILE *input = fopen(input_filename,"r");
     if (input == NULL){
 
+        printf("MPI%02d: Could not open file %s \n",devinfo.myrank,input_filename );
         if(0==devinfo.myrank){
-            printf("Could not open file %s \n",input_filename );
             printf("writing an template_input file for your convenience.\n" );
         }
         helpmode = 1;
@@ -809,7 +809,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 if (!tagcounts[igrouptype]) if(0==devinfo.myrank)
                     printf("\"%s\"  parameter group not found!\n",
                             par_macro_groups_names[igrouptype]);
-            exit(1);
+            return 1;
         }
     }
 
@@ -882,7 +882,7 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 break;
             default:
                 printf("TAG TYPE NOT RECOGNIZED\n");
-                exit(1);
+                return 1;
                 break;
         }
         if(check)
@@ -900,11 +900,12 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
     // check == 1 means at least a parameter was not found.
     if(totcheck!=0 || helpmode ){
         
-        if(helpmode) fclose(helpfile);
+        if(helpmode && 0 == devinfo.myrank) fclose(helpfile);
 
         if(0==devinfo.myrank && totcheck )
-            printf("There are errors in some groups, exiting.\n")   ;
-        exit(1);
+            printf("There are errors in some groups, exiting.\n");
+        printf("MPI%02d: Returning error 1...\n",devinfo.myrank);
+        return 1;
 
     }
     else{
@@ -939,6 +940,8 @@ void set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     }
 
+    
+    return 0;
 
 }
 
