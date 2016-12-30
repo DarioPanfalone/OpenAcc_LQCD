@@ -496,6 +496,10 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
 # In correspondence of every stored gauge conf, the random number generator statuses will be saved for each MPI rank.\n\
 # With these files, the gauge conf and the right setting file (like this one) reproducibility should be assured.";
 
+    const char statusFileName_def[] = "program_status.txt"; 
+    const char statusFileName_comment[] = "# The status of the program at the end will be saved here.\n\
+# This is useful to run the program on \"short\" queues."; 
+
     par_info mcp[]={
         (par_info){(void*) &(mcpar->ntraj                  ),TYPE_INT,   "Ntraj"                  , NULL,NULL},
         (par_info){(void*) &(mcpar->therm_ntraj            ),TYPE_INT,   "ThermNtraj"             , NULL,therm_ntraj_comment},
@@ -508,7 +512,8 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
         (par_info){(void*) &(mcpar->MaxRunTimeS),         TYPE_DOUBLE,   "MaxRunTimeS"            , (const void*) &MaxRunTimeS_def,NULL},
         (par_info){(void*) &(mcpar->seed),                   TYPE_INT,   "Seed"                   , (const void*) &seed_def,seed_comment},
         (par_info){(void*) &(mcpar->eps_gen),             TYPE_DOUBLE,   "EpsGen"                 , (const void*) &epsgen_def,eps_gen_comment},
-        (par_info){(void*) &(mcpar->JarzynskiMode),             TYPE_INT,   "JarzynskiMode"       , (const void*) &JarzynskiMode_def,JarzynskiMode_comment}
+        (par_info){(void*) &(mcpar->JarzynskiMode),             TYPE_INT,   "JarzynskiMode"       , (const void*) &JarzynskiMode_def,JarzynskiMode_comment},
+        (par_info){(void*) &(mcpar->statusFileName),            TYPE_STR,   "StatusFileName"      , (const void*) &statusFileName_def,statusFileName_comment}
     };
 
     // from here on, you should not have to modify anything.
@@ -576,15 +581,9 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
     const int doubleinv_def = 0;
     const int measEvery_def = 1;
     const char measEvery_comment[] = "#Fermionic measurements will be performed once very MeasEvery times.";
-    const double expMeasLoadRatio_def = 0.3;
-    const char expMeasLoadRatio_comment[] ="\
-#The expected duration of a batch measurements, compared to one update.\n\
-#It is recommended that you set this number to an adequate value when MeasEvery is not set to one.\n\
-# Note: this value is used (and useful) only for the first time measurements are taken.";
 
     par_info fmp[]={
         (par_info){(void*) &(fmpars->fermionic_outfilename),       TYPE_STR,"FermionicOutfilename",        NULL ,                       NULL},
-        (par_info){(void*) &(fmpars->expMeasLoadRatio),         TYPE_DOUBLE,"expMeasLoadRatio",            (const void*) &expMeasLoadRatio_def, expMeasLoadRatio_comment},
         (par_info){(void*) &(fmpars->measEvery),                   TYPE_INT,"MeasEvery"           ,(const void*) &measEvery_def,measEvery_comment},
         (par_info){(void*) &(fmpars->SingleInvNVectors),           TYPE_INT,"SingleInvNVectors"   ,        NULL ,                       NULL},
         (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),     TYPE_INT,"DoubleInvNVectorsChiral",     (const void*) &doubleinv_def,NULL},

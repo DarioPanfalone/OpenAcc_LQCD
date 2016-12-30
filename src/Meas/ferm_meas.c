@@ -17,6 +17,7 @@
 
 #include "../Include/common_defines.h"
 #include "../Include/fermion_parameters.h"
+#include "../Include/montecarlo_parameters.h"
 #include "../OpenAcc/alloc_vars.h"
 #include "../OpenAcc/sp_alloc_vars.h"
 #include "../OpenAcc/fermion_matrix.h"
@@ -42,7 +43,6 @@
 #include "../Mpi/communications.h"
 #endif
 #include "../Mpi/multidev.h"
-
 
 ferm_meas_params fm_par;
 
@@ -135,7 +135,7 @@ void fermion_measures( su3_soa * tconf_acc,
     vec3_soa * magchi_e,* magchi_o; //results of eo_inversion
     vec3_soa *bnchi_e,*bnchi_o; //for baryon number calculation 
     vec3_soa *chi2_e,*chi2_o; //results of second eo_inversion, 
-                              // for susceptibilities
+    // for susceptibilities
 
     vec3_soa * phi_e,* phi_o; // parking variables for eo_inverter
     vec3_soa * trial_sol;
@@ -146,8 +146,8 @@ void fermion_measures( su3_soa * tconf_acc,
 
 
     if(act_params.stout_steps > 0){
-    stout_wrapper(tconf_acc ,gstout_conf_acc_arr);
-    conf_to_use = &gstout_conf_acc_arr[8*(act_params.stout_steps-1)];
+        stout_wrapper(tconf_acc ,gstout_conf_acc_arr);
+        conf_to_use = &gstout_conf_acc_arr[8*(act_params.stout_steps-1)];
     }
     else conf_to_use = tconf_acc;
 #else
@@ -164,7 +164,7 @@ void fermion_measures( su3_soa * tconf_acc,
     printf("\tMPI%02d: Error in  allocation of %s . \n",devinfo.myrank, #var);\
     else if(verbosity_lv > 2) printf("\tMPI%02d: Allocation of %s : OK , %p\n",\
             devinfo.myrank, #var, var );\
-            fflush(stdout);
+    fflush(stdout);
 
     allocation_check =  posix_memalign((void **)&rnd_e, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check,rnd_e);     
@@ -219,73 +219,76 @@ void fermion_measures( su3_soa * tconf_acc,
 
 
 #pragma acc data create(phi_e[0:1]) create(phi_o[0:1])\
-            create(chi_e[0:1]) create(chi_o[0:1])   \
-            create(magchi_e[0:1]) create(magchi_o[0:1])   \
-            create(bnchi_e[0:1]) create(bnchi_o[0:1])   \
-            create(chi2_e[0:1]) create(chi2_o[0:1])   \
-            create(rnd_e[0:1]) create(rnd_o[0:1]) create(trial_sol[0:1]) 
+    create(chi_e[0:1]) create(chi_o[0:1])   \
+    create(magchi_e[0:1]) create(magchi_o[0:1])   \
+    create(bnchi_e[0:1]) create(bnchi_o[0:1])   \
+    create(chi2_e[0:1]) create(chi2_o[0:1])   \
+    create(rnd_e[0:1]) create(rnd_o[0:1]) create(trial_sol[0:1]) 
     {
 
 
 
-    // cycle on copies
-    for(int icopy = 0; icopy < tfm_par->SingleInvNVectors ; icopy++) {
-        FILE *foutfile;
+        // cycle on copies
+        int icopy = mc_params.measures_done;
+        while( icopy < tfm_par->SingleInvNVectors &&
+                RUN_CONDITION_TERMINATE != mc_params.run_condition ) {
+            FILE *foutfile;
 
-        if(devinfo.myrank == 0 ){
-            foutfile = fopen(tfm_par->fermionic_outfilename,"at");
-            if(fsize == 0){
-                set_fermion_file_header(tfm_par, tfermions_parameters);
-                fprintf(foutfile,"%s",fm_par.fermionic_outfile_header);
-                fsize++;
-            }
+            if(devinfo.myrank == 0 ){
+                foutfile = fopen(tfm_par->fermionic_outfilename,"at");
+                if(fsize == 0){
+                    set_fermion_file_header(tfm_par, tfermions_parameters);
+                    fprintf(foutfile,"%s",fm_par.fermionic_outfile_header);
+                    fsize++;
+                }
 
-            if(!foutfile) {
-                printf("File %s can't be opened for writing. Exiting.\n", fm_par.fermionic_outfilename);
-                exit(1);
-            }
+                if(!foutfile) {
+                    printf("File %s can't be opened for writing. Exiting.\n", fm_par.fermionic_outfilename);
+                    exit(1);
+                }
 
-            fprintf(foutfile,"%d\t%d\t",conf_id_iter,icopy);
-        }        
+                fprintf(foutfile,"%d\t%d\t",conf_id_iter,icopy);
+            }        
+
+            struct timeval pre_flavour_cycle, post_flavour_cycle;
+            gettimeofday(&pre_flavour_cycle,NULL);
+            // cycle on flavours
+            for(int iflv=0; iflv < alloc_info.NDiffFlavs ; iflv++){
+
+                if(verbosity_lv > 1 && devinfo.myrank == 0){
+                    printf("MPI%02d: Performing %d of %d chiral measures for quark %s",
+                            devinfo.myrank,icopy+1,tfm_par->SingleInvNVectors, 
+                            tfermions_parameters[iflv].name);
+
+                    printf("(%d for chiral susc, %d for quark number susc).\n",
+                            tfm_par->DoubleInvNVectorsChiral,
+                            tfm_par->DoubleInvNVectorsQuarkNumber);
+
+                }
 
 
-        // cycle on flavours
-        for(int iflv=0; iflv < alloc_info.NDiffFlavs ; iflv++){
-
-            if(verbosity_lv > 1 && devinfo.myrank == 0){
-                printf("MPI%02d: Performing %d of %d chiral measures for quark %s",
-                        devinfo.myrank,icopy+1,tfm_par->SingleInvNVectors, 
-                        tfermions_parameters[iflv].name);
-
-                printf("(%d for chiral susc, %d for quark number susc).\n",
-                        tfm_par->DoubleInvNVectorsChiral,
-                        tfm_par->DoubleInvNVectorsQuarkNumber);
-
-            }
-
-
-            generate_vec3_soa_z2noise(rnd_e);
-            generate_vec3_soa_z2noise(rnd_o);
-            generate_vec3_soa_gauss(trial_sol);
+                generate_vec3_soa_z2noise(rnd_e);
+                generate_vec3_soa_z2noise(rnd_o);
+                generate_vec3_soa_gauss(trial_sol);
 #pragma acc update device(rnd_e[0:1]) 
 #pragma acc update device(rnd_o[0:1]) 
 #pragma acc update device(trial_sol[0:1]) 
-            d_complex chircond_size = 0.0 + 0.0*I;
-            d_complex magnetization_size = 0.0 + 0.0*I;
-            d_complex barnum_size = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
-            d_complex trMinvSq_size = 0.0 + 0.0*I; // for connected chiral susc
-            d_complex trd2M_dmu2_Minv_size = 0.0 + 0.0*I; //for connected baryon susc,1
-            d_complex trdM_dmuMinv_sq_size = 0.0 + 0.0*I; //for connected baryon susc,2
+                d_complex chircond_size = 0.0 + 0.0*I;
+                d_complex magnetization_size = 0.0 + 0.0*I;
+                d_complex barnum_size = 0.0 + 0.0*I; // https://en.wikipedia.org/wiki/P._T._Barnum
+                d_complex trMinvSq_size = 0.0 + 0.0*I; // for connected chiral susc
+                d_complex trd2M_dmu2_Minv_size = 0.0 + 0.0*I; //for connected baryon susc,1
+                d_complex trdM_dmuMinv_sq_size = 0.0 + 0.0*I; //for connected baryon susc,2
 
-            double factor = tfermions_parameters[iflv].degeneracy*0.25/GL_SIZE;
-            // preparing inverter_package with global variables
-            inverter_package ip;
-            setup_inverter_package_dp(&ip,conf_to_use,ferm_shiftmulti_acc,1,kloc_r,kloc_h,
-                    kloc_s,kloc_p);
+                double factor = tfermions_parameters[iflv].degeneracy*0.25/GL_SIZE;
+                // preparing inverter_package with global variables
+                inverter_package ip;
+                setup_inverter_package_dp(&ip,conf_to_use,ferm_shiftmulti_acc,1,kloc_r,kloc_h,
+                        kloc_s,kloc_p);
 
-            if(inverter_tricks.useMixedPrecision) 
-                setup_inverter_package_sp(&ip,conf_to_use_f,ferm_shiftmulti_acc_f,1,
-                        kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f); 
+                if(inverter_tricks.useMixedPrecision) 
+                    setup_inverter_package_sp(&ip,conf_to_use_f,ferm_shiftmulti_acc_f,1,
+                            kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f); 
 
 
                 // FIRST INVERSION
@@ -325,7 +328,7 @@ void fermion_measures( su3_soa * tconf_acc,
                             cimag(barnum_size*factor));
 
                 // MAGNETIZATION
-               
+
 
                 acc_Deo_wf(conf_to_use,magchi_e,chi_o,tfermions_parameters[iflv].phases,
                         tfermions_parameters[iflv].mag_re,
@@ -423,14 +426,50 @@ void fermion_measures( su3_soa * tconf_acc,
                         fprintf(foutfile,"%-24s%-24s%-24s%-24s","none",
                                 "none","none","none" );
 
-        }// end of cycle over flavours
+            }// end of cycle over flavours
+            if(devinfo.myrank == 0){
+                fprintf(foutfile,"\n");
+                fclose(foutfile);
+            }
+            gettimeofday(&post_flavour_cycle,NULL);
+            
+            icopy++;
+            
 
-        if(devinfo.myrank == 0){
-            fprintf(foutfile,"\n");
-            fclose(foutfile);
-        }
-    }// end of cycle over copies
-   
+            double flavour_cycle_time = 
+            (post_flavour_cycle.tv_sec - pre_flavour_cycle.tv_sec)+
+                (double)(post_flavour_cycle.tv_usec - pre_flavour_cycle.tv_usec)/1.0e6;
+
+            mc_params.max_flavour_cycle_time = 
+                (flavour_cycle_time > mc_params.max_flavour_cycle_time)?
+                flavour_cycle_time : mc_params.max_flavour_cycle_time;
+
+            double total_duration = (double) 
+                (post_flavour_cycle.tv_sec - mc_params.start_time.tv_sec)+
+                (double)(post_flavour_cycle.tv_usec - mc_params.start_time.tv_usec)/1.0e6;
+
+            double max_expected_duration_with_another_cycle = 
+                total_duration + 2*mc_params.max_flavour_cycle_time;
+
+            if(max_expected_duration_with_another_cycle > mc_params.MaxRunTimeS){
+                printf("Time is running out (%d of %d seconds elapsed),",
+                        (int) total_duration, (int) mc_params.MaxRunTimeS);
+                printf(" shutting down now.\n");
+                printf("Total max expected duration: %d seconds",
+                        (int) max_expected_duration_with_another_cycle);
+                printf("(%d elapsed now, 2 * %d maximum expected)\n",(int) total_duration,
+                        (int) mc_params.max_flavour_cycle_time);
+                //https://www.youtube.com/watch?v=MfGhlVcrc8U
+                // but without that much pathos
+                mc_params.run_condition = RUN_CONDITION_TERMINATE;
+            
+            }
+            
+            mc_params.measures_done = icopy;
+
+        }// end of cycle over copies
+
+
     }
 
     free(rnd_e);

@@ -71,8 +71,7 @@ int verbosity_lv;
 
 int main(int argc, char* argv[]){
 
-    struct timeval tinit;
-    gettimeofday ( &tinit, NULL );
+    gettimeofday ( &(mc_params.start_time), NULL );
 
     // READ input file.
 #ifdef MULTIDEVICE
@@ -256,56 +255,10 @@ int main(int argc, char* argv[]){
     printf("\tMPI%02d: Max_unitarity_deviation on host: %e\n", devinfo.myrank,
             max_unitarity_deviation);
 
-    double fermionMeasureTiming=0 ;// default value
 
 
 
 
-    /*
-#pragma acc data  copy(conf_acc[0:alloc_info.conf_acc_size]) \
-create(ipdot_acc[0:8]) create(aux_conf_acc[0:8])\
-create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:alloc_info.NPS_tot])\
-create(ferm_phi_acc[0:alloc_info.NPS_tot])  create(ferm_out_acc[0:alloc_info.NPS_tot])\
-create(ferm_shiftmulti_acc[0:alloc_info.maxNeededShifts])\
-create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])\
-create(kloc_p[0:1])  create(k_p_shiftferm[0:alloc_info.maxApproxOrder])\
-create(aux1[0:1])\
-create(momenta[0:8])\
-create(momenta_backup[0:8*debug_settings.do_reversibility_test])\
-create(  conf_acc_bkp[0:8*debug_settings.do_reversibility_test])\
-copyin(nnp_openacc) copyin(nnm_openacc)\
-create(local_sums[0:2]) create(d_local_sums[0:2])\
-copyin(fermions_parameters[0:alloc_info.NDiffFlavs])\
-copyin(deltas_Omelyan[0:7]) \
-copyin(u1_back_phases[0:8*alloc_info.NDiffFlavs])\
-create(conf_acc_f[0:8])\
-create(ipdot_acc_f[0:8]) create(aux_conf_acc_f[0:8])\
-create(auxbis_conf_acc_f[0:8]) create(ferm_chi_acc_f[0:alloc_info.NPS_tot])\
-create(ferm_phi_acc_f[0:alloc_info.NPS_tot])  create(ferm_out_acc_f[0:alloc_info.NPS_tot])\
-create(ferm_shiftmulti_acc_f[0:alloc_info.maxNeededShifts])\
-create(kloc_r_f[0:1])  create(kloc_h_f[0:1])  create(kloc_s_f[0:1])\
-create(kloc_p_f[0:1])  create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder])\
-create(aux1_f[0:1])\
-create(momenta_f[0:8]) \
-create(local_sums_f[0:2]) create(d_local_sums_f[0:2])\
-copyin(deltas_Omelyan_f[0:7]) \
-copyin(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])\
-create(ipdot_g_old_f[0:8]) create(ipdot_f_old_f[0:8])\
-copyin(mag_obs_re[0:8*alloc_info.NDiffFlavs])\
-copyin(mag_obs_im[0:8*alloc_info.NDiffFlavs])\
-create(ipdot_g_old[0:8*debug_settings.save_diagnostics])\
-create(ipdot_f_old[0:8*debug_settings.save_diagnostics])
-{
-#ifdef STOUT_FERMIONS
-#pragma acc data create(aux_th[0:8]) create(aux_ta[0:8])\
-create(gstout_conf_acc_arr[0:(8*act_params.stout_steps)])\
-create(glocal_staples[0:8]) create(gipdot[0:8])\
-create(aux_th_f[0:8]) create(aux_ta_f[0:8])\
-create(gstout_conf_acc_arr_f[0:(8*act_params.stout_steps)])\
-create(glocal_staples_f[0:8]) create(gipdot_f[0:8]) 
-{
-#endif
-*/
     double plq,rect,topoch;
     d_complex poly;
 
@@ -369,25 +322,28 @@ create(glocal_staples_f[0:8]) create(gipdot_f[0:8])
 
     // THERMALIZATION & METRO    ----   UPDATES //
 
-    double max_cycle_duration = 0;
-    for(int id_iter=id_iter_offset;id_iter<(mc_params.ntraj+id_iter_offset);
-            id_iter++){
+    int id_iter=id_iter_offset;
+    
+    init_global_program_status();
+    while ( RUN_CONDITION_TERMINATE != mc_params.run_condition)
+    {
 
-        struct timeval tstart_cycle;
-        gettimeofday(&tstart_cycle, NULL);
+        if(GPSTATUS_UPDATE == mc_params.next_gps){
+            struct timeval tstart_cycle,tend_cycle;
+            gettimeofday(&tstart_cycle, NULL);
 
-        if(0 != mc_params.JarzynskiMode ){
+            if(0 != mc_params.JarzynskiMode ){
 
-            bf_param new_backfield_parameters = backfield_parameters;
+                bf_param new_backfield_parameters = backfield_parameters;
 
-            // DIRECT MODE 
-            if(1 == mc_params.JarzynskiMode)
-                new_backfield_parameters.bz = backfield_parameters.bz + 
-                    (double) id_iter/mc_params.MaxConfIdIter;
-            // REVERSE MODE
-            if(-1 == mc_params.JarzynskiMode)
-                new_backfield_parameters.bz = backfield_parameters.bz -
-                    (double) id_iter/mc_params.MaxConfIdIter;
+                // DIRECT MODE 
+                if(1 == mc_params.JarzynskiMode)
+                    new_backfield_parameters.bz = backfield_parameters.bz + 
+                        (double) id_iter/mc_params.MaxConfIdIter;
+                // REVERSE MODE
+                if(-1 == mc_params.JarzynskiMode)
+                    new_backfield_parameters.bz = backfield_parameters.bz -
+                        (double) id_iter/mc_params.MaxConfIdIter;
 
 
 
@@ -422,90 +378,176 @@ create(glocal_staples_f[0:8]) create(gipdot_f[0:8])
                 devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
         accettate_therm_old = accettate_therm;
         accettate_metro_old = accettate_metro;
-        conf_id_iter++;
 
 
-        if(devinfo.myrank ==0 ){
-            printf("\n#################################################\n");
-            printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
-                    conf_id_iter,mc_params.ntraj+id_iter_offset,
-                    geom_par.gnx,geom_par.gny,
-                    geom_par.gnz,geom_par.gnt,
-                    act_params.beta);
-            printf(  "#################################################\n\n");
-        }
-
-
-
-        //--------- CONF UPDATE ----------------//
-        if(id_iter<mc_params.therm_ntraj){
-            accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                    md_parameters.residue_metro,md_parameters.residue_md,
-                    id_iter-id_iter_offset,
-                    accettate_therm,0,md_parameters.max_cg_iterations);
-        }else{
-            accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
-                    md_parameters.residue_metro,md_parameters.residue_md,
-                    id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
-                    md_parameters.max_cg_iterations);
-            if(0==devinfo.myrank){
-                int iterations = id_iter-id_iter_offset-accettate_therm +1;
-                double acceptance = (double) accettate_metro / iterations;
-                double acc_err = 
-                    sqrt((double)accettate_metro*(iterations-accettate_metro)/iterations)
-                    /iterations;
-                printf("Estimated acceptance for this run: %f +- %f\n",acceptance,
-                        acc_err);
+            if(devinfo.myrank ==0 ){
+                printf("\n#################################################\n");
+                printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
+                        conf_id_iter,mc_params.ntraj+id_iter_offset,
+                        geom_par.gnx,geom_par.gny,
+                        geom_par.gnz,geom_par.gnt,
+                        act_params.beta);
+                printf(  "#################################################\n\n");
             }
-        }
 
-
-
+            //--------- CONF UPDATE ----------------//
+            if(id_iter<mc_params.therm_ntraj){
+                accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
+                        md_parameters.residue_metro,md_parameters.residue_md,
+                        id_iter-id_iter_offset,
+                        accettate_therm,0,md_parameters.max_cg_iterations);
+            }else{
+                accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
+                        md_parameters.residue_metro,md_parameters.residue_md,
+                        id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
+                        md_parameters.max_cg_iterations);
+                if(0==devinfo.myrank){
+                    int iterations = id_iter-id_iter_offset-accettate_therm +1;
+                    double acceptance = (double) accettate_metro / iterations;
+                    double acc_err = 
+                        sqrt((double)accettate_metro*(iterations-accettate_metro)/iterations)
+                        /iterations;
+                    printf("Estimated acceptance for this run: %f +- %f\n",acceptance,
+                            acc_err);
+                }
+            }
 #pragma acc update host(conf_acc[0:8])
-        //---------------------------------------//
-
-        //--------- MISURA ROBA FERMIONICA ----------------//
-        //
-
-
-        if(0 != mc_params.JarzynskiMode ){ // HALFWAY MEASUREMENTS FOR JARZYNSKI
-
-            bf_param new_backfield_parameters = backfield_parameters;
-
-            // DIRECT MODE 
-            if(1 == mc_params.JarzynskiMode)
-                new_backfield_parameters.bz = backfield_parameters.bz + 
-                    (double) (id_iter+0.5)/mc_params.MaxConfIdIter;
-            // REVERSE MODE
-            if(-1 == mc_params.JarzynskiMode)
-                new_backfield_parameters.bz = backfield_parameters.bz -
-                    (double) (id_iter+0.5)/mc_params.MaxConfIdIter;
+            id_iter++;
+            conf_id_iter++;
+            //-------------------------------------------------// 
+            
+            //--------- MISURA ROBA DI GAUGE ------------------//
+            plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+            rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+            poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
 
 
+            printf("MPI%02d - Printing gauge obs - only by master rank...\n",
+                    devinfo.myrank);
+            if(devinfo.myrank ==0 ){
+
+                FILE *goutfile = fopen(gauge_outfilename,"at");
+                if(!goutfile){
+                    goutfile = fopen(gauge_outfilename,"wt");
+                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\n");
+                    fprintf(goutfile,"%s",gauge_outfile_header);
+                }
+                if(goutfile){
+                    if(id_iter<mc_params.therm_ntraj){
+                        printf("Therm_iter %d",conf_id_iter );
+                        printf("Placchetta= %.18lf    ", plq/GL_SIZE/6.0/3.0);
+                        printf("Rettangolo= %.18lf\n",rect/GL_SIZE/6.0/3.0/2.0);
+
+
+                    }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/GL_SIZE/6.0/3.0,rect/GL_SIZE/6.0/3.0/2.0);
+
+
+                    fprintf(goutfile,"%d\t%d\t",conf_id_iter,
+                            accettate_therm+accettate_metro
+                            -accettate_therm_old-accettate_metro_old);
+                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
+                            plq/GL_SIZE/6.0/3.0,
+                            rect/GL_SIZE/6.0/3.0/2.0, 
+                            creal(poly), cimag(poly));
+
+                }
+                fclose(goutfile);
+            }
+            //-------------------------------------------------// 
+
+            //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
+            if(conf_id_iter%mc_params.storeconfinterval==0 && debug_settings.SaveAllAtEnd){
+                char tempname[50];
+                char serial[10];
+                strcpy(tempname,mc_params.store_conf_name);
+                sprintf(serial,".%05d",conf_id_iter);
+                strcat(tempname,serial);
+                printf("MPI%02d - Storing conf %s.\n",
+                        devinfo.myrank, tempname);
+                save_conf_wrapper(conf_acc,tempname,conf_id_iter,
+                        debug_settings.use_ildg);
+                strcpy(tempname,mc_params.RandGenStatusFilename);
+                sprintf(serial,".%05d",conf_id_iter);
+                strcat(tempname,serial);
+                printf("MPI%02d - Storing rng status in %s.\n", 
+                        devinfo.myrank , tempname);
+                saverand_tofile(tempname);
+            } else printf(
+                    "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+
+            if(conf_id_iter%mc_params.saveconfinterval==0 && debug_settings.SaveAllAtEnd){
+                printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
+                        mc_params.save_conf_name);
+                save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
+                        debug_settings.use_ildg);
+                printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
+                        mc_params.RandGenStatusFilename);
+                saverand_tofile(mc_params.RandGenStatusFilename);
+            }else printf(
+                    "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+
+            //-------------------------------------------------//
+
+            gettimeofday(&tend_cycle, NULL);
+
+            double update_time = (double) 
+                (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
+                (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
+            mc_params.max_update_time = (update_time > mc_params.max_update_time)?
+                update_time :mc_params.max_update_time;
 
 
             if(0==devinfo.myrank){
+                printf("Tot time : %f sec (with measurements)\n", update_time);
+                if(debug_settings.save_diagnostics == 1){
+                    FILE *foutfile = fopen(debug_settings.diagnostics_filename,"at");
+                    fprintf(foutfile,"TOTTIME  %f \n",update_time);
+                    fclose(foutfile);
+                }
 
-                printf("JarzynskiMode, iteration %d/%d (%d max for this run) - MEASUREMENTS AT HALFWAY \n",
-                        id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
-                printf("JarzynskiMode - current bz value : %f (HALFWAY)\n", new_backfield_parameters.bz);
             }
+  
+        }
 
-            init_all_u1_phases(new_backfield_parameters,fermions_parameters);
+
+        if (GPSTATUS_FERMION_MEASURES == mc_params.next_gps){
+            //--------- MISURA ROBA FERMIONICA ----------------//
+            
+            if(0 != mc_params.JarzynskiMode ){ // HALFWAY MEASUREMENTS FOR JARZYNSKI
+
+                bf_param new_backfield_parameters = backfield_parameters;
+
+                // DIRECT MODE 
+                if(1 == mc_params.JarzynskiMode)
+                    new_backfield_parameters.bz = backfield_parameters.bz + 
+                        (double) (id_iter+0.5)/mc_params.MaxConfIdIter;
+                // REVERSE MODE
+                if(-1 == mc_params.JarzynskiMode)
+                    new_backfield_parameters.bz = backfield_parameters.bz -
+                        (double) (id_iter+0.5)/mc_params.MaxConfIdIter;
+
+
+                if(0==devinfo.myrank){
+
+                    printf("JarzynskiMode, iteration %d/%d (%d max for this run) - MEASUREMENTS AT HALFWAY \n",
+                            id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
+                    printf("JarzynskiMode - current bz value : %f (HALFWAY)\n", new_backfield_parameters.bz);
+                }
+
+                init_all_u1_phases(new_backfield_parameters,fermions_parameters);
 #pragma acc update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
 #pragma acc update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
 
-        }
+            }
 
+            check_unitarity_device(conf_acc,&max_unitarity_deviation,
+                    &avg_unitarity_deviation);
+            printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
+                    devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
 
+            if(conf_id_iter % fm_par.measEvery == 0 )
+                mc_params.next_gps = GPSTATUS_FERMION_MEASURES;
 
-        check_unitarity_device(conf_acc,&max_unitarity_deviation,
-                &avg_unitarity_deviation);
-        printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
-                devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
-
-        if(conf_id_iter % fm_par.measEvery == 0 )
-        {
             struct timeval tf0, tf1;
             gettimeofday(&tf0, NULL);
             fermion_measures(conf_acc,fermions_parameters,
@@ -514,133 +556,80 @@ create(glocal_staples_f[0:8]) create(gipdot_f[0:8])
                     conf_id_iter) ;
             gettimeofday(&tf1, NULL);
 
-            fermionMeasureTiming = 
+            double fermionMeasureTiming =
                 (double) (tf1.tv_sec - tf0.tv_sec)+
                 (double)(tf1.tv_usec - tf0.tv_usec)/1.0e6;
 
-        }
+            if(debug_settings.save_diagnostics == 1){
+                FILE *foutfile = 
+                    fopen(debug_settings.diagnostics_filename,"at");
 
-        //-------------------------------------------------// 
-        //--------- MISURA ROBA DI GAUGE ------------------//
-        plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-        rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-        poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
-
-
-        printf("MPI%02d - Printing gauge obs - only by master rank...\n",
-                devinfo.myrank);
-        if(devinfo.myrank ==0 ){
-
-            FILE *goutfile = fopen(gauge_outfilename,"at");
-            if(!goutfile){
-                goutfile = fopen(gauge_outfilename,"wt");
-                strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\n");
-                fprintf(goutfile,"%s",gauge_outfile_header);
+                if(conf_id_iter % fm_par.measEvery == 0 )
+                    fprintf(foutfile,"FERMMEASTIME  %f \n",fermionMeasureTiming);
+                fclose(foutfile);
             }
-            if(goutfile){
-                if(id_iter<mc_params.therm_ntraj){
-                    printf("Therm_iter %d",conf_id_iter );
-                    printf("Placchetta= %.18lf    ", plq/GL_SIZE/6.0/3.0);
-                    printf("Rettangolo= %.18lf\n",rect/GL_SIZE/6.0/3.0/2.0);
 
+            //---- SAVES RNG STATUS TO FILE ----//
+            if(conf_id_iter%mc_params.storeconfinterval==0 && debug_settings.SaveAllAtEnd){
+                char tempname[50];
+                char serial[10];
+                strcpy(tempname,mc_params.RandGenStatusFilename);
+                sprintf(serial,".%05d",conf_id_iter);
+                strcat(tempname,serial);
+                printf("MPI%02d - Storing rng status in %s.\n", 
+                        devinfo.myrank , tempname);
+                saverand_tofile(tempname);
+            } else printf(
+                    "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING RNG STATUS.\n\n\n", devinfo.myrank);
 
-                }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/GL_SIZE/6.0/3.0,rect/GL_SIZE/6.0/3.0/2.0);
+            if(conf_id_iter%mc_params.saveconfinterval==0 && debug_settings.SaveAllAtEnd){
+                printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
+                        mc_params.RandGenStatusFilename);
+                saverand_tofile(mc_params.RandGenStatusFilename);
+            }else printf(
+                    "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING RNG STATUS.\n\n\n", devinfo.myrank);
 
+            //-------------------------------------------------//
 
-                fprintf(goutfile,"%d\t%d\t",conf_id_iter,
-                        accettate_therm+accettate_metro
-                        -accettate_therm_old-accettate_metro_old);
-                fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
-                        plq/GL_SIZE/6.0/3.0,
-                        rect/GL_SIZE/6.0/3.0/2.0, 
-                        creal(poly), cimag(poly));
-
-            }
-            fclose(goutfile);
-        }
-        //-------------------------------------------------//
-
-        //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
-        if(conf_id_iter%mc_params.storeconfinterval==0){
-            char tempname[50];
-            char serial[10];
-            strcpy(tempname,mc_params.store_conf_name);
-            sprintf(serial,".%05d",conf_id_iter);
-            strcat(tempname,serial);
-            printf("MPI%02d - Storing conf %s.\n",
-                    devinfo.myrank, tempname);
-            save_conf_wrapper(conf_acc,tempname,conf_id_iter,
-                    debug_settings.use_ildg);
-            strcpy(tempname,mc_params.RandGenStatusFilename);
-            sprintf(serial,".%05d",conf_id_iter);
-            strcat(tempname,serial);
-            printf("MPI%02d - Storing rng status in %s.\n", 
-                    devinfo.myrank , tempname);
-            saverand_tofile(tempname);
-        }
-        if(conf_id_iter%mc_params.saveconfinterval==0){
-            printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
-                    mc_params.save_conf_name);
-            save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
-                    debug_settings.use_ildg);
-            printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
-                    mc_params.RandGenStatusFilename);
-            saverand_tofile(mc_params.RandGenStatusFilename);
         }
 
-        //-------------------------------------------------//
-        // program exits if it finds a file called "stop"
+        // determining next thing to do
+        if(0 == conf_id_iter % fm_par.measEvery)
+            mc_params.next_gps = GPSTATUS_FERMION_MEASURES;
+        if(mc_params.measures_done == fm_par.SingleInvNVectors){
+            mc_params.next_gps = GPSTATUS_UPDATE;
+            mc_params.measures_done = 0;
+        }
 
-        int run_condition = 1;
+        // determining run condition
+        if(0 == devinfo.myrank && RUN_CONDITION_TERMINATE != mc_params.run_condition){
+        
+            // program exits if it finds a file called "stop"
 
-
-        if(devinfo.myrank ==0 ){
             FILE * test_stop = fopen("stop","r");
             if(test_stop){
                 fclose(test_stop);
                 printf("File  \'stop\' found, stopping cycle now.\n");
-                run_condition = 0;
+                mc_params.run_condition = RUN_CONDITION_TERMINATE;
             }
 
             // program exits if it time is running out
-            struct timeval tend_cycle;
-            gettimeofday(&tend_cycle, NULL);
-
-            double cycle_duration = (double) 
-                (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
-                (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
-            max_cycle_duration = (cycle_duration>max_cycle_duration) ? cycle_duration :max_cycle_duration;
-
-            if(0==devinfo.myrank){
-                printf("Tot time : %f sec (with measurements)\n", cycle_duration);
-                if(debug_settings.save_diagnostics == 1){
-                    FILE *foutfile = 
-                        fopen(debug_settings.diagnostics_filename,"at");
-
-                    fprintf(foutfile,"TOTTIME  %f \n",cycle_duration);
-                    if(conf_id_iter % fm_par.measEvery == 0 )
-                        fprintf(foutfile,"FERMMEASTIME  %f \n",fermionMeasureTiming);
-                    fclose(foutfile);
-                }
-
-            }
-
-
+            
+            struct timeval now;
+            gettimeofday(&now,NULL);
             double total_duration = (double) 
-                (tend_cycle.tv_sec - tinit.tv_sec)+
-                (double)(tend_cycle.tv_usec - tinit.tv_usec)/1.0e6;
-            double max_expected_duration_with_another_cycle = 
-                total_duration + 2*max_cycle_duration ;
+                (now.tv_sec - mc_params.start_time.tv_sec)+
+                (double)(now.tv_usec - mc_params.start_time.tv_usec)/1.0e6;
 
-
-            if(fermionMeasureTiming > 0)
-                fm_par.expMeasLoadRatio = fermionMeasureTiming / cycle_duration;
-
-            if(conf_id_iter+1 % fm_par.measEvery == 0 )
-                max_expected_duration_with_another_cycle += 
-                    max_cycle_duration*fm_par.expMeasLoadRatio;
-            // just to be sure
-
+            double max_expected_duration_with_another_cycle;
+            if(GPSTATUS_UPDATE == mc_params.next_gps){
+               max_expected_duration_with_another_cycle = 
+                    total_duration + 2*mc_params.max_update_time;
+            }
+            if(GPSTATUS_FERMION_MEASURES == mc_params.next_gps){
+               max_expected_duration_with_another_cycle = 
+                    total_duration + 2*mc_params.max_flavour_cycle_time;
+            }
 
             if(max_expected_duration_with_another_cycle > mc_params.MaxRunTimeS){
                 printf("Time is running out (%d of %d seconds elapsed),",
@@ -648,11 +637,10 @@ create(glocal_staples_f[0:8]) create(gipdot_f[0:8])
                 printf(" shutting down now.\n");
                 printf("Total max expected duration: %d seconds",
                         (int) max_expected_duration_with_another_cycle);
-                printf("(%d elapsed now, 2 * %d maximum expected)\n",(int) total_duration,
-                        (int) max_cycle_duration);
+                printf("(%d elapsed now)\n",(int) total_duration);
                 //https://www.youtube.com/watch?v=MfGhlVcrc8U
                 // but without that much pathos
-                run_condition = 0;
+                mc_params.run_condition = RUN_CONDITION_TERMINATE;
             }
 
             // program exits if MaxConfIdIter is reached
@@ -661,32 +649,32 @@ create(glocal_staples_f[0:8]) create(gipdot_f[0:8])
                 printf("%s - MaxConfIdIter=%d reached, job done!",
                         devinfo.myrankstr, mc_params.MaxConfIdIter);
                 printf("%s - shutting down now.\n", devinfo.myrankstr);
-                run_condition = 0;
+                mc_params.run_condition = RUN_CONDITION_TERMINATE;
             }
+            // program exits if MTraj is reached
+            if( id_iter > (mc_params.ntraj+id_iter_offset)){
+                printf("%s - NTraj=%d reached, job done!",
+                        devinfo.myrankstr, mc_params.ntraj);
+                printf("%s - shutting down now.\n", devinfo.myrankstr);
+                mc_params.run_condition = RUN_CONDITION_TERMINATE;
+            }
+
         }
 #ifdef MULTIDEVICE
 
-        MPI_Bcast((void*)&run_condition,1,MPI_INT,0,MPI_COMM_WORLD);
-        printf("MPI%02d - Broadcast of run %d condition from master...\n",
-                devinfo.myrank, run_condition);
+        MPI_Bcast((void*)&(mc_params.run_condition),1,MPI_INT,0,MPI_COMM_WORLD);
+        printf("MPI%02d - Broadcast of run condition %d from master...\n",
+                devinfo.myrank, mc_params.run_condition);
+        MPI_Bcast((void*)&(mc_params.next_gps),1,MPI_INT,0,MPI_COMM_WORLD);
+        printf("MPI%02d - Broadcast of next global program status %d from master...\n",
+                devinfo.myrank, mc_params.next_gps);
+
 #endif
-        if(run_condition == 0) break;
 
-    }// id_iter loop ends here             
+    }// while id_iter loop ends here             
 
-    //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
-
-    if(debug_settings.SaveAllAtEnd){
-        if(mc_params.ntraj > 0 ){
-            save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
-                    debug_settings.use_ildg );
-        }
-        saverand_tofile(mc_params.RandGenStatusFilename);
-    }
-    else 
-        printf(
-                "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
-    //-------------------------------------------------//
+    if(0 == devinfo.myrank)
+        save_global_program_status();
 
 
     printf("MPI%02d: Double precision free [CORE]\n", devinfo.myrank);

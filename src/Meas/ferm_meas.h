@@ -12,8 +12,6 @@
 typedef struct ferm_meas_param_t{
 
     int measEvery;
-    double expMeasLoadRatio; // the ratio of expected duration of measurements 
-                             // on the update time
     char fermionic_outfilename[50];
     char fermionic_outfile_header[1000];
     int SingleInvNVectors, DoubleInvNVectorsChiral;
