@@ -41,11 +41,17 @@ void init_global_program_status(){
 void save_global_program_status(){
 
     FILE * gps_file = fopen(mc_params.statusFileName, "w");  
-    fprintf(gps_file,"%d %lf %lf %d",
+    fprintf(gps_file,"%d %lf %lf %d\n",
             mc_params.next_gps,
             mc_params.max_flavour_cycle_time,
             mc_params.max_update_time,
             mc_params.measures_done);
+
+    fprintf(gps_file,"#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n\
+#mc_params.max_update_time,mc_params.measures_done\n");
+
+
+
 
     fclose(gps_file);
 
