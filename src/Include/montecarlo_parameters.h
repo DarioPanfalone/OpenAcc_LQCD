@@ -7,6 +7,7 @@
 
 #define GPSTATUS_UPDATE 1 
 #define RUN_CONDITION_TERMINATE 0
+#define RUN_CONDITION_GO 1
 #define GPSTATUS_FERMION_MEASURES 2
 
 typedef struct MC_PARAM_T{

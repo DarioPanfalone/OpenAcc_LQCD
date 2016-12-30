@@ -69,6 +69,12 @@
 int conf_id_iter;
 int verbosity_lv;
 
+
+
+
+
+
+
 int main(int argc, char* argv[]){
 
     gettimeofday ( &(mc_params.start_time), NULL );
@@ -348,36 +354,36 @@ int main(int argc, char* argv[]){
 
 
 
-            if(0==devinfo.myrank){
+                if(0==devinfo.myrank){
 
-                if(1 == mc_params.JarzynskiMode)
-                    printf("\n\nJarzynskiMode - DIRECT - From bz=%f to bz=%f+1 in %d steps.\n",
-                            backfield_parameters.bz , backfield_parameters.bz, 
-                            mc_params.MaxConfIdIter);
-                if(-1 == mc_params.JarzynskiMode)
-                    printf("\n\nJarzynskiMode - REVERSE - From bz=%f to bz=%f-1 in %d steps.\n",
-                            backfield_parameters.bz , backfield_parameters.bz, 
-                            mc_params.MaxConfIdIter);
+                    if(1 == mc_params.JarzynskiMode)
+                        printf("\n\nJarzynskiMode - DIRECT - From bz=%f to bz=%f+1 in %d steps.\n",
+                                backfield_parameters.bz , backfield_parameters.bz, 
+                                mc_params.MaxConfIdIter);
+                    if(-1 == mc_params.JarzynskiMode)
+                        printf("\n\nJarzynskiMode - REVERSE - From bz=%f to bz=%f-1 in %d steps.\n",
+                                backfield_parameters.bz , backfield_parameters.bz, 
+                                mc_params.MaxConfIdIter);
 
 
-                printf("JarzynskiMode, iteration %d/%d (%d max for this run)\n",
-                        id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
-                printf("JarzynskiMode - current bz value : %f\n", new_backfield_parameters.bz);
-            }
+                    printf("JarzynskiMode, iteration %d/%d (%d max for this run)\n",
+                            id_iter,mc_params.MaxConfIdIter,mc_params.ntraj);
+                    printf("JarzynskiMode - current bz value : %f\n", new_backfield_parameters.bz);
+                }
 
-            init_all_u1_phases(new_backfield_parameters,fermions_parameters);
+                init_all_u1_phases(new_backfield_parameters,fermions_parameters);
 #pragma acc update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
 #pragma acc update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
 
-        }
+            }
 
 
-        check_unitarity_device(conf_acc,&max_unitarity_deviation,
-                &avg_unitarity_deviation);
-        printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
-                devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
-        accettate_therm_old = accettate_therm;
-        accettate_metro_old = accettate_metro;
+            check_unitarity_device(conf_acc,&max_unitarity_deviation,
+                    &avg_unitarity_deviation);
+            printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
+                    devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
+            accettate_therm_old = accettate_therm;
+            accettate_metro_old = accettate_metro;
 
 
             if(devinfo.myrank ==0 ){
@@ -415,7 +421,7 @@ int main(int argc, char* argv[]){
             id_iter++;
             conf_id_iter++;
             //-------------------------------------------------// 
-            
+
             //--------- MISURA ROBA DI GAUGE ------------------//
             plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
@@ -456,7 +462,7 @@ int main(int argc, char* argv[]){
             //-------------------------------------------------// 
 
             //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
-            if(conf_id_iter%mc_params.storeconfinterval==0 && debug_settings.SaveAllAtEnd){
+            if(conf_id_iter%mc_params.storeconfinterval==0){ 
                 char tempname[50];
                 char serial[10];
                 strcpy(tempname,mc_params.store_conf_name);
@@ -472,20 +478,20 @@ int main(int argc, char* argv[]){
                 printf("MPI%02d - Storing rng status in %s.\n", 
                         devinfo.myrank , tempname);
                 saverand_tofile(tempname);
-            } else printf(
-                    "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+            }
 
-            if(conf_id_iter%mc_params.saveconfinterval==0 && debug_settings.SaveAllAtEnd){
-                printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
-                        mc_params.save_conf_name);
-                save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
-                        debug_settings.use_ildg);
-                printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
-                        mc_params.RandGenStatusFilename);
-                saverand_tofile(mc_params.RandGenStatusFilename);
-            }else printf(
-                    "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
-
+            if(conf_id_iter%mc_params.saveconfinterval==0){
+                if (debug_settings.SaveAllAtEnd){
+                    printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
+                            mc_params.save_conf_name);
+                    save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
+                            debug_settings.use_ildg);
+                    printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
+                            mc_params.RandGenStatusFilename);
+                    saverand_tofile(mc_params.RandGenStatusFilename);
+                }else printf(
+                        "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+            }
             //-------------------------------------------------//
 
             gettimeofday(&tend_cycle, NULL);
@@ -570,7 +576,7 @@ int main(int argc, char* argv[]){
             }
 
             //---- SAVES RNG STATUS TO FILE ----//
-            if(conf_id_iter%mc_params.storeconfinterval==0 && debug_settings.SaveAllAtEnd){
+            if(conf_id_iter%mc_params.storeconfinterval==0){
                 char tempname[50];
                 char serial[10];
                 strcpy(tempname,mc_params.RandGenStatusFilename);
@@ -579,16 +585,17 @@ int main(int argc, char* argv[]){
                 printf("MPI%02d - Storing rng status in %s.\n", 
                         devinfo.myrank , tempname);
                 saverand_tofile(tempname);
-            } else printf(
-                    "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING RNG STATUS.\n\n\n", devinfo.myrank);
+            } 
 
-            if(conf_id_iter%mc_params.saveconfinterval==0 && debug_settings.SaveAllAtEnd){
+            if(conf_id_iter%mc_params.saveconfinterval==0){
+               if( debug_settings.SaveAllAtEnd){
                 printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
                         mc_params.RandGenStatusFilename);
                 saverand_tofile(mc_params.RandGenStatusFilename);
-            }else printf(
+               }
+               else printf(
                     "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING RNG STATUS.\n\n\n", devinfo.myrank);
-
+            }
             //-------------------------------------------------//
 
         }
@@ -624,11 +631,14 @@ int main(int argc, char* argv[]){
             double max_expected_duration_with_another_cycle;
             if(GPSTATUS_UPDATE == mc_params.next_gps){
                max_expected_duration_with_another_cycle = 
-                    total_duration + 2*mc_params.max_update_time;
+                    total_duration + 1.3*mc_params.max_update_time;
+               printf("Next step, update : %ds\n",(int) mc_params.max_update_time);
             }
             if(GPSTATUS_FERMION_MEASURES == mc_params.next_gps){
                max_expected_duration_with_another_cycle = 
                     total_duration + 2*mc_params.max_flavour_cycle_time;
+               printf("Next step, flavour measure cycle : %ds\n",
+                       (int) mc_params.max_flavour_cycle_time);
             }
 
             if(max_expected_duration_with_another_cycle > mc_params.MaxRunTimeS){
@@ -673,8 +683,27 @@ int main(int argc, char* argv[]){
 
     }// while id_iter loop ends here             
 
-    if(0 == devinfo.myrank)
+
+    //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
+
+    if (debug_settings.SaveAllAtEnd){
+        printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
+                mc_params.save_conf_name);
+        save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
+                debug_settings.use_ildg);
+        printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
+                mc_params.RandGenStatusFilename);
+        saverand_tofile(mc_params.RandGenStatusFilename);
+    }else printf(
+            "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+    //-------------------------------------------------//
+
+
+
+    if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd)
         save_global_program_status();
+
+
 
 
     printf("MPI%02d: Double precision free [CORE]\n", devinfo.myrank);

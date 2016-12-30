@@ -451,7 +451,8 @@ void fermion_measures( su3_soa * tconf_acc,
             double max_expected_duration_with_another_cycle = 
                 total_duration + 2*mc_params.max_flavour_cycle_time;
 
-            if(max_expected_duration_with_another_cycle > mc_params.MaxRunTimeS){
+            if( 0 == devinfo.myrank  && 
+                    max_expected_duration_with_another_cycle > mc_params.MaxRunTimeS){
                 printf("Time is running out (%d of %d seconds elapsed),",
                         (int) total_duration, (int) mc_params.MaxRunTimeS);
                 printf(" shutting down now.\n");
@@ -464,6 +465,23 @@ void fermion_measures( su3_soa * tconf_acc,
                 mc_params.run_condition = RUN_CONDITION_TERMINATE;
             
             }
+
+            if(0 == devinfo.myrank && RUN_CONDITION_TERMINATE != mc_params.run_condition){
+                FILE * test_stop = fopen("stop","r");
+                if(test_stop){
+                    fclose(test_stop);
+                    printf("File  \'stop\' found, stopping cycle now.\n");
+                    mc_params.run_condition = RUN_CONDITION_TERMINATE;
+                }
+            }
+
+
+
+#ifdef MULTIDEVICE
+        MPI_Bcast((void*)&(mc_params.run_condition),1,MPI_INT,0,MPI_COMM_WORLD);
+        printf("MPI%02d - Broadcast of run condition %d from master...\n",
+                devinfo.myrank, mc_params.run_condition);
+#endif
             
             mc_params.measures_done = icopy;
 

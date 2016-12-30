@@ -35,6 +35,7 @@ void init_global_program_status(){
         mc_params.measures_done = 0 ;
     }
 
+    mc_params.run_condition = RUN_CONDITION_GO; 
 }
 
 void save_global_program_status(){
