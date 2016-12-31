@@ -43,8 +43,6 @@
 
 extern int verbosity_lv;
 
-extern tamat_soa_f * ipdot_f_old_f; // see sp_alloc_vars.c
-
 void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_f    * Sigma, // la var globale e' auxbis_conf_acc_f [sia input che ouptput]
         __restrict thmat_soa_f  * Lambda, // la var globale e' aux_th_f
         __restrict tamat_soa_f  * QA, // la var globale e' aux_ta_f
@@ -295,11 +293,14 @@ dt_preker_to_postker,devinfo.myrank);
 
 
         float  force_norm, diff_force_norm;
-        if((md_diag_count_fermion % debug_settings.md_diag_print_every) == 0)
+        if((md_diag_count_fermion % debug_settings.md_diag_print_every) == 0){
+            ipdot_f_reset = 0;
             copy_ipdot_into_old_f(tipdot_acc,ipdot_f_old_f);
+        }
 
 
-        if((md_diag_count_fermion % debug_settings.md_diag_print_every) == 1){
+        if((md_diag_count_fermion % debug_settings.md_diag_print_every) == 1 &&
+                ipdot_f_reset == 0){
             force_norm = calc_force_norm_f(tipdot_acc);
             diff_force_norm = calc_diff_force_norm_f(tipdot_acc,ipdot_f_old_f);
 

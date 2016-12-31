@@ -12,7 +12,6 @@
 #endif
 
 
-
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
 							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
 							   __restrict tamat_soa  * QA, // la var globale e' aux_ta

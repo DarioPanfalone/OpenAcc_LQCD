@@ -43,6 +43,7 @@ tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
 tamat_soa * ipdot_g_old;// for HMC diagnostics
 tamat_soa * ipdot_f_old;// for HMC diagnostics
 
+
 su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases 
 // in fermion related computation (with or without stouting)
 

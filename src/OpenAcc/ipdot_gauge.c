@@ -1,6 +1,7 @@
 #ifndef IPDOT_GAUGE_C
 #define IPDOT_GAUGE_C
 
+#include "./md_parameters.h"
 #include "./struct_c_def.h"
 #include "./su3_utilities.h"
 #include "./su3_measurements.h"
@@ -9,7 +10,7 @@
 #include "./ipdot_gauge.h"
 #include "./geometry.h"
 #include "../Include/debug.h"
-
+#include "./alloc_vars.h"
 
 #include "sys/time.h"
 //#define TIMING_STAPLES
@@ -20,8 +21,6 @@ extern int verbosity_lv;
 #include "../DbgTools/dbgtools.h"
 
 
-
-extern tamat_soa * ipdot_g_old; // see alloc_vars.c
 
 void calc_ipdot_gauge_soloopenacc_std( 
         __restrict const su3_soa * const tconf_acc, 
@@ -125,12 +124,15 @@ void calc_ipdot_gauge_soloopenacc(
 
         double  force_norm, diff_force_norm;
 
-        if((md_diag_count_gauge % debug_settings.md_diag_print_every) == 0)
+        if((md_diag_count_gauge % 
+                    (debug_settings.md_diag_print_every * md_parameters.gauge_scale )) == 0){
+            ipdot_g_reset = 0;
             copy_ipdot_into_old(tipdot,ipdot_g_old);
+        }
 
-        if((md_diag_count_gauge % debug_settings.md_diag_print_every) == 1){
-
-
+        if((md_diag_count_gauge % 
+                    (debug_settings.md_diag_print_every * md_parameters.gauge_scale )) == 1 && 
+               ipdot_g_reset == 0 ){
 
             force_norm = calc_force_norm(tipdot);
             diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old);

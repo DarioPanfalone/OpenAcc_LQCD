@@ -484,6 +484,9 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 {
     if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_SOLOOPENACC\n");
 
+    ipdot_f_reset = 1;
+    ipdot_g_reset = 1;
+
     vec3_soa * invOuts = tferm_shiftmulti_acc;
     nMdInversionPerformed = 0; // used to recycle inversion results
                                // after first force calculation is done

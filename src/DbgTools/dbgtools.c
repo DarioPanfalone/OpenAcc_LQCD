@@ -17,6 +17,12 @@
 
 #define acc_pi 3.14159265358979323846
 
+int ipdot_f_reset; // flag to be set to 1 when md starts, 
+            // and to be set to zero when first force calculation happens
+            // if it is 1 force difference is not calculated.
+int ipdot_g_reset; // same
+
+
 void save_gl_fermion(global_vec3_soa * const fermion, 
         const char* nomefile)
 {

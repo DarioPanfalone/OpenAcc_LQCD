@@ -2,6 +2,12 @@
 #define DBGTOOLS_H_
 
 #include "../OpenAcc/struct_c_def.h"
+
+extern int ipdot_f_reset; // flag to be set to 1 when md starts, 
+                   // and to be set to zero when first force calculation happens
+                   // if it is 1 force difference is not calculated.
+extern int ipdot_g_reset; // same
+
 void print_vec3_soa_wrapper(vec3_soa * const fermion,
         const char* nomefile);
 int read_vec3_soa_wrapper(vec3_soa * fermion, 

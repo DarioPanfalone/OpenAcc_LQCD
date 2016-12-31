@@ -35,6 +35,9 @@ extern thmat_soa * momenta_backup;// GAUGE FIELD EVOLUTION - REVERSIBILITY TEST
 extern tamat_soa * ipdot_acc;// GAUGE FIELD EVOLUTION
 extern tamat_soa * ipdot_g_old;// for HMC diagnostics
 extern tamat_soa * ipdot_f_old;// for HMC diagnostics
+
+
+
 extern su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases 
                       // in fermion related computation (with or without stouting)
 
