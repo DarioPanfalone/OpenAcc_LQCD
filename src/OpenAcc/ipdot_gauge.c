@@ -123,32 +123,52 @@ void calc_ipdot_gauge_soloopenacc(
 
 
         double  force_norm, diff_force_norm;
+        int printEvery = debug_settings.md_diag_print_every*md_parameters.gauge_scale;
+#ifdef MULTIDEVICE
+        if(devinfo.nranks != 1 && devinfo.async_comm_gauge)
+            printEvery /= md_parameters.gauge_scale;
+#endif
 
-        if((md_diag_count_gauge % 
-                    (debug_settings.md_diag_print_every * md_parameters.gauge_scale )) == 0){
+        if((md_diag_count_gauge % printEvery) == 0){
             ipdot_g_reset = 0;
             copy_ipdot_into_old(tipdot,ipdot_g_old);
         }
 
-        if((md_diag_count_gauge % 
-                    (debug_settings.md_diag_print_every * md_parameters.gauge_scale )) == 1 && 
-               ipdot_g_reset == 0 ){
+        if((md_diag_count_gauge % printEvery) == 1 && ipdot_g_reset == 0 ){
 
             force_norm = calc_force_norm(tipdot);
             diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old);
+
+            double diff_force_norm_corrected = diff_force_norm;
+#ifdef MULTIDEVICE
+            if(devinfo.nranks != 1 && devinfo.async_comm_gauge)
+                diff_force_norm_corrected /= (2*md_parameters.gauge_scale+1); 
+#endif
 
 
             if(0 == devinfo.myrank){
                 FILE *foutfile = 
                     fopen(debug_settings.diagnostics_filename,"at");
-                fprintf(foutfile,"%d\tGFHN %e\n%d\tDGFHN %e\n",
+                fprintf(foutfile,"%d\tGFHN %e\n%d\tDGFHN %e",
                         md_diag_count_gauge, force_norm,
-                        md_diag_count_gauge, diff_force_norm);
+                        md_diag_count_gauge, diff_force_norm_corrected);
+#ifdef MULTIDEVICE
+                if(devinfo.nranks != 1 && devinfo.async_comm_gauge)
+                    fprintf(foutfile,"  !!! [Not divided by (2ngs+1): %e ]", diff_force_norm);
+#endif
+                fprintf(foutfile,"\n");
+
                 fclose(foutfile);
 
-                if(verbosity_lv > 1)
+                if(verbosity_lv > 1){
                     printf("\t\t\tGauge Force Half Norm: %e, Diff with previous: %e \n", 
                             force_norm, diff_force_norm);
+#ifdef MULTIDEVICE
+                    if(devinfo.nranks != 1 && devinfo.async_comm_gauge)
+                        printf("\t\t\t (Diff with end of previous gauge cycle)");
+#endif
+                }
+
             }
         }
 

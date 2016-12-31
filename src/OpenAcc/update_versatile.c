@@ -621,7 +621,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         fprintf(foutfile,"TOTUPDATETIME  %f \n",dt_tot);
         fprintf(foutfile,"OLDCONFSAVETIME  %f \n",dt_saveoldconf);
         fprintf(foutfile,"MDSETUPTIME    %f \n",dt_mdsetup);
-        fprintf(foutfile,"MDTIME %f \n",mdtime);
+        fprintf(foutfile,"MDTIME %f (STEPS: %d , GAUGESTEPS: %d )\n",mdtime,md_parameters.no_md,md_parameters.gauge_scale);
         fprintf(foutfile,"METROTIME %f \n",dt_metropolis);
         fprintf(foutfile,"CG-M-iters[TOT] %d \n",multishift_invert_iterations);
         fprintf(foutfile,"CG-M-iters[MD]  %d \n",multishift_iterations_md);
