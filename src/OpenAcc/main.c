@@ -706,8 +706,9 @@ int main(int argc, char* argv[]){
 
 
 
-    if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd)
+    if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd){
         save_global_program_status();
+    }
 
 
 

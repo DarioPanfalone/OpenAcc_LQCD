@@ -19,7 +19,7 @@ extern int verbosity_lv;
 
 #include "../Mpi/multidev.h"
 #include "../DbgTools/dbgtools.h"
-
+#include "./action.h"
 
 
 void calc_ipdot_gauge_soloopenacc_std( 
@@ -136,8 +136,8 @@ void calc_ipdot_gauge_soloopenacc(
 
         if((md_diag_count_gauge % printEvery) == 1 && ipdot_g_reset == 0 ){
 
-            force_norm = calc_force_norm(tipdot);
-            diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old);
+            force_norm = calc_force_norm(tipdot)*BETA_BY_THREE;
+            diff_force_norm = calc_diff_force_norm(tipdot,ipdot_g_old)*BETA_BY_THREE;
 
             double diff_force_norm_corrected = diff_force_norm;
 #ifdef MULTIDEVICE

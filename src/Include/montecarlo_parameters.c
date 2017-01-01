@@ -36,9 +36,33 @@ void init_global_program_status(){
     }
 
     mc_params.run_condition = RUN_CONDITION_GO; 
+
+    printf("%d %lf %lf %d\n",
+            mc_params.next_gps,
+            mc_params.max_flavour_cycle_time,
+            mc_params.max_update_time,
+            mc_params.measures_done);
+
+    printf("#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n\
+#mc_params.max_update_time,mc_params.measures_done\n");
+
+
 }
 
 void save_global_program_status(){
+
+    printf("Saving global program status...\n");
+    printf("%d %lf %lf %d\n",
+            mc_params.next_gps,
+            mc_params.max_flavour_cycle_time,
+            mc_params.max_update_time,
+            mc_params.measures_done);
+
+    printf("#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n\
+#mc_params.max_update_time,mc_params.measures_done\n");
+
+
+
 
     FILE * gps_file = fopen(mc_params.statusFileName, "w");  
     fprintf(gps_file,"%d %lf %lf %d\n",
