@@ -11,7 +11,7 @@
 #include "../Include/fermion_parameters.h"
 #include "../Include/montecarlo_parameters.h"
 #include "../Include/setting_file_parser.h"
-#include "../Include/tell_geom_defines.c"
+#include "../Include/tell_geom_defines.h"
 #include "../Mpi/multidev.h"
 #include "../OpenAcc/action.h"
 #include "../OpenAcc/alloc_vars.h"

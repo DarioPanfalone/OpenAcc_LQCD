@@ -1,6 +1,7 @@
 #ifndef _MONTECARLO_PARAMS_H_
 #define _MONTECARLO_PARAMS_H_
 
+
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
@@ -28,8 +29,8 @@ typedef struct MC_PARAM_T{
     // these are not read from input file
     int next_gps; //next_global_program_status
     struct timeval start_time;
-    double max_flavour_cycle_time;
-    double max_update_time;
+    float max_flavour_cycle_time;
+    float max_update_time;
     int measures_done;
 
     int run_condition;
@@ -39,6 +40,6 @@ typedef struct MC_PARAM_T{
 extern mc_params_t mc_params;
 
 void init_global_program_status();
-void save_global_program_status();
+void save_global_program_status(mc_params_t mcp);
 
 #endif

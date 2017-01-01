@@ -1,11 +1,20 @@
 #ifndef _MONTECARLO_PARAMS_C_
 #define _MONTECARLO_PARAMS_C_
 
-#include <stdio.h>
+#include <stdlib.h> // THIS APPARENTLY USELESS INCLUDE MUST BE HERE.
+                    // EXACTLY HERE, BEFORE 'include "./montecarlo_parameters.h'.
+                    // Otherwise, printf, fscanf and fprintf DO NOT 
+                    // work correctly while operating on the MC_PARAM_T structure,
+                    // while compiling with PGCC.
+                    // Not moving it into 'montecarlo_parameters.h' itself because
+                    // I don't completely understand the issue here 
+                    // trying to be as minimal as possible
+#include "./montecarlo_parameters.h" 
+#include <stdio.h>                   
+#include "./common_defines.h"        
+#include "../Mpi/multidev.h"         
 
-#include "./montecarlo_parameters.h"
-#include "./common_defines.h"
-#include "../Mpi/multidev.h"
+
 
 mc_params_t mc_params;
 
@@ -16,11 +25,11 @@ void init_global_program_status(){
 
     FILE * gps_file = fopen(mc_params.statusFileName, "r");  
     if(gps_file){
-        fscanf(gps_file,"%d %lf %lf %d",
-                &mc_params.next_gps,
-                &mc_params.max_flavour_cycle_time,
-                &mc_params.max_update_time,
-                &mc_params.measures_done);
+        fscanf(gps_file,"%d %f %f %d",
+                &(mc_params.next_gps),
+                &(mc_params.max_flavour_cycle_time),
+                &(mc_params.max_update_time),
+                &(mc_params.measures_done));
 
         fclose(gps_file);
     }
@@ -30,14 +39,15 @@ void init_global_program_status(){
             devinfo.myrank, mc_params.statusFileName);
 
         mc_params.next_gps  = GPSTATUS_UPDATE;
-        mc_params.max_flavour_cycle_time = 1.0;
-        mc_params.max_update_time = 1.0;
+        mc_params.max_flavour_cycle_time = 1.0f;
+        mc_params.max_update_time = 1.0f;
         mc_params.measures_done = 0 ;
     }
 
     mc_params.run_condition = RUN_CONDITION_GO; 
+    printf("run_condition %d ",mc_params.run_condition);
 
-    printf("%d %lf %lf %d\n",
+    printf("%d %f %f %d\n",
             mc_params.next_gps,
             mc_params.max_flavour_cycle_time,
             mc_params.max_update_time,
@@ -49,33 +59,28 @@ void init_global_program_status(){
 
 }
 
-void save_global_program_status(){
+void save_global_program_status(mc_params_t mcp){
 
     printf("Saving global program status...\n");
-    printf("%d %lf %lf %d\n",
-            mc_params.next_gps,
-            mc_params.max_flavour_cycle_time,
-            mc_params.max_update_time,
-            mc_params.measures_done);
+    printf("%d %f %f %d\n",
+            mcp.next_gps,
+            mcp.max_flavour_cycle_time,
+            mcp.max_update_time,
+            mcp.measures_done);
 
     printf("#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n\
 #mc_params.max_update_time,mc_params.measures_done\n");
 
 
-
-
     FILE * gps_file = fopen(mc_params.statusFileName, "w");  
-    fprintf(gps_file,"%d %lf %lf %d\n",
-            mc_params.next_gps,
-            mc_params.max_flavour_cycle_time,
-            mc_params.max_update_time,
-            mc_params.measures_done);
+    fprintf(gps_file,"%d %f %f %d\n",
+            mcp.next_gps,
+            mcp.max_flavour_cycle_time,
+            mcp.max_update_time,
+            mcp.measures_done);
 
     fprintf(gps_file,"#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n\
 #mc_params.max_update_time,mc_params.measures_done\n");
-
-
-
 
     fclose(gps_file);
 

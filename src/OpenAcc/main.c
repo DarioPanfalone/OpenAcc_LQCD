@@ -20,7 +20,7 @@
 #include "../Include/montecarlo_parameters.h"
 #include "../Include/inverter_tricks.h"
 #include "../Include/setting_file_parser.h"
-#include "../Include/tell_geom_defines.c"
+#include "../Include/tell_geom_defines.h"
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
 #include "../Meas/polyakov.h"
@@ -336,7 +336,10 @@ int main(int argc, char* argv[]){
 
     int id_iter=id_iter_offset;
     
-    init_global_program_status();
+    init_global_program_status(); 
+
+    printf("run_condition: %d\n",mc_params.run_condition) ;
+  
     while ( RUN_CONDITION_TERMINATE != mc_params.run_condition)
     {
 
@@ -505,6 +508,7 @@ int main(int argc, char* argv[]){
             double update_time = (double) 
                 (tend_cycle.tv_sec - tstart_cycle.tv_sec)+
                 (double)(tend_cycle.tv_usec - tstart_cycle.tv_usec)/1.0e6;
+            
             mc_params.max_update_time = (update_time > mc_params.max_update_time)?
                 update_time :mc_params.max_update_time;
 
@@ -707,8 +711,27 @@ int main(int argc, char* argv[]){
 
 
     if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd){
-        save_global_program_status();
-    }
+/*
+	    printf("Saving global program status...\n");
+	    printf("%d %f %f %d\n",
+			    mc_params.next_gps,
+			    mc_params.max_flavour_cycle_time,
+			    mc_params.max_update_time,
+			    mc_params.measures_done);
+
+	    printf("#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n#mc_params.max_update_time,mc_params.measures_done\n");
+
+	    FILE * gps_file = fopen(mc_params.statusFileName, "w");  
+	    fprintf(gps_file,"%d %f %f %d\n",
+			    mc_params.next_gps,
+			    mc_params.max_flavour_cycle_time,
+			    mc_params.max_update_time,
+			    mc_params.measures_done);
+	    fprintf(gps_file,"#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n#mc_params.max_update_time,mc_params.measures_done\n");
+	    fclose(gps_file);
+*/
+	    save_global_program_status(mc_params); // THIS FUNCTION IN SOME CASES DOES NOT WORK
+     }
 
 
 
