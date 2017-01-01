@@ -628,7 +628,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         fprintf(foutfile,"CG-M-iters[FI]  %d \n",multishift_iterations_before_md);
         fprintf(foutfile,"CG-M-iters[LI]  %d \n",multishift_invert_iterations-
                 multishift_iterations_after_md);
-        fprintf(foutfile,"ACCEPTED  %d\n",accettata); 
+        if(metro==1) fprintf(foutfile,"ACCEPTED  %d\n",accettata); 
 
         fprintf(foutfile,"GIPDSTIME %e\n",gauge_mdtimes.calcIpdotTimeBorder      / gauge_mdtimes.count );
         fprintf(foutfile,"GIPDBTIME %e\n",gauge_mdtimes.calcIpdotTimeBulk        / gauge_mdtimes.count );
