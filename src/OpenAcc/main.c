@@ -97,9 +97,8 @@ int main(int argc, char* argv[]){
 
 #ifdef MULTIDEVICE
     if(input_file_read_check){
-        printf("MPI%02d: input file reading failed, finalize...\n",devinfo.myrank);
-        MPI_Finalize();
-        printf("MPI%02d: finalized!\n",devinfo.myrank);
+        printf("MPI%02d: input file reading failed, Aborting...\n",devinfo.myrank);
+        MPI_Abort(MPI_COMM_WORLD,1);
     }else init_multidev1D(&devinfo);
 #else
     devinfo.myrank = 0;
