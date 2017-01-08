@@ -75,8 +75,15 @@ void eo_inversion(inverter_package ip,
 
 void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 
-    strcpy(fmpar->fermionic_outfile_header,"#conf\ticopy\t");
+    strcpy(fmpar->fermionic_outfile_header,"#0.conf\t1.icopy\t");
     int col_count=2;
+    if(1 == fmpar->printPlaqAndRect){
+        char strtocat[200];
+        sprintf(strtocat, "%02d.Plaquette\t%02d.Rectangle\t",col_count,col_count+1);
+        strcat(fmpar->fermionic_outfile_header,strtocat);
+        col_count +=2;
+    }
+
     for(int iflv=0;iflv<alloc_info.NDiffFlavs;iflv++){
         char strtocat[200];
         sprintf(strtocat, "%02d.Reff_%-18s%02d.Imff_%-18s",col_count,
@@ -119,7 +126,6 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 
         }
 
-
     }
     strcat(fmpar->fermionic_outfile_header,"\n");
 
@@ -128,8 +134,9 @@ void set_fermion_file_header(ferm_meas_params * fmpar, ferm_param * tferm_par){
 void fermion_measures( su3_soa * tconf_acc,
         ferm_param * tfermions_parameters,
         ferm_meas_params * tfm_par,
-        double res, int max_cg,
-        int conf_id_iter  ){
+        double res, int max_cg, int conf_id_iter,
+        double plaq, double rect )
+{
     vec3_soa * rnd_e,* rnd_o;
     vec3_soa * chi_e,* chi_o; //results of eo_inversion
     vec3_soa * magchi_e,* magchi_o; //results of eo_inversion
@@ -248,6 +255,9 @@ void fermion_measures( su3_soa * tconf_acc,
                 }
 
                 fprintf(foutfile,"%d\t%d\t",conf_id_iter,icopy);
+                if(1==tfm_par->printPlaqAndRect){
+                    fprintf(foutfile,"%.18lf\t%.18lf\t",plaq,rect);
+                }
             }        
 
             struct timeval pre_flavour_cycle, post_flavour_cycle;

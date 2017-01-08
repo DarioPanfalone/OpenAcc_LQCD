@@ -307,15 +307,6 @@ int main(int argc, char* argv[]){
         printf("\tMEASUREMENTS ONLY ON FILE %s\n", mc_params.save_conf_name);
         printf("\n#################################################\n");
 
-        //--------- MISURA ROBA FERMIONICA ----------------//
-        //
-        if(0 == devinfo.myrank)  printf("Fermion Measurements: see file %s\n",
-                fm_par.fermionic_outfilename);
-        fermion_measures(conf_acc,fermions_parameters,
-                &fm_par, md_parameters.residue_metro, 
-                md_parameters.max_cg_iterations, id_iter_offset);
-
-
         //-------------------------------------------------// 
         //--------- MISURA ROBA DI GAUGE ------------------//
         if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
@@ -326,6 +317,19 @@ int main(int argc, char* argv[]){
         printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
         printf("Rectangle     : %.18lf\n" ,rect/GL_SIZE/3.0/6.0/2.0);
         printf("Polyakov Loop : (%.18lf,%.18lf) \n",creal(poly),cimag(poly));
+
+
+        //--------- MISURA ROBA FERMIONICA ----------------//
+        //
+        if(0 == devinfo.myrank)  printf("Fermion Measurements: see file %s\n",
+                fm_par.fermionic_outfilename);
+        fermion_measures(conf_acc,fermions_parameters,
+                &fm_par, md_parameters.residue_metro, 
+                md_parameters.max_cg_iterations, id_iter_offset,
+                plq,rect);
+
+
+
 
 
     }else printf("MPI%02d: Starting generation of Configurations.\n",
@@ -567,8 +571,8 @@ int main(int argc, char* argv[]){
             gettimeofday(&tf0, NULL);
             fermion_measures(conf_acc,fermions_parameters,
                     &fm_par, md_parameters.residue_metro,
-                    md_parameters.max_cg_iterations,
-                    conf_id_iter) ;
+                    md_parameters.max_cg_iterations,conf_id_iter,
+                    plq,rect) ;
             gettimeofday(&tf1, NULL);
 
             double fermionMeasureTiming =

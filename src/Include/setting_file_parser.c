@@ -34,22 +34,21 @@
 char input_file_str[MAXLINES*MAXLINELENGTH];
 
 //types that can be found in an input file
-#define TYPE_INT 0
-#define TYPE_DOUBLE 1
-#define TYPE_STR 2
+enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES};
 const char * type_strings[]={"(int)", "(double)", "(string)" };
+
 typedef struct par_info_t{
 
     void* par;
-    int type;
+    enum dtype type;
     const char* name;
     const void* default_value;
     const char* comment;
 
 }par_info;
 
-#define NPMGTYPES 12
 #define MAXPMG 20
+
 const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "ActionParameters",         // 0 
     "FlavourParameters",        // 1   
@@ -64,20 +63,21 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "InverterTricks"         ,  // 10
     "TestSettings"              // 11
 };
-#define PMG_ACTION           0
-#define PMG_FERMION          1
-#define PMG_BACKGROUND       2
-#define PMG_MD               3
-#define PMG_MC               4
-#define PMG_GMEAS            5
-#define PMG_FMEAS            6
-#define PMG_DEVICE           7
-#define PMG_GEOMETRY         8
-#define PMG_DEBUG            9
-#define PMG_INVERTER_TRICKS 10
-#define PMG_TESTS           11
-// last number must be NPMGTYPES - 1 !!
-
+enum pmg_types {
+    PMG_ACTION         ,
+    PMG_FERMION        ,
+    PMG_BACKGROUND     ,
+    PMG_MD             ,
+    PMG_MC             ,
+    PMG_GMEAS          ,
+    PMG_FMEAS          ,
+    PMG_DEVICE         ,
+    PMG_GEOMETRY       ,
+    PMG_DEBUG          ,
+    PMG_INVERTER_TRICKS,
+    PMG_TESTS          ,
+    NPMGTYPES};
+    
 
 FILE * helpfile;
 char IGNORE_IT[50];
@@ -581,13 +581,20 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
     const int doubleinv_def = 0;
     const int measEvery_def = 1;
     const char measEvery_comment[] = "#Fermionic measurements will be performed once very MeasEvery times.";
+    const int printPlaqAndRect_def = 0;
+    const char printPlaqAndRect_comment[] = "# Each measurement line will contain the value of the plaquette and the rectangle - reweighting will then be easier.";
+
+
 
     par_info fmp[]={
         (par_info){(void*) &(fmpars->fermionic_outfilename),       TYPE_STR,"FermionicOutfilename",        NULL ,                       NULL},
         (par_info){(void*) &(fmpars->measEvery),                   TYPE_INT,"MeasEvery"           ,(const void*) &measEvery_def,measEvery_comment},
         (par_info){(void*) &(fmpars->SingleInvNVectors),           TYPE_INT,"SingleInvNVectors"   ,        NULL ,                       NULL},
         (par_info){(void*) &(fmpars->DoubleInvNVectorsChiral),     TYPE_INT,"DoubleInvNVectorsChiral",     (const void*) &doubleinv_def,NULL},
-        (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,"DoubleInvNVectorsQuarkNumber",(const void*) &doubleinv_def,NULL}};
+        (par_info){(void*) &(fmpars->DoubleInvNVectorsQuarkNumber),TYPE_INT,"DoubleInvNVectorsQuarkNumber",(const void*) &doubleinv_def,NULL},
+        (par_info){(void*) &(fmpars->printPlaqAndRect),TYPE_INT,"PrintPlaqAndRect",(const void*) &printPlaqAndRect_def,printPlaqAndRect_comment},
+    
+    };
 
 
     // from here on, you should not have to modify anything.

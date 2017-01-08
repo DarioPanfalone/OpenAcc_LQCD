@@ -16,6 +16,7 @@ typedef struct ferm_meas_param_t{
     char fermionic_outfile_header[1000];
     int SingleInvNVectors, DoubleInvNVectorsChiral;
     int DoubleInvNVectorsQuarkNumber;
+    int printPlaqAndRect ;
 } ferm_meas_params;
 
 extern ferm_meas_params fm_par;
@@ -37,7 +38,8 @@ void eo_inversion(inverter_package ip,
 void fermion_measures(su3_soa * tconf_acc,
 			      ferm_param * tfermions_parameters, 
                   ferm_meas_params * tfm_par,
-                  double res, int max_cg, int conf_id_iter);
+                  double res, int max_cg, int conf_id_iter,
+                  double plaq, double rect);
 
 
 #endif
