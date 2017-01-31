@@ -573,7 +573,9 @@ int main(int argc, char* argv[]){
             fermion_measures(conf_acc,fermions_parameters,
                     &fm_par, md_parameters.residue_metro,
                     md_parameters.max_cg_iterations,conf_id_iter,
-                    plq,rect) ;
+                    plq/GL_SIZE/3.0/6.0,
+                    rect/GL_SIZE/3.0/6.0/2.0);   
+
             gettimeofday(&tf1, NULL);
 
             double fermionMeasureTiming =
