@@ -15,7 +15,10 @@
 
 
 
-int print_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int conf_id_iter);
+int print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,
+        int conf_id_iter,double_soa *back_phases);
+
+
 int print_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,
         int conf_id_iter);
 
@@ -37,7 +40,7 @@ inline int save_conf(global_su3_soa * const conf, const char* nomefile,
         printf("Using ILDG format.\n");
         return print_su3_soa_ildg_binary(conf,nomefile,conf_id_iter);
     }
-    else return print_su3_soa_ASCII(conf,nomefile,conf_id_iter);
+    else return print_su3_soa_ASCII(conf,nomefile,conf_id_iter,NULL);
 
 }
 
