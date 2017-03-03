@@ -289,7 +289,6 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 int reads = sscanf(filelines[iline],"%s", word);
                 if(reads==1){
                     if(0==devinfo.myrank)
-                        printf("DIOPORCO\n") ; // GOLIARDIA
                         printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
                     printf("%s\n", filelines[iline]);
                     return 1;
