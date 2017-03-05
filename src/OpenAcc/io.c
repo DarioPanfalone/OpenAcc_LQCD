@@ -486,9 +486,9 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
 
     sprintf(ildg_format_str,
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
-            <ildgFormat xmlns=\"http://www.lqcd.org/ildg\"\n\
-            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n\
-            xsi:schemaLocation=\"http://www.lqcd.org/ildg filefmt.xsd\">\n\
+           <ildgFormat xmlns=\"http://www.lqcd.org/ildg\"\n\
+           xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n\
+           xsi:schemaLocation=\"http://www.lqcd.org/ildg filefmt.xsd\">\n\
             <version>1.0</version>\n\
             <field>su3gauge</field>\n\
             <precision>64</precision>\n\
