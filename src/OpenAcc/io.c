@@ -486,9 +486,9 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
 
     sprintf(ildg_format_str,
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
-           <ildgFormat xmlns=\"http://www.lqcd.org/ildg\"\n\
-           xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n\
-           xsi:schemaLocation=\"http://www.lqcd.org/ildg filefmt.xsd\">\n\
+            <ildgFormat xmlns=\"http://www.lqcd.org/ildg\"\n\
+            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n\
+            xsi:schemaLocation=\"http://www.lqcd.org/ildg filefmt.xsd\">\n\
             <version>1.0</version>\n\
             <field>su3gauge</field>\n\
             <precision>64</precision>\n\
@@ -501,7 +501,8 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
     uint32_t magic_number =  0x456789ab;
     uint16_t version = 1;
     uint16_t mbme_flag = 0;
-    uint64_t len64 = len;
+    off_t missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
+    uint64_t len64 = len + missing_bytes;
 
     if(conf_machine_endianness_disagreement){
         uint32swe(&magic_number);
@@ -517,7 +518,6 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
     char pad[8] = {0,0,0,0,0,0,0,0};
 
     // padding to 8 bytes
-    off_t missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
     fwrite(pad,1,missing_bytes,fp);
 
 
@@ -525,7 +525,8 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
     char MD_traj_str[15];
     sprintf(MD_traj_str,"%d",conf_id_iter);
     len = strlen(MD_traj_str);
-    len64 = len;
+    missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
+    len64 = len + missing_bytes;
     if(verbosity_lv > 3) printf("Writing MD_traj, %" PRIu64 "\n", len64);
     if(conf_machine_endianness_disagreement) uint64swe(&len64);
     ILDG_header MD_traj_header = 
@@ -534,13 +535,13 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
     fwrite(MD_traj_str,1,len,fp);
 
     // padding to 8 bytes
-    missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
     fwrite(pad,1,missing_bytes,fp);
 
     // writing input file in the conf
     // the string 'input_file_str' should be initialized in ../Include/setting_file_parser.c
     len = strlen(input_file_str);
-    len64 = len;
+    missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
+    len64 = len + missing_bytes;
     if(verbosity_lv > 3) printf("Writing input file into the conf: %" PRIu64 "\n", len64);
     if(conf_machine_endianness_disagreement) uint64swe(&len64);
     ILDG_header input_file_header = 
@@ -549,13 +550,13 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
     fwrite(input_file_str,1,len,fp);
 
     // padding to 8 bytes
-    missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
     fwrite(pad,1,missing_bytes,fp);
 
 
     // writing ildg binary data, that is conf
     len = nd0*nd1*nd2*nd3*4*3*3*2*8;
-    len64 = len;
+    missing_bytes = (off_t)(len%8==0?0:8-len%8);
+    len64 = len + missing_bytes;
     if(verbosity_lv > 3) printf("Writing ildg-binary-data, %" PRIu64 "\n", len64);
     if(conf_machine_endianness_disagreement) uint64swe(&len64);
 
@@ -613,7 +614,6 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
         }
 
     // padding to 8 bytes
-    missing_bytes = (off_t)(len%8==0?0:8-len%8);
     fwrite(pad,1,missing_bytes,fp);
 
     ILDG_header ildg_data_lfn_header = 
