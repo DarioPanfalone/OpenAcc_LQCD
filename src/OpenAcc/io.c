@@ -616,8 +616,11 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
     // padding to 8 bytes
     fwrite(pad,1,missing_bytes,fp);
 
-    ILDG_header ildg_data_lfn_header = 
-        (ILDG_header){0x456789ab,1,0,0,"ildg-data-lfn"};
+
+    len64 = 0;
+    if(conf_machine_endianness_disagreement) uint64swe(&len64);
+    ILDG_header ildg_binary_data_header = 
+        (ILDG_header){magic_number,version,mbme_flag,len64,"ildg-data-lfn"};
     fwrite(&ildg_binary_data_header,sizeof(ILDG_header),1,fp);
 
     fclose(fp);
