@@ -114,9 +114,18 @@ int main(int argc, char* argv[]){
     }
     else {
         if(0 == devinfo.myrank)
-            printf("N fermions found: %d\n", alloc_info.NPS_tot);
+            printf("N fermions found: %d, only one is necessary.\n", alloc_info.NPS_tot);
     }
-    //
+
+    printf("Setting number of shifts to zero - no shifts are needeed for this benchmark.\n");
+    alloc_info.maxNeededShifts = 0;
+    printf("Setting stout level to zero - no stout is needed for this benchmark.");
+    alloc_info.stoutAllocations = 0;
+    act_params.stout_steps = 0;
+
+
+
+
 
 #ifdef MULTIDEVICE
     init_multidev1D(&devinfo);
@@ -214,15 +223,6 @@ int main(int argc, char* argv[]){
 
 
 
-    /*
-#pragma acc data  copy(conf_acc[0:8]) copy(ferm_chi_acc[0:1])\
-copy(ferm_phi_acc[0:1])  copy(u1_back_phases[0:8*alloc_info.NDiffFlavs]) \
-copy(kloc_s[0:1])\
-copy(conf_acc_f[0:8]) copy(ferm_chi_acc_f[0:1])\
-copy(ferm_phi_acc_f[0:1])  copy(u1_back_phases_f[0:8*alloc_info.NDiffFlavs]) \
-copy(kloc_s_f[0:1])
-{
-*/
     // double precision
     if(0 == devinfo.myrank){
         printf("####################\n");

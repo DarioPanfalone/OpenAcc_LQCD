@@ -42,14 +42,11 @@ extern su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in eithe
                       // in fermion related computation (with or without stouting)
 
 // STOUTING 
-#ifdef STOUT_FERMIONS
-extern su3_soa * gstout_conf_acc; // max stouted conf, just pointer
 extern su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth
 extern su3_soa * glocal_staples;
 extern tamat_soa * gipdot;
 extern tamat_soa * aux_ta; // aggiunta per il calcolo della forza stoutata
 extern thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
-#endif
 
 // FERMIONS
 

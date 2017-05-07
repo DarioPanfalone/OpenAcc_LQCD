@@ -222,7 +222,7 @@ int multishift_invert(__restrict const su3_soa * u,
         else check_iter =0;
         check *= check_iter;
 
-        if(verbosity_lv > 2 && 0 == devinfo.myrank){
+        if(verbosity_lv > 2 && 0 == devinfo.myrank && residuo != 0){
             printf("\t%1.1e",sqrt(giustoono)/residuo);
         } 
         if(verbosity_lv > 5 && 0 == devinfo.myrank) printf("\n");

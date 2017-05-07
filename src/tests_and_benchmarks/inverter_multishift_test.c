@@ -129,6 +129,12 @@ int main(int argc, char* argv[]){
     }
     //
 
+    printf("Setting stout level to zero - no stout is needed for this benchmark.");
+    alloc_info.stoutAllocations = 0;
+    act_params.stout_steps = 0;
+
+
+
 #ifdef MULTIDEVICE
     init_multidev1D(&devinfo);
 #else
@@ -155,6 +161,7 @@ int main(int argc, char* argv[]){
 #endif
     printf("Device Selected : OK \n");
 #endif
+
 
 
     mem_alloc_core();
@@ -290,7 +297,7 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
                 rationalApproxToUse,
                 ferm_shiftmulti_acc,
                 ferm_chi_acc,
-                md_parameters.residue_md,
+                0,//md_parameters.residue_md,
                 kloc_r,
                 kloc_h,
                 kloc_s,
@@ -342,7 +349,7 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
                 rationalApproxToUse,
                 ferm_shiftmulti_acc_f,
                 ferm_chi_acc_f,
-                md_parameters.residue_md,
+                0,//md_parameters.residue_md,
                 kloc_r_f,
                 kloc_h_f,
                 kloc_s_f,

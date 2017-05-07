@@ -778,6 +778,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         // see global var in /Include/fermion_parameters.
         // setting alloc_info.NDiffFlavs first
         alloc_info.NDiffFlavs = tagcounts[PMG_FERMION];
+        alloc_info.stoutAllocations = act_params.stout_steps > 0 ;
         if(alloc_info.NDiffFlavs==0)
         {
             fermions_parameters = NULL;

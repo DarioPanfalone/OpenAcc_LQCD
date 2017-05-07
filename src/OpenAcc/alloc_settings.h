@@ -16,6 +16,7 @@ typedef struct alloc_settings_t{
 
     int singlePrecCoreAllocations;
     int singlePrecExtendedAllocations;
+    int stoutAllocations;
 
 }alloc_settings;
 

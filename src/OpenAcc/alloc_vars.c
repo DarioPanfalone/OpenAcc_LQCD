@@ -49,14 +49,11 @@ su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases
 
 
 // STOUTING 
-#ifdef STOUT_FERMIONS
-su3_soa * gstout_conf_acc; // max stouted conf, just pointer
 su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth
 su3_soa * glocal_staples;
 tamat_soa * gipdot;
 tamat_soa * aux_ta; // aggiunta per il calcolo della forza stoutata
 thmat_soa * aux_th; // aggiunta per il calcolo della forza stoutata
-#endif
 
 // FERMIONS
 
@@ -210,10 +207,10 @@ void mem_alloc_extended()
     }
 
 
-#ifdef STOUT_FERMIONS
     // STOUTING
+    if(alloc_info.stoutAllocations){ // not always the same as act_params.stout_steps,
+                                     // e.g., in benchmarks
     allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, act_params.stout_steps*8*sizeof(su3_soa)); 
-    gstout_conf_acc = &gstout_conf_acc_arr[8*(act_params.stout_steps-1)];
     ALLOCCHECK(allocation_check,gstout_conf_acc_arr ) ;
 #pragma acc enter data create(gstout_conf_acc_arr[0:8*act_params.stout_steps])
 
@@ -232,12 +229,7 @@ void mem_alloc_extended()
     allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, aux_ta ) ;
 #pragma acc enter data create(aux_ta[0:8])
-
-
-
-#endif
-
-
+    }
 
     // FERMION ALLOCATIONS
 
@@ -340,18 +332,19 @@ inline void mem_free_extended()
     FREECHECK(auxbis_conf_acc);       
 #pragma acc exit data delete(auxbis_conf_acc)       
 
-#ifdef STOUT_FERMIONS               
-    FREECHECK(gstout_conf_acc_arr);   
+
+    if(alloc_info.stoutAllocations){
+        FREECHECK(gstout_conf_acc_arr);   
 #pragma acc exit data delete(gstout_conf_acc_arr)   
-    FREECHECK(glocal_staples);        
+        FREECHECK(glocal_staples);        
 #pragma acc exit data delete(glocal_staples)        
-    FREECHECK(gipdot);              
+        FREECHECK(gipdot);              
 #pragma acc exit data delete(gipdot)              
-    FREECHECK(aux_ta);                
+        FREECHECK(aux_ta);                
 #pragma acc exit data delete(aux_ta)                
-    FREECHECK(aux_th);                
+        FREECHECK(aux_th);                
 #pragma acc exit data delete(aux_th)                
-#endif                              
+    }
 
 
     FREECHECK(conf_acc_bkp);          
