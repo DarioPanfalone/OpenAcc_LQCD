@@ -129,7 +129,7 @@ int main(int argc, char* argv[]){
     }
     //
 
-    printf("Setting stout level to zero - no stout is needed for this benchmark.");
+    printf("Setting stout level to zero - no stout is needed for this benchmark.\n");
     alloc_info.stoutAllocations = 0;
     act_params.stout_steps = 0;
 
