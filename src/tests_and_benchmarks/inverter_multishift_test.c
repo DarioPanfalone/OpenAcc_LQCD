@@ -38,7 +38,6 @@
 #include <mpi.h>
 #endif
 
-//double casuale(void);
 
 #include "../Include/stringify.h"
 
@@ -292,12 +291,11 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
     }
     for(r=0; r<test_settings.multiShiftInverterRepetitions; r++){
         gettimeofday(&t0,NULL);
-        multishift_invert_iterations = 0;
         multishift_invert(conf_acc,&fermions_parameters[0],
                 rationalApproxToUse,
                 ferm_shiftmulti_acc,
                 ferm_chi_acc,
-                0,//md_parameters.residue_md,
+                2e-144,
                 kloc_r,
                 kloc_h,
                 kloc_s,
@@ -311,7 +309,7 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
                 ((double)(t1.tv_usec - t0.tv_usec)/1.0e6);
             if(0 == devinfo.myrank)
                 printf("Time for 1 step of multishift inversion   : %e\n",
-                        dt_cgm/multishift_invert_iterations);
+                        dt_cgm/cg_return);
         }
     }
 
@@ -344,12 +342,11 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
     struct timeval t0_f,t1_f,t2_f,t3_f,t4_f,t5_f;
     for(r=0; r<test_settings.multiShiftInverterRepetitions; r++){
         gettimeofday(&t0_f,NULL);
-        multishift_invert_iterations = 0;
         multishift_invert_f(conf_acc_f,&fermions_parameters[0],
                 rationalApproxToUse,
                 ferm_shiftmulti_acc_f,
                 ferm_chi_acc_f,
-                0,//md_parameters.residue_md,
+                1e-33,
                 kloc_r_f,
                 kloc_h_f,
                 kloc_s_f,
@@ -363,7 +360,7 @@ create(k_p_shiftferm_f[0:alloc_info.maxApproxOrder] )
                 ((double)(t1_f.tv_usec - t0_f.tv_usec)/1.0e6);
             if(0 == devinfo.myrank)
                 printf("Time for 1 step of multishift inversion   : %e\n",
-                        dt_cgm_f/multishift_invert_iterations);
+                        dt_cgm_f/cg_return);
         }
     }
 
