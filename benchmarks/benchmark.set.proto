@@ -1,100 +1,99 @@
 
 
 ActionParameters
-Beta                          3.75       #(double)
-StoutSteps                    2        #(int)
-StoutRho                      1.500000e-01        #(double)
+Beta                          3.75       
+StoutSteps                    2        
+StoutRho                      1.500000e-01        
 
 
 BackgroundFieldParameters
 
 
 MDParameters
-NmdSteps                      18        #(int)
-GaugeSubSteps                 4        #(int)
-TrajLength                    1.000000e+00        #(double)
-residue_metro                 1e-8        #(double)
-ExpMaxEigenvalue              5.500000e+00        #(double)
-SinglePrecMD                  0                   #(int)
-residue_md                    1e-4        #(double)
-MaxCGIterations               10000               #(int)
+NmdSteps                      18        
+GaugeSubSteps                 4        
+TrajLength                    1.000000e+00        
+residue_metro                 1e-8        
+ExpMaxEigenvalue              5.500000e+00        
+SinglePrecMD                  0                   
+residue_md                    1e-4        
+MaxCGIterations               10000  # max number of iterations 
+                                     # not to get underflow 
+                                     # in single precision
 
 
 MontecarloParameters
-Ntraj                         1        #(int)
-ThermNtraj                    0        #(int)
-StoreConfInterval             5        #(int)
-SaveConfInterval              5        #(int)
-StoreConfName                 gaugeconf_store        #(string)
-SaveConfName                  gaugeconf_save        #(string)
-MaxConfIdIter                 1000000             #(int)
-RandGenStatusFilename         rgstatus.bin        #(string)
-MaxRunTimeS                   1.000000e+09        #(double)
-Seed                          42                   #(int)
-EpsGen                        1.000000e-01        #(double)
+Ntraj                         1        
+ThermNtraj                    0        
+StoreConfInterval             5        
+SaveConfInterval              5        
+StoreConfName                 gaugeconf_store        
+SaveConfName                  gaugeconf_save        
+MaxConfIdIter                 1000000             
+RandGenStatusFilename         rgstatus.bin        
+MaxRunTimeS                   1.000000e+09        
+Seed                          42                   
+EpsGen                        1.000000e-01        
 
 
 GaugeMeasuresSettings
-GaugeOutfilename              gauge.dat        #(string)
+GaugeOutfilename              gauge.dat        
 
 
 FermionMeasuresSettings
-FermionicOutfilename          fermion.dat        #(string)
-SingleInvNVectors             1        #(int)
-DoubleInvNVectorsChiral       0                   #(int)
-DoubleInvNVectorsQuarkNumber  0                   #(int)
+FermionicOutfilename          fermion.dat        
+SingleInvNVectors             1        
+DoubleInvNVectorsChiral       0                   
+DoubleInvNVectorsQuarkNumber  0                   
 
 
 DeviceSettings
-device_choice                 0        #(int)
-AsyncFermionComms             0                   #(int)
-AsyncGaugeComms               0                   #(int)
-NProcPerNode                  SEDNODEDIM    #(int)
-NRanks                        SEDNRANKS        #(int)
-# NRanks has been set at make time with the NR3 variable.
+device_choice                 0        
+AsyncFermionComms             1
+AsyncGaugeComms               1                   
+NProcPerNode                  SEDNODEDIM    
+NRanks                        SEDNRANKS        
 
 
 
 Geometry
-nx                            SEDNX                  #(int)
-ny                            SEDNY                  #(int)
-nz                            SEDNZ                  #(int)
-nt                            SEDNT                  #(int)
-# Lattice dimensions have been fixed at make time through N0,N1,N2,N3 and NR3.
+nx                            SEDNX                  
+ny                            SEDNY                  
+nz                            SEDNZ                  
+nt                            SEDNT                  
 
-xmap                          0                   #(int)
-ymap                          1                   #(int)
-zmap                          2                   #(int)
-tmap                          3                   #(int)
-#Notice that only the dimension mapped as 3 will be parallelized
+xmap                          0                   
+ymap                          1                   
+zmap                          2                   
+tmap                          3                   
 
 
 
 DebugSettings
-UseILDG                       1                   #(int)
-VerbosityLv                   2                   #(int)
-SaveAllAtEnd                  0                   #(int)
-PrintBackFieldDbgInfo         0                   #(int)
-SaveDiagnostics               1                   #(int)
-DoRevTest                     0                   #(int)
-DoNoRandomTest                0                   #(int)
-RngFakenessLevel              0                   #(int)
-MDDbgPrintMaxCount            0                   #(int)
-SaveDiagnosticsFilename       md_diagnostics.dat  #(string)
-PrintDiagInfoEvery            10000               #(int)
+UseILDG                       1                   
+VerbosityLv                   2                   
+SaveAllAtEnd                  0                   
+PrintBackFieldDbgInfo         0                   
+SaveDiagnostics               1                   
+DoRevTest                     0                   
+DoNoRandomTest                0                   
+RngFakenessLevel              0                   
+MDDbgPrintMaxCount            0                   
+SaveDiagnosticsFilename       md_diagnostics.dat  
+PrintDiagInfoEvery            10000               
 
 
 InverterTricks
-useMixedPrecision             1                   #(int)
-restartingEvery               10000               #(int)
-mixedPrecisionDelta           1.000000e-01        #(double)
+useMixedPrecision             1                   
+restartingEvery               10000               
+mixedPrecisionDelta           1.000000e-01        
 
 
 TestSettings
-DeoDoeIterations              1000        #(int)
-MultiShiftInverterRepetitions 10        #(int)
-FakeShift                     1e-14        #(double)
-BenchmarkMode                 1        #(int)
-SaveResults                   0                   #(int)
+DeoDoeIterations              1000        
+MultiShiftInverterRepetitions 5
+FakeShift                     1e-14        
+BenchmarkMode                 1        
+SaveResults                   0                   
 
 
