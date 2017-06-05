@@ -14,7 +14,11 @@ NODEDIM:=$(shell grep NODEDIM make_settings.set | awk '{print $$2}')
 COMPILER:=$(shell grep COMPILER make_settings.set | awk '{print $$2}')
 ARCH:=$(shell grep ARCH make_settings.set | awk '{print $$2}')
 
-all: run/main run/deo_doe_test run/inverter_multishift_test run/benchmark.set run/benchmark.puregauge.set run/rgen make_settings.set test_blocks_dirac_operator.sh test_blocks_puregauge.sh dirac_blocks.txt puregauge_blocks.txt
+all: run/main run/deo_doe_test run/inverter_multishift_test \
+     run/benchmark_for_profiling.set run/benchmark_for_profiling.puregauge.set \
+     run/benchmark.set run/benchmark.puregauge.set run/rgen make_settings.set \
+     test_blocks_dirac_operator.sh test_blocks_puregauge.sh dirac_blocks.txt \
+     puregauge_blocks.txt
 
 make_settings.set:
 	$(error The file make_settings.set must be present.)
@@ -31,7 +35,7 @@ makefile: make_settings.set geom_defines.txt compiler_settings_library.txt
 	$(warning 'REMEMBER TO SPECIFY ROOTDIR')
 	cd $(ROOTDIR)/src && ./double_to_single_transformer.py autoMode && cd - && echo 'MAKE SETTINGS:'  &&  cat make_settings.set && \
 	$(ROOTDIR)/build/generate_makefile.py $(ROOTDIR)/src/OpenAcc/main.c $(ROOTDIR)/src/tests_and_benchmarks/deo_doe_test.c $(ROOTDIR)/src/tests_and_benchmarks/inverter_multishift_test.c $(ROOTDIR)/src/tools/checkinput.c  $(ROOTDIR)/src/tools/confrestart.c  $(ROOTDIR)/src/tools/confconverter.c > ./makefile 
-	
+
 run:
 	if [ ! -d run ] ; then mkdir run ; fi
 
@@ -48,31 +52,42 @@ inverter_multishift_test run/inverter_multishift_test: makefile run
 	make COMMIT_HASH=$(COMMIT_HASH) inverter_multishift_test -j32
 
 fermion_parameters.set :
-	cp $(ROOTDIR)/benchmarks/fermion_parameters.set ./
+	$(warning 'REMEMBER TO SPECIFY ROOTDIR and BENCHDIR')
+	cp $(ROOTDIR)/$(BENCHDIR)/fermion_parameters.set ./
 
 run/benchmark.set: run/benchmark.puregauge.set fermion_parameters.set run
 	cat fermion_parameters.set > run/benchmark.set && cat run/benchmark.puregauge.set >> run/benchmark.set 
 
+run/benchmark_for_profiling.set: run/benchmark_for_profiling.puregauge.set fermion_parameters.set run
+	cat fermion_parameters.set > run/benchmark_for_profiling.set && cat run/benchmark_for_profiling.puregauge.set >> run/benchmark_for_profiling.set 
+
 benchmark.set.proto : 
-	cp $(ROOTDIR)/benchmarks/benchmark.set.proto ./
+	cp $(ROOTDIR)/$(BENCHDIR)/benchmark.set.proto ./
+
+benchmark_for_profiling.set.proto : 
+	cp $(ROOTDIR)/$(BENCHDIR)/benchmark_for_profiling.set.proto ./
 
 run/benchmark.puregauge.set: benchmark.set.proto run
 	sed 's/SEDNRANKS/'$(NR3)'/' benchmark.set.proto | sed 's/SEDNX/'$(N0)'/' |\
 	   	sed 's/SEDNY/'$(N1)'/' | sed 's/SEDNZ/'$(N2)'/' | sed 's/SEDNODEDIM/'$(NODEDIM)'/' |  sed 's/SEDNT/'$$(($(N3)*$(NR3)))'/' > run/benchmark.puregauge.set 
 
 
+run/benchmark_for_profiling.puregauge.set: benchmark_for_profiling.set.proto run
+	sed 's/SEDNRANKS/'$(NR3)'/' benchmark_for_profiling.set.proto | sed 's/SEDNX/'$(N0)'/' |\
+	   	sed 's/SEDNY/'$(N1)'/' | sed 's/SEDNZ/'$(N2)'/' | sed 's/SEDNODEDIM/'$(NODEDIM)'/' |  sed 's/SEDNT/'$$(($(N3)*$(NR3)))'/' > run/benchmark_for_profiling.puregauge.set 
+
+
 test_blocks_dirac_operator.sh:
-	cp $(ROOTDIR)/benchmarks/test_blocks_dirac_operator.sh ./ 
+	cp $(ROOTDIR)/$(BENCHDIR)/test_blocks_dirac_operator.sh ./ 
 
 test_blocks_puregauge.sh:
-	cp $(ROOTDIR)/benchmarks/test_blocks_puregauge.sh ./
+	cp $(ROOTDIR)/$(BENCHDIR)/test_blocks_puregauge.sh ./
 
 dirac_blocks.txt:
-	cp $(ROOTDIR)/benchmarks/dirac_blocks.txt.example ./dirac_blocks.txt
+	cp $(ROOTDIR)/$(BENCHDIR)/dirac_blocks.txt.example ./dirac_blocks.txt
 
 puregauge_blocks.txt:
-	cp $(ROOTDIR)/benchmarks/puregauge_blocks.txt.example ./puregauge_blocks.txt
-
+	cp $(ROOTDIR)/$(BENCHDIR)/puregauge_blocks.txt.example ./puregauge_blocks.txt
 
 test: testdeodoe testmultishift testmain testmainpg
 
