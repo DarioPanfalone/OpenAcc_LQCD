@@ -27,5 +27,23 @@ gaugeMdTimeContainer gauge_mdtimes0={
 
 gaugeMdTimeContainer gauge_mdtimes;
 
+diracTimeContainer dirac_times={
+    .totTransferTime = 0,
+    .count = 0
+};
+
+void gaugeMdCountersReset(gaugeMdTimeContainer* r){
+
+    *r = (gaugeMdTimeContainer){0,0,0,0,0,0,0,0,0};
+
+}
+void diracCountersReset(diracTimeContainer* r){
+    
+    *r = (diracTimeContainer){0,0};
+
+}
+
+
+
 
 #endif

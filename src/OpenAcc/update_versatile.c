@@ -638,6 +638,15 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         fprintf(foutfile,"GMETBTIME %e\n",gauge_mdtimes.momExpTimesConfTimeBulk  / gauge_mdtimes.count );
         fprintf(foutfile,"GCOSTTIME %e\n",gauge_mdtimes.communicationsStartTime  / gauge_mdtimes.count );
         fprintf(foutfile,"GCOMMTIME %e\n",gauge_mdtimes.communicationsTime       / gauge_mdtimes.count );
+        gaugeMdCountersReset(&gauge_mdtimes);
+#ifdef MULTIDEVICE
+        if( ! devinfo.async_comm_fermion){
+            fprintf(foutfile,"FCOMMTIME %e\n", dirac_times.totTransferTime       / dirac_times.count );
+
+        diracCountersReset(&dirac_times);
+        }
+#endif
+
 
 
         fclose(foutfile);

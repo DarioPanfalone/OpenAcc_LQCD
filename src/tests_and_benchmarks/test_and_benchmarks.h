@@ -27,18 +27,27 @@ typedef struct gaugeMdTimes_t{
     double momExpTimesConfTimeBulk;
 
     double communicationsStartTime;
-    double communicationsTime;
+    double communicationsTime; // Measurement makes sense only withouy async communication.
 
-    int    count;
+    unsigned int count;
 
 } gaugeMdTimeContainer;
 
+typedef struct diracTimes_t{
+ 
+    double totTransferTime; // Measurement makes sense only without async communications.
+    unsigned int count;
+
+} diracTimeContainer;
 
 extern gaugeMdTimeContainer gauge_mdtimes;
 extern gaugeMdTimeContainer gauge_mdtimes0;
+extern diracTimeContainer dirac_times;
 
 extern test_info  test_settings;
 
+void gaugeMdCountersReset(gaugeMdTimeContainer*);
+void diracCountersReset(diracTimeContainer*);
 
 
 
