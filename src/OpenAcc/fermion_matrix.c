@@ -7,9 +7,14 @@
 #ifndef __GNUC__
 #include "openacc.h"
 #endif
+
+#ifdef __GNUC__
+#include "sys/time.h"
+#endif
 #include "./fermionic_utilities.h"
 #include "./fermion_matrix.h"
 #include "./matvecmul.h"
+#include "../tests_and_benchmarks/test_and_benchmarks.h"
 
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
@@ -181,9 +186,21 @@ inline void acc_Deo( __restrict const su3_soa * const u,
         exit(1);
 #endif
     }else{ 
+        struct timeval t_transfer_start;
+        struct timeval t_transfer_end;
 
         acc_Deo_unsafe(u, out, in, backfield);
+
+        if (0 == devinfo.myrank ) gettimeofday(&t_transfer_start,NULL);
         communicate_fermion_borders(out); // contains host-device communications
+        if (0 == devinfo.myrank ){
+            gettimeofday(&t_transfer_end,NULL);
+            dirac_times.totTransferTime += (double) 
+                (t_transfer_end.tv_sec -t_transfer_start.tv_sec)+
+                (double)(t_transfer_end.tv_usec -t_transfer_start.tv_usec)/1.0e6;
+            ++dirac_times.count;
+
+        }
     }
 #else 
     acc_Deo_unsafe(u, out, in, backfield);
@@ -223,8 +240,21 @@ inline void acc_Doe( __restrict const su3_soa * const u,
 #endif
 
     }else{ 
+        struct timeval t_transfer_start;
+        struct timeval t_transfer_end;
+
         acc_Doe_unsafe(u, out, in, backfield);
+
+        if (0 == devinfo.myrank ) gettimeofday(&t_transfer_start,NULL);
         communicate_fermion_borders(out); // contains host-device communications
+        if (0 == devinfo.myrank ){
+            gettimeofday(&t_transfer_end,NULL);
+            dirac_times.totTransferTime += (double) 
+                (t_transfer_end.tv_sec -t_transfer_start.tv_sec)+
+                (double)(t_transfer_end.tv_usec -t_transfer_start.tv_usec)/1.0e6;
+            ++dirac_times.count;
+
+        }
     }
 #else 
     acc_Doe_unsafe(u, out, in, backfield);
