@@ -111,14 +111,12 @@ main_SOURCES =	DbgTools/dbgtools.c \
 	OpenAcc/alloc_vars.c \
 	OpenAcc/backfield.c \
 	OpenAcc/backfield_parameters.c \
-	OpenAcc/binary.c \
 	OpenAcc/cooling.c \
 	OpenAcc/deviceinit.c \
 	OpenAcc/fermion_force.c \
 	OpenAcc/fermion_force_utilities.c \
 	OpenAcc/fermionic_utilities.c \
 	OpenAcc/fermion_matrix.c \
-	OpenAcc/fermion_matrix_indirect.c \
 	OpenAcc/field_times_fermion_matrix.c \
 	OpenAcc/find_min_max.c \
 	OpenAcc/float_double_conv.c \
@@ -155,7 +153,6 @@ main_SOURCES =	DbgTools/dbgtools.c \
 	OpenAcc/su3_utilities.c \
 	OpenAcc/update_versatile.c \
 	Rand/random.c \
-	RationalApprox/rationalapprox_andreoli.c \
 	RationalApprox/rationalapprox.c \
 	tests_and_benchmarks/test_and_benchmarks.c \
 	OpenAcc/main.c 
