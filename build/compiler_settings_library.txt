@@ -7,16 +7,18 @@ ifndef COMPILER
   $(error COMPILER not set!)
 endif
 
-ifndef ARCH
-  $(info ARCH not set! COMPILING WITH -O0 FLAGS!!!)
-endif
-
 ####################################################################################
 
 ifeq ($(COMPILER), PGI)
 
   $(info COMPILER set to PGI)
   CC=pgcc
+  ifndef ARCH
+    $(info ARCH not set! COMPILING WITH -O0 FLAGS!!!)
+  endif
+
+
+
 
   ifeq ($(ARCH), CC35)
     $(info ARCH set to CC35)
