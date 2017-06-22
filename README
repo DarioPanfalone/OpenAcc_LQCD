@@ -13,9 +13,37 @@
 
 1. Build
 
+At build time the geometry of the lattice must be known, and must be passed to 
+the "configure" script in the 
+
+1.0 Test with gcc
+On a system where only gcc is present, 
+
+mkdir build
+cd build
+../configure CC=gcc CFLAGS="-O3" --prefix=<directory of your choice>
+make
+make install
+
+should be enough.
+
+1.1 With mpicc
 
 
-2. Test
+mkdir build
+cd build
+../configure CC=mpicc CFLAGS="-O3" --prefix=<directory of your choice>
+make
+make install
+
+1.2 With an OpenAcc-capable compiler
+In this case, many more parameters should be specified. 
 
 
-3. Benchmarks
+2. Benchmarks
+
+Bencharks
+
+3. Test
+
+

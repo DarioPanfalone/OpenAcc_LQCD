@@ -1,15 +1,46 @@
 #!/usr/bin/python2 
-# This script does some work for converting 
+'''
+ This script does the work of creating single precision header and source files
+ from their double precision version.
 
+ There are three categories of files:
+ 1. All files (see list "fileNames")
+ 2. files where we can change all 'd_complex' with 'f_complex', 
+ and also function names without fears ("filesALLDtoF"). Not all files are such.
+ 3. Files in single precision which have been modified by hand and must 
+ not be overwritten  ("filesNoOverwrite")
+ 
+ The conversion is performed in this way:
+ 1. Types are converted through a dictionary (for files where this is allowed)
+ 2. function names are found by searching all files for function declarations,
+    and then replaced by the same name with "_f" appended
+ 3. global variable names are found by searching all files for their declaration,
+    and then replaced by the same name with "_f" appended
+ 4. #define'd Numerical constant must also be converted to float,
+    (for files where this is allowed)
+ 5. Library functions must also be converted to their float version 
+    (for files where this is allowed)
+ 6. New filenames are the old filenames with 'sp_' prepended.
+ 7. sp_struct_c_def.h is created from struct_c_def.h, defining "f_complex"
+ 8. header guards are also changed, since a file with a new name is created.
+    NOTICE that header guards must satisfy some criteria in order to be matched:
+
+       headerGuard = os.path.basename(fileName).upper().replace('.','_')
+
+'''
 from sys import argv,exit
 import os 
 import re
 
+# in autoMode, the user is not asked for permissions
+# the script does not overwrite not-automatically written files
 autoMode = False
 if 'autoMode' in argv :
     autoMode = True
     argv.remove('autoMode')
 
+# the script looks at output file timestamps, and by default does not 
+# rewrite files
 checkEverythingAnyway = False
 
 if 'recheck' in argv :
@@ -198,7 +229,8 @@ for fileName in fileNames:
     f.close()
 
 
-dpFunctionNames.sort(key = len, reverse = True ) # CRUCIAL because some function names 
+dpFunctionNames.sort(key = len, reverse = True ) # here reverse is CRUCIAL 
+                                                 # because some function names 
                                                  # contain other function names
 
 functionNamesFile = open('functions_found.txt','w')
@@ -393,7 +425,7 @@ for fileName in fileNamesToChange:
     
            
             
-            # adding 'typedef double complex d_complex' in sp_struct_c_def.c
+            # adding 'typedef double complex d_complex' in sp_struct_c_def.h
             if  'struct_c_def.h' in fileName:
                 print "Adding \'typedef float complex f_complex\' to ", newFileName
                 newText = newText.replace('//TYPEDEF_FLOAT_COMPLEX','typedef float complex f_complex;' )
