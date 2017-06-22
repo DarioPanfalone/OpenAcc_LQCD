@@ -22,7 +22,7 @@ geomDefinesFileName = "geom_defines.txt"
 def geomDefineGetterFromFile():
     geomDefineGetterString = \
             '$(info Reading lattice dimensions, block sizes  and compiler from '+\
-            geomDefinesFileName + '...)'
+            geomDefinesFileName + '...)\n'
     for defineString in defineStrings + compilerStrings:
         geomDefineGetterString += "%s:=$(shell grep -E \"^\\s*%s\\s+\" %s | awk '{print $$2}')\n" % \
         (defineString,defineString,geomDefinesFileName)
