@@ -1,8 +1,6 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
 
-# single precision code generation
-
 __common_generated_sources = \
 	OpenAcc/sp_alloc_vars.c  \
 	OpenAcc/sp_alloc_vars.h  \

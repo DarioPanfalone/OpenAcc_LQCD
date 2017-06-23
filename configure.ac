@@ -1,14 +1,22 @@
 
 AC_PREREQ([2.69])
-AC_
 AC_INIT([YALQSS],[1.0],[michele.mesiti@gmail.com])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+
 AM_PATH_PYTHON([2.7],\
                [AC_MSG_NOTICE([Python found.])],\
       [AC_MSG_ERROR([Python >2.7 is necessary to create single precision code.],1)])
+
+AC_MSG_NOTICE([Creating/updating single precision code...])
+cd $srcdir/src
+AC_MSG_NOTICE(Moving back to $srcdir/src)
+./double_to_single_transformer.py autoMode silentMode
+AC_MSG_NOTICE(Moving back to $OLDPWD)
+cd -
+
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_PROG_CC 
 
-# THINGS SUGGESTED BY AUTOSCAN
+# CHECKS SUGGESTED BY AUTOSCAN
 AC_PROG_CXX
 AC_PROG_AWK
 AC_PROG_CPP
