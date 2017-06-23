@@ -39,6 +39,7 @@ if 'autoMode' in argv :
     autoMode = True
     argv.remove('autoMode')
 
+
 # the script looks at output file timestamps, and by default does not 
 # rewrite files
 checkEverythingAnyway = False
@@ -46,7 +47,6 @@ checkEverythingAnyway = False
 if 'recheck' in argv :
     checkEverythingAnyway = True
     argv.remove('recheck')
-
 
 fileNames = [\
 'OpenAcc/alloc_vars.c',\
@@ -282,11 +282,14 @@ fileNamesToChange += filesNoOverwrite
 
 changedFiles = []
 
+fileArgs = [ fileName.replace('sp_','') for fileName in argv ] 
+
 for fileName in fileNamesToChange:
     # notice: if autoMode was in argv, it was previously removed 
     # so the case len(argv)>1 is the case when there are filenames passed as arguments 
     # and the case len(argv)==1 is the one without filenames passed as arguments
-    if (len(argv) > 1 and fileName in argv) or (len(argv)==1 and fileName not in filesNoOverwrite):
+    if (len(argv) > 1 and fileName in fileArgs) \
+            or (len(argv)==1 and fileName not in filesNoOverwrite):
         
         newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)
         writeIt = True
@@ -296,6 +299,7 @@ for fileName in fileNamesToChange:
             singleFileModTime = os.path.getmtime(newFileName)
             if singleFileModTime > doubleFileModTime and not checkEverythingAnyway:
                 print "File ", newFileName, " is newer than ",fileName," and won't be touched."
+                
                 writeIt = False
 
         if os.path.exists(newFileName) and ( ans != 'a' or fileName in filesNoOverwrite):

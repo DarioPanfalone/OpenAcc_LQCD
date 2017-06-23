@@ -1,5 +1,6 @@
 
 AC_PREREQ([2.69])
+AC_
 AC_INIT([YALQSS],[1.0],[michele.mesiti@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_PROG_CC 

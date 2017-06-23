@@ -86,7 +86,7 @@ __dp_sources = OpenAcc/alloc_vars.c  \
 	Mpi/communications.c 
 
 $(__sp_sources) : $(__dp_sources)
-	./double_to_single_transformer.py autoMode
+	cd $(srcdir) && ./double_to_single_transformer.py autoMode $@
 
 
 main_SOURCES =	DbgTools/dbgtools.c \
