@@ -54,7 +54,6 @@ NRANKS_D3=$( grep -E "^\s*NRANKS_D3\s+" geom_defines.txt | awk '{print $2}')
 if test $NRANKS_D3 -gt 1 
 then 
 AC_CHECK_HEADERS([mpi.h])
-LX_FIND_MPI
 fi
 
 #tile sizes
