@@ -3,6 +3,9 @@ AC_PREREQ([2.69])
 AC_
 AC_INIT([YALQSS],[1.0],[michele.mesiti@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+AM_PATH_PYTHON([2.7],\
+               [AC_MSG_NOTICE([Python found.])],\
+      [AC_MSG_ERROR([Python >2.7 is necessary to create single precision code.],1)])
 AC_PROG_CC 
 
 # THINGS SUGGESTED BY AUTOSCAN
@@ -43,7 +46,16 @@ AC_CHECK_FUNCS([gettimeofday memset pow sqrt strstr])
 
 
 
-# geometry
+# geometry - CHECKS CAN BE DEEPER 
+if test -f "geom_defines.txt"
+then 
+    AC_MSG_NOTICE(["Reading geom_defines.txt"]) 
+else :
+    AC_MSG_ERROR([ "File geom_defines.txt must be present. Aborting." ],[1])
+fi
+
+
+
 LOC_N0=$( grep -E "^\s*LOC_N0\s+" geom_defines.txt | awk '{print $2}')
 LOC_N1=$( grep -E "^\s*LOC_N1\s+" geom_defines.txt | awk '{print $2}')
 LOC_N2=$( grep -E "^\s*LOC_N2\s+" geom_defines.txt | awk '{print $2}')

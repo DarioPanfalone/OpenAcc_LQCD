@@ -48,6 +48,11 @@ if 'recheck' in argv :
     checkEverythingAnyway = True
     argv.remove('recheck')
 
+silentMode = False
+if 'silentMode' in argv :
+    silentMode = True
+    argv.remove('silentMode')
+
 fileNames = [\
 'OpenAcc/alloc_vars.c',\
 'OpenAcc/alloc_vars.h',\
@@ -182,7 +187,8 @@ def findFunctionNames(lineRaw):
             # $ = end of rawFunctionName    
             dpFunctionName = rawFunctionName[funcNameLocation.start():funcNameLocation.end()]
             if dpFunctionName not in dpFunctionNames and dpFunctionName != 'main':
-                print "Found function " + dpFunctionName
+                if not silentMode :
+                    print "Found function " + dpFunctionName
                 dpFunctionNames.append(dpFunctionName)
             break
 
@@ -209,7 +215,8 @@ def findFirstVarName(text): # note: does not work with,e.g. 'int a,b;':
             # $ = end of rawFunctionName    
             dpVarName = rawVarName[varNameLocation.start():varNameLocation.end()]
             if dpVarName not in dpVariableNames: 
-                print "Found Variable (", soaType, ')', dpVarName
+                if not silentMode:
+                    print "Found Variable (", soaType, ')', dpVarName
                 dpVariableNames.append(dpVarName)
 
     if len(upperBoundaries) == 0:
@@ -221,7 +228,8 @@ def findFirstVarName(text): # note: does not work with,e.g. 'int a,b;':
 
 # collecting all function names
 for fileName in fileNames:
-    print "----------\nChecking file" , fileName , '\n-----------'
+    if not silentMode:
+        print "----------\nChecking file" , fileName , '\n-----------'
     f  =open(fileName)
     fileLines = f.readlines()
     for line in fileLines:
@@ -237,10 +245,12 @@ functionNamesFile = open('functions_found.txt','w')
 for foundFunction in dpFunctionNames:
     functionNamesFile.write(foundFunction + '\n')
 functionNamesFile.close()
-print "Total functions found: ", len(dpFunctionNames)
+if not silentMode:
+    print "Total functions found: ", len(dpFunctionNames)
 
 # collecting all global variable names
-print "\n\n-----------------\nLooking for variable names\n-----------------\n"
+if not silentMode:
+    print "\n\n-----------------\nLooking for variable names\n-----------------\n"
 f = open('OpenAcc/alloc_vars.c')
 text = f.read()
 foundSomething = True
@@ -263,7 +273,9 @@ globalVarNamesFile.close()
 dpVariableNames.append('phases') # for U1 used in dirac matrix
 dpVariableNames.sort(key = len , reverse = True) # CRUCIAL
 
-print "Total global variables found: ", len(dpVariableNames)
+if not silentMode:
+    print "Total global variables found: ", len(dpVariableNames)
+
 
 
 
@@ -434,19 +446,23 @@ for fileName in fileNamesToChange:
             
             # adding 'typedef double complex d_complex' in sp_struct_c_def.h
             if  'struct_c_def.h' in fileName:
-                print "Adding \'typedef float complex f_complex\' to ", newFileName
+                if not silentMode:
+                    print "Adding \'typedef float complex f_complex\' to ", newFileName
                 newText = newText.replace('//TYPEDEF_FLOAT_COMPLEX','typedef float complex f_complex;' )
         
             if os.path.exists(newFileName):
 
-                print "Checking if ", newFileName, " must be modified..."
+                if not silentMode:
+                    print "Checking if ", newFileName, " must be modified..."
                 oldFile = open(newFileName,'r')
                 oldText = oldFile.read()
                 oldFile.close()
                 if newText != oldText:
-                    print "... file must be modified. Writing file ", newFileName , " ..."
+                    if not silentMode:
+                        print "... file must be modified. Writing file ", newFileName , " ..."
                 else:
-                    print "File ", newFileName, " has no changes and won't be touched."
+                    if not silentMode:
+                        print "File ", newFileName, " has no changes and won't be touched."
                     writeIt = False
                 
                 
@@ -461,7 +477,8 @@ for fileName in fileNamesToChange:
 
 
             if writeIt:
-                print "Writing file ", newFileName, "..."
+                if not silentMode:
+                    print "Writing file ", newFileName, "..."
                 newFile = open(newFileName,'w')
                 newFile.write(newText)
                 newFile.close()
@@ -470,13 +487,18 @@ for fileName in fileNamesToChange:
 
 
 
-     
-print "\n\nRESUME: Changed files:"
-for changedFile in changedFiles:
-    print changedFile
-if len(changedFiles) == 0 :
-    print "None!"
-
-
-
-
+if not silentMode :     
+    print "\n\nRESUME: Changed files:"
+    for changedFile in changedFiles:
+        print changedFile
+    if len(changedFiles) == 0 :
+        print "None!"
+    
+else :
+    strToPrint = "Changed files:"
+    for changedFile in changedFiles:
+        strToPrint += " " + changedFile
+    if len(changedFiles) == 0 :
+        strToPrint += " None!"
+    print strToPrint
+ 

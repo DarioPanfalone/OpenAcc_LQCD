@@ -1,17 +1,14 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
-bin_PROGRAMS = main 
-
 
 # single precision code generation
 
-__sp_sources = OpenAcc/sp_alloc_vars.c  \
+__sp_sources = \
+	OpenAcc/sp_alloc_vars.c  \
 	OpenAcc/sp_alloc_vars.h  \
 	OpenAcc/sp_backfield.c  \
 	OpenAcc/sp_backfield.h  \
 	OpenAcc/sp_cayley_hamilton.h  \
-	OpenAcc/sp_fermion_force.c  \
-	OpenAcc/sp_fermion_force.h  \
 	OpenAcc/sp_fermion_force_utilities.c  \
 	OpenAcc/sp_fermion_force_utilities.h  \
 	OpenAcc/sp_fermionic_utilities.c  \
@@ -46,7 +43,8 @@ __sp_sources = OpenAcc/sp_alloc_vars.c  \
 
 BUILT_SOURCES = $(__sp_sources)
 
-__dp_sources = OpenAcc/alloc_vars.c  \
+__dp_sources = \
+	OpenAcc/alloc_vars.c  \
 	OpenAcc/alloc_vars.h  \
 	OpenAcc/backfield.c  \
 	OpenAcc/backfield.h  \
@@ -86,73 +84,183 @@ __dp_sources = OpenAcc/alloc_vars.c  \
 	Mpi/communications.c 
 
 $(__sp_sources) : $(__dp_sources)
-	cd $(srcdir) && ./double_to_single_transformer.py autoMode $@
+	cd $(srcdir) && ./double_to_single_transformer.py autoMode silentMode $@
 
 
-main_SOURCES =	DbgTools/dbgtools.c \
+__common_sources = \
+	DbgTools/dbgtools.c \
+	DbgTools/dbgtools.h \
 	DbgTools/sp_dbgtools.c \
+	DbgTools/sp_dbgtools.h \
+	Include/all_include.h \
+	Include/common_defines.h \
 	Include/debug.c \
+	Include/debug.h \
 	Include/fermion_parameters.c \
+	Include/fermion_parameters.h \
 	Include/hash.c \
+	Include/hash.h \
+	Include/init.h \
 	Include/inverter_tricks.c \
+	Include/inverter_tricks.h \
 	Include/montecarlo_parameters.c \
+	Include/montecarlo_parameters.h \
 	Include/setting_file_parser.c \
+	Include/setting_file_parser.h \
+	Include/stringify.h \
 	Include/tell_geom_defines.c \
+	Include/tell_geom_defines.h \
 	Meas/baryon_number_utilities.c \
+	Meas/baryon_number_utilities.h \
 	Meas/ferm_meas.c \
+	Meas/ferm_meas.h \
 	Meas/gauge_meas.c \
+	Meas/gauge_meas.h \
 	Meas/magnetic_susceptibility_utilities.c \
+	Meas/magnetic_susceptibility_utilities.h \
 	Meas/polyakov.c \
+	Meas/polyakov.h \
 	Mpi/communications.c \
+	Mpi/communications.h \
+	Mpi/dbgtools.h \
+	Mpi/geometry_multidev.h \
 	Mpi/multidev.c \
+	Mpi/multidev.h \
 	Mpi/sp_communications.c \
+	Mpi/sp_communications.h \
 	OpenAcc/action.c \
+	OpenAcc/action.h \
 	OpenAcc/alloc_settings.c \
+	OpenAcc/alloc_settings.h \
 	OpenAcc/alloc_vars.c \
+	OpenAcc/alloc_vars.h \
 	OpenAcc/backfield.c \
+	OpenAcc/backfield.h \
 	OpenAcc/backfield_parameters.c \
+	OpenAcc/backfield_parameters.h \
+	OpenAcc/binary.c \
+	OpenAcc/cayley_hamilton.h \
 	OpenAcc/cooling.c \
+	OpenAcc/cooling.h \
 	OpenAcc/deviceinit.c \
+	OpenAcc/deviceinit.h \
+	OpenAcc/double_complex.h \
 	OpenAcc/fermion_force.c \
+	OpenAcc/fermion_force.h \
 	OpenAcc/fermion_force_utilities.c \
+	OpenAcc/fermion_force_utilities.h \
 	OpenAcc/fermionic_utilities.c \
+	OpenAcc/fermionic_utilities.h \
 	OpenAcc/fermion_matrix.c \
+	OpenAcc/fermion_matrix.h \
 	OpenAcc/field_times_fermion_matrix.c \
+	OpenAcc/field_times_fermion_matrix.h \
 	OpenAcc/find_min_max.c \
+	OpenAcc/find_min_max.h \
 	OpenAcc/float_double_conv.c \
+	OpenAcc/float_double_conv.h \
 	OpenAcc/geometry.c \
+	OpenAcc/geometry.h \
 	OpenAcc/inverter_full.c \
+	OpenAcc/inverter_full.h \
 	OpenAcc/inverter_mixedp.c \
+	OpenAcc/inverter_mixedp.h \
 	OpenAcc/inverter_multishift_full.c \
+	OpenAcc/inverter_multishift_full.h \
 	OpenAcc/inverter_package.c \
+	OpenAcc/inverter_package.h \
 	OpenAcc/inverter_wrappers.c \
+	OpenAcc/inverter_wrappers.h \
 	OpenAcc/io.c \
+	OpenAcc/io.h \
 	OpenAcc/ipdot_gauge.c \
+	OpenAcc/ipdot_gauge.h \
+	OpenAcc/main.c \
+	OpenAcc/matvecmul.h \
 	OpenAcc/md_integrator.c \
+	OpenAcc/md_integrator.h \
 	OpenAcc/md_parameters.c \
+	OpenAcc/md_parameters.h \
 	OpenAcc/plaquettes.c \
+	OpenAcc/plaquettes.h \
 	OpenAcc/random_assignement.c \
+	OpenAcc/random_assignement.h \
 	OpenAcc/rettangoli.c \
+	OpenAcc/rettangoli.h \
+	OpenAcc/single_types.h \
 	OpenAcc/sp_alloc_vars.c \
+	OpenAcc/sp_alloc_vars.h \
 	OpenAcc/sp_backfield.c \
+	OpenAcc/sp_backfield.h \
+	OpenAcc/sp_cayley_hamilton.h \
 	OpenAcc/sp_fermion_force.c \
+	OpenAcc/sp_fermion_force.h \
 	OpenAcc/sp_fermion_force_utilities.c \
+	OpenAcc/sp_fermion_force_utilities.h \
 	OpenAcc/sp_fermionic_utilities.c \
+	OpenAcc/sp_fermionic_utilities.h \
 	OpenAcc/sp_fermion_matrix.c \
+	OpenAcc/sp_fermion_matrix.h \
 	OpenAcc/sp_inverter_full.c \
+	OpenAcc/sp_inverter_full.h \
 	OpenAcc/sp_inverter_multishift_full.c \
+	OpenAcc/sp_inverter_multishift_full.h \
 	OpenAcc/sp_ipdot_gauge.c \
+	OpenAcc/sp_ipdot_gauge.h \
+	OpenAcc/sp_matvecmul.h \
 	OpenAcc/sp_md_integrator.c \
+	OpenAcc/sp_md_integrator.h \
 	OpenAcc/sp_plaquettes.c \
+	OpenAcc/sp_plaquettes.h \
 	OpenAcc/sp_rettangoli.c \
+	OpenAcc/sp_rettangoli.h \
+	OpenAcc/sp_single_types.h \
 	OpenAcc/sp_stouting.c \
+	OpenAcc/sp_stouting.h \
+	OpenAcc/sp_struct_c_def.h \
 	OpenAcc/sp_su3_measurements.c \
+	OpenAcc/sp_su3_measurements.h \
 	OpenAcc/sp_su3_utilities.c \
+	OpenAcc/sp_su3_utilities.h \
 	OpenAcc/stouting.c \
+	OpenAcc/stouting.h \
+	OpenAcc/struct_c_def.h \
 	OpenAcc/su3_measurements.c \
+	OpenAcc/su3_measurements.h \
 	OpenAcc/su3_utilities.c \
+	OpenAcc/su3_utilities.h \
 	OpenAcc/update_versatile.c \
+	OpenAcc/update_versatile.h \
 	Rand/random.c \
+	Rand/random.h \
 	RationalApprox/rationalapprox.c \
+	RationalApprox/rationalapprox.h \
 	tests_and_benchmarks/test_and_benchmarks.c \
-	OpenAcc/main.c 
+	tests_and_benchmarks/test_and_benchmarks.h 
+
+
+
+utilitiesdir = $(bindir)/utilities
+benchmarksdir = $(bindir)/benchmarks
+bin_PROGRAMS = main 
+benchmarks_PROGRAMS = deo_doe_test inverter_multishift_test 
+utilities_PROGRAMS = checkinput confconverter confrestart
+
+main_SOURCES =	OpenAcc/main.c\
+	$(__common_sources)
+
+deo_doe_test_SOURCES = tests_and_benchmarks/deo_doe_test.c \
+	$(__common_sources)
+
+inverter_multishift_test_SOURCES = tests_and_benchmarks/inverter_multishift_test.c \
+	$(__common_sources)
+
+checkinput_SOURCES = tools/checkinput.c \
+	$(__common_sources)
+
+confconverter_SOURCES = tools/confconverter.c \
+	$(__common_sources)
+
+confrestart_SOURCES = tools/confrestart.c \
+	$(__common_sources)
+
