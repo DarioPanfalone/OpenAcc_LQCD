@@ -294,7 +294,9 @@ for fileName in fileNamesToChange:
         newFileName = os.path.dirname(fileName)+'/sp_'+os.path.basename(fileName)
         writeIt = True
 
-        if os.path.exists(newFileName):
+        if fileName in filesNoOverwrite and autoMode:
+            writeIt = False
+        elif os.path.exists(newFileName):
             doubleFileModTime = os.path.getmtime(fileName)
             singleFileModTime = os.path.getmtime(newFileName)
             if singleFileModTime > doubleFileModTime and not checkEverythingAnyway:
@@ -302,11 +304,12 @@ for fileName in fileNamesToChange:
                 
                 writeIt = False
 
-        if os.path.exists(newFileName) and ( ans != 'a' or fileName in filesNoOverwrite):
+        elif os.path.exists(newFileName) and ( ans != 'a' or fileName in filesNoOverwrite):
             ans = ''
             while ans not in ['y','n','a']:
                 if fileName in filesNoOverwrite:
                     print "\nWARNING: File " + fileName + " is in the 'protected' file list!"
+
                 print "Overwrite file \'"+newFileName+"\'? (y=yes,n=no,a=yes to all)"
                 ans = raw_input().lower()
                 if ans == 'n':
