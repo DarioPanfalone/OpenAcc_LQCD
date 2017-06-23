@@ -312,7 +312,10 @@ for fileName in fileNamesToChange:
             doubleFileModTime = os.path.getmtime(fileName)
             singleFileModTime = os.path.getmtime(newFileName)
             if singleFileModTime > doubleFileModTime and not checkEverythingAnyway:
-                print "File ", newFileName, " is newer than ",fileName," and won't be touched."
+                if silentMode:
+                    print newFileName, "is already ok." 
+                else:
+                    print "File ", newFileName, " is newer than ",fileName," and won't be touched."
                 
                 writeIt = False
 
@@ -497,7 +500,7 @@ if not silentMode :
 else :
     strToPrint = "Changed files:"
     for changedFile in changedFiles:
-        strToPrint += " " + changedFile
+        strToPrint += "\n" + changedFile
     if len(changedFiles) == 0 :
         strToPrint += " None!"
     print strToPrint
