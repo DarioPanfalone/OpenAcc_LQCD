@@ -6,10 +6,10 @@ AM_PATH_PYTHON([2.7],\
                [AC_MSG_NOTICE([Python found.])],\
       [AC_MSG_ERROR([Python >2.7 is necessary to create single precision code.],1)])
 
-AC_MSG_NOTICE(Moving back to $srcdir/src and creating/updating single precision code...])
+AC_MSG_NOTICE([Moving back to $srcdir/src and creating/updating single precision code...])
 cd $srcdir/src
 ./double_to_single_transformer.py autoMode silentMode
-AC_MSG_NOTICE(Single prec code created/updated. Moving back to $OLDPWD)
+AC_MSG_NOTICE([Single prec code created/updated. Moving back to $OLDPWD])
 cd -
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
