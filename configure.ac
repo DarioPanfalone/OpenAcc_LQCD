@@ -52,23 +52,25 @@ AC_CHECK_FUNCS([gettimeofday memset pow sqrt strstr])
 
 
 
+COMPILE_INFO_FILENAME="geom_defines.txt"
+
 # geometry - CHECKS CAN BE DEEPER 
-if test -f "geom_defines.txt"
+if test -f $COMPILE_INFO_FILENAME
 then 
-    AC_MSG_NOTICE(["Reading geom_defines.txt"]) 
+    AC_MSG_NOTICE(["Reading $COMPILE_INFO_FILENAME"]) 
 else :
-    AC_MSG_ERROR([ "File geom_defines.txt must be present. Aborting." ],[1])
+    AC_MSG_ERROR([ "File $COMPILE_INFO_FILENAME must be present. Aborting." ],[1])
 fi
 
 
 
-LOC_N0=$( grep -E "^\s*LOC_N0\s+" geom_defines.txt | awk '{print $2}')
-LOC_N1=$( grep -E "^\s*LOC_N1\s+" geom_defines.txt | awk '{print $2}')
-LOC_N2=$( grep -E "^\s*LOC_N2\s+" geom_defines.txt | awk '{print $2}')
-LOC_N3=$( grep -E "^\s*LOC_N3\s+" geom_defines.txt | awk '{print $2}')
+LOC_N0=$( grep -E "^\s*LOC_N0\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+LOC_N1=$( grep -E "^\s*LOC_N1\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+LOC_N2=$( grep -E "^\s*LOC_N2\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+LOC_N3=$( grep -E "^\s*LOC_N3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
 
 # ranks in the 3rd direction
-NRANKS_D3=$( grep -E "^\s*NRANKS_D3\s+" geom_defines.txt | awk '{print $2}')
+NRANKS_D3=$( grep -E "^\s*NRANKS_D3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
 
 if test $NRANKS_D3 -gt 1 
 then 
@@ -77,22 +79,22 @@ fi
 
 #tile sizes
 
-DEODOETILE0=$( grep -E "^\s*DEODOETILE0\s+" geom_defines.txt | awk '{print $2}')
-DEODOETILE1=$( grep -E "^\s*DEODOETILE1\s+" geom_defines.txt | awk '{print $2}')
-DEODOETILE2=$( grep -E "^\s*DEODOETILE2\s+" geom_defines.txt | awk '{print $2}')
-DEODOEGANG3=$( grep -E "^\s*DEODOEGANG3\s+" geom_defines.txt | awk '{print $2}')
-IMPSTAPTILE2=$( grep -E "^\s*IMPSTAPTILE2\s+" geom_defines.txt | awk '{print $2}')
-IMPSTAPTILE1=$( grep -E "^\s*IMPSTAPTILE1\s+" geom_defines.txt | awk '{print $2}')
-IMPSTAPTILE0=$( grep -E "^\s*IMPSTAPTILE0\s+" geom_defines.txt | awk '{print $2}')
-IMPSTAPGANG3=$( grep -E "^\s*IMPSTAPGANG3\s+" geom_defines.txt | awk '{print $2}')
-STAPTILE2=$( grep -E "^\s*STAPTILE2\s+" geom_defines.txt | awk '{print $2}')
-STAPTILE1=$( grep -E "^\s*STAPTILE1\s+" geom_defines.txt | awk '{print $2}')
-STAPTILE0=$( grep -E "^\s*STAPTILE0\s+" geom_defines.txt | awk '{print $2}')
-STAPGANG3=$( grep -E "^\s*STAPGANG3\s+" geom_defines.txt | awk '{print $2}')
-SIGMATILE2=$( grep -E "^\s*SIGMATILE2\s+" geom_defines.txt | awk '{print $2}')
-SIGMATILE1=$( grep -E "^\s*SIGMATILE1\s+" geom_defines.txt | awk '{print $2}')
-SIGMATILE0=$( grep -E "^\s*SIGMATILE0\s+" geom_defines.txt | awk '{print $2}')
-SIGMAGANG3=$( grep -E "^\s*SIGMAGANG3\s+" geom_defines.txt | awk '{print $2}')
+DEODOETILE0=$( grep -E "^\s*DEODOETILE0\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+DEODOETILE1=$( grep -E "^\s*DEODOETILE1\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+DEODOETILE2=$( grep -E "^\s*DEODOETILE2\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+DEODOEGANG3=$( grep -E "^\s*DEODOEGANG3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+IMPSTAPTILE2=$( grep -E "^\s*IMPSTAPTILE2\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+IMPSTAPTILE1=$( grep -E "^\s*IMPSTAPTILE1\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+IMPSTAPTILE0=$( grep -E "^\s*IMPSTAPTILE0\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+IMPSTAPGANG3=$( grep -E "^\s*IMPSTAPGANG3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+STAPTILE2=$( grep -E "^\s*STAPTILE2\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+STAPTILE1=$( grep -E "^\s*STAPTILE1\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+STAPTILE0=$( grep -E "^\s*STAPTILE0\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+STAPGANG3=$( grep -E "^\s*STAPGANG3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+SIGMATILE2=$( grep -E "^\s*SIGMATILE2\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+SIGMATILE1=$( grep -E "^\s*SIGMATILE1\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+SIGMATILE0=$( grep -E "^\s*SIGMATILE0\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+SIGMAGANG3=$( grep -E "^\s*SIGMAGANG3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
 
 AC_DEFINE_UNQUOTED(LOC_N0,      [[$LOC_N0]])
 AC_DEFINE_UNQUOTED(LOC_N1,      [[$LOC_N1]])

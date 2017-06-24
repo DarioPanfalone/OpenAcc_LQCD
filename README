@@ -11,17 +11,30 @@
                (With OpenAcc)
 
 
-1. Build
+1. Build - General ideas
 
 At build time the geometry of the lattice must be known, and must be passed to 
-the "configure" script in the 
+the "configure" script. At present, "configure" reads a file names "geom_defines.txt" 
+which contains the lattice dimensions and the dimensions of the OpenAcc tiles.
+
+In case the system you are working on uses environment modules, you need to load them before 
+invoking "configure".
+
+You must also pass to configure:
+- The compiler : CC=<the compiler you want to use>
+- prefix : The place where you want the code to be installed. Note that it defaults to a system
+directory you're likely not to have access to, but even if you have access to it you should not install
+this software in system directories.
+- CFLAGS : compiler flags. Will be discussed later, depends on the compiler used.
+- 
+
 
 1.0 Test with gcc
 On a system where only gcc is present, 
 
 mkdir build
 cd build
-../configure CC=gcc CFLAGS="-O3" --prefix=<directory of your choice>
+../configure CC=gcc CFLAGS="-O3" --prefix=<installation directory of your choice>
 make
 make install
 
@@ -37,13 +50,22 @@ make
 make install
 
 1.2 With an OpenAcc-capable compiler
-In this case, many more parameters should be specified. 
+In this case, many more parameters should be specified. Some examples:
+
+# for nvidia cards
+CFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0"
+
+# for multicore
+CFLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0
 
 
 2. Benchmarks
 
-Bencharks
+WORK IN PROGRESS
+
 
 3. Test
+
+WORK IN PROGRESS
 
 
