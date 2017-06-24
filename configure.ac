@@ -48,7 +48,6 @@ AC_TYPE_UINT64_T
 
 # Checks for library functions.
 AC_FUNC_FSEEKO
-AC_FUNC_MALLOC
 AC_CHECK_FUNCS([gettimeofday memset pow sqrt strstr])
 
 
