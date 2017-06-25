@@ -10,11 +10,18 @@ else
     echo Reading compilation/geometry parameters from $COMPILE_INFO_FILENAME ...
 fi
 
-FILETEMPLATEDIR=$BENCHDIR/benchmarks/setting_file_templates
+if test $# -eq 1
+then 
+    BENCHDIR=$(dirname $BASH_SOURCE)
+    BENCHDIR=$(dirname $BENCHDIR)
+    echo BENCHDIR not set, setting to $BENCHDIR
+fi
+
+FILETEMPLATEDIR=$BENCHDIR/setting_file_templates
 
 
 if test ! -f "$FILETEMPLATEDIR/benchmark.pg.set.proto" -a \
-    -f "$FILETEMPLATEDIR/benchmark_for_profiling.pg.set.proto" \
+    -f "$FILETEMPLATEDIR/benchmark_for_profiling.pg.set.proto"  -a \
     -f "$FILETEMPLATEDIR/fermion_parameters.set"
 then
     echo Directory $BENCHDIR does not exist or not contains benchmarks templates.
@@ -45,8 +52,9 @@ MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)
 echo Modules to load: $MODULES_TO_LOAD
 
 # preparing base benchmark file
-for FILEBASE in "benchmark.pg.set.proto benchmark_profiling.pg.set.proto"
+for FILEBASE in benchmark.pg.set.proto benchmark_profiling.pg.set.proto
 do
+echo $FILEBASE
 sed 's/SEDNRANKS/'$TASKS'/' $FILETEMPLATEDIR/$FILEBASE |\
     sed 's/SEDNX/'$L0'/' | sed 's/SEDNY/'$L1'/' | sed 's/SEDNZ/'$L2'/' |\
     sed 's/SEDNODEDIM/16/' |  sed 's/SEDNT/'$((L3*TASKS))'/' > ${FILEBASE%.proto}
