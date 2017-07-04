@@ -65,6 +65,10 @@ if 'pgi' in argv:
         ta = 'multicore'
     elif 'amd' in argv:
         ta = 'radeon:hawaii'
+    else:
+        stderr.write("No architecture selected. ")
+        ta = None
+
 
     if 'cuda7.0' in argv:
         ta += ',cuda7.0'
@@ -73,8 +77,14 @@ if 'pgi' in argv:
     elif 'cuda8.0' in argv:
         ta += ',cuda8.0'
 
-    CC_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -DUSE_MPI_CUDA_AWARE -I${MPIINC}"'
-    LINKER_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -lmpi -L${MPILIB}"'
+    if ta is not None:
+        CC_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -DUSE_MPI_CUDA_AWARE -I${MPIINC}"'
+        LINKER_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -lmpi -L${MPILIB}"'
+    else:
+        stderr.write("Compiling with -O0 flags...")
+        CC_FLAGS="-O0"
+        LINKER_FLAGS="-O0 -lmpi"
+
 
 elif 'gcc' in argv:
     CC='gcc'
