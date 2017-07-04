@@ -82,8 +82,8 @@ if 'pgi' in argv:
         LINKER_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -lmpi -L${MPILIB}"'
     else:
         stderr.write("Compiling with -O0 flags...")
-        CC_FLAGS="-O0"
-        LINKER_FLAGS="-O0 -lmpi"
+        CC_FLAGS='"-O0"'
+        LINKER_FLAGS='"-O0 -lmpi"'
 
 
 elif 'gcc' in argv:
