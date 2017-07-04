@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+
+# COMPILER: PGI, GCC, MPI
+# 
+
+
+
+from sys import argv,exit,stderr,stdout
+
+
+accepted_options = ['gcc','mpi','pgi','cc35','cc60','haswell',\
+        'amd','cuda7.0','cuda7.5','cuda8.0']
+
+n=None
+
+comp_matrix=[
+        [n,0,0,0,0,0,0,0,0,0],# gcc
+        [n,n,0,0,0,0,0,0,0,0],# mpi
+        [n,n,n,1,1,1,1,1,1,1],# pgi
+        [n,n,n,n,0,0,0,1,1,1],# cc35
+        [n,n,n,n,n,0,0,1,1,1],# cc60
+        [n,n,n,n,n,n,0,0,0,0],# haswell
+        [n,n,n,n,n,n,n,0,0,0],# amd
+        [n,n,n,n,n,n,n,n,0,0],# cuda7.0
+        [n,n,n,n,n,n,n,n,n,0],# cuda7.5
+        [n,n,n,n,n,n,n,n,n,n]]# cuda8.0
+
+
+# checking for not recognized options
+
+all_ok = True
+for item in argv[1:] :
+    if item not in accepted_options:
+        stderr.write("ERROR: option '{}' not recognized.\n".format(item))
+        all_ok = False
+
+if not all_ok :
+    stderr.write("Accepted Options:\n")
+    for op in accepted_options :
+        stderr.write(op + '\n')
+    exit(1)
+
+# check for option incompatiblity
+for i,op in enumerate(accepted_options):
+    if op in argv:
+        for j,op2 in enumerate(accepted_options):
+            if j > i and op2 in argv and comp_matrix[i][j] == 0:
+                stderr.write("ERROR: options {} and {} not compatible.\n".
+                        format(op,op2))
+                all_ok = False
+
+if not all_ok :
+    exit(1)
+
+
+if 'pgi' in argv:
+
+    CC='pgcc'
+
+    if 'cc35' in argv:
+        ta = 'tesla:cc35'
+    elif 'cc60' in argv:
+        ta = 'tesla:cc35'
+    elif 'haswell' in argv:
+        ta = 'multicore'
+    elif 'amd' in argv:
+        ta = 'radeon:hawaii'
+
+    if 'cuda7.0' in argv:
+        ta += ',cuda7.0'
+    elif 'cuda7.5' in argv:
+        ta += ',cuda7.5'
+    elif 'cuda8.0' in argv:
+        ta += ',cuda8.0'
+
+    CC_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -DUSE_MPI_CUDA_AWARE -I${MPIINC}"'
+    LINKER_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -lmpi -L${MPILIB}"'
+
+elif 'gcc' in argv:
+    CC='gcc'
+    CC_FLAGS='"-O3 -std=gnu99"'
+    LINKER_FLAGS='"-lm"'
+
+
+elif 'mpi' in argv:
+    CC='mpicc'
+    CC_FLAGS='"-O3 -std=gnu99"'
+    LINKER_FLAGS='-lm'
+
+else : 
+    stderr.write("Compiler not specified\n")
+    exit(1)
+
+
+stdout.write("CC={} CFLAGS={} LDFLAGS={}".format(CC,CC_FLAGS,LINKER_FLAGS))
+
