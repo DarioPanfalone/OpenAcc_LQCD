@@ -14,49 +14,53 @@
 1. Build - General ideas
 
 At build time the geometry of the lattice must be known, and must be passed to 
-the "configure" script. At present, "configure" reads a file names "geom_defines.txt" 
+the "configure" script (notice that there is also a "configure_wrapper" script, 
+which is a python script, which makes easier to call "configure": more on that is written
+below). At present, "configure" reads a file names "geom_defines.txt" 
 which contains the lattice dimensions and the dimensions of the OpenAcc tiles.
 
 In case the system you are working on uses environment modules, you need to load them before 
 invoking "configure".
 
+Example:
+
+mkdir build
+cd build
+
+<add the geom_defines.txt file>
+
+../configure_wrapper pgi cc35 cuda8.0
+
+make && make install  # you may want to use make -j32 to be faster.
+
+
+
+1.1 Usage of the plain "configure" script
+
 You must also pass to configure:
 - The compiler : CC=<the compiler you want to use>
-- prefix : The place where you want the code to be installed. Note that it defaults to a system
-directory you're likely not to have access to, but even if you have access to it you should not install
-this software in system directories.
+- prefix : The place where you want the code to be installed. Note that it defaults to 
+  a system directory you're likely not to have access to, but even if you have access to it 
+  you should not install this software in system directories.
 - CFLAGS : compiler flags. Will be discussed later, depends on the compiler used.
-- 
+- LDFLAGS : the linker flags
 
+1.1 The "configure_wrapper" script
 
-1.0 Test with gcc
-On a system where only gcc is present, 
+This simple wrapper allows the user to call call configure without remembering all the
+options. If you don't trust this wrapper, you can look into the code and look at the 
+options you need.
+It is called in this way:
 
-mkdir build
-cd build
-../configure CC=gcc CFLAGS="-O3" --prefix=<installation directory of your choice>
-make
-make install
+../configure_wrapper pgi cc35 cuda8.0
 
-should be enough.
+It will produce the command
 
-1.1 With mpicc
+./configure CC=pgcc CFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0 -DUSE_MPI_CUDA_AWARE -I${MPIINC}" LDFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0 -lmpi -L${MPILIB}"  --prefix=$(pwd)
 
-
-mkdir build
-cd build
-../configure CC=mpicc CFLAGS="-O3" --prefix=<directory of your choice>
-make
-make install
-
-1.2 With an OpenAcc-capable compiler
-In this case, many more parameters should be specified. Some examples:
-
-# for nvidia cards
-CFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0"
-
-# for multicore
-CFLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0
+and you will be asked if you want to execute it or not. Note that, for simplicity, 
+the install directory (--prefix) is set to the working directory. If you want to change that,
+just specify --prefix=<your explicit installing directory>
 
 
 2. Benchmarks
