@@ -33,16 +33,6 @@ comp_matrix=[
 # checking for not recognized options
 
 all_ok = True
-for item in argv[1:] :
-    if item not in accepted_options:
-        stderr.write("ERROR: option '{}' not recognized.\n".format(item))
-        all_ok = False
-
-if not all_ok :
-    stderr.write("Accepted Options:\n")
-    for op in accepted_options :
-        stderr.write(op + '\n')
-    exit(1)
 
 # check for option incompatiblity
 for i,op in enumerate(accepted_options):
@@ -58,16 +48,21 @@ if not all_ok :
 
 
 if 'pgi' in argv:
+    argv.remove('pgi')
 
     CC='pgcc'
 
     if 'cc35' in argv:
+        argv.remove('cc35')
         ta = 'tesla:cc35'
     elif 'cc60' in argv:
+        argv.remove('cc60')
         ta = 'tesla:cc35'
     elif 'haswell' in argv:
+        argv.remove('haswell')
         ta = 'multicore'
     elif 'amd' in argv:
+        argv.remove('amd')
         ta = 'radeon:hawaii'
     else:
         stderr.write("No architecture selected.\n")
@@ -75,10 +70,13 @@ if 'pgi' in argv:
 
 
     if 'cuda7.0' in argv:
+        argv.remove('cuda7.0')
         ta += ',cuda7.0'
     elif 'cuda7.5' in argv:
+        argv.remove('cuda7.5')
         ta += ',cuda7.5'
     elif 'cuda8.0' in argv:
+        argv.remove('cuda8.0')
         ta += ',cuda8.0'
 
     if ta is not None:
@@ -91,12 +89,14 @@ if 'pgi' in argv:
 
 
 elif 'gcc' in argv:
+    argv.remove('gcc')
     CC='gcc'
     CC_FLAGS='"-O3 -std=gnu99"'
     LINKER_FLAGS='"-lm"'
 
 
 elif 'mpi' in argv:
+    argv.remove('mpi')
     CC='mpicc'
     CC_FLAGS='"-O3 -std=gnu99"'
     LINKER_FLAGS='"-lm"'
@@ -113,15 +113,18 @@ argCC = "CC={}".format(CC)
 argCFLAGS = "CFLAGS={}".format(CC_FLAGS)
 argLDFLAGS = "LDFLAGS={}".format(LINKER_FLAGS)
 
+argsother = ' '.join(argv[1:])
 
-command = executable+' '+argCC+' '+argCFLAGS+' '+argLDFLAGS
+command = ' '.join([executable,argCC,argCFLAGS,argLDFLAGS,argsother])
 
-stderr.write(command)
+stderr.write(command+'\n')
 ans = raw_input("Execute command? ")
 
 if ans.lower() in ['yes','y','ye']: 
     try:
         subprocess.check_call([command],shell = True)
     except subprocess.CalledProcessError as e:
-        stderr.write("Call to {} failed with error {}. \
-Maybe you need to load the correct modules? ".format(executable,e.returncode))
+        stderr.write("Call to {} failed with error {}.\n"
+                .format(executable,e.returncode))
+        if e.returncode == 77:
+            stderr.write("Maybe you need to load the correct modules?\n")
