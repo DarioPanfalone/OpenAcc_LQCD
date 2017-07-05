@@ -1,10 +1,21 @@
 #!/usr/bin/env python
+'''
+ This script calls "configure" with the right arguments, which will be 
+ chosen depending on the special-arguments passed to this script.
+ 
+ Special arguments for this script:
 
-# COMPILER: PGI, GCC, MPI
-# 
+ Compilers: gcc,mpi,pgi (mutually exclusive)
+ Options for pgi: cc35, cc60, haswell, amd (mutually exclusive)
+ Options for pgi and cc*: cuda7.0, cuda7.5, cuda8.0 (mutually exclusive)
+
+ Other arguments will be passed directly to "configure" (e.g. --prefix).
+ if --prefix is not specified, it is set to $(pwd).
 
 
 
+
+'''
 from sys import argv,exit,stderr,stdout
 from os import path
 import subprocess
@@ -12,11 +23,19 @@ import subprocess
 
 basedir = path.dirname(argv[0])
 
+foundPrefix = False
+for arg in argv[1:]:
+    if '--prefix' in arg:
+        foundPrefix = True
+
+
+
+
 accepted_options = ['gcc','mpi','pgi','cc35','cc60','haswell',\
         'amd','cuda7.0','cuda7.5','cuda8.0']
 
 n=None
-
+# flag compatibilities
 comp_matrix=[
         [n,0,0,0,0,0,0,0,0,0],# gcc
         [n,n,0,0,0,0,0,0,0,0],# mpi
@@ -29,8 +48,6 @@ comp_matrix=[
         [n,n,n,n,n,n,n,n,n,0],# cuda7.5
         [n,n,n,n,n,n,n,n,n,n]]# cuda8.0
 
-
-# checking for not recognized options
 
 all_ok = True
 
@@ -116,6 +133,10 @@ argLDFLAGS = "LDFLAGS={}".format(LINKER_FLAGS)
 argsother = ' '.join(argv[1:])
 
 command = ' '.join([executable,argCC,argCFLAGS,argLDFLAGS,argsother])
+
+
+if not foundPrefix: 
+    command += ' --prefix=$(pwd)'
 
 stderr.write(command+'\n')
 ans = raw_input("Execute command? ")

@@ -154,11 +154,13 @@ __common_sources = \
 
 
 
-utilitiesdir = $(bindir)/utilities
-benchmarksdir = $(bindir)/benchmarks
-bin_PROGRAMS = main 
-benchmarks_PROGRAMS = deo_doe_test inverter_multishift_test 
-utilities_PROGRAMS = checkinput confconverter confrestart
+bin_PROGRAMS = main deo_doe_test inverter_multishift_test checkinput confconverter confrestart
+
+# in case we wanted other directories for utilities and benchmarks
+#utilitiesdir = $(bindir)/utilities
+#benchmarksdir = $(bindir)/benchmarks
+#benchmarks_PROGRAMS = deo_doe_test inverter_multishift_test 
+#utilities_PROGRAMS = checkinput confconverter confrestart
 
 main_SOURCES =	OpenAcc/main.c\
 	$(__common_sources)
