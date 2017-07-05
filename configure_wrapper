@@ -106,7 +106,7 @@ else :
     exit(1)
 
 
-command = ("{}/configure".
+executable = ("{}/configure".
         format(basedir,CC,CC_FLAGS,LINKER_FLAGS))
 
 argCC = "CC={}".format(CC)
@@ -114,9 +114,10 @@ argCFLAGS = "CFLAGS={}".format(CC_FLAGS)
 argLDFLAGS = "LDFLAGS={}".format(LINKER_FLAGS)
 
 
-stdout.write(command+' '+argCC+' '+argCFLAGS+' '+argLDFLAGS+'\n')
+command = executable+' '+argCC+' '+argCFLAGS+' '+argLDFLAGS
 
+stderr.write(command)
 ans = raw_input("Execute command? ")
 
 if ans.lower() in ['yes','y','ye']: 
-    subprocess.check_call([command,argCC,argCFLAGS,argLDFLAGS],shell = True)
+    subprocess.check_call([command],shell = True)
