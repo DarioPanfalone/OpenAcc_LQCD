@@ -127,4 +127,18 @@ AC_CONFIG_FILES([
  Makefile
  src/Makefile
 ])
+
+# redefinitions
+AC_DEFINE(LOC_N0,4)
+AC_DEFINE(LOC_N1,4)
+AC_DEFINE(LOC_N2,4)
+AC_DEFINE(LOC_N3,4)
+AC_DEFINE(NOMULTI)
+
+AC_CONFIG_FILES([
+ tools/Makefile
+])
+
+
+
 AC_OUTPUT
