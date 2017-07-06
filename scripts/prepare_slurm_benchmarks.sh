@@ -48,7 +48,13 @@ LABEL=$L0$L1$L2$L3\_$TASKS
 
 echo Reading modules to load in slurm scripts...
 MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)
-echo Modules to load: $MODULES_TO_LOAD
+if test "$MODULES_TO_LOAD" == "" 
+then
+    echo "ERROR: No module loaded."
+    exit
+fi
+
+echo Modules to load:$MODULES_TO_LOAD....
 
 # preparing base benchmark file
 for FILEBASE in benchmark.pg.set.proto benchmark_profiling.pg.set.proto
@@ -70,6 +76,10 @@ cp benchmark_profiling.set benchmark_profiling.inverter.set
 
 
 EXECUTABLES="deodoe inverter pg"
+
+# executable 'pg' is actually 'main'
+ln -s ./main ./bin/pg
+
 for EXECUTABLE in $EXECUTABLES
 do
     for PROFILING in YES NO
@@ -106,7 +116,7 @@ export PGI_ACC_BUFFERSIZE=$SIZE
 
 rm stop
 
-srun --cpu_bind=v,sockets $PROFILINGSTR $EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
+srun --cpu_bind=v,sockets $PROFILINGSTR ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
  
 EOF
     done
