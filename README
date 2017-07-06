@@ -59,8 +59,9 @@ It will produce the command
 ./configure CC=pgcc CFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0 -DUSE_MPI_CUDA_AWARE -I${MPIINC}" LDFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0 -lmpi -L${MPILIB}"  --prefix=$(pwd)
 
 and you will be asked if you want to execute it or not. Note that, for simplicity, 
-the install directory (--prefix) is set to the working directory. If you want to change that,
-just specify --prefix=<your explicit installing directory>
+the install directory (--prefix) is set to the working directory (the programs will be
+installed in $PWD/bin).  If you want to change that, just specify 
+--prefix=<your explicit installing directory>
 
 
 2. Benchmarks
