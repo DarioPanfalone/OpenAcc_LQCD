@@ -1,25 +1,22 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 
-bin_PROGRAMS = rgen rgenfo eval_ratapprox ratnormalizer
+bin_PROGRAMS = rgen rgenfo ratnormalizer
 
 __common_sources = \
-	../src/RationalApprox/rationalapprox.c\
-	../src/RationalApprox/rationalapprox.h\
+	./rationalapprox.h\
+	./rationalapprox.cpp\
 	../src/RationalApprox/Remez/alg_remez.h\
 	../src/RationalApprox/Remez/bigfloat.h
 
-rgen_SOURCES = ../src/RationalApprox/Remez/alg_remez.cc\
-	../src/RationalApprox/rationalapprox_calc.cc\
+rgen_SOURCES = ./rationalapprox_calc.cc\
+	../src/RationalApprox/Remez/alg_remez.cc\
 	$(__common_sources)
 
-rgenfo_SOURCES = ../src/RationalApprox/Remez/alg_remez.cc\
-	../src/RationalApprox/rationalapprox_calc_fixed_order.cc\
+rgenfo_SOURCES = ./rationalapprox_calc_fixed_order.cc\
+	../src/RationalApprox/Remez/alg_remez.cc\
 	$(__common_sources)
 
-eval_ratapprox_SOURCES = eval_ratapprox.c\
-	$(__common_sources)
-
-ratnormalizer_SOURCES = normalize_ratapprox.c\
+ratnormalizer_SOURCES = normalize_ratapprox.cc\
 	$(__common_sources)
 

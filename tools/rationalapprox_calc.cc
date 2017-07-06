@@ -5,8 +5,8 @@
 #include <string.h>
 
 #include "./rationalapprox.h"
-#include"./Remez/bigfloat.h"
-#include"./Remez/alg_remez.h"
+#include"../src/RationalApprox/Remez/bigfloat.h"
+#include"../src/RationalApprox/Remez/alg_remez.h"
 
 
 //using namespace std;
@@ -86,5 +86,7 @@ int main(int argc, char **argv){
     fprintf(stderr,"\nNOTICE: Remez algorithm converged to the required precision.\n");
     fprintf(stderr,"Written file %s .\n", nomefile);
 
+    return 0;
 
-}
+
+   }

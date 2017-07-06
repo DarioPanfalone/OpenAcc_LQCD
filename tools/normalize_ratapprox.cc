@@ -1,6 +1,7 @@
-#include "../src/RationalApprox/rationalapprox.h"
+#include "./rationalapprox.h"
 #include <stdio.h>
 
+int verbosity_lv = 5 ; 
 
 int main(int argc, char **argv){
 

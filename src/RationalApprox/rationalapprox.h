@@ -49,6 +49,5 @@ void rescale_rational_approximation(RationalApprox *in, RationalApprox *out, dou
 void renormalize_rational_approximation(RationalApprox *in, RationalApprox *out);
 
 
-double rational_approx_evaluate(RationalApprox* ra, double x);
 
 #endif

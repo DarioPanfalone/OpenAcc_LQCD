@@ -138,6 +138,10 @@ command = ' '.join([executable,argCC,argCFLAGS,argLDFLAGS,argsother])
 if not foundPrefix: 
     command += ' --prefix=$(pwd)'
 
+cppargs = ' CXX=g++ CPPFLAGS="-O3"'
+
+command += cppargs
+
 stderr.write(command+'\n')
 ans = raw_input("Execute command? ")
 

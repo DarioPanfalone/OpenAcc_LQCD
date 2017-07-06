@@ -4,8 +4,8 @@
 #include <string.h>
 
 #include "./rationalapprox.h"
-#include"./Remez/bigfloat.h"
-#include"./Remez/alg_remez.h"
+#include"../src/RationalApprox/Remez/bigfloat.h"
+#include"../src/RationalApprox/Remez/alg_remez.h"
 
 
 //using namespace std;
@@ -15,6 +15,8 @@ const int gmp_remez_precision=256; // The precision that gmp uses
 //Rational approximations for Metropolis
 const double lambda_min=4.0e-7;  // rational approx valid on [lambda_min_metro, 1.0]
 const double residue=1.0e-8;    // stopping residual for CG
+
+int verbosity_lv = 5 ; 
 
 int main(int argc, char **argv){
   if(argc!=5){
