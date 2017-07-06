@@ -10,9 +10,7 @@
  Options for pgi and cc*: cuda7.0, cuda7.5, cuda8.0 (mutually exclusive)
 
  Other arguments will be passed directly to "configure" (e.g. --prefix).
- if --prefix is not specified, it is set to $(pwd).
-
-
+ If --prefix is not specified, it is set to $(pwd).
 
 
 '''
@@ -68,6 +66,7 @@ if 'pgi' in argv:
     argv.remove('pgi')
 
     CC='pgcc'
+    CXX='pgc++'
 
     if 'cc35' in argv:
         argv.remove('cc35')
@@ -108,6 +107,7 @@ if 'pgi' in argv:
 elif 'gcc' in argv:
     argv.remove('gcc')
     CC='gcc'
+    CXX='g++'
     CC_FLAGS='"-O3 -std=gnu99"'
     LINKER_FLAGS='"-lm"'
 
@@ -129,18 +129,17 @@ executable = ("{}/configure".
 argCC = "CC={}".format(CC)
 argCFLAGS = "CFLAGS={}".format(CC_FLAGS)
 argLDFLAGS = "LDFLAGS={}".format(LINKER_FLAGS)
+argCXX = "CXX={}".format(CXX)
+argCPPFLAGS = 'CPPFLAGS="-O3"'
+
 
 argsother = ' '.join(argv[1:])
 
-command = ' '.join([executable,argCC,argCFLAGS,argLDFLAGS,argsother])
+command = ' '.join([executable,argCC,argCFLAGS,argLDFLAGS,argCXX,argCPPFLAGS,argsother])
 
 
 if not foundPrefix: 
     command += ' --prefix=$(pwd)'
-
-cppargs = ' CXX=g++ CPPFLAGS="-O3"'
-
-command += cppargs
 
 stderr.write(command+'\n')
 ans = raw_input("Execute command? ")
