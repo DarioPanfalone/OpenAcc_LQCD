@@ -5,60 +5,45 @@
 
 \begin{itemize}
     \item \texttt{src}: the code, for the main program and for some tools.
-    \item tools: code and makefile for various utilities, for example to 
-generate the rational
-        approximations and test them (at present the only thing), but this
-        folder could contain tools to convert configurations from a format to
-        another and things like that), 
-    \item scripts: basically, collections of commands that you would have to
-        type too many times. Scripts here are provided for convenience, but are 
-        not maintained.
-    \item \verb|saved_approxs|: saved rational approximations, for your 
-        convenience. Not maintained.
-    \item build: the place where build happens. It is advisable to create you 
-own build directory, possibly aptly named with the lattice dimensions and 
-number of MPI ranks, since different lattice geometries require different 
-builds.
-    \item build/run: the place where your program should run. Try to put here
-        all the things your program needs (rational approximation files,
-        start configurations, files where data should be appended and so on.)
+    \item tools: code and makefile for various utilities, for example to generate the rational approximations and test them and a tool to analyse the performance from information recorded during runs. Tthis directory could also contain tools to convert configurations from a format to another and things like that; 
+    \item scripts: basically, collections of commands that you would have to type too many times. 
+    At the moment, here there are only scripts for benchmarking on SLURM clusters.
     \item docs: where documentation should be.
 \end{itemize}
-
-
-
 \section{Compilation}
 \label{compilation}
+Compilation is done using Autotools, with the usual {\sf ./configure} , {\sf make} and {\sf make install}.
+In case the 
+There are a number of parameters that must be set (the choice of the compiler and of the compiler flags), for which the user can find the python script {\sf configure\_wrapper} useful. For example,
+
+\begin{verbatim}
+../configure_wrapper pgi cc35 cuda8.0
+\end{verbatim}
+will produce the command
+\begin{verbatim}
+./configure CC=pgcc CFLAGS="-acc=noautopar -v -O3 -Minfo=all \
+ -ta=tesla:cc35,cuda8.0 -DUSE_MPI_CUDA_AWARE -I${MPIINC}" \
+ LDFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0 \
+ -lmpi -L${MPILIB}"  --prefix=$(pwd)
+\end{verbatim}
+
+
 \subsection{Generating the single precision part of the code}
-(to write)
-\subsection{Creating the makefile}
-If you don't have a makefile, or if you changed the dependence
-structure in your code, you have to create a makefile first. NO FEAR! The 
-\verb|generate_makefile.py| utility will do it for you.
-The \verb|generate_makefile.py| takes a number of arguments (in any order), 
-namely 
-\begin{itemize}
-    \item a list of files containing a \verb|main()| function that you want to 
-        compile
-    \item a \verb|compiler&linker| flag option.
-\end{itemize}
-For example:
-\begin{verbatim}
-[OPENACCREPO/build]~>./generate_makefile.py
-Please specify one compiler: either PGISLOW, GNU or PGI
-\end{verbatim}
-As you see, it will tell you to choose a compiler. Try, for example
-\begin{verbatim}
-[OPENACCREPO/build]~>./generate_makefile.py GNU ../src/OpenAcc/main.c \
-../src/tools/checkinput.c > makefile
-\end{verbatim}
-and a makefile will be generated, using gcc and -O3 optimization
-(for more informations, look into \verb|generate_makefile.py|). 
+The single-precision part of the code is generated automatically 
+by a python script ({\sf src/double\_to\_single\_transformer.py}).
 
-Note that you can call the \verb|generate_makefile.py| utility from any 
-location, and specify the main files using absolute paths. This is handy in 
-case of multiple build locations (for different geometries, for example).
+It can be called with {\sf autoMode} to require minimum input. Otherwise, it can act on
+single files, or on all files that are known to need the treatment (a list is included in the script).
 
+Notice that there may be some single precision sources or headers which are not just a 
+transformation of their double precision counterpart (at the moment, only 
+{\sf src/OpenAcc/sp_fermion_force.c}). The transformation script contains a list
+of these files, which are not touched unless explicitly stated.
+
+
+\subsection{Creating the makefile(s)}
+
+This is managed by autotools.
 
 \subsection{The actual compilation}
 

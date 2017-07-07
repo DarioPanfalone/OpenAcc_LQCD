@@ -1,13 +1,45 @@
 \documentclass[a4paper,10pt]{book}
 %\documentclass[a4paper,10pt]{scrartcl}
 
+\usepackage{amssymb}
+\usepackage{todo}     %per mettere note
+
+\usepackage{url}      %per usare links nelle referenze o altrove
+
+\usepackage{courier}
+\usepackage{listings} %per mettere dei pezzi di codice belli da vedere
+\lstset{
+    language=C,
+%    backgroundcolor=\color{g90},
+%    rulecolor=\color{red},
+%    frame=single,
+%    frame=ltrb, 
+    frame=trBL, 
+    basicstyle=\small\ttfamily,
+%    basicstyle=\footnotesize\ttfamily,    
+    breaklines=true,
+%    keywordstyle=\ttfamily\color{OliveGreen}\bfseries\underbar,
+    morekeywords={uint},
+%    identifierstyle=\ttfamily\color{CadetBlue}\bfseries,
+%    commentstyle=\color{Brown},
+    stringstyle=\ttfamily,
+%    basewidth={0.4em,0.225em},
+    fontadjust=true,
+    showstringspaces=false,
+    float %,
+    %belowskip=-2em
+}
+
+
+
 \usepackage[utf8]{inputenc}
 \usepackage{bbold}
 \newcommand{\cverb}{\linebreak[5]\verb}
 \title{{\Huge \bf YALQCDSS Manual} \\
 Yet Another Lattice QCD Simulation Suite \\
 {\small Valid around commit 
-fae4f48f407b9858001ff9efef8a68be0da19480}}
+a50e0785760ab9f4e0605b8e9e09f5bf6d38ca0f
+}}
 \author{M. Mesiti\\{\small University Of Pisa and INFN - Sezione di Pisa}}
 
 
