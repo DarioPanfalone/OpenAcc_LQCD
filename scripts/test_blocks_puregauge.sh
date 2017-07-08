@@ -9,7 +9,7 @@ then
     exit
 fi
 
-DIR=${1-./src}
+SRCDIR=${1-./src}
 
 OBJDIR=$SRCDIR/OpenAcc
 

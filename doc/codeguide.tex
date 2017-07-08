@@ -1,5 +1,5 @@
 
-\chapter{Guide to the code}
+%\chapter{Guide to the code}
 
 \section{Directory content}
 
@@ -7,7 +7,8 @@
     \item \texttt{src}: the code, for the main program and for some tools.
     \item tools: code and makefile for various utilities, for example to generate the rational approximations and test them and a tool to analyse the performance from information recorded during runs. Tthis directory could also contain tools to convert configurations from a format to another and things like that; 
     \item scripts: basically, collections of commands that you would have to type too many times. 
-    At the moment, here there are only scripts for benchmarking on SLURM clusters.
+    At the moment, there are scripts for benchmarking on SLURM clusters, to analyse the performance data produced during simulations,
+    and some utilities to test different {\sf tile} configurations.
     \item docs: where documentation should be.
 \end{itemize}
 \section{Compilation}
@@ -16,13 +17,13 @@ Compilation is done using Autotools, with the usual {\sf ./configure} , {\sf mak
 In case the {\sf configure} script is not present, it can be created from {\sf configure.ac} 
 with the command{ \sf autoreconf --install} (notice that this step creates also the {\sf Makefile.in} in the subdirectories, 
 using also the information from the files named {\sf Makefile.am}). 
-There are a number of parameters that must be set (the choice of the compiler and of the compiler flags), for which the user can find the python script {\sf configure\_wrapper} useful. For example,
+There are a number of parameters that must be passed to {\sf configure} (the choice of the compiler and of the compiler flags), for which the user can find the python script {\sf configure\_wrapper} useful. For example,
 \begin{verbatim}
 ../configure_wrapper pgi cc35 cuda8.0
 \end{verbatim}
 will produce the command
 \begin{verbatim}
-./configure CC=pgcc CFLAGS="-acc=noautopar -v -O3 -Minfo=all \
+../configure CC=pgcc CFLAGS="-acc=noautopar -v -O3 -Minfo=all \
  -ta=tesla:cc35,cuda8.0 -DUSE_MPI_CUDA_AWARE -I${MPIINC}" \
  LDFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda8.0 \
  -lmpi -L${MPILIB}"  --prefix=$(pwd)
@@ -39,6 +40,8 @@ Notice that there may be some single precision sources or headers which are not 
 transformation of their double precision counterpart (at the moment, only 
 {\sf src/OpenAcc/sp\_fermion\_force.c}). The transformation script contains a list
 of these files, which are not touched unless explicitly stated.
+
+{\bf Notice} that this step is performed by {\sf configure}.
 
 
 \subsection{The actual compilation}
@@ -465,7 +468,25 @@ In the {\sf scripts} directory there are two scripts, namely
 so that they can be tested. Examples of the \verb|dirac_blocks.txt| and 
 \verb|puregauge_blocks.txt| can be found in the {\sf scripts} directory. 
 
-
+A possible use of these scripts is the following.
+\begin{enumerate}
+ \item Create a \verb|build| directory, build the program there (configure, make and 
+ make install, see before)
+ \item Create the \verb|dirac_blocks.txt| and/or \verb|puregauge_blocks.txt|, writing 
+ the blocks you want to test inside it
+ \item Run the command
+ \begin{verbatim}
+../scripts/test_blocks_dirac_operator.sh
+ \end{verbatim}
+ and/or
+ \begin{verbatim}
+../scripts/test_blocks_puregauge.sh  
+ \end{verbatim}
+\end{enumerate}
+ These scripts will create different versions of the benchmark executables. In order to run 
+ them, you may want to insert the executables in a suitable slurm or LSF script.
+ A tool to create slurm scripts is described in Chapter \ref{tests_and_benchmarks}.
+ 
 \subsection{Molecular dynamics parameters}
 Holy texts report that optimal hybrid montecarlo acceptance should be between 70\% and 80\%. 
 The probability for a new configuration to be accepted is related to the action 
@@ -522,8 +543,8 @@ data produced can be analysed with the {\sf analyse\_md\_info.sh} script.
 
 
 
-\section{Input file reading (and advices for format modifications).}
-Input file reading is done in \verb|/src/Include/init.c|. The idea here is to 
+\section{Setting file reading (and advices for format modifications).}
+Setting file reading is done in \verb|/src/Include/setting_file_parser.c|. The idea here is to 
 read parameters from a file and store them into global variables (or, better, 
 into variables of limited number of global structures). The input file should 
 be composed by parameter ``macro groups'', with a name that is needed to find 
@@ -540,26 +561,33 @@ following things:
             \item Scan the file to find names of macro-groups of parameters, thus 
                 identifying for each group a type, an initial line and an ending line;
             \item For each of the groups found, it calls the appropriate parser (which 
-                is actually a wrapper) passing to it the correct \emph{global} data member, 
+                is actually a wrapper) passing to it the correct \emph{global} variable (which is a structure), 
                 the start file line and the end file line of the group. Every parser-wrapper 
                 defines an array of structures of the kind \verb|par_info|:
-                \begin{verbatim}
-                typedef struct par_info_t{
-                    void* par;
-                    int type; // 0 = int, 1 = double, 2 = string
-                    char* name;
-                    int is_optional;
-                    const void * default_value;
-                }par_info;
-                \end{verbatim}
+\begin{verbatim}
+//types that can be found in an input file
+enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES};
+const char * type_strings[]={"(int)", "(double)", "(string)" };
+
+typedef struct par_info_t{
+
+    void* par;
+    enum dtype type;
+    const char* name;
+    const void* default_value;
+    const char* comment;
+
+}par_info;
+\end{verbatim}
                 Inside every parser-wrapper, this array is passed to a real parser that looks 
                 for the \verb|name| in the range of lines specified by the parser-wrapper, 
                 reads a value whose type is speficied in \verb|type|, and puts it into the 
                 variable pointed at by \verb|*par|. If no value specified by \verb|type| is 
-                found, and if \verb|is_optional| is zero, an error will be generated; if 
-                instead \verb|is_optional| is one, the default value read from the pointer 
-                \verb|*default_value| will be assigned to the variable pointer at by 
-                \verb|*par|.
+                found, the \verb|*default_value| is used instead, and a message is printed.
+                If no value is read and  \verb|defalt_value| is \verb|NULL|, an error will be generated,
+                but the read of the setting file will continue until the end in order to 
+                give print all the errors.
+                
         \end{enumerate}
     \item If it is not opened for any reason, it goes into ``help'' mode, and the 
         same chain of parser-wrappers and parser is called in help mode writing an 
@@ -567,15 +595,18 @@ following things:
 \end{enumerate}
 If you want to add another parameter ``macro group'', you have to add the name 
 to the \verb|par_macro_groups_names| list, increasing also \verb|NPMGTYPES|.
-You also need to create the correct parser-wrapper for it, and modify the 
-\verb|set_global_vars_and_fermions_from_input_file()| function to accomodate 
+You also need to create the correct parser-wrapper for it, and modify the \\
+\verb|set_global_vars_and_fermions_from_input_file()| \\function to accomodate 
 the reading of that parameter ``macro group''.\\
 If you want just to add a parameter to an existing group, you just have to 
 modify its parser-wrapper and possibly the structure that should hold the value 
 of that new parameter.
 
-\section{Configuration file reading}
+\section{Gauge Configuration file reading}
 All this is performed in \verb|src/OpenAcc/io.c|.
+Notice that in the case there are more than one MPI process the gauge configuration
+file is read by rank 0, and then split into different pieces which are sent to the 
+other ranks. The reverse happens when the gauge configuration is saved to disc.
 
 \subsection{ASCII Format}
 The ASCII format is really useful for checking and debugging, and at present is 
