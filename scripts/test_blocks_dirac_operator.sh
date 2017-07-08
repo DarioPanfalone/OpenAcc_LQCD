@@ -9,7 +9,9 @@ then
     exit
 fi
 
-OBJDIR=${1-./src/OpenAcc}  
+SRCDIR=${1-./src}
+
+OBJDIR=$SRCDIR/OpenAcc
 
 if test ! -d $OBJDIR
 then 
@@ -24,11 +26,11 @@ do
    echo DEODOETILE0=$DDT0 DEODOETILE1=$DDT1  DEODOETILE2=$DDT2 DEODOEGANG3=$DDG3
    echo 
    rm $OBJDIR/fermion_matrix.o $OBJDIR/sp_fermion_matrix.o
-   makei -DDEODOETILE0=$DDT0 -DDEODOETILE1=$DDT1  -DDEODOETILE2=$DDT2 -DDEODOEGANG3=$DDG3 deo_doe_test
+   cd $SRCDIR
+   make -DDEODOETILE0=$DDT0 -DDEODOETILE1=$DDT1  -DDEODOETILE2=$DDT2 -DDEODOEGANG3=$DDG3 deo_doe_test
    echo mv deo_doe_test deo_doe_test_$DDT0\_$DDT1\_$DDT2\_$DDG3
    mv deo_doe_test deo_doe_test_$DDT0\_$DDT1\_$DDT2\_$DDG3
-   echo mv run/deo_doe_test run/deo_doe_test_$DDT0\_$DDT1\_$DDT2\_$DDG3
-   mv run/deo_doe_test run/deo_doe_test_$DDT0\_$DDT1\_$DDT2\_$DDG3
    echo Compiled deo_doe_test_$DDT0\_$DDT1\_$DDT2\_$DDG3
+   cd -
 
 done < <(grep -v '#' $BLOCKS_FILE)
