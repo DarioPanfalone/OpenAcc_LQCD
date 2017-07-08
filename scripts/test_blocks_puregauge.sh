@@ -34,8 +34,8 @@ do
    cd $SRCDIR
    make IMPSTAPTILE0=$IST0  IMPSTAPTILE1=$IST1  IMPSTAPTILE2=$IST2  IMPSTAPGANG3=$ISG3\
        STAPTILE0=$ST0  STAPTILE1=$ST1  STAPTILE2=$ST2  STAPGANG3=$SG3 main
-   echo mv main pg_$IST0\_$IST1\_$IST2\_$ISG3\_$ST0\_$ST1\_$ST2\_$SG3 
-   mv main pg_$IST0\_$IST1\_$IST2\_$ISG3\_$ST0\_$ST1\_$ST2\_$SG3 
+   echo mv main $OLDPWD/pg_$IST0\_$IST1\_$IST2\_$ISG3\_$ST0\_$ST1\_$ST2\_$SG3 
+   mv main $OLDPWD/pg_$IST0\_$IST1\_$IST2\_$ISG3\_$ST0\_$ST1\_$ST2\_$SG3 
    echo Compiled pg_$IST0\_$IST1\_$IST2\_$ISG3\_$ST0\_$ST1\_$ST2\_$SG3 
    cd -
 done < <(grep -v '#' $BLOCKS_FILE)
