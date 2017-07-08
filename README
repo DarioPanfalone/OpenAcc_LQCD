@@ -10,6 +10,9 @@
  Yet Another Lattice Qcd Simulation Suite
                (With OpenAcc)
 
+By E. Calore, M. Mesiti, F. Negro, G. Silvi 
+(and others, which can be added if they feel offended)
+
 1. Build - General ideas
 
 At build time the geometry of the lattice must be known, and must be passed to 
@@ -78,8 +81,10 @@ make && make install
 
 Notice that 'prepare_slurm_benchmarks.sh' assumes the executables are in ./bin.
 
-3. Test
 
-WORK IN PROGRESS
+3. Documentation
+Do you want to know more? A 26-page latex documentation is waiting for you.
+How to create it:
 
-
+cd doc
+pdflatex general_guide.tex

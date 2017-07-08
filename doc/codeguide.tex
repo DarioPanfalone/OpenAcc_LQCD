@@ -1,11 +1,44 @@
 
 %\chapter{Guide to the code}
+\newpage
+\section*{Preface}
 
+This code can be used for the simulation of LQCD with staggered fermions.
+The default choice is for the action is the tree-level Symanzik improved 
+action for the gauge part (it is easy to switch back to the standard Wilson one,
+setting the correct \#define) and stout-improved fermions (The stout level can be 
+set to zero to recover non-stouted fermions).  \\
+The implemented algorithm is the Rational Hybrid Monte Carlo. \\
+Magnetic fields, imaginary electric fields, imaginary chemical potentials can be 
+included in the simulation. This is done by manipulating the $U(1)$ field, which 
+also contains the so-called ``staggered phases''.
+
+This guide may have the following problems:
+\begin{itemize}
+ \item Be outdated
+ \item Be wrong
+ \item Be somewhat unclear
+ \item Contain typos, or bad uses of English 
+ \item the ``setting file'' containing the parameters of the simulation
+ and other settings can be erratically referred to as ``input file'' 
+ (in a simulation there are more input files than one, but there is only one setting file,
+ not to be confused with the ``configuration'' file that usually indicates the ``gauge configuration'' file).
+\end{itemize}
+The author thinks nonetheless that it should be helpful to any user of the code.
+In particular, a read of the relevant parts is recommended before trying to use the code,
+of asking questions.
+
+If you find any mistake, please report it to the author.
+
+\newpage
+\tableofcontents
+
+\newpage
 \section{Directory content}
 
 \begin{itemize}
     \item \texttt{src}: the code, for the main program and for some tools.
-    \item tools: code and makefile for various utilities, for example to generate the rational approximations and test them and a tool to analyse the performance from information recorded during runs. Tthis directory could also contain tools to convert configurations from a format to another and things like that; 
+    \item tools: code and makefile for various utilities, for example to generate the rational approximations and test them and a tool to analyse the performance from information recorded during runs. This directory could also contain tools to convert configurations from a format to another and things like that; 
     \item scripts: basically, collections of commands that you would have to type too many times. 
     At the moment, there are scripts for benchmarking on SLURM clusters, to analyse the performance data produced during simulations,
     and some utilities to test different {\sf tile} configurations.
@@ -73,11 +106,19 @@ You may need to do this on the right machine, with the right modules.
 For example, on the Pisa localui3, if you use the PGI compiler,
 you have to type
 \begin{verbatim}
-../scripts/vai_su_cudawn?.sh    # choose 6 or 7
+# go on the right machine first:
+./scripts/interactive_cudawn.sh 6 1
 module load pgi                 # last version
 module load cuda                # last version
 module load openmpi             # if needed 
 \end{verbatim}
+Notice the use of the script \verb|scripts/interactive_cudawn.sh|.
+On the COKA cluster the modules to load are similar, but there is no need to access
+the machines interactively to have access to the compiler.
+
+Notice that the { \bf modules you load in execution must be compatible 
+with compilation settings and with the modules loaded during compilation}.
+Strange things may happen otherwise.
 
 \section{Run a simulation}
 
@@ -100,7 +141,7 @@ where it will fail as well.
 
 
 Once you have set all you need, launch 
-{\sf ./main <input\_file>}. Here, the program 
+{\sf ./main $<$setting\_file$>$}. Here, the program 
 will  need some  files that you have to prepare in advance. Another section
 of this guide (\ref{filesneeded}) will tell you what you usually need to 
 prepare.
@@ -343,8 +384,7 @@ version of the compiler.}:
 \begin{itemize}
     \item The type of gauge action. [triggers some long recompilation]
     \item The stouting strength RHO 
-    \item The lattice dimensions in /src/OpenAcc/geometry.h [this will
-        practically trigger a full recompilation].
+    \item The lattice dimensions: they must be known at {\sf configure} time.
 \end{itemize}
 Of course, changing the input file format requires to recompile the functions 
 to read it, in \verb|/src/Include/init.c|.
@@ -649,6 +689,32 @@ to the list of arguments you pass to \verb|generate_makefile.py| in order to
 build a makefile that will have, amongst other targets,\verb|ildgtest|.
 Modify the \verb|main()| to obtain your desired result.
 
+\section{External Fields, staggered phases and field-dependent observables}
+
+The gauge links {\bf must never} be stored in a state where they
+are multiplicated by the staggered phase. All the gauge links are just
+plain SU(3) matrices.
+
+This has some consequences. The staggered phases are always passed in the "external field".
+The external field also incorporates the effect of a static abelian
+field and the effect of a nonzero chemical potential.
+This means we need a different external field for each of the
+flavours.
+
+This necessity is propagated also in measurements of observables.
+
+Notice that most observables concerning the external field - magnetizations, 
+quark numbers, and susceptibilities - contain terms that come from the derivative 
+of the links w.r.t. the external field. Since usually the $U(1)$ phases are proportional 
+to the external field, in order to build the observable the easiest thing is to 
+compute the phases for two values of the field and then take the difference.
+This may be particularly convenient when considering that the mapping of lattice axes to physical axes 
+must be totally free.
+
+Note: at present, only the magnetization is implemented using this trick. The 
+quark number and quark number susceptibilities are instead stupidly implemented, requiring e.g. 4 different 
+implementations for the 4 possible orientations of the $\tau$ axis.
+
 \section{Jarzynski Mode}
 \label{JarzynskiMode}
 
@@ -656,3 +722,5 @@ If the flag \verb|JarzynskiMode| is set to 1 (or -1) the value of the $z$-compon
 by a little step after every molecular dynamics trajectory. It goes from an integer to the next (or the previous, if \verb|JarzynskiMode| is set to -1)
 in a number of steps that is specified by \verb|MaxConfIdIter|. 
 The number of measurements of fermionic quantities is set in the \verb|FermionMeasuresSettings| group.
+
+
