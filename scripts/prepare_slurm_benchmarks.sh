@@ -51,7 +51,7 @@ MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)
 if test "$MODULES_TO_LOAD" == "" 
 then
     echo "ERROR: No module loaded."
-    exit
+#   exit
 fi
 
 echo Modules to load:$MODULES_TO_LOAD....

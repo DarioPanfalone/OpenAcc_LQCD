@@ -1,7 +1,7 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 
-bin_PROGRAMS = rgen rgenfo ratnormalizer
+bin_PROGRAMS = rgen rgenfo ratnormalizer eval_ratapprox
 
 __common_sources = \
 	./rationalapprox.h\
@@ -20,3 +20,5 @@ rgenfo_SOURCES = ./rationalapprox_calc_fixed_order.cc\
 ratnormalizer_SOURCES = normalize_ratapprox.cc\
 	$(__common_sources)
 
+eval_ratapprox_SOURCES = eval_ratapprox.cc \
+	$(__common_sources)

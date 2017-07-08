@@ -221,6 +221,19 @@ void renormalize_rational_approximation(RationalApprox *in, RationalApprox *out)
 }
 
 
+double rational_approx_evaluate(RationalApprox *in, double x){
+
+    double res = in->RA_a0;
+
+    int order;
+    for(order = 0; order<in->approx_order;++order){
+
+        res += in->RA_a[order]/(x+in->RA_b[order]);
+
+    }
+    return res;
+
+}
 
 
 #endif

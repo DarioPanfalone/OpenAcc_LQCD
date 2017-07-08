@@ -10,7 +10,6 @@
  Yet Another Lattice Qcd Simulation Suite
                (With OpenAcc)
 
-
 1. Build - General ideas
 
 At build time the geometry of the lattice must be known, and must be passed to 
@@ -34,8 +33,6 @@ cd build
 
 make && make install  # you may want to use make -j32 to be faster.
 
-
-
 1.1 Usage of the plain "configure" script
 
 You must also pass to configure:
@@ -46,7 +43,7 @@ You must also pass to configure:
 - CFLAGS : compiler flags. Will be discussed later, depends on the compiler used.
 - LDFLAGS : the linker flags
 
-1.1 The "configure_wrapper" script
+1.2 The "configure_wrapper" script
 
 This simple wrapper allows the user to call call configure without remembering all the
 options. If you don't trust this wrapper, you can look into the code and look at the 
@@ -64,7 +61,6 @@ the install directory (--prefix) is set to the working directory (the programs w
 installed in $PWD/bin).  If you want to change that, just specify 
 --prefix=<your explicit installing directory>
 
-
 2. Benchmarks
 
 In order to run all the necessary benchmarks, it is advised to create an aptly named 
@@ -81,7 +77,6 @@ make && make install
 ../scripts/prepare_slurm_benchmarks.sh geom_defines.txt
 
 Notice that 'prepare_slurm_benchmarks.sh' assumes the executables are in ./bin.
-
 
 3. Test
 
