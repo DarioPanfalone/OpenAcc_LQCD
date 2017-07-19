@@ -163,27 +163,38 @@ bin_PROGRAMS = main deo_doe_test inverter_multishift_test checkinput confconvert
 #utilities_PROGRAMS = checkinput confconverter confrestart
 
 main_SOURCES =	OpenAcc/main.c\
-	$(__common_sources)
+	$(__common_sources) \
+    $(__common_generated_sources)
 
 nodist_main_SOURCES = $(__common_generated_sources)
 
 deo_doe_test_SOURCES = tests_and_benchmarks/deo_doe_test.c \
-	$(__common_sources)
+	$(__common_sources)\
+    $(__common_generated_sources)
+
 nodist_deo_doe_test_SOURCES = $(__common_generated_sources)
 
 inverter_multishift_test_SOURCES = tests_and_benchmarks/inverter_multishift_test.c \
-	$(__common_sources)
+	$(__common_sources)\
+    $(__common_generated_sources)
+
 nodist_inverter_multishift_test_SOURCES = $(__common_generated_sources)
 
 checkinput_SOURCES = tools/checkinput.c \
-	$(__common_sources)
+	$(__common_sources)\
+    $(__common_generated_sources)
+
 nodist_checkinput_SOURCES = $(__common_generated_sources)
 
 confconverter_SOURCES = tools/confconverter.c \
-	$(__common_sources)
+	$(__common_sources)\
+    $(__common_generated_sources)
+
 nodist_confconverter_SOURCES = $(__common_generated_sources)
 
 confrestart_SOURCES = tools/confrestart.c \
-	$(__common_sources)
+	$(__common_sources)\
+    $(__common_generated_sources)
+
 nodist_confrestart_SOURCES = $(__common_generated_sources)
 
