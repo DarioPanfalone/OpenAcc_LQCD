@@ -168,14 +168,15 @@ inline void acc_Deo( __restrict const su3_soa * const u,
 
 //        acc_Deo_d3c(u, out, in, backfield,HALO_WIDTH,1);
 //        acc_Deo_d3c(u, out, in, backfield,nd3-HALO_WIDTH-1,1);
-        acc_Deo_d3p(u, out, in, backfield);
-        acc_Deo_d3m(u, out, in, backfield);
+        acc_Deo_d3p(u, out, in, backfield); //async(2)
+        acc_Deo_d3m(u, out, in, backfield); //async(3)
 
+        acc_Deo_bulk(u, out, in, backfield); //async(1)
 #pragma acc wait(2)
 #pragma acc wait(3)
         communicate_fermion_borders_async(out,send_border_requests,
                 recv_border_requests);
-        acc_Deo_bulk(u, out, in, backfield);
+//        acc_Deo_bulk(u, out, in, backfield); //async(1)
         MPI_Waitall(6,recv_border_requests,MPI_STATUSES_IGNORE);
         MPI_Waitall(6,send_border_requests,MPI_STATUSES_IGNORE);
 #pragma acc wait(1)
@@ -202,6 +203,7 @@ inline void acc_Deo( __restrict const su3_soa * const u,
 
         }
     }
+//    MPI_Barrier(MPI_COMM_WORLD);
 #else 
     acc_Deo_unsafe(u, out, in, backfield);
 #endif
@@ -221,14 +223,15 @@ inline void acc_Doe( __restrict const su3_soa * const u,
 
 //        acc_Doe_d3c(u, out, in, backfield,HALO_WIDTH,1);
 //        acc_Doe_d3c(u, out, in, backfield,nd3-HALO_WIDTH-1,1);
-        acc_Doe_d3p(u, out, in, backfield);
-        acc_Doe_d3m(u, out, in, backfield);
+        acc_Doe_d3p(u, out, in, backfield); //async(2)
+        acc_Doe_d3m(u, out, in, backfield); //async(3)
 
+        acc_Doe_bulk(u, out, in, backfield); //async(1)
 #pragma acc wait(2)
 #pragma acc wait(3)
         communicate_fermion_borders_async(out,send_border_requests,
                 recv_border_requests);
-        acc_Doe_bulk(u, out, in, backfield);
+//        acc_Doe_bulk(u, out, in, backfield); //async(1)
         MPI_Waitall(6,recv_border_requests,MPI_STATUSES_IGNORE);
         MPI_Waitall(6,send_border_requests,MPI_STATUSES_IGNORE);
 #pragma acc wait(1)
@@ -256,6 +259,7 @@ inline void acc_Doe( __restrict const su3_soa * const u,
 
         }
     }
+//    MPI_Barrier(MPI_COMM_WORLD);
 #else 
     acc_Doe_unsafe(u, out, in, backfield);
 #endif
