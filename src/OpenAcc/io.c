@@ -272,8 +272,10 @@ int read_su3_soa_ildg_binary(
     off_t ildg_header_ends_positions[MAXILDGHEADERS]; // point in files 
     // where the message starts
 
-    int ildg_format_index =-1;   // where, in ildg_headers, is the ildg_format header
-    int ildg_binary_data_index =-1;// where, in ildg_headers, is the ildg_binary_data header
+    // where, in ildg_headers, is the ildg_format header
+    int ildg_format_index =-1;   
+    // where, in ildg_headers, is the ildg_binary_data header
+    int ildg_binary_data_index =-1;
     // optionals
     int MD_traj_index = -1;
     int input_file_index = -1;// not used now 
@@ -453,8 +455,8 @@ int read_su3_soa_ildg_binary(
 
 }
 
-int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
-        int conf_id_iter)
+int print_su3_soa_ildg_binary(global_su3_soa * const conf, 
+        const char* nomefile, int conf_id_iter)
 {
 
     if(geom_par.initialized_check == 0){
@@ -538,11 +540,13 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
     fwrite(pad,1,missing_bytes,fp);
 
     // writing input file in the conf
-    // the string 'input_file_str' should be initialized in ../Include/setting_file_parser.c
+    // the string 'input_file_str' should be initialized in 
+    // ../Include/setting_file_parser.c
     len = strlen(input_file_str);
     missing_bytes = (off_t)(len%8==0 ? 0:8-len%8);
     len64 = len + missing_bytes;
-    if(verbosity_lv > 3) printf("Writing input file into the conf: %" PRIu64 "\n", len64);
+    if(verbosity_lv > 3) printf("Writing input file into the conf: %" PRIu64 
+            "\n", len64);
     if(conf_machine_endianness_disagreement) uint64swe(&len64);
     ILDG_header input_file_header = 
         (ILDG_header){magic_number,version,mbme_flag,len64,"input-file"};
@@ -554,10 +558,11 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
 
 
     // writing ildg binary data, that is conf
-    len = nd0*nd1*nd2*nd3*4*3*3*2*8;
+    len = geom_par.gnx * geom_par.gny * geom_par.gnz * geom_par.gnt *4*3*3*2*8;
     missing_bytes = (off_t)(len%8==0?0:8-len%8);
     len64 = len + missing_bytes;
-    if(verbosity_lv > 3) printf("Writing ildg-binary-data, %" PRIu64 "\n", len64);
+    if(verbosity_lv > 3) printf("Writing ildg-binary-data, %" PRIu64 
+            "\n", len64);
     if(conf_machine_endianness_disagreement) uint64swe(&len64);
 
     ILDG_header ildg_binary_data_header = 
