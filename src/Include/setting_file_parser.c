@@ -167,7 +167,8 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         for(int itype =0; itype <ntagstofind; itype++){
             found_something = strstr(filelines[iline],strtofind[itype]);
             if(found_something){
-                printf("Found group %s on line %d\n",strtofind[itype], iline);
+                if(0==devinfo.myrank) printf("Found group %s on line %d\n",
+                        strtofind[itype], iline);
                 taglines[nres] = iline;
                 tagtypes[nres] = itype;
                 nres++;
@@ -887,7 +888,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                         filelines,startline,endline);
                 break;
             default:
-                printf("TAG TYPE NOT RECOGNIZED\n");
+                if(0==devinfo.myrank)printf("TAG TYPE NOT RECOGNIZED\n");
                 return 1;
                 break;
         }
