@@ -1,10 +1,10 @@
 
-AC_PREREQ([2.69])
+AC_PREREQ([2.63])
 AC_INIT([YALQSS],[1.0],[michele.mesiti@gmail.com])
 
-AM_PATH_PYTHON([2.7],\
+AM_PATH_PYTHON([2.6],\
                [AC_MSG_NOTICE([Python found.])],\
-      [AC_MSG_ERROR([Python >2.7 is necessary to create single precision code.],1)])
+      [AC_MSG_ERROR([Python >2.6 is necessary to create single precision code.],1)])
 
 AC_MSG_NOTICE([Moving back to $srcdir/src and creating/updating single precision code...])
 cd $srcdir/src
@@ -38,7 +38,6 @@ AC_CHECK_LIB([mpi], [MPI_Init])
 AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h strings.h sys/time.h gmp.h mpfr.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
