@@ -123,14 +123,13 @@ else :
     exit(1)
 
 
-executable = ("{}/configure".
-        format(basedir,CC,CC_FLAGS,LINKER_FLAGS))
+executable = ("%s/configure" % (basedir))
 
-argCC = "CC={}".format(CC)
-argCFLAGS = "CFLAGS={}".format(CC_FLAGS)
-argLDFLAGS = "LDFLAGS={}".format(LINKER_FLAGS)
-argCXX = "CXX={}".format(CXX)
-argCPPFLAGS = 'CPPFLAGS="-O3"'
+argCC =( "CC=%s"%(CC))
+argCFLAGS = ("CFLAGS=%s"%(CC_FLAGS))
+argLDFLAGS = ("LDFLAGS=%s"%(LINKER_FLAGS))
+argCXX = ("CXX=%s"%(CXX))
+argCPPFLAGS = ('CPPFLAGS="-O3"')
 
 
 argsother = ' '.join(argv[1:])
