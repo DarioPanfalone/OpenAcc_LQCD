@@ -48,6 +48,12 @@ LABEL=$L0$L1$L2$L3\_$TASKS
 
 echo Reading modules to load in slurm scripts...
 MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)
+for MODULE_TO_LOAD in $MODULES_TO_LOAD
+do
+    MODULES_TO_LOAD_TEMP="$MODULES_TO_LOAD_TEMP $MODULE_TO_LOAD"
+done
+MODULES_TO_LOAD=$MODULES_TO_LOAD_TEMP
+
 if test "$MODULES_TO_LOAD" == "" 
 then
     echo "ERROR: No module loaded."
@@ -69,13 +75,13 @@ cat $FILETEMPLATEDIR/fermion_parameters.set benchmark.pg.set >> benchmark.set
 cat $FILETEMPLATEDIR/fermion_parameters.set benchmark_profiling.pg.set >>\
     benchmark_profiling.set
 
-cp benchmark.set benchmark.deodoe.set
-cp benchmark.set benchmark.inverter.set
-cp benchmark_profiling.set benchmark_profiling.deodoe.set
-cp benchmark_profiling.set benchmark_profiling.inverter.set
+cp benchmark.set benchmark.deo_doe_test.set
+cp benchmark.set benchmark.inverter_multishift_test.set
+cp benchmark_profiling.set benchmark_profiling.deo_doe_test.set
+cp benchmark_profiling.set benchmark_profiling.inverter_multishift_test.set
 
 
-EXECUTABLES="deodoe inverter pg"
+EXECUTABLES="deo_doe_test inverter_multishift_test pg"
 
 # executable 'pg' is actually 'main'
 ln -s ./main ./bin/pg
@@ -101,11 +107,11 @@ do
 
         cat > $SLURMFILENAME << EOF
 #!/bin/bash
-#SBATCH --job-name=$EXECUTABLE_$LABEL
+#SBATCH --job-name=${EXECUTABLE}_$LABEL
 #SBATCH --ntasks=$TASKS
 #SBATCH --cpus-per-task=1
-#SBATCH --error=$EXECUTABLE_.%J.err 
-#SBATCH --output=$EXECUTABLE_.%J.out
+#SBATCH --error=${EXECUTABLE}.%J.err 
+#SBATCH --output=${EXECUTABLE}.%J.out
 #SBATCH --gres=gpu:16
 #SBATCH --partition=shortrun
 #SBATCH --mem-per-cpu=12000
