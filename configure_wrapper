@@ -73,7 +73,7 @@ if 'pgi' in argv:
         ta = 'tesla:cc35'
     elif 'cc60' in argv:
         argv.remove('cc60')
-        ta = 'tesla:cc35'
+        ta = 'tesla:cc60'
     elif 'haswell' in argv:
         argv.remove('haswell')
         ta = 'multicore'
