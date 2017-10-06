@@ -29,22 +29,23 @@ for arg in argv[1:]:
 
 
 
-accepted_options = ['gcc','mpi','pgi','cc35','cc60','haswell',\
+accepted_options = ['gcc','mpi','pgi','cc35','cc50','cc60','haswell',\
         'amd','cuda7.0','cuda7.5','cuda8.0']
 
 n=None
 # flag compatibilities
 comp_matrix=[
-        [n,0,0,0,0,0,0,0,0,0],# gcc
-        [n,n,0,0,0,0,0,0,0,0],# mpi
-        [n,n,n,1,1,1,1,1,1,1],# pgi
-        [n,n,n,n,0,0,0,1,1,1],# cc35
-        [n,n,n,n,n,0,0,1,1,1],# cc60
-        [n,n,n,n,n,n,0,0,0,0],# haswell
-        [n,n,n,n,n,n,n,0,0,0],# amd
-        [n,n,n,n,n,n,n,n,0,0],# cuda7.0
-        [n,n,n,n,n,n,n,n,n,0],# cuda7.5
-        [n,n,n,n,n,n,n,n,n,n]]# cuda8.0
+        [n,0,0,0,0,0,0,0,0,0,0],# gcc
+        [n,n,0,0,0,0,0,0,0,0,0],# mpi
+        [n,n,n,1,1,1,1,1,1,1,1],# pgi
+        [n,n,n,n,0,0,0,0,1,1,1],# cc35
+        [n,n,n,n,n,0,0,0,1,1,1],# cc50
+        [n,n,n,n,n,n,0,0,1,1,1],# cc60
+        [n,n,n,n,n,n,n,0,0,0,0],# haswell
+        [n,n,n,n,n,n,n,n,0,0,0],# amd
+        [n,n,n,n,n,n,n,n,n,0,0],# cuda7.0
+        [n,n,n,n,n,n,n,n,n,n,0],# cuda7.5
+        [n,n,n,n,n,n,n,n,n,n,n]]# cuda8.0
 
 
 all_ok = True
@@ -70,7 +71,10 @@ if 'pgi' in argv:
 
     if 'cc35' in argv:
         argv.remove('cc35')
-        ta = 'tesla:cc35'
+        ta = 'tesla:cc35'  
+    elif 'cc50' in argv:
+        argv.remove('cc50')
+        ta = 'tesla:cc50'
     elif 'cc60' in argv:
         argv.remove('cc60')
         ta = 'tesla:cc60'
