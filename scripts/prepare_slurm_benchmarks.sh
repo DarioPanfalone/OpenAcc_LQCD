@@ -56,8 +56,11 @@ MODULES_TO_LOAD=$MODULES_TO_LOAD_TEMP
 
 if test "$MODULES_TO_LOAD" == "" 
 then
-    echo "ERROR: No module loaded."
-#   exit
+    echo "WARNING: No module loaded."
+    echo "Preparing only shell scripts and input files, no slurm scripts"
+    PREPARESLURM=no
+else 
+    PREPARESLURM=yes
 fi
 
 echo Modules to load:$MODULES_TO_LOAD....
@@ -106,7 +109,9 @@ do
         fi
 
 
-        cat > $SLURMFILENAME << EOF
+        if $PREPARESLURM == yes
+        then 
+            cat > $SLURMFILENAME << EOF
 #!/bin/bash
 #SBATCH --job-name=${EXECUTABLE}_$LABEL
 #SBATCH --ntasks=$TASKS
@@ -126,6 +131,8 @@ rm stop
 srun --cpu_bind=v,sockets $PROFILINGSTR ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
  
 EOF
+        fi
+
     done
 
 done

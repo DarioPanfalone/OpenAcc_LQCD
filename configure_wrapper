@@ -115,6 +115,7 @@ elif 'gcc' in argv:
 elif 'mpi' in argv:
     argv.remove('mpi')
     CC='mpicc'
+    CXX='mpicxx'
     CC_FLAGS='"-O3 -std=gnu99"'
     LINKER_FLAGS='"-lm"'
 
@@ -129,7 +130,7 @@ argCC =( "CC=%s"%(CC))
 argCFLAGS = ("CFLAGS=%s"%(CC_FLAGS))
 argLDFLAGS = ("LDFLAGS=%s"%(LINKER_FLAGS))
 argCXX = ("CXX=%s"%(CXX))
-argCPPFLAGS = ('CPPFLAGS="-O3"')
+argCPPFLAGS = ('CXXFLAGS="-O3"')
 
 
 argsother = ' '.join(argv[1:])

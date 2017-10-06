@@ -68,7 +68,7 @@ int read_gl_fermion(global_vec3_soa * fermion, const char* nomefile)
 
 void print_vec3_soa_wrapper(vec3_soa * const fermion, 
         const char* nomefile)
- {
+{
 
     printf("MPI%02d - Saving whole fermion...\n", devinfo.myrank);
 

@@ -7,7 +7,7 @@ int verbosity_lv= 0;
 int main(int argc, char **argv){
 
     if(argc<3){
-        printf("usage: filename_approx x_where_to_evaluate\n",argv[0] );
+        printf("usage: %s filename_approx x_where_to_evaluate\n",argv[0] );
         return 1;
     }
 
