@@ -18,7 +18,7 @@ bz      3
 MDParameters
 NmdSteps                      3         
 GaugeSubSteps                 3        
-TrajLength                    1.000000e+00        
+TrajLength                    0.500000e+00        
 residue_metro                 1e-8        
 ExpMaxEigenvalue              5.500000e+00        
 SinglePrecMD                  SINGLEPRECISIONMD
@@ -84,7 +84,7 @@ SaveDiagnostics               1
 DoRevTest                     0                   
 DoNoRandomTest                0                   
 RngFakenessLevel              0                   
-MDDbgPrintMaxCount            0                   
+MDDbgPrintMaxCount            9
 SaveDiagnosticsFilename       test.DPSP.md_diagnostics.dat  
 PrintDiagInfoEvery            10               
 
