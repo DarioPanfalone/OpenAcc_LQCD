@@ -1,3 +1,5 @@
+
+
 COMPILE_INFO_FILENAME=$1
 SCRIPTSDIR=$2
 if test ! -f $COMPILE_INFO_FILENAME
@@ -17,7 +19,8 @@ fi
 FILETEMPLATEDIR=$SCRIPTSDIR
 
 
-if test ! -f "$FILETEMPLATEDIR/test.pg.DPSP.set.proto" -a \
+if test ! -f "$FILETEMPLATEDIR/benchmark.pg.set.proto" -a \
+    -f "$FILETEMPLATEDIR/benchmark_for_profiling.pg.set.proto"  -a \
     -f "$FILETEMPLATEDIR/fermion_parameters.set"
 then
     echo Directory $SCRIPTSDIR does not exist or not contains benchmarks templates.
@@ -45,7 +48,6 @@ LABEL=$L0$L1$L2$L3\_$TASKS
 
 echo Reading modules to load in slurm scripts...
 MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)
-# creating a string with all the modules in one line
 for MODULE_TO_LOAD in $MODULES_TO_LOAD
 do
     MODULES_TO_LOAD_TEMP="$MODULES_TO_LOAD_TEMP $MODULE_TO_LOAD"
@@ -64,38 +66,25 @@ fi
 echo Modules to load:$MODULES_TO_LOAD....
 
 # preparing base benchmark file
-FILEBASE=test.pg.DPSP.set.proto
-for MODE in dp sp
+for FILEBASE in benchmark.pg.set.proto benchmark_profiling.pg.set.proto
 do
-    if test $MODE == sp
-    then 
-        SINGLEPRECISIONMD=1
-    elif test $MODE == dp
-    then 
-        SINGLEPRECISIONMD=0
-    fi
-    OUTPROTOSETFILE=$(echo ${FILEBASE%.proto} | sed 's/DPSP/'$MODE'/')
-    echo $FILEBASE | sed 's/DPSP/'$MODE'/'
-    echo Writing $OUTPROTOSETFILE
-    sed 's/SEDNRANKS/'$TASKS'/' $FILETEMPLATEDIR/$FILEBASE |\
-        sed 's/SEDNX/'$L0'/' | sed 's/SEDNY/'$L1'/' | sed 's/SEDNZ/'$L2'/' |\
-        sed 's/SEDNODEDIM/16/' |  sed 's/SEDNT/'$((L3*TASKS))'/' |\
-        sed 's/DPSP/'$MODE'/' |  sed 's/SINGLEPRECISIONMD/'$SINGLEPRECISIONMD'/'  >\
-        $OUTPROTOSETFILE
-
-
-    echo Writing test.$MODE.set
-    cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILE > test.main.$MODE.set
+echo $FILEBASE
+sed 's/SEDNRANKS/'$TASKS'/' $FILETEMPLATEDIR/$FILEBASE |\
+    sed 's/SEDNX/'$L0'/' | sed 's/SEDNY/'$L1'/' | sed 's/SEDNZ/'$L2'/' |\
+    sed 's/SEDNODEDIM/16/' |  sed 's/SEDNT/'$((L3*TASKS))'/' > ${FILEBASE%.proto}
 done
 
-echo Writing test.deo_doe_test.set
-cp test.main.dp.set test.deo_doe_test.set
-echo Writing test.inverter_multishift_test.set
-cp test.main.dp.set test.inverter_multishift_test.set
+cat $FILETEMPLATEDIR/fermion_parameters.set benchmark.pg.set >> benchmark.set
+cat $FILETEMPLATEDIR/fermion_parameters.set benchmark_profiling.pg.set >>\
+    benchmark_profiling.set
+
+cp benchmark.set benchmark.deo_doe_test.set
+cp benchmark.set benchmark.inverter_multishift_test.set
+cp benchmark_profiling.set benchmark_profiling.deo_doe_test.set
+cp benchmark_profiling.set benchmark_profiling.inverter_multishift_test.set
 
 
-
-EXECUTABLES="main.dp main.sp deo_doe_test inverter_multishift_test pg.dp pg.sp"
+EXECUTABLES="deo_doe_test inverter_multishift_test pg"
 
 # executable 'pg' is actually 'main'
 rm ./bin/pg
@@ -103,21 +92,32 @@ ln -s ./main ./bin/pg
 
 for EXECUTABLE in $EXECUTABLES
 do
-    INPUTFILENAME="test.$EXECUTABLE.set"
-    PROFILINGSTR=""
-    OUTPUTFILENAME="out.$EXECUTABLE.txt"
-    SLURMFILENAME="test.$EXECUTABLE.slurm"
-    BASHFILENAME="test.$EXECUTABLE.sh"
+    for PROFILING in YES NO
+    do
+        
+        if test $PROFILING == "YES"
+        then
+            INPUTFILENAME="benchmark_profiling.$EXECUTABLE.set"
+            PROFILINGSTR="nvprof --log-file \"$EXECUTABLE.%p"\"
+            OUTPUTFILENAME="out_profiling.$EXECUTABLE.txt"
+            SLURMFILENAME="test_profiling.$EXECUTABLE.slurm"
+        else
+            INPUTFILENAME="benchmark.$EXECUTABLE.set"
+            PROFILINGSTR=""
+            OUTPUTFILENAME="out.$EXECUTABLE.txt"
+            SLURMFILENAME="test.$EXECUTABLE.slurm"
+        fi
 
-    if $PREPARESLURM == yes
-    then
-        cat > $SLURMFILENAME << EOF
+
+        if test $PREPARESLURM == yes
+        then 
+            cat > $SLURMFILENAME << EOF
 #!/bin/bash
-#SBATCH --job-name=test.${EXECUTABLE}_$LABEL
+#SBATCH --job-name=${EXECUTABLE}_$LABEL
 #SBATCH --ntasks=$TASKS
 #SBATCH --cpus-per-task=1
-#SBATCH --error=test.${EXECUTABLE}.%J.err 
-#SBATCH --output=test.${EXECUTABLE}.%J.out
+#SBATCH --error=${EXECUTABLE}.%J.err 
+#SBATCH --output=${EXECUTABLE}.%J.out
 #SBATCH --gres=gpu:16
 #SBATCH --partition=shortrun
 #SBATCH --mem-per-cpu=12000
@@ -128,19 +128,11 @@ export PGI_ACC_BUFFERSIZE=$SIZE
 
 rm stop
 
-srun --cpu_bind=v,sockets ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
-
+srun --cpu_bind=v,sockets $PROFILINGSTR ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
+ 
 EOF
-    fi
+        fi
 
-    cat > $BASHFILENAME << EOF
-#!/bin/bash
-
-mpirun -n $TASKS ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
-
-EOF
-
-
-
+    done
 
 done
