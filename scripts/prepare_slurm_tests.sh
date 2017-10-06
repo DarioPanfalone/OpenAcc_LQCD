@@ -73,21 +73,26 @@ do
     fi
     OUTPROTOSETFILE=$(echo ${FILEBASE%.proto} | sed 's/DPSP/'$MODE'/')
     echo $FILEBASE | sed 's/DPSP/'$MODE'/'
+    echo Writing $OUTPROTOSETFILE
     sed 's/SEDNRANKS/'$TASKS'/' $FILETEMPLATEDIR/$FILEBASE |\
         sed 's/SEDNX/'$L0'/' | sed 's/SEDNY/'$L1'/' | sed 's/SEDNZ/'$L2'/' |\
         sed 's/SEDNODEDIM/16/' |  sed 's/SEDNT/'$((L3*TASKS))'/' |\
         sed 's/DPSP/'$MODE'/' |  sed 's/SINGLEPRECISIONMD/'$SINGLEPRECISIONMD'/'  >\
         $OUTPROTOSETFILE
 
-    cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILE > test.$MODE.set
+
+    echo Writing test.$MODE.set
+    cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILE > test.main.$MODE.set
 done
 
-cp test.dp.set test.deo_doe_test.set
-cp test.dp.set test.inverter_multishift_test.set
+echo Writing test.deo_doe_test.set
+cp test.main.dp.set test.deo_doe_test.set
+echo Writing test.inverter_multishift_test.set
+cp test.main.dp.set test.inverter_multishift_test.set
 
 
 
-EXECUTABLES="main deo_doe_test inverter_multishift_test pg"
+EXECUTABLES="main.dp main.sp deo_doe_test inverter_multishift_test pg.dp pg.sp"
 
 # executable 'pg' is actually 'main'
 rm ./bin/pg
@@ -95,10 +100,11 @@ ln -s ./main ./bin/pg
 
 for EXECUTABLE in $EXECUTABLES
 do
-    INPUTFILENAME="benchmark.$EXECUTABLE.set"
+    INPUTFILENAME="test.$EXECUTABLE.set"
     PROFILINGSTR=""
     OUTPUTFILENAME="out.$EXECUTABLE.txt"
     SLURMFILENAME="test.$EXECUTABLE.slurm"
+    BASHFILENAME="test.$EXECUTABLE.sh"
 
     cat > $SLURMFILENAME << EOF
 #!/bin/bash
@@ -117,8 +123,18 @@ export PGI_ACC_BUFFERSIZE=$SIZE
 
 rm stop
 
-srun --cpu_bind=v,sockets $PROFILINGSTR ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
+srun --cpu_bind=v,sockets ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
 
 EOF
+
+    cat > $BASHFILENAME << EOF
+#!/bin/bash
+
+mpirun -n $TASKS ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
+
+EOF
+
+
+
 
 done
