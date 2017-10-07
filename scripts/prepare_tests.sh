@@ -19,6 +19,7 @@ FILETEMPLATEDIR=$SCRIPTSDIR
 
 if test ! -f "$FILETEMPLATEDIR/test.pg.DPSP.set.proto" -a \
     -f "$FILETEMPLATEDIR/fermion_parameters.set"
+
 then
     echo Directory $SCRIPTSDIR does not exist or not contains benchmarks templates.
     exit
@@ -64,6 +65,8 @@ fi
 echo Modules to load:$MODULES_TO_LOAD....
 
 # preparing base benchmark file
+
+
 FILEBASE=test.pg.DPSP.set.proto
 for MODE in dp sp
 do
@@ -80,12 +83,13 @@ do
     sed 's/SEDNRANKS/'$TASKS'/' $FILETEMPLATEDIR/$FILEBASE |\
         sed 's/SEDNX/'$L0'/' | sed 's/SEDNY/'$L1'/' | sed 's/SEDNZ/'$L2'/' |\
         sed 's/SEDNODEDIM/16/' |  sed 's/SEDNT/'$((L3*TASKS))'/' |\
-        sed 's/DPSP/'$MODE'/' |  sed 's/SINGLEPRECISIONMD/'$SINGLEPRECISIONMD'/'  >\
-        $OUTPROTOSETFILE
+        sed 's/DPSP/'$MODE'/' |\
+        sed 's/SINGLEPRECISIONMD/'$SINGLEPRECISIONMD'/'  >  $OUTPROTOSETFILE
 
 
     echo Writing test.$MODE.set
-    cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILE > test.main.$MODE.set
+    cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILE >\
+        test.main.$MODE.set
 done
 
 echo Writing test.deo_doe_test.set
@@ -95,7 +99,7 @@ cp test.main.dp.set test.inverter_multishift_test.set
 
 
 
-EXECUTABLES="main.dp main.sp deo_doe_test inverter_multishift_test pg.dp pg.sp"
+EXECUTABLES="main deo_doe_test inverter_multishift_test pg"
 
 # executable 'pg' is actually 'main'
 rm ./bin/pg
@@ -103,15 +107,24 @@ ln -s ./main ./bin/pg
 
 for EXECUTABLE in $EXECUTABLES
 do
-    INPUTFILENAME="test.$EXECUTABLE.set"
-    PROFILINGSTR=""
-    OUTPUTFILENAME="out.$EXECUTABLE.txt"
-    SLURMFILENAME="test.$EXECUTABLE.slurm"
-    BASHFILENAME="test.$EXECUTABLE.sh"
+    if test $EXECUTABLE == 'main' -o $EXECUTABLE == 'pg'
+    then 
+        MODES='sp dp'
+    else 
+        MODES='dpsp'
+    fi
+    for MODE in $MODES
+    do
 
-    if test $PREPARESLURM == yes
-    then
-        cat > $SLURMFILENAME << EOF
+
+        INPUTFILENAME="test.$EXECUTABLE.$MODE.set"
+        OUTPUTFILENAME="out.$EXECUTABLE.$MODE.txt"
+        SLURMFILENAME="test.$EXECUTABLE.$MODE.slurm"
+        BASHFILENAME="test.$EXECUTABLE.$MODE.sh"
+
+        if test $PREPARESLURM == yes
+        then
+            cat > $SLURMFILENAME << EOF
 #!/bin/bash
 #SBATCH --job-name=test.${EXECUTABLE}_$LABEL
 #SBATCH --ntasks=$TASKS
@@ -131,16 +144,16 @@ rm stop
 srun --cpu_bind=v,sockets ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
 
 EOF
-    fi
+        fi
 
-    cat > $BASHFILENAME << EOF
+        cat > $BASHFILENAME << EOF
 #!/bin/bash
 
 mpirun -n $TASKS ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
 
 EOF
 
-
+    done 
 
 
 done
