@@ -56,7 +56,7 @@ MODULES_TO_LOAD=$MODULES_TO_LOAD_TEMP
 if test "$MODULES_TO_LOAD" == "" 
 then
     echo "WARNING: No module loaded."
-    echo "Preparing only shell scripts and input files, no slurm scripts"
+    echo "WARNING: Preparing only shell scripts and input files, no slurm scripts"
     PREPARESLURM=no
 else 
     PREPARESLURM=yes
@@ -93,9 +93,9 @@ do
 done
 
 echo Writing test.deo_doe_test.set
-cp test.main.dp.set test.deo_doe_test.set
+cp test.main.dp.set test.deo_doe_test.dpsp.set
 echo Writing test.inverter_multishift_test.set
-cp test.main.dp.set test.inverter_multishift_test.set
+cp test.main.dp.set test.inverter_multishift_test.dpsp.set
 
 
 
@@ -146,12 +146,19 @@ srun --cpu_bind=v,sockets ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
 EOF
         fi
 
-        cat > $BASHFILENAME << EOF
+        echo mkdir -p  dir_${BASHFILENAME%.sh}
+        mkdir -p dir_${BASHFILENAME%.sh}
+
+        cat > dir_${BASHFILENAME%.sh}/$BASHFILENAME << EOF
 #!/bin/bash
 
-mpirun -n $TASKS ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
+mpirun -n $TASKS ../bin/$EXECUTABLE ./$INPUTFILENAME | tee $OUTPUTFILENAME
 
 EOF
+        echo cp $INPUTFILENAME ./dir_${BASHFILENAME%.sh}/
+        cp $INPUTFILENAME ./dir_${BASHFILENAME%.sh}/
+        echo chmod +x dir_${BASHFILENAME%.sh}/$BASHFILENAME
+        chmod +x dir_${BASHFILENAME%.sh}/$BASHFILENAME
 
     done 
 
