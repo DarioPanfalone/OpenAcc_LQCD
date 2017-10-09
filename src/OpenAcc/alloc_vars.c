@@ -19,7 +19,19 @@
 
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
+
+//used in debugging/testing
 global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
+global_tamat_soa  * tamat_rw; // a global tamat, only for read-write
+global_thmat_soa  * thmat_rw; // a global thmat, only for read-write
+// a global dcomplex_soa, only for read-write
+global_dcomplex_soa *dcomplex_rw;
+// a global double_soa, only for read-write
+global_double_soa *double_rw; 
+
+
+
+
 su3_soa  * conf_acc; // the gauge configuration.
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
 // if the metro test fails.
@@ -153,11 +165,29 @@ void mem_alloc_extended()
 
 #ifdef MULTIDEVICE 
     if(devinfo.myrank == 0){
-#endif
-        allocation_check =  posix_memalign((void **)&conf_rw, ALIGN,8*sizeof(global_su3_soa));
-        ALLOCCHECK(allocation_check, conf_rw); // NOT ON DEVICE!!
-        allocation_check =  posix_memalign((void **)&ferm_rw, ALIGN,sizeof(global_vec3_soa));
+#endif 
+        // These containers shall not be allocated on the device
+        allocation_check =  posix_memalign((void **)&conf_rw, ALIGN,
+                8*sizeof(global_su3_soa));
+        ALLOCCHECK(allocation_check, conf_rw);
+
+        // used in debugging/testing
+        allocation_check =  posix_memalign((void **)&ferm_rw, ALIGN,
+                sizeof(global_vec3_soa));
         ALLOCCHECK(allocation_check, ferm_rw);
+        allocation_check =  posix_memalign((void **)&tamat_rw, ALIGN,
+                sizeof(global_tamat_soa));
+        ALLOCCHECK(allocation_check, tamat_rw);
+        allocation_check =  posix_memalign((void **)&thmat_rw, ALIGN,
+                sizeof(global_thmat_soa));
+        ALLOCCHECK(allocation_check, thmat_rw);
+        allocation_check =  posix_memalign((void **)&dcomplex_rw, ALIGN,
+                sizeof(global_dcomplex_soa));
+        ALLOCCHECK(allocation_check, dcomplex_rw);
+        allocation_check =  posix_memalign((void **)&double_rw, ALIGN,
+                sizeof(global_double_soa));
+        ALLOCCHECK(allocation_check, double_rw);
+
 #ifdef MULTIDEVICE
     }
 #endif
@@ -311,8 +341,13 @@ inline void mem_free_extended()
 #ifdef MULTIDEVICE 
     if(devinfo.myrank == 0){
 #endif
-        FREECHECK(conf_rw); // NOT ON DEVICE
-        //  FREECHECK(ferm_rw);
+        // NOT ON DEVICE
+        FREECHECK(conf_rw);
+        FREECHECK(ferm_rw);
+        FREECHECK(tamat_rw);
+        FREECHECK(thmat_rw);
+        FREECHECK(dcomplex_rw);
+        FREECHECK(doulbe_rw);
 #ifdef MULTIDEVICE
     }
 #endif

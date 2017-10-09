@@ -906,7 +906,8 @@ void send_lnh_subfermion_to_rank(global_vec3_soa *gl_soa_ferm,
             sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, lnh_ferm);
     send_lnh_subfermion_to_buffer(gl_soa_ferm,lnh_ferm,target_rank);
-    MPI_Send(lnh_ferm, 6*LNH_SIZEH,MPI_DOUBLE, target_rank , target_rank, MPI_COMM_WORLD); // tag = target_rank
+    MPI_Send(lnh_ferm, 6*LNH_SIZEH,MPI_DOUBLE, target_rank , target_rank,
+            MPI_COMM_WORLD); // tag = target_rank
 
     FREECHECK(lnh_ferm);
 }
@@ -939,8 +940,156 @@ void receive_lnh_subfermion_from_master(vec3_soa* lnh_ferm)
             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 }
 
+// chunks, tamats
+void send_lnh_subtamat_to_rank(global_tamat_soa *gl_soa_tamat, 
+        int target_rank){
+
+    tamat_soa* lnh_tamat;
+    int allocation_check = posix_memalign((void**) &lnh_tamat, ALIGN,
+            sizeof(tamat_soa)); 
+    ALLOCCHECK(allocation_check,lnh_tamat);
+    send_lnh_subtamat_to_buffer(gl_soa_tamat,lnh_tamat,target_rank);
+    MPI_send(lnh_tamat,8*LNH_SIZEH.MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD);
+    FREECHECK(lnh_tamat);
+
+}
+void recv_loc_subtamat_from_rank(global_tamat_soa *gl_soa_tamat,
+        int target_rank){
+    tamat_soa* lnh_tamat;
+    int allocation_check = posix_memalign((void**) &lnh_tamat, ALIGN,
+            sizeof(tamat_soa)); 
+    ALLOCCHECK(allocation_check,lnh_tamat);
+    MPI_Recv(lnh_tamat,8*LNH_SIZEH.MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    rec_loc_subtamat_to_buffer(gl_soa_tamat,lnh_tamat,target_rank);
+    FREECHECK(lnh_tamat);
+
+}
+void send_lnh_subtamat_to_master(tamat_soa *lnh_tamat, int tag){
+
+    MPI_Send(lnh_tamat,6*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+
+}
+void receive_lnh_subtamat_from_master(tamat_soa* lnh_tamat){
+    MPI_Recv(lnh_tamat,6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
+            MPI_STATUS_IGNORE);
+}
+
+// chunks, thmats
+void send_lnh_subthmat_to_rank(global_thmat_soa *gl_soa_thmat, 
+        int target_rank){
+
+    thmat_soa* lnh_thmat;
+    int allocation_check = posix_memalign((void**) &lnh_thmat, ALIGN,
+            sizeof(thmat_soa)); 
+    ALLOCCHECK(allocation_check,lnh_thmat);
+    send_lnh_subthmat_to_buffer(gl_soa_thmat,lnh_thmat,target_rank);
+    MPI_send(lnh_thmat,8*LNH_SIZEH.MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD);
+    FREECHECK(lnh_thmat);
+
+}
+void recv_loc_subthmat_from_rank(global_thmat_soa *gl_soa_thmat,
+        int target_rank){
+    thmat_soa* lnh_thmat;
+    int allocation_check = posix_memalign((void**) &lnh_thmat, ALIGN,
+            sizeof(thmat_soa)); 
+    ALLOCCHECK(allocation_check,lnh_thmat);
+    MPI_Recv(lnh_thmat,8*LNH_SIZEH.MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    rec_loc_subthmat_to_buffer(gl_soa_thmat,lnh_thmat,target_rank);
+    FREECHECK(lnh_thmat);
+
+}
+void send_lnh_subthmat_to_master(thmat_soa *lnh_thmat, int tag){
+
+    MPI_Send(lnh_thmat,6*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+
+}
+void receive_lnh_subthmat_from_master(thmat_soa* lnh_thmat){
+    MPI_Recv(lnh_thmat,6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
+            MPI_STATUS_IGNORE);
+}
+
+// chunks, dcomplexes
+void send_lnh_subdcomplex_to_rank(global_dcomplex_soa *gl_soa_dcomplex, 
+        int target_rank){
+
+    dcomplex_soa* lnh_dcomplex;
+    int allocation_check = posix_memalign((void**) &lnh_dcomplex, ALIGN,
+            sizeof(dcomplex_soa)); 
+    ALLOCCHECK(allocation_check,lnh_dcomplex);
+    send_lnh_subdcomplex_to_buffer(gl_soa_dcomplex,lnh_dcomplex,target_rank);
+    MPI_send(lnh_dcomplex,8*LNH_SIZEH.MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD);
+    FREECHECK(lnh_dcomplex);
+
+}
+void recv_loc_subdcomplex_from_rank(global_dcomplex_soa *gl_soa_dcomplex,
+        int target_rank){
+    dcomplex_soa* lnh_dcomplex;
+    int allocation_check = posix_memalign((void**) &lnh_dcomplex, ALIGN,
+            sizeof(dcomplex_soa)); 
+    ALLOCCHECK(allocation_check,lnh_dcomplex);
+    MPI_Recv(lnh_dcomplex,8*LNH_SIZEH.MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    rec_loc_subdcomplex_to_buffer(gl_soa_dcomplex,lnh_dcomplex,target_rank);
+    FREECHECK(lnh_dcomplex);
+
+}
+void send_lnh_subdcomplex_to_master(dcomplex_soa *lnh_dcomplex, int tag){
+
+    MPI_Send(lnh_dcomplex,6*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+
+}
+void receive_lnh_subdcomplex_from_master(dcomplex_soa* lnh_dcomplex){
+    MPI_Recv(lnh_dcomplex,6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
+            MPI_STATUS_IGNORE);
+}
+
+// chunks, doublees
+void send_lnh_subdouble_to_rank(global_double_soa *gl_soa_double, 
+        int target_rank){
+
+    double_soa* lnh_double;
+    int allocation_check = posix_memalign((void**) &lnh_double, ALIGN,
+            sizeof(double_soa)); 
+    ALLOCCHECK(allocation_check,lnh_double);
+    send_lnh_subdouble_to_buffer(gl_soa_double,lnh_double,target_rank);
+    MPI_send(lnh_double,8*LNH_SIZEH.MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD);
+    FREECHECK(lnh_double);
+
+}
+void recv_loc_subdouble_from_rank(global_double_soa *gl_soa_double,
+        int target_rank){
+    double_soa* lnh_double;
+    int allocation_check = posix_memalign((void**) &lnh_double, ALIGN,
+            sizeof(double_soa)); 
+    ALLOCCHECK(allocation_check,lnh_double);
+    MPI_Recv(lnh_double,8*LNH_SIZEH.MPI_DOUBLE,target_rank,target_rank,
+            MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+    rec_loc_subdouble_to_buffer(gl_soa_double,lnh_double,target_rank);
+    FREECHECK(lnh_double);
+
+}
+void send_lnh_subdouble_to_master(double_soa *lnh_double, int tag){
+
+    MPI_Send(lnh_double,6*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+
+}
+void receive_lnh_subdouble_from_master(double_soa* lnh_double){
+    MPI_Recv(lnh_double,6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
+            MPI_STATUS_IGNORE);
+}
+
+
+
+
 #endif
 // only for the master rank
+// configuration
 void send_lnh_subconf_to_buffer(global_su3_soa *gl_soa_conf, 
         su3_soa *lnh_conf, int target_rank)
 {
@@ -974,12 +1123,12 @@ if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subconf_to_buffer()\n", devinfo.m
 
                         //      printf("%d %d  %d  %d  %d  %d  %d ",dir, tg_lnh_t, tg_lnh_z, tg_lnh_y, tg_lnh_x, target_gl_snum, tsprlo);
                         single_su3 aux;
-                        single_su3_from_global_su3_soa(&(gl_soa_conf[2*dir+tsprlo]),
+                        single_gl3_from_global_su3_soa(&(gl_soa_conf[2*dir+tsprlo]),
                                 target_gl_snum,&aux);
                         //    printf("ciao \n");
                         //        printf("ciao ");
                         //      print_su3(aux);
-                        single_su3_into_su3_soa(&(target_su3_soa[2*dir+tsprlo]),
+                        single_gl3_into_su3_soa(&(target_su3_soa[2*dir+tsprlo]),
                                 target_lnh_snum, &aux);
                         //        printf("ciao \n");
 
@@ -1021,15 +1170,17 @@ if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subconf_from_buffer()", devinfo.
                         tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
 
                         single_su3 aux; 
-                        single_su3_from_su3_soa(&(lnh_conf[2*dir+tsprlo]),
+                        single_gl3_from_su3_soa(&(lnh_conf[2*dir+tsprlo]),
                                 target_lnh_snum, &aux);
-                        single_su3_into_global_su3_soa(&(gl_soa_conf[2*dir+tsprlo]),
+                        single_gl3_into_global_su3_soa(&(gl_soa_conf[2*dir+tsprlo]),
                                 target_gl_snum, &aux);
 
                     }
 
 }
 
+
+//fermions
 void send_lnh_subfermion_to_buffer(global_vec3_soa *gl_soa_ferm,
         vec3_soa *lnh_ferm, int target_rank)
 {
@@ -1092,5 +1243,256 @@ if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subferm_from_buffer()", devinfo.
                     }
 
 }
+
+//tamat
+void send_lnh_subtamat_to_buffer(global_tamat_soa *gl_soa_tamat,
+        tamat_soa *lnh_tamat, int target_rank)
+{
+    // USE ONLY FROM MASTER RANK
+
+if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subtamat_to_buffer()", devinfo.myrank);
+    
+//target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+    // building sublattice duplicate, target_tamat
+
+    int tg_lnh_0h,tg_lnh_1,tg_lnh_2,tg_lnh_3; //target-lnh coordinates
+    // Copying all relevant sites into the sublattice
+        for(tg_lnh_3=0;tg_lnh_3 < LNH_N3; tg_lnh_3++)
+        for(tg_lnh_2=0;tg_lnh_2 < LNH_N2; tg_lnh_2++)
+        for(tg_lnh_1=0;tg_lnh_1 < LNH_N1; tg_lnh_1++)
+        for(tg_lnh_0h=0;tg_lnh_0h < LNH_N0H; tg_lnh_0h++){
+
+
+            int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+            int target_lnh_snum = snum_acc(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+            //printf("%d %d %d %d  %d  %d\n",tg_lnh_0h,tg_lnh_1,           // DEBUG
+            //        tg_lnh_2, tg_lnh_3, target_gl_snum,target_lnh_snum); // DEBUG
+
+            lnh_tamat->c01[target_lnh_snum] = gl_soa_tamat->c01[target_gl_snum];
+            lnh_tamat->c02[target_lnh_snum] = gl_soa_tamat->c02[target_gl_snum];
+            lnh_tamat->c12[target_lnh_snum] = gl_soa_tamat->c12[target_gl_snum];
+            lnh_tamat->ic00[target_lnh_snum] = gl_soa_tamat->ic00[target_gl_snum];
+            lnh_tamat->ic11[target_lnh_snum] = gl_soa_tamat->ic11[target_gl_snum];
+
+        }
+}
+void recv_loc_subtamat_from_buffer(global_tamat_soa *gl_soa_tamat,
+        tamat_soa* lnh_tamat, int target_rank)
+{
+
+if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subtamat_from_buffer()", devinfo.myrank);
+    // USE ONLY FROM MASTER RANK
+    //target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+
+    int tg_loc_0h,tg_loc_1,tg_loc_2,tg_loc_3; //target-loc coordinates
+    // and link direction
+    //Copying all relevant links from the sublattice to the global lattice
+    for(tg_loc_3=0;tg_loc_3<LOC_N3; tg_loc_3++)
+        for(tg_loc_2=0;tg_loc_2<LOC_N2; tg_loc_2++)
+        for(tg_loc_1=0;tg_loc_1<LOC_N1; tg_loc_1++)
+        for(tg_loc_0h=0;tg_loc_0h<LOC_N0H; tg_loc_0h++){
+    
+                        int tg_lnh_0 = 2*tg_loc_0h + D0_HALO;
+                        int tg_lnh_1 = tg_loc_1 + D1_HALO;
+                        int tg_lnh_2 = tg_loc_2 + D2_HALO;
+                        int tg_lnh_3 = tg_loc_3 + D3_HALO;
+
+
+                        int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+                        int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+                        gl_soa_tamat->c01[target_gl_snum] = lnh_tamat->c01[target_lnh_snum];
+                        gl_soa_tamat->c02[target_gl_snum] = lnh_tamat->c02[target_lnh_snum];
+                        gl_soa_tamat->c12[target_gl_snum] = lnh_tamat->c12[target_lnh_snum];
+                        gl_soa_tamat->ic00[target_gl_snum] = lnh_tamat->ic00[target_lnh_snum];
+                        gl_soa_tamat->ic11[target_gl_snum] = lnh_tamat->ic11[target_lnh_snum];
+                    }
+
+}
+
+//thmat
+void send_lnh_subthmat_to_buffer(global_thmat_soa *gl_soa_thmat,
+        thmat_soa *lnh_thmat, int target_rank)
+{
+    // USE ONLY FROM MASTER RANK
+
+if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subthmat_to_buffer()", devinfo.myrank);
+    
+//target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+    // building sublattice duplicate, target_thmat
+
+    int tg_lnh_0h,tg_lnh_1,tg_lnh_2,tg_lnh_3; //target-lnh coordinates
+    // Copying all relevant sites into the sublattice
+        for(tg_lnh_3=0;tg_lnh_3 < LNH_N3; tg_lnh_3++)
+        for(tg_lnh_2=0;tg_lnh_2 < LNH_N2; tg_lnh_2++)
+        for(tg_lnh_1=0;tg_lnh_1 < LNH_N1; tg_lnh_1++)
+        for(tg_lnh_0h=0;tg_lnh_0h < LNH_N0H; tg_lnh_0h++){
+
+
+            int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+            int target_lnh_snum = snum_acc(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+            //printf("%d %d %d %d  %d  %d\n",tg_lnh_0h,tg_lnh_1,           // DEBUG
+            //        tg_lnh_2, tg_lnh_3, target_gl_snum,target_lnh_snum); // DEBUG
+
+            lnh_thmat->c01[target_lnh_snum] = gl_soa_thmat->c01[target_gl_snum];
+            lnh_thmat->c02[target_lnh_snum] = gl_soa_thmat->c02[target_gl_snum];
+            lnh_thmat->c12[target_lnh_snum] = gl_soa_thmat->c12[target_gl_snum];
+            lnh_thmat->rc00[target_lnh_snum] = gl_soa_thmat->rc00[target_gl_snum];
+            lnh_thmat->rc11[target_lnh_snum] = gl_soa_thmat->rc11[target_gl_snum];
+
+        }
+}
+void recv_loc_subthmat_from_buffer(global_thmat_soa *gl_soa_thmat,
+        thmat_soa* lnh_thmat, int target_rank)
+{
+
+if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subthmat_from_buffer()", devinfo.myrank);
+    // USE ONLY FROM MASTER RANK
+    //target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+
+    int tg_loc_0h,tg_loc_1,tg_loc_2,tg_loc_3; //target-loc coordinates
+    // and link direction
+    //Copying all relevant links from the sublattice to the global lattice
+    for(tg_loc_3=0;tg_loc_3<LOC_N3; tg_loc_3++)
+        for(tg_loc_2=0;tg_loc_2<LOC_N2; tg_loc_2++)
+        for(tg_loc_1=0;tg_loc_1<LOC_N1; tg_loc_1++)
+        for(tg_loc_0h=0;tg_loc_0h<LOC_N0H; tg_loc_0h++){
+    
+                        int tg_lnh_0 = 2*tg_loc_0h + D0_HALO;
+                        int tg_lnh_1 = tg_loc_1 + D1_HALO;
+                        int tg_lnh_2 = tg_loc_2 + D2_HALO;
+                        int tg_lnh_3 = tg_loc_3 + D3_HALO;
+
+
+                        int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+                        int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+                        gl_soa_thmat->c01[target_gl_snum] = lnh_thmat->c01[target_lnh_snum];
+                        gl_soa_thmat->c02[target_gl_snum] = lnh_thmat->c02[target_lnh_snum];
+                        gl_soa_thmat->c12[target_gl_snum] = lnh_thmat->c12[target_lnh_snum];
+                        gl_soa_thmat->rc00[target_gl_snum] = lnh_thmat->rc00[target_lnh_snum];
+                        gl_soa_thmat->rc11[target_gl_snum] = lnh_thmat->rc11[target_lnh_snum];
+                    }
+}
+
+//dcomplex
+void send_lnh_subdcomplex_to_buffer(global_dcomplex_soa *gl_soa_dcomplex,
+        dcomplex_soa *lnh_dcomplex, int target_rank)
+{
+    // USE ONLY FROM MASTER RANK
+
+if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subdcomplex_to_buffer()", devinfo.myrank);
+    
+//target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+    // building sublattice duplicate, target_dcomplex
+
+    int tg_lnh_0h,tg_lnh_1,tg_lnh_2,tg_lnh_3; //target-lnh coordinates
+    // Copying all relevant sites into the sublattice
+        for(tg_lnh_3=0;tg_lnh_3 < LNH_N3; tg_lnh_3++)
+        for(tg_lnh_2=0;tg_lnh_2 < LNH_N2; tg_lnh_2++)
+        for(tg_lnh_1=0;tg_lnh_1 < LNH_N1; tg_lnh_1++)
+        for(tg_lnh_0h=0;tg_lnh_0h < LNH_N0H; tg_lnh_0h++){
+
+
+            int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+            int target_lnh_snum = snum_acc(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+            //printf("%d %d %d %d  %d  %d\n",tg_lnh_0h,tg_lnh_1,           // DEBUG
+            //        tg_lnh_2, tg_lnh_3, target_gl_snum,target_lnh_snum); // DEBUG
+
+            lnh_dcomplex->c[target_lnh_snum] = gl_soa_dcomplex->c[target_gl_snum];
+
+        }
+}
+void recv_loc_subdcomplex_from_buffer(global_dcomplex_soa *gl_soa_dcomplex,
+        dcomplex_soa* lnh_dcomplex, int target_rank)
+{
+
+if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subdcomplex_from_buffer()", devinfo.myrank);
+    // USE ONLY FROM MASTER RANK
+    //target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+
+    int tg_loc_0h,tg_loc_1,tg_loc_2,tg_loc_3; //target-loc coordinates
+    // and link direction
+    //Copying all relevant links from the sublattice to the global lattice
+    for(tg_loc_3=0;tg_loc_3<LOC_N3; tg_loc_3++)
+        for(tg_loc_2=0;tg_loc_2<LOC_N2; tg_loc_2++)
+        for(tg_loc_1=0;tg_loc_1<LOC_N1; tg_loc_1++)
+        for(tg_loc_0h=0;tg_loc_0h<LOC_N0H; tg_loc_0h++){
+    
+                        int tg_lnh_0 = 2*tg_loc_0h + D0_HALO;
+                        int tg_lnh_1 = tg_loc_1 + D1_HALO;
+                        int tg_lnh_2 = tg_loc_2 + D2_HALO;
+                        int tg_lnh_3 = tg_loc_3 + D3_HALO;
+
+
+                        int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+                        int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+                        gl_soa_dcomplex->c[target_gl_snum] = lnh_dcomplex->c[target_lnh_snum];
+                    }
+}
+
+//double
+void send_lnh_subdouble_to_buffer(global_double_soa *gl_soa_double,
+        double_soa *lnh_double, int target_rank)
+{
+    // USE ONLY FROM MASTER RANK
+
+if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subdouble_to_buffer()", devinfo.myrank);
+    
+//target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+    // building sublattice duplicate, target_double
+
+    int tg_lnh_0h,tg_lnh_1,tg_lnh_2,tg_lnh_3; //target-lnh coordinates
+    // Copying all relevant sites into the sublattice
+        for(tg_lnh_3=0;tg_lnh_3 < LNH_N3; tg_lnh_3++)
+        for(tg_lnh_2=0;tg_lnh_2 < LNH_N2; tg_lnh_2++)
+        for(tg_lnh_1=0;tg_lnh_1 < LNH_N1; tg_lnh_1++)
+        for(tg_lnh_0h=0;tg_lnh_0h < LNH_N0H; tg_lnh_0h++){
+
+
+            int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+            int target_lnh_snum = snum_acc(tg_lnh_0h*2, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+            //printf("%d %d %d %d  %d  %d\n",tg_lnh_0h,tg_lnh_1,           // DEBUG
+            //        tg_lnh_2, tg_lnh_3, target_gl_snum,target_lnh_snum); // DEBUG
+
+            lnh_double->d[target_lnh_snum] = gl_soa_double->d[target_gl_snum];
+
+        }
+}
+void recv_loc_subdouble_from_buffer(global_double_soa *gl_soa_double,
+        double_soa* lnh_double, int target_rank)
+{
+
+if(verbosity_lv > 3) printf("MPI%02d - recv_loc_subdouble_from_buffer()", devinfo.myrank);
+    // USE ONLY FROM MASTER RANK
+    //target sublattice information
+    vec4int target_gl_loc_origin_from_rank = gl_loc_origin_from_rank(target_rank);
+
+    int tg_loc_0h,tg_loc_1,tg_loc_2,tg_loc_3; //target-loc coordinates
+    // and link direction
+    //Copying all relevant links from the sublattice to the global lattice
+    for(tg_loc_3=0;tg_loc_3<LOC_N3; tg_loc_3++)
+        for(tg_loc_2=0;tg_loc_2<LOC_N2; tg_loc_2++)
+        for(tg_loc_1=0;tg_loc_1<LOC_N1; tg_loc_1++)
+        for(tg_loc_0h=0;tg_loc_0h<LOC_N0H; tg_loc_0h++){
+    
+                        int tg_lnh_0 = 2*tg_loc_0h + D0_HALO;
+                        int tg_lnh_1 = tg_loc_1 + D1_HALO;
+                        int tg_lnh_2 = tg_loc_2 + D2_HALO;
+                        int tg_lnh_3 = tg_loc_3 + D3_HALO;
+
+
+                        int target_gl_snum = target_lnh_to_gl_snum(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3, target_gl_loc_origin_from_rank);
+                        int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
+                        gl_soa_double->d[target_gl_snum] = lnh_double->d[target_lnh_snum];
+                    }
+}
+
+
 
 #endif
