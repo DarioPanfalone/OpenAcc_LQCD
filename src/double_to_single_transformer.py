@@ -147,11 +147,15 @@ dpVariableNames = [] # new function names will just be dp function names + '_f' 
 dpTypes = ['double_soa','dcomplex_soa','vec3_soa','vec3',\
         'su3_soa','thmat_soa','tamat_soa',\
         'global_vec3_soa','global_su3_soa',\
+        'global_tamat_soa','global_thmat_soa',\
+        'global_dcomplex_soa','global_double_soa',\
         'single_su3' , 'single_tamat', 'single_thmat']
 # corresponding types in in sp_struct_c_def.h
 spTypes = ['float_soa','fcomplex_soa','vec3_soa_f','vec3_f',\
         'su3_soa_f','thmat_soa_f','tamat_soa_f',\
         'global_vec3_soa_f','global_su3_soa_f',\
+        'global_tamat_soa_f','global_thmat_soa_f',\
+        'global_dcomplex_soa_f','global_double_soa_f',\
         'single_su3_f' , 'single_tamat_f', 'single_thmat_f']
 
 # as in struct_c_def.h

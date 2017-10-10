@@ -25,7 +25,7 @@ int ipdot_g_reset; // same
 
 
 // multi rank data structure read/write functions - for debug/testing
-void save_gl_gl3(const global_su3_soa * conf, const char* nomefile,int conf_id_iter)
+void save_gl_gl3(const global_su3_soa * conf, const char* nomefile)
 {
 
     FILE *fp;
@@ -46,7 +46,7 @@ void save_gl_gl3(const global_su3_soa * conf, const char* nomefile,int conf_id_i
     }
     fclose(fp);
 }
-int read_gl_gl3(global_su3_soa * conf, const char* nomefile,int * conf_id_iter )
+int read_gl_gl3(global_su3_soa * conf, const char* nomefile)
 {
 
 
@@ -54,7 +54,6 @@ int read_gl_gl3(global_su3_soa * conf, const char* nomefile,int * conf_id_iter )
     fp = fopen(nomefile,"r");
     if(!fp){
         printf("gl3 file %s not readable.\n",nomefile);
-        *conf_id_iter = -1;
         return 1;
     }
     else{
@@ -139,8 +138,8 @@ void save_gl_tamat(const global_tamat_soa * tamat,
         fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c01[i]),cimag(tamat->c01[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c02[i]),cimag(tamat->c02[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c12[i]),cimag(tamat->c12[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",tamat->ic00[i]);
-        fprintf(fp, "%.18lf\t%.18lf\n",tamat->ic11[i]);
+        fprintf(fp, "%.18lf\n",tamat->ic00[i]);
+        fprintf(fp, "%.18lf\n",tamat->ic11[i]);
     }
 
     fclose(fp);
@@ -184,8 +183,8 @@ void save_gl_thmat(const global_thmat_soa * thmat,
         fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c01[i]),cimag(thmat->c01[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c02[i]),cimag(thmat->c02[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c12[i]),cimag(thmat->c12[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",thmat->rc00[i]);
-        fprintf(fp, "%.18lf\t%.18lf\n",thmat->rc11[i]);
+        fprintf(fp, "%.18lf\n",thmat->rc00[i]);
+        fprintf(fp, "%.18lf\n",thmat->rc11[i]);
     }
 
     fclose(fp);
@@ -262,7 +261,7 @@ void save_gl_double(const global_double_soa * arr,
     FILE *fp;
     fp = fopen(nomefile,"w");
     for(int i = 0 ; i < GL_SIZEH ; i++){
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(arr->c[i]),cimag(arr->c[i]));
+        fprintf(fp, "%.18lf\t%.18lf\n",creal(arr->d[i]),cimag(arr->d[i]));
     }
     fclose(fp);
 }
@@ -279,7 +278,7 @@ int read_gl_double(global_double_soa * arr, const char* nomefile)
             printf("Reading double_soa %s\n", nomefile );
         for(int i = 0 ; i < GL_SIZEH ; i++){
             double re,im;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);arr->c[i] = re + im * I;
+            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);arr->d[i] = re + im * I;
         }
         fclose(fp);
         return 0;
@@ -300,7 +299,7 @@ void print_gl3_soa_wrapper(const su3_soa * gl3,
     if(devinfo.myrank == 0){
         int irank;
         for(irank = 1 ; irank < devinfo.nranks; irank++)
-            recv_loc_subconf_from_rank(conf_rw,irank);
+            recv_loc_subconf_from_rank(conf_rw,irank,irank);
         recv_loc_subconf_from_buffer(conf_rw, gl3,0); 
         save_gl_gl3(conf_rw, nomefile);
     }

@@ -347,7 +347,7 @@ inline void mem_free_extended()
         FREECHECK(tamat_rw);
         FREECHECK(thmat_rw);
         FREECHECK(dcomplex_rw);
-        FREECHECK(doulbe_rw);
+        FREECHECK(double_rw);
 #ifdef MULTIDEVICE
     }
 #endif

@@ -200,6 +200,13 @@ static inline void single_gl3_into_su3_soa( __restrict su3_soa * const mat, cons
   mat->r2.c1[idx_mat] = Imat->comp[2][1];
   mat->r2.c2[idx_mat] = Imat->comp[2][2];
 }
+static inline void single_gl3_into_global_su3_soa( __restrict global_su3_soa * const mat, const int idx_mat,						   single_su3 * Imat){
+
+ single_su3_into_global_su3_soa(mat,idx_mat,Imat);
+  mat->r2.c0[idx_mat] = Imat->comp[2][0];
+  mat->r2.c1[idx_mat] = Imat->comp[2][1];
+  mat->r2.c2[idx_mat] = Imat->comp[2][2];
+}
 static inline void single_gl3_addinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat,						   single_su3 * Imat){
 
  single_su3_addinto_su3_soa(mat,idx_mat,Imat);
