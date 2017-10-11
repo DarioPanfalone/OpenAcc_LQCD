@@ -1,5 +1,17 @@
 COMPILE_INFO_FILENAME=$1
-SCRIPTSDIR=$2
+PREFIX=$2 # test, benchmark, profiling
+
+if test $# -ne 2 || test \
+    $PREFIX != "test" -a \
+    $PREFIX != "benchmark" -a \
+    $PREFIX != "profiling"
+then
+    echo "usage: $0 compile_info_filename prefix"
+    echo "   - compile_info_filename: usually, 'geom_defines.txt'"
+    echo "   - prefix = test OR benchmark OR profiling"
+    exit
+fi
+
 if test ! -f $COMPILE_INFO_FILENAME
 then
     echo File $COMPILE_INFO_FILENAME does not exist! 
@@ -8,27 +20,16 @@ else
     echo Reading compilation/geometry parameters from $COMPILE_INFO_FILENAME ...
 fi
 
-if test $# -eq 1
-then 
-    SCRIPTSDIR=$(dirname $BASH_SOURCE)
-    echo SCRIPTSDIR not set, setting to $SCRIPTSDIR
-fi
+SCRIPTSDIR=$(dirname $BASH_SOURCE)
+echo SCRIPTSDIR not set, setting to $SCRIPTSDIR
 
 FILETEMPLATEDIR=$SCRIPTSDIR
 
 
-if test ! -f "$FILETEMPLATEDIR/test.pg.DPSP.set.proto" -a \
-    -f "$FILETEMPLATEDIR/fermion_parameters.set"
 
-then
-    echo Directory $SCRIPTSDIR does not exist or not contains benchmarks templates.
-    exit
-else
-    echo Copying template benchmark input files from directory $SCRIPTSDIR
-fi
-
-
-
+#####################################
+### reading basic geometry info #####
+#####################################
 L0=$( grep -E "^\s*LOC_N0\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
 L1=$( grep -E "^\s*LOC_N1\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
 L2=$( grep -E "^\s*LOC_N2\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
@@ -43,7 +44,9 @@ SIZE=$((576*L0*L1*L2*(L3+4)))
 
 LABEL=$L0$L1$L2$L3\_$TASKS
 
-
+#####################################
+## preparing module load command ####
+#####################################
 echo Reading modules to load in slurm scripts...
 MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)
 # creating a string with all the modules in one line
@@ -64,10 +67,21 @@ fi
 
 echo Modules to load:$MODULES_TO_LOAD....
 
+
+#####################################
+## preparing base file ##############
+#####################################
 # preparing base benchmark file
+FILEBASE=$PREFIX.pg.DPSP.set.proto #PREFIX= test, benchmark, profiling
+if test ! -f "$FILETEMPLATEDIR/$FILEBASE" -a \
+    -f "$FILETEMPLATEDIR/fermion_parameters.set"
+then
+    echo Directory $SCRIPTSDIR does not exist or not contains benchmarks templates.
+    exit
+else
+    echo Copying template benchmark input files from directory $SCRIPTSDIR
+fi
 
-
-FILEBASE=test.pg.DPSP.set.proto
 for MODE in dp sp
 do
     if test $MODE == sp
@@ -89,16 +103,19 @@ do
 
     echo Writing test.$MODE.set
     cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILE >\
-        test.main.$MODE.set
+        $PREFIX.main.$MODE.set
 done
 
-echo Writing test.deo_doe_test.set
-cp test.main.dp.set test.deo_doe_test.dpsp.set
-echo Writing test.inverter_multishift_test.set
-cp test.main.dp.set test.inverter_multishift_test.dpsp.set
+echo Writing $PREFIX.deo_doe_test.set
+cp $PREFIX.main.dp.set $PREFIX.deo_doe_test.dpsp.set
+echo Writing $PREFIX.inverter_multishift_test.set
+cp $PREFIX.main.dp.set $PREFIX.inverter_multishift_test.dpsp.set
 
 
-
+#####################################
+## setting up directories and #######
+## scripts                    #######
+#####################################
 EXECUTABLES="main deo_doe_test inverter_multishift_test pg"
 
 # executable 'pg' is actually 'main'
@@ -116,15 +133,28 @@ do
     for MODE in $MODES
     do
 
+        INPUTFILENAME="$PREFIX.$EXECUTABLE.$MODE.set"
 
-        INPUTFILENAME="test.$EXECUTABLE.$MODE.set"
+        if test $PREFIX == "profiling"
+        then 
+            PROFILINGSTR="nvprof --log-file \"$EXECUTABLE.%p"\"
+        else
+            PROFILINGSTR=""
+        fi
         OUTPUTFILENAME="out.$EXECUTABLE.$MODE.txt"
-        SLURMFILENAME="test.$EXECUTABLE.$MODE.slurm"
-        BASHFILENAME="test.$EXECUTABLE.$MODE.sh"
+        SLURMFILENAME="$PREFIX.$EXECUTABLE.$MODE.slurm"
+        BASHFILENAME="$PREFIX.$EXECUTABLE.$MODE.sh"
+
+        DIRNAME=${BASHFILENAME%.sh}
+        echo mkdir -p  $DIRNAME
+        mkdir -p  $DIRNAME
+
+        echo cp$SCRIPTSDIR/ratapproxes/'*' ./$DIRNAME
+        cp $SCRIPTSDIR/ratapproxes/* ./$DIRNAME
 
         if test $PREPARESLURM == yes
         then
-            cat > $SLURMFILENAME << EOF
+        cat > $DIRNAME/$SLURMFILENAME << EOF
 #!/bin/bash
 #SBATCH --job-name=test.${EXECUTABLE}_$LABEL
 #SBATCH --ntasks=$TASKS
@@ -141,24 +171,21 @@ export PGI_ACC_BUFFERSIZE=$SIZE
 
 rm stop
 
-srun --cpu_bind=v,sockets ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
+srun --cpu_bind=v,sockets $PROFILINGSTR ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
 
 EOF
         fi
 
-        echo mkdir -p  dir_${BASHFILENAME%.sh}
-        mkdir -p dir_${BASHFILENAME%.sh}
-
-        cat > dir_${BASHFILENAME%.sh}/$BASHFILENAME << EOF
+        cat > $DIRNAME/$BASHFILENAME << EOF
 #!/bin/bash
 
-mpirun -n $TASKS ../bin/$EXECUTABLE ./$INPUTFILENAME | tee $OUTPUTFILENAME
+mpirun -n $TASKS $PROFILINGSTR ../bin/$EXECUTABLE ./$INPUTFILENAME | tee $OUTPUTFILENAME
 
 EOF
-        echo cp $INPUTFILENAME ./dir_${BASHFILENAME%.sh}/
-        cp $INPUTFILENAME ./dir_${BASHFILENAME%.sh}/
-        echo chmod +x dir_${BASHFILENAME%.sh}/$BASHFILENAME
-        chmod +x dir_${BASHFILENAME%.sh}/$BASHFILENAME
+        echo cp $INPUTFILENAME ./$DIRNAME/
+        cp $INPUTFILENAME ./$DIRNAME/
+        echo chmod +x $DIRNAME/$BASHFILENAME
+        chmod +x ./$DIRNAME/$BASHFILENAME
 
     done 
 
