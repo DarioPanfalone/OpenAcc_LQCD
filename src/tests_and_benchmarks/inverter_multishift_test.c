@@ -216,12 +216,9 @@ int main(int argc, char* argv[]){
     }
 
 
-#ifdef MULTIDEVICE
-    communicate_fermion_borders_hostonly(ferm_chi_acc);
-#endif
 #pragma acc update device(ferm_chi_acc[0:1])
 
-    //    print_vec3_soa(ferm_chi_acc,myfermionname);
+    print_vec3_soa(ferm_chi_acc,myfermionname);
 
 
 

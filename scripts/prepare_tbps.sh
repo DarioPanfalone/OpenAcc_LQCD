@@ -116,7 +116,11 @@ cp $PREFIX.main.dp.set $PREFIX.inverter_multishift_test.dpsp.set
 ## setting up directories and #######
 ## scripts                    #######
 #####################################
-EXECUTABLES="main deo_doe_test inverter_multishift_test pg"
+EXECUTABLES="deo_doe_test inverter_multishift_test pg" # in all cases
+if test $PREFIX == "test"
+then                                # only with tests
+    EXECUTABLES="main $EXECUTABLES" # adding 'main' to executables
+fi
 
 # executable 'pg' is actually 'main'
 rm ./bin/pg
@@ -149,8 +153,12 @@ do
         echo mkdir -p  $DIRNAME
         mkdir -p  $DIRNAME
 
-        echo cp$SCRIPTSDIR/ratapproxes/'*' ./$DIRNAME
-        cp $SCRIPTSDIR/ratapproxes/* ./$DIRNAME
+
+        if test $EXECUTABLE != "pg"
+        then
+            echo cp$SCRIPTSDIR/ratapproxes/'*' ./$DIRNAME
+            cp $SCRIPTSDIR/ratapproxes/* ./$DIRNAME
+        fi 
 
         if test $PREPARESLURM == yes
         then

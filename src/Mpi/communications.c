@@ -39,22 +39,15 @@ void sendrecv_vec3soa_borders_1Dcut(vec3_soa *lnh_fermion,
     if(verbosity_lv > 5) printf("MPI%02d - sendrecv_vec3soa_borders_1Dcut() \n",
             devinfo.myrank);
 
-    /*   // PREAMBLE
     // This function is written taking the following assumptions:
-    // 1. The domain is divided only along one direction, which is 
-    //  the 'slowest' (strong assumption);
-    // 2. That direction is the T direction (a bit weaker assumption, 
-    //  changing that requires a complete redefinition of the site 
-    //  ordering, which can be, perhaps, easily done by redefining the
-    //  various '*snum' functions in Geometry/geometry.cc, and by 
-    //  writing a tool to 'transpose' the configurations which have
-    //  been written in a 'standard' ordering.*/
+    // 1. The domain is divided only along one direction 
+    // 2. That direction is the 'slowest' direction 
 
     //must be done for the three components of the fermion.
 
     // no. of 'fermion' point in each slab)
-    int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*thickness;
-    int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
+    const int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*thickness;
+    const int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
     // NOTICE THERE IS LNH_NXH
     MPI_Status status;
 #ifdef USE_MPI_CUDA_AWARE
@@ -123,9 +116,9 @@ void sendrecv_vec3soa_borders_1Dcut_hostonly(vec3_soa *lnh_fermion,
     //must be done for the three components of the fermion.
 
     // no. of 'fermion' point in each slab)
-    int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*thickness;
-    int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
-    // NOTICE THERE IS LNH_NXH
+    const int slab_sizeh = (LNH_N0H * LNH_N1 * LNH_N2)*thickness;
+    const int offset_size =  (LNH_N0H * LNH_N1 * LNH_N2) * HALO_WIDTH;
+    // NOTICE THERE IS LNH_N0H, NOT LNH_N0
     MPI_Status status;
     d_complex *c[3] ;
     c[0] = lnh_fermion->c0;

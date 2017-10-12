@@ -216,9 +216,6 @@ int main(int argc, char* argv[]){
     }
 
 
-#ifdef MULTIDEVICE
-    communicate_fermion_borders_hostonly(ferm_chi_acc);
-#endif
 #pragma acc data update device(ferm_chi_acc[0:1])
 
 
