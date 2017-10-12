@@ -286,8 +286,8 @@ int read_gl_double(global_double_soa * arr, const char* nomefile)
 }
 
 // multi rank wrappers
-// gl3 / su3
 
+// gl3 / su3
 void print_gl3_soa_wrapper(const su3_soa * gl3, 
         const char* nomefile)
 {

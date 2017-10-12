@@ -29,7 +29,7 @@ MaxCGIterations               10000  # max number of iterations
 
 
 MontecarloParameters
-Ntraj                         1        
+Ntraj                         1
 ThermNtraj                    0        
 StoreConfInterval             5        
 SaveConfInterval              5        

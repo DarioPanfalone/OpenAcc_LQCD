@@ -15,7 +15,7 @@ GaugeSubSteps                 1
 TrajLength                    1.000000e+00        
 residue_metro                 1e-8        
 ExpMaxEigenvalue              5.500000e+00        
-SinglePrecMD                  0                   
+SinglePrecMD                  SINGLEPRECISIONMD
 residue_md                    1e-4        
 MaxCGIterations               10  # max number of iterations
                                   # suitable for profiling

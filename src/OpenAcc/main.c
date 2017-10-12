@@ -250,7 +250,7 @@ int main(int argc, char* argv[]){
             generate_Conf_cold(conf_acc,mc_params.eps_gen);
             printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                     devinfo.myrank);
-            conf_id_iter=0;
+            conf_id_iter=1;
         }
     }
 

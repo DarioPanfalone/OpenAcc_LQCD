@@ -39,9 +39,12 @@ void calc_ipdot_gauge_soloopenacc_std(
 
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
         char genericfilename[50];
+        // staples
         sprintf(genericfilename,"std_staples_%d_%d",
                 devinfo.myrank, md_dbg_print_count);
         dbgprint_gl3_soa(local_staples,genericfilename,1000);
+
+        // tipdot
         sprintf(genericfilename,"std_tipdot_staples_%d_%d",
                 devinfo.myrank, md_dbg_print_count);
         print_tamat_soa(tipdot,genericfilename);
