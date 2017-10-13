@@ -961,11 +961,11 @@ void recv_loc_subtamat_from_rank(global_tamat_soa *gl_soa_tamat,
 }
 void send_lnh_subtamat_to_master(const tamat_soa *lnh_tamat, int tag){
 
-    MPI_Send(lnh_tamat,6*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+    MPI_Send(lnh_tamat,8*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
 
 }
 void receive_lnh_subtamat_from_master(tamat_soa* lnh_tamat){
-    MPI_Recv(lnh_tamat,6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
+    MPI_Recv(lnh_tamat,8*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
             MPI_STATUS_IGNORE);
 }
 
@@ -997,11 +997,11 @@ void recv_loc_subthmat_from_rank(global_thmat_soa *gl_soa_thmat,
 }
 void send_lnh_subthmat_to_master(const thmat_soa *lnh_thmat, int tag){
 
-    MPI_Send(lnh_thmat,6*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+    MPI_Send(lnh_thmat,8*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
 
 }
 void receive_lnh_subthmat_from_master(thmat_soa* lnh_thmat){
-    MPI_Recv(lnh_thmat,6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
+    MPI_Recv(lnh_thmat,8*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
             MPI_STATUS_IGNORE);
 }
 
@@ -1014,7 +1014,7 @@ void send_lnh_subdcomplex_to_rank(const global_dcomplex_soa *gl_soa_dcomplex,
             sizeof(dcomplex_soa)); 
     ALLOCCHECK(allocation_check,lnh_dcomplex);
     send_lnh_subdcomplex_to_buffer(gl_soa_dcomplex,lnh_dcomplex,target_rank);
-    MPI_Send(lnh_dcomplex,8*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
+    MPI_Send(lnh_dcomplex,2*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
             MPI_COMM_WORLD);
     FREECHECK(lnh_dcomplex);
 
@@ -1025,7 +1025,7 @@ void recv_loc_subdcomplex_from_rank(global_dcomplex_soa *gl_soa_dcomplex,
     int allocation_check = posix_memalign((void**) &lnh_dcomplex, ALIGN,
             sizeof(dcomplex_soa)); 
     ALLOCCHECK(allocation_check,lnh_dcomplex);
-    MPI_Recv(lnh_dcomplex,8*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
+    MPI_Recv(lnh_dcomplex,2*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
             MPI_COMM_WORLD,MPI_STATUS_IGNORE);
     recv_loc_subdcomplex_from_buffer(gl_soa_dcomplex,lnh_dcomplex,target_rank);
     FREECHECK(lnh_dcomplex);
@@ -1033,11 +1033,11 @@ void recv_loc_subdcomplex_from_rank(global_dcomplex_soa *gl_soa_dcomplex,
 }
 void send_lnh_subdcomplex_to_master(const dcomplex_soa *lnh_dcomplex, int tag){
 
-    MPI_Send(lnh_dcomplex,6*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+    MPI_Send(lnh_dcomplex,2*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
 
 }
 void receive_lnh_subdcomplex_from_master(dcomplex_soa* lnh_dcomplex){
-    MPI_Recv(lnh_dcomplex,6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
+    MPI_Recv(lnh_dcomplex,2*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
             MPI_STATUS_IGNORE);
 }
 
@@ -1050,7 +1050,7 @@ void send_lnh_subdouble_to_rank(const global_double_soa *gl_soa_double,
             sizeof(double_soa)); 
     ALLOCCHECK(allocation_check,lnh_double);
     send_lnh_subdouble_to_buffer(gl_soa_double,lnh_double,target_rank);
-    MPI_Send(lnh_double,8*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
+    MPI_Send(lnh_double,1*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
             MPI_COMM_WORLD);
     FREECHECK(lnh_double);
 
@@ -1061,7 +1061,7 @@ void recv_loc_subdouble_from_rank(global_double_soa *gl_soa_double,
     int allocation_check = posix_memalign((void**) &lnh_double, ALIGN,
             sizeof(double_soa)); 
     ALLOCCHECK(allocation_check,lnh_double);
-    MPI_Recv(lnh_double,8*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
+    MPI_Recv(lnh_double,1*LNH_SIZEH,MPI_DOUBLE,target_rank,target_rank,
             MPI_COMM_WORLD,MPI_STATUS_IGNORE);
     recv_loc_subdouble_from_buffer(gl_soa_double,lnh_double,target_rank);
     FREECHECK(lnh_double);
@@ -1069,11 +1069,11 @@ void recv_loc_subdouble_from_rank(global_double_soa *gl_soa_double,
 }
 void send_lnh_subdouble_to_master(const double_soa *lnh_double, int tag){
 
-    MPI_Send(lnh_double,6*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+    MPI_Send(lnh_double,1*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
 
 }
 void receive_lnh_subdouble_from_master(double_soa* lnh_double){
-    MPI_Recv(lnh_double,6*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
+    MPI_Recv(lnh_double,1*LNH_SIZEH,MPI_DOUBLE,0,devinfo.myrank,MPI_COMM_WORLD,
             MPI_STATUS_IGNORE);
 }
 

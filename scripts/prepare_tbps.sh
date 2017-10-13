@@ -21,7 +21,7 @@ else
 fi
 
 SCRIPTSDIR=$(dirname $BASH_SOURCE)
-echo SCRIPTSDIR not set, setting to $SCRIPTSDIR
+echo Setting SCRIPTSDIR to $SCRIPTSDIR
 
 FILETEMPLATEDIR=$SCRIPTSDIR
 

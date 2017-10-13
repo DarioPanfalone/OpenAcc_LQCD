@@ -402,7 +402,7 @@ int main(int argc, char* argv[]){
             if(devinfo.myrank ==0 ){
                 printf("\n#################################################\n");
                 printf(  "   GENERATING CONF %d of %d, %dx%dx%dx%d,%1.3f \n",
-                        conf_id_iter,mc_params.ntraj+id_iter_offset,
+                        conf_id_iter,mc_params.ntraj+id_iter_offset-1,
                         geom_par.gnx,geom_par.gny,
                         geom_par.gnz,geom_par.gnt,
                         act_params.beta);
@@ -670,7 +670,7 @@ int main(int argc, char* argv[]){
             }
 
             // program exits if MaxConfIdIter is reached
-            if(conf_id_iter > mc_params.MaxConfIdIter ){
+            if(conf_id_iter >= mc_params.MaxConfIdIter ){
 
                 printf("%s - MaxConfIdIter=%d reached, job done!",
                         devinfo.myrankstr, mc_params.MaxConfIdIter);
@@ -678,7 +678,7 @@ int main(int argc, char* argv[]){
                 mc_params.run_condition = RUN_CONDITION_TERMINATE;
             }
             // program exits if MTraj is reached
-            if( id_iter > (mc_params.ntraj+id_iter_offset)){
+            if( id_iter >= (mc_params.ntraj+id_iter_offset)){
                 printf("%s - NTraj=%d reached, job done!",
                         devinfo.myrankstr, mc_params.ntraj);
                 printf("%s - shutting down now.\n", devinfo.myrankstr);

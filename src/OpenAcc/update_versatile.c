@@ -102,10 +102,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // ESTRAZIONI RANDOM
     if(debug_settings.do_norandom_test){ // NORANDOM
         printf("NORANDOM mode, loading momenta from memory.\n");
-        if(read_thmat_soa(momenta,"momenta_norndtest")){
-            printf("GENERATING MOMENTA FILE FOR YOUR CONVENIENCE, RE-RUN THIS TEST\n");
+        if(read_thmat_soa_wrapper(momenta,"momenta_norndtest")){
+            printf("MPI%02d: GENERATING MOMENTA FILE FOR YOUR CONVENIENCE, RE-RUN THIS TEST\n",
+                    devinfo.myrank);
             generate_Momenta_gauss(momenta);
-            print_thmat_soa(momenta,"momenta_norndtest");
+            print_thmat_soa_wrapper(momenta,"momenta_norndtest");
         }
     }
     else generate_Momenta_gauss(momenta); // NORMAL, RANDOM
@@ -130,10 +131,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 sprintf(ps_index_str,"%d",ps_index);
                 strcpy(psferm_filename,"fermion_norndtest");
                 strcat(psferm_filename,ps_index_str);
-                if(read_vec3_soa(&ferm_phi_acc[ps_index],psferm_filename)){
+                if(read_vec3_soa_wrapper(&ferm_phi_acc[ps_index],psferm_filename)){
                     printf("GENERATING FERMION FILE FOR YOUR CONVENIENCE, RE-RUN THIS TEST\n");
                     generate_vec3_soa_gauss(&ferm_phi_acc[ps_index]);
-                    print_vec3_soa(&ferm_phi_acc[ps_index],psferm_filename);
+                    print_vec3_soa_wrapper(&ferm_phi_acc[ps_index],psferm_filename);
 
                 }
             }

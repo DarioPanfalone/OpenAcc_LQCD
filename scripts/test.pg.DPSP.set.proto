@@ -82,7 +82,7 @@ SaveAllAtEnd                  1
 PrintBackFieldDbgInfo         0                   
 SaveDiagnostics               1                   
 DoRevTest                     0                   
-DoNoRandomTest                0                   
+DoNoRandomTest                1
 RngFakenessLevel              0                   
 MDDbgPrintMaxCount            9
 SaveDiagnosticsFilename       test.DPSP.md_diagnostics.dat  

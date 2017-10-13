@@ -209,8 +209,8 @@ int read_gl_thmat(global_thmat_soa * thmat, const char* nomefile)
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c01[i] = re + im * I;
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c02[i] = re + im * I;
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c12[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\n",&re),2);thmat->rc00[i] = re ;
-            CHECKREAD(fscanf(fp, "%lf\n",&re),2);thmat->rc11[i] = re ;
+            CHECKREAD(fscanf(fp, "%lf\n",&re),1);thmat->rc00[i] = re ;
+            CHECKREAD(fscanf(fp, "%lf\n",&re),1);thmat->rc11[i] = re ;
         }
         fclose(fp);
         return 0;
