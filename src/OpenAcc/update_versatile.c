@@ -1,4 +1,3 @@
-// se metro==1 allora fa il test di metropolis
 // se metro==0 allora non fa il test di metropolis --> termalizzazione
 #ifndef UPDATE_VERSATILE_C_
 #define UPDATE_VERSATILE_C_
@@ -113,7 +112,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     printf("MPI%02d - Momenta generated/read : OK \n", devinfo.myrank);
 
-    //    read_thmat_soa(momenta,"momenta");
 #pragma acc update device(momenta[0:8])
     if(debug_settings.do_reversibility_test)
         copy_momenta_into_old(momenta,momenta_backup);
@@ -407,7 +405,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                 devinfo.myrank);
 
         save_conf_wrapper(tconf_acc,"conf_REVTEST",0,0); // conf_id_iter =0, not using ILDG
-        save_conf_wrapper(conf_acc_bkp,"conf_REVTEST_bkp",0,0);
+//        save_conf_wrapper(conf_acc_bkp,"conf_REVTEST_bkp",0,0);
 
 
 #ifdef MULTIDEVICE

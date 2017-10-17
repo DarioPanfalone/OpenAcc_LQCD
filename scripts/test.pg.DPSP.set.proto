@@ -81,7 +81,7 @@ VerbosityLv                   2
 SaveAllAtEnd                  1                   
 PrintBackFieldDbgInfo         0                   
 SaveDiagnostics               1                   
-DoRevTest                     0                   
+DoRevTest                     SEDREVTEST
 DoNoRandomTest                1
 RngFakenessLevel              0                   
 MDDbgPrintMaxCount            9

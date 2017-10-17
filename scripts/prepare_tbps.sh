@@ -37,7 +37,6 @@ L3=$( grep -E "^\s*LOC_N3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
 
 TASKS=$( grep -E "^\s*NRANKS_D3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
 
-
 # size of the local gauge configuration in bytes.
 # the '+4' is needed only on the direction which is cut (L3)
 SIZE=$((576*L0*L1*L2*(L3+4)))
@@ -72,8 +71,8 @@ echo Modules to load:$MODULES_TO_LOAD....
 ## preparing base file ##############
 #####################################
 # preparing base benchmark file
-FILEBASE=$PREFIX.pg.DPSP.set.proto #PREFIX= test, benchmark, profiling
-if test ! -f "$FILETEMPLATEDIR/$FILEBASE" -a \
+PGFILEBASE=$PREFIX.pg.DPSP.set.proto #PREFIX= test, benchmark, profiling
+if test ! -f "$FILETEMPLATEDIR/$PGFILEBASE" -a \
     -f "$FILETEMPLATEDIR/fermion_parameters.set"
 then
     echo Directory $SCRIPTSDIR does not exist or not contains benchmarks templates.
@@ -84,31 +83,53 @@ fi
 
 for MODE in dp sp
 do
-    if test $MODE == sp
+    echo
+    echo "MODE: $MODE"
+	if test $MODE == sp
+	then 
+		SINGLEPRECISIONMD=1
+	elif test $MODE == dp
+	then 
+		SINGLEPRECISIONMD=0
+	fi
+
+	OUTPROTOSETFILE=$(echo ${PGFILEBASE%.proto} |sed 's/DPSP/'$MODE'/;')
+	echo $PGFILEBASE | sed 's/DPSP/'$MODE'/'
+	echo "  Writing $OUTPROTOSETFILE"
+
+    cat $FILETEMPLATEDIR/$PGFILEBASE |\
+ 		sed 's/SEDNRANKS/'$TASKS'/;s/SEDNX/'$L0'/;s/SEDNY/'$L1'/;s/SEDNZ/'$L2'/;
+		    s/SEDNODEDIM/16/;s/SEDNT/'$((L3*TASKS))'/;s/DPSP/'$MODE'/;
+		    s/SINGLEPRECISIONMD/'$SINGLEPRECISIONMD'/'  >  tmp_$OUTPROTOSETFILE
+
+    sed 's/SEDREVTEST/0/'  tmp_$OUTPROTOSETFILE >  $OUTPROTOSETFILE
+
+	echo "  Writing $PREFIX.main.$MODE.set"
+	cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILE >\
+		$PREFIX.main.$MODE.set
+
+
+    if test $PREFIX == "test"
     then 
-        SINGLEPRECISIONMD=1
-    elif test $MODE == dp
-    then 
-        SINGLEPRECISIONMD=0
+        OUTPROTOSETFILEREVT=$(echo ${PGFILEBASE%.proto} |sed 's/DPSP/'$MODE'.revt/;')
+        sed 's/SEDREVTEST/1/'  tmp_$OUTPROTOSETFILE >  $OUTPROTOSETFILEREVT
+
+        echo "  Writing $PREFIX.main.$MODE.revt.set"
+        cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILEREVT >\
+            $PREFIX.main.$MODE.revt.set
     fi
-    OUTPROTOSETFILE=$(echo ${FILEBASE%.proto} | sed 's/DPSP/'$MODE'/')
-    echo $FILEBASE | sed 's/DPSP/'$MODE'/'
-    echo Writing $OUTPROTOSETFILE
-    sed 's/SEDNRANKS/'$TASKS'/' $FILETEMPLATEDIR/$FILEBASE |\
-        sed 's/SEDNX/'$L0'/' | sed 's/SEDNY/'$L1'/' | sed 's/SEDNZ/'$L2'/' |\
-        sed 's/SEDNODEDIM/16/' |  sed 's/SEDNT/'$((L3*TASKS))'/' |\
-        sed 's/DPSP/'$MODE'/' |\
-        sed 's/SINGLEPRECISIONMD/'$SINGLEPRECISIONMD'/'  >  $OUTPROTOSETFILE
+    rm tmp_$OUTPROTOSETFILE
 
 
-    echo Writing test.$MODE.set
-    cat $FILETEMPLATEDIR/fermion_parameters.set $OUTPROTOSETFILE >\
-        $PREFIX.main.$MODE.set
+
 done
 
-echo Writing $PREFIX.deo_doe_test.set
+echo
+echo "PRECISION INDEPENDENT TESTS:"
+# CREATING .set FILES FOR deo_doe_test and inverter_multishift_test
+echo "  Writing $PREFIX.deo_doe_test.set"
 cp $PREFIX.main.dp.set $PREFIX.deo_doe_test.dpsp.set
-echo Writing $PREFIX.inverter_multishift_test.set
+echo "  Writing $PREFIX.inverter_multishift_test.set"
 cp $PREFIX.main.dp.set $PREFIX.inverter_multishift_test.dpsp.set
 
 
@@ -126,16 +147,26 @@ fi
 rm ./bin/pg
 ln -s ./main ./bin/pg
 
+echo
+echo CREATING DIRECTORIES...
+
 for EXECUTABLE in $EXECUTABLES
 do
+    echo "  Executable: $EXECUTABLE"
     if test $EXECUTABLE == 'main' -o $EXECUTABLE == 'pg'
     then 
-        MODES='sp dp'
+        if test $PREFIX == "test"
+        then
+           MODES='sp dp sp.revt dp.revt'
+        else
+           MODES='sp dp'
+        fi
     else 
         MODES='dpsp'
     fi
     for MODE in $MODES
     do
+        echo "    MODE: $MODE"
 
         INPUTFILENAME="$PREFIX.$EXECUTABLE.$MODE.set"
 
@@ -150,13 +181,12 @@ do
         BASHFILENAME="$PREFIX.$EXECUTABLE.$MODE.sh"
 
         DIRNAME=${BASHFILENAME%.sh}
-        echo mkdir -p  $DIRNAME
+        echo "      mkdir -p  $DIRNAME"
         mkdir -p  $DIRNAME
 
 
         if test $EXECUTABLE != "pg"
         then
-            echo cp$SCRIPTSDIR/ratapproxes/'*' ./$DIRNAME
             cp $SCRIPTSDIR/ratapproxes/* ./$DIRNAME
         fi 
 
@@ -190,9 +220,9 @@ EOF
 mpirun -n $TASKS $PROFILINGSTR ../bin/$EXECUTABLE ./$INPUTFILENAME | tee $OUTPUTFILENAME
 
 EOF
-        echo cp $INPUTFILENAME ./$DIRNAME/
+        echo "      cp $INPUTFILENAME ./$DIRNAME/"
         cp $INPUTFILENAME ./$DIRNAME/
-        echo chmod +x $DIRNAME/$BASHFILENAME
+        echo "      chmod +x $DIRNAME/$BASHFILENAME"
         chmod +x ./$DIRNAME/$BASHFILENAME
 
     done 

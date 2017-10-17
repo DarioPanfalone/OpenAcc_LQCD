@@ -32,7 +32,7 @@
 
 
 
-int print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,
+int print_su3_soa_ASCII(global_su3_soa * const conf_rw, const char* nomefile,
         int conf_id_iter, double_soa *back_phases){
 
     FILE *fp;
@@ -54,17 +54,23 @@ int print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,
     int nt = geom_par.gnt;
 
 
+    double fm = 0;
+    // if we're in pure gauge we can have problems
+    if (alloc_info.NDiffFlavs != 0){ 
+        fm = fermions_parameters[0].ferm_mass;
+    }
+        
     fprintf(fp,"%d %d %d %d %lf %lf %d %d\n",nx,ny,nz,nt, 
-            act_params.beta,fermions_parameters[0].ferm_mass,alloc_info.NDiffFlavs,
+            act_params.beta,fm,alloc_info.NDiffFlavs,
             conf_id_iter);
     int expected_stag_phases_minuses_count = nx*ny*nz*nt*3/2;
     int stag_phases_minuses_count = 0;
-
+    
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < GL_SIZEH ; i++){
             // rebuilding the 3rd row
             single_su3 aux;
-            single_su3_from_global_su3_soa(&conf[q],i,&aux);
+            single_su3_from_global_su3_soa(&conf_rw[q],i,&aux);
             rebuild3row(&aux);
 
 
@@ -100,6 +106,8 @@ int print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,
     fclose(fp);
     return 0;
 }
+
+
 int read_su3_soa_ASCII(global_su3_soa * conf, const char* nomefile,int * conf_id_iter ){
 
 

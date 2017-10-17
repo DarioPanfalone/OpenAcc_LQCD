@@ -18,17 +18,19 @@ extern int verbosity_lv;
 #include "mpi.h"
 
 #define ALIGN 128
+
 #define ALLOCCHECK(control_int,var)  if(control_int != 0 ) \
-                                                       printf("\tError in  allocation of %s . \n", #var);\
-else if(verbosity_lv > 2) printf("\tAllocation of %s : OK , %p\n", #var, var );\
+    printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var);\
+    else if(verbosity_lv > 2) printf("MPI%02d: \tAllocation of %s : OK , %p\n",\
+         devinfo.myrank, #var, var );\
 
 #define FREECHECK(var) if(verbosity_lv >2) \
-    printf("\tFreed %s, %p ...", #var,var);\
-free(var); if(verbosity_lv > 2)  printf(" done.\n");
+    printf("\tMPI%02d: Freed %s, %p ...", devinfo.myrank, #var,var);\
+    free(var); if(verbosity_lv > 2)  printf(" done.\n");
+
+
 
 // fermions
-
-// offset stands for the 
 void sendrecv_vec3soa_borders_1Dcut(vec3_soa *lnh_fermion,
         int rankL, int rankR, int thickness)
 {
