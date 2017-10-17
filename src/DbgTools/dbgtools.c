@@ -31,60 +31,102 @@ void save_gl_gl3(const global_su3_soa * conf, const char* nomefile)
     FILE *fp;
     fp = fopen(nomefile,"w");
 
-    for(int q = 0 ; q < 8 ; q++){
-        for(int i = 0 ; i < GL_SIZEH ; i++){
-            // rebuilding the 3rd row
-            single_su3 aux;
-            single_gl3_from_global_su3_soa(&conf[q],i,&aux);
+    int nx = geom_par.gnx;
+    int ny = geom_par.gny;
+    int nz = geom_par.gnz;
+    int nt = geom_par.gnt;
 
 
-            for(int r=0; r < 3 ; r++)
-                for(int c=0; c < 3 ; c++) 
-                    fprintf(fp, "%.18lf %.18lf\n",
-                            creal(aux.comp[r][c]),cimag(aux.comp[r][c])); 
-        }
-    }
+    int x,y,z,t,dir;
+    for(t=0;t<nt;t++) for(z=0;z<nz;z++)
+        for(y=0;y<ny;y++) for(x=0;x<nx;x++)
+        {
+
+            // ILDG format on disk is not transposed,
+            //  but conf in machine memory could be.
+            int xs[4] = {x,y,z,t};
+            int d[4];
+            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
+
+#ifdef MULTIDEVICE
+            int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
+#else
+            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
+#endif
+            int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
+
+            for(dir=0;dir<4;dir++){
+
+                int dirmachine = geom_par.xyztmap[dir];
+                single_su3 m;          
+                single_gl3_from_global_su3_soa(&conf[2*dirmachine+parity],
+                        idxh,&m);
+
+                for(int r=0; r < 3 ; r++)
+                    for(int c=0; c < 3 ; c++) 
+                        fprintf(fp, "%.18lf %.18lf\n",
+                                creal(m.comp[r][c]),cimag(m.comp[r][c])); 
+
+            }// dir
+        }// xyzt
+
     fclose(fp);
 }
+
 int read_gl_gl3(global_su3_soa * conf, const char* nomefile)
 {
-
-
     FILE *fp;
     fp = fopen(nomefile,"r");
     if(!fp){
         printf("gl3 file %s not readable.\n",nomefile);
         return 1;
     }
-    else{
 
-        for(int q = 0 ; q < 8 ; q++){
-            for(int i = 0 ; i < GL_SIZEH ; i++){
-                double re,im;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r0.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r0.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r0.c2[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r1.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r1.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r1.c2[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r2.c0[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r2.c1[i] = re + im * I;
-                CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                conf[q].r2.c2[i] = re + im * I;
+    int nx = geom_par.gnx;
+    int ny = geom_par.gny;
+    int nz = geom_par.gnz;
+    int nt = geom_par.gnt;
+    int xl,yl,zl,tl,dir;//local coordinates
 
-            }
-        }
-        fclose(fp);
-        return 0;
-    }
+    for(tl=0;tl<nt;tl++)for(zl=0;zl<nz;zl++)
+        for(yl=0;yl<ny;yl++) for(xl=0;xl<nx;xl++)
+        {
+            // ILDG format on disk is not transposed,
+            //  but conf in machine memory could be.
+            int xs[4] = {xl,yl,zl,tl};
+            int d[4];
+            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
+
+            int parity = (xl+yl+zl+tl)%2;// parity = (d0+d1+d2+d3)%2;
+
+            //            printf("d0 %d d1 %d d2 %d d3 %d\n", d[0],d[1],d[2],d[3]);//DEBUG
+            //            printf("x  %d y  %d z  %d t  %d\n", xs[0],xs[1],xs[2],xs[3]);//DEBUG
+
+
+            int x = xl,y = yl ,z = zl, t = tl;
+#ifdef MULTIDEVICE
+            int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
+#else
+            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
+#endif
+
+            for(dir=0;dir<4;dir++){
+                int dirmachine = geom_par.xyztmap[dir];
+                single_su3 m;
+                double re, im;
+                for(int r=0; r < 3 ; r++)
+                    for(int c=0; c < 3 ; c++){
+                        CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
+                        m.comp[r][c] = re + im * I;
+                    }
+                single_su3_into_global_su3_soa(&conf[2*dirmachine+parity],
+                        idxh,&m);
+
+            } // dir
+        } // xyzt
+
+    fclose(fp);
+    return 0;
 }
 
 void save_gl_fermion(const global_vec3_soa * fermion, 
