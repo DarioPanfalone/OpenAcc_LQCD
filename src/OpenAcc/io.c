@@ -59,13 +59,13 @@ int print_su3_soa_ASCII(global_su3_soa * const conf_rw, const char* nomefile,
     if (alloc_info.NDiffFlavs != 0){ 
         fm = fermions_parameters[0].ferm_mass;
     }
-        
+
     fprintf(fp,"%d %d %d %d %lf %lf %d %d\n",nx,ny,nz,nt, 
             act_params.beta,fm,alloc_info.NDiffFlavs,
             conf_id_iter);
     int expected_stag_phases_minuses_count = nx*ny*nz*nt*3/2;
     int stag_phases_minuses_count = 0;
-    
+
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < GL_SIZEH ; i++){
             // rebuilding the 3rd row
@@ -402,60 +402,13 @@ int read_su3_soa_ildg_binary(
 
 
     off_t ibd_start = ildg_header_ends_positions[ildg_binary_data_index];
-    fseeko(fg,ibd_start,SEEK_SET);
-    int xl,yl,zl,tl,dir;//local coordinates
 
-    for(tl=0;tl<nt;tl++)for(zl=0;zl<nz;zl++)
-        for(yl=0;yl<ny;yl++) for(xl=0;xl<nx;xl++)
-        {
-            // ILDG format on disk is not transposed,
-            //  but conf in machine memory could be.
-            int xs[4] = {xl,yl,zl,tl};
-            int d[4];
-            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
+    fseeko(fg,ibd_start, SEEK_SET);
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            binaryread_single_su3_into_su3_soa,
+            (void*)conf,
+            fg);
 
-            int parity = (xl+yl+zl+tl)%2;// parity = (d0+d1+d2+d3)%2;
-
-            //            printf("d0 %d d1 %d d2 %d d3 %d\n", d[0],d[1],d[2],d[3]);//DEBUG
-            //            printf("x  %d y  %d z  %d t  %d\n", xs[0],xs[1],xs[2],xs[3]);//DEBUG
-
-
-            int x = xl,y = yl ,z = zl, t = tl;
-#ifdef MULTIDEVICE
-            int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
-#else
-            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
-#endif
-
-            for(dir=0;dir<4;dir++){
-                off_t mat_off_t = 
-                    (dir+4*(x+nx*(y+ny*(z+nz*t))))*sizeof(double)*18;
-                fseeko(fg,ibd_start + mat_off_t, SEEK_SET);
-                single_su3 m;          
-                reads = fread((void*)m.comp,sizeof(double),18,fg);
-                if(reads!= 18){
-                    printf("Error in reading file: %s ,%d, idxh: %d, dir %d , reads %d\n",
-                            __FILE__,__LINE__, idxh, dir,reads );
-                    return 2;
-                }
-
-                // check enddiannes
-                if(conf_machine_endianness_disagreement){
-                    int irow,icol;
-                    for(irow=0;irow<2;irow++) for(icol=0;icol<3;icol++){
-                        double re = creal(m.comp[irow][icol]);
-                        double im = cimag(m.comp[irow][icol]);
-                        doubleswe(&re);
-                        doubleswe(&im);
-                        m.comp[irow][icol] = re + im*I;
-                    }
-                }
-                int dirmachine = geom_par.xyztmap[dir];
-                single_su3_into_global_su3_soa(&conf[2*dirmachine+parity],idxh,&m);
-
-            }
-
-        }
 
     fclose(fg);
 
@@ -577,54 +530,9 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf,
         (ILDG_header){magic_number,version,mbme_flag,len64,"ildg-binary-data"};
     fwrite(&ildg_binary_data_header,sizeof(ILDG_header),1,fp);
 
-    int x,y,z,t,dir;
-    for(t=0;t<nt;t++) for(z=0;z<nz;z++)
-        for(y=0;y<ny;y++) for(x=0;x<nx;x++)
-        {
 
-            // ILDG format on disk is not transposed,
-            //  but conf in machine memory could be.
-            int xs[4] = {x,y,z,t};
-            int d[4];
-            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
-
-#ifdef MULTIDEVICE
-            int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
-#else
-            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
-#endif
-            int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
-
-            for(dir=0;dir<4;dir++){
-
-                int dirmachine = geom_par.xyztmap[dir];
-                single_su3 m;          
-                single_su3_from_global_su3_soa(&conf[2*dirmachine+parity],idxh,&m);
-                rebuild3row(&m);
-
-                // fix enddiannes
-                int irow,icol;
-                for(irow=0;irow<3;irow++) for(icol=0;icol<3;icol++){
-                    double re = creal(m.comp[irow][icol]);
-                    double im = cimag(m.comp[irow][icol]);
-                    if(conf_machine_endianness_disagreement){
-                        doubleswe(&re);
-                        doubleswe(&im);
-                    }
-                    writes =  fwrite((void*)&re,sizeof(double),1,fp);
-                    if(writes!= 1){
-                        printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
-                        return 2;
-                    }
-                    writes =  fwrite((void*)&im,sizeof(double),1,fp);
-                    if(writes!= 1){
-                        printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
-                        return 2;
-                    }
-
-                }
-            }
-        }
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            binarywrite_single_su3_into_su3_soa, conf, fp );
 
     // padding to 8 bytes
     fwrite(pad,1,missing_bytes,fp);
@@ -646,8 +554,110 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf,
 
 
 
+void rw_iterate_on_global_sites_lx_xyzt_axis_ordering( 
+        void (*single_element_rw)(
+            int /*idxh machine*/, int /*parity*/, int /*dirmachine*/,
+            void* /*data*/, int /*conf_machine_endianness_disagreement*/,
+            FILE * /*fp*/), 
+        void* datastruct, FILE * fp){
+    // fp must be already in the right position
 
+    int nx = geom_par.gnx;
+    int ny = geom_par.gny;
+    int nz = geom_par.gnz;
+    int nt = geom_par.gnt;
+    int conf_machine_endianness_disagreement = machine_is_little_endian();
 
+    int x,y,z,t,dir;
+    // iterating on the sites and directions in the order expected 
+    // for the file 
+    for(t=0;t<nt;t++) for(z=0;z<nz;z++)
+        for(y=0;y<ny;y++) for(x=0;x<nx;x++)
+        {
+            // ILDG format on disk is not transposed,
+            //  but conf in machine memory could be.
+            int xs[4] = {x,y,z,t};
+            int d[4];
+            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
+
+#ifdef MULTIDEVICE
+            int idxh_machine = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
+#else
+            int idxh_machine = snum_acc(d[0],d[1],d[2],d[3]);
+#endif
+            int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
+
+            for(dir=0;dir<4;dir++){
+                int dirmachine = geom_par.xyztmap[dir];
+                single_element_rw(idxh_machine,parity,dirmachine,datastruct,
+                        conf_machine_endianness_disagreement,fp);
+            }
+        }
+}
+
+void binaryread_single_su3_into_su3_soa( // machine big endian
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement, FILE* fp){
+
+    global_su3_soa * conf = (global_su3_soa *) datastruct;
+
+    single_su3 m;          
+    int reads = fread((void*)m.comp,sizeof(double),18,fp);
+    if(reads!= 18){
+        printf("Error in reading file: %s ,%d, idxh: %d, dir %d , reads %d\n",
+                __FILE__,__LINE__, idxh_machine, dirmachine,reads );
+        exit(2);
+    }
+
+    // fix enddiannes
+    int irow,icol;
+    for(irow=0;irow<3;irow++) for(icol=0;icol<3;icol++){
+        double re = creal(m.comp[irow][icol]);
+        double im = cimag(m.comp[irow][icol]);
+        if(conf_machine_endianness_disagreement){
+            doubleswe(&re);
+
+            doubleswe(&im);
+
+            m.comp[irow][icol] = re + im*I;
+        }
+
+    }
+    rebuild3row(&m);
+    single_su3_into_global_su3_soa(&conf[2*dirmachine+parity],idxh_machine,&m);
+}
+
+void binarywrite_single_su3_into_su3_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement, FILE* fp){
+
+    global_su3_soa * conf = (global_su3_soa *) datastruct;
+
+    single_su3 m;          
+    single_su3_from_global_su3_soa(&conf[2*dirmachine+parity],idxh_machine,&m);
+    rebuild3row(&m);
+
+    // fix enddiannes
+    int irow,icol;
+    for(irow=0;irow<3;irow++) for(icol=0;icol<3;icol++){
+        double re = creal(m.comp[irow][icol]);
+        double im = cimag(m.comp[irow][icol]);
+        if(conf_machine_endianness_disagreement){
+            doubleswe(&re);
+            doubleswe(&im);
+        }
+        int writes =  fwrite((void*)&re,sizeof(double),1,fp);
+        if(writes!= 1){
+            printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
+            exit(2);
+        }
+        writes =  fwrite((void*)&im,sizeof(double),1,fp);
+        if(writes!= 1){
+            printf("Error in writing file: %s ,%d\n",__FILE__,__LINE__);
+            exit(2);
+        }
+    }
+}
 
 
 
