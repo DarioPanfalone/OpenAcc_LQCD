@@ -180,8 +180,8 @@ void save_gl_tamat(const global_tamat_soa * tamat,
         fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c01[i]),cimag(tamat->c01[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c02[i]),cimag(tamat->c02[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c12[i]),cimag(tamat->c12[i]));
-        fprintf(fp, "%.18lf\n",tamat->ic00[i]);
-        fprintf(fp, "%.18lf\n",tamat->ic11[i]);
+        fprintf(fp, "0\t%.18lf\n",tamat->ic00[i]);
+        fprintf(fp, "0\t%.18lf\n",tamat->ic11[i]);
     }
 
     fclose(fp);
@@ -206,8 +206,8 @@ int read_gl_tamat(global_tamat_soa * tamat, const char* nomefile)
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c01[i] = re + im * I;
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c02[i] = re + im * I;
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c12[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\n",&im),2);tamat->ic00[i] =im ;
-            CHECKREAD(fscanf(fp, "%lf\n",&im),2);tamat->ic11[i] =im ;
+            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->ic00[i] =im ;
+            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->ic11[i] =im ;
         }
         fclose(fp);
         return 0;
@@ -225,8 +225,8 @@ void save_gl_thmat(const global_thmat_soa * thmat,
         fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c01[i]),cimag(thmat->c01[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c02[i]),cimag(thmat->c02[i]));
         fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c12[i]),cimag(thmat->c12[i]));
-        fprintf(fp, "%.18lf\n",thmat->rc00[i]);
-        fprintf(fp, "%.18lf\n",thmat->rc11[i]);
+        fprintf(fp, "%.18lf\t0\n",thmat->rc00[i]);
+        fprintf(fp, "%.18lf\t0\n",thmat->rc11[i]);
     }
 
     fclose(fp);
@@ -251,8 +251,8 @@ int read_gl_thmat(global_thmat_soa * thmat, const char* nomefile)
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c01[i] = re + im * I;
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c02[i] = re + im * I;
             CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c12[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\n",&re),1);thmat->rc00[i] = re ;
-            CHECKREAD(fscanf(fp, "%lf\n",&re),1);thmat->rc11[i] = re ;
+            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->rc00[i] = re ;
+            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->rc11[i] = re ;
         }
         fclose(fp);
         return 0;
@@ -913,7 +913,6 @@ void dbg_print_su3_soa(su3_soa * const conf, const char* nomefile,int conf_id_it
 
 
 #pragma acc data update host(conf[0:8])
-    fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
             // rebuilding the 3rd row
@@ -1032,7 +1031,6 @@ void dbgprint_gl3_soa(su3_soa * const conf, const char* nomefile,int conf_id_ite
 
 #pragma acc data update host(conf[0:8])
 
-    fprintf(fp,"%d\t%d\t%d\t%d\t%d\n",nx,ny,nz,nt,conf_id_iter);
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
             // rebuilding the 3rd row
@@ -1069,11 +1067,6 @@ int dbgread_gl3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter )
 
         int nxt,nyt,nzt,ntt;
         int minus_det_count = 0;
-        CHECKREAD(fscanf(fp,"%d\t%d\t%d\t%d\t%d\n",&nxt,&nyt,&nzt,&ntt,conf_id_iter),5);
-        if((nx!=nxt)||(ny!=nyt)||(nz!=nzt)||(nz!=nzt)){
-            printf("Error, configuration dimensions not compatible with code.\n");
-            exit(1);
-        }
 
         for(int q = 0 ; q < 8 ; q++){
             for(int i = 0 ; i < sizeh ; i++){
@@ -1207,8 +1200,8 @@ void print_tamat_soa(tamat_soa * const ipdot, const char* nomefile)
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
-            fprintf(fp, "%.18lf\n",ipdot[q].ic00[i]);
-            fprintf(fp, "%.18lf\n",ipdot[q].ic11[i]);
+            fprintf(fp, "0\t%.18lf\n",ipdot[q].ic00[i]);
+            fprintf(fp, "0\t%.18lf\n",ipdot[q].ic11[i]);
         }
     }
     fclose(fp);
@@ -1230,8 +1223,8 @@ int read_tamat_soa(tamat_soa * ipdot, const char* nomefile)
                 CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c01[i] = re + im * I;
                 CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c02[i] = re + im * I;
                 CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c12[i] = re + im * I;//
-                CHECKREAD(fscanf(fp, "%lf\n",&(ipdot[q].ic00[i])),1);
-                CHECKREAD(fscanf(fp, "%lf\n",&(ipdot[q].ic11[i])),1);
+                CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&(ipdot[q].ic00[i])),2);
+                CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&(ipdot[q].ic11[i])),2);
             }
         }
         fclose(fp);
@@ -1251,8 +1244,8 @@ void print_thmat_soa(thmat_soa * const ipdot, const char* nomefile)
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
-            fprintf(fp, "%.18lf\n",ipdot[q].rc00[i]);
-            fprintf(fp, "%.18lf\n",ipdot[q].rc11[i]);
+            fprintf(fp, "%.18lf\t0\n",ipdot[q].rc00[i]);
+            fprintf(fp, "%.18lf\t0\n",ipdot[q].rc11[i]);
         }
     }
     fclose(fp);
@@ -1266,8 +1259,8 @@ void print_1thmat_soa(thmat_soa * const ipdot, const char* nomefile)
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c01[i]),cimag(ipdot[q].c01[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c02[i]),cimag(ipdot[q].c02[i]));
             fprintf(fp, "%.18lf\t%.18lf\n",creal(ipdot[q].c12[i]),cimag(ipdot[q].c12[i]));//
-            fprintf(fp, "%.18lf\n",ipdot[q].rc00[i]);
-            fprintf(fp, "%.18lf\n",ipdot[q].rc11[i]);
+            fprintf(fp, "%.18lf\t0\n",ipdot[q].rc00[i]);
+            fprintf(fp, "%.18lf\t0\n",ipdot[q].rc11[i]);
         }
     }
     fclose(fp);
@@ -1289,8 +1282,8 @@ int read_thmat_soa(thmat_soa * ipdot, const char* nomefile)
                 CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c01[i] = re + im * I;
                 CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c02[i] = re + im * I;
                 CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);ipdot[q].c12[i] = re + im * I;//
-                CHECKREAD(fscanf(fp, "%lf\n",&(ipdot[q].rc00[i])),1);
-                CHECKREAD(fscanf(fp, "%lf\n",&(ipdot[q].rc11[i])),1);
+                CHECKREAD(fscanf(fp, "%lf\t%lf\n",&(ipdot[q].rc00[i]),&im),2);
+                CHECKREAD(fscanf(fp, "%lf\t%lf\n",&(ipdot[q].rc11[i]),&im),2);
             }
         }
         fclose(fp);

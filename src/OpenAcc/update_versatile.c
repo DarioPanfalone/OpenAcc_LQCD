@@ -168,14 +168,14 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         if(verbosity_lv > 2 ) printf("Rat approx rescale (flav=%d)\n",iflav);
 
         if(debug_settings.do_norandom_test){ // NORANDOM
-            if(read_vec3_soa(kloc_p,"kloc_p_norndtest")){
+            if(read_vec3_soa_wrapper(kloc_p,"kloc_p_norndtest")){
                 generate_vec3_soa_gauss(kloc_p);
-                print_vec3_soa(kloc_p,"kloc_p_norndtest");
+                print_vec3_soa_wrapper(kloc_p,"kloc_p_norndtest");
                 printf("GENERATED kloc_p_norndtest FOR NORANDOM TEST, RE-RUN THIS TEST\n");
             }
-            if(read_vec3_soa(kloc_s,"kloc_s_norndtest")){
+            if(read_vec3_soa_wrapper(kloc_s,"kloc_s_norndtest")){
                 generate_vec3_soa_gauss(kloc_s);
-                print_vec3_soa(kloc_s,"kloc_s_norndtest");
+                print_vec3_soa_wrapper(kloc_s,"kloc_s_norndtest");
                 printf("GENERATED kloc_s_norndtest FOR NORANDOM TEST, RE-RUN THIS TEST\n");
             }
         }
@@ -440,14 +440,14 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
             // generate gauss-randomly the fermion kloc_p that will be used in the computation of the max eigenvalue
             if(debug_settings.do_norandom_test){ // NORANDOM
-                if(read_vec3_soa(kloc_p,"kloc_p_norndtest")){
+                if(read_vec3_soa_wrapper(kloc_p,"kloc_p_norndtest")){
                     generate_vec3_soa_gauss(kloc_p);
-                    print_vec3_soa(kloc_p,"kloc_p_norndtest");
+                    print_vec3_soa_wrapper(kloc_p,"kloc_p_norndtest");
                     printf("GENERATED kloc_p_norndtest FOR NORANDOM TEST, RE-RUN THIS TEST\n");
                 }
-                if(read_vec3_soa(kloc_s,"kloc_s_norndtest")){
+                if(read_vec3_soa_wrapper(kloc_s,"kloc_s_norndtest")){
                     generate_vec3_soa_gauss(kloc_s);
-                    print_vec3_soa(kloc_s,"kloc_s_norndtest");
+                    print_vec3_soa_wrapper(kloc_s,"kloc_s_norndtest");
                     printf("GENERATED kloc_s_norndtest FOR NORANDOM TEST, RE-RUN THIS TEST\n");
                 }
             }
