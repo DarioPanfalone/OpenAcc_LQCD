@@ -25,54 +25,48 @@ int ipdot_g_reset; // same
 
 
 // multi rank data structure read/write functions - for debug/testing
+// GL3
+void ascii_write_single_su3_into_su3_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+
+    global_su3_soa * conf = (global_su3_soa *) datastruct;
+
+    single_su3 m;          
+    single_su3_from_global_su3_soa(&conf[2*dirmachine+parity],idxh_machine,&m);
+    rebuild3row(&m);
+    for(int r=0; r < 3 ; r++) for(int c=0; c < 3 ; c++) 
+        fprintf(fp, "%.18lf %.18lf\n",creal(m.comp[r][c]),cimag(m.comp[r][c])); 
+
+}
 void save_gl_gl3(const global_su3_soa * conf, const char* nomefile)
 {
 
     FILE *fp;
     fp = fopen(nomefile,"w");
 
-    int nx = geom_par.gnx;
-    int ny = geom_par.gny;
-    int nz = geom_par.gnz;
-    int nt = geom_par.gnt;
-
-
-    int x,y,z,t,dir;
-    for(t=0;t<nt;t++) for(z=0;z<nz;z++)
-        for(y=0;y<ny;y++) for(x=0;x<nx;x++)
-        {
-
-            // ILDG format on disk is not transposed,
-            //  but conf in machine memory could be.
-            int xs[4] = {x,y,z,t};
-            int d[4];
-            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
-
-#ifdef MULTIDEVICE
-            int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
-#else
-            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
-#endif
-            int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
-
-            for(dir=0;dir<4;dir++){
-
-                int dirmachine = geom_par.xyztmap[dir];
-                single_su3 m;          
-                single_gl3_from_global_su3_soa(&conf[2*dirmachine+parity],
-                        idxh,&m);
-
-                for(int r=0; r < 3 ; r++)
-                    for(int c=0; c < 3 ; c++) 
-                        fprintf(fp, "%.18lf %.18lf\n",
-                                creal(m.comp[r][c]),cimag(m.comp[r][c])); 
-
-            }// dir
-        }// xyzt
-
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            ascii_write_single_su3_into_su3_soa,
+            (void*)conf, fp);
     fclose(fp);
 }
 
+void ascii_read_single_su3_into_su3_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+
+    global_su3_soa * conf = (global_su3_soa *) datastruct;
+    single_su3 m;          
+
+    double re, im;
+    for(int r=0; r < 3 ; r++)
+        for(int c=0; c < 3 ; c++){
+            CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
+            m.comp[r][c] = re + im * I;
+        }
+
+    single_su3_into_global_su3_soa(&conf[2*dirmachine+parity],idxh_machine,&m);
+}
 int read_gl_gl3(global_su3_soa * conf, const char* nomefile)
 {
     FILE *fp;
@@ -82,66 +76,52 @@ int read_gl_gl3(global_su3_soa * conf, const char* nomefile)
         return 1;
     }
 
-    int nx = geom_par.gnx;
-    int ny = geom_par.gny;
-    int nz = geom_par.gnz;
-    int nt = geom_par.gnt;
-    int xl,yl,zl,tl,dir;//local coordinates
-
-    for(tl=0;tl<nt;tl++)for(zl=0;zl<nz;zl++)
-        for(yl=0;yl<ny;yl++) for(xl=0;xl<nx;xl++)
-        {
-            // ILDG format on disk is not transposed,
-            //  but conf in machine memory could be.
-            int xs[4] = {xl,yl,zl,tl};
-            int d[4];
-            for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
-
-            int parity = (xl+yl+zl+tl)%2;// parity = (d0+d1+d2+d3)%2;
-
-            //            printf("d0 %d d1 %d d2 %d d3 %d\n", d[0],d[1],d[2],d[3]);//DEBUG
-            //            printf("x  %d y  %d z  %d t  %d\n", xs[0],xs[1],xs[2],xs[3]);//DEBUG
-
-
-            int x = xl,y = yl ,z = zl, t = tl;
-#ifdef MULTIDEVICE
-            int idxh = gl_to_gl_snum(d[0],d[1],d[2],d[3]);
-#else
-            int idxh = snum_acc(d[0],d[1],d[2],d[3]);
-#endif
-
-            for(dir=0;dir<4;dir++){
-                int dirmachine = geom_par.xyztmap[dir];
-                single_su3 m;
-                double re, im;
-                for(int r=0; r < 3 ; r++)
-                    for(int c=0; c < 3 ; c++){
-                        CHECKREAD(fscanf(fp, "%lf %lf\n",&re,&im),2);
-                        m.comp[r][c] = re + im * I;
-                    }
-                single_su3_into_global_su3_soa(&conf[2*dirmachine+parity],
-                        idxh,&m);
-
-            } // dir
-        } // xyzt
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            ascii_write_single_su3_into_su3_soa,
+            (void*)conf,fp);
 
     fclose(fp);
     return 0;
 }
 
+
+//FERMIONS
+
+void ascii_write_single_vec3_into_vec3_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+
+    global_vec3_soa * femion = (global_vec3_soa*) datastruct;
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c0[i]),cimag(fermion->c0[i]));
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c1[i]),cimag(fermion->c1[i]));
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c2[i]),cimag(fermion->c2[i]));
+
+}
 void save_gl_fermion(const global_vec3_soa * fermion, 
         const char* nomefile)
 {
 
     FILE *fp;
     fp = fopen(nomefile,"w");
-    for(int i = 0 ; i < GL_SIZEH ; i++){
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c0[i]),cimag(fermion->c0[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c1[i]),cimag(fermion->c1[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c2[i]),cimag(fermion->c2[i]));
-    }
+
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            ascii_write_single_vec3_into_vec3_soa,
+            (void*) fermion, fp );
 
     fclose(fp);
+
+}
+
+void ascii_read_single_vec3_into_vec3_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+
+    global_vec3_soa * femion = (global_vec3_soa*) datastruct;
+    double re,im;
+
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c0[i] = re + im * I;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c1[i] = re + im * I;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c2[i] = re + im * I;
 
 }
 int read_gl_fermion(global_vec3_soa * fermion, const char* nomefile)
@@ -154,42 +134,63 @@ int read_gl_fermion(global_vec3_soa * fermion, const char* nomefile)
         printf("vec3_soa File %s not found.\n", nomefile );
         return 1;
     }
-    else{
-        if(verbosity_lv > 2) 
-            printf("Reading vec3_soa %s\n", nomefile );
+    if(verbosity_lv > 2) 
+        printf("Reading vec3_soa %s\n", nomefile );
 
-        for(int i = 0 ; i < GL_SIZEH ; i++){
-            double re,im;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c0[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c1[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);fermion->c2[i] = re + im * I;
-        }
-        fclose(fp);
-        return 0;
-    }
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            ascii_read_single_su3_into_su3_soa,
+            (void* ) fermion, fp);
+    
+    fclose(fp);
+    return 0;
 
 }
 
+// TAMAT
+void ascii_write_single_tamat_into_tamat_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+
+    global_tamat_soa * tamat = (global_tamat_soa*) datastruct;
+    tamat += 2*dirmachine + parity;
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c01[i]),cimag(tamat->c01[i]));
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c02[i]),cimag(tamat->c02[i]));
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c12[i]),cimag(tamat->c12[i]));
+    fprintf(fp, "0\t%.18lf\n",tamat->ic00[i]);
+    fprintf(fp, "0\t%.18lf\n",tamat->ic11[i]);
+
+}
 void save_gl_tamat(const global_tamat_soa * tamat, 
         const char* nomefile)
 {
-
     FILE *fp;
     fp = fopen(nomefile,"w");
-    for(int i = 0 ; i < GL_SIZEH ; i++){
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c01[i]),cimag(tamat->c01[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c02[i]),cimag(tamat->c02[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(tamat->c12[i]),cimag(tamat->c12[i]));
-        fprintf(fp, "0\t%.18lf\n",tamat->ic00[i]);
-        fprintf(fp, "0\t%.18lf\n",tamat->ic11[i]);
-    }
+
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            ascii_write_single_tamat_into_tamat_soa,
+            (void*) tamat, fp);
 
     fclose(fp);
 
 }
+
+void ascii_read_single_tamat_into_tamat_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+
+    global_tamat_soa * tamat = (global_tamat_soa*) datastruct;
+    tamat += 2*dirmachine + parity;
+    double re,im;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c01[i] = re + im * I;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c02[i] = re + im * I;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c12[i] = re + im * I;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->ic00[i] =im ;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->ic11[i] =im ;
+
+
+}
 int read_gl_tamat(global_tamat_soa * tamat, const char* nomefile)
 {
-
 
     FILE *fp;
     fp = fopen(nomefile,"r");
@@ -197,44 +198,62 @@ int read_gl_tamat(global_tamat_soa * tamat, const char* nomefile)
         printf("tamat_soa File %s not found.\n", nomefile );
         return 1;
     }
-    else{
-        if(verbosity_lv > 2) 
-            printf("Reading tamat_soa %s\n", nomefile );
+    if(verbosity_lv > 2) 
+        printf("Reading tamat_soa %s\n", nomefile );
 
-        for(int i = 0 ; i < GL_SIZEH ; i++){
-            double re,im;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c01[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c02[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->c12[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->ic00[i] =im ;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);tamat->ic11[i] =im ;
-        }
-        fclose(fp);
-        return 0;
-    }
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            ascii_read_single_tamat_into_tamat_soa,
+            (void*) tamat, fp);
+
+    fclose(fp);
+    return 0;
 
 }
 
+// THMAT
+void ascii_write_single_thmat_into_thmat_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+
+    global_thmat_soa * thmat = (global_thmat_soa*) datastruct;
+    thmat += 2*dirmachine + parity;
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c01[i]),cimag(thmat->c01[i]));
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c02[i]),cimag(thmat->c02[i]));
+    fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c12[i]),cimag(thmat->c12[i]));
+    fprintf(fp, "%.18lf\t0\n",thmat->rc00[i]);
+    fprintf(fp, "%.18lf\t0\n",thmat->rc11[i]);
+
+}
 void save_gl_thmat(const global_thmat_soa * thmat, 
         const char* nomefile)
 {
-
     FILE *fp;
     fp = fopen(nomefile,"w");
-    for(int i = 0 ; i < GL_SIZEH ; i++){
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c01[i]),cimag(thmat->c01[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c02[i]),cimag(thmat->c02[i]));
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(thmat->c12[i]),cimag(thmat->c12[i]));
-        fprintf(fp, "%.18lf\t0\n",thmat->rc00[i]);
-        fprintf(fp, "%.18lf\t0\n",thmat->rc11[i]);
-    }
+
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            ascii_write_single_thmat_into_thmat_soa,
+            (void*) thmat, fp);
 
     fclose(fp);
 
 }
+
+void ascii_read_single_thmat_into_thmat_soa(
+        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+
+    global_thmat_soa * thmat = (global_thmat_soa*) datastruct;
+    double re,im;
+    thmat += 2*dirmachine + parity;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c01[i] = re + im * I;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c02[i] = re + im * I;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c12[i] = re + im * I;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->ic00[i] =re ;
+    CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->ic11[i] =re ;
+
+}
 int read_gl_thmat(global_thmat_soa * thmat, const char* nomefile)
 {
-
 
     FILE *fp;
     fp = fopen(nomefile,"r");
@@ -242,37 +261,20 @@ int read_gl_thmat(global_thmat_soa * thmat, const char* nomefile)
         printf("thmat_soa File %s not found.\n", nomefile );
         return 1;
     }
-    else{
-        if(verbosity_lv > 2) 
-            printf("Reading thmat_soa %s\n", nomefile );
+    if(verbosity_lv > 2) 
+        printf("Reading thmat_soa %s\n", nomefile );
 
-        for(int i = 0 ; i < GL_SIZEH ; i++){
-            double re,im;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c01[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c02[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->c12[i] = re + im * I;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->rc00[i] = re ;
-            CHECKREAD(fscanf(fp, "%lf\t%lf\n",&re,&im),2);thmat->rc11[i] = re ;
-        }
-        fclose(fp);
-        return 0;
-    }
-
-}
-
-void save_gl_dcomplex(const global_dcomplex_soa * dcomplex, 
-        const char* nomefile)
-{
-
-    FILE *fp;
-    fp = fopen(nomefile,"w");
-    for(int i = 0 ; i < GL_SIZEH ; i++){
-        fprintf(fp, "%.18lf\t%.18lf\n",creal(dcomplex->c[i]),cimag(dcomplex->c[i]));
-    }
+    rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
+            ascii_read_single_thmat_into_thmat_soa,
+            (void*) thmat, fp);
 
     fclose(fp);
+    return 0;
 
 }
+
+// DCOMPLEX 
+// to do
 int read_gl_dcomplex(global_dcomplex_soa * dcomplex, const char* nomefile)
 {
 
