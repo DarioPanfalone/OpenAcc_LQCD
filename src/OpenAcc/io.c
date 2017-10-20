@@ -405,9 +405,7 @@ int read_su3_soa_ildg_binary(
 
     fseeko(fg,ibd_start, SEEK_SET);
     rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
-            binaryread_single_su3_into_su3_soa,
-            (void*)conf,
-            fg);
+            binaryread_single_su3_into_su3_soa,(void*)conf,fg,0);
 
 
     fclose(fg);
@@ -532,7 +530,7 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf,
 
 
     rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
-            binarywrite_single_su3_into_su3_soa, conf, fp );
+            binarywrite_single_su3_into_su3_soa, conf, fp , 0);
 
     // padding to 8 bytes
     fwrite(pad,1,missing_bytes,fp);
@@ -559,7 +557,7 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
             int /*idxh machine*/, int /*parity*/, int /*dirmachine*/,
             void* /*data*/, int /*conf_machine_endianness_disagreement*/,
             FILE * /*fp*/), 
-        void* datastruct, FILE * fp){
+        void* datastruct, FILE * fp, int scalar_even_mode){
     // fp must be already in the right position
 
     int nx = geom_par.gnx;
@@ -571,11 +569,30 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
     int x,y,z,t,dir;
     // iterating on the sites and directions in the order expected 
     // for the file 
+    int xtmp,xlimit,dirlimit;
+    if (scalar_even_mode){
+        xlimit = nx/2;
+        dirlimit = 1;
+
+    }else {
+        xlimit = nx;
+        dirlimit = 4;
+    }
+
     for(t=0;t<nt;t++) for(z=0;z<nz;z++)
-        for(y=0;y<ny;y++) for(x=0;x<nx;x++)
+        for(y=0;y<ny;y++) for(xtmp=0;xtmp<xlimit;xtmp++)
         {
             // ILDG format on disk is not transposed,
             //  but conf in machine memory could be.
+            int parity;
+            if(scalar_even_mode){
+                parity = 0; // even
+                x = 2*xtmp + ((y+z+t)&0x1);
+            }
+            else {
+                x = xtmp;
+                parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
+            }
             int xs[4] = {x,y,z,t};
             int d[4];
             for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
@@ -585,9 +602,8 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
 #else
             int idxh_machine = snum_acc(d[0],d[1],d[2],d[3]);
 #endif
-            int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
 
-            for(dir=0;dir<4;dir++){
+            for(dir=0;dir<dirlimit;dir++){
                 int dirmachine = geom_par.xyztmap[dir];
                 single_element_rw(idxh_machine,parity,dirmachine,datastruct,
                         conf_machine_endianness_disagreement,fp);

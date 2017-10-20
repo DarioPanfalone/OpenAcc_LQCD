@@ -182,7 +182,8 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
             int /*idxh*/, int /*parity*/, int /*direction*/, void* /*data*/,
             int /*conf_machine_endianness_disagreement*/,
             FILE * /*fp*/), 
-        void* datastruct, FILE * fp);
+        void* datastruct, FILE * fp,
+        int scalar_even_mode);
 
 void binaryread_single_su3_into_su3_soa( // machine big endian
         int idx, int parity, int direction, void* datastruct,
