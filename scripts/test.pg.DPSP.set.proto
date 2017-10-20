@@ -78,7 +78,7 @@ tmap                          3
 DebugSettings
 UseILDG                       1                   
 VerbosityLv                   2                   
-SaveAllAtEnd                  1                   
+SaveAllAtEnd                  0                   
 PrintBackFieldDbgInfo         0                   
 SaveDiagnostics               1                   
 DoRevTest                     SEDREVTEST
