@@ -138,7 +138,7 @@ int read_gl_fermion(global_vec3_soa * fermion, const char* nomefile)
         printf("Reading vec3_soa %s\n", nomefile );
 
     rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
-            ascii_read_single_su3_into_su3_soa,
+            ascii_read_single_vec3_into_vec3_soa,
             (void* ) fermion, fp, 1);
     
     fclose(fp);
