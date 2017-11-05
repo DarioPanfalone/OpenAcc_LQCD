@@ -554,17 +554,18 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf,
 
 void rw_iterate_on_global_sites_lx_xyzt_axis_ordering( 
         void (*single_element_rw)(
-            int /*idxh machine*/, int /*parity*/, int /*dirmachine*/,
-            void* /*data*/, int /*conf_machine_endianness_disagreement*/,
+            const int /*idxh machine*/, const int /*parity*/, 
+            const int /*dirmachine*/, const void* /*data*/, 
+            const int /*conf_machine_endianness_disagreement*/,
             FILE * /*fp*/), 
-        void* datastruct, FILE * fp, int scalar_even_mode){
+        const void* datastruct, FILE * fp, const int scalar_even_mode){
     // fp must be already in the right position
 
-    int nx = geom_par.gnx;
-    int ny = geom_par.gny;
-    int nz = geom_par.gnz;
-    int nt = geom_par.gnt;
-    int conf_machine_endianness_disagreement = machine_is_little_endian();
+    const int nx = geom_par.gnx;
+    const int ny = geom_par.gny;
+    const int nz = geom_par.gnz;
+    const int nt = geom_par.gnt;
+    const int conf_machine_endianness_disagreement = machine_is_little_endian();
 
     int x,y,z,t,dir;
     // iterating on the sites and directions in the order expected 
@@ -602,7 +603,6 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
 #else
             int idxh_machine = snum_acc(d[0],d[1],d[2],d[3]);
 #endif
-
             for(dir=0;dir<dirlimit;dir++){
                 int dirmachine = geom_par.xyztmap[dir];
                 single_element_rw(idxh_machine,parity,dirmachine,datastruct,
@@ -612,8 +612,9 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
 }
 
 void binaryread_single_su3_into_su3_soa( // machine big endian
-        int idxh_machine, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement, FILE* fp){
+        const int idxh_machine, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement, FILE* fp){
 
     global_su3_soa * conf = (global_su3_soa *) datastruct;
 
@@ -644,8 +645,9 @@ void binaryread_single_su3_into_su3_soa( // machine big endian
 }
 
 void binarywrite_single_su3_into_su3_soa(
-        int idxh_machine, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement, FILE* fp){
+        const int idxh_machine, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement, FILE* fp){
 
     global_su3_soa * conf = (global_su3_soa *) datastruct;
 

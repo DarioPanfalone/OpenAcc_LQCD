@@ -159,16 +159,16 @@ void mem_alloc_extended()
                 sizeof(global_vec3_soa));
         ALLOCCHECK(allocation_check, ferm_rw);
         allocation_check =  posix_memalign((void **)&tamat_rw, ALIGN,
-                sizeof(global_tamat_soa));
+                8*sizeof(global_tamat_soa));
         ALLOCCHECK(allocation_check, tamat_rw);
         allocation_check =  posix_memalign((void **)&thmat_rw, ALIGN,
-                sizeof(global_thmat_soa));
+                8*sizeof(global_thmat_soa));
         ALLOCCHECK(allocation_check, thmat_rw);
         allocation_check =  posix_memalign((void **)&dcomplex_rw, ALIGN,
-                sizeof(global_dcomplex_soa));
+                8*sizeof(global_dcomplex_soa));
         ALLOCCHECK(allocation_check, dcomplex_rw);
         allocation_check =  posix_memalign((void **)&double_rw, ALIGN,
-                sizeof(global_double_soa));
+                8*sizeof(global_double_soa));
         ALLOCCHECK(allocation_check, double_rw);
 
 #ifdef MULTIDEVICE

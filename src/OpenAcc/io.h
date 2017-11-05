@@ -179,19 +179,22 @@ inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,
 
 void rw_iterate_on_global_sites_lx_xyzt_axis_ordering( 
         void (*single_element_rw)(
-            int /*idxh*/, int /*parity*/, int /*direction*/, void* /*data*/,
-            int /*conf_machine_endianness_disagreement*/,
+            const int /*idxh*/, const int /*parity*/, 
+            const int /*direction*/, const void* /*data*/,
+            const int /*conf_machine_endianness_disagreement*/,
             FILE * /*fp*/), 
-        void* datastruct, FILE * fp,
-        int scalar_even_mode);
+        const void* datastruct, FILE * fp,
+        const int scalar_even_mode);
 
 void binaryread_single_su3_into_su3_soa( // machine big endian
-        int idx, int parity, int direction, void* datastruct,
-        int conf_machine_endianness_disagreement, FILE* fp);
+        const int idx, const int parity, const int direction, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement, FILE* fp);
 
 void binarywrite_single_su3_into_su3_soa(
-        int idx, int parity, int direction, void* datastruct,
-        int conf_machine_endianness_disagreement, FILE* fp);
+        const int idx, const int parity, const int direction, 
+        const void* datastruct, 
+        const int conf_machine_endianness_disagreement, FILE* fp);
 
 
 // READ AND WRITE FOR THE POOR MAN

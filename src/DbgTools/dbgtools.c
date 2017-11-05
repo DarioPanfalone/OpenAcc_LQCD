@@ -27,7 +27,8 @@ int ipdot_g_reset; // same
 // multi rank data structure read/write functions - for debug/testing
 // GL3
 void ascii_write_single_su3_into_su3_soa(
-        int idxh_machine, int parity, int dirmachine, void* datastruct,
+        const int idxh_machine, const int parity, const int dirmachine, 
+        const void* datastruct,
         int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
 
     global_su3_soa * conf = (global_su3_soa *) datastruct;
@@ -52,8 +53,9 @@ void save_gl_gl3(const global_su3_soa * conf, const char* nomefile)
 }
 
 void ascii_read_single_su3_into_su3_soa(
-        int idxh_machine, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+        const int idxh_machine, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
 
     global_su3_soa * conf = (global_su3_soa *) datastruct;
     single_su3 m;          
@@ -88,8 +90,9 @@ int read_gl_gl3(global_su3_soa * conf, const char* nomefile)
 //FERMIONS
 
 void ascii_write_single_vec3_into_vec3_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
 
     global_vec3_soa * fermion = (global_vec3_soa*) datastruct;
     fprintf(fp, "%.18lf\t%.18lf\n",creal(fermion->c0[i]),cimag(fermion->c0[i]));
@@ -113,8 +116,9 @@ void save_gl_fermion(const global_vec3_soa * fermion,
 }
 
 void ascii_read_single_vec3_into_vec3_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
 
     global_vec3_soa * fermion = (global_vec3_soa*) datastruct;
     double re,im;
@@ -148,8 +152,9 @@ int read_gl_fermion(global_vec3_soa * fermion, const char* nomefile)
 
 // TAMAT
 void ascii_write_single_tamat_into_tamat_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
 
     global_tamat_soa * tamat = (global_tamat_soa*) datastruct;
     tamat += 2*dirmachine + parity;
@@ -175,8 +180,9 @@ void save_gl_tamat(const global_tamat_soa * tamat,
 }
 
 void ascii_read_single_tamat_into_tamat_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
 
     global_tamat_soa * tamat = (global_tamat_soa*) datastruct;
     tamat += 2*dirmachine + parity;
@@ -212,8 +218,9 @@ int read_gl_tamat(global_tamat_soa * tamat, const char* nomefile)
 
 // THMAT
 void ascii_write_single_thmat_into_thmat_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
 
     global_thmat_soa * thmat = (global_thmat_soa*) datastruct;
     thmat += 2*dirmachine + parity;
@@ -239,8 +246,9 @@ void save_gl_thmat(const global_thmat_soa * thmat,
 }
 
 void ascii_read_single_thmat_into_thmat_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED, FILE* fp){
 
     global_thmat_soa * thmat = (global_thmat_soa*) datastruct;
     double re,im;
@@ -275,8 +283,9 @@ int read_gl_thmat(global_thmat_soa * thmat, const char* nomefile)
 
 // DCOMPLEX 
 void ascii_write_dcomplex_into_dcomplex_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED,FILE *fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED,FILE *fp){
 
     global_dcomplex_soa * arr = (global_dcomplex_soa *) datastruct;
     arr += 2*dirmachine + parity;
@@ -297,8 +306,9 @@ void save_gl_dcomplex(const global_dcomplex_soa * arr,
 }
 
 void ascii_read_dcomplex_into_dcomplex_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED,FILE *fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED,FILE *fp){
 
     global_dcomplex_soa * arr = (global_dcomplex_soa *) datastruct;
     arr += 2*dirmachine + parity;
@@ -330,8 +340,9 @@ int read_gl_dcomplex(global_dcomplex_soa * arr, const char* nomefile)
 
 // double
 void ascii_write_double_into_double_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED,FILE *fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED,FILE *fp){
 
     global_double_soa * arr = (global_double_soa *) datastruct;
     arr += 2*dirmachine + parity;
@@ -352,8 +363,9 @@ void save_gl_double(const global_double_soa * arr,
 }
 
 void ascii_read_double_into_double_soa(
-        int i, int parity, int dirmachine, void* datastruct,
-        int conf_machine_endianness_disagreement_UNUSED,FILE *fp){
+        const int i, const int parity, const int dirmachine, 
+        const void* datastruct,
+        const int conf_machine_endianness_disagreement_UNUSED,FILE *fp){
 
     global_double_soa * arr = (global_double_soa *) datastruct;
     arr += 2*dirmachine + parity;
