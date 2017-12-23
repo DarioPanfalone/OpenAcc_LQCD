@@ -113,8 +113,4 @@ do
                                                         
 done
 
-
-
-
-
 git checkout $CURRENTCOMMIT

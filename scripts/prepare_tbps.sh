@@ -53,18 +53,19 @@ then
     exit
 fi
 
-if test ! -f $GEOMFILE
-then
-    echo File $GEOMFILE does not exist! 
-    exit
-else
-    echo Reading compilation/geometry parameters from $GEOMFILE ...
-fi
-
 SCRIPTSDIR=$(dirname $BASH_SOURCE)
 echo Setting SCRIPTSDIR to $SCRIPTSDIR
 
 FILETEMPLATEDIR=$SCRIPTSDIR
+
+
+if test ! -f $GEOMFILE
+then
+    echo File $GEOMFILE does not exist! 
+    exit
+fi
+
+echo Reading compilation/geometry parameters from $GEOMFILE ...
 
 
 
@@ -241,12 +242,13 @@ do
 
         if test $PREPARESLURM == yes
         then
-        if test $NRESGPUS != "none"
-        then
-            SLURM_GPU_GRES='#SBATCH --gres=gpu:'$NRESGPUS
-        else
-            SLURM_GPU_GRES=''
-        fi
+
+            if test $NRESGPUS != "none"
+            then
+                SLURM_GPU_GRES='#SBATCH --gres=gpu:'$NRESGPUS
+            else
+                SLURM_GPU_GRES=''
+            fi
 
         cat > $DIRNAME/$SLURMFILENAME << EOF
 #!/bin/bash
