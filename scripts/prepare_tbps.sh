@@ -1,23 +1,64 @@
-COMPILE_INFO_FILENAME=$1
-PREFIX=$2 # test, benchmark, profiling
 
-if test $# -ne 2 || test \
+GEOMFILE="geom_defines.txt"
+PREFIX="test"
+PREPARESLURM=no
+MODULES_TO_LOAD_CSV="auto"
+NRESGPUS=16
+SLURMPARTITION=shortrun
+MEMORY=12000
+
+while (( "$#" ))
+do
+    case $1 in 
+        -c|--compileinfo)
+            GEOMFILE=$2
+            shift
+            ;;
+        -p|--pref)
+            PREFIX=$2
+            shift;;
+        -s|--slurm)
+            PREPARESLURM=yes
+            ;;
+        -m|--modules)
+            MODULES_TO_LOAD_CSV=$2
+            shift
+            ;;
+        -a|--partition)
+            SLURMPARTITION=$2
+            shift
+            ;;
+        -n|-ngpus)
+            NRESGPUS=$2 # 'none' is an available option
+            shift
+            ;;
+    esac
+    shift
+done
+
+echo "geomfile $GEOMFILE"
+echo "prefix $PREFIX"
+echo "PREPARESLURM = $PREPARESLURM"
+echo "modules = $MODULES_TO_LOAD_CSV"
+echo "partition = $SLURMPARTITION"
+echo "ngpus = $NRESGPUS"
+
+if test \
     $PREFIX != "test" -a \
     $PREFIX != "benchmark" -a \
     $PREFIX != "profiling"
 then
-    echo "usage: $0 compile_info_filename prefix"
-    echo "   - compile_info_filename: usually, 'geom_defines.txt'"
-    echo "   - prefix = test OR benchmark OR profiling"
+    echo "usage: $0 -c compile_info_filename -p prefix -s -m modules,to,load"
+    echo "       prefix = test OR benchmark OR profiling"
     exit
 fi
 
-if test ! -f $COMPILE_INFO_FILENAME
+if test ! -f $GEOMFILE
 then
-    echo File $COMPILE_INFO_FILENAME does not exist! 
+    echo File $GEOMFILE does not exist! 
     exit
 else
-    echo Reading compilation/geometry parameters from $COMPILE_INFO_FILENAME ...
+    echo Reading compilation/geometry parameters from $GEOMFILE ...
 fi
 
 SCRIPTSDIR=$(dirname $BASH_SOURCE)
@@ -30,12 +71,12 @@ FILETEMPLATEDIR=$SCRIPTSDIR
 #####################################
 ### reading basic geometry info #####
 #####################################
-L0=$( grep -E "^\s*LOC_N0\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
-L1=$( grep -E "^\s*LOC_N1\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
-L2=$( grep -E "^\s*LOC_N2\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
-L3=$( grep -E "^\s*LOC_N3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+L0=$( grep -E "^\s*LOC_N0\s+" $GEOMFILE | awk '{print $2}')
+L1=$( grep -E "^\s*LOC_N1\s+" $GEOMFILE | awk '{print $2}')
+L2=$( grep -E "^\s*LOC_N2\s+" $GEOMFILE | awk '{print $2}')
+L3=$( grep -E "^\s*LOC_N3\s+" $GEOMFILE | awk '{print $2}')
 
-TASKS=$( grep -E "^\s*NRANKS_D3\s+" $COMPILE_INFO_FILENAME | awk '{print $2}')
+TASKS=$( grep -E "^\s*NRANKS_D3\s+" $GEOMFILE | awk '{print $2}')
 
 # size of the local gauge configuration in bytes.
 # the '+4' is needed only on the direction which is cut (L3)
@@ -46,22 +87,25 @@ LABEL=$L0$L1$L2$L3\_$TASKS
 #####################################
 ## preparing module load command ####
 #####################################
-echo Reading modules to load in slurm scripts...
-MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)
-# creating a string with all the modules in one line
-for MODULE_TO_LOAD in $MODULES_TO_LOAD
-do
-    MODULES_TO_LOAD_TEMP="$MODULES_TO_LOAD_TEMP $MODULE_TO_LOAD"
-done
-MODULES_TO_LOAD=$MODULES_TO_LOAD_TEMP
+if test $MODULES_TO_LOAD_CSV=="auto"
+then 
+    echo Reading modules to load in slurm scripts...
+    MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)
+    # creating a string with all the modules in one line
+    for MODULE_TO_LOAD in $MODULES_TO_LOAD
+    do
+        MODULES_TO_LOAD_TEMP="$MODULES_TO_LOAD_TEMP $MODULE_TO_LOAD"
+    done
+    MODULES_TO_LOAD=$MODULES_TO_LOAD_TEMP
+else
+    MODULES_TO_LOAD=$(echo $MODULES_TO_LOAD_CSV | sed 's/,/ /g')
 
-if test "$MODULES_TO_LOAD" == "" 
+if test -z "$MODULES_TO_LOAD" 
 then
     echo "WARNING: No module loaded."
-    echo "WARNING: Preparing only shell scripts and input files, no slurm scripts"
-    PREPARESLURM=no
-else 
-    PREPARESLURM=yes
+    MODULES_TO_LOAD_COMMAND=""
+else
+    MODULES_TO_LOAD_COMMAND="module load $MODULES_TO_LOAD"
 fi
 
 echo Modules to load:$MODULES_TO_LOAD....
@@ -158,6 +202,11 @@ do
         if test $PREFIX == "test"
         then
            MODES='sp dp sp.revt dp.revt'
+           if test $NRESGPUS != "none"
+           then 
+               NRESGPUS=$TASKS
+               echo "selecting minimum number of gpus per testing, $TASKS"
+           fi
         else
            MODES='sp dp'
         fi
@@ -192,6 +241,13 @@ do
 
         if test $PREPARESLURM == yes
         then
+        if test $NRESGPUS != "none"
+        then
+            SLURM_GPU_GRES='#SBATCH --gres=gpu:'$NRESGPUS
+        else
+            SLURM_GPU_GRES=''
+        fi
+
         cat > $DIRNAME/$SLURMFILENAME << EOF
 #!/bin/bash
 #SBATCH --job-name=test.${EXECUTABLE}_$LABEL
@@ -199,12 +255,13 @@ do
 #SBATCH --cpus-per-task=1
 #SBATCH --error=test.${EXECUTABLE}.%J.err 
 #SBATCH --output=test.${EXECUTABLE}.%J.out
-#SBATCH --gres=gpu:16
-#SBATCH --partition=shortrun
-#SBATCH --mem-per-cpu=12000
+$SLURM_GPU_GRES
+#SBATCH --gres=gpu:$NRESGPUS
+#SBATCH --partition=$SLURMPARTITION
+#SBATCH --mem-per-cpu=$MEMORY
 
 module purge
-module load $MODULES_TO_LOAD
+$MODULES_TO_LOAD_COMMAND
 export PGI_ACC_BUFFERSIZE=$SIZE
 
 rm stop
