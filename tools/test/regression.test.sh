@@ -23,6 +23,14 @@ MODULES_TO_LOAD_CSV=""
 
 CURRENTCOMMIT=$(git rev-parse --abbrev-ref HEAD)
 
+
+CLEAREVERYTHING(){
+    git checkout -f $CURRENTCOMMIT
+    exit
+}
+
+
+
 while (( "$#" ))
 do
     case $1 in
@@ -80,7 +88,6 @@ else
    SLURMFLAGS=""
 fi
 
-
 WORKDIR=$PWD
 SCRIPTSDIR=$PWD/$(dirname $BASH_SOURCE)
 REPODIR=$(dirname $(dirname $SCRIPTSDIR))
@@ -102,9 +109,16 @@ do
    cp $WORKDIR/$GEOMFILE $WORKDIR/$COMMIT/
    cd $WORKDIR/$COMMIT
    yes | $REPODIR/configure_wrapper $( echo $CONFIGOPTIONS_CSV | sed 's/,/ /g')
-   make -j4
-   make install
+   make -j4 &&  make install 
+   if test $? -ne 0 ; then 
+       echo "Error: make failed, in $PWD"
+       CLEAREVERYTHING
+   fi
    $WORKDIR/test/prepare_tbps.sh -c $GEOMFILE -p test $SLURMFLAGS $MODULESFLAGS
+   if test $? -ne 0 ; then 
+       echo "Error: prepare_tbps.sh failed, in $PWD"
+       CLEAREVERYTHING
+   fi
    cd -
 
 done

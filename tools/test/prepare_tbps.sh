@@ -3,8 +3,8 @@ GEOMFILE="geom_defines.txt"
 PREFIX="test"
 PREPARESLURM=no
 MODULES_TO_LOAD_CSV="auto"
-NRESGPUS=16
-SLURMPARTITION=shortrun
+NRESGPUS=
+SLURMPARTITION=
 MEMORY=12000
 
 while (( "$#" ))
@@ -52,6 +52,23 @@ then
     echo "       prefix = test OR benchmark OR profiling"
     exit
 fi
+
+if test $PREPARESLURM == "yes"
+then
+    if test -z $SLURMPARTITION
+    then 
+        SLURMPARTITION=shortrun
+    fi
+else
+    if [ test ! -z $SLURMPARTITION ] || [ -z $NRESGPUS -a $NRESGPUS != "none" ] 
+    then
+        echo "Error: incompatible options:"
+        echo "     either slurm partition specified without -s flag,"
+        echo "     or     number of reqested gpus specified without -s flag."
+        exit
+    fi      
+fi
+
 
 SCRIPTSDIR=$(dirname $BASH_SOURCE)
 echo Setting SCRIPTSDIR to $SCRIPTSDIR
