@@ -1,5 +1,6 @@
 
-GEOMFILE="geom_defines.txt"]PREFIX="test"
+GEOMFILE="geom_defines.txt"
+PREFIX="test"
 PREPARESLURM=no
 MODULES_TO_LOAD_CSV="auto"
 NRESGPUS=
