@@ -100,6 +100,7 @@ then
     MODULES_TO_LOAD=$MODULES_TO_LOAD_TEMP
 else
     MODULES_TO_LOAD=$(echo $MODULES_TO_LOAD_CSV | sed 's/,/ /g')
+fi
 
 if test -z "$MODULES_TO_LOAD" 
 then

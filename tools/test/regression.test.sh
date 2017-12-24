@@ -14,7 +14,7 @@
 #                    configure-wrapper script for compilation.
 
 # Default values
-# Scheduler can be either 'BASH' or a proper scheduling system. 
+# Scheduler can be either 'bash' or a proper scheduling system. 
 SCHEDULER=bash
 OLDCOMMIT=8d4dcd6cbf91be1354a471665ec71a1db4756628
 NEWCOMMIT=$(git rev-parse HEAD)
@@ -83,8 +83,9 @@ fi
 
 WORKDIR=$PWD
 SCRIPTSDIR=$PWD/$(dirname $BASH_SOURCE)
-REPODIR=$(dirname $SCRIPTSDIR)
+REPODIR=$(dirname $(dirname $SCRIPTSDIR))
 
+cp -r $SCRIPTSDIR test
 
 for COMMIT in $OLDCOMMIT $NEWCOMMIT
 do 
@@ -103,14 +104,9 @@ do
    yes | $REPODIR/configure_wrapper $( echo $CONFIGOPTIONS_CSV | sed 's/,/ /g')
    make -j4
    make install
-   $REPODIR/scripts/prepare_tbps.sh -c $GEOMFILE -p test $SLURMFLAGS \
-       $MODULESFLAGS
+   $WORKDIR/test/prepare_tbps.sh -c $GEOMFILE -p test $SLURMFLAGS $MODULESFLAGS
    cd -
 
-
-                                                       
-                                                       
-                                                        
 done
 
 git checkout $CURRENTCOMMIT
