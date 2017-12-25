@@ -60,13 +60,18 @@ then
         SLURMPARTITION=shortrun
     fi
 else
-    if [ ! -z $SLURMPARTITION ] || [ -z $NRESGPUS -a $NRESGPUS != "none" ] 
+    if [ ! -z "$NRESGPUS" ] && [ "$NRESGPUS" != "none" ] 
     then
         echo "$0 Error: incompatible options:"
-        echo "     either slurm partition specified without -s flag,"
-        echo "     or     number of reqested gpus specified without -s flag."
+        echo "   number of reqested gpus $NRESGPUS specified without -s flag."
         exit
     fi      
+    if [ ! -z $SLURMPARTITION ]
+    then
+        echo "$0 Error: incompatible options:"
+        echo "   slurm partition $SLURMPARTITION specified without -s flag."
+        exit
+    fi
 fi
 
 

@@ -73,7 +73,7 @@ do
     shift 
 done
 
-if [ -z $GEOMFILE ] && [ -z $GEOMFILE1  -o -z $GEOMFILE2 ] 
+if [ -z $GEOMFILE1 ] || [ -z $GEOMFILE2 ] &&  [ -z $GEOMFILE ]  
 then
     echo "$0 Error: Incompatible options: -g and -g1 or -g2"
     exit
@@ -126,6 +126,7 @@ REPODIR=$(dirname $(dirname $SCRIPTSDIR))
 
 cp -r $SCRIPTSDIR test
 
+# TO FIX CHOICE OF GEOM FILE
 for COMMIT in $OLDCOMMIT $NEWCOMMIT
 do 
    cd $REPODIR
