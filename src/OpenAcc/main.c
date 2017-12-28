@@ -233,9 +233,13 @@ int main(int argc, char* argv[]){
         }
         else{
             // cold start
-            printf("MPI%02d - COMPILED IN NORANDOM MODE. A CONFIGURATION FILE NAMED\
-                    \"conf_norndtest\" MUST BE PRESENT\n",devinfo.myrank);
-            exit(1);
+            printf("MPI%02d: GENERATING CONFIGURATION FILE FOR YOUR CONVENIENCE, RE-RUN THIS TEST\n",
+            generate_Conf_cold(conf_acc,mc_params.eps_gen);
+            printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
+                    devinfo.myrank);
+            save_conf_wrapper(conf_acc,"conf_norndtest", conf_id_iter,
+                            debug_settings.use_ildg);
+            conf_id_iter=1;
         }
     }
     else{
