@@ -122,8 +122,6 @@ else
    SLURMFLAGS=""
 fi
 
-#DEBUG
-echo $PWD $BASH_SOURCE
 WORKDIR=$PWD
 SCRIPTSDIR=$PWD/$(dirname $BASH_SOURCE)
 REPODIR=$(dirname $(dirname $SCRIPTSDIR))
