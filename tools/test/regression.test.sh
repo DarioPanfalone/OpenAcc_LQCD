@@ -31,6 +31,7 @@ CLEAREVERYTHING(){
     exit
 }
 
+trap CLEAREVERYTHING EXIT
 
 
 while (( "$#" ))
