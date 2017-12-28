@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # This script runs the tests comparing the results between different commits.
 # Options:
 #   -s, --scheduler: The job scheduler that will be used to launch the tests.
@@ -102,10 +102,12 @@ echo "Selecting geom_defines,2 file $GEOMFILE2 (choose with -g2)"
 echo "Selecting modules $MODULES_TO_LOAD_CSV (choose with -m)" 
 echo "Selecting config wrapper options $CONFIGOPTIONS_CSV (choose with -c)" 
 
-if test -z $MODULES_TO_LOAD_CSV
+if [ ! -z $MODULES_TO_LOAD_CSV ]
 then
+   echo 'Loading modules...'
    for MODULE in $(echo $MODULES_TO_LOAD_CSV | sed 's/,/ /g')
    do
+       echo "module load $MODULE"
        module load $MODULE
    done
    MODULESFLAGS="-m $MODULES_TO_LOAD_CSV"
@@ -113,13 +115,15 @@ else
    MODULESFLAGS=""
 fi
 
-if test $SCHEDULER == "slurm"
+if [ $SCHEDULER == "slurm" ]
 then
    SLURMFLAGS="-s"
 else 
    SLURMFLAGS=""
 fi
 
+#DEBUG
+echo $PWD $BASH_SOURCE
 WORKDIR=$PWD
 SCRIPTSDIR=$PWD/$(dirname $BASH_SOURCE)
 REPODIR=$(dirname $(dirname $SCRIPTSDIR))
@@ -132,7 +136,7 @@ do
    cd $REPODIR
    autoreconf --install
    git checkout $COMMIT
-   if test $? -ne 0
+   if [ $? -ne 0 ]
    then 
        echo "ERROR: could not checkout to commit $COMMIT"
        echo "Exiting."
@@ -143,12 +147,14 @@ do
    cd $WORKDIR/$COMMIT
    yes | $REPODIR/configure_wrapper $( echo $CONFIGOPTIONS_CSV | sed 's/,/ /g')
    make -j4 &&  make install 
-   if test $? -ne 0 ; then 
+   if [ $? -ne 0 ]
+   then 
        echo "Error: make failed, in $PWD"
        CLEAREVERYTHING
    fi
    $WORKDIR/test/prepare_tbps.sh -c $GEOMFILE -p test $SLURMFLAGS $MODULESFLAGS
-   if test $? -ne 0 ; then 
+   if [ $? -ne 0 ]
+   then 
        echo "Error: prepare_tbps.sh failed, in $PWD"
        CLEAREVERYTHING
    fi
