@@ -19,13 +19,13 @@ SCHEDULER=bash
 OLDCOMMIT=8d4dcd6cbf91be1354a471665ec71a1db4756628
 NEWCOMMIT=$(git rev-parse HEAD)
 GEOMFILE=
-GEOMFILE1=geom_defines.txt
-GEOMFILE2=geom_defines.txt
+GEOMFILE1=
+GEOMFILE2=
 MODULES_TO_LOAD_CSV=""
 WORKDIR=$PWD
 SCRIPTSDIR=$PWD/$(dirname $BASH_SOURCE)
 REPODIR=$(dirname $(dirname $SCRIPTSDIR))
-
+BUILDJOBS=4
 
 CURRENTCOMMIT=$(git rev-parse --abbrev-ref HEAD)
 
@@ -74,27 +74,35 @@ do
         CONFIGOPTIONS_CSV=$2
         shift
         ;;
+    -bj|--build-jobs)
+        BUILDJOBS=$2
+        shift
+        ;;
+
     esac
     shift 
 done
 
-if [ -z $GEOMFILE1 ] || [ -z $GEOMFILE2 ] &&  [ -z $GEOMFILE ]  
+if [ ! -z $GEOMFILE1 ] || [ ! -z $GEOMFILE2 ] &&  [ ! -z $GEOMFILE ]  
 then
     echo "$0 Error: Incompatible options: -g and -g1 or -g2"
+    echo $GEOMFILE1
+    echo $GEOMFILE2
+    echo $GEOMFILE
     exit
 fi
 
-if [ ! -z $GEOMFILE ] && [ ! -z $GEOMFILE1 ] && [ ! -z $GEOMFILE2 ]
+if [ -z $GEOMFILE ] && [ -z $GEOMFILE1 ] && [ -z $GEOMFILE2 ]
 then 
     GEOMFILE=geom_defines.txt
     echo "No geom_defines file names provided. Using default $GEOMFILE"
 fi
 
-if [ ! -z $GEOMFILE1 ] && [ -z $GEOMFILE ] 
+if [ -z $GEOMFILE1 ] && [ ! -z $GEOMFILE ] 
 then 
     GEOMFILE1=$GEOMFILE
 fi
-if [ ! -z $GEOMFILE2 ] && [ -z $GEOMFILE ] 
+if [ -z $GEOMFILE2 ] && [ ! -z $GEOMFILE ] 
 then 
     GEOMFILE2=$GEOMFILE
 fi
@@ -142,10 +150,10 @@ do
        exit 1
    fi
    mkdir $WORKDIR/$COMMIT
-   cp $WORKDIR/$GEOMFILE $WORKDIR/$COMMIT/
+   cp $WORKDIR/$GEOMFILE $WORKDIR/$COMMIT/geom_defines.txt
    cd $WORKDIR/$COMMIT
    yes | $REPODIR/configure_wrapper $( echo $CONFIGOPTIONS_CSV | sed 's/,/ /g')
-   make -j4 &&  make install 
+   make -j$BUILDJOBS &&  make install 
    if [ $? -ne 0 ]
    then 
        echo "Error: make failed, in $PWD"
