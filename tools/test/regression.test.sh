@@ -27,6 +27,14 @@ SCRIPTSDIR=$PWD/$(dirname $BASH_SOURCE)
 REPODIR=$(dirname $(dirname $SCRIPTSDIR))
 BUILDJOBS=4
 
+# Types of test
+DOMAINTEST=no
+DOMAINREVTEST=no
+DOPGTEST=no
+DOPGREVTEST=no
+DODIRACTEST=no
+DOINVTEST=no
+
 CURRENTCOMMIT=$(git rev-parse --abbrev-ref HEAD)
 
 
@@ -78,7 +86,10 @@ do
         BUILDJOBS=$2
         shift
         ;;
-
+    -t|--test)
+        TESTSCSV=$2
+        shift
+        ;;
     esac
     shift 
 done
@@ -135,9 +146,36 @@ else
    SLURMFLAGS=""
 fi
 
+TESTSLIST=(${TESTCSV//,/ }) # bash arrays
+for TEST in ${TESTSLIST[@]}
+do
+    case $TEST in
+        main)
+            DOMAINTEST=yes
+            ;;
+        mainrev)
+            DOMAINREVTEST=yes
+            ;;
+        pg)
+            DOPGTEST=yes
+            ;;
+        pgrev)
+            DOPGREVTEST=yes
+            ;;
+        dirac)
+            DODIRACTEST=yes
+            ;;
+        inv|inverter)
+            DOINVTEST=yes
+            ;;
+    esac
+done
+
+
+
 cp -r $SCRIPTSDIR test
 
-# TO FIX CHOICE OF GEOM FILE
+# compilation and setting up of all directories
 for COMMIT in $OLDCOMMIT $NEWCOMMIT
 do 
    cd $REPODIR
@@ -169,7 +207,102 @@ do
        CLEAREVERYTHING
    fi
    cd -
-
 done
+
+# setting up all the tests, submitting all the jobs, linking the files
+# that must be the same
+
+if [ $DOMAINTEST == "yes" ] 
+then
+    # both single and double precision tests will be run on both commits.
+    for DPSP in dp sp
+    do 
+        if [  $SCHEDULER == "slurm" ]
+        then 
+            diff $WORKDIR/$OLDCOMMIT/test.main.$DPSP\.set $WORKDIR/$NEWCOMMIT/test.main.$DPSP\.set
+            # 1. job on first commit
+            cd $WORKDIR/$OLDCOMMIT/test.main.$DPSP
+            CAJOB=$(sbatch test.main.$DPSP\.slurm | cut -d' ' -f4)
+            # 2. "connection" job
+            cd $WORKDIR
+            # WHAT EXACTLY NEEDS TO BE COPIED-LINKED? TO DEFINE
+            cat > test.main.$DPSP\.connection.slurm << EOF
+#!/bin/bash
+#SBATCH --job-name=main.$DPSP\.connection
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error=main.$DPSP\.connection.%J.err 
+#SBATCH --output=main.$DPSP\.connection.%J.out
+#SBATCH --gres=gpu:$NRESGPUS
+#SBATCH --partition=$SLURMPARTITION
+
+for file in $WORKDIR/$OLDCOMMIT/test.main.$DPSP/*norndtest* 
+do 
+    ln $file $WORKDIR/$OLDCOMMIT/test.main.$DPSP
+done
+
+EOF
+            CONNJOB=$(\
+                sbatch test.main.$DPSP\.connection.slurm --dependency=afterok:$CAJOB\
+                | cut -d' ' -f4)
+            # 3. job on second commit
+            cd $WORKDIR/$NEWCOMMIT/test.main.$DPSP
+            CBJOB=$(sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB\
+                | cut -d' ' -f4)
+
+            # 4. final-check job to compare the results
+            cd $WORKDIR
+            # WHAT EXACTLY NEED TO BE CHECKED? TO DEFINE
+            cat > test.main.$DPSP\.finalcheck.slurm << EOF
+#!/bin/bash
+#SBATCH --job-name=main.$DPSP\.finalcheck
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error=main.$DPSP\.finalcheck.%J.err 
+#SBATCH --output=main.$DPSP\.finalcheck.%J.out
+#SBATCH --gres=gpu:$NRESGPUS
+#SBATCH --partition=$SLURMPARTITION
+
+for file in $WORKDIR/$OLDCOMMIT/test.main.$DPSP/* 
+do 
+    ./test/diff_ascii_files.py $file $WORKDIR/$OLDCOMMIT/test.main.$DPSP/$(basename $file) 
+done
+EOF           
+            sbatch test.main.$DPSP\.finalcheck.slurm --dependency=afterok:$CBJOB
+
+        else
+           # BASH VERSION TO WRITE 
+        fi
+
+    done
+fi
+
+if [ $DOMAINREVTEST == "yes" ] 
+then
+    # both single and double precision tests will be run on both commits.
+    for $DPSP in dp sp
+    do
+    done
+fi
+
+if [ $DOPGTEST == "yes" ] 
+then
+    # both single and double precision tests will be run on both commits.
+fi
+
+if [ $DOPGREVTEST == "yes" ] 
+then
+    # both single and double precision tests will be run on both commits.
+fi
+
+if [ $DODIRACTEST == "yes" ] 
+then
+fi
+
+if [ $DOINVTEST == "yes" ] 
+then
+fi
+
+
 
 git checkout $CURRENTCOMMIT
