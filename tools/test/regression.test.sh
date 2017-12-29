@@ -150,6 +150,8 @@ do
        exit 1
    fi
    mkdir $WORKDIR/$COMMIT
+   # configure_wrapper and configure need the geom_defines.txt file to be named
+   # exactly geom_defines.txt
    cp $WORKDIR/$GEOMFILE $WORKDIR/$COMMIT/geom_defines.txt
    cd $WORKDIR/$COMMIT
    yes | $REPODIR/configure_wrapper $( echo $CONFIGOPTIONS_CSV | sed 's/,/ /g')
@@ -159,7 +161,8 @@ do
        echo "Error: make failed, in $PWD"
        CLEAREVERYTHING
    fi
-   $WORKDIR/test/prepare_tbps.sh -c $GEOMFILE -p test $SLURMFLAGS $MODULESFLAGS
+
+   $WORKDIR/test/prepare_tbps.sh -c geom_defines.txt -p test $SLURMFLAGS $MODULESFLAGS
    if [ $? -ne 0 ]
    then 
        echo "Error: prepare_tbps.sh failed, in $PWD"

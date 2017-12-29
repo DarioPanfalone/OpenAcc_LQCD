@@ -234,6 +234,7 @@ int main(int argc, char* argv[]){
         else{
             // cold start
             printf("MPI%02d: GENERATING CONFIGURATION FILE FOR YOUR CONVENIENCE, RE-RUN THIS TEST\n",
+                    devinfo.myrank);
             generate_Conf_cold(conf_acc,mc_params.eps_gen);
             printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                     devinfo.myrank);
