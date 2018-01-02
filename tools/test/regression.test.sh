@@ -49,50 +49,9 @@ CLEAREVERYTHING(){
 }
 
 trap CLEAREVERYTHING EXIT
-
-
-# function for compilation and setting up of all directories
-PREPARE_TEST(){
-    # variables that are expected to change form call to call are passed as arguments.
-    COMMIT=$1
-    TEMPGEOMFILE=$2
-    TEMPCONFIGOPTIONS_CSV=$3 # compiler versions may change
-    # the other are taken as global.
-
-    cd $REPODIR
-    autoreconf --install
-    git checkout $COMMIT
-    if [ $? -ne 0 ]
-    then 
-        echo "ERROR: could not checkout to commit $COMMIT"
-        echo "Exiting."
-        exit 1
-    fi
-    mkdir $WORKDIR/$COMMIT
-    # configure_wrapper and configure need the geom_defines.txt file to be named
-    # exactly geom_defines.txt
-    cp $WORKDIR/$TEMPGEOMFILE $WORKDIR/$COMMIT/geom_defines.txt
-    cd $WORKDIR/$COMMIT
-    yes | $REPODIR/configure_wrapper $( echo $TEMPCONFIGOPTIONS_CSV | sed 's/,/ /g')
-    make -j$BUILDJOBS &&  make install 
-    if [ $? -ne 0 ]
-    then 
-        echo "Error: make failed, in $PWD"
-        CLEAREVERYTHING
-    fi
-
-    $WORKDIR/test/prepare_tbps.sh -c geom_defines.txt -p test $SLURMFLAGS $MODULESFLAGS
-    if [ $? -ne 0 ]
-    then 
-        echo "Error: prepare_tbps.sh failed, in $PWD"
-        CLEAREVERYTHING
-    fi
-
-    cd -
-}
-
-
-
+###################################################
+####   READING COMMAND LINE OPTIONS   #############
+###################################################
 while (( "$#" ))
 do
     case $1 in
@@ -145,7 +104,7 @@ do
         TESTSCSV=$2
         shift
         ;;
-    -p|--partition)
+    -a|--partition) # -a is choosen for uniformity with prepare_tbps.sh
         SLURMPARTITION=$2
         shift
         ;;
@@ -153,53 +112,57 @@ do
     shift 
 done
 
-if [ ! -z $GEOMFILE1 ] || [ ! -z $GEOMFILE2 ] &&  [ ! -z $GEOMFILE ]  
-then
-    echo "$0 Error: Incompatible options: -g and -g1 or -g2"
-    echo $GEOMFILE1
-    echo $GEOMFILE2
-    echo $GEOMFILE
-    exit
-fi
+#########################################################
+#######   LOGIC OPERATIONS ON OPTIONS   #################
+#########################################################
 
-if [ -z $GEOMFILE ] && [ -z $GEOMFILE1 ] && [ -z $GEOMFILE2 ]
-then 
-    GEOMFILE=geom_defines.txt
-    echo "No geom_defines file names provided. Using default $GEOMFILE"
-fi
+# this function checks if an option has been set equal for both runs, e.g. GEOMFILE, or
+# CONFIGOPTIONS_CSV, or MODULES_TO_LOAD_CSV. In that case sets the run-specific options 
+# equal to the common value.
+# If instead it has been set separately for the two runs (e.g. using GEOMFILE1 and GEOMFILE2)
+# basically nothing is done, except some checking (you cannot specify GEOMFILE and GEOMFILE1 
+# at the same time, for example).
 
-if [ -z $GEOMFILE1 ] && [ ! -z $GEOMFILE ] 
-then 
-    GEOMFILE1=$GEOMFILE
-fi
-if [ -z $GEOMFILE2 ] && [ ! -z $GEOMFILE ] 
-then 
-    GEOMFILE2=$GEOMFILE
-fi
+OPTION12CHECK(){
 
-echo "Selecting  scheduler $SCHEDULER (choose with -s)"
-echo "Selecting old commit $OLDCOMMIT (choose with -o)"
-echo "Selecting new commit $NEWCOMMIT (choose with -n)" 
-echo "Selecting geom_defines,1 file $GEOMFILE1 (choose with -g1)" 
-echo "Selecting geom_defines,2 file $GEOMFILE2 (choose with -g2)" 
-echo "Selecting modules $MODULES_TO_LOAD_CSV (choose with -m)" 
-echo "Selecting config wrapper options $CONFIGOPTIONS_CSV (choose with -c)" 
+    VARNAME=$1
+    VARDEFAULT=$2
+    CLOPTION=$3
+    VARNAME1=${VARNAME}1
+    VARNAME2=${VARNAME}2
 
 
+    if [ ! -z ${!VARNAME1} ] || [ ! -z ${!VARNAME2} ] &&  [ ! -z ${!VARNAME} ]  
+    then
+        echo "$0 Error: Incompatible options: -$CLOPTION and -$CLOPTION\1 or -$CLOPTION\2"
+        echo ${!VARNAME1}
+        echo ${!VARNAME2}
+        echo ${!VARNAME}
+        exit
+    fi
 
-if [ ! -z $MODULES_TO_LOAD_CSV ]
-then
-    echo 'Loading modules...'
-    for MODULE in $(echo $MODULES_TO_LOAD_CSV | sed 's/,/ /g')
-    do
-        echo "module load $MODULE"
-        module load $MODULE
-    done
-    MODULESFLAGS="-m $MODULES_TO_LOAD_CSV"
-else 
-    MODULESFLAGS=""
-fi
+    if [ -z ${!VARNAME} ] && [ -z ${!VARNAME1} ] && [ -z ${!VARNAME2} ]
+    then 
+            eval $VARNAME=$VARDEFAULT
+            echo "No geom_defines file names provided. Using default ${!VARNAME}"
+        fi
 
+        if [ -z ${!VARNAME1} ] && [ ! -z ${!VARNAME} ] 
+        then 
+            eval $VARNAME1=${!VARNAME}
+        fi
+        if [ -z ${!VARNAME2} ] && [ ! -z ${!VARNAME} ] 
+        then 
+            eval $VARNAME2=${!VARNAME}
+        fi
+
+}
+
+OPTION12CHECK GEOMFILE geom_defines.txt -g
+OPTION12CHECK MODULES_TO_LOAD_CSV " " -m
+OPTION12CHECK CONFIGOPTIONS_CSV "gcc" -c
+
+# SLURM-related checks
 if [ $SCHEDULER == "slurm" ]
 then
     if [ -z $SLURMPARTITION ] 
@@ -212,10 +175,91 @@ else
     SLURMFLAGS=""
 fi
 
+# Showing which options we got.
+echo "Selecting  scheduler $SCHEDULER (choose with -s)"
+echo "Selecting commit $OLDCOMMIT for (1) (choose with -o)"
+echo "Selecting commit $NEWCOMMIT for (2) (choose with -n)" 
+echo "Selecting geom_defines file $GEOMFILE1 for (1) (choose with -g1 or -g)" 
+echo "Selecting geom_defines file $GEOMFILE2 for (2) (choose with -g2 or -g)" 
+echo "Selecting config wrapper options $CONFIGOPTIONS_CSV1 for (1) (choose with -c1 or -c)" 
+echo "Selecting config wrapper options $CONFIGOPTIONS_CSV2 for (2) (choose with -c2 or -c)" 
+echo "Selecting modules \"$MODULES_TO_LOAD_CSV1\" for (1) (choose with -m1 or -m)" 
+echo "Selecting modules \"$MODULES_TO_LOAD_CSV2\" for (1) (choose with -m1 or -m)" 
+
+# creating directory with all the test scripts, which will not be changed by git
+# when we checkout to another commit.
+echo "Using regression test scripts at commit $CURRENTCOMMIT"
+cp -r $SCRIPTSDIR test
+
+########################################################
+########  COMPILING AND PREPARING RUNS   ###############
+########################################################
+# function for compilation and setting up of all directories
+PREPARE_RUN(){
+    # variables that are expected to change form call to call are passed as arguments.
+    COMMIT=$1
+    TEMPGEOMFILE=$2
+    TEMPCONFIGOPTIONS_CSV=$3 # compiler versions may change
+    TEMPMODULES_TO_LOAD_CSV=$4
+    # the other are taken as global.
+
+    if [ ! -z $TEMPMODULES_TO_LOAD_CSV ]
+    then
+        echo 'Loading modules...'
+        for MODULE in $(echo $TEMPMODULES_TO_LOAD_CSV | sed 's/,/ /g')
+        do
+            echo "module load $MODULE"
+            module load $MODULE
+        done
+        TEMPMODULESFLAGS="-m $TEMPMODULES_TO_LOAD_CSV"
+    else 
+        TEMPMODULESFLAGS=""
+    fi
+
+    cd $REPODIR
+    autoreconf --install
+    git checkout $COMMIT
+    if [ $? -ne 0 ]
+    then 
+        echo "ERROR: could not checkout to commit $COMMIT"
+        echo "Exiting."
+        exit 1
+    fi
+    mkdir $WORKDIR/$COMMIT
+    # configure_wrapper and configure need the geom_defines.txt file to be named
+    # exactly geom_defines.txt
+    cp $WORKDIR/$TEMPGEOMFILE $WORKDIR/$COMMIT/geom_defines.txt
+    cd $WORKDIR/$COMMIT
+    yes | $REPODIR/configure_wrapper $( echo $TEMPCONFIGOPTIONS_CSV | sed 's/,/ /g')
+    make -j$BUILDJOBS &&  make install 
+    if [ $? -ne 0 ]
+    then 
+        echo "Error: make failed, in $PWD"
+        CLEAREVERYTHING
+    fi
+
+    $WORKDIR/test/prepare_tbps.sh -c geom_defines.txt -p test $SLURMFLAGS $TEMPMODULESFLAGS
+    if [ $? -ne 0 ]
+    then 
+        echo "Error: prepare_tbps.sh failed, in $PWD"
+        CLEAREVERYTHING
+    fi
+
+    cd -
+}
+
+# compilation and setting up of all directories
+PREPARE_RUN $OLDCOMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
+PREPARE_RUN $NEWCOMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
 
 
+#####################################################
+####### SETTING UP ALL THE TESTS ####################
+#####################################################
+# setting up all the tests, submitting all the jobs, linking the files
+# that must be the same
 
-TESTSLIST=(${TESTCSV//,/ }) # bash arrays
+TESTSLIST=(${TESTCSV//,/ }) # using a bash array
 for TEST in ${TESTSLIST[@]}
 do
     case $TEST in
@@ -240,30 +284,25 @@ do
     esac
 done
 
-cp -r $SCRIPTSDIR test
 
-# compilation and setting up of all directories
-PREPARE_TEST $OLDCOMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1
-PREPARE_TEST $NEWCOMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2
-
-# setting up all the tests, submitting all the jobs, linking the files
-# that must be the same
 
 if [ $DOMAINTEST == "yes" ] 
 then
     # both single and double precision tests will be run on both commits.
     for DPSP in dp sp
     do 
-        if [  $SCHEDULER == "slurm" ]
-        then 
-            diff $WORKDIR/$OLDCOMMIT/test.main.$DPSP\.set $WORKDIR/$NEWCOMMIT/test.main.$DPSP\.set
             # 1. job on first commit
             cd $WORKDIR/$OLDCOMMIT/test.main.$DPSP
+            if [  $SCHEDULER == "slurm" ]
+            then 
             CAJOB=$(sbatch test.main.$DPSP\.slurm | cut -d' ' -f4)
+            else
+               bash ./test.main.$DPSP\.sh
+            fi
             # 2. "connection" job
             cd $WORKDIR
             # WHAT EXACTLY NEEDS TO BE COPIED-LINKED? TO DEFINE
-            cat > test.main.$DPSP\.connection.slurm << EOF
+            cat > test.main.$DPSP\.connection.sh-slurm << EOF
 #!/bin/bash
 #SBATCH --job-name=main.$DPSP\.connection
 #SBATCH --ntasks=1
@@ -278,18 +317,27 @@ do
 done
 
 EOF
+            if [  $SCHEDULER == "slurm" ]
+            then
             CONNJOB=$(\
-                sbatch test.main.$DPSP\.connection.slurm --dependency=afterok:$CAJOB\
+                sbatch test.main.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB\
                 | cut -d' ' -f4)
+            else
+                bash ./test.main.$DPSP\.connection.sh-slurm
+            fi
             # 3. job on second commit
             cd $WORKDIR/$NEWCOMMIT/test.main.$DPSP
+            if [  $SCHEDULER == "slurm" ]
+            then
             CBJOB=$(sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB\
                 | cut -d' ' -f4)
-
+            else
+                bash ./test.main.$DPSP\.sh
+            fi
             # 4. final-check job to compare the results
             cd $WORKDIR
             # WHAT EXACTLY NEED TO BE CHECKED? TO DEFINE
-            cat > test.main.$DPSP\.finalcheck.slurm << EOF
+            cat > test.main.$DPSP\.finalcheck.sh-slurm << EOF
 #!/bin/bash
 #SBATCH --job-name=main.$DPSP\.finalcheck
 #SBATCH --ntasks=1
@@ -302,13 +350,15 @@ for file in $WORKDIR/$OLDCOMMIT/test.main.$DPSP/*
 do 
     ./test/diff_ascii_files.py $file $WORKDIR/$OLDCOMMIT/test.main.$DPSP/$(basename $file) 
 done
-EOF           
-            sbatch test.main.$DPSP\.finalcheck.slurm --dependency=afterok:$CBJOB
 
-        else
-           # BASH VERSION TO WRITE 
-        fi
+EOF
 
+            if [  $SCHEDULER == "slurm" ]
+            then
+                sbatch test.main.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB
+            else
+                bash test.main.$DPSP\.finalcheck.sh
+            fi
     done
 fi
 
@@ -317,17 +367,26 @@ then
     # both single and double precision tests will be run on both commits.
     for $DPSP in dp sp
     do
+        echo "To implement"
     done
 fi
 
 if [ $DOPGTEST == "yes" ] 
 then
     # both single and double precision tests will be run on both commits.
+    for $DPSP in dp sp
+    do
+        echo "To implement"
+    done
 fi
 
 if [ $DOPGREVTEST == "yes" ] 
 then
     # both single and double precision tests will be run on both commits.
+    for $DPSP in dp sp
+    do
+        echo "To implement"
+    done
 fi
 
 if [ $DODIRACTEST == "yes" ] 
