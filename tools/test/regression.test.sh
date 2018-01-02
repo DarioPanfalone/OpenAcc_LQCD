@@ -26,6 +26,11 @@ WORKDIR=$PWD
 SCRIPTSDIR=$PWD/$(dirname $BASH_SOURCE)
 REPODIR=$(dirname $(dirname $SCRIPTSDIR))
 BUILDJOBS=4
+SLURMPARTITION=
+CONFIGOPTIONS_CSV=""
+CONFIGOPTIONS_CSV1=""
+CONFIGOPTIONS_CSV2=""
+
 
 # Types of test
 DOMAINTEST=no
@@ -44,6 +49,48 @@ CLEAREVERYTHING(){
 }
 
 trap CLEAREVERYTHING EXIT
+
+
+# function for compilation and setting up of all directories
+PREPARE_TEST(){
+    # variables that are expected to change form call to call are passed as arguments.
+    COMMIT=$1
+    TEMPGEOMFILE=$2
+    TEMPCONFIGOPTIONS_CSV=$3 # compiler versions may change
+    # the other are taken as global.
+
+    cd $REPODIR
+    autoreconf --install
+    git checkout $COMMIT
+    if [ $? -ne 0 ]
+    then 
+        echo "ERROR: could not checkout to commit $COMMIT"
+        echo "Exiting."
+        exit 1
+    fi
+    mkdir $WORKDIR/$COMMIT
+    # configure_wrapper and configure need the geom_defines.txt file to be named
+    # exactly geom_defines.txt
+    cp $WORKDIR/$TEMPGEOMFILE $WORKDIR/$COMMIT/geom_defines.txt
+    cd $WORKDIR/$COMMIT
+    yes | $REPODIR/configure_wrapper $( echo $TEMPCONFIGOPTIONS_CSV | sed 's/,/ /g')
+    make -j$BUILDJOBS &&  make install 
+    if [ $? -ne 0 ]
+    then 
+        echo "Error: make failed, in $PWD"
+        CLEAREVERYTHING
+    fi
+
+    $WORKDIR/test/prepare_tbps.sh -c geom_defines.txt -p test $SLURMFLAGS $MODULESFLAGS
+    if [ $? -ne 0 ]
+    then 
+        echo "Error: prepare_tbps.sh failed, in $PWD"
+        CLEAREVERYTHING
+    fi
+
+    cd -
+}
+
 
 
 while (( "$#" ))
@@ -82,12 +129,24 @@ do
         CONFIGOPTIONS_CSV=$2
         shift
         ;;
+    -c1|--config-options1)
+        CONFIGOPTIONS_CSV1=$2
+        shift
+        ;;
+    -c2|--config-options2)
+        CONFIGOPTIONS_CSV2=$2
+        shift
+        ;;
     -bj|--build-jobs)
         BUILDJOBS=$2
         shift
         ;;
     -t|--test)
         TESTSCSV=$2
+        shift
+        ;;
+    -p|--partition)
+        SLURMPARTITION=$2
         shift
         ;;
     esac
@@ -126,25 +185,35 @@ echo "Selecting geom_defines,2 file $GEOMFILE2 (choose with -g2)"
 echo "Selecting modules $MODULES_TO_LOAD_CSV (choose with -m)" 
 echo "Selecting config wrapper options $CONFIGOPTIONS_CSV (choose with -c)" 
 
+
+
 if [ ! -z $MODULES_TO_LOAD_CSV ]
 then
-   echo 'Loading modules...'
-   for MODULE in $(echo $MODULES_TO_LOAD_CSV | sed 's/,/ /g')
-   do
-       echo "module load $MODULE"
-       module load $MODULE
-   done
-   MODULESFLAGS="-m $MODULES_TO_LOAD_CSV"
+    echo 'Loading modules...'
+    for MODULE in $(echo $MODULES_TO_LOAD_CSV | sed 's/,/ /g')
+    do
+        echo "module load $MODULE"
+        module load $MODULE
+    done
+    MODULESFLAGS="-m $MODULES_TO_LOAD_CSV"
 else 
-   MODULESFLAGS=""
+    MODULESFLAGS=""
 fi
 
 if [ $SCHEDULER == "slurm" ]
 then
-   SLURMFLAGS="-s"
+    if [ -z $SLURMPARTITION ] 
+    then
+        echo "$0 Error: Slurm Partition must be selected with -a or --partition."
+        exit
+    fi
+    SLURMFLAGS="-s -a $SLURMPARTITION"
 else 
-   SLURMFLAGS=""
+    SLURMFLAGS=""
 fi
+
+
+
 
 TESTSLIST=(${TESTCSV//,/ }) # bash arrays
 for TEST in ${TESTSLIST[@]}
@@ -171,43 +240,11 @@ do
     esac
 done
 
-
-
 cp -r $SCRIPTSDIR test
 
 # compilation and setting up of all directories
-for COMMIT in $OLDCOMMIT $NEWCOMMIT
-do 
-   cd $REPODIR
-   autoreconf --install
-   git checkout $COMMIT
-   if [ $? -ne 0 ]
-   then 
-       echo "ERROR: could not checkout to commit $COMMIT"
-       echo "Exiting."
-       exit 1
-   fi
-   mkdir $WORKDIR/$COMMIT
-   # configure_wrapper and configure need the geom_defines.txt file to be named
-   # exactly geom_defines.txt
-   cp $WORKDIR/$GEOMFILE $WORKDIR/$COMMIT/geom_defines.txt
-   cd $WORKDIR/$COMMIT
-   yes | $REPODIR/configure_wrapper $( echo $CONFIGOPTIONS_CSV | sed 's/,/ /g')
-   make -j$BUILDJOBS &&  make install 
-   if [ $? -ne 0 ]
-   then 
-       echo "Error: make failed, in $PWD"
-       CLEAREVERYTHING
-   fi
-
-   $WORKDIR/test/prepare_tbps.sh -c geom_defines.txt -p test $SLURMFLAGS $MODULESFLAGS
-   if [ $? -ne 0 ]
-   then 
-       echo "Error: prepare_tbps.sh failed, in $PWD"
-       CLEAREVERYTHING
-   fi
-   cd -
-done
+PREPARE_TEST $OLDCOMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1
+PREPARE_TEST $NEWCOMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2
 
 # setting up all the tests, submitting all the jobs, linking the files
 # that must be the same
@@ -233,7 +270,6 @@ then
 #SBATCH --cpus-per-task=1
 #SBATCH --error=main.$DPSP\.connection.%J.err 
 #SBATCH --output=main.$DPSP\.connection.%J.out
-#SBATCH --gres=gpu:$NRESGPUS
 #SBATCH --partition=$SLURMPARTITION
 
 for file in $WORKDIR/$OLDCOMMIT/test.main.$DPSP/*norndtest* 
@@ -260,7 +296,6 @@ EOF
 #SBATCH --cpus-per-task=1
 #SBATCH --error=main.$DPSP\.finalcheck.%J.err 
 #SBATCH --output=main.$DPSP\.finalcheck.%J.out
-#SBATCH --gres=gpu:$NRESGPUS
 #SBATCH --partition=$SLURMPARTITION
 
 for file in $WORKDIR/$OLDCOMMIT/test.main.$DPSP/* 

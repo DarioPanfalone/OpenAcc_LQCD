@@ -56,8 +56,9 @@ fi
 if test $PREPARESLURM == "yes"
 then
     if test -z $SLURMPARTITION
-    then 
-        SLURMPARTITION=shortrun
+    then
+        echo "$0 Error: Slurm Partition must be selected with -a or --partition."
+        exit
     fi
 else
     if [ ! -z "$NRESGPUS" ] && [ "$NRESGPUS" != "none" ] 
