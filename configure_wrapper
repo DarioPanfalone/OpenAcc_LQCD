@@ -28,24 +28,26 @@ for arg in argv[1:]:
 
 
 
-
-accepted_options = ['gcc','mpi','pgi','cc35','cc50','cc60','haswell',\
+accepted_options = ['gcc','gcc-4','gcc-5','gcc-6','mpi','pgi','cc35','cc50','cc60','haswell',\
         'amd','cuda7.0','cuda7.5','cuda8.0']
 
 n=None
 # flag compatibilities
 comp_matrix=[
-        [n,0,0,0,0,0,0,0,0,0,0],# gcc
-        [n,n,0,0,0,0,0,0,0,0,0],# mpi
-        [n,n,n,1,1,1,1,1,1,1,1],# pgi
-        [n,n,n,n,0,0,0,0,1,1,1],# cc35
-        [n,n,n,n,n,0,0,0,1,1,1],# cc50
-        [n,n,n,n,n,n,0,0,1,1,1],# cc60
-        [n,n,n,n,n,n,n,0,0,0,0],# haswell
-        [n,n,n,n,n,n,n,n,0,0,0],# amd
-        [n,n,n,n,n,n,n,n,n,0,0],# cuda7.0
-        [n,n,n,n,n,n,n,n,n,n,0],# cuda7.5
-        [n,n,n,n,n,n,n,n,n,n,n]]# cuda8.0
+        [n,0,0,0,0,0,0,0,0,0,0,0,0,0],# gcc, default
+        [n,n,0,0,0,0,0,0,0,0,0,0,0,0],# gcc-4
+        [n,n,n,0,0,0,0,0,0,0,0,0,0,0],# gcc-5
+        [n,n,n,n,0,0,0,0,0,0,0,0,0,0],# gcc-6
+        [n,n,n,n,n,0,0,0,0,0,0,0,0,0],# mpi
+        [n,n,n,n,n,n,1,1,1,1,1,1,1,1],# pgi
+        [n,n,n,n,n,n,n,0,0,0,0,1,1,1],# cc35
+        [n,n,n,n,n,n,n,n,0,0,0,1,1,1],# cc50
+        [n,n,n,n,n,n,n,n,n,0,0,1,1,1],# cc60
+        [n,n,n,n,n,n,n,n,n,n,0,0,0,0],# haswell
+        [n,n,n,n,n,n,n,n,n,n,n,0,0,0],# amd
+        [n,n,n,n,n,n,n,n,n,n,n,n,0,0],# cuda7.0
+        [n,n,n,n,n,n,n,n,n,n,n,n,n,0],# cuda7.5
+        [n,n,n,n,n,n,n,n,n,n,n,n,n,n]]# cuda8.0
 
 
 all_ok = True
@@ -108,12 +110,37 @@ if 'pgi' in argv:
         LINKER_FLAGS='"-O0 -lmpi"'
 
 
-elif 'gcc' in argv:
+elif 'gcc' in argv:  # warning: this option defaults to gcc-7 on ubuntu 17.10
+                     # unfortunately code cannot be compiled woth gcc 7 due to a bug 
+                     # in the compiler
     argv.remove('gcc')
     CC='gcc'
     CXX='g++'
     CC_FLAGS='"-O3 -std=gnu99"'
     LINKER_FLAGS='"-lm"'
+
+elif 'gcc-4' in argv: # on ubuntu systems, this is actually g??-4.8. Ubuntu only 
+                      # This is the default on coka (CENTOS 7.4) but it's just named gcc
+    argv.remove('gcc-4')
+    CC='gcc-4.8'
+    CXX='g++-4.8'
+    CC_FLAGS='"-O3 -std=gnu99"'
+    LINKER_FLAGS='"-lm"'
+
+elif 'gcc-5' in argv: # does not exists on coka (CENTOS 7.4), ubuntu only
+    argv.remove('gcc-5')
+    CC='gcc-5'
+    CXX='g++-5'
+    CC_FLAGS='"-O3 -std=gnu99"'
+    LINKER_FLAGS='"-lm"'
+
+elif 'gcc-6' in argv: # does not exists on coka (CENTOS 7.4), ubuntu only
+    argv.remove('gcc-6')
+    CC='gcc-6'
+    CXX='g++-6'
+    CC_FLAGS='"-O3 -std=gnu99"'
+    LINKER_FLAGS='"-lm"'
+
 
 
 elif 'mpi' in argv:
