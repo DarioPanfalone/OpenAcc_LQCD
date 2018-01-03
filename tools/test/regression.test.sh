@@ -16,8 +16,8 @@
 # Default values
 # Scheduler can be either 'bash' or a proper scheduling system. 
 SCHEDULER=bash
-V1COMMIT=8d4dcd6cbf91be1354a471665ec71a1db4756628
-V2COMMIT=$(git rev-parse HEAD)
+V1COMMIT=$(git rev-parse HEAD)
+V2COMMIT=
 GEOMFILE=
 GEOMFILE1=
 GEOMFILE2=
@@ -177,19 +177,79 @@ fi
 
 # Showing which options we got.
 echo "Selecting  scheduler $SCHEDULER (choose with -s)"
-echo "Selecting commit $V1COMMIT for (1) (choose with -o)"
-echo "Selecting commit $V2COMMIT for (2) (choose with -n)" 
+echo "Selecting commit $V1COMMIT for (1) (choose with -v1)"
 echo "Selecting geom_defines file $GEOMFILE1 for (1) (choose with -g1 or -g)" 
-echo "Selecting geom_defines file $GEOMFILE2 for (2) (choose with -g2 or -g)" 
 echo "Selecting config wrapper options $CONFIGOPTIONS_CSV1 for (1) (choose with -c1 or -c)" 
-echo "Selecting config wrapper options $CONFIGOPTIONS_CSV2 for (2) (choose with -c2 or -c)" 
 echo "Selecting modules \"$MODULES_TO_LOAD_CSV1\" for (1) (choose with -m1 or -m)" 
-echo "Selecting modules \"$MODULES_TO_LOAD_CSV2\" for (1) (choose with -m1 or -m)" 
+
+if [ ! -z "$V2COMMIT" ]
+then
+    echo "Selecting commit $V2COMMIT for (2) (choose with -v2)" 
+    echo "Selecting geom_defines file $GEOMFILE2 for (2) (choose with -g2 or -g)" 
+    echo "Selecting config wrapper options $CONFIGOPTIONS_CSV2 for (2) (choose with -c2 or -c)" 
+    echo "Selecting modules \"$MODULES_TO_LOAD_CSV2\" for (1) (choose with -m1 or -m)" 
+else
+    echo "Commit (2)  not selected (choose with -v2)" 
+fi
 
 # creating directory with all the test scripts, which will not be changed by git
 # when we checkout to another commit.
 echo "Using regression test scripts at commit $CURRENTCOMMIT"
 cp -r $SCRIPTSDIR test
+
+TESTSLIST=(${TESTSCSV//,/ }) # using a bash array
+for TEST in ${TESTSLIST[@]}
+do
+    case $TEST in
+        main)
+            if [ ! -z "$V2COMMIT" ]
+            then 
+                DOMAINTEST=yes
+	    else
+                DOMAINTEST=no
+		echo "ERROR: Main program regression test not possible."
+	        echo "       Only one code version specified: select other commit with -v2"
+		exit
+	    fi
+            ;;
+        mainrev)
+            DOMAINREVTEST=yes
+	    echo "Selected reversibility test on main program, commit $V1COMMIT."
+            ;;
+        pg)
+            if [ ! -z "$V2COMMIT" ]
+            then 
+                DOPGTEST=yes
+	    else
+                DOPGTEST=no
+		echo "ERROR: Pure gauge regression test not possible."
+	        echo "       Only one code version specified: select other commit with -v2"
+		exit
+	    fi
+            ;;
+        pgrev)
+            DOPGREVTEST=yes
+	    echo "Selected reversibility test on pure gauge, commit $V1COMMIT."
+            ;;
+        dirac)
+	    if [ ! -z "$V2COMMIT" ]
+            then 
+                DODIRACTEST=yes
+	    else
+                DODIRACTEST=no
+		echo "ERROR: Dirac regression test not possible."
+	        echo "       Only one code version specified: select other commit with -v2"
+		exit
+	    fi
+            ;;
+        inv|inverter)
+            DOINVTEST=yes
+	    echo "Selected inverter test, commit $V1COMMIT."
+            ;;
+    esac
+done
+
+
 
 ########################################################
 ########  COMPILING AND PREPARING RUNS   ###############
@@ -249,8 +309,12 @@ PREPARE_RUN(){
 }
 
 # compilation and setting up of all directories
-# PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1 #DEBUG
-# PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2 #DEBUG
+
+PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
+if [ ! -z "$V2COMMIT" ]
+then
+       	PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
+fi
 
 
 #####################################################
@@ -258,33 +322,6 @@ PREPARE_RUN(){
 #####################################################
 # setting up all the tests, submitting all the jobs, linking the files
 # that must be the same
-
-TESTSLIST=(${TESTSCSV//,/ }) # using a bash array
-for TEST in ${TESTSLIST[@]}
-do
-    case $TEST in
-        main)
-            DOMAINTEST=yes
-            ;;
-        mainrev)
-            DOMAINREVTEST=yes
-            ;;
-        pg)
-            DOPGTEST=yes
-            ;;
-        pgrev)
-            DOPGREVTEST=yes
-            ;;
-        dirac)
-            DODIRACTEST=yes
-            ;;
-        inv|inverter)
-            DOINVTEST=yes
-            ;;
-    esac
-done
-
-
 
 if [ $DOMAINTEST == "yes" ] 
 then
@@ -369,10 +406,17 @@ fi
 
 if [ $DOMAINREVTEST == "yes" ] 
 then
-    # both single and double precision tests will be run on both commits.
+    # both single and double precision tests will be run on V1 commit.
     for $DPSP in dp sp
     do
-        echo "To implement"
+	cd $WORKDIR/$V1COMMIT/test.main.$DPSP.revt
+        if [  $SCHEDULER == "slurm" ]
+        then 
+        sbatch test.main.$DPSP\.revt.slurm 
+        else
+           echo $PWD
+           bash ./test.main.$DPSP\.revt.sh
+        fi
     done
 fi
 
@@ -460,21 +504,113 @@ fi
 
 if [ $DOPGREVTEST == "yes" ] 
 then
-    # both single and double precision tests will be run on both commits.
+    # both single and double precision tests will be run on V1 commit.
     for $DPSP in dp sp
     do
-        echo "To implement"
+	cd $WORKDIR/$V1COMMIT/test.pg.$DPSP.revt
+        if [  $SCHEDULER == "slurm" ]
+        then 
+        sbatch test.pg.$DPSP\.revt.slurm
+        else
+           echo $PWD
+           bash ./test.pg.$DPSP\.revt.sh
+        fi
     done
 fi
 
 if [ $DODIRACTEST == "yes" ] 
 then
-        echo "To implement"
+    # 1. job on first commit
+    cd $WORKDIR/$V1COMMIT/test.deo_doe_test.dpsp
+    if [  $SCHEDULER == "slurm" ]
+    then 
+        CAJOB=$(sbatch test.deo_doe_test.dpsp.slurm | cut -d' ' -f4)
+    else
+        bash ./test.deo_doe_test.dpsp.sh
+    fi
+    # 2. "connection" job
+    cd $WORKDIR
+    cat > test.deo_doe_test.dpsp.connection.sh-slurm << EOF
+#!/bin/bash
+#SBATCH --job-name=deo_doe_test.dpsp.connection
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error=deo_doe_test.dpsp.connection.%J.err 
+#SBATCH --output=deo_doe_test.dpsp.connection.%J.out
+#SBATCH --partition=$SLURMPARTITION
+
+for file in test.dp.gaugeconf_save test_fermion
+do 
+	echo "Linking file \$file ..."
+    ln -s $WORKDIR/$V1COMMIT/test.deo_doe_test.dpsp/\$file \
+    $WORKDIR/$V2COMMIT/test.deo_doe_test.dpsp/\$file  
+done
+
+EOF
+    if [  $SCHEDULER == "slurm" ]
+    then
+    CONNJOB=$(\
+    sbatch test.deo_doe_test.dpsp.connection.sh-slurm --dependency=afterok:$CAJOB\
+        | cut -d' ' -f4)
+    else
+        bash ./test.deo_doe_test.dpsp.connection.sh-slurm 
+    fi
+    # 3. job on second commit
+    cd $WORKDIR/$V2COMMIT/test.deo_doe_test.dpsp
+    if [  $SCHEDULER == "slurm" ]
+    then
+        CBJOB=$(sbatch test.deo_doe_test.dpsp.slurm --dependency=afterok:$CONNJOB\
+            | cut -d' ' -f4)
+    else
+        echo $PWD
+        bash ./test.deo_doe_test.dpsp.sh
+    fi
+    # 4. final-check job to compare the results
+    cd $WORKDIR
+    cat > test.deo_doe_test.dpsp.finalcheck.sh-slurm << EOF
+#!/bin/bash
+#SBATCH --job-name=deo_doe_test.dpsp.finalcheck
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error=deo_doe_test.dpsp.finalcheck.%J.err 
+#SBATCH --output=deo_doe_test.dpsp.finalcheck.%J.out
+#SBATCH --partition=$SLURMPARTITION
+
+FILES_TO_CHECK=( "test_fermion" \
+    "test_fermion_result_doe2" \
+    "test_fermion_result_deo2" \ 
+    "test_fermion_result_fulldirac2" \
+    "sp_test_fermion_result_doe2" \ 
+    "sp_test_fermion_result_deo2" \
+    "sp_test_fermion_result_fulldirac2" )
+
+
+for file in \${FILES_TO_CHECK[@]}
+do 
+    echo "Checking differences in file \$file ..." 
+    ./test/diff_ascii_files.py $WORKDIR/$V1COMMIT/test.deo_doe_test.dpsp/\$file \
+      $WORKDIR/$V2COMMIT/test.deo_doe_test.dpsp/\$file \
+done
+
+EOF
+    if [  $SCHEDULER == "slurm" ]
+    then
+        sbatch test.deo_doe_test.dpsp.finalcheck.sh-slurm --dependency=afterok:$CBJOB
+    else
+        bash test.deo_doe_test.dpsp.finalcheck.sh-slurm | tee test.deo_doe_test.dpsp.check
+    fi
 fi
 
 if [ $DOINVTEST == "yes" ] 
 then
-        echo "To implement"
+    cd $WORKDIR/$V1COMMIT/test.inverter_multishift_test.dpsp
+    if [  $SCHEDULER == "slurm" ]
+    then
+        sbatch test.inverter_multishift_test.dpsp.slurm
+    else
+        bash test.inverter_multishift_test.dpsp.sh \
+            | tee test.inverter_multishift_test.dpsp.check
+    fi
 fi
 
 
