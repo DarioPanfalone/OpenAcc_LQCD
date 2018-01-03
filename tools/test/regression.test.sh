@@ -249,8 +249,8 @@ PREPARE_RUN(){
 }
 
 # compilation and setting up of all directories
-PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1 
-PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2 
+# PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1 #DEBUG
+# PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2 #DEBUG
 
 
 #####################################################
@@ -291,18 +291,18 @@ then
     # both single and double precision tests will be run on both commits.
     for DPSP in dp sp
     do 
-            # 1. job on first commit
-            cd $WORKDIR/$V1COMMIT/test.main.$DPSP
-            if [  $SCHEDULER == "slurm" ]
-            then 
-            CAJOB=$(sbatch test.main.$DPSP\.slurm | cut -d' ' -f4)
-            else
-	       echo $PWD
-               bash ./test.main.$DPSP\.sh
-            fi
-            # 2. "connection" job
-            cd $WORKDIR
-            cat > test.main.$DPSP\.connection.sh-slurm << EOF
+        # 1. job on first commit
+        cd $WORKDIR/$V1COMMIT/test.main.$DPSP
+        if [  $SCHEDULER == "slurm" ]
+        then 
+        CAJOB=$(sbatch test.main.$DPSP\.slurm | cut -d' ' -f4)
+        else
+           echo $PWD
+           bash ./test.main.$DPSP\.sh
+        fi
+        # 2. "connection" job
+        cd $WORKDIR
+        cat > test.main.$DPSP\.connection.sh-slurm << EOF
 #!/bin/bash
 #SBATCH --job-name=main.$DPSP\.connection
 #SBATCH --ntasks=1
@@ -319,29 +319,29 @@ do
 done
 
 EOF
-            if [  $SCHEDULER == "slurm" ]
-            then
-            CONNJOB=$(\
-                sbatch test.main.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB\
-                | cut -d' ' -f4)
-            else
-                echo bash ./test.main.$DPSP\.connection.sh-slurm
-                bash ./test.main.$DPSP\.connection.sh-slurm
-            fi
-            # 3. job on second commit
-            cd $WORKDIR/$V2COMMIT/test.main.$DPSP
-            if [  $SCHEDULER == "slurm" ]
-            then
-            CBJOB=$(sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB\
-                | cut -d' ' -f4)
-            else
-		echo $PWD
-                bash ./test.main.$DPSP\.sh
-            fi
-            # 4. final-check job to compare the results
-            cd $WORKDIR
-            # WHAT EXACTLY NEED TO BE CHECKED? TO DEFINE
-            cat > test.main.$DPSP\.finalcheck.sh-slurm << EOF
+        if [  $SCHEDULER == "slurm" ]
+        then
+        CONNJOB=$(\
+            sbatch test.main.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB\
+            | cut -d' ' -f4)
+        else
+            echo bash ./test.main.$DPSP\.connection.sh-slurm
+            bash ./test.main.$DPSP\.connection.sh-slurm
+        fi
+        # 3. job on second commit
+        cd $WORKDIR/$V2COMMIT/test.main.$DPSP
+        if [  $SCHEDULER == "slurm" ]
+        then
+        CBJOB=$(sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB\
+            | cut -d' ' -f4)
+        else
+         echo $PWD
+            bash ./test.main.$DPSP\.sh
+        fi
+        # 4. final-check job to compare the results
+        cd $WORKDIR
+        # WHAT EXACTLY NEED TO BE CHECKED? TO DEFINE
+        cat > test.main.$DPSP\.finalcheck.sh-slurm << EOF
 #!/bin/bash
 #SBATCH --job-name=main.$DPSP\.finalcheck
 #SBATCH --ntasks=1
@@ -352,18 +352,18 @@ EOF
 
 for file in $WORKDIR/$V1COMMIT/test.main.$DPSP/global* 
 do 
-    echo "Checking differences in file \$file ..."
-    ./test/diff_ascii_files.py \$file $WORKDIR/$V1COMMIT/test.main.$DPSP/\$(basename \$file) 
+    echo "Checking differences in file \$file ..." 
+    ./test/diff_ascii_files.py \$file $WORKDIR/$V1COMMIT/test.main.$DPSP/\$(basename \$file)
 done
 
 EOF
 
-            if [  $SCHEDULER == "slurm" ]
-            then
-                sbatch test.main.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB
-            else
-                bash test.main.$DPSP\.finalcheck.sh-slurm
-            fi
+       if [  $SCHEDULER == "slurm" ]
+       then
+           sbatch test.main.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB
+       else
+           bash test.main.$DPSP\.finalcheck.sh-slurm | tee test.main.$DPSP.check
+       fi
     done
 fi
 
@@ -379,10 +379,83 @@ fi
 if [ $DOPGTEST == "yes" ] 
 then
     # both single and double precision tests will be run on both commits.
-    for $DPSP in dp sp
-    do
-        echo "To implement"
+    for DPSP in dp sp
+    do 
+        # 1. job on first commit
+        cd $WORKDIR/$V1COMMIT/test.pg.$DPSP
+        if [  $SCHEDULER == "slurm" ]
+        then 
+        CAJOB=$(sbatch test.pg.$DPSP\.slurm | cut -d' ' -f4)
+        else
+           echo $PWD
+           bash ./test.pg.$DPSP\.sh
+        fi
+        # 2. "connection" job
+        cd $WORKDIR
+        cat > test.pg.$DPSP\.connection.sh-slurm << EOF
+#!/bin/bash
+#SBATCH --job-name=pg.$DPSP\.connection
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error=pg.$DPSP\.connection.%J.err 
+#SBATCH --output=pg.$DPSP\.connection.%J.out
+#SBATCH --partition=$SLURMPARTITION
+
+for file in $WORKDIR/$V1COMMIT/test.pg.$DPSP/*norndtest* 
+do 
+	echo "Linking file \$file ..."
+	echo ln -s \$file $WORKDIR/$V2COMMIT/test.pg.$DPSP/\$(basename \$file)
+	ln -s \$file $WORKDIR/$V2COMMIT/test.pg.$DPSP/\$(basename \$file)
+done
+
+EOF
+        if [  $SCHEDULER == "slurm" ]
+        then
+        CONNJOB=$(\
+            sbatch test.pg.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB\
+            | cut -d' ' -f4)
+        else
+            echo bash ./test.pg.$DPSP\.connection.sh-slurm
+            bash ./test.pg.$DPSP\.connection.sh-slurm
+        fi
+        # 3. job on second commit
+        cd $WORKDIR/$V2COMMIT/test.pg.$DPSP
+        if [  $SCHEDULER == "slurm" ]
+        then
+        CBJOB=$(sbatch test.pg.$DPSP\.slurm --dependency=afterok:$CONNJOB\
+            | cut -d' ' -f4)
+        else
+         echo $PWD
+            bash ./test.pg.$DPSP\.sh
+        fi
+        # 4. final-check job to compare the results
+        cd $WORKDIR
+        # WHAT EXACTLY NEED TO BE CHECKED? TO DEFINE
+        cat > test.pg.$DPSP\.finalcheck.sh-slurm << EOF
+#!/bin/bash
+#SBATCH --job-name=pg.$DPSP\.finalcheck
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --error=pg.$DPSP\.finalcheck.%J.err 
+#SBATCH --output=pg.$DPSP\.finalcheck.%J.out
+#SBATCH --partition=$SLURMPARTITION
+
+for file in $WORKDIR/$V1COMMIT/test.pg.$DPSP/global* 
+do 
+    echo "Checking differences in file \$file ..." 
+    ./test/diff_ascii_files.py \$file $WORKDIR/$V1COMMIT/test.pg.$DPSP/\$(basename \$file)
+done
+
+EOF
+
+       if [  $SCHEDULER == "slurm" ]
+       then
+           sbatch test.pg.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB
+       else
+           bash test.pg.$DPSP\.finalcheck.sh-slurm | tee test.pg.$DPSP.check
+       fi
     done
+
 fi
 
 if [ $DOPGREVTEST == "yes" ] 
