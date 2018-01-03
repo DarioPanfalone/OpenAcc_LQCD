@@ -16,8 +16,8 @@
 # Default values
 # Scheduler can be either 'bash' or a proper scheduling system. 
 SCHEDULER=bash
-OLDCOMMIT=8d4dcd6cbf91be1354a471665ec71a1db4756628
-NEWCOMMIT=$(git rev-parse HEAD)
+V1COMMIT=8d4dcd6cbf91be1354a471665ec71a1db4756628
+V2COMMIT=$(git rev-parse HEAD)
 GEOMFILE=
 GEOMFILE1=
 GEOMFILE2=
@@ -60,12 +60,12 @@ do
         shift
         ;;
 
-    -o|--oldcommit) 
-        OLDCOMMIT=$2
+    -v1|--version1) 
+        V1COMMIT=$2
         shift
         ;;
-    -n|--newcommit)
-        NEWCOMMIT=$2
+    -v2|--version2)
+        V2COMMIT=$2
         shift
         ;;
     -g|--geomfile)
@@ -177,8 +177,8 @@ fi
 
 # Showing which options we got.
 echo "Selecting  scheduler $SCHEDULER (choose with -s)"
-echo "Selecting commit $OLDCOMMIT for (1) (choose with -o)"
-echo "Selecting commit $NEWCOMMIT for (2) (choose with -n)" 
+echo "Selecting commit $V1COMMIT for (1) (choose with -o)"
+echo "Selecting commit $V2COMMIT for (2) (choose with -n)" 
 echo "Selecting geom_defines file $GEOMFILE1 for (1) (choose with -g1 or -g)" 
 echo "Selecting geom_defines file $GEOMFILE2 for (2) (choose with -g2 or -g)" 
 echo "Selecting config wrapper options $CONFIGOPTIONS_CSV1 for (1) (choose with -c1 or -c)" 
@@ -249,8 +249,8 @@ PREPARE_RUN(){
 }
 
 # compilation and setting up of all directories
-PREPARE_RUN $OLDCOMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
-PREPARE_RUN $NEWCOMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
+#PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
+#PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
 
 
 #####################################################
@@ -259,7 +259,7 @@ PREPARE_RUN $NEWCOMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
 # setting up all the tests, submitting all the jobs, linking the files
 # that must be the same
 
-TESTSLIST=(${TESTCSV//,/ }) # using a bash array
+TESTSLIST=(${TESTSCSV//,/ }) # using a bash array
 for TEST in ${TESTSLIST[@]}
 do
     case $TEST in
@@ -292,7 +292,7 @@ then
     for DPSP in dp sp
     do 
             # 1. job on first commit
-            cd $WORKDIR/$OLDCOMMIT/test.main.$DPSP
+            cd $WORKDIR/$V1COMMIT/test.main.$DPSP
             if [  $SCHEDULER == "slurm" ]
             then 
             CAJOB=$(sbatch test.main.$DPSP\.slurm | cut -d' ' -f4)
@@ -311,9 +311,10 @@ then
 #SBATCH --output=main.$DPSP\.connection.%J.out
 #SBATCH --partition=$SLURMPARTITION
 
-for file in $WORKDIR/$OLDCOMMIT/test.main.$DPSP/*norndtest* 
+for file in $WORKDIR/$V1COMMIT/test.main.$DPSP/*norndtest* 
 do 
-    ln $file $WORKDIR/$OLDCOMMIT/test.main.$DPSP
+	echo "Linking file $file ..."
+	ln -s $file $WORKDIR/$V1COMMIT/test.main.$DPSP/$(basename $file)
 done
 
 EOF
@@ -326,7 +327,7 @@ EOF
                 bash ./test.main.$DPSP\.connection.sh-slurm
             fi
             # 3. job on second commit
-            cd $WORKDIR/$NEWCOMMIT/test.main.$DPSP
+            cd $WORKDIR/$V2COMMIT/test.main.$DPSP
             if [  $SCHEDULER == "slurm" ]
             then
             CBJOB=$(sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB\
@@ -346,9 +347,10 @@ EOF
 #SBATCH --output=main.$DPSP\.finalcheck.%J.out
 #SBATCH --partition=$SLURMPARTITION
 
-for file in $WORKDIR/$OLDCOMMIT/test.main.$DPSP/* 
+for file in $WORKDIR/$V1COMMIT/test.main.$DPSP/* 
 do 
-    ./test/diff_ascii_files.py $file $WORKDIR/$OLDCOMMIT/test.main.$DPSP/$(basename $file) 
+    echo "Checking differences in file $file ..."
+    ./test/diff_ascii_files.py $file $WORKDIR/$V1COMMIT/test.main.$DPSP/$(basename $file) 
 done
 
 EOF
@@ -391,10 +393,13 @@ fi
 
 if [ $DODIRACTEST == "yes" ] 
 then
+        echo "To implement"
+
 fi
 
 if [ $DOINVTEST == "yes" ] 
 then
+        echo "To implement"
 fi
 
 
