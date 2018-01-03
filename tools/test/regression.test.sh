@@ -249,8 +249,8 @@ PREPARE_RUN(){
 }
 
 # compilation and setting up of all directories
-#PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
-#PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
+PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1 
+PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2 
 
 
 #####################################################
@@ -297,11 +297,11 @@ then
             then 
             CAJOB=$(sbatch test.main.$DPSP\.slurm | cut -d' ' -f4)
             else
+	       echo $PWD
                bash ./test.main.$DPSP\.sh
             fi
             # 2. "connection" job
             cd $WORKDIR
-            # WHAT EXACTLY NEEDS TO BE COPIED-LINKED? TO DEFINE
             cat > test.main.$DPSP\.connection.sh-slurm << EOF
 #!/bin/bash
 #SBATCH --job-name=main.$DPSP\.connection
@@ -313,8 +313,9 @@ then
 
 for file in $WORKDIR/$V1COMMIT/test.main.$DPSP/*norndtest* 
 do 
-	echo "Linking file $file ..."
-	ln -s $file $WORKDIR/$V1COMMIT/test.main.$DPSP/$(basename $file)
+	echo "Linking file \$file ..."
+	echo ln -s \$file $WORKDIR/$V2COMMIT/test.main.$DPSP/\$(basename \$file)
+	ln -s \$file $WORKDIR/$V2COMMIT/test.main.$DPSP/\$(basename \$file)
 done
 
 EOF
@@ -324,6 +325,7 @@ EOF
                 sbatch test.main.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB\
                 | cut -d' ' -f4)
             else
+                echo bash ./test.main.$DPSP\.connection.sh-slurm
                 bash ./test.main.$DPSP\.connection.sh-slurm
             fi
             # 3. job on second commit
@@ -333,6 +335,7 @@ EOF
             CBJOB=$(sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB\
                 | cut -d' ' -f4)
             else
+		echo $PWD
                 bash ./test.main.$DPSP\.sh
             fi
             # 4. final-check job to compare the results
@@ -347,10 +350,10 @@ EOF
 #SBATCH --output=main.$DPSP\.finalcheck.%J.out
 #SBATCH --partition=$SLURMPARTITION
 
-for file in $WORKDIR/$V1COMMIT/test.main.$DPSP/* 
+for file in $WORKDIR/$V1COMMIT/test.main.$DPSP/global* 
 do 
-    echo "Checking differences in file $file ..."
-    ./test/diff_ascii_files.py $file $WORKDIR/$V1COMMIT/test.main.$DPSP/$(basename $file) 
+    echo "Checking differences in file \$file ..."
+    ./test/diff_ascii_files.py \$file $WORKDIR/$V1COMMIT/test.main.$DPSP/\$(basename \$file) 
 done
 
 EOF
@@ -359,7 +362,7 @@ EOF
             then
                 sbatch test.main.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB
             else
-                bash test.main.$DPSP\.finalcheck.sh
+                bash test.main.$DPSP\.finalcheck.sh-slurm
             fi
     done
 fi
@@ -394,7 +397,6 @@ fi
 if [ $DODIRACTEST == "yes" ] 
 then
         echo "To implement"
-
 fi
 
 if [ $DOINVTEST == "yes" ] 
