@@ -48,6 +48,13 @@ CLEAREVERYTHING(){
     exit
 }
 
+WAIT_FOR_RETURN(){
+           echo "Next command: "
+           echo $1
+           echo "Press Return to continue"
+           read
+}
+
 trap CLEAREVERYTHING EXIT
 ###################################################
 ####   READING COMMAND LINE OPTIONS   #############
@@ -68,9 +75,7 @@ do
         V2COMMIT=$2
         shift
         ;;
-    -g|--geomfile)
-        GEOMFILE=$2
-        shift
+    $1
         ;;
     -g1|--geomfile1)
         GEOMFILE1=$2
@@ -195,6 +200,10 @@ fi
 # creating directory with all the test scripts, which will not be changed by git
 # when we checkout to another commit.
 echo "Using regression test scripts at commit $CURRENTCOMMIT"
+
+echo "Press Return to continue."
+read
+
 cp -r $SCRIPTSDIR test
 
 TESTSLIST=(${TESTSCSV//,/ }) # using a bash array
@@ -205,6 +214,7 @@ do
             if [ ! -z "$V2COMMIT" ]
             then 
                 DOMAINTEST=yes
+                echo "main program test will be performed." 
 	    else
                 DOMAINTEST=no
 		echo "ERROR: Main program regression test not possible."
@@ -214,12 +224,13 @@ do
             ;;
         mainrev)
             DOMAINREVTEST=yes
-	    echo "Selected reversibility test on main program, commit $V1COMMIT."
+	        echo "reversibility test on main program will be performed on commit $V1COMMIT."
             ;;
         pg)
             if [ ! -z "$V2COMMIT" ]
             then 
                 DOPGTEST=yes
+                echo "pure gauge molecular dynamics test will be performed." 
 	    else
                 DOPGTEST=no
 		echo "ERROR: Pure gauge regression test not possible."
@@ -229,12 +240,13 @@ do
             ;;
         pgrev)
             DOPGREVTEST=yes
-	    echo "Selected reversibility test on pure gauge, commit $V1COMMIT."
+            echo "reversibility test on pure gauge will be performed commit $V1COMMIT."
             ;;
         dirac)
 	    if [ ! -z "$V2COMMIT" ]
             then 
                 DODIRACTEST=yes
+                echo "dirac operator test will be performed."
 	    else
                 DODIRACTEST=no
 		echo "ERROR: Dirac regression test not possible."
@@ -244,10 +256,14 @@ do
             ;;
         inv|inverter)
             DOINVTEST=yes
-	    echo "Selected inverter test, commit $V1COMMIT."
+	        echo "inverter test will be performed on commit $V1COMMIT."
             ;;
     esac
 done
+
+echo "Press Return to continue..."
+read
+
 
 
 
@@ -313,6 +329,13 @@ PREPARE_RUN(){
 PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
 if [ ! -z "$V2COMMIT" ]
 then
+        echo "Preparing run:"
+        echo "Commit: " $V2COMMIT 
+        echo "compilation/geometry info file: " $GEOMFILE2 
+        echo "configuration optionas: " $CONFIGOPTIONS_CSV2 
+        echo "environment modules to load: "$MODULES_TO_LOAD_CSV2
+        echo "Press return to continue..."
+        read
        	PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
 fi
 
@@ -323,19 +346,28 @@ fi
 # setting up all the tests, submitting all the jobs, linking the files
 # that must be the same
 
+echo "Runs have been prepared."
+
 if [ $DOMAINTEST == "yes" ] 
 then
     # both single and double precision tests will be run on both commits.
+    echo "Setting up main program test on both commits."
+    echo "Press Return to continue..."
+    read
     for DPSP in dp sp
     do 
         # 1. job on first commit
         cd $WORKDIR/$V1COMMIT/test.main.$DPSP
         if [  $SCHEDULER == "slurm" ]
         then 
-        CAJOB=$(sbatch test.main.$DPSP\.slurm | cut -d' ' -f4)
+            COMMAND="sbatch test.main.$DPSP\.slurm"
+            WAIT_FOR_RETURN $COMMAND
+            CAJOB=$($COMMAND| cut -d' ' -f4)
         else
            echo $PWD
-           bash ./test.main.$DPSP\.sh
+           COMMAND="bash ./test.main.$DPSP\.sh"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
         fi
         # 2. "connection" job
         cd $WORKDIR
@@ -358,22 +390,25 @@ done
 EOF
         if [  $SCHEDULER == "slurm" ]
         then
-        CONNJOB=$(\
-            sbatch test.main.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB\
-            | cut -d' ' -f4)
+            COMMAND="sbatch test.main.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB"
+            WAIT_FOR_RETURN $COMMAND
+            CONNJOB=$( $COMMAND | cut -d' ' -f4)
         else
-            echo bash ./test.main.$DPSP\.connection.sh-slurm
-            bash ./test.main.$DPSP\.connection.sh-slurm
+            COMMAND="bash ./test.main.$DPSP\.connection.sh-slurm"
+            WAIT_FOR_RETURN $COMMAND
+            $COMMAND
         fi
         # 3. job on second commit
         cd $WORKDIR/$V2COMMIT/test.main.$DPSP
         if [  $SCHEDULER == "slurm" ]
         then
-        CBJOB=$(sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB\
-            | cut -d' ' -f4)
+            COMMAND="sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB"
+            WAIT_FOR_RETURN $COMMAND
+            CBJOB=$( $COMMAND | cut -d' ' -f4)
         else
-         echo $PWD
-            bash ./test.main.$DPSP\.sh
+            COMMAND="bash ./test.main.$DPSP\.sh"
+            WAIT_FOR_RETURN $COMMAND
+            $COMMAND
         fi
         # 4. final-check job to compare the results
         cd $WORKDIR
@@ -397,9 +432,13 @@ EOF
 
        if [  $SCHEDULER == "slurm" ]
        then
-           sbatch test.main.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB
+           COMMAND="sbatch test.main.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
        else
-           bash test.main.$DPSP\.finalcheck.sh-slurm | tee test.main.$DPSP.check
+           COMMAND="bash test.main.$DPSP\.finalcheck.sh-slurm | tee test.main.$DPSP.check"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
        fi
     done
 fi
@@ -407,15 +446,23 @@ fi
 if [ $DOMAINREVTEST == "yes" ] 
 then
     # both single and double precision tests will be run on V1 commit.
+    echo "Setting up main program reversibility test"
+    echo "Commit: " $V1COMMIT
+    echo "Press Return to continue..."
+    read
+
     for $DPSP in dp sp
     do
 	cd $WORKDIR/$V1COMMIT/test.main.$DPSP.revt
         if [  $SCHEDULER == "slurm" ]
         then 
-        sbatch test.main.$DPSP\.revt.slurm 
+           COMMAND="sbatch test.main.$DPSP\.revt.slurm"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
         else
-           echo $PWD
-           bash ./test.main.$DPSP\.revt.sh
+           COMMAND="bash ./test.main.$DPSP\.revt.sh"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
         fi
     done
 fi
@@ -423,16 +470,22 @@ fi
 if [ $DOPGTEST == "yes" ] 
 then
     # both single and double precision tests will be run on both commits.
+    echo "Setting up pure gauge molecular dynamics test on both commits."
+    echo "Press Return to continue..."
+    read
     for DPSP in dp sp
     do 
         # 1. job on first commit
         cd $WORKDIR/$V1COMMIT/test.pg.$DPSP
         if [  $SCHEDULER == "slurm" ]
         then 
-        CAJOB=$(sbatch test.pg.$DPSP\.slurm | cut -d' ' -f4)
+            COMMAND="sbatch test.pg.$DPSP\.slurm"
+            WAIT_FOR_RETURN $COMMAND
+            CAJOB=$($COMMAND | cut -d' ' -f4)
         else
-           echo $PWD
-           bash ./test.pg.$DPSP\.sh
+           COMMAND="bash ./test.pg.$DPSP\.sh"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
         fi
         # 2. "connection" job
         cd $WORKDIR
@@ -455,22 +508,25 @@ done
 EOF
         if [  $SCHEDULER == "slurm" ]
         then
-        CONNJOB=$(\
-            sbatch test.pg.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB\
-            | cut -d' ' -f4)
+            COMMAND="sbatch test.pg.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB"
+            WAIT_FOR_RETURN $COMMAND
+            CONNJOB=$($COMMAND | cut -d' ' -f4)
         else
-            echo bash ./test.pg.$DPSP\.connection.sh-slurm
-            bash ./test.pg.$DPSP\.connection.sh-slurm
+            COMMAND="bash ./test.pg.$DPSP\.connection.sh-slurm"
+            WAIT_FOR_RETURN $COMMAND
+            $COMMAND
         fi
         # 3. job on second commit
         cd $WORKDIR/$V2COMMIT/test.pg.$DPSP
         if [  $SCHEDULER == "slurm" ]
         then
-        CBJOB=$(sbatch test.pg.$DPSP\.slurm --dependency=afterok:$CONNJOB\
-            | cut -d' ' -f4)
+            COMMAND="sbatch test.pg.$DPSP\.slurm --dependency=afterok:$CONNJOB"
+            WAIT_FOR_RETURN $COMMAND
+            CBJOB=$($COMMAND | cut -d' ' -f4)
         else
-         echo $PWD
-            bash ./test.pg.$DPSP\.sh
+            COMMAND="bash ./test.pg.$DPSP\.sh"
+            WAIT_FOR_RETURN $COMMAND
+            $COMMAND
         fi
         # 4. final-check job to compare the results
         cd $WORKDIR
@@ -494,9 +550,13 @@ EOF
 
        if [  $SCHEDULER == "slurm" ]
        then
-           sbatch test.pg.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB
+           COMMAND="sbatch test.pg.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
        else
-           bash test.pg.$DPSP\.finalcheck.sh-slurm | tee test.pg.$DPSP.check
+           COMMAND="bash test.pg.$DPSP\.finalcheck.sh-slurm | tee test.pg.$DPSP.check"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
        fi
     done
 
@@ -510,10 +570,13 @@ then
 	cd $WORKDIR/$V1COMMIT/test.pg.$DPSP.revt
         if [  $SCHEDULER == "slurm" ]
         then 
-        sbatch test.pg.$DPSP\.revt.slurm
+        COMMAND="sbatch test.pg.$DPSP\.revt.slurm"
+        WAIT_FOR_RETURN $COMMAND
+        $COMMAND
         else
-           echo $PWD
-           bash ./test.pg.$DPSP\.revt.sh
+           COMMAND="bash ./test.pg.$DPSP\.revt.sh"
+           WAIT_FOR_RETURN $COMMAND
+           $COMMAND
         fi
     done
 fi
@@ -524,9 +587,13 @@ then
     cd $WORKDIR/$V1COMMIT/test.deo_doe_test.dpsp
     if [  $SCHEDULER == "slurm" ]
     then 
-        CAJOB=$(sbatch test.deo_doe_test.dpsp.slurm | cut -d' ' -f4)
+        COMMAND="sbatch test.deo_doe_test.dpsp.slurm"
+        WAIT_FOR_RETURN $COMMAND
+        CAJOB=$($COMMAND | cut -d' ' -f4)
     else
-        bash ./test.deo_doe_test.dpsp.sh
+        COMMAND="bash ./test.deo_doe_test.dpsp.sh"
+        WAIT_FOR_RETURN $COMMAND
+        $COMMAND
     fi
     # 2. "connection" job
     cd $WORKDIR
@@ -549,21 +616,25 @@ done
 EOF
     if [  $SCHEDULER == "slurm" ]
     then
-    CONNJOB=$(\
-    sbatch test.deo_doe_test.dpsp.connection.sh-slurm --dependency=afterok:$CAJOB\
-        | cut -d' ' -f4)
+        COMMAND="sbatch test.deo_doe_test.dpsp.connection.sh-slurm --dependency=afterok:$CAJOB"
+        WAIT_FOR_RETURN $COMMAND
+        CONNJOB=$($COMMAND | cut -d' ' -f4)
     else
-        bash ./test.deo_doe_test.dpsp.connection.sh-slurm 
+        COMMAND="bash ./test.deo_doe_test.dpsp.connection.sh-slurm"
+        WAIT_FOR_RETURN $COMMAND
+        $COMMAND
     fi
     # 3. job on second commit
     cd $WORKDIR/$V2COMMIT/test.deo_doe_test.dpsp
     if [  $SCHEDULER == "slurm" ]
     then
-        CBJOB=$(sbatch test.deo_doe_test.dpsp.slurm --dependency=afterok:$CONNJOB\
-            | cut -d' ' -f4)
+        COMMAND="sbatch test.deo_doe_test.dpsp.slurm --dependency=afterok:$CONNJOB"
+        WAIT_FOR_RETURN $COMMAND
+        CBJOB=$( $COMMAND | cut -d' ' -f4)
     else
-        echo $PWD
-        bash ./test.deo_doe_test.dpsp.sh
+        COMMAND="bash ./test.deo_doe_test.dpsp.sh"
+        WAIT_FOR_RETURN $COMMAND
+        $COMMAND
     fi
     # 4. final-check job to compare the results
     cd $WORKDIR
@@ -595,9 +666,13 @@ done
 EOF
     if [  $SCHEDULER == "slurm" ]
     then
-        sbatch test.deo_doe_test.dpsp.finalcheck.sh-slurm --dependency=afterok:$CBJOB
+        COMMAND="sbatch test.deo_doe_test.dpsp.finalcheck.sh-slurm --dependency=afterok:$CBJOB"
+        WAIT_FOR_RETURN $COMMAND
+        $COMMAND
     else
-        bash test.deo_doe_test.dpsp.finalcheck.sh-slurm | tee test.deo_doe_test.dpsp.check
+        COMMAND="bash test.deo_doe_test.dpsp.finalcheck.sh-slurm | tee test.deo_doe_test.dpsp.check"
+        WAIT_FOR_RETURN $COMMAND
+        $COMMAND
     fi
 fi
 
@@ -606,10 +681,13 @@ then
     cd $WORKDIR/$V1COMMIT/test.inverter_multishift_test.dpsp
     if [  $SCHEDULER == "slurm" ]
     then
-        sbatch test.inverter_multishift_test.dpsp.slurm
+        COMMAND="sbatch test.inverter_multishift_test.dpsp.slurm"
+        WAIT_FOR_RETURN $COMMAND
+        $COMMAND
     else
-        bash test.inverter_multishift_test.dpsp.sh \
-            | tee test.inverter_multishift_test.dpsp.check
+        COMMAND="bash test.inverter_multishift_test.dpsp.sh | tee test.inverter_multishift_test.dpsp.check"
+        WAIT_FOR_RETURN $COMMAND
+        $COMMAND
     fi
 fi
 
