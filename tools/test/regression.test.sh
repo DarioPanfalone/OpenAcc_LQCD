@@ -75,7 +75,9 @@ do
         V2COMMIT=$2
         shift
         ;;
-    $1
+    -g|--geomfile)
+        GEOMFILE=$2
+        shift
         ;;
     -g1|--geomfile1)
         GEOMFILE1=$2
@@ -233,8 +235,8 @@ do
                 echo "pure gauge molecular dynamics test will be performed." 
 	    else
                 DOPGTEST=no
-		echo "ERROR: Pure gauge regression test not possible."
-	        echo "       Only one code version specified: select other commit with -v2"
+                echo "ERROR: Pure gauge regression test not possible."
+                echo "       Only one code version specified: select other commit with -v2"
 		exit
 	    fi
             ;;
@@ -249,8 +251,8 @@ do
                 echo "dirac operator test will be performed."
 	    else
                 DODIRACTEST=no
-		echo "ERROR: Dirac regression test not possible."
-	        echo "       Only one code version specified: select other commit with -v2"
+                echo "ERROR: Dirac regression test not possible."
+                echo "       Only one code version specified: select other commit with -v2"
 		exit
 	    fi
             ;;
@@ -260,6 +262,12 @@ do
             ;;
     esac
 done
+
+if [[ ${#TESTSLIST[@]} == 0 ]]
+then 
+    echo "No test has been selected to run."
+    echo "Builing and setting up will be done anyway"
+fi
 
 echo "Press Return to continue..."
 read
