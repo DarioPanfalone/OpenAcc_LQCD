@@ -4,6 +4,8 @@
  chosen depending on the special-arguments passed to this script.
  
  Special arguments for this script:
+ debug - if the argument 'debug' is passed, none of the ones listed down here
+         may. Use this to debug your code with gdb. No mpi.
 
  Compilers: gcc,mpi,pgi (mutually exclusive)
  Options for pgi: cc35, cc60, haswell, amd (mutually exclusive)
@@ -29,25 +31,26 @@ for arg in argv[1:]:
 
 
 accepted_options = ['gcc','gcc-4','gcc-5','gcc-6','mpi','pgi','cc35','cc50','cc60','haswell',\
-        'amd','cuda7.0','cuda7.5','cuda8.0']
+        'amd','cuda7.0','cuda7.5','cuda8.0','debug']
 
 n=None
 # flag compatibilities
 comp_matrix=[
-        [n,0,0,0,0,0,0,0,0,0,0,0,0,0],# gcc, default
-        [n,n,0,0,0,0,0,0,0,0,0,0,0,0],# gcc-4
-        [n,n,n,0,0,0,0,0,0,0,0,0,0,0],# gcc-5
-        [n,n,n,n,0,0,0,0,0,0,0,0,0,0],# gcc-6
-        [n,n,n,n,n,0,0,0,0,0,0,0,0,0],# mpi
-        [n,n,n,n,n,n,1,1,1,1,1,1,1,1],# pgi
-        [n,n,n,n,n,n,n,0,0,0,0,1,1,1],# cc35
-        [n,n,n,n,n,n,n,n,0,0,0,1,1,1],# cc50
-        [n,n,n,n,n,n,n,n,n,0,0,1,1,1],# cc60
-        [n,n,n,n,n,n,n,n,n,n,0,0,0,0],# haswell
-        [n,n,n,n,n,n,n,n,n,n,n,0,0,0],# amd
-        [n,n,n,n,n,n,n,n,n,n,n,n,0,0],# cuda7.0
-        [n,n,n,n,n,n,n,n,n,n,n,n,n,0],# cuda7.5
-        [n,n,n,n,n,n,n,n,n,n,n,n,n,n]]# cuda8.0
+        [n,0,0,0,0,0,0,0,0,0,0,0,0,0,0],# gcc, default
+        [n,n,0,0,0,0,0,0,0,0,0,0,0,0,0],# gcc-4
+        [n,n,n,0,0,0,0,0,0,0,0,0,0,0,0],# gcc-5
+        [n,n,n,n,0,0,0,0,0,0,0,0,0,0,0],# gcc-6
+        [n,n,n,n,n,0,0,0,0,0,0,0,0,0,0],# mpi
+        [n,n,n,n,n,n,1,1,1,1,1,1,1,1,0],# pgi
+        [n,n,n,n,n,n,n,0,0,0,0,1,1,1,0],# cc35
+        [n,n,n,n,n,n,n,n,0,0,0,1,1,1,0],# cc50
+        [n,n,n,n,n,n,n,n,n,0,0,1,1,1,0],# cc60
+        [n,n,n,n,n,n,n,n,n,n,0,0,0,0,0],# haswell
+        [n,n,n,n,n,n,n,n,n,n,n,0,0,0,0],# amd
+        [n,n,n,n,n,n,n,n,n,n,n,n,0,0,0],# cuda7.0
+        [n,n,n,n,n,n,n,n,n,n,n,n,n,0,0],# cuda7.5
+        [n,n,n,n,n,n,n,n,n,n,n,n,n,n,0],# cuda8.0
+        [n,n,n,n,n,n,n,n,n,n,n,n,n,n,n]]# debug
 
 
 all_ok = True
@@ -65,7 +68,14 @@ if not all_ok :
     exit(1)
 
 
-if 'pgi' in argv:
+if 'debug' in argv:
+    argv.remove('debug')
+    CC='gcc'
+    CXX='g++'
+    CC_FLAGS='"-O0 -g -std=gnu99"'
+    LINKER_FLAGS='"-lm"'
+
+elif 'pgi' in argv:
     argv.remove('pgi')
 
     CC='pgcc'

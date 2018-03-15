@@ -91,7 +91,7 @@ void generate_vec3_soa_gauss(__restrict vec3_soa * const vect)
 #endif
 }
 
-inline double norm3(d_complex a,d_complex b, d_complex c)
+static inline double norm3(d_complex a,d_complex b, d_complex c)
 {
 
     double norm ;

@@ -24,7 +24,7 @@ int print_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,
 
 
 //WRAPPER
-inline int save_conf(global_su3_soa * const conf_rw, const char* nomefile,
+static inline int save_conf(global_su3_soa * const conf_rw, const char* nomefile,
         int conf_id_iter, int use_ildg)
 {
 
@@ -49,7 +49,7 @@ inline int save_conf(global_su3_soa * const conf_rw, const char* nomefile,
 
 
 // WRAPPER OF WRAPPER
-inline void save_conf_wrapper(su3_soa* conf, const char* nomefile,
+static inline void save_conf_wrapper(su3_soa* conf, const char* nomefile,
         int conf_id_iter, int use_ildg)
  {
 
@@ -92,7 +92,7 @@ int read_su3_soa_ildg_binary(global_su3_soa * conf, const char* nomefile,
 
 
 //WRAPPER
-inline int read_conf(global_su3_soa * conf, const char* nomefile,
+static inline int read_conf(global_su3_soa * conf, const char* nomefile,
         int * conf_id_iter, int use_ildg )
 {
 
@@ -119,7 +119,7 @@ inline int read_conf(global_su3_soa * conf, const char* nomefile,
 
 
 // WRAPPER OF WRAPPER
-inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,
+static inline int read_conf_wrapper(su3_soa* conf, const char* nomefile,
         int * conf_id_iter, int use_ildg)
 {
 
