@@ -33,6 +33,7 @@ CONFIGOPTIONS_CSV2=""
 
 
 # Types of test
+DOBUILDTESTONLY=no
 DOMAINTEST=no
 DOMAINREVTEST=no
 DOPGTEST=no
@@ -43,19 +44,20 @@ DOINVTEST=no
 CURRENTCOMMIT=$(git rev-parse --abbrev-ref HEAD)
 
 
-CLEAREVERYTHING(){
+CLEANUP(){
+    echo "Restoring repo state to $CURRENTCOMMIT..."
     git checkout -f $CURRENTCOMMIT
     exit
 }
 
 WAIT_FOR_RETURN(){
            echo "Next command: "
-           echo $1
+           echo $@
            echo "Press Return to continue"
            read
 }
 
-trap CLEAREVERYTHING EXIT
+trap CLEANUP EXIT SIGINT
 ###################################################
 ####   READING COMMAND LINE OPTIONS   #############
 ###################################################
@@ -66,7 +68,6 @@ do
         SCHEDULER=$2
         shift
         ;;
-
     -v1|--version1) 
         V1COMMIT=$2
         shift
@@ -151,7 +152,11 @@ OPTION12CHECK(){
     if [ -z ${!VARNAME} ] && [ -z ${!VARNAME1} ] && [ -z ${!VARNAME2} ]
     then 
             eval $VARNAME=$VARDEFAULT
-            echo "No geom_defines file names provided. Using default ${!VARNAME}"
+            if [ -z $VARDEFAULT ];then
+                echo "No $VARNAME provided. Using default: (none)"
+            else
+                echo "No $VARNAME provided. Using default: \"${!VARNAME}\""
+            fi
         fi
 
         if [ -z ${!VARNAME1} ] && [ ! -z ${!VARNAME} ] 
@@ -183,17 +188,25 @@ else
 fi
 
 # Showing which options we got.
-echo "Selecting  scheduler $SCHEDULER (choose with -s)"
-echo "Selecting commit $V1COMMIT for (1) (choose with -v1)"
-echo "Selecting geom_defines file $GEOMFILE1 for (1) (choose with -g1 or -g)" 
-echo "Selecting config wrapper options $CONFIGOPTIONS_CSV1 for (1) (choose with -c1 or -c)" 
+echo "Selecting scheduler \"$SCHEDULER\" (choose with -s)"
+echo "Selecting commit \"$V1COMMIT\" for (1) (choose with -v1)"
+echo "Selecting geom_defines file \"$GEOMFILE1\" for (1) (choose with -g1 or -g)" 
+if [ ! -f "$GEOMFILE1" ]; then
+    echo "Error: \"$GEOMFILE1\" does not exist. Exiting"
+    exit 1
+fi
+echo "Selecting config wrapper options \"$CONFIGOPTIONS_CSV1\" for (1) (choose with -c1 or -c)" 
 echo "Selecting modules \"$MODULES_TO_LOAD_CSV1\" for (1) (choose with -m1 or -m)" 
 
 if [ ! -z "$V2COMMIT" ]
 then
-    echo "Selecting commit $V2COMMIT for (2) (choose with -v2)" 
-    echo "Selecting geom_defines file $GEOMFILE2 for (2) (choose with -g2 or -g)" 
-    echo "Selecting config wrapper options $CONFIGOPTIONS_CSV2 for (2) (choose with -c2 or -c)" 
+    echo "Selecting commit \"$V2COMMIT\" for (2) (choose with -v2)" 
+    echo "Selecting geom_defines file \"$GEOMFILE2\" for (2) (choose with -g2 or -g)" 
+    if [ ! -f "$GEOMFILE2" ]; then
+        echo "Error: \"$GEOMFILE2\" does not exist. Exiting"
+        exit 1
+    fi
+    echo "Selecting config wrapper options \"$CONFIGOPTIONS_CSV2\" for (2) (choose with -c2 or -c)" 
     echo "Selecting modules \"$MODULES_TO_LOAD_CSV2\" for (1) (choose with -m1 or -m)" 
 else
     echo "Commit (2)  not selected (choose with -v2)" 
@@ -201,10 +214,7 @@ fi
 
 # creating directory with all the test scripts, which will not be changed by git
 # when we checkout to another commit.
-echo "Using regression test scripts at commit $CURRENTCOMMIT"
-
-echo "Press Return to continue."
-read
+echo "Using regression test scripts at commit \"$CURRENTCOMMIT\""
 
 cp -r $SCRIPTSDIR test
 
@@ -212,11 +222,16 @@ TESTSLIST=(${TESTSCSV//,/ }) # using a bash array
 for TEST in ${TESTSLIST[@]}
 do
     case $TEST in
+        build) 
+            DOBUILDTESTONLY=yes
+            echo "Build test will be performed for commit \"$V1COMMIT\""
+            ;;
         main)
             if [ ! -z "$V2COMMIT" ]
             then 
                 DOMAINTEST=yes
-                echo "main program test will be performed." 
+                DOBUILDTESTONLY=no # included automatically
+                echo "main program regression test will be performed." 
 	    else
                 DOMAINTEST=no
 		echo "ERROR: Main program regression test not possible."
@@ -226,13 +241,15 @@ do
             ;;
         mainrev)
             DOMAINREVTEST=yes
-	        echo "reversibility test on main program will be performed on commit $V1COMMIT."
+            DOBUILDTESTONLY=no # included automatically
+	        echo "reversibility test on main program will be performed on commit \"$V1COMMIT\"."
             ;;
         pg)
             if [ ! -z "$V2COMMIT" ]
             then 
                 DOPGTEST=yes
-                echo "pure gauge molecular dynamics test will be performed." 
+                DOBUILDTESTONLY=no # included automatically
+                echo "pure gauge molecular dynamics regression test will be performed." 
 	    else
                 DOPGTEST=no
                 echo "ERROR: Pure gauge regression test not possible."
@@ -242,13 +259,15 @@ do
             ;;
         pgrev)
             DOPGREVTEST=yes
-            echo "reversibility test on pure gauge will be performed commit $V1COMMIT."
+            DOBUILDTESTONLY=no # included automatically
+            echo "reversibility test on pure gauge will be performed for commit $V1COMMIT."
             ;;
         dirac)
 	    if [ ! -z "$V2COMMIT" ]
             then 
                 DODIRACTEST=yes
-                echo "dirac operator test will be performed."
+                DOBUILDTESTONLY=no # included automatically
+                echo "dirac operator regression test will be performed."
 	    else
                 DODIRACTEST=no
                 echo "ERROR: Dirac regression test not possible."
@@ -258,7 +277,12 @@ do
             ;;
         inv|inverter)
             DOINVTEST=yes
-	        echo "inverter test will be performed on commit $V1COMMIT."
+            DOBUILDTESTONLY=no # included automatically
+	        echo "inverter test will be performed on commit \"$V1COMMIT\"."
+            ;;
+        *)
+            echo "ERROR: test \"$TEST\" not recognized."
+            exit 1
             ;;
     esac
 done
@@ -266,9 +290,10 @@ done
 if [[ ${#TESTSLIST[@]} == 0 ]]
 then 
     echo "No test has been selected to run."
-    echo "Builing and setting up will be done anyway"
+    echo "Possible tests are: build,main,mainrev,pg,pgrev,dirac,inv (or inverter)."
+    echo "Exiting."
+    exit 1 
 fi
-
 echo "Press Return to continue..."
 read
 
@@ -279,14 +304,13 @@ read
 ########  COMPILING AND PREPARING RUNS   ###############
 ########################################################
 # function for compilation and setting up of all directories
-PREPARE_RUN(){
-    # variables that are expected to change form call to call are passed as arguments.
-    COMMIT=$1
-    TEMPGEOMFILE=$2
-    TEMPCONFIGOPTIONS_CSV=$3 # compiler versions may change
-    TEMPMODULES_TO_LOAD_CSV=$4
-    # the other are taken as global.
-
+BUILD(){
+    local COMMIT=$1
+    local TEMPGEOMFILE=$2
+    local TEMPCONFIGOPTIONS_CSV=$3 # compiler versions may change
+    local TEMPMODULES_TO_LOAD_CSV=$4
+ 
+    echo "Building at commit \"$COMMIT\"..."
     if [ ! -z $TEMPMODULES_TO_LOAD_CSV ]
     then
         echo 'Loading modules...'
@@ -295,9 +319,6 @@ PREPARE_RUN(){
             echo "module load $MODULE"
             module load $MODULE
         done
-        TEMPMODULESFLAGS="-m $TEMPMODULES_TO_LOAD_CSV"
-    else 
-        TEMPMODULESFLAGS=""
     fi
 
     cd $REPODIR
@@ -319,32 +340,57 @@ PREPARE_RUN(){
     if [ $? -ne 0 ]
     then 
         echo "Error: make failed, in $PWD"
-        CLEAREVERYTHING
+        CLEANUP
+    fi
+}
+
+PREPARE_RUN(){
+    # variables that are expected to change form call to call are passed as arguments.
+    local COMMIT=$1
+    local TEMPGEOMFILE=$2
+    local TEMPCONFIGOPTIONS_CSV=$3 # compiler versions may change
+    local TEMPMODULES_TO_LOAD_CSV=$4
+    # the other are taken as global.
+    echo "Preparing run:"
+    echo "Commit: \"$COMMIT\" "
+    echo "compilation/geometry info file:  \"$TEMPGEOMFILE\""
+    echo "Options for configure_wrapper:  \"$TEMPCONFIGOPTIONS_CSV\""
+    echo "environment modules to load: \"$TEMPMODULES_TO_LOAD_CSV\""
+    echo "Press return to continue..."
+    read
+ 
+
+    BUILD $COMMIT $TEMPGEOMFILE $TEMPCONFIGOPTIONS_CSV $TEMPMODULES_TO_LOAD_CSV
+
+    if [ ! -z $TEMPMODULES_TO_LOAD_CSV ]
+    then
+        local TEMPMODULESFLAGS="-m $TEMPMODULES_TO_LOAD_CSV"
+    else 
+        local TEMPMODULESFLAGS=""
     fi
 
     $WORKDIR/test/prepare_tbps.sh -c geom_defines.txt -p test $SLURMFLAGS $TEMPMODULESFLAGS
     if [ $? -ne 0 ]
     then 
         echo "Error: prepare_tbps.sh failed, in $PWD"
-        CLEAREVERYTHING
+        CLEANUP
     fi
 
     cd -
 }
 
 # compilation and setting up of all directories
+if [ $DOBUILDTESTONLY == "yes" ] 
+then 
+    BUILD $V1COMMIT  $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
+    exit 
+else
+    PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
+fi
 
-PREPARE_RUN $V1COMMIT $GEOMFILE1 $CONFIGOPTIONS_CSV1 $MODULES_TO_LOAD_CSV1
 if [ ! -z "$V2COMMIT" ]
 then
-        echo "Preparing run:"
-        echo "Commit: " $V2COMMIT 
-        echo "compilation/geometry info file: " $GEOMFILE2 
-        echo "configuration optionas: " $CONFIGOPTIONS_CSV2 
-        echo "environment modules to load: "$MODULES_TO_LOAD_CSV2
-        echo "Press return to continue..."
-        read
-       	PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
+      	PREPARE_RUN $V2COMMIT $GEOMFILE2 $CONFIGOPTIONS_CSV2 $MODULES_TO_LOAD_CSV2
 fi
 
 
@@ -368,12 +414,12 @@ then
         cd $WORKDIR/$V1COMMIT/test.main.$DPSP
         if [  $SCHEDULER == "slurm" ]
         then 
-            COMMAND="sbatch test.main.$DPSP\.slurm"
+            COMMAND="sbatch test.main.$DPSP.slurm"
             WAIT_FOR_RETURN $COMMAND
             CAJOB=$($COMMAND| cut -d' ' -f4)
         else
            echo $PWD
-           COMMAND="bash ./test.main.$DPSP\.sh"
+           COMMAND="bash ./test.main.$DPSP.sh"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
         fi
@@ -398,11 +444,11 @@ done
 EOF
         if [  $SCHEDULER == "slurm" ]
         then
-            COMMAND="sbatch test.main.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB"
+            COMMAND="sbatch test.main.$DPSP.connection.sh-slurm --dependency=afterok:$CAJOB"
             WAIT_FOR_RETURN $COMMAND
             CONNJOB=$( $COMMAND | cut -d' ' -f4)
         else
-            COMMAND="bash ./test.main.$DPSP\.connection.sh-slurm"
+            COMMAND="bash ./test.main.$DPSP.connection.sh-slurm"
             WAIT_FOR_RETURN $COMMAND
             $COMMAND
         fi
@@ -410,11 +456,11 @@ EOF
         cd $WORKDIR/$V2COMMIT/test.main.$DPSP
         if [  $SCHEDULER == "slurm" ]
         then
-            COMMAND="sbatch test.main.$DPSP\.slurm --dependency=afterok:$CONNJOB"
+            COMMAND="sbatch test.main.$DPSP.slurm --dependency=afterok:$CONNJOB"
             WAIT_FOR_RETURN $COMMAND
             CBJOB=$( $COMMAND | cut -d' ' -f4)
         else
-            COMMAND="bash ./test.main.$DPSP\.sh"
+            COMMAND="bash ./test.main.$DPSP.sh"
             WAIT_FOR_RETURN $COMMAND
             $COMMAND
         fi
@@ -432,7 +478,7 @@ EOF
 
 for file in $WORKDIR/$V1COMMIT/test.main.$DPSP/global* 
 do 
-    echo "Checking differences in file \$file ..." 
+    echo "Checking differences for \$(basename \$file)" 
     ./test/diff_ascii_files.py \$file $WORKDIR/$V1COMMIT/test.main.$DPSP/\$(basename \$file)
 done
 
@@ -440,11 +486,11 @@ EOF
 
        if [  $SCHEDULER == "slurm" ]
        then
-           COMMAND="sbatch test.main.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB"
+           COMMAND="sbatch test.main.$DPSP.finalcheck.sh-slurm --dependency=afterok:$CBJOB"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
        else
-           COMMAND="bash test.main.$DPSP\.finalcheck.sh-slurm | tee test.main.$DPSP.check"
+           COMMAND="bash test.main.$DPSP.finalcheck.sh-slurm | tee test.main.$DPSP.check"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
        fi
@@ -459,16 +505,16 @@ then
     echo "Press Return to continue..."
     read
 
-    for $DPSP in dp sp
+    for DPSP in dp sp
     do
 	cd $WORKDIR/$V1COMMIT/test.main.$DPSP.revt
         if [  $SCHEDULER == "slurm" ]
         then 
-           COMMAND="sbatch test.main.$DPSP\.revt.slurm"
+           COMMAND="sbatch test.main.$DPSP.revt.slurm"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
         else
-           COMMAND="bash ./test.main.$DPSP\.revt.sh"
+           COMMAND="bash ./test.main.$DPSP.revt.sh"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
         fi
@@ -487,11 +533,11 @@ then
         cd $WORKDIR/$V1COMMIT/test.pg.$DPSP
         if [  $SCHEDULER == "slurm" ]
         then 
-            COMMAND="sbatch test.pg.$DPSP\.slurm"
+            COMMAND="sbatch test.pg.$DPSP.slurm"
             WAIT_FOR_RETURN $COMMAND
             CAJOB=$($COMMAND | cut -d' ' -f4)
         else
-           COMMAND="bash ./test.pg.$DPSP\.sh"
+           COMMAND="bash ./test.pg.$DPSP.sh"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
         fi
@@ -516,11 +562,11 @@ done
 EOF
         if [  $SCHEDULER == "slurm" ]
         then
-            COMMAND="sbatch test.pg.$DPSP\.connection.sh-slurm --dependency=afterok:$CAJOB"
+            COMMAND="sbatch test.pg.$DPSP.connection.sh-slurm --dependency=afterok:$CAJOB"
             WAIT_FOR_RETURN $COMMAND
             CONNJOB=$($COMMAND | cut -d' ' -f4)
         else
-            COMMAND="bash ./test.pg.$DPSP\.connection.sh-slurm"
+            COMMAND="bash ./test.pg.$DPSP.connection.sh-slurm"
             WAIT_FOR_RETURN $COMMAND
             $COMMAND
         fi
@@ -528,11 +574,11 @@ EOF
         cd $WORKDIR/$V2COMMIT/test.pg.$DPSP
         if [  $SCHEDULER == "slurm" ]
         then
-            COMMAND="sbatch test.pg.$DPSP\.slurm --dependency=afterok:$CONNJOB"
+            COMMAND="sbatch test.pg.$DPSP.slurm --dependency=afterok:$CONNJOB"
             WAIT_FOR_RETURN $COMMAND
             CBJOB=$($COMMAND | cut -d' ' -f4)
         else
-            COMMAND="bash ./test.pg.$DPSP\.sh"
+            COMMAND="bash ./test.pg.$DPSP.sh"
             WAIT_FOR_RETURN $COMMAND
             $COMMAND
         fi
@@ -550,19 +596,20 @@ EOF
 
 for file in $WORKDIR/$V1COMMIT/test.pg.$DPSP/global* 
 do 
-    echo "Checking differences in file \$file ..." 
-    ./test/diff_ascii_files.py \$file $WORKDIR/$V1COMMIT/test.pg.$DPSP/\$(basename \$file)
+    echo "Checking differences for file \$(basename \$file)"
+    ./test/diff_ascii_files.py \$file $WORKDIR/$V1COMMIT/test.main.$DPSP/\$(basename \$file) \
+    \$file $WORKDIR/$V1COMMIT/test.pg.$DPSP/\$(basename \$file)
 done
 
 EOF
 
        if [  $SCHEDULER == "slurm" ]
        then
-           COMMAND="sbatch test.pg.$DPSP\.finalcheck.sh-slurm --dependency=afterok:$CBJOB"
+           COMMAND="sbatch test.pg.$DPSP.finalcheck.sh-slurm --dependency=afterok:$CBJOB"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
        else
-           COMMAND="bash test.pg.$DPSP\.finalcheck.sh-slurm | tee test.pg.$DPSP.check"
+           COMMAND="bash test.pg.$DPSP.finalcheck.sh-slurm | tee test.pg.$DPSP.check"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
        fi
@@ -573,16 +620,16 @@ fi
 if [ $DOPGREVTEST == "yes" ] 
 then
     # both single and double precision tests will be run on V1 commit.
-    for $DPSP in dp sp
+    for DPSP in dp sp
     do
-	cd $WORKDIR/$V1COMMIT/test.pg.$DPSP.revt
+    	cd $WORKDIR/$V1COMMIT/test.pg.$DPSP.revt
         if [  $SCHEDULER == "slurm" ]
         then 
-        COMMAND="sbatch test.pg.$DPSP\.revt.slurm"
+        COMMAND="sbatch test.pg.$DPSP.revt.slurm"
         WAIT_FOR_RETURN $COMMAND
         $COMMAND
         else
-           COMMAND="bash ./test.pg.$DPSP\.revt.sh"
+           COMMAND="bash ./test.pg.$DPSP.revt.sh"
            WAIT_FOR_RETURN $COMMAND
            $COMMAND
         fi
@@ -666,9 +713,9 @@ FILES_TO_CHECK=( "test_fermion" \
 
 for file in \${FILES_TO_CHECK[@]}
 do 
-    echo "Checking differences in file \$file ..." 
+    echo "Checking differences for file \$file" 
     ./test/diff_ascii_files.py $WORKDIR/$V1COMMIT/test.deo_doe_test.dpsp/\$file \
-      $WORKDIR/$V2COMMIT/test.deo_doe_test.dpsp/\$file \
+      $WORKDIR/$V2COMMIT/test.deo_doe_test.dpsp/\$file 
 done
 
 EOF
