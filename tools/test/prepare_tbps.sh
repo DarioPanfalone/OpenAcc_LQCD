@@ -111,7 +111,7 @@ LABEL=$L0$L1$L2$L3\_$TASKS
 #####################################
 ## preparing module load command ####
 #####################################
-if test $MODULES_TO_LOAD_CSV=="auto"
+if test $MODULES_TO_LOAD_CSV == "auto"
 then 
     echo Reading modules to load in slurm scripts...
     MODULES_TO_LOAD=$(module list -t 2>&1 | tail -n+2)

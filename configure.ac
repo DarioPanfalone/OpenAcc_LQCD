@@ -1,6 +1,6 @@
 
 AC_PREREQ([2.63])
-AC_INIT([YALQSS],[1.0],[michele.mesiti@gmail.com])
+AC_INIT([OpenStaPLE],[1.0],[michele.mesiti@gmail.com])
 
 AM_PATH_PYTHON([2.6],\
                [AC_MSG_NOTICE([Python found.])],\
