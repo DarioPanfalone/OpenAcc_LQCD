@@ -157,7 +157,7 @@ void exp_minus_QA_times_conf(__restrict const su3_soa * const tu,
 #pragma acc kernels present(tu) present(QA) present(tu_out) present(exp_aux)
 #pragma acc loop independent gang
     for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(SIGMATILE0,SIGMATILE1,SIGMATILE2)
+#pragma acc loop independent tile(SIGMATILE0,SIGMATILE1,SIGMATILE2)
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(d0=0; d0 < nd0; d0++) {
@@ -551,7 +551,7 @@ void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una
 #pragma acc kernels present(L)  present(SP)  present(U)  present(QA)  present(TMP)
 #pragma acc loop independent gang(SIGMAGANG3)
     for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) { 
-#pragma acc loop independent vector tile(SIGMATILE0,SIGMATILE1,SIGMATILE2)
+#pragma acc loop independent tile(SIGMATILE0,SIGMATILE1,SIGMATILE2)
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(d0=0; d0 < nd0; d0++) {
@@ -1199,7 +1199,7 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
 #pragma acc kernels present(L) present(U) present(nnp_openacc) present(nnm_openacc) present(S) present(QA) present(TMP)
 #pragma acc loop independent gang(SIGMAGANG3)
     for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(SIGMATILE0,SIGMATILE1,SIGMATILE2)
+#pragma acc loop independent tile(SIGMATILE0,SIGMATILE1,SIGMATILE2)
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(d0=0; d0 < nd0; d0++) {

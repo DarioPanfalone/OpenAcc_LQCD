@@ -19,7 +19,7 @@ double calc_loc_plaquettes_nnptrick(
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(STAPTILE0,STAPTILE1,STAPTILE2)
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
           for(d0=0; d0 < nd0; d0++) {
@@ -96,7 +96,7 @@ void calc_loc_staples_nnptrick_all(
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3)
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(STAPTILE0,STAPTILE1,STAPTILE2)
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
 	for(d0=0; d0 < nd0; d0++) {
@@ -177,7 +177,7 @@ void calc_loc_staples_nnptrick_all_bulk(
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3) 
   for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
-#pragma acc loop independent vector tile(STAPTILE0,STAPTILE1,STAPTILE2)
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
 	for(d0=0; d0 < nd0; d0++) {
@@ -258,7 +258,7 @@ void calc_loc_staples_nnptrick_all_d3c(
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang
   for(d3=offset; d3<offset+thickness; d3++) {
-#pragma acc loop independent vector tile(STAPTILE0,STAPTILE1,STAPTILE2)
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
 	for(d0=0; d0 < nd0; d0++) {
@@ -342,7 +342,7 @@ void calc_loc_staples_nnptrick_all_only_even(
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3) 
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(STAPTILE0/2,STAPTILE1,STAPTILE2)
+#pragma acc loop independent tile(STAPTILE0/2,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
 	for(hd0=0; hd0 < nd0h; hd0++) {
@@ -421,7 +421,7 @@ void calc_loc_staples_nnptrick_all_only_odd(
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3) 
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent vector tile(STAPTILE0/2,STAPTILE1,STAPTILE2)
+#pragma acc loop independent tile(STAPTILE0/2,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
      for(d1=0; d1<nd1; d1++) {
 	for(hd0=0; hd0 < nd0h; hd0++) {
