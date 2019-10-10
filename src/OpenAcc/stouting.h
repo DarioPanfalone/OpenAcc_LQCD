@@ -17,11 +17,11 @@ void exp_minus_QA_times_conf(__restrict const su3_soa * const tu,
 			     __restrict su3_soa * const exp_aux);
 
 void stout_isotropic(
-        __restrict const su3_soa * const u,               // --> input conf
-        __restrict su3_soa * const uprime,          // --> output conf [stouted]
-        __restrict su3_soa * const local_staples,   // --> parking variable
-        __restrict su3_soa * const auxiliary,       // --> parking variable
-        __restrict tamat_soa * const tipdot);       // --> parking variable
+        const su3_soa * u,               // --> input conf
+        su3_soa * uprime,          // --> output conf [stouted]
+        su3_soa * local_staples,   // --> parking variable
+        su3_soa * auxiliary,       // --> parking variable
+        tamat_soa * tipdot);       // --> parking variable
 
 
 void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
@@ -32,8 +32,8 @@ __restrict su3_soa   * const TMP  // variabile di parcheggio
 		    );
 
 #ifdef STOUT_FERMIONS
-void stout_wrapper(__restrict const su3_soa * const tconf_acc,
-        __restrict su3_soa * tstout_conf_acc_arr);
+void stout_wrapper(const su3_soa * const tconf_acc,
+        su3_soa * tstout_conf_acc_arr);
 #endif
 
 void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
