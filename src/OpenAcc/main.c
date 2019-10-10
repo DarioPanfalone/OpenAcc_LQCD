@@ -739,37 +739,13 @@ int main(int argc, char* argv[]){
 
 
 
-    if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd){
-/*
-	    printf("Saving global program status...\n");
-	    printf("%d %f %f %d\n",
-			    mc_params.next_gps,
-			    mc_params.max_flavour_cycle_time,
-			    mc_params.max_update_time,
-			    mc_params.measures_done);
-
-	    printf("#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n#mc_params.max_update_time,mc_params.measures_done\n");
-
-	    FILE * gps_file = fopen(mc_params.statusFileName, "w");  
-	    fprintf(gps_file,"%d %f %f %d\n",
-			    mc_params.next_gps,
-			    mc_params.max_flavour_cycle_time,
-			    mc_params.max_update_time,
-			    mc_params.measures_done);
-	    fprintf(gps_file,"#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n#mc_params.max_update_time,mc_params.measures_done\n");
-	    fclose(gps_file);
-*/
+    if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd)
 	    save_global_program_status(mc_params); // THIS FUNCTION IN SOME CASES DOES NOT WORK
-     }
-
-
-
 
     printf("MPI%02d: Double precision free [CORE]\n", devinfo.myrank);
     mem_free_core();
     printf("MPI%02d: Double precision free [EXTENDED]\n", devinfo.myrank);
     mem_free_extended();
-
 
     if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
         printf("MPI%02d: Single precision free [CORE]\n", devinfo.myrank);
