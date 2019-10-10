@@ -668,7 +668,7 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
     const int nx_def   = nd0; 
     const int ny_def   = nd1; 
     const int nz_def   = nd2; 
-    const int nt_def   = nd3; 
+    const int nt_def   = NRANKS_D3*LOC_N3; 
     const int xmap_def = 0;
     const int ymap_def = 1;
     const int zmap_def = 2;
