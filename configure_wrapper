@@ -4,12 +4,12 @@
  chosen depending on the special-arguments passed to this script.
  
  Special arguments for this script:
- debug - if the argument 'debug' is passed, none of the ones listed down here
-         may. Use this to debug your code with gdb. No mpi.
+ debuggnu - if the argument 'debuggnu' is passed, none of the ones listed down here
+         may. Use this to debuggnu your code with gdb. No mpi.
 
  Compilers: gcc,mpi,pgi (mutually exclusive)
  Options for pgi: cc35, cc60, haswell, amd (mutually exclusive)
- Options for pgi and cc*: cuda7.0, cuda7.5, cuda8.0 (mutually exclusive)
+ Options for pgi and cc*: cuda7.0, 7.5, 8.0, 9.0 and 10.0 (mutually exclusive)
 
  Other arguments will be passed directly to "configure" (e.g. --prefix).
  If --prefix is not specified, it is set to $(pwd).
@@ -28,10 +28,17 @@ for arg in argv[1:]:
     if '--prefix' in arg:
         foundPrefix = True
 
+foundDebugSym = False
+for arg in argv[1:]:
+    if arg== '--debugsym':
+        foundDebugSym = True
+
+if foundDebugSym:
+    argv.remove('--debugsym')
 
 
 accepted_options = ['gcc','gcc-4','gcc-5','gcc-6','mpi','pgi','cc35','cc50','cc60','haswell',\
-        'amd','cuda7.0','cuda7.5','cuda8.0','cuda9.0','cuda10.0','debug']
+        'amd','cuda7.0','cuda7.5','cuda8.0','cuda9.0','cuda10.0','debuggnu']
 
 n=None
 # flag compatibilities
@@ -52,7 +59,7 @@ comp_matrix=[
         [n,n,n,n,n,n,n,n,n,n,n,n,n,n,0,0,0],# cuda8.0
         [n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,0,0],# cuda9.0
         [n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,0],# cuda10.0
-        [n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n]]# debug
+        [n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n]]# debuggnu
 
 
 all_ok = True
@@ -70,8 +77,8 @@ if not all_ok :
     exit(1)
 
 
-if 'debug' in argv:
-    argv.remove('debug')
+if 'debuggnu' in argv:
+    argv.remove('debuggnu')
     CC='gcc'
     CXX='g++'
     CC_FLAGS='"-O0 -g -std=gnu99"'
@@ -122,12 +129,12 @@ elif 'pgi' in argv:
 
 
     if ta is not None:
-        CC_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -DUSE_MPI_CUDA_AWARE -I${MPIINC}"'
-        LINKER_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -lmpi -L${MPILIB}"'
+        CC_FLAGS='-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -DUSE_MPI_CUDA_AWARE -I${MPIINC}'
+        LINKER_FLAGS='-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -lmpi -L${MPILIB}'
     else:
         stderr.write("Compiling with -O0 flags...")
-        CC_FLAGS='"-O0"'
-        LINKER_FLAGS='"-O0 -lmpi"'
+        CC_FLAGS='-O0'
+        LINKER_FLAGS='-O0 -lmpi'
 
 
 elif 'gcc' in argv:  # warning: this option defaults to gcc-7 on ubuntu 17.10
@@ -136,30 +143,30 @@ elif 'gcc' in argv:  # warning: this option defaults to gcc-7 on ubuntu 17.10
     argv.remove('gcc')
     CC='gcc'
     CXX='g++'
-    CC_FLAGS='"-O3 -std=gnu99"'
-    LINKER_FLAGS='"-lm"'
+    CC_FLAGS='-O3 -std=gnu99'
+    LINKER_FLAGS='-lm'
 
 elif 'gcc-4' in argv: # on ubuntu systems, this is actually g??-4.8. Ubuntu only 
                       # This is the default on coka (CENTOS 7.4) but it's just named gcc
     argv.remove('gcc-4')
     CC='gcc-4.8'
     CXX='g++-4.8'
-    CC_FLAGS='"-O3 -std=gnu99"'
-    LINKER_FLAGS='"-lm"'
+    CC_FLAGS='-O3 -std=gnu99'
+    LINKER_FLAGS='-lm'
 
 elif 'gcc-5' in argv: # does not exists on coka (CENTOS 7.4), ubuntu only
     argv.remove('gcc-5')
     CC='gcc-5'
     CXX='g++-5'
-    CC_FLAGS='"-O3 -std=gnu99"'
-    LINKER_FLAGS='"-lm"'
+    CC_FLAGS='-O3 -std=gnu99'
+    LINKER_FLAGS='-lm'
 
 elif 'gcc-6' in argv: # does not exists on coka (CENTOS 7.4), ubuntu only
     argv.remove('gcc-6')
     CC='gcc-6'
     CXX='g++-6'
-    CC_FLAGS='"-O3 -std=gnu99"'
-    LINKER_FLAGS='"-lm"'
+    CC_FLAGS='-O3 -std=gnu99'
+    LINKER_FLAGS='-lm'
 
 
 
@@ -167,22 +174,23 @@ elif 'mpi' in argv:
     argv.remove('mpi')
     CC='mpicc'
     CXX='mpicxx'
-    CC_FLAGS='"-O3 -std=gnu99"'
-    LINKER_FLAGS='"-lm"'
+    CC_FLAGS='-O3 -std=gnu99'
+    LINKER_FLAGS='-lm'
 
 else : 
     stderr.write("Compiler not specified\n")
     exit(1)
 
+if foundDebugSym:
+    CC_FLAGS += ' -g'
 
 executable = ("%s/configure" % (basedir))
 
-argCC =( "CC=%s"%(CC))
-argCFLAGS = ("CFLAGS=%s"%(CC_FLAGS))
-argLDFLAGS = ("LDFLAGS=%s"%(LINKER_FLAGS))
-argCXX = ("CXX=%s"%(CXX))
+argCC =( 'CC="%s"'%(CC))
+argCFLAGS = ('CFLAGS="%s"'%(CC_FLAGS))
+argLDFLAGS = ('LDFLAGS="%s"'%(LINKER_FLAGS))
+argCXX = ('CXX="%s"'%(CXX))
 argCPPFLAGS = ('CXXFLAGS="-O3"')
-
 
 argsother = ' '.join(argv[1:])
 
