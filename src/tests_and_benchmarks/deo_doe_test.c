@@ -166,8 +166,8 @@ int main(int argc, char* argv[]){
 
     printf("nn computation : OK \n");
     init_all_u1_phases(backfield_parameters,fermions_parameters);
-#pragma acc data update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
-#pragma acc data update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
+#pragma acc update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
+#pragma acc update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
     printf("u1_backfield initialization : OK \n");
     sprintf(myconfname             ,"%s_MPI%02d",confname             ,devinfo.myrank);
     sprintf(myfermionname          ,"%s_MPI%02d",fermionname          ,devinfo.myrank);
@@ -201,7 +201,7 @@ int main(int argc, char* argv[]){
             printf("MPI%02d: You're using ILDG format.\n", devinfo.myrank);
         conf_id_iter=0;
     }
-#pragma acc data update device(conf_acc[0:8])
+#pragma acc update device(conf_acc[0:8])
 
 
     // init fermion
@@ -216,7 +216,7 @@ int main(int argc, char* argv[]){
     }
 
 
-#pragma acc data update device(ferm_chi_acc[0:1])
+#pragma acc update device(ferm_chi_acc[0:1])
 
 
 

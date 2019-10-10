@@ -978,7 +978,7 @@ void dbg_print_su3_soa(su3_soa * const conf, const char* nomefile,int conf_id_it
 
 
 
-#pragma acc data update host(conf[0:8])
+#pragma acc update host(conf[0:8])
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
             // rebuilding the 3rd row
@@ -1076,7 +1076,7 @@ int dbgread_su3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter )
         }
         fclose(fp);
 
-#pragma acc data update device(conf[0:8])
+#pragma acc update device(conf[0:8])
         return 0;
     }
 }
@@ -1095,7 +1095,7 @@ void dbgprint_gl3_soa(su3_soa * const conf, const char* nomefile,int conf_id_ite
 
 
 
-#pragma acc data update host(conf[0:8])
+#pragma acc update host(conf[0:8])
 
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
@@ -1187,7 +1187,7 @@ int dbgread_gl3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter )
 
         }
         fclose(fp);
-#pragma acc data update device(conf[0:8])
+#pragma acc update device(conf[0:8])
         return 0;
     }
 }
@@ -1259,7 +1259,7 @@ void print_1su3_soa(su3_soa * const conf, const char* nomefile)
 void print_tamat_soa(tamat_soa * const ipdot, const char* nomefile)
 {
     FILE *fp;
-#pragma acc data update host(ipdot[0:8])
+#pragma acc update host(ipdot[0:8])
     fp = fopen(nomefile,"w");
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
@@ -1294,7 +1294,7 @@ int read_tamat_soa(tamat_soa * ipdot, const char* nomefile)
             }
         }
         fclose(fp);
-#pragma acc data update device(ipdot[0:8])
+#pragma acc update device(ipdot[0:8])
         return 0;
     }
 }
@@ -1303,7 +1303,7 @@ int read_tamat_soa(tamat_soa * ipdot, const char* nomefile)
 void print_thmat_soa(thmat_soa * const ipdot, const char* nomefile)
 {
     FILE *fp;
-#pragma acc data update host(ipdot[0:8])
+#pragma acc update host(ipdot[0:8])
     fp = fopen(nomefile,"w");
     for(int q = 0 ; q < 8 ; q++){
         for(int i = 0 ; i < sizeh ; i++){
@@ -1353,7 +1353,7 @@ int read_thmat_soa(thmat_soa * ipdot, const char* nomefile)
             }
         }
         fclose(fp);
-#pragma acc data update device(ipdot[0:8])
+#pragma acc update device(ipdot[0:8])
         return 0;
     }
 }
