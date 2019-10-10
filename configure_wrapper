@@ -182,7 +182,7 @@ else :
     exit(1)
 
 if foundDebugSym:
-    CC_FLAGS += ' -g'
+    CC_FLAGS += ' -g '  
 
 executable = ("%s/configure" % (basedir))
 
