@@ -943,9 +943,13 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
             FILE * input2 = fopen(input_filename,"r");
             FILE * input_renamed = fopen(input_to_rename_filename,"w"); 
             printf("Creating copy of run configuration file (%s) \nwith hash appended in the name (%s)...\n", input_filename, input_to_rename_filename);
-            int ch;
-            while(( ch = fgetc(input2) ) != EOF)
+            char ch;
+            do{
+                ch = fgetc(input2); 
+                if(feof(input2)) break;
                 fputc((char)ch, input_renamed);
+            }
+            while(1);
 
             fclose(input2);
             fclose(input_renamed);
