@@ -24,8 +24,8 @@ extern int verbosity_lv;
 #define TRANSFER_THICKNESS 2
 
 #ifdef STOUT_FERMIONS
-void stout_wrapper(__restrict const su3_soa * const tconf_acc,
-        __restrict su3_soa * tstout_conf_acc_arr)
+void stout_wrapper(const su3_soa * const tconf_acc,
+        su3_soa * tstout_conf_acc_arr)
 {
     double max_unitarity_deviation,avg_unitarity_deviation;
 
@@ -78,11 +78,11 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
 #endif
 
 void stout_isotropic(
-        __restrict const su3_soa * const u,               // --> input conf
-        __restrict su3_soa * const uprime,          // --> output conf [stouted]
-        __restrict su3_soa * const local_staples,   // --> parking variable
-        __restrict su3_soa * const auxiliary,       // --> parking variable
-        __restrict tamat_soa * const tipdot)       // --> parking variable
+        __restrict const su3_soa * u,               // --> input conf
+        su3_soa * uprime,          // --> output conf [stouted]
+        __restrict su3_soa * local_staples,   // --> parking variable
+        su3_soa * auxiliary,       // --> parking variable
+        __restrict tamat_soa * tipdot)       // --> parking variable
 {
 
 
@@ -147,7 +147,7 @@ static inline void conf_left_exp_multiply_to_su3_soa(
 
 
 void exp_minus_QA_times_conf(__restrict const su3_soa * const tu,
-        __restrict tamat_soa * const QA,
+        __restrict const tamat_soa * QA,
         __restrict su3_soa * const tu_out,
         __restrict su3_soa * const exp_aux)
 {
