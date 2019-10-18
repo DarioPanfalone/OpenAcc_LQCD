@@ -105,9 +105,13 @@ typedef struct su3_plk3_t {
     }
 
 
-    DEF_SU3_PLKN_SU3_SOA_MULTINPLACE(su3_plk0_su3_soa_multinplace, su3_plk0)
-    DEF_SU3_PLKN_SU3_SOA_MULTINPLACE(su3_plk1_su3_soa_multinplace, su3_plk1)
-    DEF_SU3_PLKN_SU3_SOA_MULTINPLACE(su3_plk2_su3_soa_multinplace, su3_plk2)
+#pragma acc routine seq
+DEF_SU3_PLKN_SU3_SOA_MULTINPLACE(su3_plk0_su3_soa_multinplace, su3_plk0)
+#pragma acc routine seq
+DEF_SU3_PLKN_SU3_SOA_MULTINPLACE(su3_plk1_su3_soa_multinplace, su3_plk1)
+#pragma acc routine seq
+DEF_SU3_PLKN_SU3_SOA_MULTINPLACE(su3_plk2_su3_soa_multinplace, su3_plk2)
+#pragma acc routine seq
 DEF_SU3_PLKN_SU3_SOA_MULTINPLACE(su3_plk3_su3_soa_multinplace, su3_plk3)
 
 #define DEF_SU3_PLKN_TRACE(FUNCNAME,TYPE)\
@@ -121,9 +125,13 @@ DEF_SU3_PLKN_SU3_SOA_MULTINPLACE(su3_plk3_su3_soa_multinplace, su3_plk3)
     return (loc_plaq_00 + loc_plaq_11 + loc_plaq_22);\
 }
 
-    DEF_SU3_PLKN_TRACE(su3_plk0_trace,su3_plk0)
-    DEF_SU3_PLKN_TRACE(su3_plk1_trace,su3_plk1)
-    DEF_SU3_PLKN_TRACE(su3_plk2_trace,su3_plk2)
+#pragma acc routine seq
+DEF_SU3_PLKN_TRACE(su3_plk0_trace,su3_plk0)
+#pragma acc routine seq
+DEF_SU3_PLKN_TRACE(su3_plk1_trace,su3_plk1)
+#pragma acc routine seq
+DEF_SU3_PLKN_TRACE(su3_plk2_trace,su3_plk2)
+#pragma acc routine seq
 DEF_SU3_PLKN_TRACE(su3_plk3_trace,su3_plk3)
 
 

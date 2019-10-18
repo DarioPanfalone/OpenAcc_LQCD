@@ -4,7 +4,7 @@
 #include "./struct_c_def.h"
 #include "math.h"
 
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline vec3 mat_vec_mul( __restrict const su3_soa * const matrix,
         const int idx_mat,
         __restrict const vec3_soa * const in_vect,
@@ -43,7 +43,7 @@ static inline vec3 mat_vec_mul( __restrict const su3_soa * const matrix,
 
 }
 
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline vec3 conjmat_vec_mul(__restrict const su3_soa *const matrix,
         const int idx_mat,
         __restrict const vec3_soa * const in_vect,
@@ -84,7 +84,7 @@ static inline vec3 conjmat_vec_mul(__restrict const su3_soa *const matrix,
 
 }
 
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline vec3 mat_vec_mul_arg(__restrict const su3_soa *const matrix,
         const int idx_mat,
         __restrict const vec3_soa * const in_vect,
@@ -125,7 +125,7 @@ static inline vec3 mat_vec_mul_arg(__restrict const su3_soa *const matrix,
 
 }
 
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline vec3 conjmat_vec_mul_arg( 
         __restrict const su3_soa * const matrix,
         const int idx_mat,
@@ -173,7 +173,7 @@ static inline vec3 conjmat_vec_mul_arg(
 }
 
 // 'wf = with a field (for magnetic susceptibility)'
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline vec3 mat_vec_mul_arg_wf(__restrict const su3_soa *const matrix,
         const int idx_mat,
         __restrict const vec3_soa * const in_vect,
@@ -219,7 +219,7 @@ static inline vec3 mat_vec_mul_arg_wf(__restrict const su3_soa *const matrix,
 }
 
 // 'wf = with a field (for magnetic susceptibility)'
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline vec3 conjmat_vec_mul_arg_wf( 
         __restrict const su3_soa * const matrix,
         const int idx_mat,
@@ -269,7 +269,7 @@ static inline vec3 conjmat_vec_mul_arg_wf(
 
 
 
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline vec3 sumResult ( vec3 aux, vec3 aux_tmp) {
 
     aux.c0 += aux_tmp.c0;
@@ -280,7 +280,7 @@ static inline vec3 sumResult ( vec3 aux, vec3 aux_tmp) {
 
 }
 
-//#pragma acc routine seq
+#pragma acc routine seq
 static inline vec3 subResult ( vec3 aux, vec3 aux_tmp) {
 
     aux.c0 -= aux_tmp.c0;
