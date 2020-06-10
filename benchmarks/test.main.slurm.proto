@@ -1,0 +1,16 @@
+#!/bin/bash
+#SBATCH --job-name=MAIN_SEDDIR
+#SBATCH --ntasks=SEDN
+#SBATCH --cpus-per-task=1
+#SBATCH --error=MAIN.%J.err 
+#SBATCH --output=MAIN.%J.out
+#SBATCH --gres=gpu:16
+#SBATCH --partition=shortrun
+#SBATCH --mem-per-cpu=12000
+
+
+module purge; module load cuda/8.0 openmpi/2.1.1-cuda8.0 pgi/17.3
+export PGI_ACC_BUFFERSIZE=SED_SIZE
+
+rm stop
+srun --cpu_bind=v,sockets ./main benchmark.set                     > out_main.txt  

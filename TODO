@@ -1,0 +1,327 @@
+
+
+Things to do:
+1. Compilation with GCC, no multidev: DONE
+2. Correct execution with GCC, no multidev
+   (check-bugfix)  
+     TEST PURE GAUGE (no fermions):    OK (8^4) (accepts)
+     TEST WITH FERMIONS              : OK (8^4) (accepts)
+
+3. Compilation with MPICC, multidev (2 ranks, minilattice) DONE
+4. Correct execution with MPICC (2 ranks, minilattice) OK
+   - checks for segmentation faults and mpi errors: OK
+   - check for actual correctness of the code:
+     - TEST PURE GAUGE   (no fermions): OK (8^4 x 2) (accepts)
+     - TEST PURE GAUGE on different machines 
+           (sbombolator, cudawn7, zassenhaus(using openmpi1.8):  OK)
+    - check of nranks read from input file from MPI_Init() WRITTEN
+    - DIFFERENT MPI PROCESSES DON'T AGREE ON ACCEPTING (solved)
+       MPI_Bcast was called on a double variable with MPI_INT datatype.
+
+    - dynamical fermions: SUCCESS
+       TEST dirac operator: OK (4^4x2)
+         some #defines were wrong, MULTIDEV instead of MULTIDEVICE
+         moreover the initialization of u1 phases was incorrect,
+         not taking correctly into account the antiperiodicity when
+         considering the negative halo of the first rank.
+       TEST no stouting: Accepts (4^4x2) 
+         - after an acc_Doe() call in fermion force calculation,
+           fermion borders must be communicated.
+         - test no stouging multi device - seems to accept.
+         - acceptance in metropolis test suggests that it's ok.
+           Acceptance on 4^3x8 on single device and on two ranks are in
+           agreement.
+       STOUTING:  OK (4^4x2)
+         - Results seems correct, acceptance is consistent.
+         - Border passing functions made more versatile, 
+           should be efficient now.
+     - SEE ASYNC WORK BELOW
+
+4.5 ASYNC WORK:
+
+   1. Fermions: Deo and Doe separately, ansync versions:
+      0. Splitting Deo and Doe in different versions (bulk/slices*) DONE
+      NOTE: the bulk version is ok, but it does not make sense to have 
+            TWO functions, one for up surface and one for down surface.
+            One function, more versatile, is fine, which works on slices
+            of custom thickness. No parallelization is done in the direction
+            of the cut.
+      1. calculation of both surfaces and then communication, while
+         calculation in the bulk is performed (slightly inefficient)
+         DONE, ACCEPTS
+      2. calculation of one surface, start communication, calculation on 
+         the other surface, start communication, 
+         then start calculation in the bulk (more efficient)
+      NOTE: for approach 1 and 2 no big gains are expected in scalability 
+            for the fermion part, but something more significant can happen
+            for the gauge part.
+   2. Gauge: 
+      0. Splitting functions in different versions (see Fermions) WRITTEN
+         See all functions below [14 functions, to be modified in 
+         full, bulk and 'direction 3 custom' (d3c) versions]
+      1. Similar to fermion case - (DONE)
+         ISSUE: see md_integrator.c
+         Issue: calc_ipdot_gauge_bulk needs the original configuration
+         in the whole local lattice, but it has already been changed on the surface.
+         So, another configuration is needed. (DONE, OK)
+
+
+5. Compilation with PGI, no multidev (OK)
+6. Correct execution with PGI, no multidev (OK)
+    STATUS : Compiles and ~accepts
+    - ACC_DEO, ACC_DOE rewritten.
+    - performance to check: with some 'gang' and 'vector' in the 
+      acc_Deo and acc_Doe functions, the code executes reasonably 
+      fast
+    
+7. Integration MPI-OPENACC
+   0. Execution of multinode code compiled with gcc on cudawm7: OK
+   1. Compilation : ok 
+   2. Execution: OKish (Accepts on 24^3x6 on 2 nodes)
+    1. Trying execution of DeoDoe test. 
+       Small lattices : Results OK, but segfault at end on MPI_Finalize(). <<<---CHECK 
+       Big Lattices: Like small lattices. 
+          "Results OK" means 2-node accelerated works like 1-node not accelerated.
+    2. pure gauge: Seems that gauge conf update in md bloc was not working.
+       Seems to work now.
+    3. Fermions: accepts on a 24^3x6. 
+    4. Re-integration of async communications - DONE
+    5. Async communications in gauge substep - DONE
+    6. Observables
+       - Fixed generation of z2 noise
+       - added MPI_Allreduce in topological charge computation (still cooling TO CHECK)
+
+   THINGS TO DO:
+    a. Understand the MPI_Finalize()-segfault issue.
+    b. Check correctness- compare gnu multinode vs accelerated multinode in detail
+    c. Reversibility
+    d. Observables
+    e. Try a run and compare results (ongoing, actually, will stop because of 
+       segmentation fault)
+    f. CHECK PERFORMANCES - added measurements for gauge md blocs.
+        - mom_exp_conf_stocazzo is now accelerated correctly, but THERE ARE ISSUES
+          CHECK CH exponential, seems to give wrong results in MD.
+          <<<<<<<<<<<<------------------ TODO 
+
+        - performance on a 24^3x6 split in 2 (24^2x6x12) does not seem really good,
+          little or no speedup over a single card. (MEASURE BETTER AND CHECK)
+
+   
+TESTS
+
+Montecarlo with more nodes
+Montecarlo with transposed configurations
+Observables 1 rank vs N ranks
+With OPENACC
+
+DEBUG TOOLS:
+
+Implemented reversibility test, easy to perform with input file.
+Problems: (OK)
+1. Moments differences obtained are HUGE - (FIXED, OK)
+   Heh, because you have to sum, not to subtract..
+2. Configuration differences obtained are ok, when integration step 
+   is reasonably small. (OK)
+3. Try single node vs multi node results (OK)
+   a. Tripiccione idea - 0 (random number = 0.5, always)
+   b. Tripiccione idea - 1 (random number dependent on the physical position)
+   RESULT: REASONABLE AGREEMENT
+
+
+   
+
+ 
+----------------------------------------------------------------
+
+
+- linear combination of fermions, restricted to local lattice + 1-thick borders DONE
+  (fermionic_utilities.c)
+   CHECK MONTECARLO AFTER MODIFICATION   <<<<<------- TO DO
+
+- phases in the multinode setup  (DONE, TO CHECK)
+- Kernels that must be restricted to local lattice (conf generation)
+  fermionic_utilities (basic linear algebra):
+   (NO LINEAR COMBINATIONS)
+   real_scal_prod_loc DONE, 1D CUT TOO
+   scal_prod_loc DONE, 1D CUT TOO
+   l2norm2_loc DONE, 1D CUT TOO
+  fermion_matrix
+   acc_Deo  
+    acc_Deo full (inherits the name) WRITTEN
+    acc_Deo_bulk                     WRITTEN
+    acc_Deo_d3c                      WRITTEN
+   acc_Doe                           WRITTEN
+    acc_Doe full (inherits the name) WRITTEN
+    acc_Doe_bulk                     WRITTEN
+    acc_Doe_d3c                      WRITTEN
+  NOTE: write fermion_matrix_multiplication to make use 
+  of async transfers etc.
+  
+  fermion force utilities:
+   direct_product_of_fermions_into_auxmat             DONE  
+   multiply_conf_times_force_and_take_ta_even_nophase DELETED
+   multiply_conf_times_force_and_take_ta_odd_nophase  DELETED 
+   multiply_conf_times_force_and_take_ta_nophase DONE
+   multiply_backfield_times_force   DONE
+   accumulate_gl3soa_into_gl3soa  DONE
+  plaquettes:
+   calc_loc_plaquettes_nnptrick  1DCUTWARNING - DONE
+   calc_loc_staples_nnptrick_all:
+    calc_loc_staples_nnptrick_all (full) DONE 
+    calc_loc_staples_nnptrick_all_bulk WRITTEN
+    calc_loc_staples_nnptrick_all_d3c  WRITTEN
+   calc_loc_staples_nnptrick_all_only_even DONE 
+   calc_loc_staples_nnptrick_all_only_odd DONE
+  random_assignement:
+   generate_vec3_soa_gauss WRITTEN
+   // should include border communication
+   generate_Momenta_gauss  WRITTEN
+   // should include border communication
+   generate_Conf_cold  WRITTEN
+   // should include border communication
+   generate_vec3_soa_z2noise WRITTEN 
+   // should include border communication
+  rettangoli:
+   calc_loc_rectangles_2x1_nnptrick  1DCUTWARNING - DONE
+   calc_loc_rectangles_1x2_nnptrick  1DCUTWARNING - DONE
+   calc_loc_improved_staples_typeA_nnptrick_all:
+    calc_loc_improved_staples_typeA_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeA_nnptrick_all_bulk  WRITTEN
+    calc_loc_improved_staples_typeA_nnptrick_all_d3c   WRITTEN
+   calc_loc_improved_staples_typeB_nnptrick_all:
+    calc_loc_improved_staples_typeB_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeB_nnptrick_all_bulk  WRITTEN
+    calc_loc_improved_staples_typeB_nnptrick_all_d3c   WRITTEN
+   calc_loc_improved_staples_typeC_nnptrick_all:
+    calc_loc_improved_staples_typeC_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeC_nnptrick_all_bulk  WRITTEN
+    calc_loc_improved_staples_typeC_nnptrick_all_d3c   WRITTEN
+   calc_loc_improved_staples_typeABC_nnptrick_all:
+    calc_loc_improved_staples_typeABC_nnptrick_all (full) DONE
+    calc_loc_improved_staples_typeABC_nnptrick_all_bulk  WRITTEN
+    calc_loc_improved_staples_typeABC_nnptrick_all_d3c   WRITTEN
+  stouting:
+   exp_minus_QA_times_conf DONE
+   compute_lambda DONE
+  su3_measurements:
+   calc_momenta_action   1DCUTWARNING - DONE
+   calc_force_norm       1DCUTWARNING - DONE CHECK REDUCTIONS
+   calc_diff_force_norm  1DCUTWARNING - DONE CHECK REDUCTIONS
+   copy_ipdot_into_old   1DCUTWARNING - DONE
+  su3_utilities:
+   set_su3_soa_to_zero:
+    set_su3_soa_to_zero full  WRITTEN
+    set_su3_soa_to_zero_bulk  WRITTEN
+    set_su3_soa_to_zero_d3c   WRITTEN
+   conf_times_staples_ta_part:
+    conf_times_staples_ta_part full WRITTEN
+    conf_times_staples_ta_part_bulk WRITTEN
+    conf_times_staples_ta_part_d3c WRITTEN
+   unitarize_conf        DONE
+   conf_times_staples_ta_part   DONE
+   RHO_times_conf_times_staples_ta_part DONE
+   mom_sum_mult:
+    mom_sum_mult full DONE
+    mom_sum_mult_bulk WRITTEN
+    mom_sum_mult_d3c WRITTE
+   mom_exp_times_conf_soloopenacc:
+    mom_exp_times_conf_soloopenacc full DONE 
+    mom_exp_times_conf_soloopenacc_bulk WRITTEN
+    mom_exp_times_conf_soloopenacc_d3c WRITTEN
+  ipdot_gauge: (HIGHER LEVEL FUNCTIONS)
+    calc_ipdot_gauge_soloopenacc:
+     calc_ipdot_gauge_soloopenacc full DONE
+     calc_ipdot_gauge_soloopenacc_bulk WRITTEN
+     calc_ipdot_gauge_soloopenacc_d3c WRITTEN
+     calc_ipdot_gauge_soloopenacc_std full DONE
+     calc_ipdot_gauge_soloopenacc_std_bulk WRITTEN
+     calc_ipdot_gauge_soloopenacc_std_d3c WRITTEN
+     calc_ipdot_gauge_soloopenacc_tlsm full DONE 
+     calc_ipdot_gauge_soloopenacc_tlsm_bulk WRITTEN
+     calc_ipdot_gauge_soloopenacc_tlsm_d3c WRITTEN
+
+- Kernels that must be restricted to local lattice (measurements)
+  baryon number utilities:
+   dM_dmu_eo(0123)    DONE
+   dM_dmu_oe(0123)    DONE
+   d2M_dmu2_eo(0123)    DONE
+   d2M_dmu2_oe(0123)    DONE
+  gauge_meas:
+   reduce_loc_top_charge   DONE
+   compute_local_topological_charge DONE 
+  polyakov:
+   polyakov_loop(0123)  DONE
+
+                     
+
+OTHER MODIFICATIONS
+  
+- NNP and NNM must give errors when they should 
+  DONE : now they give -1 if the site is not included in the local+halo lattice.
+  TODO: remove printing of them once we're sure.
+  
+  FOR MEASURES
+  cooling:
+   compute_cooled_even_links
+   compute_cooled_odd_links
+  
+
+  fermion measures: 
+   eo_inversion (communicate borders in two places)
+   random elements generation should be ok 
+    (border communication should already be done by the generating
+     functions. )
+    
+
+COMMUNICATIONS
+  - in fermion matrix multiplication (fermion_borders, after acc_Deo and acc_Doe)
+  - in multistep_2MN_gauge (conf borders, after mom_exp_times_conf_soloopenacc) 
+  - in stout_wrapper
+  - in compute_sigma_from_sigma_prime_backinto_sigma_prime
+
+
+REDUCTIONS:
+  in su3_measurements:
+  - in calc_plaquette_soloopenacc(); 
+  - in calc_momenta_action(); 
+  - in calc_force_norm(); 
+  - in calc_diff_force_norm(); 
+
+  in fermionic_utilities:
+  - in scal_prod_global()
+  - in real_scal_prod_global()
+  - in l2norm2_global()
+
+
+
+===============================================================
+Possible improvements for performance
+
+- To improve strong scaling on multishift: (+30% max scalability )
+  - modify matrix multiplication, to have only one communication BUT
+    TWICE AS LARGE (and more calculations).
+  - kernels working only on the surface:
+
+    |--/////BULK/////--|
+   -|---////BULK////---|-
+  --|----///BULK///----|--
+
+  The gain would be that this would allow to superpose the bulk
+  calculations of ALL the multishift machinery (the linear combinations on
+  all the shifted vectors)  with the communications of the halos.
+  Especially when the number of terms in the rational approximation is
+  high, this is likely to allow better scalability (note that is is
+  going to slow down performance a little bit in the case where )
+
+- Single precision molecular dynamics: (+100% flat)
+  -known advantages
+  -doubling of "soa" data types 
+  -brainless rewrite of the gauge part 
+  -fermion part semi-brainless
+  -need conversion functions
+
+- No multishift (boh)
+  -advantages not precisely known 
+    (possibility of preconditioning, deflation and such)
+  -functions already in place (not for multinode though).
+ 
