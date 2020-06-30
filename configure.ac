@@ -30,7 +30,7 @@ AC_PROG_MKDIR_P
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lgmp':
-AC_CHECK_LIB([gmp], [mpz_init])
+AC_CHECK_LIB([gmp], [posmpz_init])
 # FIXME: Replace `main' with a function in `-lm':
 AC_CHECK_LIB([m], [sqrt])
 # FIXME: Replace `main' with a function in `-lmpfr':
