@@ -25,17 +25,20 @@ AC_PROG_MKDIR_P
 
 
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-lgmp':
-AC_CHECK_LIB([gmp], [mpz_init])
-# FIXME: Replace `main' with a function in `-lm':
-AC_CHECK_LIB([m], [sqrt])
-# FIXME: Replace `main' with a function in `-lmpfr':
-AC_CHECK_LIB([mpfr], [mpfr_init2])
-# FIXME: Replace `main' with a function in `-lmpi':
-AC_CHECK_LIB([mpi], [MPI_Init])
+AC_CHECK_LIB([gmp], [mpz_init],[],[AC_MSG_ERROR([gmp library not found.])])
+AC_CHECK_LIB([m], [sqrt],[],[AC_MSG_ERROR([math library not found.])])
+AC_CHECK_LIB([mpfr], [mpfr_init2],[],[AC_MSG_ERROR([mpfr library not found.])])
+AC_CHECK_LIB([mpi], [MPI_Init],[],[AC_MSG_ERROR([mpi library not found.])])
 
 # Checks for header files.
-AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h strings.h sys/time.h gmp.h mpfr.h])
+AC_CHECK_HEADER([inttypes.h],[],[AC_MSG_ERROR([inttypes.h not found])])
+AC_CHECK_HEADER([stdint.h],[],[AC_MSG_ERROR([stdint.h not found])])
+AC_CHECK_HEADER([stdlib.h],[],[AC_MSG_ERROR([stdlib.h not found])])
+AC_CHECK_HEADER([string.h],[],[AC_MSG_ERROR([string.h not found])])
+AC_CHECK_HEADER([strings.h] ,[],[AC_MSG_ERROR([strings.h not found] )])
+AC_CHECK_HEADER([sys/time.h],[],[AC_MSG_ERROR([sys/time.h not found])])
+AC_CHECK_HEADER([gmp.h] ,[],[AC_MSG_ERROR([gmp.h not found] )])
+AC_CHECK_HEADER([mpfr.h],[],[AC_MSG_ERROR([mpfr.h not found])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
