@@ -1,3 +1,4 @@
+```
    ____                    _____ _        _____  _      ______ 
   / __ \                  / ____| |      |  __ \| |    |  ____|
  | |  | |_ __   ___ _ __ | (___ | |_ __ _| |__) | |    | |__   
@@ -11,7 +12,7 @@
 
 By E. Calore, M. Mesiti, F. Negro, G. Silvi 
 (and others, which can be added if they feel offended)
-
+```
 # An humorous intro to this code
 
 ## 0. Create the `configure` and `Makefile.in`s in the repo
