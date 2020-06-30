@@ -36,9 +36,8 @@ AC_CHECK_HEADER([inttypes.h],[],[AC_MSG_ERROR([inttypes.h not found])])
 AC_CHECK_HEADER([stdint.h],[],[AC_MSG_ERROR([stdint.h not found])])
 AC_CHECK_HEADER([stdlib.h],[],[AC_MSG_ERROR([stdlib.h not found])])
 AC_CHECK_HEADER([string.h],[],[AC_MSG_ERROR([string.h not found])])
-AC_CHECK_HEADER([strings.h] ,[],[AC_MSG_ERROR([strings.h not found] )])
 AC_CHECK_HEADER([sys/time.h],[],[AC_MSG_ERROR([sys/time.h not found])])
-AC_CHECK_HEADER([gmp.h] ,[],[AC_MSG_ERROR([gmp.h not found] )])
+AC_CHECK_HEADER([gmp.h],[],[AC_MSG_ERROR([gmp.h not found] )])
 AC_CHECK_HEADER([mpfr.h],[],[AC_MSG_ERROR([mpfr.h not found])])
 
 # Checks for typedefs, structures, and compiler characteristics.
