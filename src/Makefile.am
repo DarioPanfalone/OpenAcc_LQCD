@@ -43,6 +43,7 @@ __common_generated_sources = \
 __common_sources = \
 	DbgTools/dbgtools.c \
 	DbgTools/dbgtools.h \
+	DbgTools/debugger_hook.h \
 	Include/all_include.h \
 	Include/common_defines.h \
 	Include/debug.c \
@@ -152,9 +153,13 @@ __common_sources = \
 	tests_and_benchmarks/test_and_benchmarks.c \
 	tests_and_benchmarks/test_and_benchmarks.h 
 
+__debugger_sources = \
+	DbgTools/debugger_hook.c 
 
 
 bin_PROGRAMS = main deo_doe_test inverter_multishift_test checkinput confconverter confrestart
+
+noinst_LIBRARIES = libdbghook.a
 
 # in case we wanted other directories for utilities and benchmarks
 #utilitiesdir = $(bindir)/utilities
@@ -164,6 +169,8 @@ bin_PROGRAMS = main deo_doe_test inverter_multishift_test checkinput confconvert
 
 main_SOURCES =	OpenAcc/main.c\
 	$(__common_sources) 
+
+LDADD = libdgbhook.a
 
 nodist_main_SOURCES = $(__common_generated_sources)
 
@@ -192,3 +199,5 @@ confrestart_SOURCES = tools/confrestart.c \
 
 nodist_confrestart_SOURCES = $(__common_generated_sources)
 
+libdbghook_a_SOURCES = DbgTools/debugger_hook.c
+libdbghook_a_CFLAGS = -O0
