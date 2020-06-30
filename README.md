@@ -85,7 +85,7 @@ make install
 ```
 to finally install in the `--prefix` directory (see above).
 
-### 2. Benchmarks
+## 2. Benchmarks
 
 In order to run all the necessary benchmarks, it is advised to create an aptly named 
 directory. In such directory, create a "geom_defines.txt" file (see an example in 'docs').
