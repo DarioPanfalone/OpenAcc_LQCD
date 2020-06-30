@@ -2,6 +2,7 @@
 AC_PREREQ([2.63])
 AC_INIT([OpenStaPLE],[1.0],[michele.mesiti@gmail.com])
 
+
 AM_PATH_PYTHON([2.6],\
                [AC_MSG_NOTICE([Python found.])],\
       [AC_MSG_ERROR([Python >2.6 is necessary to create single precision code.],1)])
@@ -13,8 +14,11 @@ AC_MSG_NOTICE([Single prec code created/updated. Moving back to $OLDPWD])
 cd -
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
-AC_PROG_CC 
 
+AC_PROG_RANLIB # Requested by autoreconf on sunbird
+AM_PROG_AR     # Requested by autoreconf on sunbird
+
+AC_PROG_CC 
 # CHECKS SUGGESTED BY AUTOSCAN
 AC_PROG_CXX
 AC_PROG_AWK
