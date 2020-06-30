@@ -17,7 +17,7 @@
 
 '''
 from sys import argv,exit,stderr,stdout
-from os import path
+from os import path,environ
 import subprocess
 
 
@@ -129,8 +129,14 @@ elif 'pgi' in argv:
 
 
     if ta is not None:
-        CC_FLAGS='-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -DUSE_MPI_CUDA_AWARE -I${MPIINC}'
-        LINKER_FLAGS='-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -lmpi -L${MPILIB}'
+        mpiinc = environ['MPIINC'] if 'MPIINC' in environ else \
+                 environ['MPI_INCLUDE'] if 'MPI_INCLUDE' in environ else None
+        mpilib = environ['MPILIB'] if 'MPILIB' in environ else \
+                 environ['MPI_LIB'] if 'MPI_LIB' in environ else None
+        CC_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -DUSE_MPI_CUDA_AWARE '+\
+              ( '-I%s'%mpiinc if mpiinc is not None else '') + '"'
+        LINKER_FLAGS='"-acc=noautopar -v -O3 -Minfo=all -ta='+ta+' -lmpi '+\
+              ( '-L%s'%mpilib if mpilib is not None else '') + '"'
     else:
         stderr.write("Compiling with -O0 flags...")
         CC_FLAGS='-O0'
@@ -210,4 +216,4 @@ if ans.lower() in ['yes','y','ye']:
         stderr.write("Call to {} failed with error {}.\n"
                 .format(executable,e.returncode))
         if e.returncode == 77:
-            stderr.write("Maybe you need to load the correct modules?\n")
+            stderr.write("Maybe you need to load the correct modules, or compile options are wrong?\n")
