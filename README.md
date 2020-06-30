@@ -26,6 +26,16 @@ and configure.ac.
 
 ## 1. Build - General ideas
 
+### 1.0 Dependencies
+You need 
+- gmp and mpfr, for the rational approximation generation. You need to point 
+  your `configure` to the include/lib locations of these libraries with `-L`
+  and `-I` (you should not have to use `-l`).
+- very likely the pgi compiler. For MPI, best thing is to use the mpicc and
+  mpicxx (c++ is used only to compile the remez algorithm).
+
+### 1.1 Build
+
 At build time the geometry of the lattice must be known, and must be passed to 
 the "configure" script (notice that there is also a "configure_wrapper" script, 
 which is a python script, which makes easier to call "configure": more on that is written
@@ -47,7 +57,7 @@ cd build
 
 make && make install  # you may want to use make -j32 to be faster.
 ```
-### 1.1 Usage of the plain "configure" script
+### 1.2 Usage of the plain "configure" script
 
 You must also pass to configure:
 - The compiler : `CC=<the compiler you want to use>`
@@ -55,9 +65,10 @@ You must also pass to configure:
   a system directory you're likely not to have access to, but even if you have access to it 
   you should not install this software in system directories.
 - CFLAGS : compiler flags. Will be discussed later, depends on the compiler used.
-- LDFLAGS : the linker flags
+- LDFLAGS : the linker flags (e.g. the `-L/path`)
+- CPPFLAGS : the C-preprocessor flags (e.g. `-I/path`)
 
-### 1.2 Shortcuts to configure
+### 1.3 Shortcuts to configure
 
 For some cases, the python script `configure_wrapper` may help.
 This simple wrapper allows the user to call call configure without remembering all the
@@ -114,7 +125,7 @@ In order to run all the necessary benchmarks, it is advised to create an aptly n
 directory. In such directory, create a `geom_defines.txt` file (see an example in 'docs').
 Then build the software, using the commands described in the previous section.
 You can also produce all the necessary slurm scripts and setting files using the script
-`prepare_tbps.sh` in 'scripts'. For example,
+`prepare_tbps.sh` in `tools/test`. For example,
 ```
 mkdir my_benchmark
 cd my_benchmark
