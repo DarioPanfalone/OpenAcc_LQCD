@@ -28,15 +28,13 @@ AC_PROG_MAKE_SET
 AC_PROG_MKDIR_P
 
 
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-lgmp':
-AC_CHECK_LIB([gmp], [posmpz_init])
-# FIXME: Replace `main' with a function in `-lm':
-AC_CHECK_LIB([m], [sqrt])
-# FIXME: Replace `main' with a function in `-lmpfr':
-AC_CHECK_LIB([mpfr], [mpfr_init2])
-# FIXME: Replace `main' with a function in `-lmpi':
+# Checks for headers
+AC_CHECK_HEADER(gmp.h)
+AC_CHECK_HEADER(mpfr.h)
+
+# check for libraries
 AC_CHECK_LIB([mpi], [MPI_Init])
+AC_CHECK_LIB([m], [sqrt])
 
 # Checks for header files.
 AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h strings.h sys/time.h gmp.h mpfr.h])
