@@ -282,7 +282,6 @@ do
 #SBATCH --error=test.${EXECUTABLE}.%J.err 
 #SBATCH --output=test.${EXECUTABLE}.%J.out
 $SLURM_GPU_GRES
-#SBATCH --gres=gpu:$NRESGPUS
 #SBATCH --partition=$SLURMPARTITION
 #SBATCH --mem-per-cpu=$MEMORY
 
@@ -292,7 +291,7 @@ export PGI_ACC_BUFFERSIZE=$SIZE
 
 rm stop
 
-srun --cpu_bind=v,sockets $PROFILINGSTR ./bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
+srun --cpu_bind=v,sockets $PROFILINGSTR ../bin/$EXECUTABLE ./$INPUTFILENAME > $OUTPUTFILENAME
 
 EOF
         fi
