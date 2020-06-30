@@ -57,8 +57,9 @@ You must also pass to configure:
 - CFLAGS : compiler flags. Will be discussed later, depends on the compiler used.
 - LDFLAGS : the linker flags
 
-### 1.2 The `configure_wrapper` script
+### 1.2 Shortcuts to configure
 
+For some cases, the python script `configure_wrapper` may help.
 This simple wrapper allows the user to call call configure without remembering all the
 options. If you don't trust this wrapper, you can look into the code and look at the 
 options you need.
@@ -75,7 +76,29 @@ and you will be asked if you want to execute it or not. Note that, for simplicit
 the install directory (`--prefix`) is set to the working directory (the programs will be
 installed in `$PWD/bin`).  If you want to change that, just specify 
 `--prefix=<your explicit installing directory>`
-After that, you need to run 
+
+If you know what you are doing or the `configure_wrapper` script does not work
+for any reason, you can have a look at `doc/configure.example.sh`. 
+```
+#!/bin/bash
+# This is an example of a possible "configure" command for OpenStaPLE. 
+
+MPFR_AND_GMP_LOCATION=/home/s.michele.mesiti/software
+
+../configure CC="mpicc"\
+ CFLAGS="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc70,cuda10.0 -DUSE_MPI_CUDA_AWARE"\
+ LDFLAGS="-L$MPFR_AND_GMP_LOCATION/lib -lgmp"\
+ CPPFLAGS="-I$MPFR_AND_GMP_LOCATION/include"\
+ CXX="mpicxx"\
+ CXXFLAGS="-O3"\
+  --prefix=$(pwd)
+```
+On some machines, you will have to specify manually the location of the `mpfr` 
+and `gmp` libraries (that are needed only by the code that generates the 
+rational approximations). Also, using the mpi compiler wrapper may or may not
+be beneficial.
+
+After configuring, you need to run 
 ```
 make -jN # with N > 1 to make it faster, 
 ```
@@ -88,19 +111,25 @@ to finally install in the `--prefix` directory (see above).
 ## 2. Benchmarks
 
 In order to run all the necessary benchmarks, it is advised to create an aptly named 
-directory. In such directory, create a "geom_defines.txt" file (see an example in 'docs').
+directory. In such directory, create a `geom_defines.txt` file (see an example in 'docs').
 Then build the software, using the commands described in the previous section.
 You can also produce all the necessary slurm scripts and setting files using the script
-'prepare_slurm_benchmarks.sh' in 'scripts'. For example,
+`prepare_tbps.sh` in 'scripts'. For example,
 ```
 mkdir my_benchmark
 cd my_benchmark
 <create the geom_defines.txt file>
-../configure_wrapper pgi cc35 cuda8.0
+bash ./configure.sh # a wrapper like ../doc/configure.sh
 make && make install 
-../scripts/prepare_tbps.sh geom_defines.txt benchmark
+../tools/test/prepare_tbps.sh -c geom_defines.txt -p benchmark -s -a gpu -n 1
 ```
-Notice that 'scripts/prepare_tpbs.sh' assumes the executables are in ./bin.
+This script prepares some benchmark/test cases with an associated slurm script,
+reading many of the necessary information from the file passed with `-c`, in 
+this case `geom_defines.txt` (*the generated script should be reviewed by a human*).
+Notice that `tools/test/prepare_tpbs.sh` assumes the executables are in ./bin.
+
+**NOTE**: the `tools/test/prepare_tpbs.sh` script has not been tested too much.
+See the script for the meaning of the options and for other options.
 
 ## 3. Documentation
 Do you want to know more? A 26-page latex document is waiting for you.
