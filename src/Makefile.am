@@ -153,10 +153,6 @@ __common_sources = \
 	tests_and_benchmarks/test_and_benchmarks.c \
 	tests_and_benchmarks/test_and_benchmarks.h 
 
-__debugger_sources = \
-	DbgTools/debugger_hook.c 
-
-
 bin_PROGRAMS = main deo_doe_test inverter_multishift_test checkinput confconverter confrestart
 
 noinst_LIBRARIES = libdbghook.a
@@ -170,7 +166,7 @@ noinst_LIBRARIES = libdbghook.a
 main_SOURCES =	OpenAcc/main.c\
 	$(__common_sources) 
 
-LDADD = libdgbhook.a
+main_LDADD = libdbghook.a
 
 nodist_main_SOURCES = $(__common_generated_sources)
 

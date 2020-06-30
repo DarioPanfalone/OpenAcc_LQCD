@@ -2,6 +2,7 @@
 AC_PREREQ([2.63])
 AC_INIT([OpenStaPLE],[1.0],[michele.mesiti@gmail.com])
 
+
 AM_PATH_PYTHON([2.6],\
                [AC_MSG_NOTICE([Python found.])],\
       [AC_MSG_ERROR([Python >2.6 is necessary to create single precision code.],1)])
@@ -13,8 +14,11 @@ AC_MSG_NOTICE([Single prec code created/updated. Moving back to $OLDPWD])
 cd -
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
-AC_PROG_CC 
 
+AC_PROG_RANLIB # Requested by autoreconf on sunbird
+AM_PROG_AR     # Requested by autoreconf on sunbird
+
+AC_PROG_CC 
 # CHECKS SUGGESTED BY AUTOSCAN
 AC_PROG_CXX
 AC_PROG_AWK
@@ -23,11 +27,8 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_MKDIR_P
 
-
-# Checks for libraries.
-AC_CHECK_LIB([gmp], [mpz_init],[],[AC_MSG_ERROR([gmp library not found.])])
+# check for libraries
 AC_CHECK_LIB([m], [sqrt],[],[AC_MSG_ERROR([math library not found.])])
-AC_CHECK_LIB([mpfr], [mpfr_init2],[],[AC_MSG_ERROR([mpfr library not found.])])
 AC_CHECK_LIB([mpi], [MPI_Init],[],[AC_MSG_ERROR([mpi library not found.])])
 
 # Checks for header files.
