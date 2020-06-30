@@ -117,8 +117,9 @@ int main(int argc, char* argv[]){
             printf("N fermions found: %d, only one is necessary.\n", alloc_info.NPS_tot);
     }
 
-    printf("Setting number of shifts to zero - no shifts are needeed for this benchmark.\n");
-    alloc_info.maxNeededShifts = 0;
+    printf("Setting number of shifts to 1 - no shifts are needeed for this benchmark.\n");
+    printf("                                but using 1 just to avoid errors.\n");
+    alloc_info.maxNeededShifts = 1; // DEBUG
     printf("Setting stout level to zero - no stout is needed for this benchmark.\n");
     alloc_info.stoutAllocations = 0;
     act_params.stout_steps = 0;

@@ -272,9 +272,11 @@ void mem_alloc_extended()
     ALLOCCHECK(allocation_check, ferm_out_acc) ;
 #pragma acc enter data create(ferm_out_acc[0:alloc_info.NPS_tot])
 
-    allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, alloc_info.maxNeededShifts*sizeof(vec3_soa)); 
-    ALLOCCHECK(allocation_check, ferm_shiftmulti_acc ) ;
+    if(alloc_info.maxNeededShifts){
+        allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, alloc_info.maxNeededShifts*sizeof(vec3_soa)); 
+        ALLOCCHECK(allocation_check, ferm_shiftmulti_acc ) ;
 #pragma acc enter data create(ferm_shiftmulti_acc[0:alloc_info.maxNeededShifts])
+    }
 
 
     // REDUCTIONS
@@ -398,8 +400,11 @@ inline void mem_free_extended()
 #pragma acc exit data delete(ferm_phi_acc)          
     FREECHECK(ferm_out_acc);          
 #pragma acc exit data delete(ferm_out_acc)          
-    FREECHECK(ferm_shiftmulti_acc);   
+
+    if(alloc_info.maxNeededShifts){
+        FREECHECK(ferm_shiftmulti_acc);   
 #pragma acc exit data delete(ferm_shiftmulti_acc)   
+    }
     
     // REDUCTIONS
     FREECHECK(local_sums);            
