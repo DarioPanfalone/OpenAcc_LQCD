@@ -74,6 +74,27 @@ int main(int argc, char* argv[]){
 
     act_params.stout_steps = 0;
     alloc_info.NPS_tot = 1;
+    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
+#ifndef __GNUC__
+    acc_device_t my_device_type = acc_device_nvidia; // NVIDIA GPUs
+    // acc_device_t my_device_type = acc_device_radeon; // AMD GPUs
+    //acc_device_t my_device_type = acc_device_xeonphi; // Intel XeonPhi
+#ifdef MULTIDEVICE
+    {
+        char* localRankStr = NULL;
+        if ((localRankStr = getenv("OMPI_COMM_WORLD_RANK")) != NULL){
+            printf("LocalRankStr: %s\n",localRankStr);
+            devinfo.myrank = atoi(localRankStr);
+        }
+    }
+    select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
+    printf("MPI%02d: Device Selected : OK \n", devinfo.myrank );
+#else
+    select_init_acc_device(my_device_type, devinfo.single_dev_choice);
+    printf("MPI%02d: Device Selected : OK \n", devinfo.single_dev_choice );
+#endif
+#endif
+
 
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
@@ -136,25 +157,6 @@ int main(int argc, char* argv[]){
 #endif
 
     if(0==devinfo.myrank) print_geom_defines();
-#ifndef __GNUC__
-    //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
-    // NVIDIA GPUs
-    acc_device_t my_device_type = acc_device_nvidia;
-    // AMD GPUs
-    // acc_device_t my_device_type = acc_device_radeon;
-    // Intel XeonPhi
-    //acc_device_t my_device_type = acc_device_xeonphi;
-    // Select device ID
-    printf("MPI%02d: Selecting device.\n", devinfo.myrank);
-#ifdef MULTIDEVICE
-    select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
-#else
-    select_init_acc_device(my_device_type, devinfo.single_dev_choice);
-#endif
-    printf("MPI%02d: Device Selected : OK \n", devinfo.myrank );
-#endif
-
-
     mem_alloc_core();
     mem_alloc_extended();
     mem_alloc_core_f();
