@@ -42,7 +42,8 @@ Per Marconi100 serve aggiungere al bashrc le seguenti righe:
 
 module load profile/global
 module load gnu/8.4.0
-module load /cineca/prod/opt/compilers/pgi/19.10/binary/modulefiles/openmpi/3.1.3/2019 module load pgi/19.10–binary
+module load /cineca/prod/opt/compilers/pgi/19.10/binary/modulefiles/openmpi/3.1.3/2019 
+module load pgi/19.10--binary
 module load cuda/10.1
 
 # export env var
