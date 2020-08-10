@@ -100,7 +100,7 @@ d_complex scal_prod_global(  const __restrict vec3_soa * const in_vect1,
 
     return trr + tri * I;
 }
-inline double real_scal_prod_global(  
+double real_scal_prod_global(  
         const __restrict vec3_soa * const in_vect1,
         const __restrict vec3_soa * const in_vect2 )
 {
@@ -111,7 +111,7 @@ inline double real_scal_prod_global(
     MPI_Allreduce((void*)&local_res,(void*)&total_res,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
     return total_res;
 }
-inline double l2norm2_global( 
+double l2norm2_global( 
         const __restrict vec3_soa * const in_vect1  )
 {
 

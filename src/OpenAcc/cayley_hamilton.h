@@ -182,7 +182,7 @@ static inline void CH_exponential_antihermitian_soa_nissalike(
 }
 
 #pragma acc routine seq
-inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, __restrict single_tamat * const QA, single_su3 * const out){
+static inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, __restrict single_tamat * const QA, single_su3 * const out){
 // this is a degree 2 polynomial in Q= iQA, that is
 // P = f0 + f1 * Q + f2 * Q^2 = f0 + i * f1 * QA - f2 * QA^2
 
@@ -218,7 +218,7 @@ inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2
 
 }
 #pragma acc routine seq
-inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out){
+static inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out){
    // See comments in Itamat_2ndDeg_poly_no3rdrow(f0,f1,f2,QA,out);
    
     Itamat_2ndDeg_poly_no3rdrow(f0,f1,f2,QA,out);

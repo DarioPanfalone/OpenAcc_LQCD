@@ -273,7 +273,7 @@ void mem_alloc_extended()
 
 
 
-inline void mem_free_core()
+void mem_free_core()
 {
 
     printf("[CORE] Deallocation.\n");
@@ -302,7 +302,7 @@ inline void mem_free_core()
 
 
 
-inline void mem_free_extended()
+void mem_free_extended()
 {
 
 

@@ -155,7 +155,7 @@ void acc_Doe_unsafe( __restrict const su3_soa * const u,
                 }}}}
 }
 
-inline void acc_Deo( __restrict const su3_soa * const u, 
+void acc_Deo( __restrict const su3_soa * const u, 
                      __restrict vec3_soa * const out, 
                      __restrict const vec3_soa * const in,
                      __restrict const double_soa * const backfield) {
@@ -210,7 +210,7 @@ inline void acc_Deo( __restrict const su3_soa * const u,
 
 }
 
-inline void acc_Doe( __restrict const su3_soa * const u,
+void acc_Doe( __restrict const su3_soa * const u,
                      __restrict vec3_soa * const out,
                      __restrict const vec3_soa * const in,
                      __restrict const double_soa * const backfield) {

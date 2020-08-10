@@ -24,15 +24,15 @@ void set_double_soa_to_zero(double_soa * p);
 void u1_diff(double_soa * out_re, double_soa * out_im,
         double_soa * phase_p,double_soa * phase_m );
 
-inline int KSphaseX(int x,int y,int z,int t){return 1;};
-inline int KSphaseY(int x,int y,int z,int t){
+static inline int KSphaseX(int x,int y,int z,int t){return 1;};
+static inline int KSphaseY(int x,int y,int z,int t){
     return 1 - ( 2*(x & 0x1) );
 
 }
-inline int KSphaseZ(int x,int y,int z,int t){
+static inline int KSphaseZ(int x,int y,int z,int t){
     return 1 - ( 2*((x+y) & 0x1) );
 }
-inline int KSphaseT(int x,int y,int z,int t){ 
+static inline int KSphaseT(int x,int y,int z,int t){ 
     return 1 - ( 2*((x+y+z) & 0x1) );
 }
 
