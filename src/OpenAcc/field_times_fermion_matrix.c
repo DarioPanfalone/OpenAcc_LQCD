@@ -198,7 +198,7 @@ void acc_Doe_wf_unsafe( __restrict const su3_soa * const u,
 }
 
 // 'wf = with a field (for magnetic susceptibility)'
-inline void acc_Deo_wf( __restrict const su3_soa * const u, 
+void acc_Deo_wf( __restrict const su3_soa * const u, 
         __restrict vec3_soa * const out, 
         __restrict const vec3_soa * const in,
         const double_soa * phases,
@@ -216,7 +216,7 @@ inline void acc_Deo_wf( __restrict const su3_soa * const u,
 }
 
 // 'wf = with a field (for magnetic susceptibility)'
-inline void acc_Doe_wf( __restrict const su3_soa * const u,
+void acc_Doe_wf( __restrict const su3_soa * const u,
         __restrict vec3_soa * const out,
         __restrict const vec3_soa * const in,
         const double_soa * phases,

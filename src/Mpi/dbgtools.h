@@ -212,12 +212,12 @@ void send_lnh_subfermion_to_rank(const global_vec3_soa * gl_soa_fermion, int tar
     MPI_Send(target_vec3_soa, 3*2*LNH_SIZEH , MPI_DOUBLE, target_rank, tag, MPI_COMM_WORLD);
 
 }
-inline void recv_lnh_subfermion_from_master(lnh_vec3_soa * lnh_fermion, int tag){
+static inline void recv_lnh_subfermion_from_master(lnh_vec3_soa * lnh_fermion, int tag){
 
     MPI_Recv(lnh_fermion, 3*2*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD,MPI_STATUS_IGNORE );
     // ^^ CHECK
 }
-inline void send_lnh_subfermion_to_master(lnh_vec3_soa * lnh_fermion, int tag){
+static inline void send_lnh_subfermion_to_master(lnh_vec3_soa * lnh_fermion, int tag){
 
     MPI_Send(lnh_fermion, 3*2*LNH_SIZEH,MPI_DOUBLE,0,tag,MPI_COMM_WORLD );
     // ^^ CHECK
