@@ -20,10 +20,10 @@ ifeq ($(COMPILER), PGI)
 
 
 
-  ifeq ($(ARCH), CC35)
-    $(info ARCH set to CC35)
-    CC_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda10.0 -DUSE_MPI_CUDA_AWARE -I${MPIINC}
-    LINKER_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda10.0 -lmpi -L${MPILIB}
+  ifeq ($(ARCH), CC70)
+    $(info ARCH set to CC70)
+    CC_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc70,cuda10.0 -DUSE_MPI_CUDA_AWARE -I${MPIINC}
+    LINKER_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc70,cuda10.0 -lmpi -L${MPILIB}
   else ifeq ($(ARCH), CC60)
     $(info ARCH set to CC60)
     CC_FLAGS=-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc35,cuda10.0 -DUSE_MPI_CUDA_AWARE -I${MPIINC}
