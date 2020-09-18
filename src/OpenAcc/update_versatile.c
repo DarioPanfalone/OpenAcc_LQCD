@@ -31,6 +31,7 @@
 #include "../tests_and_benchmarks/test_and_benchmarks.h"
 #include "./alloc_settings.h"
 #include "./update_versatile.h"
+#include "./topological_action.c"
 
 #ifdef __GNUC__
 #include "sys/time.h"
@@ -45,7 +46,7 @@ action_param act_params;
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro, int max_cg){
 
-#ifdef STOUT_FERMIONS        
+#ifdef STOUT_FERMIONS //Per adesso va bene così, ma dopo aggiungerà la topossibilità       
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
     su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_arr_f;
 #endif
@@ -86,6 +87,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     int accettata;
     double delta_S;
     double action_in,action_fin,action_mom_in,action_mom_fin,action_ferm_in,action_ferm_fin;
+	double action_topo_in,action_topo_fin;
 
     struct timeval t_start, t_saved,t_end;
     gettimeofday ( &t_start, NULL ); 
@@ -202,7 +204,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     }//end for iflav
 
 
-
     if(metro==1){
         /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
         if(GAUGE_ACTION == 0)// Standard gauge action 
@@ -211,6 +212,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             action_in = C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
             action_in += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
         }
+
+		
+	   	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
+	    
         action_mom_in = 0.0;
         for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
         action_ferm_in=0;
@@ -499,6 +504,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             action_fin += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
         }
 
+		action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
+
         action_mom_fin = 0.0;
         for(mu =0;mu<8;mu++)    action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
 
@@ -514,7 +521,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         ////////////////////////////////////////////////////////////////////////////////////////
 
         // delta_S = action_new - action_old
-        delta_S  = - (-action_in+action_mom_in+action_ferm_in) + (-action_fin+action_mom_fin+action_ferm_fin);
+        delta_S  = - (-action_in+action_mom_in+action_ferm_in-action_topo_in) + (-action_fin+action_mom_fin+action_ferm_fin-action_topo_fin);
         if(verbosity_lv > 2 && 0 == devinfo.myrank ){
             printf("MPI%02d-iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",
                     devinfo.myrank,iterazioni,-action_in,-action_fin);

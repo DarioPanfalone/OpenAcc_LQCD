@@ -375,13 +375,24 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
 {
     // see OpenAcc/su3_measurements.h
     const double stout_rho_def = RHO;
-
+	const int topo_action_def = 0;
+	const double barrier_def = 2.0;
+	const double width_def = 0.1;
+	const char topo_file_path_def[] = "ToPotential";
+	const int topo_stout_steps_def = 0;
+	const char topo_act_comment[] = "#Set to 1 to enable multicanonical topological potential.";
     par_info ap[]={
-        (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      , NULL,NULL},
-        (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps", NULL,NULL},
-        (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  , (const void*) &stout_rho_def,NULL}};
-
-
+        (par_info){(void*) &(act_par->beta)            , TYPE_DOUBLE, "Beta"          , NULL, NULL},
+        (par_info){(void*) &(act_par->stout_steps)     , TYPE_INT   , "StoutSteps"    , NULL, NULL},
+        (par_info){(void*) &(act_par->stout_rho)       , TYPE_DOUBLE, "StoutRho"      , (const void*) &stout_rho_def, NULL},
+		(par_info){(void*) &(act_par->topo_action)     , TYPE_INT   , "TopoAct"       , (const void*) &topo_acrion_def, topo_act_comment},
+		(par_info){(void*) &(act_par->barrier)         , TYPE_DOUBLE, "Barrier"       , (const void*) &barrier_def, NULL},
+		(par_info){(void*) &(act_par->width)           , TYPE_DOUBLE, "Width"         , (const void*) &width_def, NULL},
+		(par_info){(void*) &(act_par->topo_file_path)  , TYPE_STR   , "TopoPath"      , (const void*) &topo_file_path_def, NULL},
+		(par_info){(void*) &(act_par->topo_stout_steps), TYPE_INT   , "TopoStoutSteps", (const void*) &topo_stout_steps_def, NULL},
+		(par_info){(void*) &(act_par->topo_rho)        , TYPE_DOUBLE, "TopoRho"       , NULL, NULL}
+	};			   
+				   
     // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
 
@@ -902,7 +913,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     }
 
 
-    alloc_info.stoutAllocations = act_params.stout_steps > 0 ;
+    alloc_info.stoutAllocations = act_params.stout_steps > 0 || act_params.topo_stout_steps > 0;
     if(devinfo.myrank == 0 )
         printf("Set alloc_info.stoutAllocations to %d\n",  alloc_info.stoutAllocations );
 
