@@ -385,7 +385,7 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
         (par_info){(void*) &(act_par->beta)            , TYPE_DOUBLE, "Beta"          , NULL, NULL},
         (par_info){(void*) &(act_par->stout_steps)     , TYPE_INT   , "StoutSteps"    , NULL, NULL},
         (par_info){(void*) &(act_par->stout_rho)       , TYPE_DOUBLE, "StoutRho"      , (const void*) &stout_rho_def, NULL},
-		(par_info){(void*) &(act_par->topo_action)     , TYPE_INT   , "TopoAct"       , (const void*) &topo_acrion_def, topo_act_comment},
+		(par_info){(void*) &(act_par->topo_action)     , TYPE_INT   , "TopoAct"       , (const void*) &topo_action_def, topo_act_comment},
 		(par_info){(void*) &(act_par->barrier)         , TYPE_DOUBLE, "Barrier"       , (const void*) &barrier_def, NULL},
 		(par_info){(void*) &(act_par->width)           , TYPE_DOUBLE, "Width"         , (const void*) &width_def, NULL},
 		(par_info){(void*) &(act_par->topo_file_path)  , TYPE_STR   , "TopoPath"      , (const void*) &topo_file_path_def, NULL},

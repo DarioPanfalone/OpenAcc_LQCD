@@ -12,7 +12,6 @@
  #define M_PI 3.14159265358979323846
 #endif
 
-
 extern char gauge_outfilename[50];
 extern char gauge_outfile_header[100];
 

@@ -1,13 +1,15 @@
-#ifndef TOPO_FORCE
+#ifndef TOPOLOGICAL_FORCE_C
 
-#define TOPO_FORCE
+#define TOPOLOGICAL_FORCE_C
+#include "../Include/common_defines.h"
 #include "./topological_force.h"
 #include <math.h>
+
 #include "../Meas/gauge_meas.h"
 #include "./topological_action.h"
 #include "./fermion_force_utilities.h"
 
-double compute_topodynamical_potential_der(__restrict const su3_soa * const u, const double Q)
+double compute_topodynamical_potential_der(const double Q)
 {
 	double barr=act_params.barrier, width=act_params.width;
 	int ngrid=(2*barr+width/2)/width;
@@ -16,7 +18,7 @@ double compute_topodynamical_potential_der(__restrict const su3_soa * const u, c
 	if(igrid>=0 && igrid<ngrid)
 		{
 			double *grid = (double *)malloc(ngrid*sizeof(double));
-			load(act_params.topo_file_path,barr,width,grid,ngrid);
+			load_topo(act_params.topo_file_path,barr,width,grid,ngrid);
 			return (grid[igrid+1]-grid[igrid])/width;
 		}
 	else
@@ -120,22 +122,23 @@ void antihermatize_unsafe(su3_soa * const leaves)
 }
 
 
-void topo_staples(__restrict const su3_soa * const u,__restrict su3_soa * const staples)
+void topo_staples(__restrict const su3_soa * const u,__restrict su3_soa * const staples, double norm)
 {
 	//compute leaves
 	su3_soa * leaves;
-	
-#pragma acc enter data create(leaves[0:12]) present(nnp_openacc) present(nnm_openacc)
-	
+
+#pragma kernels present(nnp_openacc) present(nnm_openacc)
+#pragma acc enter data create(leaves[0:12])
+#pragma acc data create(norm)
 	//compute leaves
 	four_leaves(leaves, u);
 	//antihermatize leaves
 	antihermatize_unsafe(leaves);
-	
+	int d0, d1, d2, d3;
 	int perp_dir[4][3] = {{ 1, 2, 3}, { 0, 2, 3}, { 0, 1, 3}, { 0, 1, 2}};
     int plan_perp[4][3]= {{ 5, 4, 3}, { 5, 2, 1}, { 4, 2, 0}, { 3, 1, 0}};
     int plan_sign[4][3]= {{+1,-1,+1}, {-1,+1,-1}, {+1,-1,+1}, {-1,+1,-1}};
-	su3_soa * ABC,BCF,ABCF, ADE,DEF,ADEF, temp_r, temp_l;
+	su3_soa *ABC, *BCF, *ABCF, *ADE, *DEF, *ADEF, *temp_r, *temp_l;
 	
 	for(int mu=0; mu<4; mu++)
 		for(int inu=0; inu<3; inu++)
@@ -161,71 +164,71 @@ void topo_staples(__restrict const su3_soa * const u,__restrict su3_soa * const 
 						int idxE = nnp_openacc[idxD][mu][!parity];
 
 						//compute ABC BCF ABCF
-						mat1_times_mat2_into_mat3_absent_stag_phases(u[nu+parity], idxA,
-																	 u[mu+!parity],idxB,
-																	 ABC[mu+parity],idxA);
-						mat1_times_conj_mat2_into_mat3_absent_stag_phases(u[mu+!parity], idxB,
-																		 u[nu+!parity],idxF,
-																		 BCF[mu+parity],idxA);
-						mat1_times_conj_mat2_into_mat3_absent_stag_phases(ABC[mu+parity], idxA,
-																		 u[nu+!parity],idxF,
-																		 ABCF[mu+parity],idxA);
+						mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+parity], idxA,
+																	 &u[mu+!parity],idxB,
+																	 &ABC[mu+parity],idxA);
+						mat1_times_conj_mat2_into_mat3_absent_stag_phases(&u[mu+!parity], idxB,
+																		 &u[nu+!parity],idxF,
+																		 &BCF[mu+parity],idxA);
+						mat1_times_conj_mat2_into_mat3_absent_stag_phases(&ABC[mu+parity], idxA,
+																		 &u[nu+!parity],idxF,
+																		 &ABCF[mu+parity],idxA);
 						//compute ADE DEF ADEF
-						conj_mat1_times_mat2_into_mat3_absent_stag_phases(u[nu+!parity], idxD,
-																		 u[mu+!parity],idxD,
-																		 ADE[mu+parity],idxA);
-						mat1_times_mat2_into_mat3_absent_stag_phases(u[nu+!parity], idxD,
-																	 u[mu+parity],idxE,
-																	 DEF[mu+parity],idxA);
-						conj_mat1_times_mat2_into_mat3_absent_stag_phases(u[nu+!parity], idxD,
-																		 DEF[mu+parity],idxA,
-																		 ADEF[mu+parity],idxA);
+						conj_mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+!parity], idxD,
+																		 &u[mu+!parity],idxD,
+																		 &ADE[mu+parity],idxA);
+						mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+!parity], idxD,
+																	 &u[mu+parity],idxE,
+																	 &DEF[mu+parity],idxA);
+						conj_mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+!parity], idxD,
+																		 &DEF[mu+parity],idxA,
+																		 &ADEF[mu+parity],idxA);
 						//compute local staples. Beware, this step should differ from nissa's
-						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(leaves[iplan+parity], idxA, //--
-																				 ABCF[iplan+parity], idxA,   // |
-																				 staples[mu+parity],idxA,    // |
-																				 plan_sign[mu][nu]);         // |
-						mat1_times_mat2_into_mat3_absent_stag_phases(u[nu+parity], idxA,					 // |
-																	 leaves[iplan+!parity], idxB,			 // |
-																	 temp_r[nu+parity], idxA);               // |
-						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(temp_r[nu+parity], idxA,	 // |
-																				 BCF[iplan+parity], idxA,	 // |
-																				 staples[mu+parity],idxA,	 // |
-																				 plan_sign[mu][nu]);		 // |
-						mat1_times_conj_mat2_into_mat3_absent_stag_phases(leaves[iplan+parity],idxC,         //   RIGHT STAPLE    
-																		  u[nu+!parity], idxF,               // |
-																		  temp_r[nu+!parity], idxF);		 //	|
-						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(ABC[iplans+parity], idxA,	 //	|
-																				 temp_r[nu+!parity], idxF,	 //	|
-																				 staples[mu+parity],idxA,	 //	|
-																				 plan_sign[mu][nu]);		 //	|
-						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(ABCF[iplan+parity], idxA,   //	|
-																				 leaves[iplan+parity], idxF, //	|
-																				 staples[mu+parity],idxA,	 //	|
-																				 plan_sign[mu][nu]);         //--
+						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&leaves[iplan+parity], idxA, //--
+																				 &ABCF[iplan+parity], idxA,   // |
+																				 &staples[mu+parity],idxA,    // |
+																				 norm*plan_sign[mu][nu]);    // |
+						mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+parity], idxA,					 // |
+																	 &leaves[iplan+!parity], idxB,			 // |
+																	 &temp_r[nu+parity], idxA);               // |
+						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&temp_r[nu+parity], idxA,	 // |
+																				 &BCF[iplan+parity], idxA,	 // |
+																				 &staples[mu+parity],idxA,	 // |
+																				 norm*plan_sign[mu][nu]);    // |
+						mat1_times_conj_mat2_into_mat3_absent_stag_phases(&leaves[iplan+parity],idxC,         //   RIGHT STAPLE    
+																		  &u[nu+!parity], idxF,               // |
+																		  &temp_r[nu+!parity], idxF);		 //	|
+						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&ABC[iplan+parity], idxA,	 //	|
+																				 &temp_r[nu+!parity], idxF,	 //	|
+																				 &staples[mu+parity],idxA,	 //	|
+																				 norm*plan_sign[mu][nu]);	 //	|
+						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&ABCF[iplan+parity], idxA,   //	|
+																				 &leaves[iplan+parity], idxF, //	|
+																				 &staples[mu+parity],idxA,	 //	|
+																				 norm*plan_sign[mu][nu]);    //--
 						
-						conj_mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(leaves[iplan+parity], idxA, //--
-																					  ADEF[iplan+parity], idxA,   // |
-																					  staples[mu+parity],idxA,    // |
-																					  plan_sign[mu][nu]);         // |
-						conj_mat1_times_conj_mat2_into_mat3_absent_stag_phases(u[nu+parity], idxD,			      // |
-																			   leaves[iplan+!parity], idxD,		  // |
-																			   temp_l[nu+parity], idxD);          // |
-						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(temp_l[nu+parity], idxD,	      // |
-																				 DEF[iplan+parity], idxA,	      // |
-																				 staples[mu+parity],idxA,	      // |
-																				 plan_sign[mu][nu]);		      // |
-						conj_mat1_times_mat2_into_mat3_absent_stag_phases(leaves[iplan+parity],idxE,              //   LEFT STAPLE    
-																		  u[nu+!parity], idxF,                    // |
-																		  temp_l[nu+!parity], idxF);		      // |
-						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(ADE[iplans+parity], idxA,	      // |
-																				 temp_l[nu+!parity], idxF,	      // |
-																				 staples[mu+parity],idxA,         // |
-																				 plan_sign[mu][nu]);		      // |
-						mat1_times_conj_mat2_times_fact_addto_mat3_absent_stag_phases(ADEF[iplan+parity], idxA,   // |
-																					  leaves[iplan+parity], idxF, // |
-																					  staples[mu+parity],idxA,	  // |
-																					  plan_sign[mu][nu]);         //--
+						conj_mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&leaves[iplan+parity], idxA, //--
+																					  &ADEF[iplan+parity], idxA,   // |
+																					  &staples[mu+parity],idxA,    // |
+																					  norm*plan_sign[mu][nu]);    // |
+						conj_mat1_times_conj_mat2_into_mat3_absent_stag_phases(&u[nu+parity], idxD,			      // |
+																			   &leaves[iplan+!parity], idxD,		  // |
+																			   &temp_l[nu+parity], idxD);          // |
+						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&temp_l[nu+parity], idxD,	      // |
+																				 &DEF[iplan+parity], idxA,	      // |
+																				 &staples[mu+parity],idxA,	      // |
+																				 norm*plan_sign[mu][nu]);	      // |
+						conj_mat1_times_mat2_into_mat3_absent_stag_phases(&leaves[iplan+parity],idxE,              //   LEFT STAPLE    
+																		  &u[nu+!parity], idxF,                    // |
+																		  &temp_l[nu+!parity], idxF);		      // |
+						mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&ADE[iplan+parity], idxA,	      // |
+																				 &temp_l[nu+!parity], idxF,	      // |
+																				 &staples[mu+parity],idxA,         // |
+																				 norm*plan_sign[mu][nu]);	      // |
+						mat1_times_conj_mat2_times_fact_addto_mat3_absent_stag_phases(&ADEF[iplan+parity], idxA,   // |
+																					  &leaves[iplan+parity], idxF, // |
+																					  &staples[mu+parity],idxA,	  // |
+																					  norm*plan_sign[mu][nu]);    //--
 												
 					}
 	
@@ -233,28 +236,34 @@ void topo_staples(__restrict const su3_soa * const u,__restrict su3_soa * const 
 
 
 
-double calc_loc_topo_staples(__restrict const su3_soa * const u, double Q)
+void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_soa * const staples)
 {
-	su3_soa * const staples, tstout_conf_acc_arr;
+	su3_soa tstout_conf_acc_arr, * const quadri;
 	double_soa * const loc_q;
-
-	topo_staples(u, staples)
+	double Q = compute_topological_charge(u, quadri, loc_q);
+	double pot_der=compute_topodynamical_potential_der(Q);
+	double norm=pot_der/(M_PI*M_PI*64);
+	
+	topo_staples(u, staples, norm);
 	
 #ifdef STOUT_TOPO
 	stout_wrapper(u,tstout_conf_acc_arr); //INSERIRE PARAMETRI STOUTING TOPOLOGICO
 #else
 	tstout_conf_acc_arr=*u;
 #endif
-	
-	double pot_der=compute_topodynamical_potential_der(u, Q);
-	double norm=pot_der/(M_PI*M_PI*64);
-	
-	//MANCA TUTTA LA PARTE DELLA TOPOLOGICAL STAPLE
-	
+	int d0, d1, d2, d3;
+	for(int mu=0; mu<4; mu++)
+#pragma acc loop independent gang
+		for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++)
+#pragma acc loop independent gang vector
+			for(d2=0; d2<nd2; d2++)
+#pragma acc loop independent gang vector
+				for(d2=0; d2<nd2; d2++){
+					const int idxm = snum_acc(d0,d1,d2,d3);
+					const int parity = (d0+d1+d2+d3)%2;
+					mat1_times_double_factor(&staples[mu+parity], idxm, norm);
+		}
 }
-#endif
-
-
 
 
 #endif

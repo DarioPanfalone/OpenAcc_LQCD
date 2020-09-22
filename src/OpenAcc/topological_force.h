@@ -6,12 +6,15 @@
 #include "./action.h"
 
 
+double compute_topodynamical_potential_der(double Q);
 
-double compute_topodynamical_potential_der(__restrict const su3_soa * u, double Q);
+void four_leaves(su3_soa * const leaves, su3_soa * const u);
 
 double compute_topological_force_internal(__restrict const su3_soa * const u,__restrict su3_soa * const F);
 
-double compute_topo_force(su3_soa * const u, const double Q);
+void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_soa * const staples);
+
+
 
 
 #endif

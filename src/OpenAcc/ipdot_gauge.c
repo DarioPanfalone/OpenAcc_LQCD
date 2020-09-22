@@ -21,6 +21,7 @@ extern int verbosity_lv;
 #include "../DbgTools/dbgtools.h"
 #include "./action.h"
 
+#include "./topological_force.h"
 
 void calc_ipdot_gauge_soloopenacc_std( 
         __restrict const su3_soa * const tconf_acc, 
@@ -80,6 +81,8 @@ void calc_ipdot_gauge_soloopenacc_tlsm(
     calc_loc_improved_staples_typeB_nnptrick_all(tconf_acc,local_staples);
     calc_loc_improved_staples_typeC_nnptrick_all(tconf_acc,local_staples);
 
+    calc_loc_topo_staples(tconf_acc, local_staples);
+	
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
@@ -116,9 +119,8 @@ void calc_ipdot_gauge_soloopenacc(
     if(GAUGE_ACTION==1){
         calc_ipdot_gauge_soloopenacc_tlsm(tconf_acc,local_staples,tipdot);
     }
-
-
-
+	
+	
     if(debug_settings.save_diagnostics == 1){
 
 

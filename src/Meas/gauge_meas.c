@@ -2,7 +2,6 @@
 // use the global defined fermions loc_chi, loc_phi, rnd_o, rnd_e, chi_o and loc_h
 #ifndef GAUGE_MEAS_C
 #define GAUGE_MEAS_C
-
 #include "../OpenAcc/geometry.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/su3_utilities.h"
@@ -33,7 +32,7 @@ void compute_local_topological_charge(  __restrict su3_soa * const u,
   
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(quadri) present(loc_q) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang 
+#pragma loop independent gang 
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector 
       for(d2=0; d2<nd2; d2++) {
