@@ -81,10 +81,11 @@ void calc_ipdot_gauge_soloopenacc_tlsm(
     calc_loc_improved_staples_typeB_nnptrick_all(tconf_acc,local_staples);
     calc_loc_improved_staples_typeC_nnptrick_all(tconf_acc,local_staples);
 
-    calc_loc_topo_staples(tconf_acc, local_staples);
+	if(act_params.topo_action)
+		calc_loc_topo_staples(tconf_acc, local_staples);
 	
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
-
+	
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
         char genericfilename[50];
         sprintf(genericfilename,"impr_staples_%d_%d",

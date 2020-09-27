@@ -12,12 +12,12 @@ typedef struct action_param_t{
 	int topo_action;
 	double barrier;
 	double width; // MAYBE IT GIVE REDUNDANT INFO: width = 2*barrier/(tot lines in topo_file)
-	char * topo_file_path;
+	char topo_file_path[20];
 	int topo_stout_steps;
 	double topo_rho;
 } action_param;
 
-
+extern double grid[];
 
 extern action_param act_params;
 

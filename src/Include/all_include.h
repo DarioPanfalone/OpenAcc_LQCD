@@ -54,6 +54,10 @@
 #include "../OpenAcc/su3_measurements.h"
 #include "../OpenAcc/update_versatile.c"
 #include "../OpenAcc/update_versatile.h"
+#include "../OpenAcc/topological_action.c"
+#include "../OpenAcc/topological_action.h"
+#include "../OpenAcc/topological_force.c"
+#include "../OpenAcc/topological_force.h"
 #include "../RationalApprox/rationalapprox.c"
 #include "../RationalApprox/rationalapprox.h"
 

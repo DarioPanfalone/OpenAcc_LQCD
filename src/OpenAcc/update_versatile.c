@@ -31,7 +31,7 @@
 #include "../tests_and_benchmarks/test_and_benchmarks.h"
 #include "./alloc_settings.h"
 #include "./update_versatile.h"
-#include "./topological_action.c"
+#include "./topological_action.h"
 
 #ifdef __GNUC__
 #include "sys/time.h"
@@ -212,8 +212,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             action_in = C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
             action_in += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
         }
-
 		
+		if(verbosity_lv>3 && act_params.topo_action==1)printf("\tComputing topological action\n");
 	   	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
 	    
         action_mom_in = 0.0;
@@ -525,6 +525,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         if(verbosity_lv > 2 && 0 == devinfo.myrank ){
             printf("MPI%02d-iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",
                     devinfo.myrank,iterazioni,-action_in,-action_fin);
+			printf("MPI%02d-iterazione %i:  Topol_ACTION  (in and out) = %.18lf , %.18lf\n",
+                    devinfo.myrank,iterazioni,-action_topo_in,-action_topo_fin);
             printf("MPI%02d-iterazione %i:  Momen_ACTION  (in and out) = %.18lf , %.18lf\n",
                     devinfo.myrank,iterazioni,action_mom_in,action_mom_fin);
             printf("MPI%02d-iterazione %i:  Fermi_ACTION  (in and out) = %.18lf , %.18lf\n",

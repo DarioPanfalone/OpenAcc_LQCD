@@ -40,7 +40,6 @@ void unitarize_conf( __restrict su3_soa * const u)
 }
 
 
-
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix)
 {
   int hd0, d1, d2, d3;

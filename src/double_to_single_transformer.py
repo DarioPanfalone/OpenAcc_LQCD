@@ -77,6 +77,10 @@ filesALLDtoF=[\
 'OpenAcc/fermion_force.h',\
 'OpenAcc/fermion_force_utilities.c',\
 'OpenAcc/fermion_force_utilities.h',\
+'OpenAcc/topological_action.c',\
+'OpenAcc/topological_action.h',\
+'OpenAcc/topological_force.c',\
+'OpenAcc/topological_force.h',\
 'OpenAcc/fermion_matrix.c',\
 'OpenAcc/fermion_matrix.h',\
 'OpenAcc/ipdot_gauge.c',\

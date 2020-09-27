@@ -14,7 +14,6 @@
 #include "../Mpi/communications.h"
 
 
-
 int print_su3_soa_ASCII(global_su3_soa * const conf, const char* nomefile,
         int conf_id_iter,double_soa *back_phases);
 

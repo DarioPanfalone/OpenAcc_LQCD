@@ -6,7 +6,7 @@
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/su3_utilities.h"
 #include "./gauge_meas.h"
-
+#include "../Mpi/multidev.h"
 
 #ifdef __GNUC__
  #include "math.h"
@@ -164,18 +164,28 @@ double reduce_loc_top_charge(double_soa * const loc_q)
     return result;
 }
 
-
 double compute_topological_charge(__restrict su3_soa * const u,
-        __restrict su3_soa * const quadri,
+        su3_soa * const quadri,
         double_soa * const loc_q){  
 
-    set_su3_soa_to_zero(quadri); // forse non serve a una mazza
 
+	if(verbosity_lv>3)
+		printf("MPI%02d - set_su3_soa_to_zero(quadri)\n",devinfo.myrank);
+#pragma acc data present(quadri) present(loc_q)
+	set_su3_soa_to_zero(quadri); // forse non serve a una mazza
+
+	
     double temp_ch =0.0;
+	if(verbosity_lv>3)
+		printf("MPI%02d - compute_local_topological_charge(u,quadri,loc_q,0,1) - first\n",devinfo.myrank);
     compute_local_topological_charge(u,quadri,loc_q,0,1);// (d0,d1) - (d2,d3)
     temp_ch = reduce_loc_top_charge(loc_q);
+	if(verbosity_lv>3)
+		printf("MPI%02d - compute_local_topological_charge(u,quadri,loc_q,0,1) - second\n",devinfo.myrank);
     compute_local_topological_charge(u,quadri,loc_q,0,2);// (d0,d2) - (d1,d3)
     temp_ch += reduce_loc_top_charge(loc_q);
+	if(verbosity_lv>3)
+		printf("MPI%02d - compute_local_topological_charge(u,quadri,loc_q,0,1) - third\n",devinfo.myrank);
     compute_local_topological_charge(u,quadri,loc_q,0,3);// (d0,d3) - (d1,d2)
     temp_ch += reduce_loc_top_charge(loc_q);
 
