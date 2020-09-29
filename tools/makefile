@@ -19,10 +19,10 @@ alg_remez.o: ../src/RationalApprox/Remez/alg_remez.cc ../src/RationalApprox/Reme
 	g++ -O3 -c ../src/RationalApprox/Remez/alg_remez.cc  -DNOMULTI  -DLOC_N0=4  -DLOC_N1=4 -DLOC_N2=4 -DLOC_N3=4 -DNRANKS_D3=1
 
 rgen: rationalapprox_calc.o rationalapprox.o alg_remez.o
-	g++ -O3 -o rgen rationalapprox_calc.o rationalapprox.o alg_remez.o -I/usr/include/x86_64-linux-gnu/ -L/usr/lib/x86_64-linux-gnu/ -L/usr/lib/x86_64-linux-gnu/ -lgmp -lmpfr
+	g++ -O3 -o rgen rationalapprox_calc.o rationalapprox.o alg_remez.o -lgmp -lmpfr
 
 rgenfo: rationalapprox_calc_fixed_order.o rationalapprox.o alg_remez.o
-	g++ -O3 -o rgenfo rationalapprox_calc_fixed_order.o  rationalapprox.o alg_remez.o -I/usr/include/x86_64-linux-gnu/ -L/usr/lib/x86_64-linux-gnu/ -L/usr/lib/x86_64-linux-gnu/ -lgmp -lmpfr
+	g++ -O3 -o rgenfo rationalapprox_calc_fixed_order.o  rationalapprox.o alg_remez.o -lgmp -lmpfr
 
 
 

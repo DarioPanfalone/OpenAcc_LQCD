@@ -1,12 +1,6 @@
 #ifndef COMMON_DEFINES_H_
 #define COMMON_DEFINES_H_
 
-#define conj __builtin_conj
-#define creal __builtin_creal
-#define cimag __builtin_cimag
-#define conjf __builtin_conjf
-#define crealf __builtin_crealf
-#define cimagf __builtin_cimagf
 //#define BACKFIELD
 //#define IMCHEMPOT
 

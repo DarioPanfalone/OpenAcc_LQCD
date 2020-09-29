@@ -29,12 +29,14 @@ double compute_topodynamical_potential_der(const double Q)
 		return 0;
 }
 
+static inline void where_error(int a){printf("Where is the error? %d\n",a);}
+
 void four_leaves(su3_soa * const leaves, su3_soa * const u)
 {
 	int mu, nu;
 	int d0, d1, d2, d3;
 	
-	
+where_error(0);	
 #pragma acc kernels present(u) present(leaves) present(nnp_openacc) present(nnm_openacc)
 	for(mu=0;mu<3;mu++)
 		for(nu=mu+1;nu<4;nu++)
@@ -49,9 +51,7 @@ void four_leaves(su3_soa * const leaves, su3_soa * const u)
 						for(d0=0; d0 < nd0; d0++){
 							const int idxh = snum_acc(d0,d1,d2,d3);
 							const int parity = (d0+d1+d2+d3)%2;
-							const int idx_plane = 2*mu + nu - 1 - ((int)mu/2);//mu=0 nu=1 --> idx_plane=0;...\
-																			    mu=1 nu=2 --> idx_plane=3;...\
-																			    mu=2 nu=3 --> idx_plane=5.
+							const int idx_plane = 2*mu + nu - 1 - ((int)mu/2);//mu=0 nu=1 --> idx_plane=0;... mu=1 nu=2 --> idx_plane=3;... mu=2 nu=3 --> idx_plane=5.
 							//leaves points
 							int idx_p_mu = nnp_openacc[idxh][mu][parity];
 							int idx_p_nu = nnp_openacc[idxh][nu][parity];
@@ -61,7 +61,7 @@ void four_leaves(su3_soa * const leaves, su3_soa * const u)
 							int idx_p_nu_m_mu = nnm_openacc[idx_p_nu][mu][!parity];
 							int idx_m_mu_m_nu = nnm_openacc[idx_m_mu][nu][!parity];
 							int idx_m_nu_p_mu = nnp_openacc[idx_m_nu][mu][!parity];
-							
+							where_error(1);
 							
 							//first leave
 							comp_U_U_Udag_Udag(&u[2*mu+parity] , idxh,
@@ -87,11 +87,11 @@ void four_leaves(su3_soa * const leaves, su3_soa * const u)
 													   &u[2*nu+parity] , idx_m_nu_p_mu,      
 													   &u[2*mu+parity] , idxh,      
 													   &leaves[idx_plane+parity], idxh);
-
+							
 						}//closing all loops at once
-			
-			
-					}
+					
+					
+			}
 }
 
 void antihermatize_unsafe(su3_soa * const leaves)
@@ -132,10 +132,12 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 {
 	//compute leaves
 	su3_soa * leaves;
-	posix_memalign((void **)&leaves,128,12*sizeof(double_soa));
-#pragma kernels present(u[:]) present(nnp_openacc) present(nnm_openacc) present(staples)
+	posix_memalign((void **)&leaves,128,12*sizeof(su3_soa));
+
+#pragma acc enter data create(leaves[0:12]) create(norm[0:1])
+
+#pragma kernels present(u[:8]) present(nnp_openacc) present(nnm_openacc) present(staples)
 	
-#pragma acc enter data create(leaves[0:12]) create(norm[:1])
 
 	if(verbosity_lv>3)
 		printf("\t\t\tMPI%02d - four_leaves(leaves,u)\n",devinfo.myrank);

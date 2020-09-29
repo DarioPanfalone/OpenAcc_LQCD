@@ -213,32 +213,32 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             action_in += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
         }
 		
-		if(verbosity_lv>3 && act_params.topo_action==1)printf("\tComputing topological action\n");
-	   	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
-	    
+	if(verbosity_lv>3 && act_params.topo_action==1)printf("\tComputing topological action\n");
+	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
+	
         action_mom_in = 0.0;
         for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
         action_ferm_in=0;
         for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
-            for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-
-                int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-                action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
-            }
+	  for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	    
+	    int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+	    action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
+	  }
         }// end for iflav
         ///////////////////////////////////////////////////////////////////////////////////////
         printf("MPI%02d - Initial Action Computed : OK \n", devinfo.myrank);
     }
-
-
+    
+    
     multishift_invert_iterations = 0 ; 
     // FIRST INV APPROX CALC --> calculation of CHI fermion
-
+    
     inverter_package ip;
     setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,alloc_info.maxApproxOrder,
-            kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
+			      kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
     setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  alloc_info.maxApproxOrder,
-            kloc_r,  kloc_h,  kloc_s,  kloc_p);  
+			      kloc_r,  kloc_h,  kloc_s,  kloc_p);  
 
 
 
