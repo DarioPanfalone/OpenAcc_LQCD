@@ -43,8 +43,6 @@ void load_topo(const char *path,const double barr,const double width, double *gr
 					exit(1);
 				}
 		}
-	printf("%lf\n",widthh); //NON TOGLIERLO, SEMBRA INUTILE MA SENZA SCAZZA TUTTO. NON SO PERCHÉ.\
-	^ DO NOT REMOVE IT, MAY SEEM USELES BU WITHOUT IT EVERITYNG FUCKS OUT, IDK WHY.
 	int check_closure=fclose(fin);
 	if(check_closure!=0)
 		{
@@ -111,7 +109,10 @@ double compute_topo_action(su3_soa * const u)
 	double topo_action = topodynamical_pot(Q);
 	
 	free(quadri);
+#pragma acc exit data delete(quadri)
+
 	free(loc_q);
+#pragma acc exit data delete(loc_q)
 
 	return topo_action;
 }

@@ -43,7 +43,6 @@ void compute_local_topological_charge(  __restrict su3_soa * const u,
                   const int idxh = snum_acc(d0,d1,d2,d3);  // r
                   const int parity = (d0+d1+d2+d3) % 2;
                   loc_q[parity].d[idxh] = 0.0;
-                  //	  for(nu=1; nu<4; nu++){
                   int b;
                   int a;
                   int rho;
@@ -134,9 +133,6 @@ void compute_local_topological_charge(  __restrict su3_soa * const u,
                           &quadri[2+parity],   idxh,
                           Epsilon,
                           &loc_q[parity],      idxh);
-                  //	      if((idxh==0)&&(parity==0)) printf("loc_q(mu=%d,nu=%d)= %.18lf\n",mu,nu,loc_q[0].d[0]);
-
-                  //	  } // closes nu
               } // closes d0
           } // closes d1
       } // closes d2
@@ -176,16 +172,10 @@ double compute_topological_charge(__restrict su3_soa * const u,
 
 	
     double temp_ch =0.0;
-	if(verbosity_lv>3)
-		printf("MPI%02d - compute_local_topological_charge(u,quadri,loc_q,0,1) - first\n",devinfo.myrank);
     compute_local_topological_charge(u,quadri,loc_q,0,1);// (d0,d1) - (d2,d3)
     temp_ch = reduce_loc_top_charge(loc_q);
-	if(verbosity_lv>3)
-		printf("MPI%02d - compute_local_topological_charge(u,quadri,loc_q,0,1) - second\n",devinfo.myrank);
     compute_local_topological_charge(u,quadri,loc_q,0,2);// (d0,d2) - (d1,d3)
     temp_ch += reduce_loc_top_charge(loc_q);
-	if(verbosity_lv>3)
-		printf("MPI%02d - compute_local_topological_charge(u,quadri,loc_q,0,1) - third\n",devinfo.myrank);
     compute_local_topological_charge(u,quadri,loc_q,0,3);// (d0,d3) - (d1,d2)
     temp_ch += reduce_loc_top_charge(loc_q);
 

@@ -79,7 +79,6 @@ int verbosity_lv;
 int main(int argc, char* argv[]){
 
     gettimeofday ( &(mc_params.start_time), NULL );
-    printf("let's-a-go!");
     // READ input file.
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
