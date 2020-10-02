@@ -87,10 +87,6 @@ double compute_topo_action(su3_soa * const u)
 	su3_soa *quadri, tstout_conf_acc_arr;
 	double_soa *loc_q;
 	
-	posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
-
-	posix_memalign((void **)&loc_q,128,2*sizeof(double_soa));
-#pragma acc enter data create(quadri[0:8]) create(loc_q[0:2])
 
 #ifdef STOUT_TOPO
 	stout_wrapper(u,tstout_conf_acc_arr); //INSERIRE PARAMETRI STOUTING TOPOLOGICO
@@ -100,19 +96,31 @@ double compute_topo_action(su3_soa * const u)
 	
 	if(verbosity_lv>3)
 		printf("\t\t\tMPI%02d - compute_topological_charge(u,quadri,loc_q)\n",devinfo.myrank);
+
+	posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
+#pragma acc enter data create(quadri[0:8])
+
+	posix_memalign((void **)&loc_q,128,2*sizeof(double_soa));
+#pragma acc enter data create(loc_q[0:2])
+
 		
 	double Q = compute_topological_charge(u, quadri, loc_q);
 	
-	if(verbosity_lv>3)
-		printf("\t\t\tMPI%02d - topodynamical_pot(Q)\n",devinfo.myrank);
 
-	double topo_action = topodynamical_pot(Q);
-	
 	free(quadri);
 #pragma acc exit data delete(quadri)
 
 	free(loc_q);
 #pragma acc exit data delete(loc_q)
+
+	if(verbosity_lv>4)
+	  printf("Topological Charge: %lf\n", Q);
+
+	if(verbosity_lv>3)
+		printf("\t\t\tMPI%02d - topodynamical_pot(Q)\n",devinfo.myrank);
+
+	double topo_action = topodynamical_pot(Q);
+	
 
 	return topo_action;
 }

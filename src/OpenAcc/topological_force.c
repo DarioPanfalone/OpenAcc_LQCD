@@ -101,7 +101,7 @@ void four_leaves(su3_soa * const leaves, su3_soa * const u)
  
 }
 
-void antihermatize_unsafe(su3_soa * const leaves)
+void antihermatize_and_normalize_unsafe(su3_soa * const leaves, double norm)
 {
 	int d0,d1,d2,d3,plane;
 #pragma acc kernels present(leaves)
@@ -115,21 +115,21 @@ void antihermatize_unsafe(su3_soa * const leaves)
 					const int idxh = snum_acc(d0,d1,d2,d3);
 					const int parity = (d0+d1+d2+d3)%2;
 
-					leaves[plane+parity].r0.c0[idxh] = cimag(leaves[plane+parity].r0.c0[idxh]) * _Complex_I;
-					leaves[plane+parity].r1.c1[idxh] = cimag(leaves[plane+parity].r1.c1[idxh]) * _Complex_I;
-					leaves[plane+parity].r2.c2[idxh] = cimag(leaves[plane+parity].r2.c2[idxh]) * _Complex_I;
+					leaves[plane+parity].r0.c0[idxh] = cimag(leaves[plane+parity].r0.c0[idxh]) * _Complex_I *norm;
+					leaves[plane+parity].r1.c1[idxh] = cimag(leaves[plane+parity].r1.c1[idxh]) * _Complex_I *norm;
+					leaves[plane+parity].r2.c2[idxh] = cimag(leaves[plane+parity].r2.c2[idxh]) * _Complex_I *norm;
 
 					d_complex tmp01 = conj(leaves[plane+parity].r1.c0[idxh]);
 					d_complex tmp02 = conj(leaves[plane+parity].r2.c0[idxh]);
 					d_complex tmp12 = conj(leaves[plane+parity].r2.c1[idxh]);
 					
-					leaves[plane+parity].r1.c0[idxh] = 0.5 * (leaves[plane+parity].r1.c0[idxh] - conj(leaves[plane+parity].r0.c1[idxh]));
-					leaves[plane+parity].r2.c0[idxh] = 0.5 * (leaves[plane+parity].r2.c0[idxh] - conj(leaves[plane+parity].r0.c2[idxh]));
-					leaves[plane+parity].r2.c1[idxh] = 0.5 * (leaves[plane+parity].r2.c1[idxh] - conj(leaves[plane+parity].r1.c2[idxh]));
+					leaves[plane+parity].r1.c0[idxh] = 0.5 * (leaves[plane+parity].r1.c0[idxh] - conj(leaves[plane+parity].r0.c1[idxh])) *norm;
+					leaves[plane+parity].r2.c0[idxh] = 0.5 * (leaves[plane+parity].r2.c0[idxh] - conj(leaves[plane+parity].r0.c2[idxh])) *norm;
+					leaves[plane+parity].r2.c1[idxh] = 0.5 * (leaves[plane+parity].r2.c1[idxh] - conj(leaves[plane+parity].r1.c2[idxh])) *norm;
 
-					leaves[plane+parity].r0.c1[idxh] = 0.5 * (leaves[plane+parity].r0.c1[idxh] - tmp01);
-					leaves[plane+parity].r0.c2[idxh] = 0.5 * (leaves[plane+parity].r0.c2[idxh] - tmp02);
-					leaves[plane+parity].r1.c2[idxh] = 0.5 * (leaves[plane+parity].r1.c2[idxh] - tmp12);
+					leaves[plane+parity].r0.c1[idxh] = 0.5 * (leaves[plane+parity].r0.c1[idxh] - tmp01) *norm;
+					leaves[plane+parity].r0.c2[idxh] = 0.5 * (leaves[plane+parity].r0.c2[idxh] - tmp02) *norm;
+					leaves[plane+parity].r1.c2[idxh] = 0.5 * (leaves[plane+parity].r1.c2[idxh] - tmp12) *norm;
 					
 				}//closing all the loops at once
 
@@ -147,14 +147,14 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
   
   //compute leaves
   
-  four_leaves(leaves, u);
+  four_leaves(leaves,u);
   
   if(verbosity_lv>3)
     printf("\t\t\tMPI%02d - antihermatize_usafe(leaves)\n",devinfo.myrank);
   
   //antihermatize leaves
   
-  antihermatize_unsafe(leaves);
+  antihermatize_and_normalize_unsafe(leaves,norm);
   int d0, d1, d2, d3;
   if(verbosity_lv>3)
     {
@@ -222,15 +222,14 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 #pragma acc loop independent gang vector
 	    for(d0=0; d0<nd0; d0++){
 
-
 	      int perp_dir[4][3] = {{ 1, 2, 3}, { 0, 2, 3}, { 0, 1, 3}, { 0, 1, 2}};
 	      int plan_perp[4][3]= {{ 5, 4, 3}, { 5, 2, 1}, { 4, 2, 0}, { 3, 1, 0}};
 	      int plan_sign[4][3]= {{+1,-1,+1}, {-1,+1,-1}, {+1,-1,+1}, {-1,+1,-1}};
 
-	      const int nu=perp_dir[mu][inu];                  //  E---F---C   
-	      const int idxA = snum_acc(d0,d1,d2,d3);          //  |   |   | mu
-	      const int parity = (d0+d1+d2+d3)%2;	       //  D---A---B
-	      const int iplan=plan_perp[mu][inu];              //        nu
+	      const int nu = perp_dir[mu][inu];                  //  E---F---C   
+	      const int idxA = snum_acc(d0,d1,d2,d3);            //  |   |   | mu
+	      const int parity = (d0+d1+d2+d3)%2;                //  D---A---B
+	      const int iplan = plan_perp[mu][inu];              //        nu
 	      
 	      
 	      const int idxF = nnp_openacc[idxA][mu][parity];
@@ -363,7 +362,7 @@ void calc_loc_topo_staples(__restrict su3_soa * const u, __restrict su3_soa * co
 	free(loc_q);
 #pragma acc exit data delete(loc_q)
 
-	if(verbosity_lv>3)
+	if(verbosity_lv>4)
 	  printf("Topological Charge: %lf\n",Q);
 
 
@@ -376,25 +375,25 @@ void calc_loc_topo_staples(__restrict su3_soa * const u, __restrict su3_soa * co
 	if(verbosity_lv>3)
 	  printf("\t\tMPI%02d - topo_staples(u, staples, norm)\n",devinfo.myrank);
 	
-	topo_staples(u, staples, norm);
+	topo_staples(u,staples,norm);
 	
 #ifdef STOUT_TOPO
 	stout_wrapper(u,tstout_conf_acc_arr); //INSERIRE PARAMETRI STOUTING TOPOLOGICO
 #else
 	tstout_conf_acc_arr=*u;
 #endif
-	int d0, d1, d2, d3;
-	for(int mu=0; mu<4; mu++)
-#pragma acc loop independent gang
-		for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++)
-#pragma acc loop independent gang vector
-			for(d2=0; d2<nd2; d2++)
-#pragma acc loop independent gang vector
-				for(d2=0; d2<nd2; d2++){
-					const int idxm = snum_acc(d0,d1,d2,d3);
-					const int parity = (d0+d1+d2+d3)%2;
-					mat1_times_double_factor(&staples[mu+parity], idxm, norm);
-		}
+/* 	int d0, d1, d2, d3; */
+/* 	for(int mu=0; mu<4; mu++) */
+/* #pragma acc loop independent gang */
+/* 		for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++) */
+/* #pragma acc loop independent gang vector                                   QUESTO È SBAGLIATO */ 
+/* 			for(d2=0; d2<nd2; d2++) */
+/* #pragma acc loop independent gang vector */
+/* 				for(d2=0; d2<nd2; d2++){ */
+/* 					const int idxm = snum_acc(d0,d1,d2,d3); */
+/* 					const int parity = (d0+d1+d2+d3)%2; */
+/* 					mat1_times_double_factor(&staples[mu+parity], idxm, norm); */
+/* 		} */
 
 }
 
