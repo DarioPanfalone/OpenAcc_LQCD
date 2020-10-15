@@ -40,7 +40,7 @@ void free_wrapper(void *memptr)
   /* creates the page and insert on top of the stack */
   struct memory_allocated_t *all=memory_allocated_base,*prev=NULL;
   
-  while(all->ptr!=memptr && all->next!=NULL)
+  while(all!=NULL && all->ptr!=memptr)
     {
       prev=all;
       all=all->next;
