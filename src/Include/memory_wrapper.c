@@ -7,6 +7,7 @@
 struct memory_allocated_t
 {
   void* ptr;
+  const char* varname;
   size_t size;
   struct memory_allocated_t *next;
   
@@ -17,7 +18,7 @@ struct memory_allocated_t *memory_allocated_base=NULL;
 size_t memory_used=0;
 size_t max_memory_used=0;
 
-int posix_memalign_wrapper(void **memptr,size_t alignment,size_t size)
+int posix_memalign_wrapper(void **memptr,size_t alignment,size_t size,const char* varname)
 {
   int res=posix_memalign(memptr,alignment,size);
   
@@ -28,6 +29,7 @@ int posix_memalign_wrapper(void **memptr,size_t alignment,size_t size)
   /* creates the page and insert on top of the stack */
   struct memory_allocated_t *all=(struct memory_allocated_t *)malloc(sizeof(struct memory_allocated_t));
   all->ptr=*memptr;
+  all->varname=varname;
   all->size=size;
   all->next=memory_allocated_base;
   memory_allocated_base=all;
