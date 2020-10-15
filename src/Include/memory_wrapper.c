@@ -19,8 +19,8 @@ size_t max_memory_used=0;
 
 int posix_memalign_wrapper(void **memptr,size_t alignment,size_t size)
 {
-  int res=posix_memalign_wrapper(memptr,alignment,size);
-
+  int res=posix_memalign(memptr,alignment,size);
+  
   /*! increment the used size, and take the maximum */
   memory_used+=size;
   if(memory_used>max_memory_used) max_memory_used=memory_used;
