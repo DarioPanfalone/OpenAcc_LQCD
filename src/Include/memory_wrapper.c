@@ -27,7 +27,7 @@ int posix_memalign_wrapper(void **memptr,size_t alignment,size_t size)
   
   /* creates the page and insert on top of the stack */
   struct memory_allocated_t *all=(struct memory_allocated_t *)malloc(sizeof(struct memory_allocated_t));
-  all->ptr=memptr;
+  all->ptr=*memptr;
   all->size=size;
   all->next=memory_allocated_base;
   memory_allocated_base=all;
