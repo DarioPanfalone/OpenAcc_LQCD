@@ -10,6 +10,7 @@
 
 #include "../Include/debug.h"
 #include "../Include/fermion_parameters.h"
+#include "../Include/memory_wrapper.h"
 #include "../Mpi/multidev.h"
 #include "./action.h"
 #include "./alloc_vars.h"
@@ -88,20 +89,20 @@ void mem_alloc_core(){
 
     printf("\n\n[CORE] Allocations..\n");
     
-    allocation_check =  posix_memalign((void **)&kloc_r, ALIGN, sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&kloc_r, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_r) ;
 #pragma acc enter data create(kloc_r[0:1])
-    allocation_check =  posix_memalign((void **)&kloc_h, ALIGN, sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&kloc_h, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_h ) ;
 #pragma acc enter data create(kloc_h[0:1])
-    allocation_check =  posix_memalign((void **)&kloc_s, ALIGN, sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&kloc_s, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_s ) ;
 #pragma acc enter data create(kloc_s[0:1])
-    allocation_check =  posix_memalign((void **)&kloc_p, ALIGN, sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&kloc_p, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, kloc_p) ;
 #pragma acc enter data create(kloc_p[0:1])
 
-    allocation_check =  posix_memalign((void **)&aux1, ALIGN, sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&aux1, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, aux1) ; // used in fermion force calculation, 
                                          // for single precision acceleration
 #pragma acc enter data create(aux1[0:1])
@@ -109,7 +110,7 @@ void mem_alloc_core(){
 
 
 
-    allocation_check =  posix_memalign((void **)&u1_back_phases, ALIGN,
+    allocation_check =  posix_memalign_wrapper((void **)&u1_back_phases, ALIGN,
             alloc_info.NDiffFlavs*8*sizeof(double_soa));   
     //  --> alloc_info.NDiffFlavs*4*NSITES phases (as many as links)
     ALLOCCHECK(allocation_check, u1_back_phases);
@@ -119,7 +120,7 @@ void mem_alloc_core(){
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_gauge) alloc_info.conf_acc_size *=2 ; 
 #endif
-    allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 
+    allocation_check =  posix_memalign_wrapper((void **)&conf_acc, ALIGN, 
             alloc_info.conf_acc_size*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, conf_acc);
 #pragma acc enter data create(conf_acc[0:alloc_info.conf_acc_size])
@@ -136,13 +137,13 @@ void mem_alloc_extended()
 
 
 
-    allocation_check =  posix_memalign((void **)&mag_obs_re, ALIGN,
+    allocation_check =  posix_memalign_wrapper((void **)&mag_obs_re, ALIGN,
             alloc_info.NDiffFlavs*8*sizeof(double_soa));   
     //  --> alloc_info.NDiffFlavs*4*NSITES phases (as many as links)
     ALLOCCHECK(allocation_check, mag_obs_re);
 #pragma acc enter data create(mag_obs_re[0:alloc_info.NDiffFlavs*8])
 
-    allocation_check =  posix_memalign((void **)&mag_obs_im, ALIGN,
+    allocation_check =  posix_memalign_wrapper((void **)&mag_obs_im, ALIGN,
             alloc_info.NDiffFlavs*8*sizeof(double_soa));   
     //  --> alloc_info.NDiffFlavs*4*NSITES phases (as many as links)
     ALLOCCHECK(allocation_check, mag_obs_im);
@@ -154,23 +155,23 @@ void mem_alloc_extended()
 #ifdef MULTIDEVICE 
     if(devinfo.myrank == 0){
 #endif
-        allocation_check =  posix_memalign((void **)&conf_rw, ALIGN,8*sizeof(global_su3_soa));
+        allocation_check =  posix_memalign_wrapper((void **)&conf_rw, ALIGN,8*sizeof(global_su3_soa));
         ALLOCCHECK(allocation_check, conf_rw); // NOT ON DEVICE!!
-        allocation_check =  posix_memalign((void **)&ferm_rw, ALIGN,sizeof(global_vec3_soa));
+        allocation_check =  posix_memalign_wrapper((void **)&ferm_rw, ALIGN,sizeof(global_vec3_soa));
         ALLOCCHECK(allocation_check, ferm_rw);
 #ifdef MULTIDEVICE
     }
 #endif
 
     //the double bracket in the setfree macro MUST be there(because of operators precedence)
-    allocation_check =  posix_memalign((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check, aux_conf_acc );
 #pragma acc enter data create(aux_conf_acc[0:8])
-    allocation_check =  posix_memalign((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa));
+    allocation_check =  posix_memalign_wrapper((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, auxbis_conf_acc ) ;
 #pragma acc enter data create(auxbis_conf_acc[0:8])
 
-    allocation_check =  posix_memalign((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
+    allocation_check =  posix_memalign_wrapper((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
         ALLOCCHECK(allocation_check, conf_acc_bkp) ;
     if(alloc_info.revTestAllocations){
 #pragma acc enter data create(conf_acc_bkp[0:8])
@@ -179,29 +180,29 @@ void mem_alloc_extended()
 
 
     // GAUGE EVOLUTION
-    allocation_check =  posix_memalign((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  
+    allocation_check =  posix_memalign_wrapper((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  
     ALLOCCHECK(allocation_check, momenta ) ;
 #pragma acc enter data create(momenta[0:8])
 
     if(alloc_info.revTestAllocations){
 
-        allocation_check =  posix_memalign((void **)&momenta_backup, ALIGN, 8*sizeof(thmat_soa));
+        allocation_check =  posix_memalign_wrapper((void **)&momenta_backup, ALIGN, 8*sizeof(thmat_soa));
         ALLOCCHECK(allocation_check, momenta_backup ) ;
 #pragma acc enter data create(momenta_backup[0:8])
     }
 
 
-    allocation_check =  posix_memalign((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&ipdot_acc, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, ipdot_acc) ;
 #pragma acc enter data create(ipdot_acc[0:8])
 
     alloc_info.diagnosticsAllocations = debug_settings.save_diagnostics;
 
     if(alloc_info.diagnosticsAllocations){
-        allocation_check =  posix_memalign((void **)&ipdot_g_old, ALIGN, 8*sizeof(tamat_soa)); 
+        allocation_check =  posix_memalign_wrapper((void **)&ipdot_g_old, ALIGN, 8*sizeof(tamat_soa)); 
         ALLOCCHECK(allocation_check, ipdot_g_old) ;
 #pragma acc enter data create(ipdot_g_old[0:8])
-        allocation_check =  posix_memalign((void **)&ipdot_f_old, ALIGN, 8*sizeof(tamat_soa)); 
+        allocation_check =  posix_memalign_wrapper((void **)&ipdot_f_old, ALIGN, 8*sizeof(tamat_soa)); 
         ALLOCCHECK(allocation_check, ipdot_f_old) ;
 #pragma acc enter data create(ipdot_f_old[0:8])
     }
@@ -210,56 +211,56 @@ void mem_alloc_extended()
     // STOUTING
     if(alloc_info.stoutAllocations){ // not always the same as act_params.stout_steps,
                                      // e.g., in benchmarks
-    allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, act_params.stout_steps*8*sizeof(su3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&gstout_conf_acc_arr, ALIGN, act_params.stout_steps*8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check,gstout_conf_acc_arr ) ;
 #pragma acc enter data create(gstout_conf_acc_arr[0:8*act_params.stout_steps])
 
-    allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check, glocal_staples) ;
 #pragma acc enter data create(glocal_staples[0:8])
 
-    allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, gipdot) ;
 #pragma acc enter data create(gipdot[0:8])
 
-    allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); 
     ALLOCCHECK(allocation_check, aux_th ) ;
 #pragma acc enter data create(aux_th[0:8])
 
-    allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); 
     ALLOCCHECK(allocation_check, aux_ta ) ;
 #pragma acc enter data create(aux_ta[0:8])
     }
 
     // FERMION ALLOCATIONS
 
-    allocation_check =  posix_memalign((void **)&k_p_shiftferm, ALIGN, alloc_info.maxApproxOrder* sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&k_p_shiftferm, ALIGN, alloc_info.maxApproxOrder* sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, k_p_shiftferm) ;
 #pragma acc enter data create(k_p_shiftferm[0:alloc_info.maxApproxOrder])
 
 
-    allocation_check =  posix_memalign((void **)&ferm_chi_acc  , ALIGN, alloc_info.NPS_tot * sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&ferm_chi_acc  , ALIGN, alloc_info.NPS_tot * sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, ferm_chi_acc) ;
 #pragma acc enter data create(ferm_chi_acc[0:alloc_info.NPS_tot])
 
-    allocation_check =  posix_memalign((void **)&ferm_phi_acc  , ALIGN, alloc_info.NPS_tot * sizeof(vec3_soa));
+    allocation_check =  posix_memalign_wrapper((void **)&ferm_phi_acc  , ALIGN, alloc_info.NPS_tot * sizeof(vec3_soa));
     ALLOCCHECK(allocation_check, ferm_phi_acc) ;
 #pragma acc enter data create(ferm_phi_acc[0:alloc_info.NPS_tot])
 
-    allocation_check =  posix_memalign((void **)&ferm_out_acc  , ALIGN, alloc_info.NPS_tot * sizeof(vec3_soa));
+    allocation_check =  posix_memalign_wrapper((void **)&ferm_out_acc  , ALIGN, alloc_info.NPS_tot * sizeof(vec3_soa));
     ALLOCCHECK(allocation_check, ferm_out_acc) ;
 #pragma acc enter data create(ferm_out_acc[0:alloc_info.NPS_tot])
 
-    allocation_check =  posix_memalign((void **)&ferm_shiftmulti_acc, ALIGN, alloc_info.maxNeededShifts*sizeof(vec3_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&ferm_shiftmulti_acc, ALIGN, alloc_info.maxNeededShifts*sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, ferm_shiftmulti_acc ) ;
 #pragma acc enter data create(ferm_shiftmulti_acc[0:alloc_info.maxNeededShifts])
 
 
-    allocation_check =  posix_memalign((void **)&d_local_sums, ALIGN, 2*sizeof(double_soa)); 
+    allocation_check =  posix_memalign_wrapper((void **)&d_local_sums, ALIGN, 2*sizeof(double_soa)); 
     ALLOCCHECK(allocation_check, d_local_sums) ;
 #pragma acc enter data create(d_local_sums[0:2])
     
-    allocation_check =  posix_memalign((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));
+    allocation_check =  posix_memalign_wrapper((void **)&local_sums, ALIGN, 2*sizeof(dcomplex_soa));
     ALLOCCHECK(allocation_check, local_sums) ;
 #pragma acc enter data create(local_sums[0:2])
 
@@ -269,7 +270,7 @@ void mem_alloc_extended()
 
 #define FREECHECK(var) if(verbosity_lv >2) \
     printf("\tFreed %s, %p ...", #var,var);\
-    free(var); if(verbosity_lv > 2)  printf(" done.\n");
+    free_wrapper(var); if(verbosity_lv > 2)  printf(" done.\n");
 
 
 
