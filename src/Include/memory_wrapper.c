@@ -4,6 +4,8 @@
 
 #include "../Mpi/multidev.h"
 
+#include "memory_wrapper.h"
+
 struct memory_allocated_t *memory_allocated_base=NULL;
 
 size_t memory_used=0;
