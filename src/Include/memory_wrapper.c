@@ -4,15 +4,6 @@
 
 #include "../Mpi/multidev.h"
 
-struct memory_allocated_t
-{
-  void* ptr;
-  const char* varname;
-  size_t size;
-  struct memory_allocated_t *next;
-  
-};
-
 struct memory_allocated_t *memory_allocated_base=NULL;
 
 size_t memory_used=0;

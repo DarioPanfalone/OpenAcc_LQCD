@@ -780,7 +780,15 @@ int main(int argc, char* argv[]){
 #pragma acc exit data delete(nnm_openacc)
 
     printf("\n  MPI%02d - Prima dello shutdown, memoria allocata: %zu \n\n\n",devinfo.myrank,memory_used);
-
+    
+    struct memory_allocated_t *all=memory_allocated_base;
+    
+    while(all!=NULL)
+      {
+	printf("\n  MPI%02d - Va disallocato: %s di taglia %zu \n\n\n",devinfo.myrank,all->varname,all->size);
+	free_wrapper(all->ptr);
+	all=all->next;
+    };
 
 #ifndef __GNUC__
     //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
