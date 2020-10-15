@@ -785,8 +785,8 @@ int main(int argc, char* argv[]){
     
     while(all!=NULL)
       {
-	printf("\n  MPI%02d - Va disallocato: %s di taglia %zu \n\n\n",devinfo.myrank,all->varname,all->size);
-	free_wrapper(all->ptr);
+	printf("\n  MPI%02d - Va disallocato: %s di taglia %zu (o va conteggiato)\n\n\n",devinfo.myrank,all->varname,all->size);
+	//free_wrapper(all->ptr);
 	all=all->next;
     };
 
