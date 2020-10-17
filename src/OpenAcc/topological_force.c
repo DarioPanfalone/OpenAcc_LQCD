@@ -9,6 +9,40 @@
 #include "./alloc_vars.h"
 #include "./action.h"
 #include "./topological_action.h"
+#include "./single_types.h"
+
+#define DEBUG_LOLLO
+
+#ifdef DEBUG_LOLLO
+ #include "./cayley_hamilton.h"
+ #include "./alloc_vars.h"
+ #include "../DbgTools/dbgtools.h"
+#endif
+
+#define STAMPA_DEBUG_SU3_SOA(var,dir,idx)					\
+  printf("%s[%d], idx %d:\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n", #var, dir, idx, \
+	   creal(var[dir].r0.c0[idx]),cimag(var[dir].r0.c0[idx]),creal(var[dir].r0.c1[idx]),cimag(var[dir].r0.c1[idx]),creal(var[dir].r0.c2[idx]),cimag(var[dir].r0.c2[idx]), \
+	   creal(var[dir].r1.c0[idx]),cimag(var[dir].r1.c0[idx]),creal(var[dir].r1.c1[idx]),cimag(var[dir].r1.c1[idx]),creal(var[dir].r1.c2[idx]),cimag(var[dir].r1.c2[idx]), \
+	   creal(var[dir].r2.c0[idx]),cimag(var[dir].r2.c0[idx]),creal(var[dir].r2.c1[idx]),cimag(var[dir].r2.c1[idx]),creal(var[dir].r2.c2[idx]),cimag(var[dir].r2.c2[idx]));
+
+#define STAMPA_DEBUG_TAMAT_SOA(var,dir,idx)				\
+  printf("%s[%d], idx %d :\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n", #var, dir, idx, \
+	 0.0,var[dir].ic00[idx],creal(var[dir].c01[idx]),cimag(var[dir].c01[idx]),creal(var[dir].c02[idx]),cimag(var[dir].c02[idx]), \
+	 -creal(var[dir].c01[idx]),cimag(var[dir].c01[idx]),0.0,var[dir].ic11[idx],creal(var[dir].c12[idx]),cimag(var[dir].c12[idx]), \
+	 -creal(var[dir].c02[idx]),cimag(var[dir].c02[idx]),-creal(var[dir].c12[idx]),cimag(var[dir].c12[idx]),0.0,-(var[dir].ic00[idx]+var[dir].ic11[idx]));
+
+#define STAMPA_DEBUG_SINGLE_SU3(var)					\
+  printf("%s:\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n", #var, \
+	 creal(var.comp[0][0]),cimag(var.comp[0][0]),creal(var.comp[0][1]),cimag(var.comp[0][1]),creal(var.comp[0][2]),cimag(var.comp[0][2]), \
+	 creal(var.comp[1][0]),cimag(var.comp[1][0]),creal(var.comp[1][1]),cimag(var.comp[1][1]),creal(var.comp[1][2]),cimag(var.comp[1][2]), \
+	 creal(var.comp[2][0]),cimag(var.comp[2][0]),creal(var.comp[2][1]),cimag(var.comp[2][1]),creal(var.comp[2][2]),cimag(var.comp[2][2]));
+
+#define STAMPA_DEBUG_SINGLE_TAMAT(var)					\
+  printf("%s:\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n", #var, \
+	 0.0,var.ic00,creal(var.c01),cimag(var.c01),creal(var.c02),cimag(var.c02), \
+	 -creal(var.c01),cimag(var.c01),0.0,var.ic11,creal(var.c12),cimag(var.c12), \
+	 -creal(var.c02),cimag(var.c02),-creal(var.c12),cimag(var.c12),0.0,-(var.ic00+var.ic11));
+
 
 #define ALLOLLOCHECK(control_int,var)  if(control_int != 0 ) \
     printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var);\
@@ -22,117 +56,141 @@
 
 double compute_topodynamical_potential_der(const double Q)
 {
-	double barr=act_params.barrier, width=act_params.width;
-	int ngrid= (int) floor((2*barr+width/2)/width);
-	int kgrid= (int) floor((Q+barr)/width);
-	
-	if(kgrid>=0 && kgrid<=ngrid)
-		{
-			double grid[ngrid];
-			if(verbosity_lv>3)
-				printf("\t\t\tMPI%02d - load_topo(path,barr,width,grid,ngrid)\n",devinfo.myrank);
-			
-			load_topo(act_params.topo_file_path,barr,width,grid,ngrid);
-			return (grid[kgrid+1]-grid[kgrid])/width;
-		}
-	else
-		return 0;
+  double barr=act_params.barrier, width=act_params.width;
+  int ngrid= (int) floor((2*barr+width/2)/width);
+  int kgrid= (int) floor((Q+barr)/width);
+  
+  if(kgrid>=0 && kgrid<=ngrid)
+    {
+      double grid[ngrid];
+      if(verbosity_lv>3)
+	printf("\t\t\tMPI%02d - load_topo(path,barr,width,grid,ngrid)\n",devinfo.myrank);
+      
+      load_topo(act_params.topo_file_path,barr,width,grid,ngrid);
+      return (grid[kgrid+1]-grid[kgrid])/width;
+    }
+  else
+    return 0;
 }
 
-void four_leaves(su3_soa * const leaves, su3_soa * const u)
+void four_leaves(__restrict su3_soa * const leaves,__restrict su3_soa * const u)
 {
   int mu, nu;
-    int d0, d1, d2, d3;
-	
+  int d0, d1, d2, d3;
+  int plane_idxs[8][5];
+#pragma acc enter data create(plane_idxs[0:8][0:5])
 #pragma acc kernels present(u) present(leaves) present(nnp_openacc) present(nnm_openacc)
- for(mu=0;mu<3;mu++)
-   for(nu=mu+1;nu<4;nu++){
+  for(mu=0;mu<3;mu++)
+    for(nu=mu+1;nu<4;nu++){
 #pragma acc loop independent gang
-     for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++){
+      for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++){
 #pragma acc loop independent gang vector
-       for(d2=0; d2<nd2; d2++){
+	for(d2=0; d2<nd2; d2++){
 #pragma acc loop independent gang vector
-	 for(d1=0; d1<nd1; d1++){
+	  for(d1=0; d1<nd1; d1++){
 #pragma acc loop independent vector 
-	   for(d0=0; d0 < nd0; d0++){
-	     const int idxh = snum_acc(d0,d1,d2,d3);
-	     const int parity = (d0+d1+d2+d3)%2;
-	     const int idx_plane = 2*mu + nu - 1 - ((int)mu/2);//mu=0 nu=1 --> idx_plane=0;... mu=1 nu=2 --> idx_plane=3;... mu=2 nu=3 --> idx_plane=5.
-	     //leaves points
-	     int idx_p_mu = nnp_openacc[idxh][mu][parity];
-	     int idx_p_nu = nnp_openacc[idxh][nu][parity];
-	     int idx_m_mu = nnm_openacc[idxh][mu][parity];
-	     int idx_m_nu = nnm_openacc[idxh][nu][parity];
-
-	     int idx_p_nu_m_mu = nnm_openacc[idx_p_nu][mu][!parity];
-	     int idx_m_mu_m_nu = nnm_openacc[idx_m_mu][nu][!parity];
-	     int idx_m_nu_p_mu = nnp_openacc[idx_m_nu][mu][!parity];
+	    for(d0=0; d0 < nd0; d0++){
+	      const int idxh = snum_acc(d0,d1,d2,d3);
+	      const int parity = (d0+d1+d2+d3)%2;
+	      const int idx_plane = 2*mu + nu - 1 - ((int)mu/2);//mu=0 nu=1 --> idx_plane=0;... mu=1 nu=2 --> idx_plane=3;... mu=2 nu=3 --> idx_plane=5.
+	      //leaves points
+	      int idx_p_mu = nnp_openacc[idxh][mu][parity];
+	      int idx_p_nu = nnp_openacc[idxh][nu][parity];
+	      int idx_m_mu = nnm_openacc[idxh][mu][parity];
+	      int idx_m_nu = nnm_openacc[idxh][nu][parity];
+	      
+	      int idx_p_nu_m_mu = nnm_openacc[idx_p_nu][mu][!parity];
+	      int idx_m_mu_m_nu = nnm_openacc[idx_m_mu][nu][!parity];
+	      int idx_m_nu_p_mu = nnp_openacc[idx_m_nu][mu][!parity];
 							
-	     //first leave
-	     comp_U_U_Udag_Udag(&u[2*mu+parity] , idxh,
-				&u[2*nu+!parity], idx_p_mu,
-				&u[2*mu+!parity], idx_p_nu,
-				&u[2*nu+parity] , idxh,
-				&leaves[idx_plane+parity], idxh);
-
-	     comp_and_add_U_Udag_Udag_U(&u[2*nu+parity] , idxh,
-					&u[2*mu+parity] , idx_p_nu_m_mu,
-					&u[2*nu+!parity], idx_m_mu,
-					&u[2*mu+!parity], idx_m_mu,
-					&leaves[idx_plane+parity], idxh);
-
-	     comp_and_add_Udag_Udag_U_U(&u[2*mu+!parity], idx_m_mu,           
-					&u[2*nu+parity] , idx_m_mu_m_nu,  
-					&u[2*mu+parity] , idx_m_mu_m_nu,      
-					&u[2*nu+!parity], idx_m_nu,      
-					&leaves[idx_plane+parity], idxh);
-
-	     comp_and_add_Udag_U_U_Udag(&u[2*nu+!parity], idx_m_nu,           
-					&u[2*mu+!parity], idx_m_nu,  
-					&u[2*nu+parity] , idx_m_nu_p_mu,      
-					&u[2*mu+parity] , idxh,      
-					&leaves[idx_plane+parity], idxh);
-							
-	   }//d0
-	 }//d1
-       }//d2
-     }//d3
-   }//nu
- 
+	      //first leave
+	      comp_U_U_Udag_Udag(&u[2*mu+parity] , idxh,
+				 &u[2*nu+!parity], idx_p_mu,
+				 &u[2*mu+!parity], idx_p_nu,
+				 &u[2*nu+parity] , idxh,
+				 &leaves[2*idx_plane+parity], idxh);
+	      
+	      comp_and_add_U_Udag_Udag_U(&u[2*nu+parity] , idxh,
+					 &u[2*mu+parity] , idx_p_nu_m_mu,
+					 &u[2*nu+!parity], idx_m_mu,
+					 &u[2*mu+!parity], idx_m_mu,
+					 &leaves[2*idx_plane+parity], idxh);
+	      
+	      comp_and_add_Udag_Udag_U_U(&u[2*mu+!parity], idx_m_mu,           
+					 &u[2*nu+parity] , idx_m_mu_m_nu,  
+					 &u[2*mu+parity] , idx_m_mu_m_nu,      
+					 &u[2*nu+!parity], idx_m_nu,      
+					 &leaves[2*idx_plane+parity], idxh);
+	      
+	      comp_and_add_Udag_U_U_Udag(&u[2*nu+!parity], idx_m_nu,           
+					 &u[2*mu+!parity], idx_m_nu,  
+					 &u[2*nu+parity] , idx_m_nu_p_mu,      
+					 &u[2*mu+parity] , idxh,      
+					 &leaves[2*idx_plane+parity], idxh);
+	      if(idxh<32 && d0==0 && mu==0 && nu==1){
+		plane_idxs[d1][0] = idxh;
+		plane_idxs[d1][1] = nnp_openacc[idxh][mu][parity];
+		plane_idxs[d1][2] = nnp_openacc[idxh][nu][parity];
+		plane_idxs[d1][3] = nnm_openacc[idxh][mu][parity];
+		plane_idxs[d1][4] = nnm_openacc[idxh][nu][parity];
+	      }
+	    }//d0
+	  }//d1
+	}//d2
+      }//d3
+    }//nu
+#pragma acc update self(plane_idxs[0:8][0:5])
+  printf("0: %d, %d, %d, %d, %d;\n\
+1: %d, %d, %d, %d, %d;\n\
+2: %d, %d, %d, %d, %d;\n\
+3: %d, %d, %d, %d, %d;\n\
+4: %d, %d, %d, %d, %d;\n\
+5: %d, %d, %d, %d, %d;\n\
+6: %d, %d, %d, %d, %d;\n\
+7: %d, %d, %d, %d, %d;\n",
+plane_idxs[0][0],plane_idxs[0][1],plane_idxs[0][2],plane_idxs[0][3],plane_idxs[0][4],
+plane_idxs[1][0],plane_idxs[1][1],plane_idxs[1][2],plane_idxs[1][3],plane_idxs[1][4],
+plane_idxs[2][0],plane_idxs[2][1],plane_idxs[2][2],plane_idxs[2][3],plane_idxs[2][4],
+plane_idxs[3][0],plane_idxs[3][1],plane_idxs[3][2],plane_idxs[3][3],plane_idxs[3][4],
+plane_idxs[4][0],plane_idxs[4][1],plane_idxs[4][2],plane_idxs[4][3],plane_idxs[4][4],
+plane_idxs[5][0],plane_idxs[5][1],plane_idxs[5][2],plane_idxs[5][3],plane_idxs[5][4],
+plane_idxs[6][0],plane_idxs[6][1],plane_idxs[6][2],plane_idxs[6][3],plane_idxs[6][4],
+plane_idxs[7][0],plane_idxs[7][1],plane_idxs[7][2],plane_idxs[7][3],plane_idxs[7][4]);
 }
 
-void antihermatize_and_normalize_unsafe(su3_soa * const leaves, double norm)
+void antihermatize_unsafe(__restrict su3_soa * const leaves)
 {
-	int d0,d1,d2,d3,plane;
+  int d0,d1,d2,d3,plane;
+
 #pragma acc kernels present(leaves)
-	for(plane=0;plane<6;plane++)
-#pragma acc loop independent gang
-		for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++)
-#pragma acc loop independent gang vector
-			for(d2=0; d2<nd2; d2++)
-#pragma acc loop independent gang vector
-				for(d1=0; d1<nd1; d1++){
-					const int idxh = snum_acc(d0,d1,d2,d3);
-					const int parity = (d0+d1+d2+d3)%2;
-
-					leaves[plane+parity].r0.c0[idxh] = cimag(leaves[plane+parity].r0.c0[idxh]) * _Complex_I *norm;
-					leaves[plane+parity].r1.c1[idxh] = cimag(leaves[plane+parity].r1.c1[idxh]) * _Complex_I *norm;
-					leaves[plane+parity].r2.c2[idxh] = cimag(leaves[plane+parity].r2.c2[idxh]) * _Complex_I *norm;
-
-					d_complex tmp01 = conj(leaves[plane+parity].r1.c0[idxh]);
-					d_complex tmp02 = conj(leaves[plane+parity].r2.c0[idxh]);
-					d_complex tmp12 = conj(leaves[plane+parity].r2.c1[idxh]);
-					
-					leaves[plane+parity].r1.c0[idxh] = 0.5 * (leaves[plane+parity].r1.c0[idxh] - conj(leaves[plane+parity].r0.c1[idxh])) *norm;
-					leaves[plane+parity].r2.c0[idxh] = 0.5 * (leaves[plane+parity].r2.c0[idxh] - conj(leaves[plane+parity].r0.c2[idxh])) *norm;
-					leaves[plane+parity].r2.c1[idxh] = 0.5 * (leaves[plane+parity].r2.c1[idxh] - conj(leaves[plane+parity].r1.c2[idxh])) *norm;
-
-					leaves[plane+parity].r0.c1[idxh] = 0.5 * (leaves[plane+parity].r0.c1[idxh] - tmp01) *norm;
-					leaves[plane+parity].r0.c2[idxh] = 0.5 * (leaves[plane+parity].r0.c2[idxh] - tmp02) *norm;
-					leaves[plane+parity].r1.c2[idxh] = 0.5 * (leaves[plane+parity].r1.c2[idxh] - tmp12) *norm;
-					
-				}//closing all the loops at once
-
+#pragma acc loop independent vector
+  for(plane=0; plane<12; plane++)
+#pragma acc loop independent gang(STAPGANG3)
+    for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++)
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+      for(d2=0; d2<nd2; d2++)
+	for(d1=0; d1<nd1; d1++)
+	  for(d0=0; d0<nd0; d0++)
+	    {
+	      const int idx = snum_acc(d0,d1,d2,d3);
+	      
+	      leaves[plane].r0.c0[idx] = cimag(leaves[plane].r0.c0[idx]) * _Complex_I;
+	      leaves[plane].r1.c1[idx] = cimag(leaves[plane].r1.c1[idx]) * _Complex_I;
+	      leaves[plane].r2.c2[idx] = cimag(leaves[plane].r2.c2[idx]) * _Complex_I;
+	      
+	      d_complex tmp01 = conj(leaves[plane].r1.c0[idx]);
+	      d_complex tmp02 = conj(leaves[plane].r2.c0[idx]);
+	      d_complex tmp12 = conj(leaves[plane].r2.c1[idx]);
+	      
+	      leaves[plane].r1.c0[idx] = 0.5 * (leaves[plane].r1.c0[idx] - conj(leaves[plane].r0.c1[idx]));
+	      leaves[plane].r2.c0[idx] = 0.5 * (leaves[plane].r2.c0[idx] - conj(leaves[plane].r0.c2[idx]));
+	      leaves[plane].r2.c1[idx] = 0.5 * (leaves[plane].r2.c1[idx] - conj(leaves[plane].r1.c2[idx]));
+	      
+	      leaves[plane].r0.c1[idx] = 0.5 * (leaves[plane].r0.c1[idx] - tmp01);
+	      leaves[plane].r0.c2[idx] = 0.5 * (leaves[plane].r0.c2[idx] - tmp02);
+	      leaves[plane].r1.c2[idx] = 0.5 * (leaves[plane].r1.c2[idx] - tmp12);
+	      
+	    }//closing all the loops at once
 }
 
 void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staples, double norm)
@@ -140,7 +198,13 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
   //compute leaves
   su3_soa * leaves;
   posix_memalign((void **)&leaves,128,12*sizeof(su3_soa));
-#pragma acc enter data create(leaves[0:12]) copyin(norm[0:1])
+#pragma acc enter data create(leaves[0:12]) copyin(norm)
+
+#ifdef DEBUG_LOLLO
+#pragma acc update self(leaves[0:12])
+  printf("Initial leaves\n");
+  STAMPA_DEBUG_SU3_SOA(leaves,0,0)
+#endif
 
   if(verbosity_lv>3)
     printf("\t\t\tMPI%02d - four_leaves(leaves,u)\n",devinfo.myrank);
@@ -148,72 +212,44 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
   //compute leaves
   
   four_leaves(leaves,u);
+
+#ifdef DEBUG_LOLLO
+#pragma acc update self(leaves[0:12]) self(u[0:8])
+  printf("Computed leaves\n");
+  STAMPA_DEBUG_SU3_SOA(leaves,0,0)
+  printf("Conf\n");
+  STAMPA_DEBUG_SU3_SOA(u,0,0)
+#endif
   
   if(verbosity_lv>3)
     printf("\t\t\tMPI%02d - antihermatize_usafe(leaves)\n",devinfo.myrank);
   
   //antihermatize leaves
   
-  antihermatize_and_normalize_unsafe(leaves,norm);
+  antihermatize_unsafe(leaves);
+  
+#ifdef DEBUG_LOLLO
+#pragma acc update self(leaves[0:12])
+  printf("Anti-hermatized\n");
+  STAMPA_DEBUG_SU3_SOA(leaves,0,0)
+#endif
+
   int d0, d1, d2, d3;
   if(verbosity_lv>3)
     {
       printf("MPI%d - computing staples\n",devinfo.myrank);
-    }
+    }  
+#ifdef DEBUG_LOLLO   
+  su3_soa *dbg_su3, *dbg_su3_2;
+  posix_memalign((void **)&dbg_su3,128,8*sizeof(su3_soa));
+#pragma acc enter data create(dbg_su3[0:8])
+  posix_memalign((void **)&dbg_su3_2,128,8*sizeof(su3_soa));
+#pragma acc enter data create(dbg_su3_2[0:8])
+#endif
   
-  su3_soa *ABC, *BCF, *ABCF, *ADE, *DEF, *ADEF, *temp_r, *temp_l;
-  int allocation_check;
-  
-
-  allocation_check = posix_memalign((void **)&ABC,128,8*sizeof(su3_soa));
-  ALLOLLOCHECK(allocation_check,ABC);
-
-#pragma acc enter data create(ABC[0:8])
-  
-  allocation_check = posix_memalign((void **)&BCF,128,8*sizeof(su3_soa));
-  ALLOLLOCHECK(allocation_check,BCF);
-  
-#pragma acc enter data create(BCF[0:8])
-  
-  allocation_check = posix_memalign((void **)&ABCF,128,8*sizeof(su3_soa));
-  ALLOLLOCHECK(allocation_check,ABCF);
-  
-#pragma acc enter data create(ABCF[0:8])
-  
-  allocation_check = posix_memalign((void **)&ADE,128,8*sizeof(su3_soa));
-  ALLOLLOCHECK(allocation_check,ADE);
-  
-#pragma acc enter data create(ADE[0:8])
-  
-  allocation_check = posix_memalign((void **)&DEF,128,8*sizeof(su3_soa));
-  ALLOLLOCHECK(allocation_check,DEF);
-  
-#pragma acc enter data create(DEF[0:8])
-  
-  allocation_check = posix_memalign((void **)&ADEF,128,8*sizeof(su3_soa));
-  ALLOLLOCHECK(allocation_check,ADEF);
-  
-#pragma acc enter data create(ADEF[0:8])
-  
-  allocation_check = posix_memalign((void **)&temp_r,128,8*sizeof(su3_soa));
-  ALLOLLOCHECK(allocation_check,temp_r);
-  
-#pragma acc enter data create(temp_r[0:8])
-  
-  allocation_check = posix_memalign((void **)&temp_l,128,8*sizeof(su3_soa));
-  ALLOLLOCHECK(allocation_check,temp_l);
-  
-#pragma acc enter data create(temp_l[0:8])
-  
-
   for(int mu=0; mu<4; mu++)
     for(int inu=0; inu<3; inu++){
-#pragma acc data present(u[0:8]) present(nnp_openacc) present(nnm_openacc) present(staples) \
-  present(ABC[0:8]) present(leaves[0:12]) present(BCF[0:8]) present(ABCF[0:8]) \
-  present(ADE[0:8]) present(DEF[0:8]) present(ADEF[0:8])		\
-  present(temp_l[0:8]) present(temp_r[0:8])
-      
-#pragma acc parallel loop independent gang
+#pragma acc parallel loop independent gang present(leaves) present(u) present(nnp_openacc) present(nnm_openacc) present(staples) present(norm) present(dbg_su3) present(dbg_su3_2)
       for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++){
 #pragma acc loop independent gang vector
 	for(d2=0; d2<nd2; d2++){
@@ -221,181 +257,341 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 	  for(d1=0; d1<nd1; d1++){
 #pragma acc loop independent gang vector
 	    for(d0=0; d0<nd0; d0++){
-
+	      single_su3 ABC, BCF, ABCF;
+	      single_su3 ADE, DEF, ADEF;
+	      single_su3 temp_r, temp_l;
+	      single_su3 loc_stap;
+	      set_to_zero_single_su3(&loc_stap);
+	      
 	      int perp_dir[4][3] = {{ 1, 2, 3}, { 0, 2, 3}, { 0, 1, 3}, { 0, 1, 2}};
 	      int plan_perp[4][3]= {{ 5, 4, 3}, { 5, 2, 1}, { 4, 2, 0}, { 3, 1, 0}};
 	      int plan_sign[4][3]= {{+1,-1,+1}, {-1,+1,-1}, {+1,-1,+1}, {-1,+1,-1}};
-
+	      
 	      const int nu = perp_dir[mu][inu];                  //  E---F---C   
 	      const int idxA = snum_acc(d0,d1,d2,d3);            //  |   |   | mu
 	      const int parity = (d0+d1+d2+d3)%2;                //  D---A---B
 	      const int iplan = plan_perp[mu][inu];              //        nu
-	      
 	      
 	      const int idxF = nnp_openacc[idxA][mu][parity];
 	      const int idxB = nnp_openacc[idxA][nu][parity];
 	      const int idxC = nnp_openacc[idxB][mu][!parity];
 	      const int idxD = nnm_openacc[idxA][nu][parity];
 	      const int idxE = nnp_openacc[idxD][mu][!parity];
-						
+
 	      //compute ABC BCF ABCF
-	      mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+parity], idxA,
-							   &u[mu+!parity],idxB,
-							   &ABC[mu+parity],idxA);
+
+	      su3_soa_times_su3_soa_into_single_su3(&u[2*nu+parity],  idxA,
+	      					    &u[2*mu+!parity], idxB,
+	      					    &ABC);
+
+	      su3_soa_times_su3_soa_dag_into_single_su3(&u[2*mu+!parity], idxB,
+	      						&u[2*nu+!parity], idxF,
+							&BCF);
+
+	      su3_soa_times_single_su3_into_single_su3(&u[2*nu+parity],idxA,
+	      					       &BCF, &ABCF);
+	      
+	      single_su3_into_su3_soa(&dbg_su3[2*mu+parity],idxA,&ABCF);
+
+	      //compute ADE DEF ADEF
+
+	      su3_soa_dag_times_su3_soa_into_single_su3(&u[2*nu+!parity], idxD,
+	      						&u[2*mu+!parity], idxD,
+	      						&ADE);
+
+	      su3_soa_times_su3_soa_into_single_su3(&u[2*mu+!parity], idxD,
+	      					    &u[2*nu+parity],  idxE,
+	      					    &DEF);
+
+	      single_su3_times_su3_soa_into_single_su3(&ADE,
+	      					       &u[2*nu+parity], idxE,
+	      					       &ADEF);
+	      //compute local staples.
+
+	      gl3_soa_times_single_su3_addto_gl3(&leaves[2*iplan+parity],idxA,
+	      					 &ABCF,&loc_stap);
+	      
+	      single_gl3_into_su3_soa(&dbg_su3_2[2*mu+parity],idxA,&loc_stap);
 
 	      
-		mat1_times_conj_mat2_into_mat3_absent_stag_phases(&u[mu+!parity], idxB,
-								  &u[nu+!parity],idxF,
-								  &BCF[mu+parity],idxA);
-		mat1_times_conj_mat2_into_mat3_absent_stag_phases(&ABC[mu+parity], idxA,
-								  &u[nu+!parity],idxF,
-								  &ABCF[mu+parity],idxA);
+	      su3_soa_times_gl3_soa_into_gl3(&u[2*nu+parity],idxA,
+	      				     &leaves[2*iplan+!parity],idxB,
+	      				     &temp_r);
+	      
+	      single_gl3xsu3_add_to_out(&loc_stap,&temp_r,&BCF);
 
-		//compute ADE DEF ADEF
-		conj_mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+!parity], idxD,
-								  &u[mu+!parity],idxD,
-								  &ADE[mu+parity],idxA);
-		mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+!parity], idxD,
-							     &u[mu+parity],idxE,
-							     &DEF[mu+parity],idxA);
-		conj_mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+!parity], idxD,
-								  &DEF[mu+parity],idxA,
-								  &ADEF[mu+parity],idxA);
+	      gl3_soa_times_su3_soa_dag_into_gl3(&leaves[2*iplan+parity],idxC,
+	      					 &u[2*nu+!parity],       idxF,
+	      					 &temp_r);
 
-		//compute local staples. Beware, this step should differ from nissa's
-		mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&leaves[iplan+parity], idxA, //--
-									 &ABCF[iplan+parity], idxA,   // |
-									 &staples[mu+parity],idxA,    // |
-									 norm*plan_sign[mu][inu]);    // |
-		mat1_times_mat2_into_mat3_absent_stag_phases(&u[nu+parity], idxA,		      // |
-							     &leaves[iplan+!parity], idxB,	      // |
-							     &temp_r[nu+parity], idxA);               // |
-		mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&temp_r[nu+parity], idxA,    // |
-									 &BCF[iplan+parity], idxA,    // |
-									 &staples[mu+parity],idxA,    // |
-									 norm*plan_sign[mu][inu]);    // |
-		mat1_times_conj_mat2_into_mat3_absent_stag_phases(&leaves[iplan+parity],idxC,         //   RIGHT STAPLE    
-								  &u[nu+!parity], idxF,               // |
-								  &temp_r[nu+!parity], idxF);	      // |
-		mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&ABC[iplan+parity], idxA,    // |
-									 &temp_r[nu+!parity], idxF,   // |
-									 &staples[mu+parity],idxA,    // |
-									 norm*plan_sign[mu][inu]);    // |
-		mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&ABCF[iplan+parity], idxA,   // |
-									 &leaves[iplan+parity], idxF, // |
-									 &staples[mu+parity],idxA,    // |
-									 norm*plan_sign[mu][inu]);    //--
+              single_su3xgl3_add_to_out(&loc_stap,&ABC,&temp_r);
 
-		conj_mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&leaves[iplan+parity], idxA, //--
-									      &ADEF[iplan+parity], idxA,   // |
-									      &staples[mu+parity],idxA,    // |
-									      norm*plan_sign[mu][inu]);    // |
-		conj_mat1_times_conj_mat2_into_mat3_absent_stag_phases(&u[nu+parity], idxD,		   // |
-								       &leaves[iplan+!parity], idxD,       // |
-								       &temp_l[nu+parity], idxD);          // |
-		mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&temp_l[nu+parity], idxD,	   // |
-									 &DEF[iplan+parity], idxA,	   // |
-									 &staples[mu+parity],idxA,	   // |
-									 norm*plan_sign[mu][inu]);	   // |
-		conj_mat1_times_mat2_into_mat3_absent_stag_phases(&leaves[iplan+parity],idxE,              //   LEFT STAPLE    
-								  &u[nu+!parity], idxF,                    // |
-								  &temp_l[nu+!parity], idxF);	           // |
-		mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(&ADE[iplan+parity], idxA,	   // |
-									 &temp_l[nu+!parity], idxF,	   // |
-									 &staples[mu+parity],idxA,         // |
-									 norm*plan_sign[mu][inu]);	   // |
-		mat1_times_conj_mat2_times_fact_addto_mat3_absent_stag_phases(&ADEF[iplan+parity], idxA,   // |
-									      &leaves[iplan+parity], idxF, // |
-									      &staples[mu+parity],idxA,    // |
-									      norm*plan_sign[mu][inu]);    //--
+	      single_su3_times_gl3_soa_addto_gl3(&ABCF,
+	      					 &leaves[2*iplan+!parity],idxF,
+	      					 &loc_stap);
+
+	      //^--Right staple v--Left staple
+
+	      gl3_soa_dag_times_single_su3_addto_gl3(&leaves[2*iplan+parity],idxA,
+	      					     &ADEF,&loc_stap);
+
+	      su3_soa_dag_times_gl3_soa_dag_into_gl3(&u[2*nu+!parity],        idxD,
+	      					     &leaves[2*iplan+!parity],idxD,
+	      					     &temp_l);
+
+	      single_gl3xsu3_add_to_out(&loc_stap,&temp_l,&DEF);
+
+	      gl3_soa_dag_times_su3_soa_into_gl3(&leaves[2*iplan+parity],idxE,
+	      					 &u[2*nu+parity],        idxE,
+	      					 &temp_l);
+
+	      single_su3xgl3_add_to_out(&loc_stap,&ADE,&temp_l);
+
+	      single_su3_times_gl3_soa_dag_addto_gl3(&ADEF,
+	      					 &leaves[2*iplan+!parity],idxF,
+	      					 &loc_stap);
+
+	      //finalizing
+
+	      d_complex fact = norm*plan_sign[mu][inu];
+	      single_su3_times_scalar(&loc_stap,fact);
+	      single_gl3_addinto_su3_soa(&staples[2*mu+parity], idxA,&loc_stap);
 
 	    }//d0
 	  }//d1
 	}//d2
       }//d3
-      printf("this should appear 12 times\n");
     }//inu
 
-  FREELOLLOCHECK(ABC);
-#pragma acc exit data delete(ABC[:8])
-  FREELOLLOCHECK(BCF);
-#pragma acc exit data delete(BCF[:8])
-  FREELOLLOCHECK(ABCF);
-#pragma acc exit data delete(ABCF[:8])
-  FREELOLLOCHECK(ADE);
-#pragma acc exit data delete(ADE[:8])
-  FREELOLLOCHECK(DEF);
-#pragma acc exit data delete(DEF[:8])
-  FREELOLLOCHECK(ADEF);
-#pragma acc exit data delete(ADEF[:8])
-  FREELOLLOCHECK(temp_r);
-#pragma acc exit data delete(temp_r[:8])
-  FREELOLLOCHECK(temp_l);
-#pragma acc exit data delete(temp_l[:8])
-  FREELOLLOCHECK(leaves);
-#pragma acc exit data delete(leaves[:12]) 
+#ifdef DEBUG_LOLLO
+#pragma acc update self(u[0:8]) self(dbg_su3[0:8]) self(dbg_su3_2[0:8])
+  printf("Link product\n");
+  int a = snum_acc(0,0,0,0);
+  single_su3 aux;
+  single_su3_from_su3_soa(&u[6],a,&aux);
+  rebuild3row(&aux);
+  printf("%d\n",a);  
+  STAMPA_DEBUG_SINGLE_SU3(aux);
 
-#pragma acc exit data delete(norm)
+  a = nnp_openacc[a][3][0];
+  single_su3_from_su3_soa(&u[1],a,&aux);
+  rebuild3row(&aux);
+  printf("%d\n",a);  
+  STAMPA_DEBUG_SINGLE_SU3(aux);
 
-	
-}
+  a = snum_acc(0,0,0,0);
+  a = nnp_openacc[a][0][0];
+  single_su3_from_su3_soa(&u[7],a,&aux);
+  rebuild3row(&aux);
+  gl3_dagger(&aux);
+  printf("%d\n",a);  
+  STAMPA_DEBUG_SINGLE_SU3(aux);
 
+  printf("ABCF:\n");  
+  a = snum_acc(0,0,0,0);
+  single_su3_from_su3_soa(&dbg_su3[0],a,&aux);
+  rebuild3row(&aux);
+  printf("%d\n",a);  
+  STAMPA_DEBUG_SINGLE_SU3(aux);
 
-
-void calc_loc_topo_staples(__restrict su3_soa * const u, __restrict su3_soa * const staples)
-{
-	su3_soa tstout_conf_acc_arr, *quadri;
-	double_soa * loc_q;
-
-	if(verbosity_lv>3)
-	  printf("\t\tMPI%02d - compute_topological_charge(u,quadri,loc_q)\n",devinfo.myrank);
-	
-	posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
-#pragma acc enter data create(quadri[0:8])
-	posix_memalign((void **)&loc_q,128,2*sizeof(double_soa));
-#pragma acc enter data create(loc_q[0:2])
-
-	double Q = compute_topological_charge(u, quadri, loc_q);
-
-	free(quadri);
-#pragma acc exit data delete(quadri)
-	free(loc_q);
-#pragma acc exit data delete(loc_q)
-
-	if(verbosity_lv>4)
-	  printf("Topological Charge: %lf\n",Q);
-
-
-	if(verbosity_lv>3)
-	  printf("\t\tMPI%02d - compute_topodynamical_potential_der(Q)\n",devinfo.myrank);
-	
-	double pot_der=compute_topodynamical_potential_der(Q);
-	double norm=pot_der/(M_PI*M_PI*64);
-	
-	if(verbosity_lv>3)
-	  printf("\t\tMPI%02d - topo_staples(u, staples, norm)\n",devinfo.myrank);
-	
-	topo_staples(u,staples,norm);
-	
-#ifdef STOUT_TOPO
-	stout_wrapper(u,tstout_conf_acc_arr); //INSERIRE PARAMETRI STOUTING TOPOLOGICO
-#else
-	tstout_conf_acc_arr=*u;
+  printf("leaves times previous:\n");
+  a = snum_acc(0,0,0,0);
+  single_gl3_from_su3_soa(&dbg_su3_2[0],a,&aux);
+  printf("%d\n",a);  
+  STAMPA_DEBUG_SINGLE_SU3(aux);
+  
+#pragma acc exit data delete(dbg_su3)
+  free(dbg_su3);
+#pragma acc exit data delete(dbg_su3_2)
+  free(dbg_su3_2);
 #endif
-/* 	int d0, d1, d2, d3; */
-/* 	for(int mu=0; mu<4; mu++) */
-/* #pragma acc loop independent gang */
-/* 		for(d3 = D3_HALO; d3<nd3-D3_HALO; d3++) */
-/* #pragma acc loop independent gang vector                                   QUESTO È SBAGLIATO */ 
-/* 			for(d2=0; d2<nd2; d2++) */
-/* #pragma acc loop independent gang vector */
-/* 				for(d2=0; d2<nd2; d2++){ */
-/* 					const int idxm = snum_acc(d0,d1,d2,d3); */
-/* 					const int parity = (d0+d1+d2+d3)%2; */
-/* 					mat1_times_double_factor(&staples[mu+parity], idxm, norm); */
-/* 		} */
 
+#pragma acc exit data delete(leaves)
+  free(leaves);
 }
 
+
+
+void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_soa * const staples)
+{
+#ifdef DEBUG_LOLLO
+  printf("set to zero check: \n");
+  set_su3_soa_to_zero(staples);
+#pragma acc update self(staples[0:8])
+  int a = snum_acc(0,1,0,0);
+  single_su3 aux;
+  single_gl3_from_su3_soa(&staples[2],a,&aux);
+  STAMPA_DEBUG_SINGLE_SU3(aux);
+#endif
+    
+  su3_soa tstout_conf_acc_arr, *quadri;
+  double_soa * loc_q;
+  
+  if(verbosity_lv>3)
+    printf("\t\tMPI%02d - compute_topological_charge(u,quadri,loc_q)\n",devinfo.myrank);
+  
+  posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
+#pragma acc enter data create(quadri[0:8])
+  posix_memalign((void **)&loc_q,128,2*sizeof(double_soa));
+#pragma acc enter data create(loc_q[0:2])
+  
+  double Q = compute_topological_charge(u, quadri, loc_q);
+
+#pragma acc exit data delete(quadri)  
+  free(quadri);
+#pragma acc exit data delete(loc_q)
+  free(loc_q);
+  
+  if(verbosity_lv>4)
+    printf("Topological Charge: %lf\n",Q);
+  
+  
+  if(verbosity_lv>3)
+    printf("\t\tMPI%02d - compute_topodynamical_potential_der(Q)\n",devinfo.myrank);
+	
+  double pot_der=compute_topodynamical_potential_der(Q);
+  double norm=pot_der/(M_PI*M_PI*64);
+  
+  if(verbosity_lv>3)
+    printf("\t\tMPI%02d - topo_staples(u, staples, norm)\n",devinfo.myrank);
+  
+  topo_staples(u,staples,norm);
+
+
+#ifdef DEBUG_LOLLO
+  printf("topo staples:\n");
+#pragma acc update self(staples[0:8])
+  a = snum_acc(0,0,0,0);
+  single_gl3_from_su3_soa(&staples[0],a,&aux);
+  STAMPA_DEBUG_SINGLE_SU3(aux);
+#endif
+  
+  
+#ifdef STOUT_TOPO
+  stout_wrapper(u,tstout_conf_acc_arr); //INSERIRE PARAMETRI STOUTING TOPOLOGICO
+#else
+  tstout_conf_acc_arr=*u;
+#endif
+  
+  
+#ifdef DEBUG_LOLLO
+  tamat_soa *tipdot;
+  int allocation_check =  posix_memalign((void **)&tipdot, 128, 8*sizeof(tamat_soa)); 
+  ALLOLLOCHECK(allocation_check, tipdot) ;
+#pragma acc enter data create(tipdot[0:8])
+  set_tamat_soa_to_zero(tipdot);
+#pragma acc update self(tipdot[0:8]) self(u[0:8]) self(staples[0:8])
+  printf("check set tamat to zero:\n");
+  single_tamat taux;  
+  a = snum_acc(0,0,0,0);
+  single_tamat_from_tamat_soa(&tipdot[0],a,&taux);
+  STAMPA_DEBUG_SINGLE_TAMAT(taux);
+
+  printf("check multiplication into tamat:\n");
+  a = snum_acc(0,0,0,0);
+  single_su3_from_su3_soa(&u[0],a,&aux);
+  rebuild3row(&aux);
+  STAMPA_DEBUG_SINGLE_SU3(aux);
+  
+  a = snum_acc(0,0,0,0);
+  single_gl3_from_su3_soa(&staples[0],a,&aux);
+  STAMPA_DEBUG_SINGLE_SU3(aux);
+  
+  conf_times_staples_ta_part(u,staples,tipdot);
+  
+#pragma acc update self(tipdot[0:8])
+  a = snum_acc(0,0,0,0);
+  single_tamat_from_tamat_soa(&tipdot[0],a,&taux);
+  printf("%d\n",a);  
+
+  STAMPA_DEBUG_SINGLE_TAMAT(taux);
+  printf("^-- Questi dovrebbero essere uguali --v\n");
+  STAMPA_DEBUG_TAMAT_SOA(tipdot,0,0);
+  
+#define SQRT_3 1.732050807568877
+  //i*Gell-mann matrices as from eq.A.10 of Gattringer - note that T=lambda/2
+  single_tamat i_gell_mann_matr[8]={ 
+    { 0+1*I, 0+0*I, 0+0*I, 0, 0 },
+    { 1+0*I, 0+0*I, 0+0*I, 0, 0 },
+    { 0+0*I, 0+0*I, 0+0*I, 1, -1 },
+    { 0+0*I, 0+1*I, 0+0*I, 0, 0 },
+    { 0+0*I, 1+0*I, 0+0*I, 0, 0 },
+    { 0+0*I, 0+0*I, 0+1*I, 0, 0 },
+    { 0+0*I, 0+0*I, 1+0*I, 0, 0 },
+    { 0+0*I, 0+0*I, 0+0*I, 1/SQRT_3, 1/SQRT_3 }
+  };
+  double eps=1e-4;
+  
+  //store initial link and comp action
+  single_su3 sto;
+#pragma acc update self(u[0:8])
+  single_su3_from_su3_soa(&u[0],0,&sto);
+  rebuild3row(&sto);
+  
+  double ori_act = compute_topo_action(u);
+  //store derivative
+  single_tamat posi={ 0+0*I, 0+0*I, 0+0*I, 0, 0 };
+  single_tamat nega={ 0+0*I, 0+0*I, 0+0*I, 0, 0 };
+  
+  for(int igen=0;igen<8;igen++)
+    {	    
+      //prepare increment and change
+      single_tamat ba;
+      single_tamat_times_scalar_into_tamat(&ba,&i_gell_mann_matr[igen],eps/2+0*I);
+      
+      single_su3 exp_mod;
+      CH_exponential_antihermitian_nissalike(&exp_mod,&ba);
+      rebuild3row(&exp_mod);
+      
+      //change +, compute action
+      single_su3 shilink;
+      single_su3xsu3(&shilink, &exp_mod, &sto);
+      single_su3_into_su3_soa(&u[0], 0, &shilink);
+      
+#pragma acc update device(u[0:8])
+      
+      double act_minus = compute_topo_action(u);
+      
+      //change -, compute action
+      gl3_dagger(&exp_mod);
+      single_su3xsu3(&shilink, &exp_mod, &sto);
+      single_su3_into_su3_soa(&u[0], 0, &shilink);
+      
+#pragma acc update device(u[0:8])
+      
+      double act_plus = compute_topo_action(u);
+
+      //set back everything
+      single_su3_into_su3_soa(&u[0], 0, &sto);
+	    
+#pragma acc update device(u[0:8])
+
+      double check_ori_act = compute_topo_action(u);
+      /* printf("plus = %+016.016le ",act_plus); */
+      /* printf("ori = %+016.016le ",check_ori_act); */
+      /* printf("minus = %+016.016le\n",act_minus);	     */
+	    
+      double gr_plus = -(act_plus-ori_act)/eps;
+      double gr_minus = -(ori_act-act_minus)/eps;
+      single_tamat_times_scalar_add_to_tamat(&posi,&i_gell_mann_matr[igen],gr_plus+0*I);
+      single_tamat_times_scalar_add_to_tamat(&nega,&i_gell_mann_matr[igen],gr_minus+0*I);
+
+      /* printf("gr_plus = %+016.016le\ngr_minus = %+016.016le\n", gr_plus, gr_minus); */
+    }
+  //take the average
+  single_tamat Numerical_derivative;
+  summ_single_tamats_times_scalar(&Numerical_derivative, &posi, &nega, 0.5+0*I);
+  STAMPA_DEBUG_SINGLE_TAMAT(Numerical_derivative);
+	
+  printf("Ringrazia Iddio se si assomigliano almeno un po'\n");
+  FREELOLLOCHECK(tipdot);
+#pragma acc exit data delete(tipdot)
+  mem_free_core();
+  mem_free_extended();
+  exit(0);
+#endif
+
+
+}
 
 #endif

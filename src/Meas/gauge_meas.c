@@ -165,7 +165,7 @@ double compute_topological_charge(__restrict su3_soa * const u,
         double_soa * const loc_q){  
 
 
-	if(verbosity_lv>3)
+	if(verbosity_lv>4)
 		printf("MPI%02d - set_su3_soa_to_zero(quadri)\n",devinfo.myrank);
 #pragma acc data present(quadri) present(loc_q)
 	set_su3_soa_to_zero(quadri); // forse non serve a una mazza

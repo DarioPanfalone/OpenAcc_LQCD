@@ -17,7 +17,7 @@
 
 void load_topo(const char *path,const double barr,const double width, double *grid,const int ngrid)
 {
-	if(verbosity_lv>3)
+	if(verbosity_lv>4)
 		printf("Searching file %s\n",path);
 	double widthh = width/2;
 	FILE *fin=fopen(path,"r");
@@ -62,7 +62,7 @@ double topodynamical_pot(double Q)
 	if(igrid>=0 && igrid<=ngrid)
 		{
 			double grid[ngrid];
-			if(verbosity_lv>3)
+			if(verbosity_lv>4)
 				printf("\t\t\tMPI%02d - load_topo(path,barr,width,grid,ngrid)\n",devinfo.myrank);
 			
 			load_topo(act_params.topo_file_path,barr,width,grid,ngrid);			
@@ -94,7 +94,7 @@ double compute_topo_action(su3_soa * const u)
 	tstout_conf_acc_arr=*u;
 #endif
 	
-	if(verbosity_lv>3)
+	if(verbosity_lv>4)
 		printf("\t\t\tMPI%02d - compute_topological_charge(u,quadri,loc_q)\n",devinfo.myrank);
 
 	posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
@@ -116,7 +116,7 @@ double compute_topo_action(su3_soa * const u)
 	if(verbosity_lv>4)
 	  printf("Topological Charge: %lf\n", Q);
 
-	if(verbosity_lv>3)
+	if(verbosity_lv>4)
 		printf("\t\t\tMPI%02d - topodynamical_pot(Q)\n",devinfo.myrank);
 
 	double topo_action = topodynamical_pot(Q);
