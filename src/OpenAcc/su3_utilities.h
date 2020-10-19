@@ -956,6 +956,30 @@ static inline void  gl3_times_double_factor(
 
 }
 
+#pragma acc routine seq
+static inline void  gl3_dag_times_double_factor( 
+        __restrict su3_soa * const mgl3,
+        const int idx_mgl3,
+        double factor){
+  
+  mgl3->r0.c0[idx_mgl3] = conj(mgl3->r0.c0[idx_mgl3])*factor;
+  d_complex m01 = mgl3->r0.c1[idx_mgl3];
+  d_complex m02 = mgl3->r0.c2[idx_mgl3];
+  mgl3->r0.c1[idx_mgl3] = conj(mgl3->r1.c0[idx_mgl3])*factor;
+  mgl3->r0.c2[idx_mgl3] = conj(mgl3->r2.c0[idx_mgl3])*factor;
+  
+  mgl3->r1.c0[idx_mgl3] = conj(m01)*factor;
+  mgl3->r1.c1[idx_mgl3] = conj(mgl3->r1.c1[idx_mgl3])*factor;  
+  d_complex m12 = mgl3->r1.c2[idx_mgl3];
+  mgl3->r1.c2[idx_mgl3] = conj(mgl3->r2.c1[idx_mgl3])*factor;
+
+  mgl3->r2.c0[idx_mgl3] = conj(m02)*factor;
+  mgl3->r2.c1[idx_mgl3] = conj(m12)*factor;
+  mgl3->r2.c2[idx_mgl3] = conj(mgl3->r2.c2[idx_mgl3])*factor;
+  
+}
+
+
 // calcola la traccia della matrice di su3
 #pragma acc routine seq
 static inline d_complex matrix_trace_absent_stag_phase(

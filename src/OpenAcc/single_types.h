@@ -203,6 +203,15 @@ static inline void single_su3_addinto_su3_soa( __restrict su3_soa * const mat, c
   mat->r1.c2[idx_mat] += Imat->comp[1][2];
 }
 #pragma acc routine seq
+static inline void single_su3_subtinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat,  single_su3 * Imat){
+  mat->r0.c0[idx_mat] -= Imat->comp[0][0];
+  mat->r0.c1[idx_mat] -= Imat->comp[0][1];
+  mat->r0.c2[idx_mat] -= Imat->comp[0][2];
+  mat->r1.c0[idx_mat] -= Imat->comp[1][0];
+  mat->r1.c1[idx_mat] -= Imat->comp[1][1];
+  mat->r1.c2[idx_mat] -= Imat->comp[1][2];
+}
+#pragma acc routine seq
 static inline void single_gl3_into_su3_soa( __restrict su3_soa * const mat, const int idx_mat, single_su3 * Imat){
 
  single_su3_into_su3_soa(mat,idx_mat,Imat);
@@ -217,6 +226,14 @@ static inline void single_gl3_addinto_su3_soa( __restrict su3_soa * const mat, c
   mat->r2.c0[idx_mat] += Imat->comp[2][0];
   mat->r2.c1[idx_mat] += Imat->comp[2][1];
   mat->r2.c2[idx_mat] += Imat->comp[2][2];
+}
+#pragma acc routine seq
+static inline void single_gl3_subtinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat, single_su3 * Imat){
+
+  single_su3_subtinto_su3_soa(mat,idx_mat,Imat);
+  mat->r2.c0[idx_mat] -= Imat->comp[2][0];
+  mat->r2.c1[idx_mat] -= Imat->comp[2][1];
+  mat->r2.c2[idx_mat] -= Imat->comp[2][2];
 }
 #pragma acc routine seq
 static inline void single_tamat_into_tamat_soa(__restrict tamat_soa * out, int idx, single_tamat * in){
@@ -518,10 +535,7 @@ static inline void su3_soa_times_su3_soa_into_single_su3( const su3_soa * const 
   m2.comp[1][0] = mat2->r1.c0[idx_mat2];
   m2.comp[1][1] = mat2->r1.c1[idx_mat2];
   m2.comp[1][2] = mat2->r1.c2[idx_mat2];
-  m2.comp[2][0] = mat2->r2.c0[idx_mat2];
-  m2.comp[2][1] = mat2->r2.c1[idx_mat2];
-  m2.comp[2][2] = mat2->r2.c2[idx_mat2];
-
+  rebuild3row(&m2);
   for(int r = 0; r < 2; r++)
     for(int c = 0; c < 3; c++){
       Omat->comp[r][c] = 0;
@@ -716,7 +730,9 @@ static inline void gl3_soa_dag_times_single_su3_addto_gl3(__restrict const su3_s
   gl3.comp[2][1] = mat1->r2.c1[idx_mat1];
   gl3.comp[2][2] = mat1->r2.c2[idx_mat1];
   gl3_dagger(&gl3);
-    
+  
+  rebuild3row(mat2);
+  
   single_su3xsu3_add_to_out(Omat,&gl3,mat2);
 }
 

@@ -173,11 +173,11 @@ double compute_topological_charge(__restrict su3_soa * const u,
 	
     double temp_ch =0.0;
     compute_local_topological_charge(u,quadri,loc_q,0,1);// (d0,d1) - (d2,d3)
-    temp_ch = reduce_loc_top_charge(loc_q);
+    temp_ch -= reduce_loc_top_charge(loc_q);
     compute_local_topological_charge(u,quadri,loc_q,0,2);// (d0,d2) - (d1,d3)
-    temp_ch += reduce_loc_top_charge(loc_q);
+    temp_ch -= reduce_loc_top_charge(loc_q);
     compute_local_topological_charge(u,quadri,loc_q,0,3);// (d0,d3) - (d1,d2)
-    temp_ch += reduce_loc_top_charge(loc_q);
+    temp_ch -= reduce_loc_top_charge(loc_q);
 
 
     return  temp_ch;
