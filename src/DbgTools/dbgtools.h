@@ -36,6 +36,35 @@ void print_all_abelian_plaquettes(const double_soa* phases, const char * filenam
 void dbgprint_gl3_soa(su3_soa * const conf, const char* nomefile,int conf_id_iter);
 int dbgread_gl3_soa(su3_soa * conf, const char* nomefile,int * conf_id_iter );
 
+#define STAMPA_DEBUG_SU3_SOA(var,dir,idx)					\
+  printf("%s[%d], idx %d:\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n\n", #var, dir, idx, \
+	   creal(var[dir].r0.c0[idx]),cimag(var[dir].r0.c0[idx]),creal(var[dir].r0.c1[idx]),cimag(var[dir].r0.c1[idx]),creal(var[dir].r0.c2[idx]),cimag(var[dir].r0.c2[idx]), \
+	   creal(var[dir].r1.c0[idx]),cimag(var[dir].r1.c0[idx]),creal(var[dir].r1.c1[idx]),cimag(var[dir].r1.c1[idx]),creal(var[dir].r1.c2[idx]),cimag(var[dir].r1.c2[idx]), \
+	   creal(var[dir].r2.c0[idx]),cimag(var[dir].r2.c0[idx]),creal(var[dir].r2.c1[idx]),cimag(var[dir].r2.c1[idx]),creal(var[dir].r2.c2[idx]),cimag(var[dir].r2.c2[idx]));
+
+#define STAMPA_DEBUG_SU3_SOA_DAG(var,dir,idx)					\
+  printf("%s[%d], idx %d:\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n\n", #var, dir, idx, \
+	   creal(var[dir].r0.c0[idx]),-cimag(var[dir].r0.c0[idx]),creal(var[dir].r1.c0[idx]),-cimag(var[dir].r1.c0[idx]),creal(var[dir].r2.c0[idx]),-cimag(var[dir].r2.c0[idx]), \
+	   creal(var[dir].r0.c1[idx]),-cimag(var[dir].r0.c1[idx]),creal(var[dir].r1.c1[idx]),-cimag(var[dir].r1.c1[idx]),creal(var[dir].r2.c1[idx]),-cimag(var[dir].r2.c1[idx]), \
+	   creal(var[dir].r0.c2[idx]),-cimag(var[dir].r0.c2[idx]),creal(var[dir].r1.c2[idx]),-cimag(var[dir].r1.c2[idx]),creal(var[dir].r2.c2[idx]),-cimag(var[dir].r2.c2[idx]));
+
+#define STAMPA_DEBUG_TAMAT_SOA(var,dir,idx)				\
+  printf("%s[%d], idx %d :\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n\n", #var, dir, idx, \
+	 0.0,var[dir].ic00[idx],creal(var[dir].c01[idx]),cimag(var[dir].c01[idx]),creal(var[dir].c02[idx]),cimag(var[dir].c02[idx]), \
+	 -creal(var[dir].c01[idx]),cimag(var[dir].c01[idx]),0.0,var[dir].ic11[idx],creal(var[dir].c12[idx]),cimag(var[dir].c12[idx]), \
+	 -creal(var[dir].c02[idx]),cimag(var[dir].c02[idx]),-creal(var[dir].c12[idx]),cimag(var[dir].c12[idx]),0.0,-(var[dir].ic00[idx]+var[dir].ic11[idx]));
+
+#define STAMPA_DEBUG_SINGLE_SU3(var)					\
+  printf("%s:\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n\n", #var, \
+	 creal(var.comp[0][0]),cimag(var.comp[0][0]),creal(var.comp[0][1]),cimag(var.comp[0][1]),creal(var.comp[0][2]),cimag(var.comp[0][2]), \
+	 creal(var.comp[1][0]),cimag(var.comp[1][0]),creal(var.comp[1][1]),cimag(var.comp[1][1]),creal(var.comp[1][2]),cimag(var.comp[1][2]), \
+	 creal(var.comp[2][0]),cimag(var.comp[2][0]),creal(var.comp[2][1]),cimag(var.comp[2][1]),creal(var.comp[2][2]),cimag(var.comp[2][2]));
+
+#define STAMPA_DEBUG_SINGLE_TAMAT(var)					\
+  printf("%s:\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n\n", #var, \
+	 0.0,var.ic00,creal(var.c01),cimag(var.c01),creal(var.c02),cimag(var.c02), \
+	 -creal(var.c01),cimag(var.c01),0.0,var.ic11,creal(var.c12),cimag(var.c12), \
+	 -creal(var.c02),cimag(var.c02),-creal(var.c12),cimag(var.c12),0.0,-(var.ic00+var.ic11));
 
 
 #endif

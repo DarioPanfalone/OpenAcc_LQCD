@@ -11,54 +11,24 @@
 #include "./topological_action.h"
 #include "./single_types.h"
 
-#define DEBUG_LOLLO
+//#define DEBUG_LOLLO
 
 #ifdef DEBUG_LOLLO
  #include "./cayley_hamilton.h"
  #include "./alloc_vars.h"
  #include "../DbgTools/dbgtools.h"
-#endif
-
-#define STAMPA_DEBUG_SU3_SOA(var,dir,idx)					\
-  printf("%s[%d], idx %d:\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n\n", #var, dir, idx, \
-	   creal(var[dir].r0.c0[idx]),cimag(var[dir].r0.c0[idx]),creal(var[dir].r0.c1[idx]),cimag(var[dir].r0.c1[idx]),creal(var[dir].r0.c2[idx]),cimag(var[dir].r0.c2[idx]), \
-	   creal(var[dir].r1.c0[idx]),cimag(var[dir].r1.c0[idx]),creal(var[dir].r1.c1[idx]),cimag(var[dir].r1.c1[idx]),creal(var[dir].r1.c2[idx]),cimag(var[dir].r1.c2[idx]), \
-	   creal(var[dir].r2.c0[idx]),cimag(var[dir].r2.c0[idx]),creal(var[dir].r2.c1[idx]),cimag(var[dir].r2.c1[idx]),creal(var[dir].r2.c2[idx]),cimag(var[dir].r2.c2[idx]));
-
-#define STAMPA_DEBUG_SU3_SOA_DAG(var,dir,idx)					\
-  printf("%s[%d], idx %d:\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n\n", #var, dir, idx, \
-	   creal(var[dir].r0.c0[idx]),-cimag(var[dir].r0.c0[idx]),creal(var[dir].r1.c0[idx]),-cimag(var[dir].r1.c0[idx]),creal(var[dir].r2.c0[idx]),-cimag(var[dir].r2.c0[idx]), \
-	   creal(var[dir].r0.c1[idx]),-cimag(var[dir].r0.c1[idx]),creal(var[dir].r1.c1[idx]),-cimag(var[dir].r1.c1[idx]),creal(var[dir].r2.c1[idx]),-cimag(var[dir].r2.c1[idx]), \
-	   creal(var[dir].r0.c2[idx]),-cimag(var[dir].r0.c2[idx]),creal(var[dir].r1.c2[idx]),-cimag(var[dir].r1.c2[idx]),creal(var[dir].r2.c2[idx]),-cimag(var[dir].r2.c2[idx]));
-
-#define STAMPA_DEBUG_TAMAT_SOA(var,dir,idx)				\
-  printf("%s[%d], idx %d :\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n\n", #var, dir, idx, \
-	 0.0,var[dir].ic00[idx],creal(var[dir].c01[idx]),cimag(var[dir].c01[idx]),creal(var[dir].c02[idx]),cimag(var[dir].c02[idx]), \
-	 -creal(var[dir].c01[idx]),cimag(var[dir].c01[idx]),0.0,var[dir].ic11[idx],creal(var[dir].c12[idx]),cimag(var[dir].c12[idx]), \
-	 -creal(var[dir].c02[idx]),cimag(var[dir].c02[idx]),-creal(var[dir].c12[idx]),cimag(var[dir].c12[idx]),0.0,-(var[dir].ic00[idx]+var[dir].ic11[idx]));
-
-#define STAMPA_DEBUG_SINGLE_SU3(var)					\
-  printf("%s:\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n\n", #var, \
-	 creal(var.comp[0][0]),cimag(var.comp[0][0]),creal(var.comp[0][1]),cimag(var.comp[0][1]),creal(var.comp[0][2]),cimag(var.comp[0][2]), \
-	 creal(var.comp[1][0]),cimag(var.comp[1][0]),creal(var.comp[1][1]),cimag(var.comp[1][1]),creal(var.comp[1][2]),cimag(var.comp[1][2]), \
-	 creal(var.comp[2][0]),cimag(var.comp[2][0]),creal(var.comp[2][1]),cimag(var.comp[2][1]),creal(var.comp[2][2]),cimag(var.comp[2][2]));
-
-#define STAMPA_DEBUG_SINGLE_TAMAT(var)					\
-  printf("%s:\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n(%le,%le)\t(%le,%le)\t(%le,%le)\n\n", #var, \
-	 0.0,var.ic00,creal(var.c01),cimag(var.c01),creal(var.c02),cimag(var.c02), \
-	 -creal(var.c01),cimag(var.c01),0.0,var.ic11,creal(var.c12),cimag(var.c12), \
-	 -creal(var.c02),cimag(var.c02),-creal(var.c12),cimag(var.c12),0.0,-(var.ic00+var.ic11));
 
 
 #define ALLOLLOCHECK(control_int,var)  if(control_int != 0 ) \
     printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var);\
     else if(verbosity_lv > 2) printf("MPI%02d: \tAllocation of %s : OK , %p\n",\
-         devinfo.myrank, #var, var );\
+         devinfo.myrank, #var, var );
 
 #define FREELOLLOCHECK(var) if(verbosity_lv >2) \
     printf("\tFreed %s, %p ...", #var,var);\
-    free(var); if(verbosity_lv > 2)  printf(" done.\n");\
+    free(var); if(verbosity_lv > 2)  printf(" done.\n");
 
+#endif
 
 double compute_topodynamical_potential_der(const double Q)
 {
@@ -177,12 +147,6 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
   posix_memalign((void **)&leaves,128,12*sizeof(su3_soa));
 #pragma acc enter data create(leaves[0:12]) copyin(norm)
 
-#ifdef DEBUG_LOLLO
-#pragma acc update self(leaves[0:12])
-  printf("Initial leaves\n");
-  STAMPA_DEBUG_SU3_SOA(leaves,0,0)
-#endif
-
   if(verbosity_lv>3)
     printf("\t\t\tMPI%02d - four_leaves(leaves,u)\n",devinfo.myrank);
   
@@ -190,13 +154,6 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
   
   four_leaves(leaves,u);
 
-#ifdef DEBUG_LOLLO
-#pragma acc update self(leaves[0:12]) self(u[0:8])
-  printf("Computed leaves\n");
-  STAMPA_DEBUG_SU3_SOA(leaves,0,0)
-  printf("Conf\n");
-  STAMPA_DEBUG_SU3_SOA(u,0,0)
-#endif
   
   if(verbosity_lv>3)
     printf("\t\t\tMPI%02d - antihermatize_usafe(leaves)\n",devinfo.myrank);
@@ -205,12 +162,6 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
   
   antihermatize_unsafe(leaves);
   
-#ifdef DEBUG_LOLLO
-#pragma acc update self(leaves[0:12])
-  printf("Anti-hermatized\n");
-  STAMPA_DEBUG_SU3_SOA(leaves,0,0)
-#endif
-
   int d0, d1, d2, d3;
   if(verbosity_lv>3)
     {
@@ -249,204 +200,57 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 	      const int idxE = nnp_openacc[idxD][mu][!parity];
 
 	      //compute ABC BCF ABCF
-
 	      su3_soa_times_su3_soa_into_single_su3(&u[2*nu+parity],  idxA,
 	      					    &u[2*mu+!parity], idxB,
 	      					    &ABC);
-
-
 	      su3_soa_times_su3_soa_dag_into_single_su3(&u[2*mu+!parity], idxB,
 	      						&u[2*nu+!parity], idxF,
 							&BCF);
-
 	      su3_soa_times_single_su3_into_single_su3(&u[2*nu+parity],idxA,
 	      					       &BCF, &ABCF);
-	      
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA(u,2*nu+parity,idxA);
-		      STAMPA_DEBUG_SU3_SOA(u,2*mu+!parity,idxB);
-		      STAMPA_DEBUG_SU3_SOA_DAG(u,2*nu+!parity,idxF);
-		      STAMPA_DEBUG_SINGLE_SU3(ABC);
-		      STAMPA_DEBUG_SINGLE_SU3(BCF);
-		      STAMPA_DEBUG_SINGLE_SU3(ABCF);
-		    }
-
 	      //compute ADE DEF ADEF
-
 	      su3_soa_dag_times_su3_soa_into_single_su3(&u[2*nu+!parity], idxD,
 	      						&u[2*mu+!parity], idxD,
 	      						&ADE);
-
 	      su3_soa_times_su3_soa_into_single_su3(&u[2*mu+!parity], idxD,
 	      					    &u[2*nu+parity],  idxE,
 	      					    &DEF);
-
 	      single_su3_times_su3_soa_into_single_su3(&ADE,
 	      					       &u[2*nu+parity], idxE,
 	      					       &ADEF);
-
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA_DAG(u,2*nu+!parity,idxD);
-		      STAMPA_DEBUG_SU3_SOA(u,2*mu+!parity,idxD);
-		      STAMPA_DEBUG_SU3_SOA(u,2*nu+parity,idxE);
-		      STAMPA_DEBUG_SINGLE_SU3(ADE);
-		      STAMPA_DEBUG_SINGLE_SU3(DEF);
-		      STAMPA_DEBUG_SINGLE_SU3(ADEF);
-		    }
-
 	      //compute local staples.
-
 	      gl3_soa_times_single_su3_addto_gl3(&leaves[2*iplan+parity],idxA,
 	      					 &ABCF,&loc_stap);
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA(leaves,2*iplan+parity,idxA);
-		      STAMPA_DEBUG_SINGLE_SU3(loc_stap);
-		    }
-
 	      su3_soa_times_gl3_soa_into_gl3(&u[2*nu+parity],idxA,
 	      				     &leaves[2*iplan+!parity],idxB,
 	      				     &temp);
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA(leaves,2*iplan+!parity,idxB);
-		      STAMPA_DEBUG_SINGLE_SU3(temp);
-		    }
-	      
 	      single_gl3xsu3_add_to_out(&loc_stap,&temp,&BCF);
-
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SINGLE_SU3(loc_stap);
-		    }
-
 	      gl3_soa_times_su3_soa_dag_into_gl3(&leaves[2*iplan+parity],idxC,
 	      					 &u[2*nu+!parity],       idxF,
 	      					 &temp);
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA(leaves,2*iplan+parity,idxC);
-		      STAMPA_DEBUG_SINGLE_SU3(temp);
-		    }
-
               single_su3xgl3_add_to_out(&loc_stap,&ABC,&temp);
-
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SINGLE_SU3(loc_stap);
-		    }
-
 	      single_su3_times_gl3_soa_addto_gl3(&ABCF,
 	      					 &leaves[2*iplan+!parity],idxF,
 	      					 &loc_stap);
-	      
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA(leaves,2*iplan+!parity,idxF);
-		      STAMPA_DEBUG_SINGLE_SU3(loc_stap);
-		    }
-
 	      //^--Right staple v--Left staple
-
 	      gl3_soa_dag_times_single_su3_addto_gl3(&leaves[2*iplan+parity],idxA,
 	      					     &ADEF,&loc_stap);
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA_DAG(leaves,2*iplan+parity,idxA);
-		      STAMPA_DEBUG_SINGLE_SU3(loc_stap);
-		    }
-
 	      su3_soa_dag_times_gl3_soa_dag_into_gl3(&u[2*nu+!parity],        idxD,
 	      					     &leaves[2*iplan+!parity],idxD,
 	      					     &temp);
-	      
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA_DAG(leaves,2*iplan+!parity,idxD);
-		      STAMPA_DEBUG_SINGLE_SU3(temp);
-		    }
-
-	      
 	      single_gl3xsu3_add_to_out(&loc_stap,&temp,&DEF);
-
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SINGLE_SU3(loc_stap);
-		    }
-
-
 	      gl3_soa_dag_times_su3_soa_into_gl3(&leaves[2*iplan+parity],idxE,
 	      					 &u[2*nu+parity],        idxE,
 	      					 &temp);
-
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA_DAG(leaves,2*iplan+parity,idxE);
-		      STAMPA_DEBUG_SINGLE_SU3(temp);
-		    }
-
 	      single_su3xgl3_add_to_out(&loc_stap,&ADE,&temp);
-	      
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SINGLE_SU3(loc_stap);
-		    }
-
-	      
 	      single_su3_times_gl3_soa_dag_addto_gl3(&ADEF,
 	      					 &leaves[2*iplan+!parity],idxF,
 	      					 &loc_stap);
-	      
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 1){
-		      STAMPA_DEBUG_SU3_SOA_DAG(leaves,2*iplan+!parity,idxF);
-		      STAMPA_DEBUG_SINGLE_SU3(loc_stap);
-		    }
-
 	      //finalizing
-	      
 	      if(plan_sign[mu][inu] >= 0)
 		single_gl3_addinto_su3_soa(&staples[2*mu+parity], idxA,&loc_stap);
 	      else
 		single_gl3_subtinto_su3_soa(&staples[2*mu+parity], idxA,&loc_stap);		
-
-	      if(idxA == 0)
-		if(parity == 0)
-		  if(mu == 0)
-		    if(nu == 3){
-		      printf("plan_sign[0][0,1,2] = %d, %d, %d\n",plan_sign[mu][0],plan_sign[mu][1],plan_sign[mu][2]);
-		      STAMPA_DEBUG_SU3_SOA(staples,2*mu+parity,idxA);
-		    }
 	    }//d0
 	  }//d1
 	}//d2
@@ -471,10 +275,10 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 	for(int mu = 0; mu<4; mu++)
 	  gl3_dag_times_double_factor(&staples[2*mu+parity],idxA,norm);
 	
+	}
       }
-      }
-      }	    
-      }
+    }	    
+  }
 }
 
 
@@ -498,8 +302,7 @@ void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_so
 #pragma acc enter data create(loc_q[0:2])
   
   double Q = compute_topological_charge(u, quadri, loc_q);
-  printf("TOPO CHARGE = %f\n",Q);
-
+  
 #pragma acc exit data delete(quadri)  
   free(quadri);
 #pragma acc exit data delete(loc_q)
@@ -515,17 +318,10 @@ void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_so
   double pot_der=compute_topodynamical_potential_der(Q);
   double norm=pot_der/(M_PI*M_PI*128);
 
-  printf("NORM: %f\n",norm);
   if(verbosity_lv>3)
     printf("\t\tMPI%02d - topo_staples(u, staples, norm)\n",devinfo.myrank);
   
   topo_staples(u,staples,norm);
-  
-#ifdef DEBUG_LOLLO
-#pragma acc update self(staples[0:8])
- STAMPA_DEBUG_SU3_SOA(staples,0,0);
-#endif
-  
   
 #ifdef STOUT_TOPO
   stout_wrapper(u,tstout_conf_acc_arr); //INSERIRE PARAMETRI STOUTING TOPOLOGICO
