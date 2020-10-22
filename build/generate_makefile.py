@@ -29,6 +29,9 @@ def geomDefineGetterFromFile():
 
     return geomDefineGetterString
 
+def getGitHash():
+    return 'COMMIT_HASH:=$(shell git rev-parse HEAD|tr -d "\\n")'"\n"
+
 # General philosophy: build a graph of files, with directed links, 
 # which depics the dependences in the code as described with #includes.
 # Loops are not allowed.
@@ -212,6 +215,7 @@ class file_node:
 
     def generate_make_string(self):
         makeString = ''
+        
         if '.h' in self.name:
             makeString += self.name + " :"
         elif '.c' in self.name:
@@ -316,6 +320,7 @@ if __name__ == '__main__':
     makefileBase = open("compiler_settings_library.txt").read()
 
     stdout.write(geomDefineGetterFromFile())
+    stdout.write(getGitHash())
     stdout.write(makefileBase)    
     stdout.write(makeall)
     stdout.write(makeclean)
