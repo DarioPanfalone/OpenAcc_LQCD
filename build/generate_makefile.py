@@ -29,7 +29,7 @@ def geomDefineGetterFromFile():
 
     return geomDefineGetterString
 
-def getGitHash():
+def getGitHashGetter():
     return 'COMMIT_HASH:=$(shell git rev-parse HEAD|tr -d "\\n")'"\n"
 
 # General philosophy: build a graph of files, with directed links, 
@@ -320,7 +320,7 @@ if __name__ == '__main__':
     makefileBase = open("compiler_settings_library.txt").read()
 
     stdout.write(geomDefineGetterFromFile())
-    stdout.write(getGitHash())
+    stdout.write(getGitHashGetter())
     stdout.write(makefileBase)    
     stdout.write(makeall)
     stdout.write(makeclean)
