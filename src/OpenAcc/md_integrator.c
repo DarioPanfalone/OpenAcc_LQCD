@@ -46,6 +46,9 @@
 
 #include <sys/time.h>
 
+#define TOPO_MACRO 1
+#define TOPO_MICRO 0
+
 #ifdef MULTIDEVICE
 #include "../Mpi/communications.h"
 #endif
@@ -507,12 +510,26 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             tipdot_acc, tfermions_parameters, tNDiffFlavs, 
             ferm_in_acc, res, taux_conf_acc, invOuts, ip,max_cg);
 
-    if(verbosity_lv > 4) printf("MPI%02d - Calculated first fermion force/n", 
+    if(verbosity_lv > 4) printf("MPI%02d - Calculated first fermion force\n", 
             devinfo.myrank);
-
-
+    
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
 
+    if(TOPO_MACRO == 1)
+      {
+        calc_ipdot_topo(tconf_acc,  
+#ifdef STOUT_TOPO
+			tstout_conf_acc_arr,tauxbis_conf_acc,
+#endif
+			taux_conf_acc,
+			tipdot_acc);
+	
+	if(verbosity_lv > 4) printf("MPI%02d - Calculated first topological force\n", 
+				    devinfo.myrank);
+	
+	mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
+      }
+    
     for(md=1; md<md_parameters.no_md; md++){
 
         if(md_parameters.extrapolateInvsForce){
@@ -529,7 +546,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             multistep_2MN_gauge_async(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
         else 
 #endif
-            multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
+	  multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
         // Step for the P
         // P' = P - (1-2l)*dt*dS/dq
         // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
@@ -544,6 +561,20 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 
 
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,1);
+
+	if(TOPO_MACRO == 1)
+	  {
+	    calc_ipdot_topo(tconf_acc,  
+#ifdef STOUT_TOPO
+			    tstout_conf_acc_arr,tauxbis_conf_acc,
+#endif
+			    taux_conf_acc,
+			    tipdot_acc);
+	
+	    mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,1);
+	  }
+
+
         // Step for the Q
         // Q' = exp[dt/2 *i P] Q
 #ifdef MULTIDEVICE
@@ -573,6 +604,18 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 
         mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
 
+	if(TOPO_MACRO == 1)
+	  {
+	    calc_ipdot_topo(tconf_acc,  
+#ifdef STOUT_TOPO
+			    tstout_conf_acc_arr,tauxbis_conf_acc,
+#endif
+			    taux_conf_acc,
+			    tipdot_acc);
+	
+	    mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,2);
+	  }
+
 
         if(md_parameters.extrapolateInvsForce){
             printf("ERROR, not implemented correctly! %s : %d",__FILE__,__LINE__); exit(1);
@@ -595,8 +638,8 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     else
 #endif
         multistep_2MN_gauge(tconf_acc,taux_conf_acc,tipdot_acc,tmomenta);
-
-
+    
+    
     // Step for the P
     // P' = P - (1-2l)*dt*dS/dq
     // deltas_Omelyan[1]=-cimag(ieps_acc)*(1.0-2.0*lambda);
@@ -610,7 +653,20 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             ip,max_cg);
 
     mom_sum_mult(tmomenta,ipdot_acc,deltas_Omelyan,1);
-
+    
+    if(TOPO_MACRO == 1)
+      {
+	calc_ipdot_topo(tconf_acc,  
+#ifdef STOUT_TOPO
+			tstout_conf_acc_arr,tauxbis_conf_acc,
+#endif
+			taux_conf_acc,
+			tipdot_acc);
+	
+	mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,1);
+      }
+    
+    
     // Step for the Q
     // Q' = exp[dt/2 *i P] Q
 #ifdef MULTIDEVICE
@@ -640,7 +696,19 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             ferm_in_acc, res, taux_conf_acc, invOuts, ip,max_cg);
 
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
-
+    
+    if(TOPO_MACRO == 1)
+      {
+	calc_ipdot_topo(tconf_acc,  
+#ifdef STOUT_TOPO
+			tstout_conf_acc_arr,tauxbis_conf_acc,
+#endif
+			taux_conf_acc,
+			tipdot_acc);
+	
+	mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
+      }
+    
 
 }// end multistep_2MN_SOLOOPENACC()
 

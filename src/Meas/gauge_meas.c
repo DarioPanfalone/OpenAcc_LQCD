@@ -19,6 +19,7 @@
 #include <mpi.h>
 #endif
 
+extern int TOPO_GLOBAL_DONT_TOUCH;
 
 
 char gauge_outfilename[50];
@@ -160,13 +161,9 @@ double reduce_loc_top_charge(double_soa * const loc_q)
     return result;
 }
 
-double compute_topological_charge(__restrict su3_soa * const u,
-        su3_soa * const quadri,
-        double_soa * const loc_q){  
+double compute_topological_charge(__restrict su3_soa * const u, su3_soa * const quadri, double_soa * const loc_q){  
 
 
-	if(verbosity_lv>4)
-		printf("MPI%02d - set_su3_soa_to_zero(quadri)\n",devinfo.myrank);
 #pragma acc data present(quadri) present(loc_q)
 	set_su3_soa_to_zero(quadri); // forse non serve a una mazza
 

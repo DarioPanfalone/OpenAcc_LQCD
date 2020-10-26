@@ -42,6 +42,7 @@
 #endif 
 
 extern int verbosity_lv;
+extern int TOPO_GLOBAL_DONT_TOUCH;
 
 void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_f    * Sigma, // la var globale e' auxbis_conf_acc_f [sia input che ouptput]
         __restrict thmat_soa_f  * Lambda, // la var globale e' aux_th_f
@@ -69,6 +70,18 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_
         printf("Sigma[old]20 = %f + (%f)*I\n",crealf(Sigma[0].r2.c0[0]),cimagf(Sigma[0].r2.c0[0]));                                               
         printf("Sigma[old]21 = %f + (%f)*I\n",crealf(Sigma[0].r2.c1[0]),cimagf(Sigma[0].r2.c1[0]));                                               
         printf("Sigma[old]22 = %f + (%f)*I\n\n",crealf(Sigma[0].r2.c2[0]),cimagf(Sigma[0].r2.c2[0]));                
+    
+#pragma acc update self(U[0:8])
+        printf("-------------U------------------\n");                                                                                             
+        printf("U00 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c0[0]),cimag(U[0].r0.c0[0]));                                               
+        printf("U01 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c1[0]),cimag(U[0].r0.c1[0]));                                               
+        printf("U02 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c2[0]),cimag(U[0].r0.c2[0]));                                               
+        printf("U10 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c0[0]),cimag(U[0].r1.c0[0]));                                               
+        printf("U11 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c1[0]),cimag(U[0].r1.c1[0]));                                               
+        printf("U12 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c2[0]),cimag(U[0].r1.c2[0]));                                               
+        printf("U20 = %.18lf + (%.18lf)*I\n",creal(U[0].r2.c0[0]),cimag(U[0].r2.c0[0]));                                               
+        printf("U21 = %.18lf + (%.18lf)*I\n",creal(U[0].r2.c1[0]),cimag(U[0].r2.c1[0]));                                               
+        printf("U22 = %.18lf + (%.18lf)*I\n\n",creal(U[0].r2.c2[0]),cimag(U[0].r2.c2[0]));                
     }
 
     set_su3_soa_to_zero_f(TMP);
@@ -79,7 +92,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_
 #ifdef MULTIDEVICE
     communicate_gl3_borders_f(TMP,1);
 #endif
-
+    printf("RHOF: %f\n", RHOF);
     RHO_times_conf_times_staples_ta_part_f(U,TMP,QA);
 
 #ifdef MULTIDEVICE

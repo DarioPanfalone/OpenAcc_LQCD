@@ -13,6 +13,8 @@
 #include "./struct_c_def.h"
 #include "./single_types.h"
 
+extern int TOPO_GLOBAL_DONT_TOUCH;
+
 // reunitarize the conf by brute force
 void unitarize_conf( __restrict su3_soa * const u)
 {

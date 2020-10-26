@@ -214,8 +214,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         }
 		
 	if(verbosity_lv>3 && act_params.topo_action==1)printf("\tComputing topological action\n");
+
+#ifdef STOUT_TOPO
+	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+#else
 	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
-	
+#endif
+
         action_mom_in = 0.0;
         for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
         action_ferm_in=0;
@@ -503,9 +508,12 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             action_fin = C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
             action_fin += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
         }
-
-		action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
-
+	
+#ifdef STOUT_TOPO
+	action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+#else
+	action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
+#endif
         action_mom_fin = 0.0;
         for(mu =0;mu<8;mu++)    action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
 

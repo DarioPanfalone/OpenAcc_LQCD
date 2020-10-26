@@ -5,14 +5,16 @@
 #include <math.h>
 #include "../Mpi/multidev.h"
 #include "../Meas/gauge_meas.h"
+#include "./fermion_force.h"
 #include "./fermion_force_utilities.h"
 #include "./alloc_vars.h"
 #include "./action.h"
 #include "./topological_action.h"
 #include "./single_types.h"
 
-//#define DEBUG_LOLLO
+int TOPO_GLOBAL_DONT_TOUCH = 0;
 
+#define DEBUG_LOLLO
 #ifdef DEBUG_LOLLO
  #include "./cayley_hamilton.h"
  #include "./alloc_vars.h"
@@ -198,7 +200,7 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 	      const int idxC = nnp_openacc[idxB][mu][!parity];
 	      const int idxD = nnm_openacc[idxA][nu][parity];
 	      const int idxE = nnp_openacc[idxD][mu][!parity];
-
+		  
 	      //compute ABC BCF ABCF
 	      su3_soa_times_su3_soa_into_single_su3(&u[2*nu+parity],  idxA,
 	      					    &u[2*mu+!parity], idxB,
@@ -251,6 +253,7 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 		single_gl3_addinto_su3_soa(&staples[2*mu+parity], idxA,&loc_stap);
 	      else
 		single_gl3_subtinto_su3_soa(&staples[2*mu+parity], idxA,&loc_stap);		
+	      
 	    }//d0
 	  }//d1
 	}//d2
@@ -283,15 +286,12 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 
 
 
-void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_soa * const staples)
+void calc_loc_topo_staples( __restrict const su3_soa * const u,
+			   __restrict su3_soa * const staples)
 {    
-#ifdef DEBUG_LOLLO
- set_su3_soa_to_zero(staples);
-#endif
+  su3_soa *quadri;
+  double_soa *loc_q;
 
-
-  su3_soa tstout_conf_acc_arr, *quadri;
-  double_soa * loc_q;
   
   if(verbosity_lv>3)
     printf("\t\tMPI%02d - compute_topological_charge(u,quadri,loc_q)\n",devinfo.myrank);
@@ -317,34 +317,68 @@ void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_so
 	
   double pot_der=compute_topodynamical_potential_der(Q);
   double norm=pot_der/(M_PI*M_PI*128);
-
+  
+  
   if(verbosity_lv>3)
     printf("\t\tMPI%02d - topo_staples(u, staples, norm)\n",devinfo.myrank);
   
+
   topo_staples(u,staples,norm);
-  
+}
+
+
+void calc_ipdot_topo(__restrict const su3_soa * const tconf_acc,  
 #ifdef STOUT_TOPO
-  stout_wrapper(u,tstout_conf_acc_arr); //INSERIRE PARAMETRI STOUTING TOPOLOGICO
-#else
-  tstout_conf_acc_arr=*u;
+		     __restrict su3_soa * const tstout_conf_acc_arr,
+		     __restrict su3_soa  * taux_conf_acc,
 #endif
-  
-  
+		     __restrict su3_soa * const local_staples,
+		     __restrict tamat_soa * const tipdot_acc)
+{
+  TOPO_GLOBAL_DONT_TOUCH = 1;
+  set_su3_soa_to_zero(local_staples);
+  __restrict su3_soa * conf_to_use; // CONF TO USE IN CALCULATION OF TOPO FORCE
+  //  __restrict su3_soa_f * conf_to_use_f; // CONF TO USE IN CALCULATION OF TOPO FORCE
+
+#ifdef STOUT_TOPO
+  if(act_params.topo_stout_steps > 0){
+    stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+    conf_to_use = &(tstout_conf_acc_arr[8*(act_params.topo_stout_steps-1)]);
+  }
+  else conf_to_use=&tconf_acc;
+#else
+  conf_to_use=&tconf_acc;
+#endif
+
+  calc_loc_topo_staples(conf_to_use,local_staples);
+
+#ifdef STOUT_TOPO
+  for(int stout_level = act_params.topo_stout_steps; stout_level > 1; stout_level--){
+    conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
+
+    compute_sigma_from_sigma_prime_backinto_sigma_prime(local_staples,aux_th,aux_ta,
+							conf_to_use,taux_conf_acc);
+  }    
+  if(act_params.topo_stout_steps > 0 ){
+    compute_sigma_from_sigma_prime_backinto_sigma_prime(local_staples,aux_th,aux_ta,
+							tconf_acc, taux_conf_acc );
+
+  }
+#endif
+  conf_times_staples_ta_part(tconf_acc,local_staples,tipdot_acc);  
+    
+TOPO_GLOBAL_DONT_TOUCH = 0;  
+
+
+//DEBUG
 #ifdef DEBUG_LOLLO
-  tamat_soa *tipdot;
-  int allocation_check =  posix_memalign((void **)&tipdot, 128, 8*sizeof(tamat_soa)); 
-  ALLOLLOCHECK(allocation_check, tipdot) ;
-#pragma acc enter data create(tipdot[0:8])
-  set_tamat_soa_to_zero(tipdot);
-#pragma acc update self(tipdot[0:8]) self(u[0:8]) self(staples[0:8])
+#pragma acc update self(tconf_acc[0:8]) self(local_staples[0:8])
   printf("check multiplication into tamat:\n");
-  STAMPA_DEBUG_SU3_SOA(u,0,0);
-  STAMPA_DEBUG_SU3_SOA(staples,0,0);
-  
-  conf_times_staples_ta_part(u,staples,tipdot);
-  
-#pragma acc update self(tipdot[0:8])
-  STAMPA_DEBUG_TAMAT_SOA(tipdot,0,0);
+  STAMPA_DEBUG_SU3_SOA(tconf_acc,0,0);
+  STAMPA_DEBUG_SU3_SOA(local_staples,0,0);
+
+#pragma acc update self(tipdot_acc[0:8])
+  STAMPA_DEBUG_TAMAT_SOA(tipdot_acc,0,0);
   
 #define SQRT_3 1.732050807568877
   //i*Gell-mann matrices as from eq.A.10 of Gattringer - note that T=lambda/2
@@ -358,15 +392,19 @@ void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_so
     { 0+0*I, 0+0*I, 1+0*I, 0, 0 },
     { 0+0*I, 0+0*I, 0+0*I, 1/SQRT_3, 1/SQRT_3 }
   };
-  double eps=1e-4;
+  double eps=1e-3;
   
   //store initial link and comp action
   single_su3 sto;
-#pragma acc update self(u[0:8])
-  single_su3_from_su3_soa(&u[0],0,&sto);
+#pragma acc update self(tconf_acc[0:8])
+  single_su3_from_su3_soa(&tconf_acc[0],0,&sto);
   rebuild3row(&sto);
   
-  double ori_act = compute_topo_action(u);
+#ifdef STOUT_TOPO
+      double ori_act = compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+#else
+      double ori_act = compute_topo_action(tconf_acc);
+#endif
   //store derivative
   single_tamat posi={ 0+0*I, 0+0*I, 0+0*I, 0, 0 };
   single_tamat nega={ 0+0*I, 0+0*I, 0+0*I, 0, 0 };
@@ -384,27 +422,35 @@ void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_so
       //change +, compute action
       single_su3 shilink;
       single_su3xsu3(&shilink, &exp_mod, &sto);
-      single_su3_into_su3_soa(&u[0], 0, &shilink);
+      single_su3_into_su3_soa(&tconf_acc[0], 0, &shilink);
       
-#pragma acc update device(u[0:8])
-      
-      double act_minus = compute_topo_action(u);
-      
+#pragma acc update device(tconf_acc[0:8])      
+#ifdef STOUT_TOPO
+      double act_minus = compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+#else
+      double act_minus = compute_topo_action(tconf_acc);
+#endif
       //change -, compute action
       gl3_dagger(&exp_mod);
       single_su3xsu3(&shilink, &exp_mod, &sto);
-      single_su3_into_su3_soa(&u[0], 0, &shilink);
+      single_su3_into_su3_soa(&tconf_acc[0], 0, &shilink);
       
-#pragma acc update device(u[0:8])
-      
-      double act_plus = compute_topo_action(u);
+#pragma acc update device(tconf_acc[0:8])      
+#ifdef STOUT_TOPO
+      double act_plus = compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+#else
+      double act_plus = compute_topo_action(tconf_acc);
+#endif
 
       //set back everything
-      single_su3_into_su3_soa(&u[0], 0, &sto);
-	    
-#pragma acc update device(u[0:8])
+      single_su3_into_su3_soa(&tconf_acc[0], 0, &sto);
 
-      double check_ori_act = compute_topo_action(u);
+#pragma acc update device(tconf_acc[0:8])
+#ifdef STOUT_TOPO
+      double check_ori_act = compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+#else
+      double check_ori_act = compute_topo_action(tconf_acc);
+#endif
       /* printf("plus = %+016.016le ",act_plus); */
       /* printf("ori = %+016.016le ",check_ori_act); */
       /* printf("minus = %+016.016le\n",act_minus);	     */
@@ -422,13 +468,10 @@ void calc_loc_topo_staples(__restrict const su3_soa * const u, __restrict su3_so
   STAMPA_DEBUG_SINGLE_TAMAT(Numerical_derivative);
 	
   printf("Ringrazia Iddio se si assomigliano almeno un po'\n");
-  FREELOLLOCHECK(tipdot);
-#pragma acc exit data delete(tipdot)
   mem_free_core();
   mem_free_extended();
   exit(0);
 #endif
-
 
 }
 

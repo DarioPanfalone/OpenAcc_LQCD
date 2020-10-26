@@ -210,24 +210,26 @@ void mem_alloc_extended()
     // STOUTING
     if(alloc_info.stoutAllocations){ // not always the same as act_params.stout_steps,
                                      // e.g., in benchmarks
-    allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, act_params.stout_steps*8*sizeof(su3_soa)); 
-    ALLOCCHECK(allocation_check,gstout_conf_acc_arr ) ;
-#pragma acc enter data create(gstout_conf_acc_arr[0:8*act_params.stout_steps])
+      int  allocation_steps = (act_params.stout_steps>act_params.topo_stout_steps?
+			       act_params.stout_steps : act_params.topo_stout_steps);
+      allocation_check =  posix_memalign((void **)&gstout_conf_acc_arr, ALIGN, allocation_steps*8*sizeof(su3_soa)); 
+      ALLOCCHECK(allocation_check,gstout_conf_acc_arr ) ;
+#pragma acc enter data create(gstout_conf_acc_arr[0:8*allocation_steps])
 
-    allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); 
-    ALLOCCHECK(allocation_check, glocal_staples) ;
+      allocation_check =  posix_memalign((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); 
+      ALLOCCHECK(allocation_check, glocal_staples) ;
 #pragma acc enter data create(glocal_staples[0:8])
 
-    allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); 
-    ALLOCCHECK(allocation_check, gipdot) ;
+      allocation_check =  posix_memalign((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); 
+      ALLOCCHECK(allocation_check, gipdot) ;
 #pragma acc enter data create(gipdot[0:8])
 
-    allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); 
-    ALLOCCHECK(allocation_check, aux_th ) ;
+      allocation_check =  posix_memalign((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); 
+      ALLOCCHECK(allocation_check, aux_th ) ;
 #pragma acc enter data create(aux_th[0:8])
 
-    allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); 
-    ALLOCCHECK(allocation_check, aux_ta ) ;
+      allocation_check =  posix_memalign((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); 
+      ALLOCCHECK(allocation_check, aux_ta ) ;
 #pragma acc enter data create(aux_ta[0:8])
     }
 

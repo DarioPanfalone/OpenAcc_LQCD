@@ -47,17 +47,18 @@
 #endif 
 
 extern int verbosity_lv;
+extern int TOPO_GLOBAL_DONT_TOUCH;
 
 
 
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
         __restrict thmat_soa  * Lambda, // la var globale e' aux_th
         __restrict tamat_soa  * QA, // la var globale e' aux_ta
-        __restrict const su3_soa * const U,// la var globale e' .... per adesso conf_acc
+        __restrict const su3_soa * const U,// qua ci va la conf al livello di smearing opportuno
         __restrict su3_soa * const TMP//la var globale e' aux_conf_acc //PARCHEGGIO??
         ){
     if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF COMPUTE_SIGMA_FROM_SIGMA_PRIME_BACKINTO_SIGMA_PRIME\n");
-
+    
 
 
 
@@ -75,17 +76,31 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Sigma[old]20 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c0[0]),cimag(Sigma[0].r2.c0[0]));                                               
         printf("Sigma[old]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
         printf("Sigma[old]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
+    
+#pragma acc update self(U[0:8])
+        printf("-------------U------------------\n");                                                                                             
+        printf("U00 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c0[0]),cimag(U[0].r0.c0[0]));                                               
+        printf("U01 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c1[0]),cimag(U[0].r0.c1[0]));                                               
+        printf("U02 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c2[0]),cimag(U[0].r0.c2[0]));                                               
+        printf("U10 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c0[0]),cimag(U[0].r1.c0[0]));                                               
+        printf("U11 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c1[0]),cimag(U[0].r1.c1[0]));                                               
+        printf("U12 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c2[0]),cimag(U[0].r1.c2[0]));                                               
+        printf("U20 = %.18lf + (%.18lf)*I\n",creal(U[0].r2.c0[0]),cimag(U[0].r2.c0[0]));                                               
+        printf("U21 = %.18lf + (%.18lf)*I\n",creal(U[0].r2.c1[0]),cimag(U[0].r2.c1[0]));                                               
+        printf("U22 = %.18lf + (%.18lf)*I\n\n",creal(U[0].r2.c2[0]),cimag(U[0].r2.c2[0]));                
     }
+
+
 
     set_su3_soa_to_zero(TMP);
 
     calc_loc_staples_nnptrick_all(U,TMP);
     if(verbosity_lv > 4)printf("MPI%02d:\t\tcomputed staples  \n",
-            devinfo.myrank);
+			       devinfo.myrank,RHO);
 #ifdef MULTIDEVICE
     communicate_gl3_borders(TMP,1);
 #endif
-
+    printf("RHO: %f\n", RHO);
     RHO_times_conf_times_staples_ta_part(U,TMP,QA);
 
 #ifdef MULTIDEVICE

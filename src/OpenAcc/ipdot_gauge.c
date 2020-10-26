@@ -82,7 +82,7 @@ void calc_ipdot_gauge_soloopenacc_tlsm(
     calc_loc_improved_staples_typeC_nnptrick_all(tconf_acc,local_staples);
 
     if(act_params.topo_action==1)
-      calc_loc_topo_staples(tconf_acc,local_staples);
+      calc_loc_topo_staples(tconf_acc,local_staples); //QUESTO LO DEVO TOGLIERE E METTERE IN UNA FUNZIONE CHE DEVO CHIAMARE ipdottopo AHIMÉ
 	
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 	
