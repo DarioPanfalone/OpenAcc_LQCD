@@ -13,6 +13,14 @@
   #define PHASE_MAT_VEC_MULT 
 #endif
 
+#define conj __builtin_conj
+#define creal __builtin_creal
+#define cimag __builtin_cimag
+#define conjf __builtin_conjf
+#define crealf __builtin_crealf
+#define cimagf __builtin_cimagf
+
+
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
 #define DIM_BLOCK_Y 8 // This should divide ny
 #define DIM_BLOCK_Z 8  // This should divide nz*nt
@@ -26,10 +34,21 @@
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 2
 #endif
+
+#define COOL_STEP 80
+#define MEAS_STOUT_TOPO_STEP 20
+
 #define STOUT_TOPO
+
+#define TOPO_RHO 0.1
+#define FERMION_RHO 0.15
+
+#define TOPO_RHOF 0.1f
+#define FERMION_RHOF 0.15f
+
 extern int TOPO_GLOBAL_DONT_TOUCH;
-#define RHO (TOPO_GLOBAL_DONT_TOUCH == 1? 0.1 : 0.15)
-#define RHOF (TOPO_GLOBAL_DONT_TOUCH == 1? 0.1f : 0.15f)
+#define RHO (TOPO_GLOBAL_DONT_TOUCH == 1? TOPO_RHO : FERMION_RHO)
+#define RHOF (TOPO_GLOBAL_DONT_TOUCH == 1? TOPO_RHOF : FERMION_RHOF)
 
 #define ONE_BY_THREE   0.33333333333333333333333
 #define ONE_BY_THREEF   0.33333333333333333333333f

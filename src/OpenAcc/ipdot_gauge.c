@@ -21,8 +21,6 @@ extern int verbosity_lv;
 #include "../DbgTools/dbgtools.h"
 #include "./action.h"
 
-#include "./topological_force.h"
-
 void calc_ipdot_gauge_soloopenacc_std( 
         __restrict const su3_soa * const tconf_acc, 
         __restrict su3_soa * const local_staples,
@@ -81,9 +79,6 @@ void calc_ipdot_gauge_soloopenacc_tlsm(
     calc_loc_improved_staples_typeB_nnptrick_all(tconf_acc,local_staples);
     calc_loc_improved_staples_typeC_nnptrick_all(tconf_acc,local_staples);
 
-    if(act_params.topo_action==1)
-      calc_loc_topo_staples(tconf_acc,local_staples); //QUESTO LO DEVO TOGLIERE E METTERE IN UNA FUNZIONE CHE DEVO CHIAMARE ipdottopo AHIMÉ
-	
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 	
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){

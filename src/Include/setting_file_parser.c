@@ -396,7 +396,7 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
     // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
 
-    if(startline<endline)
+    if(startline<endline){
         if(act_par->stout_rho != RHO ){ 
 
             if(0==devinfo.myrank){
@@ -408,6 +408,17 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
 
         }
 
+        if(act_par->topo_rho != TOPO_RHO ){ 
+
+            if(0==devinfo.myrank){
+                printf("Error, input file topo_rho != TOPO_RHO \n");
+                printf("  Either modify the input file, or recompile changing TOPO_RHO\n");
+                printf(" (input) topo_rho = %f, (code) TOPO_RHO = %f\n", act_par->topo_rho,TOPO_RHO);
+            }
+            res = 1;
+
+        }
+    }
     return res;
 
 

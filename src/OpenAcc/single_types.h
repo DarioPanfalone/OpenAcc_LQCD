@@ -721,7 +721,7 @@ static inline void single_su3_times_gl3_soa_addto_gl3(single_su3 * mat1,__restri
 }
 
 #pragma acc routine seq
-static inline void gl3_soa_dag_times_single_su3_addto_gl3(__restrict const su3_soa * const mat1, const int idx_mat1, const single_su3 * mat2, single_su3 * Omat)
+static inline void gl3_soa_dag_times_single_su3_addto_gl3(__restrict const su3_soa * const mat1, const int idx_mat1, single_su3 * mat2, single_su3 * Omat)
 {
   //single gl3
   single_su3 gl3;

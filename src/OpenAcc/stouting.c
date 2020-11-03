@@ -26,7 +26,7 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 
 #define TRANSFER_THICKNESS 2
 
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
 void stout_wrapper(__restrict const su3_soa * const tconf_acc,
         __restrict su3_soa * tstout_conf_acc_arr)
 {

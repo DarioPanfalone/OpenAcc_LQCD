@@ -14,6 +14,7 @@
 
 #pragma acc routine seq
 static inline void cabibbo_marinari_cooling(__restrict su3_soa   * const U, // configurazione "calda" in entrata
+	        			    __restrict su3_soa   * const Ucool,//conf frìa
 					    __restrict su3_soa   * const STAP, //staples in entrata
 					    int idx){
 
@@ -116,21 +117,22 @@ static inline void cabibbo_marinari_cooling(__restrict su3_soa   * const U, // c
   A = A * norm;
   B = B * norm;
   // la matrice T e' il link U raffreddatto lungo il terzo sottogruppo
-  U->r0.c0[idx] = U00;
-  U->r0.c1[idx] = U01;
-  U->r0.c2[idx] = U02;
-  U->r1.c0[idx] = A * U10 + B * U20;
-  U->r1.c1[idx] = A * U11 + B * U21;
-  U->r1.c2[idx] = A * U12 + B * U22;
-  U->r2.c0[idx] = -conj(B) * U10 + conj(A) * U20;
-  U->r2.c1[idx] = -conj(B) * U11 + conj(A) * U21;
-  U->r2.c2[idx] = -conj(B) * U12 + conj(A) * U22;
+  Ucool->r0.c0[idx] = U00;
+  Ucool->r0.c1[idx] = U01;
+  Ucool->r0.c2[idx] = U02;
+  Ucool->r1.c0[idx] = A * U10 + B * U20;
+  Ucool->r1.c1[idx] = A * U11 + B * U21;
+  Ucool->r1.c2[idx] = A * U12 + B * U22;
+  Ucool->r2.c0[idx] = -conj(B) * U10 + conj(A) * U20;
+  Ucool->r2.c1[idx] = -conj(B) * U11 + conj(A) * U21;
+  Ucool->r2.c2[idx] = -conj(B) * U12 + conj(A) * U22;
   
 }
 
 
 
-void compute_cooled_even_links(__restrict su3_soa   * const U,
+void compute_cooled_even_links(__restrict su3_soa   * const U,//conf caliente
+	       		       __restrict su3_soa   * const Ucool,//conf frìa
 			       __restrict su3_soa   * const STAP){
 
   int dirindex,idxh;
@@ -140,12 +142,13 @@ void compute_cooled_even_links(__restrict su3_soa   * const U,
     const int dir_link = 2*dirindex;//only even sites
 #pragma acc loop independent
     for( idxh = 0 ; idxh < sizeh; idxh++){
-      cabibbo_marinari_cooling(&U[dir_link],&STAP[dir_link],idxh);
+      cabibbo_marinari_cooling(&U[dir_link],&Ucool[dir_link],&STAP[dir_link],idxh);
     }
   }
 }
 
-void compute_cooled_odd_links(__restrict su3_soa   * const U,
+void compute_cooled_odd_links(__restrict su3_soa   * const U,//conf caliente
+	       		      __restrict su3_soa   * const Ucool,//conf frìa
 			      __restrict su3_soa   * const STAP){
   
   int dirindex,idxh;
@@ -155,22 +158,23 @@ void compute_cooled_odd_links(__restrict su3_soa   * const U,
     const int dir_link = 2*dirindex+1;//only odd sites
 #pragma acc loop independent
     for( idxh = 0 ; idxh < sizeh; idxh++){
-      cabibbo_marinari_cooling(&U[dir_link],&STAP[dir_link],idxh);
+      cabibbo_marinari_cooling(&U[dir_link],&Ucool[dir_link],&STAP[dir_link],idxh);
     }
   }
 }
 
 
-void cool_conf(__restrict su3_soa   * const U,
+void cool_conf(__restrict su3_soa   * const U,//Conf caliente
+	       __restrict su3_soa   * const Ucool,//conf frìa
 	       __restrict su3_soa   * const TMP){ // parcheggio per le staples
 
   set_su3_soa_to_zero(TMP);
 
   calc_loc_staples_nnptrick_all_only_even(U,TMP);
-  compute_cooled_even_links(U,TMP);
+  compute_cooled_even_links(U,Ucool,TMP);
   calc_loc_staples_nnptrick_all_only_odd(U,TMP);
-  compute_cooled_odd_links(U,TMP);
-  unitarize_conf(U);
+  compute_cooled_odd_links(U,Ucool,TMP);
+  unitarize_conf(Ucool);
 
 }
 

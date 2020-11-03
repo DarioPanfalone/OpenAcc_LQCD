@@ -53,7 +53,7 @@
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
-
+#include "./cooling.h"
 #include <unistd.h>
 #include <mpi.h>
 #include "../Include/stringify.h"
@@ -70,7 +70,7 @@
 int conf_id_iter;
 int verbosity_lv;
 
-
+extern int TOPO_GLOBAL_DONT_TOUCH; 
 
 
 
@@ -285,7 +285,7 @@ int main(int argc, char* argv[]){
 
 
 
-    double plq,rect,topoch;
+    double plq,rect,topo_ch,stout_topo_ch;
     d_complex poly;
 
     int accettate_therm=0;
@@ -305,8 +305,7 @@ int main(int argc, char* argv[]){
     poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
     printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
             devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
-
-
+	
     //char confile_dbg[50];
     //sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
     //dbg_print_su3_soa(conf_acc,confile_dbg,0);
@@ -328,11 +327,12 @@ int main(int argc, char* argv[]){
         plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
         rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
         poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
+    
 
-        printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
+	
+	printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
         printf("Rectangle     : %.18lf\n" ,rect/GL_SIZE/3.0/6.0/2.0);
         printf("Polyakov Loop : (%.18lf,%.18lf) \n",creal(poly),cimag(poly));
-
 
         //--------- MISURA ROBA FERMIONICA ----------------//
         //
@@ -454,8 +454,27 @@ int main(int argc, char* argv[]){
             plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
-
-
+#pragma acc update self(conf_acc[0:8])
+        STAMPA_DEBUG_SU3_SOA(conf_acc,0,0);    
+	    if(COOL_STEP > 1) cool_conf(conf_acc,aux_conf_acc,auxbis_conf_acc);
+	    for(int cs = 1; cs < COOL_STEP; cs++)
+	        cool_conf(aux_conf_acc,aux_conf_acc,auxbis_conf_acc);
+	    topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
+#pragma acc update self(aux_conf_acc[0:8])
+#pragma acc update self(conf_acc[0:8])
+	STAMPA_DEBUG_SU3_SOA(conf_acc,0,0);
+	STAMPA_DEBUG_SU3_SOA(aux_conf_acc,0,0);
+	    if(MEAS_STOUT_TOPO_STEP > 0){
+		    TOPO_GLOBAL_DONT_TOUCH=1;
+		    stout_wrapper(conf_acc,gstout_conf_acc_arr);
+		    TOPO_GLOBAL_DONT_TOUCH=0;
+	    	    aux_conf_acc = &(gstout_conf_acc_arr[8*(MEAS_STOUT_TOPO_STEP-1)]);
+		    stout_topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
+	    }
+#pragma acc update self(aux_conf_acc[0:8])
+#pragma acc update self(conf_acc[0:8])
+	    STAMPA_DEBUG_SU3_SOA(aux_conf_acc,0,0);
+            STAMPA_DEBUG_SU3_SOA(conf_acc,0,0);
             printf("MPI%02d - Printing gauge obs - only by master rank...\n",
                     devinfo.myrank);
             if(devinfo.myrank ==0 ){
@@ -463,7 +482,7 @@ int main(int argc, char* argv[]){
                 FILE *goutfile = fopen(gauge_outfilename,"at");
                 if(!goutfile){
                     goutfile = fopen(gauge_outfilename,"wt");
-                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\n");
+                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\ttopoCool\ttopoStout\n");
                     fprintf(goutfile,"%s",gauge_outfile_header);
                 }
                 if(goutfile){
@@ -471,7 +490,8 @@ int main(int argc, char* argv[]){
                         printf("Therm_iter %d",conf_id_iter );
                         printf("Placchetta= %.18lf    ", plq/GL_SIZE/6.0/3.0);
                         printf("Rettangolo= %.18lf\n",rect/GL_SIZE/6.0/3.0/2.0);
-
+			printf("Topo charge cool= %.18lf\n",topo_ch);
+			printf("Topo charge stout= %.18lf\n",stout_topo_ch);
 
                     }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/GL_SIZE/6.0/3.0,rect/GL_SIZE/6.0/3.0/2.0);
 
@@ -479,10 +499,11 @@ int main(int argc, char* argv[]){
                     fprintf(goutfile,"%d\t%d\t",conf_id_iter,
                             accettate_therm+accettate_metro
                             -accettate_therm_old-accettate_metro_old);
-                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
+                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
                             plq/GL_SIZE/6.0/3.0,
                             rect/GL_SIZE/6.0/3.0/2.0, 
-                            creal(poly), cimag(poly));
+                            creal(poly), cimag(poly),
+			    topo_ch,stout_topo_ch);
 
                 }
                 fclose(goutfile);

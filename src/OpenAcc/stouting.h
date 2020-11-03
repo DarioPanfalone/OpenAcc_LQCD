@@ -31,7 +31,7 @@ __restrict const tamat_soa * const QA, // gli stessi Q che arrivano a Cayley ham
 __restrict su3_soa   * const TMP  // variabile di parcheggio
 		    );
 
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
 void stout_wrapper(__restrict const su3_soa * const tconf_acc,
         __restrict su3_soa * tstout_conf_acc_arr);
 #endif

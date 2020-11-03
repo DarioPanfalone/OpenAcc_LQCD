@@ -335,7 +335,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         }
 
         multistep_2MN_SOLOOPENACC_f(ipdot_acc_f,tconf_acc_f,
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr_f,
 #endif
                 auxbis_conf_acc_f, // globale
@@ -357,7 +357,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         printf("DOUBLE PRECISION MOLECULAR DYNAMICS...\n");
 
         multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr,
 #endif
                 auxbis_conf_acc, // globale
@@ -394,7 +394,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         invert_momenta(momenta);
 
         multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr,
 #endif
                 auxbis_conf_acc, // globale

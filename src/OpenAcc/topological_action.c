@@ -17,6 +17,7 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 
 void load_topo(const char *path,const double barr,const double width, double *grid,const int ngrid)
 {
+
 	if(verbosity_lv>4)
 		printf("Searching file %s\n",path);
 	double widthh = width/2;
@@ -35,7 +36,6 @@ void load_topo(const char *path,const double barr,const double width, double *gr
 					printf("ERROR: topological file ill-formatted\n");
 					exit(1);
 				}
-			
 			int jgrid=(int)floor((xread+barr+widthh)/width);
 			if(igrid!=jgrid)
 				{
@@ -44,11 +44,13 @@ void load_topo(const char *path,const double barr,const double width, double *gr
 				}
 		}
 	int check_closure=fclose(fin);
+	printf("In some systems, if you remove this printf, this function won't work. I don't know why. %f\n",widthh);
 	if(check_closure!=0)
 		{
 			printf("ERROR: file %s can't be closed",path);
 			exit(1);
 		}
+
 }
 
 
@@ -56,33 +58,40 @@ void load_topo(const char *path,const double barr,const double width, double *gr
 double topodynamical_pot(double Q)
 {
 	double barr=act_params.barrier, width=act_params.width;
-	int ngrid= (int) floor((2*barr+width/2)/width);
-	int igrid= (int) floor((Q+barr)/width);
-
+	double widthh = width/2;
+	double igridfloat = (Q+barr)/width;
+	int ngrid= (int) floor((2*barr+widthh)/width);
+	int igrid= (int) floor(igridfloat);
+	double grid[ngrid];
+	if(verbosity_lv>4)
+		printf("\t\t\tMPI%02d - load_topo(path,barr,width,grid,ngrid)\n",devinfo.myrank);
+	load_topo(act_params.topo_file_path,barr,width,grid,ngrid);
 	if(igrid>=0 && igrid<=ngrid)
 		{
-			double grid[ngrid];
-			if(verbosity_lv>4)
-				printf("\t\t\tMPI%02d - load_topo(path,barr,width,grid,ngrid)\n",devinfo.myrank);
-			
-			load_topo(act_params.topo_file_path,barr,width,grid,ngrid);			
 			//interpolate
 			double x0=igrid*width-barr;
 			double m=(grid[igrid+1]-grid[igrid])/width;
 			double q=grid[igrid]-m*x0;
-		    
+	 	        printf("topotential: q+mx = %f; q = %f m = %f, x0 = %f, igrid = %d, ngrid = %d, Q = %f\n", q+m*x0,q,m,x0,igrid,ngrid,Q);
+			printf("barr = %f, width = %f, widthh = %f, \n",barr,width,widthh);
 			return q+m*Q;
 		}
+	else if(igrid<0){
+		printf("topotential: grid[0] = %f\n, igrid = %d, ngrid = %d, Q = %f\n",grid[0],igrid,ngrid,Q);
+		printf("barr = %f, width = %f, widthh = %f\n",barr,width,widthh);
+		return grid[0];
+	}
 	else{
-		printf("\tCarica topologica oltre la barriera\n");
-		return 0;
+		printf("topotential: grid[ngrid] = %f, igrid = %d, ngrid = %d, Q = %f\n",grid[ngrid],igrid,ngrid,Q);
+		printf("barr = %f, width = %f, widthh = %f\n",barr,width,widthh);
+		return grid[ngrid];
 	}
 }
 
 
 
 
-double compute_topo_action(__restrict su3_soa * const u
+double compute_topo_action(__restrict su3_soa * u
 #ifdef STOUT_TOPO
 			  ,__restrict su3_soa * const tstout_conf_acc_arr
 #endif
@@ -100,9 +109,9 @@ double compute_topo_action(__restrict su3_soa * const u
     stout_wrapper(u,tstout_conf_acc_arr);
     conf_to_use = &(tstout_conf_acc_arr[8*(act_params.topo_stout_steps-1)]);
   }
-  else conf_to_use=&u;
+  else conf_to_use=u;
 #else
-  conf_to_use=&u;
+  conf_to_use=u;
 #endif
   
   if(verbosity_lv>4)
@@ -127,9 +136,9 @@ double compute_topo_action(__restrict su3_soa * const u
   
   if(verbosity_lv>4)
     printf("\t\t\tMPI%02d - topodynamical_pot(Q)\n",devinfo.myrank);
-  
+
   double topo_action = topodynamical_pot(Q);
-  
+
   TOPO_GLOBAL_DONT_TOUCH = 0;
   return topo_action;
 }

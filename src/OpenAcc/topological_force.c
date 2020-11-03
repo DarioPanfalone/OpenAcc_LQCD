@@ -11,13 +11,13 @@
 #include "./action.h"
 #include "./topological_action.h"
 #include "./single_types.h"
-
+#include "./stouting.h"
 int TOPO_GLOBAL_DONT_TOUCH = 0;
 
-#define DEBUG_LOLLO
-#ifdef DEBUG_LOLLO
- #include "./cayley_hamilton.h"
- #include "./alloc_vars.h"
+//#define DEBUG_LOLLO
+//#ifdef DEBUG_LOLLO
+// #include "./cayley_hamilton.h"
+// #include "./alloc_vars.h"
  #include "../DbgTools/dbgtools.h"
 
 
@@ -30,28 +30,32 @@ int TOPO_GLOBAL_DONT_TOUCH = 0;
     printf("\tFreed %s, %p ...", #var,var);\
     free(var); if(verbosity_lv > 2)  printf(" done.\n");
 
-#endif
+//#endif
 
 double compute_topodynamical_potential_der(const double Q)
 {
   double barr=act_params.barrier, width=act_params.width;
   int ngrid= (int) floor((2*barr+width/2)/width);
-  int kgrid= (int) floor((Q+barr)/width);
+  int kgridfloat = (Q+barr)/width;
+  int kgrid= (int) floor(kgridfloat);
   
-  if(kgrid>=0 && kgrid<=ngrid)
+  if(kgrid>=0 && kgrid<ngrid)
     {
       double grid[ngrid];
       if(verbosity_lv>3)
 	printf("\t\t\tMPI%02d - load_topo(path,barr,width,grid,ngrid)\n",devinfo.myrank);
       
       load_topo(act_params.topo_file_path,barr,width,grid,ngrid);
-      return (grid[kgrid+1]-grid[kgrid])/width;
+      double dVdQ=(grid[kgrid+1]-grid[kgrid])/width;
+      printf("dtopotential/dQ = %f, kgrid = %d, width = %f, Q = %f\n",dVdQ,kgrid,width,Q);
+      return dVdQ;
     }
-  else
-    return 0;
+  else{
+	  printf("dtopotential/dQ = %f, kgrid = %d, width = %f, Q = %f\n",0.0,kgrid,width,Q);
+    return 0;}
 }
 
-void four_leaves(__restrict su3_soa * const leaves,__restrict su3_soa * const u)
+void four_leaves(__restrict su3_soa * const leaves,__restrict const su3_soa * const u)
 {
   int mu, nu;
   int d0, d1, d2, d3;
@@ -142,7 +146,7 @@ void antihermatize_unsafe(__restrict su3_soa * const leaves)
 	    }//closing all the loops at once
 }
 
-void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staples, double norm)
+void topo_staples(__restrict const su3_soa *const u,__restrict su3_soa * const staples, double norm)
 {
   //compute leaves
   su3_soa * leaves;
@@ -153,7 +157,10 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
     printf("\t\t\tMPI%02d - four_leaves(leaves,u)\n",devinfo.myrank);
   
   //compute leaves
-  
+#ifdef MULTIDEVICE
+    communicate_su3_borders(u, GAUGE_HALO);  
+#endif
+
   four_leaves(leaves,u);
 
   
@@ -164,6 +171,10 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
   
   antihermatize_unsafe(leaves);
   
+#ifdef MULTIDEVICE
+    communicate_gl3_borders(leaves, GAUGE_HALO);  
+#endif
+
   int d0, d1, d2, d3;
   if(verbosity_lv>3)
     {
@@ -277,36 +288,38 @@ void topo_staples(__restrict su3_soa * const u,__restrict su3_soa * const staple
 	
 	for(int mu = 0; mu<4; mu++)
 	  gl3_dag_times_double_factor(&staples[2*mu+parity],idxA,norm);
-	
+
+      
 	}
       }
     }	    
   }
+#pragma acc exit data delete(norm)
 }
 
 
 
-void calc_loc_topo_staples( __restrict const su3_soa * const u,
+void calc_loc_topo_staples(__restrict su3_soa const * const u,
 			   __restrict su3_soa * const staples)
 {    
-  su3_soa *quadri;
-  double_soa *loc_q;
+//  su3_soa *quadri;
+//  double_soa *loc_q;
 
   
   if(verbosity_lv>3)
     printf("\t\tMPI%02d - compute_topological_charge(u,quadri,loc_q)\n",devinfo.myrank);
   
-  posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
-#pragma acc enter data create(quadri[0:8])
-  posix_memalign((void **)&loc_q,128,2*sizeof(double_soa));
-#pragma acc enter data create(loc_q[0:2])
+//  posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
+//#pragma acc enter data create(quadri[0:8])
+//  posix_memalign((void **)&loc_q,128,2*sizeof(double_soa));
+//#pragma acc enter data create(loc_q[0:2])
   
-  double Q = compute_topological_charge(u, quadri, loc_q);
-  
-#pragma acc exit data delete(quadri)  
-  free(quadri);
-#pragma acc exit data delete(loc_q)
-  free(loc_q);
+ double Q = compute_topological_charge(u, staples, topo_loc);
+
+//#pragma acc exit data delete(quadri)  
+//  free(quadri);
+//#pragma acc exit data delete(loc_q)
+//  free(loc_q);
   
   if(verbosity_lv>4)
     printf("Topological Charge: %lf\n",Q);
@@ -323,15 +336,16 @@ void calc_loc_topo_staples( __restrict const su3_soa * const u,
     printf("\t\tMPI%02d - topo_staples(u, staples, norm)\n",devinfo.myrank);
   
 
+  set_su3_soa_to_zero(staples);
   topo_staples(u,staples,norm);
 }
 
 
-void calc_ipdot_topo(__restrict const su3_soa * const tconf_acc,  
+void calc_ipdot_topo(__restrict su3_soa const * const tconf_acc,  
 #ifdef STOUT_TOPO
 		     __restrict su3_soa * const tstout_conf_acc_arr,
-		     __restrict su3_soa  * taux_conf_acc,
 #endif
+		     __restrict su3_soa  * const taux_conf_acc,
 		     __restrict su3_soa * const local_staples,
 		     __restrict tamat_soa * const tipdot_acc)
 {
@@ -340,14 +354,15 @@ void calc_ipdot_topo(__restrict const su3_soa * const tconf_acc,
   __restrict su3_soa * conf_to_use; // CONF TO USE IN CALCULATION OF TOPO FORCE
   //  __restrict su3_soa_f * conf_to_use_f; // CONF TO USE IN CALCULATION OF TOPO FORCE
 
+
 #ifdef STOUT_TOPO
   if(act_params.topo_stout_steps > 0){
     stout_wrapper(tconf_acc,tstout_conf_acc_arr);
     conf_to_use = &(tstout_conf_acc_arr[8*(act_params.topo_stout_steps-1)]);
   }
-  else conf_to_use=&tconf_acc;
+  else conf_to_use=(su3_soa*)tconf_acc;
 #else
-  conf_to_use=&tconf_acc;
+  conf_to_use=(su3_soa*)tconf_acc;
 #endif
 
   calc_loc_topo_staples(conf_to_use,local_staples);
@@ -365,21 +380,24 @@ void calc_ipdot_topo(__restrict const su3_soa * const tconf_acc,
 
   }
 #endif
-  conf_times_staples_ta_part(tconf_acc,local_staples,tipdot_acc);  
-    
-TOPO_GLOBAL_DONT_TOUCH = 0;  
+
+  conf_times_staples_ta_part_addto_tamat(tconf_acc,local_staples,tipdot_acc);  
+
+TOPO_GLOBAL_DONT_TOUCH = 0;
 
 
 //DEBUG
 #ifdef DEBUG_LOLLO
-#pragma acc update self(tconf_acc[0:8]) self(local_staples[0:8])
+if(devinfo.myrank == 0){
+#pragma acc update self(tconf_acc[0:8]) self(local_staples[0:8]) self(conf_to_use[0:8]) self(tipdot_acc[0:8])
+  int O = snum_acc(0,0,0,D3_HALO); 
   printf("check multiplication into tamat:\n");
-  STAMPA_DEBUG_SU3_SOA(tconf_acc,0,0);
-  STAMPA_DEBUG_SU3_SOA(local_staples,0,0);
+  STAMPA_DEBUG_SU3_SOA(tconf_acc,0,O);
+  STAMPA_DEBUG_SU3_SOA(conf_to_use,0,O);
+  STAMPA_DEBUG_SU3_SOA(local_staples,0,O);
+  STAMPA_DEBUG_TAMAT_SOA(tipdot_acc,0,O);
+}
 
-#pragma acc update self(tipdot_acc[0:8])
-  STAMPA_DEBUG_TAMAT_SOA(tipdot_acc,0,0);
-  
 #define SQRT_3 1.732050807568877
   //i*Gell-mann matrices as from eq.A.10 of Gattringer - note that T=lambda/2
   single_tamat i_gell_mann_matr[8]={ 
@@ -470,6 +488,16 @@ TOPO_GLOBAL_DONT_TOUCH = 0;
   printf("Ringrazia Iddio se si assomigliano almeno un po'\n");
   mem_free_core();
   mem_free_extended();
+  #ifndef __GNUC__
+    //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
+    shutdown_acc_device(my_device_type);
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+#endif
+
+
+#ifdef MULTIDEVICE
+    shutdown_multidev();
+#endif
   exit(0);
 #endif
 

@@ -36,8 +36,15 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix);
 void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
         __restrict su3_soa * const matrix_out);
 
+void set_su3_soa_to_su3_soa_device(__restrict const su3_soa * const matrix_in,
+			     	   __restrict su3_soa * const matrix_out);
 
 void conf_times_staples_ta_part(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot);
+
+void conf_times_staples_ta_part_addto_tamat(
         __restrict const su3_soa * const u,
         __restrict const su3_soa * const loc_stap,
         __restrict tamat_soa * const tipdot);
@@ -399,11 +406,7 @@ static inline void mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(
   d_complex mat1_10 = mat1->r1.c0[idx_mat1];
   d_complex mat1_11 = mat1->r1.c1[idx_mat1];
   d_complex mat1_12 = mat1->r1.c2[idx_mat1];
-  
-  d_complex mat1_20 = mat1->r2.c0[idx_mat1];
-  d_complex mat1_21 = mat1->r2.c1[idx_mat1];
-  d_complex mat1_22 = mat1->r2.c2[idx_mat1];
-  
+    
   d_complex mat2_00 = mat2->r0.c0[idx_mat2];
   d_complex mat2_10 = mat2->r1.c0[idx_mat2];
   d_complex mat2_20 = mat2->r2.c0[idx_mat2];
@@ -511,10 +514,6 @@ static inline void mat1_times_conj_mat2_times_fact_addto_mat3_absent_stag_phases
     d_complex mat1_10 = mat1->r1.c0[idx_mat1];
     d_complex mat1_11 = mat1->r1.c1[idx_mat1];
     d_complex mat1_12 = mat1->r1.c2[idx_mat1];
-
-    d_complex mat1_20 = mat1->r2.c0[idx_mat1];
-    d_complex mat1_21 = mat1->r2.c1[idx_mat1];
-    d_complex mat1_22 = mat1->r2.c2[idx_mat1];
 
     d_complex mat2_00 = conj(mat2->r0.c0[idx_mat2]);
     d_complex mat2_10 = conj(mat2->r0.c1[idx_mat2]);
@@ -807,6 +806,65 @@ static inline void mat1_times_mat2_into_tamat3(
   mat3->ic00[idx_mat3] = cimag(mat3_00)-
       ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
   mat3->ic11[idx_mat3] = cimag(mat1_01)-
+      ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
+}
+
+#pragma acc routine seq
+static inline void mat1_times_mat2_addto_tamat3(
+        __restrict const su3_soa * const mat1,
+        const int idx_mat1,
+        __restrict const su3_soa * const mat2,
+        const int idx_mat2,
+        __restrict tamat_soa * const mat3,
+        const int idx_mat3)
+{
+  //Load the first two rows of mat1 (that is a link variable)
+  d_complex mat1_00 = mat1->r0.c0[idx_mat1];
+  d_complex mat1_01 = mat1->r0.c1[idx_mat1];
+  d_complex mat1_02 = mat1->r0.c2[idx_mat1];
+  d_complex mat1_10 = mat1->r1.c0[idx_mat1];
+  d_complex mat1_11 = mat1->r1.c1[idx_mat1];
+  d_complex mat1_12 = mat1->r1.c2[idx_mat1];
+  //Compute the 3rd row of mat1 (that is a link variable)
+  d_complex mat1_20 = conj(( mat1_01 * mat1_12 )-( mat1_02 * mat1_11));
+  d_complex mat1_21 = conj(( mat1_02 * mat1_10 )-( mat1_00 * mat1_12));
+  d_complex mat1_22 = conj(( mat1_00 * mat1_11 )-( mat1_01 * mat1_10));
+
+  //Load all the rows of mat2 (that is a staple variable)
+  d_complex mat2_00 = mat2->r0.c0[idx_mat2];
+  d_complex mat2_01 = mat2->r0.c1[idx_mat2];
+  d_complex mat2_02 = mat2->r0.c2[idx_mat2];
+  d_complex mat2_10 = mat2->r1.c0[idx_mat2];
+  d_complex mat2_11 = mat2->r1.c1[idx_mat2];
+  d_complex mat2_12 = mat2->r1.c2[idx_mat2];
+  d_complex mat2_20 = mat2->r2.c0[idx_mat2];
+  d_complex mat2_21 = mat2->r2.c1[idx_mat2];
+  d_complex mat2_22 = mat2->r2.c2[idx_mat2];
+
+  // Compute first row of the product mat1 * mat2
+  d_complex mat3_00 = mat1_00 * mat2_00 + mat1_01 * mat2_10 
+      + mat1_02 * mat2_20;
+  d_complex mat3_01 = mat1_00 * mat2_01 + mat1_01 * mat2_11 
+      + mat1_02 * mat2_21;
+  d_complex mat3_02 = mat1_00 * mat2_02 + mat1_01 * mat2_12 
+      + mat1_02 * mat2_22;
+  // Compute second row of the product mat1 * mat2 and save it
+  // into reusable variables
+  mat1_00 = mat1_10*mat2_00+mat1_11*mat2_10+mat1_12*mat2_20; // mat3_10 
+  mat1_01 = mat1_10*mat2_01+mat1_11*mat2_11+mat1_12*mat2_21; // mat3_11
+  mat1_02 = mat1_10*mat2_02+mat1_11*mat2_12+mat1_12*mat2_22; // mat3_12
+  // Compute third row of the product mat1 * mat2 and save it 
+  // into reusable variables
+  mat1_10 = mat1_20*mat2_00+mat1_21*mat2_10+mat1_22*mat2_20; // mat3_20
+  mat1_11 = mat1_20*mat2_01+mat1_21*mat2_11+mat1_22*mat2_21; // mat3_21
+  mat1_12 = mat1_20*mat2_02+mat1_21*mat2_12+mat1_22*mat2_22; // mat3_22
+
+  mat3->c01[idx_mat3] += 0.5*(mat3_01-conj(mat1_00));
+  mat3->c02[idx_mat3] += 0.5*(mat3_02-conj(mat1_10));
+  mat3->c12[idx_mat3] += 0.5*(mat1_02-conj(mat1_11));
+  mat3->ic00[idx_mat3]+= cimag(mat3_00)-
+      ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
+  mat3->ic11[idx_mat3]+= cimag(mat1_01)-
       ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
 }
 

@@ -173,7 +173,7 @@ double calc_momenta_action( const __restrict thmat_soa * const mom,
 }// closes routine
 
 
-double invert_momenta( __restrict thmat_soa * mom)
+void invert_momenta( __restrict thmat_soa * mom)
 {
     int t,mu;
 

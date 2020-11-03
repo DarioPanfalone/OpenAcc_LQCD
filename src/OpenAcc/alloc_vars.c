@@ -36,6 +36,7 @@ double_soa * mag_obs_im;     // Imaginary part of the 'algebra-prefix'
                              // of magnetization observable 
                              // 8 for each flavour
 
+double_soa * topo_loc; //topological charge auxiliary
 
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 thmat_soa * momenta_backup;// GAUGE FIELD EVOLUTION - REVERSIBILITY TEST
@@ -148,7 +149,9 @@ void mem_alloc_extended()
     ALLOCCHECK(allocation_check, mag_obs_im);
 #pragma acc enter data create(mag_obs_im[0:alloc_info.NDiffFlavs*8])
 
-
+    allocation_check = posix_memalign((void **)&topo_loc,ALIGN,
+		    2*sizeof(double_soa));
+#pragma acc enter data create(topo_loc[0:2])  
 
 
 #ifdef MULTIDEVICE 

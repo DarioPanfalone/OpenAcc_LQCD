@@ -25,7 +25,7 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 char gauge_outfilename[50];
 char gauge_outfile_header[100];
 
-void compute_local_topological_charge(  __restrict su3_soa * const u,
+void compute_local_topological_charge(  __restrict const su3_soa * const u,
 					__restrict su3_soa * const quadri,
 					double_soa * const loc_q,
 					int mu, int nu)
@@ -161,20 +161,20 @@ double reduce_loc_top_charge(double_soa * const loc_q)
     return result;
 }
 
-double compute_topological_charge(__restrict su3_soa * const u, su3_soa * const quadri, double_soa * const loc_q){  
+double compute_topological_charge(__restrict const su3_soa * const u, su3_soa * const quadri, double_soa * const loc_q){  
 
 
 #pragma acc data present(quadri) present(loc_q)
 	set_su3_soa_to_zero(quadri); // forse non serve a una mazza
 
 	
-    double temp_ch =0.0;
+    double temp_ch;
     compute_local_topological_charge(u,quadri,loc_q,0,1);// (d0,d1) - (d2,d3)
-    temp_ch -= reduce_loc_top_charge(loc_q);
+    temp_ch = reduce_loc_top_charge(loc_q);
     compute_local_topological_charge(u,quadri,loc_q,0,2);// (d0,d2) - (d1,d3)
-    temp_ch -= reduce_loc_top_charge(loc_q);
+    temp_ch += reduce_loc_top_charge(loc_q);
     compute_local_topological_charge(u,quadri,loc_q,0,3);// (d0,d3) - (d1,d2)
-    temp_ch -= reduce_loc_top_charge(loc_q);
+    temp_ch += reduce_loc_top_charge(loc_q);
 
 
     return  temp_ch;
