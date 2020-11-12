@@ -217,6 +217,20 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 #ifdef STOUT_TOPO
 	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+
+#ifdef STOUT_FERMIONS 
+    // DILATION USING STOUTED DIRAC OPERATOR
+    // STOUTING...(ALREADY ON DEVICE)
+    if(act_params.stout_steps > 0){
+        stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+        gconf_as_fermionmatrix = 
+            &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+
+        if(md_parameters.singlePrecMD)
+            convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
+    }
+    else gconf_as_fermionmatrix = tconf_acc;
+#endif
 #else
 	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
 #endif
@@ -511,6 +525,18 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 	
 #ifdef STOUT_TOPO
 	action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+	
+#ifdef STOUT_FERMIONS
+    // STOUTING...(ALREADY ON DEVICE)
+    if(act_params.stout_steps > 0){
+        stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+        gconf_as_fermionmatrix = 
+            &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+    }
+    else gconf_as_fermionmatrix = tconf_acc;
+#else
+    gconf_as_fermionmatrix = tconf_acc;
+#endif
 #else
 	action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
 #endif
@@ -529,12 +555,12 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         ////////////////////////////////////////////////////////////////////////////////////////
 
         // delta_S = action_new - action_old
-        delta_S  = - (-action_in+action_mom_in+action_ferm_in-action_topo_in) + (-action_fin+action_mom_fin+action_ferm_fin-action_topo_fin);
+        delta_S  = - (-action_in+action_mom_in+action_ferm_in+action_topo_in) + (-action_fin+action_mom_fin+action_ferm_fin+action_topo_fin);
         if(verbosity_lv > 2 && 0 == devinfo.myrank ){
             printf("MPI%02d-iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",
                     devinfo.myrank,iterazioni,-action_in,-action_fin);
 			printf("MPI%02d-iterazione %i:  Topol_ACTION  (in and out) = %.18lf , %.18lf\n",
-                    devinfo.myrank,iterazioni,-action_topo_in,-action_topo_fin);
+                    devinfo.myrank,iterazioni,+action_topo_in,+action_topo_fin);
             printf("MPI%02d-iterazione %i:  Momen_ACTION  (in and out) = %.18lf , %.18lf\n",
                     devinfo.myrank,iterazioni,action_mom_in,action_mom_fin);
             printf("MPI%02d-iterazione %i:  Fermi_ACTION  (in and out) = %.18lf , %.18lf\n",

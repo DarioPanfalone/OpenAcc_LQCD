@@ -454,16 +454,10 @@ int main(int argc, char* argv[]){
             plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
-#pragma acc update self(conf_acc[0:8])
-        STAMPA_DEBUG_SU3_SOA(conf_acc,0,0);    
 	    if(COOL_STEP > 1) cool_conf(conf_acc,aux_conf_acc,auxbis_conf_acc);
 	    for(int cs = 1; cs < COOL_STEP; cs++)
 	        cool_conf(aux_conf_acc,aux_conf_acc,auxbis_conf_acc);
 	    topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
-#pragma acc update self(aux_conf_acc[0:8])
-#pragma acc update self(conf_acc[0:8])
-	STAMPA_DEBUG_SU3_SOA(conf_acc,0,0);
-	STAMPA_DEBUG_SU3_SOA(aux_conf_acc,0,0);
 	    if(MEAS_STOUT_TOPO_STEP > 0){
 		    TOPO_GLOBAL_DONT_TOUCH=1;
 		    stout_wrapper(conf_acc,gstout_conf_acc_arr);
@@ -471,10 +465,6 @@ int main(int argc, char* argv[]){
 	    	    aux_conf_acc = &(gstout_conf_acc_arr[8*(MEAS_STOUT_TOPO_STEP-1)]);
 		    stout_topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
 	    }
-#pragma acc update self(aux_conf_acc[0:8])
-#pragma acc update self(conf_acc[0:8])
-	    STAMPA_DEBUG_SU3_SOA(aux_conf_acc,0,0);
-            STAMPA_DEBUG_SU3_SOA(conf_acc,0,0);
             printf("MPI%02d - Printing gauge obs - only by master rank...\n",
                     devinfo.myrank);
             if(devinfo.myrank ==0 ){

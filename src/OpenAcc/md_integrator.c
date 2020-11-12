@@ -527,7 +527,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 				    devinfo.myrank);
 	
       }
-    
+
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);
     for(md=1; md<md_parameters.no_md; md++){
 

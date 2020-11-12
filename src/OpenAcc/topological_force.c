@@ -12,13 +12,14 @@
 #include "./topological_action.h"
 #include "./single_types.h"
 #include "./stouting.h"
+#include "../DbgTools/dbgtools.h"
 int TOPO_GLOBAL_DONT_TOUCH = 0;
 
 //#define DEBUG_LOLLO
-//#ifdef DEBUG_LOLLO
-// #include "./cayley_hamilton.h"
-// #include "./alloc_vars.h"
- #include "../DbgTools/dbgtools.h"
+#ifdef DEBUG_LOLLO
+ #include "./cayley_hamilton.h"
+ #include "./alloc_vars.h"
+
 
 
 #define ALLOLLOCHECK(control_int,var)  if(control_int != 0 ) \
@@ -30,7 +31,7 @@ int TOPO_GLOBAL_DONT_TOUCH = 0;
     printf("\tFreed %s, %p ...", #var,var);\
     free(var); if(verbosity_lv > 2)  printf(" done.\n");
 
-//#endif
+#endif
 
 double compute_topodynamical_potential_der(const double Q)
 {
@@ -302,25 +303,11 @@ void topo_staples(__restrict const su3_soa *const u,__restrict su3_soa * const s
 void calc_loc_topo_staples(__restrict su3_soa const * const u,
 			   __restrict su3_soa * const staples)
 {    
-//  su3_soa *quadri;
-//  double_soa *loc_q;
-
-  
   if(verbosity_lv>3)
     printf("\t\tMPI%02d - compute_topological_charge(u,quadri,loc_q)\n",devinfo.myrank);
-  
-//  posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
-//#pragma acc enter data create(quadri[0:8])
-//  posix_memalign((void **)&loc_q,128,2*sizeof(double_soa));
-//#pragma acc enter data create(loc_q[0:2])
-  
- double Q = compute_topological_charge(u, staples, topo_loc);
 
-//#pragma acc exit data delete(quadri)  
-//  free(quadri);
-//#pragma acc exit data delete(loc_q)
-//  free(loc_q);
-  
+  double Q = compute_topological_charge(u, staples, topo_loc);
+
   if(verbosity_lv>4)
     printf("Topological Charge: %lf\n",Q);
   
