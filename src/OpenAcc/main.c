@@ -24,6 +24,7 @@
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
 #include "../Meas/polyakov.h"
+#include "../Meas/measure_topo.h"
 #include "../Mpi/communications.h"
 #include "../Mpi/multidev.h"
 #include "../Rand/random.h"
@@ -454,21 +455,30 @@ int main(int argc, char* argv[]){
             plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
-	    if(COOL_STEP > 1) cool_conf(conf_acc,aux_conf_acc,auxbis_conf_acc);
-	    for(int cs = 1; cs < COOL_STEP; cs++)
-	        cool_conf(aux_conf_acc,aux_conf_acc,auxbis_conf_acc);
-	    topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
-	    if(MEAS_STOUT_TOPO_STEP > 0){
+	    
+	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
+		    cool_conf(conf_acc,aux_conf_acc,auxbis_conf_acc);
+		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
+	    		cool_conf(aux_conf_acc,aux_conf_acc,auxbis_conf_acc);
+			if(cs%meastopo_params.cool_measinterval){
+		    	    topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
+			    /*INSERISCI SCRITTURA SU FILE*/
+			}
+		    }
+	    }
+	    if(meastopo_params.measstout && conf_id_iter%meastopo_params.stouteach==0){
 		    TOPO_GLOBAL_DONT_TOUCH=1;
 		    stout_wrapper(conf_acc,gstout_conf_acc_arr);
 		    TOPO_GLOBAL_DONT_TOUCH=0;
-	    	    aux_conf_acc = &(gstout_conf_acc_arr[8*(MEAS_STOUT_TOPO_STEP-1)]);
-		    stout_topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
+		    for(int ss = meastopo_params.stout_measinterval; ss <= meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
+	    	    	aux_conf_acc = &(gstout_conf_acc_arr[8*(ss-1)]);
+		    	stout_topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
+		    	/*INSERISCI SCRITTURA SU FILE*/
+		    }
 	    }
             printf("MPI%02d - Printing gauge obs - only by master rank...\n",
                     devinfo.myrank);
-            if(devinfo.myrank ==0 ){
-
+            if(devinfo.myrank ==0){
                 FILE *goutfile = fopen(gauge_outfilename,"at");
                 if(!goutfile){
                     goutfile = fopen(gauge_outfilename,"wt");

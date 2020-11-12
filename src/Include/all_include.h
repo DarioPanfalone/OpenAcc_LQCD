@@ -58,6 +58,8 @@
 #include "../OpenAcc/topological_action.h"
 #include "../OpenAcc/topological_force.c"
 #include "../OpenAcc/topological_force.h"
+#include "../Meas/measure_topo.c"
+#include "../Meas/measure_topo.h"
 #include "../RationalApprox/rationalapprox.c"
 #include "../RationalApprox/rationalapprox.h"
 

@@ -11,10 +11,10 @@ void four_leaves(su3_soa * const leaves,__restrict const su3_soa * const u);
 
 double compute_topological_force_internal(__restrict const su3_soa * const u,__restrict su3_soa * const F);
 
-void calc_loc_topo_staples(__restrict const su3_soa * const u,
+void calc_loc_topo_staples(__restrict su3_soa * u,
 			   __restrict su3_soa * const staples);
 
-void topo_staples(__restrict const su3_soa * const u,__restrict su3_soa * const staples, double norm);
+void topo_staples(__restrict su3_soa * u,__restrict su3_soa * const staples, double norm);
 
 void calc_ipdot_topo(__restrict const su3_soa * const tconf_acc,  
 #ifdef STOUT_TOPO

@@ -13,6 +13,11 @@
 #include "./single_types.h"
 #include "./stouting.h"
 #include "../DbgTools/dbgtools.h"
+
+#ifdef MULTIDEVICE
+#include "../Mpi/communications.h"
+#endif 
+
 int TOPO_GLOBAL_DONT_TOUCH = 0;
 
 //#define DEBUG_LOLLO
@@ -147,7 +152,7 @@ void antihermatize_unsafe(__restrict su3_soa * const leaves)
 	    }//closing all the loops at once
 }
 
-void topo_staples(__restrict const su3_soa *const u,__restrict su3_soa * const staples, double norm)
+void topo_staples(__restrict su3_soa * u,__restrict su3_soa * const staples, double norm)
 {
   //compute leaves
   su3_soa * leaves;
@@ -300,7 +305,7 @@ void topo_staples(__restrict const su3_soa *const u,__restrict su3_soa * const s
 
 
 
-void calc_loc_topo_staples(__restrict su3_soa const * const u,
+void calc_loc_topo_staples(__restrict su3_soa * u,
 			   __restrict su3_soa * const staples)
 {    
   if(verbosity_lv>3)
