@@ -35,9 +35,6 @@
 #define STOUT_STEPS 2
 #endif
 
-#define COOL_STEP 80
-#define MEAS_STOUT_TOPO_STEP 20
-
 #define STOUT_TOPO
 
 #define TOPO_RHO 0.1

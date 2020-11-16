@@ -286,7 +286,9 @@ int main(int argc, char* argv[]){
 
 
 
-    double plq,rect,topo_ch,stout_topo_ch;
+    double plq,rect;
+    double cool_topo_ch[meastopo_params.coolmeasstep/meastopo_params.cool_measinterval];
+    double stout_topo_ch[meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval];
     d_complex poly;
 
     int accettate_therm=0;
@@ -461,10 +463,27 @@ int main(int argc, char* argv[]){
 		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
 	    		cool_conf(aux_conf_acc,aux_conf_acc,auxbis_conf_acc);
 			if(cs%meastopo_params.cool_measinterval){
-		    	    topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
-			    /*INSERISCI SCRITTURA SU FILE*/
+		    	    cool_topo_ch[cs/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
 			}
 		    }
+	            printf("MPI%02d - Printing cooled charge - only by master rank...\n",
+                    devinfo.myrank);
+        	    if(devinfo.myrank ==0){
+                	FILE *cooloutfile = fopen(meastopo_params.pathcool,"at");
+	                if(!cooloutfile){
+        	            cooloutfile = fopen(meastopo_params.pathcool,"wt");
+	                    char coolheader[35];
+			    strcpy(coolheader,"#conf_id\tCoolStp\tTopoChCool\n");
+                	    fprintf(cooloutfile,"%s",coolheader);
+	                }
+        	        if(cooloutfile){
+				for(int i = 0; i < meastopo_params.coolmeasstep/meastopo_params.cool_measinterval;i++)
+					fprintf(cooloutfile,"%d\t%d\t%18.18lf\n",conf_id_iter,
+						(i+1)*meastopo_params.cool_measinterval,
+						cool_topo_ch[i]);
+			}
+        	        fclose(cooloutfile);
+            	    }
 	    }
 	    if(meastopo_params.measstout && conf_id_iter%meastopo_params.stouteach==0){
 		    TOPO_GLOBAL_DONT_TOUCH=1;
@@ -472,17 +491,37 @@ int main(int argc, char* argv[]){
 		    TOPO_GLOBAL_DONT_TOUCH=0;
 		    for(int ss = meastopo_params.stout_measinterval; ss <= meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
 	    	    	aux_conf_acc = &(gstout_conf_acc_arr[8*(ss-1)]);
-		    	stout_topo_ch=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
-		    	/*INSERISCI SCRITTURA SU FILE*/
+			int topoindx = (ss-meastopo_params.stout_measinterval)/meastopo_params.stout_measinterval; 
+		    	stout_topo_ch[topoindx]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
 		    }
+	    
+	            printf("MPI%02d - Printing stouted charge - only by master rank...\n",
+                    devinfo.myrank);
+        	    if(devinfo.myrank ==0){
+                	FILE *stoutoutfile = fopen(meastopo_params.pathstout,"at");
+	                if(!stoutoutfile){
+        	            stoutoutfile = fopen(meastopo_params.pathstout,"wt");
+	                    char stoutheader[35];
+			    strcpy(stoutheader,"#conf_id\tStoutStp\tTopoChStout\n");
+                	    fprintf(stoutoutfile,"%s",stoutheader);
+	                }
+        	        if(stoutoutfile){
+				for(int i = 0; i < meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval;i++)
+					fprintf(stoutoutfile,"%d\t%d\t%18.18lf\n",conf_id_iter,
+						(i+1)*meastopo_params.stout_measinterval,
+						stout_topo_ch[i]);
+			}
+        	        fclose(stoutoutfile);
+            	    }
 	    }
+
             printf("MPI%02d - Printing gauge obs - only by master rank...\n",
                     devinfo.myrank);
             if(devinfo.myrank ==0){
                 FILE *goutfile = fopen(gauge_outfilename,"at");
                 if(!goutfile){
                     goutfile = fopen(gauge_outfilename,"wt");
-                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\ttopoCool\ttopoStout\n");
+                    strcpy(gauge_outfile_header,"#conf_id\tacc\tplq\trect\tReP\tImP\n");
                     fprintf(goutfile,"%s",gauge_outfile_header);
                 }
                 if(goutfile){
@@ -490,21 +529,16 @@ int main(int argc, char* argv[]){
                         printf("Therm_iter %d",conf_id_iter );
                         printf("Placchetta= %.18lf    ", plq/GL_SIZE/6.0/3.0);
                         printf("Rettangolo= %.18lf\n",rect/GL_SIZE/6.0/3.0/2.0);
-			printf("Topo charge cool= %.18lf\n",topo_ch);
-			printf("Topo charge stout= %.18lf\n",stout_topo_ch);
-
                     }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/GL_SIZE/6.0/3.0,rect/GL_SIZE/6.0/3.0/2.0);
 
 
                     fprintf(goutfile,"%d\t%d\t",conf_id_iter,
                             accettate_therm+accettate_metro
                             -accettate_therm_old-accettate_metro_old);
-                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
+                    fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
                             plq/GL_SIZE/6.0/3.0,
                             rect/GL_SIZE/6.0/3.0/2.0, 
-                            creal(poly), cimag(poly),
-			    topo_ch,stout_topo_ch);
-
+                            creal(poly), cimag(poly));
                 }
                 fclose(goutfile);
             }
