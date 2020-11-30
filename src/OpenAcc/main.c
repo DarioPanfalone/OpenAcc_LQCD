@@ -287,8 +287,8 @@ int main(int argc, char* argv[]){
 
 
     double plq,rect;
-    double cool_topo_ch[meastopo_params.coolmeasstep/meastopo_params.cool_measinterval];
-    double stout_topo_ch[meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval];
+    double cool_topo_ch[meastopo_params.coolmeasstep/meastopo_params.cool_measinterval+1];
+    double stout_topo_ch[meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval+1];
     d_complex poly;
 
     int accettate_therm=0;
@@ -459,11 +459,12 @@ int main(int argc, char* argv[]){
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
 	    
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
-		    cool_conf(conf_acc,aux_conf_acc,auxbis_conf_acc);
-		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
+	      cool_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
+	      cool_conf(conf_acc,aux_conf_acc,auxbis_conf_acc);
+		    for(int cs = 0; cs <= meastopo_params.coolmeasstep; cs++){
 	    		cool_conf(aux_conf_acc,aux_conf_acc,auxbis_conf_acc);
-			if(cs%meastopo_params.cool_measinterval){
-		    	    cool_topo_ch[cs/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
+			if((cs+2)%meastopo_params.cool_measinterval==0){
+			  cool_topo_ch[(cs+2)/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
 			}
 		    }
 	            printf("MPI%02d - Printing cooled charge - only by master rank...\n",
@@ -477,9 +478,9 @@ int main(int argc, char* argv[]){
                 	    fprintf(cooloutfile,"%s",coolheader);
 	                }
         	        if(cooloutfile){
-				for(int i = 0; i < meastopo_params.coolmeasstep/meastopo_params.cool_measinterval;i++)
+				for(int i = 0; i <= meastopo_params.coolmeasstep/meastopo_params.cool_measinterval;i++)
 					fprintf(cooloutfile,"%d\t%d\t%18.18lf\n",conf_id_iter,
-						(i+1)*meastopo_params.cool_measinterval,
+						i*meastopo_params.cool_measinterval,
 						cool_topo_ch[i]);
 			}
         	        fclose(cooloutfile);

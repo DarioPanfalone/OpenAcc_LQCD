@@ -12,6 +12,10 @@
  #include <accelmath.h>
 #endif
 
+#ifdef MULTIDEVICE
+#include "../Mpi/communications.h"
+#endif
+
 #pragma acc routine seq
 static inline void cabibbo_marinari_cooling(__restrict su3_soa   * const U, // configurazione "calda" in entrata
 	        			    __restrict su3_soa   * const Ucool,//conf frìa
@@ -169,12 +173,30 @@ void cool_conf(__restrict su3_soa   * const U,//Conf caliente
 	       __restrict su3_soa   * const TMP){ // parcheggio per le staples
 
   set_su3_soa_to_zero(TMP);
-
+#ifdef MULTIDEVICE
+  communicate_su3_borders(U, GAUGE_HALO);  
+#endif
+ 
   calc_loc_staples_nnptrick_all_only_even(U,TMP);
+
+#ifdef MULTIDEVICE
+  communicate_gl3_borders(TMP, GAUGE_HALO);  
+#endif
+
   compute_cooled_even_links(U,Ucool,TMP);
   calc_loc_staples_nnptrick_all_only_odd(U,TMP);
+
+#ifdef MULTIDEVICE
+  communicate_gl3_borders(TMP, GAUGE_HALO);  
+#endif  
+
   compute_cooled_odd_links(U,Ucool,TMP);
   unitarize_conf(Ucool);
+
+#ifdef MULTIDEVICE
+  communicate_su3_borders(Ucool, GAUGE_HALO);  
+#endif
+
 
 }
 
