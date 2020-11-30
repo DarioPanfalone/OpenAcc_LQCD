@@ -1,0 +1,16 @@
+#!/bin/bash
+echo "If you are not in build directory, this script will not work."
+cur_dir=$(pwd)
+cd ../src/
+./double_to_single_transformer.py autoMode
+sed -i 's/int TOPO_GLOBAL_DONT_TOUCH = 0/extern int TOPO_GLOBAL_DONT_TOUCH/' OpenAcc/sp_topological_force.c
+cd ../$cur_dir
+
+../build/generate_makefile.py ../src/OpenAcc/main.c > makefile
+
+if [ "$1" == "clean" ]
+   then
+           make clean
+fi
+
+make
