@@ -44,7 +44,6 @@ void load_topo(const char *path,const double barr,const double width, double *gr
 				}
 		}
 	int check_closure=fclose(fin);
-	printf("In some systems, if you remove this printf, this function won't work. I don't know why. %f\n",widthh);
 	if(check_closure!=0)
 		{
 			printf("ERROR: file %s can't be closed",path);

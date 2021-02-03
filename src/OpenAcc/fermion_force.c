@@ -317,7 +317,7 @@ printf("F12 = %.18lf + (%.18lf)*I\n\n",creal(tipdot_acc[0].c12[0]),cimag(tipdot_
     double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
     printf("MPI%02d\t\t\
 FULL FERMION FORCE COMPUTATION  PreKer->PostKer :%f sec  \n",
-dt_preker_to_postker,devinfo.myrank);
+devinfo.myrank,dt_preker_to_postker);
 #endif
     if(verbosity_lv > 0){
         printf("MPI%02d:\t\tCompleted fermion force openacc\n",
