@@ -461,13 +461,16 @@ int main(int argc, char* argv[]){
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
 	    
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
+	      su3_soa *conf_to_use;
 	      cool_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
-	      cool_conf(conf_acc,aux_conf_acc,auxbis_conf_acc);
-		    for(int cs = 0; cs <= meastopo_params.coolmeasstep; cs++){
-	    		cool_conf(aux_conf_acc,aux_conf_acc,auxbis_conf_acc);
-			if((cs+2)%meastopo_params.cool_measinterval==0){
-			  cool_topo_ch[(cs+2)/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
-			}
+		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
+		      if(cs==1)
+			conf_to_use=(su3_soa*)conf_acc;
+		      else
+			conf_to_use=(su3_soa*)aux_conf_acc;	
+		      cool_conf(conf_to_use,aux_conf_acc,auxbis_conf_acc);
+		      if(cs%meastopo_params.cool_measinterval==0)
+			cool_topo_ch[cs/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
 		    }
 	            printf("MPI%02d - Printing cooled charge - only by master rank...\n",
                     devinfo.myrank);
