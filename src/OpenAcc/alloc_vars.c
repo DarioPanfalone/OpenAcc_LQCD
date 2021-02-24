@@ -215,11 +215,16 @@ void mem_alloc_extended()
     // STOUTING
     if(alloc_info.stoutAllocations){ // not always the same as act_params.stout_steps,
                                      // e.g., in benchmarks
+      /*
       int  allocation_steps = act_params.stout_steps;
       if(allocation_steps<act_params.topo_stout_steps)
 	allocation_steps=act_params.topo_stout_steps;
       if(allocation_steps<meastopo_params.stoutmeasstep)
 	allocation_steps=meastopo_params.stoutmeasstep;
+      */
+      int  allocation_steps = (act_params.stout_steps>act_params.topo_stout_steps?
+			       act_params.stout_steps:act_params.topo_stout_steps);
+      
       allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&gstout_conf_acc_arr, ALIGN, allocation_steps*8*sizeof(su3_soa)); 
       ALLOCCHECK(allocation_check,gstout_conf_acc_arr ) ;
 #pragma acc enter data create(gstout_conf_acc_arr[0:8*allocation_steps])
