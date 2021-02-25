@@ -53,7 +53,6 @@
 #include "../Mpi/communications.h"
 #endif
 
-
 #ifdef MULTIDEVICE
 
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
@@ -513,7 +512,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
     if(verbosity_lv > 4) printf("MPI%02d - Calculated first fermion force\n", 
             devinfo.myrank);
     
-    if(TOPO_MACRO == 1)
+    if(TOPO_MACRO == 1 && act_params.topo_action == 1)
       {
     	calc_ipdot_topo(tconf_acc,  
 #ifdef STOUT_TOPO
@@ -558,7 +557,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 ferm_in_acc, res, taux_conf_acc, invOuts,
                 ip,max_cg);
 
-	if(TOPO_MACRO == 1)
+	if(TOPO_MACRO == 1 && act_params.topo_action == 1)
 	  {
 	    calc_ipdot_topo(tconf_acc,  
 #ifdef STOUT_TOPO
@@ -599,7 +598,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
                 ferm_in_acc, res, taux_conf_acc, invOuts, ip,max_cg);
 
 
-	if(TOPO_MACRO == 1)
+	if(TOPO_MACRO == 1 && act_params.topo_action == 1)
 	  {
 
 	    calc_ipdot_topo(tconf_acc,  
@@ -650,7 +649,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             ip,max_cg);
 
     
-    if(TOPO_MACRO == 1)
+    if(TOPO_MACRO == 1 && act_params.topo_action == 1)
       {
 
 	calc_ipdot_topo(tconf_acc,  
@@ -694,7 +693,7 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
             ferm_in_acc, res, taux_conf_acc, invOuts, ip,max_cg);
 
     
-    if(TOPO_MACRO == 1)
+    if(TOPO_MACRO == 1 && act_params.topo_action == 1)
       {
 
 	calc_ipdot_topo(tconf_acc,  

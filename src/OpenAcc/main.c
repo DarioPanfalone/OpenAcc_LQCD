@@ -461,13 +461,16 @@ int main(int argc, char* argv[]){
             poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
 	    
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
+	      su3_soa *conf_to_use;
 	      cool_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
-	      cool_conf(conf_acc,aux_conf_acc,auxbis_conf_acc);
-		    for(int cs = 0; cs <= meastopo_params.coolmeasstep; cs++){
-	    		cool_conf(aux_conf_acc,aux_conf_acc,auxbis_conf_acc);
-			if((cs+2)%meastopo_params.cool_measinterval==0){
-			  cool_topo_ch[(cs+2)/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
-			}
+		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
+		      if(cs==1)
+			conf_to_use=(su3_soa*)conf_acc;
+		      else
+			conf_to_use=(su3_soa*)aux_conf_acc;	
+		      cool_conf(conf_to_use,aux_conf_acc,auxbis_conf_acc);
+		      if(cs%meastopo_params.cool_measinterval==0)
+			cool_topo_ch[cs/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
 		    }
 	            printf("MPI%02d - Printing cooled charge - only by master rank...\n",
                     devinfo.myrank);
@@ -492,10 +495,11 @@ int main(int argc, char* argv[]){
 		    TOPO_GLOBAL_DONT_TOUCH=1;
 		    stout_wrapper(conf_acc,gstout_conf_acc_arr);
 		    TOPO_GLOBAL_DONT_TOUCH=0;
-		    for(int ss = meastopo_params.stout_measinterval; ss <= meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
-	    	    	aux_conf_acc = &(gstout_conf_acc_arr[8*(ss-1)]);
-			int topoindx = (ss-meastopo_params.stout_measinterval)/meastopo_params.stout_measinterval; 
-		    	stout_topo_ch[topoindx]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
+		    stout_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
+		    for(int ss = 0; ss < meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
+	    	    	/* aux_conf_acc = &(gstout_conf_acc_arr[8*ss]); */
+			int topoindx =1+ss/meastopo_params.stout_measinterval; 
+		    	stout_topo_ch[topoindx]=compute_topological_charge(&gstout_conf_acc_arr[8*ss],auxbis_conf_acc,topo_loc);
 		    }
 	    
 	            printf("MPI%02d - Printing stouted charge - only by master rank...\n",
@@ -509,9 +513,9 @@ int main(int argc, char* argv[]){
                 	    fprintf(stoutoutfile,"%s",stoutheader);
 	                }
         	        if(stoutoutfile){
-				for(int i = 0; i < meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval;i++)
+				for(int i = 0; i <= meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval;i++)
 					fprintf(stoutoutfile,"%d\t%d\t%18.18lf\n",conf_id_iter,
-						(i+1)*meastopo_params.stout_measinterval,
+						i*meastopo_params.stout_measinterval,
 						stout_topo_ch[i]);
 			}
         	        fclose(stoutoutfile);
