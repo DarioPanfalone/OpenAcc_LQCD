@@ -2,8 +2,7 @@
 
 COMPILAZIONE:
 
-cd WHERE\_THE\_CODE\_IS
-cd src/
+cd YOUR_PATH/OpenAcc_LQCD
 mkdir build_test
 cd build_test/
 cp ../build/compiler_settings_library.txt ./
