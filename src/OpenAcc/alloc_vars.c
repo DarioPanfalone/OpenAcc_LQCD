@@ -51,6 +51,11 @@ su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases
 // in fermion related computation (with or without stouting)
 
 
+//CONF HASENBUSCH
+
+su3_soa ** conf_hasenbush;
+
+
 // STOUTING 
 su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth
 su3_soa * glocal_staples;
@@ -64,7 +69,7 @@ vec3_soa * ferm_chi_acc; // questo e' il chi [alloc_info.NPS_tot]
 vec3_soa * ferm_phi_acc; // questo e' il phi [alloc_info.NPS_tot]
 vec3_soa * ferm_out_acc; // questo e' uno ausiliario [alloc_info.NPS_tot]
 vec3_soa * ferm_shiftmulti_acc; // ausiliario per l'invertitore multishift [alloc_info.maxNeededShifts]
-vec3_soa * kloc_r;  // vettore ausiliario
+vec3_soa * kloc_r;  // vettore ausiliario //ecco la definzione di questi vettori ausilairi.
 vec3_soa * kloc_h;  // vettore ausiliario
 vec3_soa * kloc_s;  // vettore ausiliario
 vec3_soa * kloc_p;  // vettore ausiliario
@@ -84,14 +89,18 @@ double_soa * d_local_sums;
     else if(verbosity_lv > 2) printf("MPI%02d: \tAllocation of %s : OK , %p\n",\
          devinfo.myrank, #var, var );\
 
-
+//ovviamente l'int di alloccheck sarà l'int che ritorna la funzione posix_memalign_wrapper. Se funziona ritorna 0. Var invece non ho capito da dove viene.
 void mem_alloc_core(){
 
     int allocation_check;  
 
     printf("\n\n[CORE] Allocations..\n");
     
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&kloc_r, ALIGN, sizeof(vec3_soa)); 
+    //chi fa l'allocazione è POSIX! viene allocato il puntatore con la terza variabile che è un size.
+    //Poi la seconda è un ALIGN che viene definito nel file main.c
+    
+    //ALLOCA I VARI AUSILIARI KLOC
+    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&kloc_r, ALIGN, sizeof(vec3_soa));
     ALLOCCHECK(allocation_check, kloc_r) ;
 #pragma acc enter data create(kloc_r[0:1])
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&kloc_h, ALIGN, sizeof(vec3_soa)); 
@@ -104,29 +113,48 @@ void mem_alloc_core(){
     ALLOCCHECK(allocation_check, kloc_p) ;
 #pragma acc enter data create(kloc_p[0:1])
 
+    //ALLOCA IL VETTORE AUX1 per il single precision
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux1, ALIGN, sizeof(vec3_soa)); 
     ALLOCCHECK(allocation_check, aux1) ; // used in fermion force calculation, 
                                          // for single precision acceleration
 #pragma acc enter data create(aux1[0:1])
 
 
-
-
+ 
+//ALLOCA u1_back_phases
+    
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&u1_back_phases, ALIGN,
             alloc_info.NDiffFlavs*8*sizeof(double_soa));   
     //  --> alloc_info.NDiffFlavs*4*NSITES phases (as many as links)
     ALLOCCHECK(allocation_check, u1_back_phases);
 #pragma acc enter data create(u1_back_phases[0:alloc_info.NDiffFlavs*8])
 
+    
+    //ESISTE una struct che ha dentro le informazioni dell'allocazione, ovviamente alloc_info.conf_acc_size=8
     alloc_info.conf_acc_size = 8;
+ 
+    
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_gauge) alloc_info.conf_acc_size *=2 ; 
 #endif
+    
+    
+    
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_acc, ALIGN, 
-            alloc_info.conf_acc_size*sizeof(su3_soa));
+            alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_accsize fa da size.
     ALLOCCHECK(allocation_check, conf_acc);
 #pragma acc enter data create(conf_acc[0:alloc_info.conf_acc_size])
 
+    
+    //sembra che il comando pragma funzioni cosi:
+    // #pragma acc enter data create(NOME VARIABILE[0:LUNGHEZZA DELLA VARIABILE])
+    
+    //MOD
+    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbush, ALIGN,
+                                               alloc_info.num_replicas*alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_accsize fa da size.
+    ALLOCCHECK(allocation_check, conf_hasenbush);
+#pragma acc enter data create(conf_hasenbush[0:alloc_info.num_replicas])
+    
 
 }
 
@@ -183,7 +211,7 @@ void mem_alloc_extended()
 
 
 
-    // GAUGE EVOLUTION
+    // GAUGE EVOLUTION : qui alloca le variabili coniugate dell'HMC.
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&momenta, ALIGN, 8*sizeof(thmat_soa));  
     ALLOCCHECK(allocation_check, momenta ) ;
 #pragma acc enter data create(momenta[0:8])
@@ -311,6 +339,11 @@ void mem_free_core()
 
     FREECHECK(conf_acc);
 #pragma acc exit data delete(conf_acc)
+    
+    
+    //MOD/////HERE SET CONF_HASENBUSH FREE.//////////////
+    FREECHECK(conf_hasenbush);
+#pragma acc exit data delete(conf_hasenbush)
 
 
 }

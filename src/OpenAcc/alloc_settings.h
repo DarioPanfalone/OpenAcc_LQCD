@@ -17,6 +17,8 @@ typedef struct alloc_settings_t{
     int singlePrecCoreAllocations;
     int singlePrecExtendedAllocations;
     int stoutAllocations;
+    
+    int num_relplicas //numero di repliche dell'hasenbush
 
 }alloc_settings;
 
