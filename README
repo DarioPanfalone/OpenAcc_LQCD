@@ -6,7 +6,7 @@ cd YOUR_PATH/OpenAcc_LQCD
 mkdir build_test
 cd build_test/
 cp ../build/compiler_settings_library.txt ./
-cp ../build/geom_defines.txt.example/ ./geom_defines.txt
+cp ../build/geom_defines.txt.example ./geom_defines.txt
 cp ../build/compile ./
 
 
@@ -15,7 +15,7 @@ A questo punto è possibile modificare il file geom_define.txt inserendo la tag
 gpu su cui si vuol far girare il programma. Tutte le altre voci del file di input (in prima approssimazione) possono essere lasciate come sono. 
 Una volta impostata la taglia del reticolo, rimanere nella cartella build_test e usare il comando:
 
-./compile
+./compile (//ricordati di compilare solo quando alteri la dimensione del reticolo)ls
 
 (se compile non ha i permessi di esecuzione, si usi prima il comando: chmod +x compile)
 Se la compilazione è andata a buon fine ora dovreste avere, dentro la directory build_test, un’altra directory 

@@ -1,4 +1,4 @@
-#define PRINT_DETAILS_INSIDE_UPDATE
+'#define PRINT_DETAILS_INSIDE_UPDATE
 #define ALIGN 128
 
 // if using GCC, there are some problems with __restrict.
@@ -74,6 +74,18 @@ int verbosity_lv;
 
 extern int TOPO_GLOBAL_DONT_TOUCH; 
 
+/////funzione aggiunta//////////////////////
+//per ora la metto qui poi la sposto in struct_def.h
+void init_k(su3_soa * conf,int c_r){
+    int mu,i;
+    for(mu=0;mu<8;mu++){
+        for(i=0; i<sizeh; i++ )
+            conf[mu].K.d[i]=c_r;
+    }
+}
+
+
+///////////////////////////////////////////////////
 
 
 
@@ -207,7 +219,7 @@ int main(int argc, char* argv[]){
     }
 #pragma acc enter data copyin(fermions_parameters[0:alloc_info.NDiffFlavs])
 
-    mem_alloc_core();
+    mem_alloc_core(); // Allocation has been done here.
     mem_alloc_extended();
   
     printf("\n   MPI%02d - Allocazione della memoria (double) : OK \n\n\n",devinfo.myrank);
@@ -236,13 +248,16 @@ int main(int argc, char* argv[]){
 
     printf("MPI%02d - u1_backfield initialization (float & double): OK \n",devinfo.myrank);
 
-    initialize_md_global_variables(md_parameters);
+    initialize_md_global_variables(md_parameters);//inizializza le variabili globale.
     printf("MPI%02d - init md vars : OK \n",devinfo.myrank);
 
 
 
     //################## INIZIALIZZAZIONE DELLA CONFIGURAZIONE #######################
     // start from saved conf
+    
+    
+    
 
     if(debug_settings.do_norandom_test){
         if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
@@ -264,15 +279,27 @@ int main(int argc, char* argv[]){
                     devinfo.myrank, mc_params.save_conf_name);
 
         }
-        else{
+        else{ 
             generate_Conf_cold(conf_acc,mc_params.eps_gen);
             printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                     devinfo.myrank);
             conf_id_iter=0;
         }
     }
+    
+    
+    /////inizializzazione Ku della conf////////////###############################/////////    /////////###############################/////////
+    int c_r=1;
+    
+    init_k(conf_acc,int c_r);
+    
+    
+    /////////###############################/////////    /////////###############################/////////
 
 #pragma acc update device(conf_acc[0:8])
+    
+    
+    
     //#################################################################################  
 
 

@@ -149,13 +149,13 @@ void mem_alloc_core(){
     //sembra che il comando pragma funzioni cosi:
     // #pragma acc enter data create(NOME VARIABILE[0:LUNGHEZZA DELLA VARIABILE])
     
-    //MOD
+    //MOD////////////////////////////////////////////////
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbush, ALIGN,
                                                alloc_info.num_replicas*alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_accsize fa da size.
     ALLOCCHECK(allocation_check, conf_hasenbush);
 #pragma acc enter data create(conf_hasenbush[0:alloc_info.num_replicas])
     
-
+///////////////////////////////////////////////////////////////////
 }
 
 
