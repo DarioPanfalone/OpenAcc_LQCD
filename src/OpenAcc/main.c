@@ -1,4 +1,4 @@
-'#define PRINT_DETAILS_INSIDE_UPDATE
+#define PRINT_DETAILS_INSIDE_UPDATE
 #define ALIGN 128
 
 // if using GCC, there are some problems with __restrict.
@@ -291,7 +291,7 @@ int main(int argc, char* argv[]){
     /////inizializzazione Ku della conf////////////###############################/////////    /////////###############################/////////
     int c_r=1;
     
-    init_k(conf_acc,int c_r);
+    init_k(conf_acc, c_r);
     
     
     /////////###############################/////////    /////////###############################/////////

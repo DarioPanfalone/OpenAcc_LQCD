@@ -200,7 +200,7 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
                 int  d0 = 2*d0h + ((d1+d2+d3) & 0x1);
                 int t  = snum_acc(d0,d1,d2,d3);
 
-                single_su3 aux
+                single_su3 aux;
                 generate_random_su3(&aux,factor); //questo genera random su3.
                 single_gl3_into_su3_soa(&conf[mu],t,&aux);
 //conf[mu] ovviamente va passato per le modifiche come puntatore quindi &conf[mu]
@@ -214,7 +214,7 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
 
 }
 
-
+/*
 void init_kmu(su3_soa * conf,double c_r){
     
     for(int mu=0; mu<8; mu++){
@@ -227,6 +227,8 @@ void init_kmu(su3_soa * conf,double c_r){
     
     
 }
+*/
+
 
 void generate_vec3_soa_z2noise(__restrict vec3_soa * const vect)
 {
