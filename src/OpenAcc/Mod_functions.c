@@ -22,3 +22,15 @@ void init_k(su3_soa * conf,int c_r){
 }
 
 
+int init_k_test(su3_soa *conf_acc){
+    int kk2=0;
+    int mu1=0;
+    for(mu1=0;mu1<8;mu1++){
+        for(kk2=0;kk2<sizeh;kk2++){
+        printf("%d:ku[%d]:%f\n",mu1,kk2, conf_acc[mu1].K.d[kk2]);
+        }
+    }
+    return 0;
+}
+
+

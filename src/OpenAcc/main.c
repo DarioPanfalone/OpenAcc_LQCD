@@ -61,7 +61,7 @@
 #include "../Include/stringify.h"
 
 
-#include "Mod_functions.h" //funzioni moddate.
+#include "./Mod_functions.h" //funzioni moddate.
 
 // double level macro, necessary to stringify
 // https://gcc.gnu.org/onlinedocs/cpp/Stringification.html
@@ -296,6 +296,12 @@ int main(int argc, char* argv[]){
     int c_r=1;
     
     init_k(conf_acc, c_r);
+    ///TEST 1//////////////
+    init_k_test(conf_acc);
+    //////////**************************************////////////////////////////
+    
+    //test inizializzazione
+    /*
     printf("SIZEH: %d",sizeh);
     printf("###########################################################################\n");
     printf("############################INIZIALIZZATI I KU ###############################################\n");
@@ -311,7 +317,7 @@ int main(int argc, char* argv[]){
     }
     printf("###########################################################################\n");
     printf("###########################################################################\n");
-
+    */
     
     /////////###############################/////////    /////////###############################/////////
 

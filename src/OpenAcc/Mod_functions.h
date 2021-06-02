@@ -17,4 +17,7 @@
 
 
 void init_k(su3_soa * conf,int c_r);
+int init_k_test(su3_soa *conf_acc);
+
 #endif /* Mod_functions_h */
+
