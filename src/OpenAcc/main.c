@@ -60,6 +60,9 @@
 #include <mpi.h>
 #include "../Include/stringify.h"
 
+
+#include "Mod_functions.h" //funzioni moddate.
+
 // double level macro, necessary to stringify
 // https://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 #define xstr(s) str(s) 
@@ -74,6 +77,7 @@ int verbosity_lv;
 
 extern int TOPO_GLOBAL_DONT_TOUCH; 
 
+/*
 /////funzione aggiunta//////////////////////
 //per ora la metto qui poi la sposto in struct_def.h
 void init_k(su3_soa * conf,int c_r){
@@ -84,7 +88,7 @@ void init_k(su3_soa * conf,int c_r){
     }
 }
 
-
+*/
 ///////////////////////////////////////////////////
 
 
