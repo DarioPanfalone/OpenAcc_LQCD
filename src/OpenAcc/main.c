@@ -77,19 +77,6 @@ int verbosity_lv;
 
 extern int TOPO_GLOBAL_DONT_TOUCH; 
 
-/*
-/////funzione aggiunta//////////////////////
-//per ora la metto qui poi la sposto in struct_def.h
-void init_k(su3_soa * conf,int c_r){
-    int mu,i;
-    for(mu=0;mu<8;mu++){
-        for(i=0; i<sizeh; i++ )
-            conf[mu].K.d[i]=c_r;
-    }
-}
-
-*/
-///////////////////////////////////////////////////
 
 
 
@@ -296,30 +283,13 @@ int main(int argc, char* argv[]){
     int c_r=1;
     
     init_k(conf_acc, c_r);
+    
+    
     ///TEST 1//////////////
     init_k_test(conf_acc);
     //////////**************************************////////////////////////////
     
-    //test inizializzazione
-    /*
-    printf("SIZEH: %d",sizeh);
-    printf("###########################################################################\n");
-    printf("############################INIZIALIZZATI I KU ###############################################\n");
-    printf("###########################################################################\n");
-    int kk2=0;
-    int mu1=0;
-    for(mu1=0;mu1<8;mu1++){
-    for(kk2=0;kk2<sizeh;kk2++){
-	    printf("%d:ku[%d]:%f\n",mu1,kk2, conf_acc[mu1].K.d[kk2]);
-    }
-
-          
-    }
-    printf("###########################################################################\n");
-    printf("###########################################################################\n");
-    */
-    
-    /////////###############################/////////    /////////###############################/////////
+  
 
 #pragma acc update device(conf_acc[0:8])
     

@@ -9,6 +9,9 @@
 #include "./struct_c_def.h"
 #include "./alloc_settings.h"
 #include "./alloc_vars.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 /////funzione aggiunta//////////////////////
 //per ora la metto qui poi la sposto in struct_def.h
@@ -27,6 +30,9 @@ int init_k_test(su3_soa *conf_acc){
     int mu1=0;
     for(mu1=0;mu1<8;mu1++){
         for(kk2=0;kk2<sizeh;kk2++){
+            if(conf_acc[mu1].K.d[kk2]!=(1 && c_r)){
+                return 1;
+            }
         printf("%d:ku[%d]:%f\n",mu1,kk2, conf_acc[mu1].K.d[kk2]);
         }
     }
