@@ -287,7 +287,7 @@ int main(int argc, char* argv[]){
     
     ///TEST 1//////////////
     
-    if(init_k_test(conf_acc)!=0){
+    if(init_k_test(conf_acc,c_r)!=0){
         perror("KU VALUE DOESN'T MATCH!");
         return 0;
     }
