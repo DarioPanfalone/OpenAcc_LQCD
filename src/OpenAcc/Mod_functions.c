@@ -25,7 +25,7 @@ void init_k(su3_soa * conf,int c_r){
 }
 
 
-int init_k_test(su3_soa *conf_acc){
+int init_k_test(su3_soa *conf_acc,int c_r){
     int kk2=0;
     int mu1=0;
     for(mu1=0;mu1<8;mu1++){

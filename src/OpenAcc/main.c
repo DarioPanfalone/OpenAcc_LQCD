@@ -60,7 +60,7 @@
 #include <mpi.h>
 #include "../Include/stringify.h"
 
-
+#include <errno.h>
 #include "./Mod_functions.h" //funzioni moddate.
 
 // double level macro, necessary to stringify
@@ -286,7 +286,11 @@ int main(int argc, char* argv[]){
     
     
     ///TEST 1//////////////
-    init_k_test(conf_acc);
+    
+    if(init_k_test(conf_acc)!=0){
+        perror("KU VALUE DOESN'T MATCH!");
+        return 0;
+    }
     //////////**************************************////////////////////////////
     
   
