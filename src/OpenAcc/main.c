@@ -113,7 +113,16 @@ int main(int argc, char* argv[]){
     }
 
 
-    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]);
+    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]); //il nome del file è argv[1];
+    
+    ////******************************************************************************************////////
+    ////******************************************************************************************////////
+    
+    alloc_info.num_replicas=n_replicas_reader;
+    printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",alloc_info.num_replicas);
+    
+    ////******************************************************************************************////////
+    ////******************************************************************************************////////
 
 #ifdef MULTIDEVICE
     if(input_file_read_check){
@@ -124,7 +133,7 @@ int main(int argc, char* argv[]){
     devinfo.myrank = 0;
     devinfo.nranks = 1;
 #endif
-
+//qui  c'è un errore dovrebbe essere se non è 1, ma va beh.
     if(input_file_read_check){
         printf("MPI%02d: input file reading failed, aborting...\n",devinfo.myrank);
         exit(1);
@@ -209,10 +218,15 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 #pragma acc enter data copyin(fermions_parameters[0:alloc_info.NDiffFlavs])
-
+    
+///////////////////////////////QUI ALLOCA//////////// PRIMA DI QUI LA CONF NON ESISTE.
     mem_alloc_core(); // Allocation has been done here.
     mem_alloc_extended();
-  
+ 
+    
+    //////direi che il for per la conf va messo qui./////
+    
+    ////qui alloca se siamo in single precision/////////////////////
     printf("\n   MPI%02d - Allocazione della memoria (double) : OK \n\n\n",devinfo.myrank);
     if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
         mem_alloc_core_f();
@@ -223,7 +237,16 @@ int main(int argc, char* argv[]){
         mem_alloc_extended_f();
         printf("\n  MPI%02d - Allocazione della memoria (float) [EXTENDED]: OK \n\n\n",devinfo.myrank);
     }
+    ////////////////////////////////******
+    //VA MESSO QUI IL FOR PER LE CONF_HASENBUSCH
+    //***************************
+    
+    
+       //////direi che il for per la conf va messo qui./////
+    
     printf("\n  MPI%02d - Allocazione della memoria totale: %zu \n\n\n",devinfo.myrank,max_memory_used);
+    
+    //qui  calcola il borodo della conf /////
     compute_nnp_and_nnm_openacc();
 #pragma acc enter data copyin(nnp_openacc)
 #pragma acc enter data copyin(nnm_openacc)

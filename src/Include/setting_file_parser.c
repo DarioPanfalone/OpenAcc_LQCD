@@ -811,16 +811,16 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
 
 }
 
-
-
+//LE FUNZIONI PRECEDENTI INVECE LEGGONO E STAMPANO A VIDEO.
+//QUESTA FUNZIONE LEGGE DA FILE E DA IL VALORE AD ALLOC_INFO.
 
 int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 {
 
     // Opening filenames and reading it
     int helpmode = 0;
-    char filelines[MAXLINES][MAXLINELENGTH];
-    FILE *input = fopen(input_filename,"r");
+    char filelines[MAXLINES][MAXLINELENGTH]; //questi sono delle stringhe che deve leggere.
+    FILE *input = fopen(input_filename,"r"); //questo ovviamente apre il file
     if (input == NULL){
 
         printf("MPI%02d: Could not open file %s \n",devinfo.myrank,input_filename );
@@ -832,8 +832,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     int lines_read = 0;
 
-    int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES];
-    int found_tags = 0;
+    int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES]; //qui definisce i tag.
+    int found_tags = 0; //variabile che trova il tag
     fermions_parameters = NULL;
     if (! helpmode){//reading input file 
         char *readcheck = filelines[0];
@@ -841,10 +841,10 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
             readcheck = fgets(filelines[lines_read],MAXLINELENGTH,input);
             if(readcheck != NULL) lines_read++;
         }
-        fclose(input);
+        fclose(input); //qui chiude il file
 
         if(0==devinfo.myrank)
-            printf("lines read: %d\n", lines_read);
+            printf("lines read: %d\n", lines_read); //qui legge il file.
 
 
         int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str);

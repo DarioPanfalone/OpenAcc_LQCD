@@ -13,6 +13,10 @@
 #include <stdlib.h>
 #include <math.h>
 
+
+#define MAXLINES 300
+#define MAXLINELENGTH 500 // pretty long to accomodate all the comments
+
 /////funzione aggiunta//////////////////////
 //per ora la metto qui poi la sposto in struct_def.h
 
@@ -39,4 +43,29 @@ int init_k_test(su3_soa *conf_acc,int c_r){
     return 0;
 }
 
-
+int n_replicas_reader(const char* input_filename){
+    int value_nr;
+    int trovato=0;
+    char riga[MAXLINELENGTH];
+    char riga2[MAXLINELENGTH]="Replicas number";
+    FILE *input = fopen(input_filename,"r"); //questo ovviamente apre il file
+    printf("LETTURA DEL NUMERO DI REPLICHE\n");
+    while(trovato=0){
+        fgets(riga,MAXLINELENGTH,input);
+        if(strncmp(riga,riga2)==0){
+          fscanf(input,"%d",&value_nr );
+            trovato=1;
+        }
+        
+        
+        
+        
+        
+    }
+    
+    
+    
+    fclose(input);
+    
+    return value_nr;
+}
