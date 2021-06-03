@@ -819,7 +819,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     // Opening filenames and reading it
     int helpmode = 0;
-    char filelines[MAXLINES][MAXLINELENGTH]; //questi sono delle stringhe che deve leggere.
+    char filelines[MAXLINES][MAXLINELENGTH]; //questi sono delle stringhe.
     FILE *input = fopen(input_filename,"r"); //questo ovviamente apre il file
     if (input == NULL){
 
@@ -832,8 +832,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     int lines_read = 0;
 
-    int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES]; //qui definisce i tag.
-    int found_tags = 0; //variabile che trova il tag
+    int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES]; //qui definisce
+    int found_tags = 0;
     fermions_parameters = NULL;
     if (! helpmode){//reading input file 
         char *readcheck = filelines[0];
@@ -844,7 +844,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         fclose(input); //qui chiude il file
 
         if(0==devinfo.myrank)
-            printf("lines read: %d\n", lines_read); //qui legge il file.
+            printf("lines read: %d\n", lines_read);
 
 
         int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str);
