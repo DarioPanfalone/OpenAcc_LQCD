@@ -53,7 +53,7 @@ int n_replicas_reader(const char* input_filename){
     printf("LETTURA DEL NUMERO DI REPLICHE\n");
     while(trovato=0){
         fgets(riga,MAXLINELENGTH,input);
-        if(strncmp(riga,riga2)==0){
+        if(strcmp(riga,riga2)==0){
           fscanf(input,"%d",&value_nr );
             trovato=1;
         }
