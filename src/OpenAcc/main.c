@@ -118,8 +118,8 @@ int main(int argc, char* argv[]){
     ////******************************************************************************************////////
     ////******************************************************************************************////////
     
-    alloc_info.num_replicas=n_replicas_reader(argv[1]); //qui definisco il numero di repliche.
-   /* printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",alloc_info.num_replicas);*/
+    /*alloc_info.num_replicas=n_replicas_reader(argv[1]); //qui definisco il numero di repliche.*/
+    printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",alloc_info.num_replicas);
     
     ////******************************************************************************************////////
     ////******************************************************************************************////////
