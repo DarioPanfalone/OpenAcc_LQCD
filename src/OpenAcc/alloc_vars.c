@@ -53,7 +53,7 @@ su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases
 
 //CONF HASENBUSCH
 
-su3_soa ** conf_hasenbush;
+su3_soa ** conf_hasenbusch;
 
 
 // STOUTING 
@@ -150,10 +150,10 @@ void mem_alloc_core(){
     // #pragma acc enter data create(NOME VARIABILE[0:LUNGHEZZA DELLA VARIABILE])
     
     //MOD////////////////////////////////////////////////
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbush, ALIGN,
+    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch, ALIGN,
                                                alloc_info.num_replicas*alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_accsize fa da size.
-    ALLOCCHECK(allocation_check, conf_hasenbush);
-#pragma acc enter data create(conf_hasenbush[0:alloc_info.num_replicas])
+    ALLOCCHECK(allocation_check, conf_hasenbusch);
+#pragma acc enter data create(conf_hasenbusch[0:alloc_info.num_replicas])
     
 ///////////////////////////////////////////////////////////////////
 }
@@ -341,9 +341,9 @@ void mem_free_core()
 #pragma acc exit data delete(conf_acc)
     
     
-    //MOD/////HERE SET CONF_HASENBUSH FREE.//////////////
-    FREECHECK(conf_hasenbush);
-#pragma acc exit data delete(conf_hasenbush)
+    //MOD/////HERE SET conf_hasenbusch FREE.//////////////
+    FREECHECK(conf_hasenbusch);
+#pragma acc exit data delete(conf_hasenbusch)
 
 
 }

@@ -118,8 +118,8 @@ int main(int argc, char* argv[]){
     ////******************************************************************************************////////
     ////******************************************************************************************////////
     
-    alloc_info.num_replicas=n_replicas_reader(argv[1]);
-    printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",alloc_info.num_replicas);
+    alloc_info.num_replicas=n_replicas_reader(argv[1]); //qui definisco il numero di repliche.
+   /* printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",alloc_info.num_replicas);*/
     
     ////******************************************************************************************////////
     ////******************************************************************************************////////
@@ -223,7 +223,7 @@ int main(int argc, char* argv[]){
     mem_alloc_core(); // Allocation has been done here.
     mem_alloc_extended();
  
-    
+    //ora la conf_hasenbusch esiste.
     //////direi che il for per la conf va messo qui./////
     
     ////qui alloca se siamo in single precision/////////////////////
@@ -245,6 +245,7 @@ int main(int argc, char* argv[]){
        //////direi che il for per la conf va messo qui./////
     
     printf("\n  MPI%02d - Allocazione della memoria totale: %zu \n\n\n",devinfo.myrank,max_memory_used);
+ 
     
     //qui  calcola il borodo della conf /////
     compute_nnp_and_nnm_openacc();

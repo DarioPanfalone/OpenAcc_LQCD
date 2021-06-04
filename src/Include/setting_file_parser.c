@@ -836,6 +836,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     int lines_read = 0;
 
+    char riga_repli[20]="Replicas number";
     int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES]; //qui definisce
     int found_tags = 0;
     fermions_parameters = NULL;
@@ -844,7 +845,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         while(readcheck != NULL){ // saving input file in array of lines
             readcheck = fgets(filelines[lines_read],MAXLINELENGTH,input);
             if(readcheck != NULL) lines_read++;
-        }
+            if(strncmp(readcheck,riga_repli,15)==0){ fscanf(input,"%d",&value_nr ;}
+            }
         fclose(input); //qui chiude il file
 
         if(0==devinfo.myrank)

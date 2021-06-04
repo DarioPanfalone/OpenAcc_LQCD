@@ -43,7 +43,7 @@ int init_k_test(su3_soa *conf_acc,int c_r){
     }
     return 0;
 }
-
+/*
 int n_replicas_reader(const char* input_filename){
     int value_nr;
     int trovato=0;
@@ -54,9 +54,9 @@ int n_replicas_reader(const char* input_filename){
     printf("LETTURA DEL NUMERO DI REPLICHE\n");
     while(trovato==0){
         fgets(riga,20,input);
-      /*  printf("ecc %d\n",i);
+      //  printf("ecc %d\n",i);
  
-        i=i+1;*/
+        //i=i+1;
         if(strncmp(riga,riga2,15)==0){
           fscanf(input,"%d",&value_nr );
             trovato=1;
@@ -74,3 +74,4 @@ int n_replicas_reader(const char* input_filename){
     
     return value_nr;
 }
+*/
