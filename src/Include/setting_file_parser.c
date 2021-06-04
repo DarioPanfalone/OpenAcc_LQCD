@@ -293,7 +293,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 char riga2[20]="Replicas number";
                 int reads = sscanf(filelines[iline],"%s", word);
                 int repli=0;
-                repli=strncmp(word,riga2);
+                repli=strncmp(word,riga2,15);
                 if(reads==1 && repli!=0){
                     if(0==devinfo.myrank)
                         printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
