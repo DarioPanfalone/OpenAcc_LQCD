@@ -47,12 +47,15 @@ int init_k_test(su3_soa *conf_acc,int c_r){
 int n_replicas_reader(const char* input_filename){
     int value_nr;
     int trovato=0;
+    int i=0;
     char riga[MAXLINELENGTH];
     char riga2[MAXLINELENGTH]="Replicas number";
     FILE *input = fopen(input_filename,"r"); //questo ovviamente apre il file
     printf("LETTURA DEL NUMERO DI REPLICHE\n");
     while(trovato=0){
         fgets(riga,MAXLINELENGTH,input);
+        printf("ecc %d\n");
+        i++;
         if(strcmp(riga,riga2)==0){
           fscanf(input,"%d",&value_nr );
             trovato=1;
