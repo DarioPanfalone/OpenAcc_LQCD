@@ -287,6 +287,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                     }
                 };
             }
+            /*
             if(!found_something){
                 char word[50];
                 int reads = sscanf(filelines[iline],"%s", word);
@@ -297,7 +298,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                     return 1;
                 }
             }
-
+*/
 
             iline++; 
             res = 1;
