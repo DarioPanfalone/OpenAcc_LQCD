@@ -53,7 +53,7 @@ int n_replicas_reader(const char* input_filename){
     FILE *input = fopen(input_filename,"r"); //questo ovviamente apre il file
     printf("LETTURA DEL NUMERO DI REPLICHE\n");
     while(trovato==0){
-        fgets(riga,MAXLINELENGTH,input);
+        fgets(riga,20,input);
       /*  printf("ecc %d\n",i);
  
         i=i+1;*/
