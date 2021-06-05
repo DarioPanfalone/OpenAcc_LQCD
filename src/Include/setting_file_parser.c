@@ -844,8 +844,12 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         while(readcheck != NULL){ // saving input file in array of lines
             readcheck = fgets(filelines[lines_read],MAXLINELENGTH,input);
             if(readcheck != NULL) lines_read++;
-            printf("linea %d\n",lines_read);
+            printf("linea %d",lines_read);
+            int i3=0;
+            for(i3=0;i3<20;i3++){ printf("%d",readcheck[i3]);  }
+            printf("%\n");
              if(strncmp(readcheck,riga_repli,15)==0){ fscanf(input,"%d",&alloc_info.num_replicas );}
+            
         }
         fclose(input); //qui chiude il file
 
