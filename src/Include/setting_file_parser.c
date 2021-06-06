@@ -35,21 +35,24 @@
 char input_file_str[MAXLINES*MAXLINELENGTH];
 
 //types that can be found in an input file
-enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES};
-const char * type_strings[]={"(int)", "(double)", "(string)" };
+enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES}; //i tipi  che si trovano nel file. é un enum (0,3)
+const char * type_strings[]={"(int)", "(double)", "(string)" }; //vettore di stringhe non modificabile.
 
+
+//qui è definita questa struct, che verrà usata per leggere i valori dal file.
 typedef struct par_info_t{
 
-    void* par;
-    enum dtype type;
-    const char* name;
-    const void* default_value;
-    const char* comment;
+    void* par;  //
+    enum dtype type; //da il tipo
+    const char* name; // nome della variabile
+    const void* default_value;//il valore di default
+    const char* comment; //eventuale commento
 
 }par_info;
 
 #define MAXPMG 20
 
+//definisce il nome dei gruppi di variabili.(MOD)
 const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "ActionParameters",         // 0 
     "FlavourParameters",        // 1   
@@ -63,9 +66,10 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "Geometry"               ,  // 9
     "DebugSettings"          ,  // 10
     "InverterTricks"         ,  // 11
-    "TestSettings"              // 12
+    "TestSettings"           ,   // 12
+    "Replicas numbers"          //13
 };
-enum pmg_types {
+enum pmg_types {  //ricorda enum gli da valore da 0 a n-1. Perciò l'ultimo è davvero il numero di tutti i gruppi. qui va aggiunto replicas. (MOD)
     PMG_ACTION         ,
     PMG_FERMION        ,
     PMG_BACKGROUND     ,
@@ -79,39 +83,51 @@ enum pmg_types {
     PMG_DEBUG          ,
     PMG_INVERTER_TRICKS,
     PMG_TESTS          ,
+    PMG_REPLICAS       ,
     NPMGTYPES};
     
 
-FILE * helpfile;
+FILE * helpfile; //definisce l'help file.
 char IGNORE_IT[50];
 
+//FUNZIONE 1: appiccica tutto e ridà la launghezza totale del file in caratteri. (NON MOD)
+
 // just to save it in the conf
+//i parametri sono la matrice con dentro il contenuto del file input, un int  del numero massimo di linee che è di interesse scrivere, il nome del file da mandare in input
+
+
 int prepare_string_from_stringarray(char file_lines[MAXLINES][MAXLINELENGTH], 
         int maxlines,
         char* input_filename_to_write){
 
-    int iline;int totlen = 0;
+    int iline;int totlen = 0; //contatori
     for(iline = 0; iline < maxlines ; iline++){
-        strcat(input_filename_to_write,file_lines[iline]);
+        strcat(input_filename_to_write,file_lines[iline]); //aggiunge le righe una a una.
         totlen += strlen(file_lines[iline]);
     }
     return totlen;
 
 }
 
+//FUNZIONE 2: Funzione che cancella i commenti.(trova # ed elimina cioò che viene dopo.) (NON MOD)
+
 void erase_comments(char file_lines[MAXLINES][MAXLINELENGTH], int maxlines)
 {
+    //cerca le righe fino a maxlines.
     for(int i = 0; i<maxlines; i++){
-        char* start_comment_ptr = index(file_lines[i],'#' );
+        char* start_comment_ptr = index(file_lines[i],'#' ); //questa funzione index appartiene a strings.h e restituisce la stringa che inizia con #
+        //immagino che l'if cosi voglia dire, se la funzione è definita.
         if(start_comment_ptr){
-            int comment_start = start_comment_ptr - file_lines[i];
+            int comment_start = start_comment_ptr - file_lines[i]; //se il carattere # si trova al 15 carattere della riga, il risulatato sarà 15
             file_lines[i][comment_start] = '\n';
-            file_lines[i][comment_start+1] = '\0';
+            file_lines[i][comment_start+1] = '\0'; //it stands for null.
             for(int j = comment_start+2; j < MAXLINELENGTH; j++)
                 file_lines[i][j] = ' ';
         }
     }
 }
+
+//FUNZIONE 3: funzione che serve per l'omonimia tra parametri. Non mi serve. (NON MOD)
 
 void reorder_par_infos(int npar, par_info * par_infos ){
     // this is necessary if a parameter name is contained in another
@@ -144,9 +160,11 @@ void reorder_par_infos(int npar, par_info * par_infos ){
     }
 }
 
+//FUNZIONE 4: CERCA I GRUPPI DI PARAMETRI E RESTITUISCE IL NUMERO DI GRUPPI TROVATI.(NO MOD.)
 
+//ovviamente a parametro gli passa par_macro_groups_names[], quindi mi basta modificare questo parametro. e anche ntagstofind.
 int scan_group_V(int ntagstofind, const char **strtofind, 
-        int *tagcount,
+        int *tagcount, //Vettore definito per contare i gruppi. Passato a parametro come ntagstofind.
         int *taglines, int *tagtypes, int maxnres,
         char filelines[MAXLINES][MAXLINELENGTH], 
         int startline, int endline)
@@ -158,21 +176,21 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 
     if(0==devinfo.myrank)
         printf("Scanning for parameter macro groups..\n");
-    for(int i =0; i<ntagstofind; i++) tagcount[i] = 0;
+    for(int i =0; i<ntagstofind; i++) tagcount[i] = 0; //manda a zero gli elementi di quel vettore.
     for(int i =0; i<maxnres; i++){// initializing output arrays
-        taglines[i] = -1;
+        taglines[i] = -1; //inizializza i vettori in output a -1.
         tagtypes[i] = -1;
     }
     int nres = 0;
-    int iline = startline;
+    int iline = startline; //linea da cui parte la ricerca. //ricorda filelines è la matrice in cui viene copiato il file.
     while(iline<endline && nres < maxnres ){
         char * found_something;
         for(int itype =0; itype <ntagstofind; itype++){
-            found_something = strstr(filelines[iline],strtofind[itype]);
+            found_something = strstr(filelines[iline],strtofind[itype]); //strtofind è un'altra matrice che viene data da input.
             if(found_something){
                 printf("Found group %s on line %d\n",strtofind[itype], iline);
-                taglines[nres] = iline;
-                tagtypes[nres] = itype;
+                taglines[nres] = iline; //alla fine tagline è un vettore che segna la posizione dei gruppi di macro.
+                tagtypes[nres] = itype; //tagtypes è una roba che segna il type segnato.
                 nres++;
                 tagcount[itype]++;
             }
@@ -185,6 +203,8 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 
     return nres;
 }
+
+//FUNZIONE 5
 
 int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {   
@@ -360,10 +380,16 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
     }// else normal mode
 }
 
+
+//FUNZIONE 6: Legge le informazioni relative ai flavour. //questo ferm_param non si capisce dove lo definisce va beh meno male che per ora i fermioni non servono.
+
 int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
     // see /Include/fermion_parameters.h
+    
+    //vediamo che definisce par_info utilizzando la struttura flpar
+    //basta passargli dentro filelines, inizio e fine righe.
 
     par_info fp[]={
         (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          , NULL,NULL},
@@ -378,6 +404,18 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+//anche qui questo action_param non ho capito dove lo definisce.
 int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
     // see OpenAcc/su3_measurements.h
@@ -499,6 +537,9 @@ int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELEN
 
 }
 
+
+
+
 int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
@@ -549,6 +590,7 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
     return scan_group_NV(sizeof(mcp)/sizeof(par_info),mcp, filelines, startline, endline);
 
 }
+
 
 int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
@@ -845,14 +887,14 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
             readcheck = fgets(filelines[lines_read],MAXLINELENGTH,input);
             if(readcheck != NULL){ lines_read++;
                 printf("linea %d",lines_read);
-                if(strncmp(readcheck,riga_repli,15)==0){ fscanf(input,"%d",&alloc_info.num_replicas )};
+               /* if(strncmp(readcheck,riga_repli,15)==0){ fscanf(input,"%d",&alloc_info.num_replicas );printf("ecco %d\n",alloc_info.num_replicas);}*/
             
            /* int i3=0;
             for(i3=0;i3<20;i3++){ printf("%c",readcheck[i3]);  }
             printf("%\n");*/
             }
-            
         }
+        
         fclose(input); //qui chiude il file
 
         if(0==devinfo.myrank)
@@ -923,7 +965,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     // note 'check' is reused here
     int totcheck = 0;
     for(int igroup  = 0 ; igroup < found_tags; igroup++){
-        int startline = tagpositions[igroup];
+        int startline = tagpositions[igroup]; //la startline ovviamente è data dalle posizioni dei gruppi.
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
         if(helpmode){
