@@ -1096,7 +1096,7 @@ printf("ci siamo\n"); //fino a qui va bene è corretto.
                         filelines,startline,endline);
                 break;
             case PMG_REPLICAS       :
-                check = 0;
+                check =read_replicas_numbers(rep,filelines,startline,endline) ;
                 break;
             default:
                 printf("TAG TYPE NOT RECOGNIZED\n");
