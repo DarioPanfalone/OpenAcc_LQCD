@@ -80,14 +80,6 @@ typedef struct rep_info_t{
     
 }rep_info;
 
-rep_info rep;
-
-rep.replicas_total_number=0; //default settings
-int ise=0;
-for(ise=0;ise<MAXCRLENGTH;ise++){
-    rep.cr_vet[ise]=-1;
-}
-
 
 //******************************************************************************************************************//
 
@@ -101,7 +93,25 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 
 
 int main(int argc, char* argv[]){
-
+    
+    
+   //MOD.
+   //*****************************************************************************************************************//
+    rep_info rep;
+    
+    rep.replicas_total_number=0; //default settings
+    int ise=0;
+    for(ise=0;ise<MAXCRLENGTH;ise++){
+        rep.cr_vet[ise]=-1;
+    }
+    
+//*****************************************************************************************************************//
+    
+    
+    
+    
+    
+    
     gettimeofday ( &(mc_params.start_time), NULL );
     // READ input file.
 #ifdef MULTIDEVICE
