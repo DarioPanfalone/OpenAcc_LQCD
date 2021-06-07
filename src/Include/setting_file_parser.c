@@ -32,7 +32,7 @@
 #define MAXLINES 300
 #define MAXLINELENGTH 500 // pretty long to accomodate all the comments
 
-
+#define MAXCRLENGTH 300
 
 char input_file_str[MAXLINES*MAXLINELENGTH];
 
@@ -882,12 +882,12 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
 
 int read_replicas_numbers(rep_info  rep,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
     
-    const char* c_name="cr"
+    
     int i2=0;
     
     par_info rp[]={
         
-        (par_info){(void*) &(rep.replicas_total_number;),TYPE_INT,"total number",NULL, NULL},
+        (par_info){(void*) &(rep.replicas_total_number),TYPE_INT,"total number",NULL, NULL},
         
         for(i2=0;i2<MAXCRLENGTH;i2++){
             (par_info){(void*) &(rep.cr_vet[i2]),TYPE_DOUBLE,"",1, NULL},

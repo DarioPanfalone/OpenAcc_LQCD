@@ -70,7 +70,7 @@
 
 //MOD.
 //*****************************************************************************************************************//
-#define MAXCRLENGTH 300 // pretty long to accomadate every eventual replicas.
+ // pretty long to accomadate every eventual replicas.
 
 typedef struct rep_info_t{
     

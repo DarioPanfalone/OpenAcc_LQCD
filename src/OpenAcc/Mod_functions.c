@@ -15,8 +15,7 @@
 #include <string.h>
 
 
-#define MAXLINES 300
-#define MAXLINELENGTH 500 // pretty long to accomodate all the comments
+
 
 /////funzione aggiunta//////////////////////
 //per ora la metto qui poi la sposto in struct_def.h
