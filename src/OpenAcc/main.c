@@ -90,12 +90,12 @@ int main(int argc, char* argv[]){
     
    //MOD.
    //*****************************************************************************************************************//
-    rep_info * rep;
+    rep_info  rep;
     
-    rep->replicas_total_number=0; //default settings
+    rep.replicas_total_number=0; //default settings
     int ise=0;
     for(ise=0;ise<MAXCRLENGTH;ise++){
-        rep->cr_vet[ise]=-1;
+        rep.cr_vet[ise]=-1;
     }
     
 //*****************************************************************************************************************//
@@ -141,7 +141,7 @@ int main(int argc, char* argv[]){
     ////******************************************************************************************////////
     
     /*alloc_info.num_replicas=n_replicas_reader(argv[1]); //qui definisco il numero di repliche.*/
-    alloc_info.num_replicas=rep->replicas_total_number;
+    alloc_info.num_replicas=rep.replicas_total_number;
     printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",alloc_info.num_replicas);
     
     ////******************************************************************************************////////
