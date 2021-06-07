@@ -164,8 +164,8 @@ void reorder_par_infos(int npar, par_info * par_infos ){
 
 //ovviamente a parametro gli passa par_macro_groups_names[], quindi mi basta modificare questo parametro. e anche ntagstofind.
 int scan_group_V(int ntagstofind, const char **strtofind, 
-        int *tagcount, //Vettore definito per contare i gruppi. Passato a parametro come ntagstofind.
-        int *taglines, int *tagtypes, int maxnres,
+        int *tagcount, //Vettore definito per contare i gruppi.
+        int *taglines, int *tagtypes, int maxnres, //maxres massimo numero dei risultati
         char filelines[MAXLINES][MAXLINELENGTH], 
         int startline, int endline)
 {
@@ -310,11 +310,11 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
             
             if(!found_something){
                 char word[50];
-                char riga2[20]="Replicas number";
+                /*char riga2[20]="Replicas number";*/
                 int reads = sscanf(filelines[iline],"%s", word);
-                int repli=0; //aggiunta delega al test per inserire un nuovo parametro
-                repli=strncmp(word,riga2,8);
-                if(reads==1 && repli!=0){
+                /*int repli=0; //aggiunta delega al test per inserire un nuovo parametro
+                repli=strncmp(word,riga2,8);*/
+                if(reads==1 /*&& repli!=0*/){
                     if(0==devinfo.myrank)
                         printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
                     printf("%s\n", filelines[iline]);
@@ -876,6 +876,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         helpmode = 1;
     }
 
+    
+    //in questa parte legge il file  e lo copia in taglines.
     int lines_read = 0;
     char riga_repli[20]="Replicas number";
     int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES]; //qui definisce
@@ -898,36 +900,41 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         fclose(input); //qui chiude il file
 
         if(0==devinfo.myrank)
-            printf("lines read: %d\n", lines_read);
+            printf("lines read: %d\n", lines_read); //printa il numero di linee lette.
+       
 
-
-        int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str);
+        int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str); // mi da la lunghezza totale di quanto letto.
 
         if(0==devinfo.myrank)
             printf("Written %d characters into input_file_str\n",totlen);
 
 
         // erasing comments 
-        erase_comments(filelines,lines_read);
+        erase_comments(filelines,lines_read);  //cancella i commmenti da tutte le linee.
 
-        //scanning for macro parameter families
-        found_tags = scan_group_V(NPMGTYPES,par_macro_groups_names,
+        //scanning for macro parameter families //cerca tutti itag
+        found_tags = scan_group_V(NPMGTYPES,par_macro_groups_names,  //trova i tag. //il numero di type da trovare viene definito dall'enum di sopra.
                 tagcounts,
-                tagpositions,tagtypes,MAXPMG,
+                tagpositions,tagtypes,MAXPMG, //MAXPMG é definito 20
                 filelines,0,lines_read );
 
+        
+        
+        
+        
         // see global var in /Include/fermion_parameters.
         // setting alloc_info.NDiffFlavs first
-        alloc_info.NDiffFlavs = tagcounts[PMG_FERMION];
+        alloc_info.NDiffFlavs = tagcounts[PMG_FERMION]; //tagcount PMG_Fermions è il numero di flavour
+        
         if(alloc_info.NDiffFlavs==0)
         {
-            fermions_parameters = NULL;
+            fermions_parameters = NULL; //se non trova i parametri fermionici
             if(0==devinfo.myrank){
                 printf("NO FERMIONS FOUND, ");
                 printf("SIMULATING PURE GAUGE THEORY...\n");
             }
         }
-        else fermions_parameters = (ferm_param*) malloc(alloc_info.NDiffFlavs*sizeof(ferm_param));
+        else fermions_parameters = (ferm_param*) malloc(alloc_info.NDiffFlavs*sizeof(ferm_param)); //altrimenti nullo.
     }
     else
     {   // goes into help mode
@@ -945,7 +952,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     }
 
 
-    // check if all parameter groups were found (neglecting optional goups)
+    // check if all parameter groups were found (neglecting optional goups) //qui controlla che tutti i parametri siano stati trovati.
     int check = 1;
     if(!helpmode){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
@@ -965,7 +972,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     // note 'check' is reused here
     int totcheck = 0;
     for(int igroup  = 0 ; igroup < found_tags; igroup++){
-        int startline = tagpositions[igroup]; //la startline ovviamente è data dalle posizioni dei gruppi.
+        int startline = tagpositions[igroup]; //la startline ovviamente è data dalle posizioni dei gruppi. //ovvero dalla riga dove quel gruppo si trova.
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
         if(helpmode){
@@ -1031,6 +1038,10 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 check = read_test_setting(&test_settings,
                         filelines,startline,endline);
                 break;
+            case PMG_REPLICAS:
+                check = read_test_setting(&test_settings,
+                                          filelines,startline,endline);;
+                
             default:
                 printf("TAG TYPE NOT RECOGNIZED\n");
                 return 1;
