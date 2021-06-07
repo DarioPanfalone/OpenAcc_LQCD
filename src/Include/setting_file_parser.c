@@ -876,18 +876,18 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
 
 
 
+//qui sto solo definendo una funziona
 
 
 
-
-int read_replicas_numbers(rep_info  rep,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
+int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
     
     
     int i2=0;
     
     par_info rp[]={
         
-        (par_info){(void*) &(rep.replicas_total_number),TYPE_INT,"total number",NULL, NULL},
+        (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"total number",NULL, NULL},
        
         /*
         for(i2=0;i2<MAXCRLENGTH;i2++){
