@@ -66,11 +66,27 @@
 // double level macro, necessary to stringify
 // https://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 #define xstr(s) str(s) 
-#define str(s) #s 
+#define str(s) #s
+
+//MOD.
+//*****************************************************************************************************************//
+#define MAXCRLENGTH 300 // pretty long to accomadate every eventual replicas.
+
+typedef struct rep_info_t{
+    
+    int replicas_total_number;
+    double cr_vet [MAXCRLENGTH];
+    
+    
+}rep_info;
+rep_info.replicas_total_number=0;//default settings
+int i32=0;
+for(i32=0;i32<MAXCRLENGTH;i32++){
+    rep_info.cr_vet[i32]=-1;
+}
 
 
-
-
+//******************************************************************************************************************//
 
 int conf_id_iter;
 int verbosity_lv;
