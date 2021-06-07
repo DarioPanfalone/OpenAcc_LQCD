@@ -13,6 +13,7 @@ typedef struct rep_info_t{
     
     
 }rep_info;
+extern rep_info *rep;
 
 
 extern char input_file_str[MAXLINES*MAXLINELENGTH];
