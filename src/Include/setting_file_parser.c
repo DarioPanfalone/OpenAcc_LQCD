@@ -32,6 +32,8 @@
 #define MAXLINES 300
 #define MAXLINELENGTH 500 // pretty long to accomodate all the comments
 
+
+
 char input_file_str[MAXLINES*MAXLINELENGTH];
 
 //types that can be found in an input file
@@ -42,7 +44,7 @@ const char * type_strings[]={"(int)", "(double)", "(string)" }; //vettore di str
 //qui è definita questa struct, che verrà usata per leggere i valori dal file.
 typedef struct par_info_t{
 
-    void* par;  //
+    void* par;  //The void pointer in C is a pointer which is not associated with any data types. It points to some data location in the storage means points to the address of variables.
     enum dtype type; //da il tipo
     const char* name; // nome della variabile
     const void* default_value;//il valore di default
@@ -273,7 +275,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         char parname[50];
 
                         switch(par_infos[i].type){
-                            case TYPE_INT: 
+                            case TYPE_INT: //il case che gli da scannerizza la striga con il nome e il codice.
                                 reads = sscanf(filelines[iline],
                                         "%s %d",parname,(int*)par_infos[i].par);
                                 if(reads == 2) 
@@ -610,6 +612,8 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     const char SaveAllAtEnd_comment[] = "# Set this to 0 if you want the program not to save its state at the end\n\
 # (or it may overwrite some files and you won't be able to reproduce bugs/do other things)";
     // see /Meas
+    
+    //è un vettore di par_info.
     par_info gmp[]= {
         (par_info){(void*) &(dbg_settings->use_ildg),              TYPE_INT,"UseILDG"                , (const void*) &useildg_def,NULL},
         (par_info){(void*) &(dbg_settings->input_vbl),             TYPE_INT,"VerbosityLv"            , (const void*) &input_vbl_def,NULL},
@@ -632,6 +636,10 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
 
 }
+
+
+
+
 
 int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
@@ -823,6 +831,9 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
     return res;
 
 }
+//devo solo capire dove test_info e questi type cosi sono definiti.
+
+
 
 int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
@@ -840,6 +851,9 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
 # In benchmark mode, a fake rationan approximation will be used in CG-M.\n";
 
     par_info tp[]= {
+        //ti è un puntatore a test_info.
+        
+        //qui si definisce questo vettore tp, che  ha come elementi, struct par_info e come elementi, 1 indirizzo in cui ti punta a deodoeiteration. 2 Type int, nome del coso, NULL(dovrebbe essere il default value), NULL(un eventuale commento).
         (par_info){(void*) &(ti->deoDoeIterations),       TYPE_INT,"DeoDoeIterations",NULL, NULL},
         (par_info){(void*) &(ti->multiShiftInverterRepetitions),TYPE_INT,"MultiShiftInverterRepetitions",NULL, NULL},
         (par_info){(void*) &(ti->fakeShift),TYPE_DOUBLE,"FakeShift",NULL,fakeShift_comment},
@@ -856,6 +870,54 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
     return res;
 
 }
+//********************************************************************************************************************************************//
+//********************************************************************************************************************************************//
+
+/*
+ #define MAXCRLENGTH 300 // pretty long to accomadate every eventual replicas.
+
+typedef struct rep_info_t{
+    
+    int replicas_total_number;
+    double cr_vet [MAXCRLENGTH];
+    
+    
+}rep_info;
+
+
+
+
+
+
+int read_replicas_numbers(rep_info * rep,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
+    
+    const char* c_name="cr"
+    int i2=0;
+    
+    par_info rp[]={
+        
+        (par_info){(void*) &(rep->replicas_total_number;),TYPE_INT,"total number",NULL, NULL},
+        
+        for(i2=0;i2<MAXCRLENGTH;i2++){
+            (par_info){(void*) &(rep->cr_vet[i2]),TYPE_DOUBLE,"",1, NULL},
+       
+        
+        }
+        
+    };
+    
+    
+    int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, endline);
+    
+    
+    return res;
+}
+*/
+//********************************************************************************************************************************************//
+//********************************************************************************************************************************************//
+
+
+
 
 //LE FUNZIONI PRECEDENTI INVECE LEGGONO E STAMPANO A VIDEO.
 //QUESTA FUNZIONE LEGGE DA FILE E DA IL VALORE AD ALLOC_INFO.
@@ -971,8 +1033,10 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     int fermion_count = 0;
     // note 'check' is reused here
     int totcheck = 0;
+    
+    //qui inizia un grande for dove si analizzano tutti i gruppi di variabili.
     for(int igroup  = 0 ; igroup < found_tags; igroup++){
-        int startline = tagpositions[igroup]; //la startline ovviamente è data dalle posizioni dei gruppi. //ovvero dalla riga dove quel gruppo si trova.
+        int startline = tagpositions[igroup]; //la startline ovviamente è data dalle posizioni dei gruppi. //ovvero dalla riga dove quel gruppo si trova. A ogni iterazione la startline cambia.
         int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
         if(helpmode){
@@ -986,7 +1050,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                     par_macro_groups_names[tagtypes[igroup]],
                     startline, endline);
         }
-
+printf("ci siamo\n"); //fino a qui va bene è corretto.
+        printf("e %d\n",tagtypes[igroup]);
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
                 check = read_action_info(&act_params,filelines,startline,endline);
@@ -1034,20 +1099,19 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 check = read_inv_tricks_info(&inverter_tricks, 
                         filelines,startline,endline);
                 break;
-            case PMG_TESTS:
+            case PMG_TESTS           :
                 check = read_test_setting(&test_settings,
                         filelines,startline,endline);
                 break;
-            case PMG_REPLICAS:
-                check = read_test_setting(&test_settings,
-                                          filelines,startline,endline);;
-                
+            case PMG_REPLICAS       :
+                check = 0;
+                break;
             default:
                 printf("TAG TYPE NOT RECOGNIZED\n");
                 return 1;
                 break;
         }
-        if(check)
+        if(check) //check diverso da 0.
             if(0==devinfo.myrank)
                 printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
         totcheck += check;
