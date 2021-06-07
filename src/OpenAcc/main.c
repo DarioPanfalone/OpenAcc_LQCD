@@ -135,13 +135,13 @@ int main(int argc, char* argv[]){
     }
 
 
-    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1],&rep); //il nome del file è argv[1];
+    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]); //il nome del file è argv[1];
     
     ////******************************************************************************************////////
     ////******************************************************************************************////////
     
     /*alloc_info.num_replicas=n_replicas_reader(argv[1]); //qui definisco il numero di repliche.*/
-    alloc_info.num_replicas=rep->replicas_total_number;
+    alloc_info.num_replicas=rep.replicas_total_number;
     printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",alloc_info.num_replicas);
     
     ////******************************************************************************************////////

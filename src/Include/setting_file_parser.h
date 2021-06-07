@@ -17,7 +17,7 @@ typedef struct rep_info_t{
 
 extern char input_file_str[MAXLINES*MAXLINELENGTH];
 
-int set_global_vars_and_fermions_from_input_file(const char* input_filename,rep_info * rep);
+int set_global_vars_and_fermions_from_input_file(const char* input_filename);
 
 #endif
 
