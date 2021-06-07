@@ -79,10 +79,11 @@ typedef struct rep_info_t{
     
     
 }rep_info;
+
 rep_info.replicas_total_number=0;//default settings
-int i32=0;
-for(i32=0;i32<MAXCRLENGTH;i32++){
-    rep_info.cr_vet[i32]=-1;
+int ise=0;
+for(ise=0;ise<MAXCRLENGTH;ise++){
+    rep_info.cr_vet[ise]=-1;
 }
 
 
