@@ -888,12 +888,13 @@ int read_replicas_numbers(rep_info  rep,char filelines[MAXLINES][MAXLINELENGTH],
     par_info rp[]={
         
         (par_info){(void*) &(rep.replicas_total_number),TYPE_INT,"total number",NULL, NULL},
-        
+       
+        /*
         for(i2=0;i2<MAXCRLENGTH;i2++){
             (par_info){(void*) &(rep.cr_vet[i2]),TYPE_DOUBLE,"",1, NULL},
        
         
-        }
+        }*/
         
     };
     
