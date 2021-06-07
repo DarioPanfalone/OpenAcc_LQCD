@@ -80,10 +80,12 @@ typedef struct rep_info_t{
     
 }rep_info;
 
-rep_info.replicas_total_number=0;//default settings
+rep_info rep;
+
+rep.replicas_total_number=0; //default settings
 int ise=0;
 for(ise=0;ise<MAXCRLENGTH;ise++){
-    rep_info.cr_vet[ise]=-1;
+    rep.cr_vet[ise]=-1;
 }
 
 
