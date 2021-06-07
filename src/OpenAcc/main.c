@@ -135,7 +135,7 @@ int main(int argc, char* argv[]){
     }
 
 
-    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]); //il nome del file è argv[1];
+    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1],&rep); //il nome del file è argv[1];
     
     ////******************************************************************************************////////
     ////******************************************************************************************////////

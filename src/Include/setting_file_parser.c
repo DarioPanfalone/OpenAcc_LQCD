@@ -914,7 +914,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
 //LE FUNZIONI PRECEDENTI INVECE LEGGONO E STAMPANO A VIDEO.
 //QUESTA FUNZIONE LEGGE DA FILE E DA IL VALORE AD ALLOC_INFO.
 
-int set_global_vars_and_fermions_from_input_file(const char* input_filename)
+int set_global_vars_and_fermions_from_input_file(const char* input_filename,rep_info * rep)
 {
 
     // Opening filenames and reading it
@@ -1161,7 +1161,7 @@ printf("ci siamo\n"); //fino a qui va bene è corretto.
 
 
     }
-    printf("ta da:%d\n",rep.replicas_total_number);
+    printf("ta da:%d\n",rep->replicas_total_number);
     
     return 0;
 
