@@ -246,7 +246,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
         // necessary step if a parameter name is contained 
         // in another parameter name.
 
-        reorder_par_infos(npars, par_infos);
+        /*reorder_par_infos(npars, par_infos);*/
 
 
         int * rc = (int *) malloc(npars*sizeof(int));
