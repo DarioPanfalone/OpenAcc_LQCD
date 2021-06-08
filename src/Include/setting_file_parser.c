@@ -903,6 +903,13 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
        printf("%d\n",re->replicas_total_number);
   
     alloc_info.num_replicas=re->replicas_total_number;
+    
+    char sec [10];
+    char sec2[10];
+    sec=10;
+    sec2="noo";
+    strcat(sec,sec2);
+    
   /*
     par_info *rp2 ;
     rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
