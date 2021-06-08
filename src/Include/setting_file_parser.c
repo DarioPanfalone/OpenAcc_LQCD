@@ -900,14 +900,29 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         
         }*/
         
+        
     };
     
     
-    int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, endline);
+    /*int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, endline);*/
+    int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, startline);
     
        printf("%d\n",re->replicas_total_number);
     alloc_info.num_replicas=re->replicas_total_number;
     
+    
+    par_info rp2[]={
+        for(i2=0;i2<alloc_info.num_replicas){
+            
+            (par_info){(void*) &(re->cr_vet[i2]),TYPE_INT,"cr",1, NULL},
+        }
+        
+        
+    };
+    
+     int res = scan_group_NV(sizeof(rp2)/sizeof(par_info),rp2, filelines, startline+1, endline);
+    
+     printf("%d  new\n",re->replicas_total_number);
     return res;
 }
 
@@ -983,7 +998,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         
         for(i2=0;i2<MAXCRLENGTH;i2++){
             rep->cr_vet[i2]=-1;
-            printf("%f\n",rep->cr_vet[i2]);
+            
             
         }
         
