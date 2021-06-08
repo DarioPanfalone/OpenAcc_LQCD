@@ -864,7 +864,7 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
     };
 
     // from here on, you should not have to modify anything.
-    printf("%d\n",sizeof(tp)/sizeof(par_info));
+ 
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
     if(!res) ti->parametersAreSet = 1; 
@@ -900,7 +900,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         
     };
     
-    
+       printf("%d\n",sizeof(rp)/sizeof(par_info));
     int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, endline);
     
     
