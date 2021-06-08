@@ -905,9 +905,9 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     alloc_info.num_replicas=re->replicas_total_number;
     
     char sec [10];
-    char sec2[10];
+    char sec2[10]="noo";
     sec=10;
-    sec2="noo";
+    
     strcat(sec,sec2);
     
   /*
