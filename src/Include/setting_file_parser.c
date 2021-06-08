@@ -910,7 +910,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   
     par_info *rp2 ;
     rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
-      printf("%f\n",re->cr_vet[i2]);
+   
     char str[9];
     
        for(i2=0;i2<(alloc_info.num_replicas);i2++){
@@ -928,7 +928,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
        }
     startline=startline+2;
     
-    /*
+    
     for(i2=0;i2<alloc_info.num_replicas;i2++){
     
   int res = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, startline+2);
@@ -939,8 +939,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   
    
     
-     int res = scan_group_NV(sizeof(rp2)/sizeof(par_info),rp2, filelines, startline+2, endline);
-    */
+ 
      printf("%d  new\n",re->replicas_total_number);
     return res;
 }
