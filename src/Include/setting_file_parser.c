@@ -910,7 +910,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   
     par_info *rp2 ;
     rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
-    
+      printf("%f\n",re->cr_vet[i2]);
  
        for(i2=0;i2<(alloc_info.num_replicas);i2++){
            
@@ -1013,7 +1013,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         
         for(i2=0;i2<MAXCRLENGTH;i2++){
             rep->cr_vet[i2]=-1;
-            
+             printf("%f\n",rep->cr_vet[i2]);
             
         }
         
