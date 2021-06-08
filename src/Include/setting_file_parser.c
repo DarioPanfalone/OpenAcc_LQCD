@@ -975,7 +975,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
         
         
-        rep = (rep*) malloc(sizeof(rep_info));
+       /* rep = (rep*) malloc(sizeof(rep_info));*/
         
         // see global var in /Include/fermion_parameters.
         // setting alloc_info.NDiffFlavs first
@@ -1097,7 +1097,7 @@ printf("ci siamo\n"); //fino a qui va bene è corretto.
                         filelines,startline,endline);
                 break;
             case PMG_REPLICAS       :
-                check =read_replicas_numbers(&rep,filelines,startline,endline) ;
+                check =read_replicas_numbers(rep,filelines,startline,endline) ;
                 break;
             default:
                 printf("TAG TYPE NOT RECOGNIZED\n");
