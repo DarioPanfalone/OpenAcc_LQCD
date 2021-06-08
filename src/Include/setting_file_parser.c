@@ -1099,6 +1099,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 break;
             case PMG_REPLICAS       :
                 check =read_replicas_numbers(&rep,filelines,startline,endline) ;
+                printf("%d\n",rep->replicas_total_number);
                 break;
             default:
                 printf("TAG TYPE NOT RECOGNIZED\n");
