@@ -911,11 +911,11 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     par_info *rp2 ;
     rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
     
- /*
+ 
        for(i2=0;i2<(alloc_info.num_replicas);i2++){
            
            rp2[i2].par= &(re->cr_vet[i2]);
-           
+           printf("%d\n",re->cr_vet[i2]);
            rp2[i2].type=TYPE_DOUBLE;
            rp2[i2].name="cr_value";
            rp2[i2].default_value=NULL;
@@ -924,7 +924,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
        }
     startline=startline+2;
     
-    
+    /*
     for(i2=0;i2<alloc_info.num_replicas;i2++){
     
   int res = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, startline+2);
