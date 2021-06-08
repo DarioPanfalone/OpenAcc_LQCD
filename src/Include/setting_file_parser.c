@@ -983,7 +983,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         
         for(i2=0;i2<MAXCRLENGTH;i2++){
             rep->cr_vet[i2]=-1;
-            printf("%f\n",cr_vet[i2])
+            printf("%f\n",rep->cr_vet[i2])
             
         }
         
