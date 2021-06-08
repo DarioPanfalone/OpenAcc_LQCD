@@ -888,7 +888,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     par_info rp[]={
         
-        (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"total number",NULL, NULL},
+        (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"totalnumber",NULL, NULL},
        
         /*
         for(i2=0;i2<MAXCRLENGTH;i2++){
