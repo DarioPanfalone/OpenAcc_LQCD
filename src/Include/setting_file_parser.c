@@ -975,7 +975,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
         
         
-        
+        rep = (rep*) malloc(sizeof(rep_info));
         
         // see global var in /Include/fermion_parameters.
         // setting alloc_info.NDiffFlavs first
