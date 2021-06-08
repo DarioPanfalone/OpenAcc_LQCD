@@ -917,9 +917,9 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     startline=startline+2;
     
     
-    while(startline<endline){
+    for(i2=0;i2<replicas_total_number;i2++){
     
-  int res = scan_group_NV(sizeof(rp2)/sizeof(par_info),rp2, filelines, startline, startline+1);
+  int res = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, startline+1);
         startline++;
         
     }
