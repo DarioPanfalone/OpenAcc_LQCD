@@ -4,16 +4,8 @@
 #define MAXLINES 300
 #define MAXLINELENGTH 500 // pretty long to accomodate all the comments
 
-#define MAXCRLENGTH 300
 
-typedef struct rep_info_t{
-    
-    int replicas_total_number;
-    double cr_vet [MAXCRLENGTH];
-    
-    
-}rep_info;
-extern rep_info *rep;
+
 
 
 extern char input_file_str[MAXLINES*MAXLINELENGTH];

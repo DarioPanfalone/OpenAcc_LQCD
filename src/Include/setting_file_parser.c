@@ -15,6 +15,7 @@
 #include "./debug.h"
 #include "./fermion_parameters.h"
 #include "./hash.h"
+#include "./rep_info.h"
 #include "./montecarlo_parameters.h"
 #include "./setting_file_parser.h"
 #include "./inverter_tricks.h"
@@ -933,7 +934,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     
     //in questa parte legge il file  e lo copia in taglines.
     int lines_read = 0;
-    char riga_repli[20]="Replicas number";
+  /*  char riga_repli[20]="Replicas number";*/
     int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES]; //qui definisce
     int found_tags = 0;
     fermions_parameters = NULL;
