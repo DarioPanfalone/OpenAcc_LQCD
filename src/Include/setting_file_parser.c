@@ -1162,7 +1162,7 @@ printf("ci siamo\n"); //fino a qui va bene è corretto.
 
 
     }
-    printf("ta da:%d\n",rep->replicas_total_number);
+    printf("ta da:%d\n",mc_params->ntraj);
     free(rep);
     return 0;
 
