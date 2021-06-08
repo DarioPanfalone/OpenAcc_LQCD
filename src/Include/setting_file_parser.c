@@ -975,7 +975,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
         
         printf("last\n");
-        rep = malloc(sizeof(rep_info)); //funziona?
+        rep =(rep_info*) malloc(sizeof(rep_info)); //funziona?
         
         // see global var in /Include/fermion_parameters.
         // setting alloc_info.NDiffFlavs first
@@ -1162,7 +1162,7 @@ printf("ci siamo\n"); //fino a qui va bene è corretto.
 
 
     }
-    printf("ta da:%d\n",inverter_tricks->singlePInvAccelMultiInv);
+  /*  printf("ta da:%d\n",rep->replicas_total_number);*/
     return 0;
 
 }
