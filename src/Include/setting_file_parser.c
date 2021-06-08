@@ -891,16 +891,16 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         
         (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"totalnumber",NULL, NULL},
        
-        /*
+        
         for(i2=0;i2<MAXCRLENGTH;i2++){
             (par_info){(void*) &(rep.cr_vet[i2]),TYPE_DOUBLE,"",1, NULL},
        
         
-        }*/
+        }
         
     };
     
-       printf("%d\n",re->replicas_total_number);
+    
     int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, endline);
     
        printf("%d\n",re->replicas_total_number);
@@ -1099,7 +1099,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 break;
             case PMG_REPLICAS       :
                 check =read_replicas_numbers(&rep,filelines,startline,endline) ;
-                printf("%d\n",rep->replicas_total_number);
+              
                 break;
             default:
                 printf("TAG TYPE NOT RECOGNIZED\n");
