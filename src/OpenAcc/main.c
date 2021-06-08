@@ -22,6 +22,7 @@
 #include "../Include/memory_wrapper.h"
 #include "../Include/setting_file_parser.h"
 #include "../Include/tell_geom_defines.h"
+#include "../Include/rep_info.h"
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
 #include "../Meas/polyakov.h"
