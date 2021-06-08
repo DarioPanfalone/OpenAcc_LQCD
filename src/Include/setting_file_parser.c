@@ -915,7 +915,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
        for(i2=0;i2<(alloc_info.num_replicas);i2++){
            
            rp2[i2].par= &(re->cr_vet[i2]);
-           printf("%d\n",re->cr_vet[i2]);
+           printf("%f\n",re->cr_vet[i2]);
            rp2[i2].type=TYPE_DOUBLE;
            rp2[i2].name="cr_value";
            rp2[i2].default_value=NULL;
