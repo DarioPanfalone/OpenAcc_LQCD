@@ -925,6 +925,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     // Opening filenames and reading it
     int helpmode = 0;
+    int i2=0;
     char filelines[MAXLINES][MAXLINELENGTH]; //questi sono delle stringhe.
     FILE *input = fopen(input_filename,"r"); //questo ovviamente apre il file
     if (input == NULL){
@@ -939,7 +940,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     
     //in questa parte legge il file  e lo copia in taglines.
     int lines_read = 0;
-  /*  char riga_repli[20]="Replicas number";*/
+
     int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES]; //qui definisce
     int found_tags = 0;
     fermions_parameters = NULL;
@@ -949,11 +950,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
             readcheck = fgets(filelines[lines_read],MAXLINELENGTH,input);
             if(readcheck != NULL){ lines_read++;
                 printf("linea %d",lines_read);
-               /* if(strncmp(readcheck,riga_repli,15)==0){ fscanf(input,"%d",&alloc_info.num_replicas );printf("ecco %d\n",alloc_info.num_replicas);}*/
-            
-           /* int i3=0;
-            for(i3=0;i3<20;i3++){ printf("%c",readcheck[i3]);  }
-            printf("%\n");*/
+        
             }
         }
         
@@ -981,6 +978,14 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         
         printf("last\n");
         rep =(rep_info*) malloc(sizeof(rep_info)); //funziona?
+        
+        //inizializza rep
+        
+        for(i2=0;i2<MAXCRLENGTH;i2++){
+            rep->cr_vet[i2]=-1;
+            printf("%f\n",cr_vet[i2])
+            
+        }
         
         // see global var in /Include/fermion_parameters.
         // setting alloc_info.NDiffFlavs first
