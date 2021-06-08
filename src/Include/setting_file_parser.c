@@ -1139,7 +1139,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                         filelines,startline,endline);
                 break;
             case PMG_REPLICAS       :
-                check = read_replicas_numbers(&rep,filelines,startline,endline) ;
+                check = read_replicas_numbers(rep,filelines,startline,endline) ;
               
                 break;
             default:
