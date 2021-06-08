@@ -906,6 +906,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, endline);
     
        printf("%d\n",re->replicas_total_number);
+    alloc_info.num_replicas=rep->replicas_total_number;
     return res;
 }
 
