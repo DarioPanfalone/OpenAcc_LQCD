@@ -904,7 +904,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     alloc_info.num_replicas=re->replicas_total_number;
   
     par_info *rp2 ;
-    rp2=malloc(alloc_info.num_replicas*sizeof(par_info))
+    rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
     
 
        for(i2=0;i2<(alloc_info.num_replicas);i2++){
