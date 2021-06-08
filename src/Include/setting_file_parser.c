@@ -912,10 +912,10 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     
    par_info rp2[]={
-        for(i2=0;i2<alloc_info.num_replicas){
+       for(i2=0;i2<alloc_info.num_replicas;i2++){
             
             (par_info){(void*) &(re->cr_vet[i2]),TYPE_INT,"cr",1, NULL},
-        };
+        }
         
         
     };
