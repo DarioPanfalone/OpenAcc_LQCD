@@ -1164,6 +1164,7 @@ printf("ci siamo\n"); //fino a qui va bene è corretto.
     }
     printf("ta da:%d\n",mc_params.ntraj);
     free(rep);
+    printf("ecc\n");
     return 0;
 
 }
