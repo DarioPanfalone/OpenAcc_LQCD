@@ -1046,8 +1046,9 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                     par_macro_groups_names[tagtypes[igroup]],
                     startline, endline);
         }
-
-    
+        printf("se\n");
+        alloc_info.num_replicas=rep->replicas_total_number;
+       printf("se2\n");
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
                 check = read_action_info(&act_params,filelines,startline,endline);
