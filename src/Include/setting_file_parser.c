@@ -914,7 +914,13 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            rp2[i2].comment=NULL;
            
        }
+    
+    while(startline<endline){
+    
+  int res = scan_group_NV(sizeof(rp2)/sizeof(par_info),rp2, filelines, startline+2, startline+3);
+        startline++
         
+    }
         
   
     /*
