@@ -1163,6 +1163,7 @@ printf("ci siamo\n"); //fino a qui va bene è corretto.
 
     }
     printf("ta da:%d\n",rep->replicas_total_number);
+    free(rep);
     return 0;
 
 }
