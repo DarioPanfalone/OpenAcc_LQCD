@@ -915,7 +915,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         for(i2=0;i2<alloc_info.num_replicas){
             
             (par_info){(void*) &(re->cr_vet[i2]),TYPE_INT,"cr",1, NULL},
-        }
+        };
         
         
     };
