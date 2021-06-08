@@ -864,6 +864,7 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
     };
 
     // from here on, you should not have to modify anything.
+    printf("%d\n",sizeof(tp)/sizeof(par_info));
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
     if(!res) ti->parametersAreSet = 1; 
@@ -1043,8 +1044,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                     par_macro_groups_names[tagtypes[igroup]],
                     startline, endline);
         }
-printf("ci siamo\n"); //fino a qui va bene è corretto.
-        printf("e %d\n",tagtypes[igroup]);
+
+    
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
                 check = read_action_info(&act_params,filelines,startline,endline);
