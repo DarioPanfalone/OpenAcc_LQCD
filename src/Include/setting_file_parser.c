@@ -891,14 +891,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         
         (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"totalnumber",NULL, NULL},
        
-        
-        //mettigli un While!!.
-        /*
-        for(i2=0;i2<MAXCRLENGTH;i2++){
-            (par_info){(void*) &(rep.cr_vet[i2]),TYPE_DOUBLE,"",1, NULL},
-       
-        
-        }*/
+
         
         
     };
@@ -909,19 +902,24 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
        printf("%d\n",re->replicas_total_number);
     alloc_info.num_replicas=re->replicas_total_number;
+  
+    par_info rp2[MAXCRLENGTH];
     
-    
-   par_info rp2[]={
-       for(i2=0;i2<alloc_info.num_replicas;i2++){
-            
-            (par_info){(void*) &(re->cr_vet[i2]),TYPE_INT,"cr",1, NULL},
-        }
+
+       for(i2=0;i2<MAXCRLENGTH;i2++){
+           
+           rp2[i2].par= &(re->cr_vet[i2]);
+           rp2[i2].type=TYPE_DOUBLE;
+           rp2[i2].default_value=NULL;
+           rp2[i2].comment=NULL;
+           
+       }
         
         
     };
     /*
     
-     int res = scan_group_NV(sizeof(rp2)/sizeof(par_info),rp2, filelines, startline+1, endline);
+     int res = scan_group_NV(sizeof(rp2)/sizeof(par_info),rp2, filelines, startline+2, endline);
     
      printf("%d  new\n",re->replicas_total_number);*/
     return res;
