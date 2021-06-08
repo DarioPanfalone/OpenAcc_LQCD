@@ -1048,6 +1048,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         }
         printf("se\n");
         alloc_info.num_replicas=rep->replicas_total_number;
+        printf("%d\n",rep->replicas_total_number);
        printf("se2\n");
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
@@ -1101,7 +1102,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                         filelines,startline,endline);
                 break;
             case PMG_REPLICAS       :
-                check =read_replicas_numbers(&rep,filelines,startline,endline) ;
+                check = read_replicas_numbers(&rep,filelines,startline,endline) ;
               
                 break;
             default:
@@ -1168,7 +1169,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     }
     printf("ta da:%d\n",mc_params.ntraj);
-    alloc_info.num_replicas=rep->replicas_total_number;
+    /*alloc_info.num_replicas=rep->replicas_total_number;*/
+    
    /* free(rep);*/
     printf("ecc\n");
     return 0;
