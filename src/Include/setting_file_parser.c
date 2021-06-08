@@ -1206,7 +1206,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
     }
    
-    /*alloc_info.num_replicas=rep->replicas_total_number;*/
+    alloc_info.num_replicas=rep->replicas_total_number;
     
    /* free(rep);*/
     printf("ecc\n");
