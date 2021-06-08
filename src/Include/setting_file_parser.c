@@ -901,9 +901,9 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   
     
        printf("%d\n",re->replicas_total_number);
-  /*
-    alloc_info.num_replicas=re->replicas_total_number;
   
+    alloc_info.num_replicas=re->replicas_total_number;
+  /*
     par_info *rp2 ;
     rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
     
@@ -1201,7 +1201,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 
 
     }
-    printf("ta da:%d\n",mc_params.ntraj);
+   
     /*alloc_info.num_replicas=rep->replicas_total_number;*/
     
    /* free(rep);*/
