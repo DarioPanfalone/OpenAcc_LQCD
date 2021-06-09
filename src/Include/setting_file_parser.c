@@ -886,7 +886,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     
     int i2=0;
-    
+
     par_info rp[]={
         
         (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"totalnumber",NULL, NULL},
@@ -932,7 +932,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
  
     
-  int res = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
+  int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
 
    
 
