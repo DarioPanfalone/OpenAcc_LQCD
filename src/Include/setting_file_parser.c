@@ -905,7 +905,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     alloc_info.num_replicas=re->replicas_total_number;
 
     
- 
+    re->cr_vet=malloc(alloc_info.num_replicas*sizeof(double));
     
   
     par_info *rp2 ;
@@ -932,7 +932,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            
        }
     startline=startline+1;
-    printf("startline: %d\n",startline);
+    
  
  
 
@@ -1020,12 +1020,12 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         rep =(rep_info*) malloc(sizeof(rep_info)); //funziona?
         
         //inizializza rep
-        
+        /*
         for(i2=0;i2<MAXCRLENGTH;i2++){
             rep->cr_vet[i2]=-1;
              /*printf("%f\n",rep->cr_vet[i2]);*/
             
-        }
+        }*/
         
         // see global var in /Include/fermion_parameters.
         // setting alloc_info.NDiffFlavs first
