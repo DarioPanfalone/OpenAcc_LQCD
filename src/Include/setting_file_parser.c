@@ -911,7 +911,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     par_info *rp2 ;
     rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
    
-    char str[10];
+    char str[10];//uno in più perchè deve avere il carattere di fine stringa.
     
        for(i2=0;i2<(alloc_info.num_replicas);i2++){
            
@@ -928,8 +928,8 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            
        }
     startline=startline+2;
-    
-    
+    printf("startline: %d\n",startline);
+    printf("%s  %s  %s",rp2[i0].name,rp2[i1].name,rp2[i2].name);
  
     
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
