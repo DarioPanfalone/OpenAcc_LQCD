@@ -143,8 +143,12 @@ int main(int argc, char* argv[]){
     
     /*alloc_info.num_replicas=n_replicas_reader(argv[1]); //qui definisco il numero di repliche.*/
     /*alloc_info.num_replicas=rep->replicas_total_number;*/
-    printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",alloc_info.num_replicas);
+   
     printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",rep->replicas_total_number);
+    int i3=0;
+    for(i3;i3<alloc_info.num_replicas;i3++){
+        printf("c %d: %f",i3,rep->cr_vet[i3]);
+    }
     ////******************************************************************************************////////
     ////******************************************************************************************////////
 
