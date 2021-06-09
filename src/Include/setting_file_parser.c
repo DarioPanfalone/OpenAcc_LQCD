@@ -921,7 +921,8 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            
            
            snprintf(str,10,"cr_value%d",i2);
-           rp2[i2].name=str;
+           /*rp2[i2].name=str;*/
+           strcpy(rp2[i2].name,str);
             printf("%s\n",rp2[i2].name);
            printf("%s\n",str);
            rp2[i2].default_value=NULL;
@@ -932,6 +933,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     printf("startline: %d\n",startline);
     printf("%s  %s  %s",rp2[0].name,rp2[1].name,rp2[2].name);
  
+
     
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
 
@@ -1019,7 +1021,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         
         for(i2=0;i2<MAXCRLENGTH;i2++){
             rep->cr_vet[i2]=-1;
-             printf("%f\n",rep->cr_vet[i2]);
+             /*printf("%f\n",rep->cr_vet[i2]);*/
             
         }
         
