@@ -19,6 +19,7 @@
 #include "../Meas/measure_topo.h"
 
 
+
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 global_vec3_soa  * ferm_rw; // a global fermion, only for read-write

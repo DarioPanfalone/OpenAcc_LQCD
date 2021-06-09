@@ -147,7 +147,8 @@ int main(int argc, char* argv[]){
     printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",rep->replicas_total_number);
     int i3=0;
     for(i3;i3<alloc_info.num_replicas;i3++){
-        printf("c %d: %f",i3,rep->cr_vet[i3]);
+        printf("Ecco i valori dei cr:\n");
+        printf("c%d: %f\n",i3,rep->cr_vet[i3]);
     }
     ////******************************************************************************************////////
     ////******************************************************************************************////////
@@ -902,6 +903,8 @@ int main(int argc, char* argv[]){
     printf("MPI%02d: Double precision free [EXTENDED]\n", devinfo.myrank);
     mem_free_extended();
 
+    //MOD//////
+    free(rep);
 
     if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
         printf("MPI%02d: Single precision free [CORE]\n", devinfo.myrank);
