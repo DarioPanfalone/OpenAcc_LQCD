@@ -922,19 +922,18 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            
            snprintf(str,10,"cr_value%d",i2);
            
-           printf("children of the revolution!\n");
+           
             rp2[i2].name=malloc(sizeof(char)*20);
            /*rp2[i2].name=str;*/ //non puoi eguagliare due stringhe perchè sono due puntatori e tu vuoi modificare invece il contenuto della stringa-
            strcpy(rp2[i2].name,str);
-            printf("%s\n",rp2[i2].name);
-           printf("%s\n",str);
+          
            rp2[i2].default_value=NULL;
            rp2[i2].comment=NULL;
            
        }
     startline=startline+2;
     printf("startline: %d\n",startline);
-    printf("%s  %s  %s",rp2[0].name,rp2[1].name,rp2[2].name);
+   /* printf("%s  %s  %s\n",rp2[0].name,rp2[1].name,rp2[2].name);*/
  
 
     
