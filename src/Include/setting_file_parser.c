@@ -929,7 +929,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
        }
     startline=startline+2;
     printf("startline: %d\n",startline);
-    printf("%s  %s  %s",rp2[i0].name,rp2[i1].name,rp2[i2].name);
+    printf("%s  %s  %s",rp2[0].name,rp2[1].name,rp2[2].name);
  
     
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
