@@ -903,8 +903,8 @@ int main(int argc, char* argv[]){
     printf("MPI%02d: Double precision free [EXTENDED]\n", devinfo.myrank);
     mem_free_extended();
 
-    //MOD//////
-    free(rep);
+
+    
 
     if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
         printf("MPI%02d: Single precision free [CORE]\n", devinfo.myrank);
