@@ -931,7 +931,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            rp2[i2].comment=NULL;
            
        }
-    startline=startline+2;
+    startline=startline+1;
     printf("startline: %d\n",startline);
    /* printf("%s  %s  %s\n",rp2[0].name,rp2[1].name,rp2[2].name);*/
  
