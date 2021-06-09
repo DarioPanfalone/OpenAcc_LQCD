@@ -1,7 +1,7 @@
 #ifndef rep_info_h
 #define rep_info_h
 
-/*#define MAXCRLENGTH 300*/
+
 
 typedef struct rep_info_t{
     
