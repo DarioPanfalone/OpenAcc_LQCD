@@ -246,7 +246,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
         // necessary step if a parameter name is contained 
         // in another parameter name.
 
-        /*reorder_par_infos(npars, par_infos);*/
+        reorder_par_infos(npars, par_infos);
 
 
         int * rc = (int *) malloc(npars*sizeof(int));
@@ -922,6 +922,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            
            snprintf(str,9,"cr_value%d",i2);
            rp2[i2].name=str;
+           printf("%s\n",str);
            rp2[i2].default_value=NULL;
            rp2[i2].comment=NULL;
            
