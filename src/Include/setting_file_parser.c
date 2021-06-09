@@ -922,6 +922,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            
            snprintf(str,10,"cr_value%d",i2);
            rp2[i2].name=str;
+            printf("%s\n",rp2[i2].name);
            printf("%s\n",str);
            rp2[i2].default_value=NULL;
            rp2[i2].comment=NULL;
