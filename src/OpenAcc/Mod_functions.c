@@ -78,7 +78,7 @@ int n_replicas_reader(const char* input_filename){
 */
 
 //this function does actually nothing useful, I wrote it down just for studying how bc have been implementated.
-void counter size function(int d1,int d2, int d3, int d4){
+void counter_size_function(int d1,int d2, int d3, int d4){
     int id=0;
     for(d3=0; d3<nd3; d3++) {
         for(d2=0; d2<nd2; d2++) {
@@ -92,6 +92,6 @@ void counter size function(int d1,int d2, int d3, int d4){
         }
     }
     
-    
+    return;
 }
 
