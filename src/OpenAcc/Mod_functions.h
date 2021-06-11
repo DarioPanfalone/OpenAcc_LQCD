@@ -19,7 +19,7 @@
 void init_k(su3_soa * conf,int c_r);
 int init_k_test(su3_soa *conf_acc,int c_r);
 int n_replicas_reader(const char* input_filename);
-counter size function(int d1,int d2, int d3, int d4);
+void counter size function(int d1,int d2,int d3,int d4);
 
 #endif /* Mod_functions_h */
 
