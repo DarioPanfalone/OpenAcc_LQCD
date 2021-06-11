@@ -144,7 +144,7 @@ int main(int argc, char* argv[]){
     }
     
     
-    printf("%d\n",nd0);
+    counter_size_function(nd0,nd1,nd2,nd3);
     
     
     
