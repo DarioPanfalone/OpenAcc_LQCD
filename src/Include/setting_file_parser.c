@@ -313,11 +313,10 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
             
             if(!found_something){
                 char word[50];
-                /*char riga2[20]="Replicas number";*/
+
                 int reads = sscanf(filelines[iline],"%s", word);
-                /*int repli=0; //aggiunta delega al test per inserire un nuovo parametro
-                repli=strncmp(word,riga2,8);*/
-                if(reads==1 /*&& repli!=0*/){
+               
+                if(reads==1){
                     if(0==devinfo.myrank)
                         printf("line: %d, ERROR, parameter %s not recognized\n",iline+1,word);
                     printf("%s\n", filelines[iline]);
@@ -924,7 +923,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            
            
             rp2[i2].name=malloc(sizeof(char)*20);
-           /*rp2[i2].name=str;*/ //non puoi eguagliare due stringhe perchè sono due puntatori e tu vuoi modificare invece il contenuto della stringa-
+         //non puoi eguagliare due stringhe perchè sono due puntatori e tu vuoi modificare invece il contenuto della stringa-
            strcpy(rp2[i2].name,str);
           
            rp2[i2].default_value=NULL;
@@ -946,7 +945,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
    
     
  
-     printf("%d  new\n",re->replicas_total_number);
+    
     free(rp2);
     return res;
 }
@@ -1213,7 +1212,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
   
     
   
-    printf("ecc\n");
+
     return 0;
 
 }

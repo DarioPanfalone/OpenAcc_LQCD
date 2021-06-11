@@ -209,6 +209,7 @@ static inline int gl_to_gl_snum(int gl_0, int gl_1, int gl_2, int gl_3){
 }
 
 #pragma acc routine seq
+//accesso al sito del reticolo. Lattice site access function.
 static inline int snum_acc(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
 // local'n'halo coordinates to lnh 'snum' index
  

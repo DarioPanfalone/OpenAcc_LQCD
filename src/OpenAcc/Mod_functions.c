@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "./geometry.h"
+#include "../Mpi/multidev.h"
 
 
 
@@ -74,3 +76,22 @@ int n_replicas_reader(const char* input_filename){
     return value_nr;
 }
 */
+
+//this function does actually nothing useful, I wrote it down just for studying how bc have been implementated.
+void counter size function(int d1,int d2, int d3, int d4){
+    int id=0;
+    for(d3=0; d3<nd3; d3++) {
+        for(d2=0; d2<nd2; d2++) {
+            for(d1=0; d1<nd1; d1++) {
+                for(d0=0; d0 < nd0; d0++) { //i cicli sui siti del reticolo.
+                    
+                    id=snum_acc(d0,d1,d2,d3);
+                    printf("(%d,%d,%d,%d):      id=%d\n",d0,d1,d2,d3,id);
+                }
+            }
+        }
+    }
+    
+    
+}
+

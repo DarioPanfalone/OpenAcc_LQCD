@@ -9,10 +9,12 @@
 
 geom_parameters geom_par = {.initialized_check = 0};
 
-void compute_nnp_and_nnm_openacc(void){
-  int d0, d1, d2, d3,parity;
 
-/*
+//This function well defines the boundaries conditions.
+//questa funzione non ha parametri da inserire.
+void compute_nnp_and_nnm_openacc(void){
+  int d0, d1, d2, d3,parity; //gli interi sono ovviamente degli indici che scorrono i siti del reticolo.
+/* // questo pezzo è commentato,non serve. At first look it seems to be used to write a file.
   char nnfilename[50];
 #ifdef MULTIDEVICE
   sprintf(nnfilename,"nnfile_%s",devinfo.myrankstr);
@@ -25,12 +27,13 @@ void compute_nnp_and_nnm_openacc(void){
   for(d3=0; d3<nd3; d3++) {
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
-        for(d0=0; d0 < nd0; d0++) {
-          int  d0m, d1m, d2m, d3m, d0p, d1p, d2p, d3p, idxh;
-          idxh = snum_acc(d0,d1,d2,d3);
-          parity = (d0+d1+d2+d3) % 2;
+        for(d0=0; d0 < nd0; d0++) { //i cicli sui siti del reticolo.
+          int  d0m, d1m, d2m, d3m, d0p, d1p, d2p, d3p, idxh; //idxh è un indice int.
+          idxh = snum_acc(d0,d1,d2,d3); //definita in geometry multidev. it runs on the half-lattice.
+          parity = (d0+d1+d2+d3) % 2; //serve per vedere se il sito è pari o dispari,
+            //0=pari even, 1 odd.
 
-          d0m = d0 - 1;
+          d0m = d0 - 1; //the negative neighbours
           d1m = d1 - 1;
           d2m = d2 - 1;
           d3m = d3 - 1;
@@ -44,7 +47,7 @@ void compute_nnp_and_nnm_openacc(void){
           nnm_openacc[idxh][2][parity] = snum_acc(d0,d1,d2m,d3);
           nnm_openacc[idxh][3][parity] = snum_acc(d0,d1,d2,d3m);
 
-          d0p = d0 + 1;
+          d0p = d0 + 1; //the positive ones.
           d1p = d1 + 1;
           d2p = d2 + 1;
           d3p = d3 + 1;

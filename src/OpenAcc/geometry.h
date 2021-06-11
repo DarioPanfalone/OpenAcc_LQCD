@@ -28,7 +28,7 @@
 #define sizeh (NSITES / 2)
 #define no_links (4 * vol4)
 
-
+//struttura con i parametri geometrici.
 typedef struct geom_parameters_t{
 
     int initialized_check;
@@ -44,7 +44,7 @@ typedef struct geom_parameters_t{
     int xyztmap[4];
     int d0123map[4];
 
-    int nranks[4];
+    int nranks[4]; //numero di rank.
     int halos[4];
 
 } geom_parameters;
@@ -52,9 +52,11 @@ typedef struct geom_parameters_t{
 extern geom_parameters geom_par;
 
 
-// TABLES FOR THE NEAREST NEIGHBOURS       
+//Look Out!(Achtung!): Comprension of the table of the nearest neighbours is fundamental for the correct initialization of K_mu.
+
+// TABLES FOR THE NEAREST NEIGHBOURS       (Actually here is  not quite clear, but I suppose that for positive he meant the onward direction and as negative the backward one.)
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            
-//                            starting from the site "site_half" (from 0 to sizeh) of parity "par"         
+//                            starting from the site "site_half" (from 0 to sizeh) of parity "par"      //4 directions. // 2 parity.
 // nnm[site_half][dir][par] = nearest neighbour in the negative direction "dir"            
 //                            starting from the site "site_half" (from 0 to sizeh) of parity "par"         
 // temporarily defined and computed here (should be moved elsewhere!)      

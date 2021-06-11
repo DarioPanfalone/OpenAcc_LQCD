@@ -69,14 +69,6 @@
 #define xstr(s) str(s) 
 #define str(s) #s
 
-//MOD.
-//*****************************************************************************************************************//
- // pretty long to accomadate every eventual replicas.
-
-
-
-//******************************************************************************************************************//
-
 int conf_id_iter;
 int verbosity_lv;
 
@@ -141,15 +133,24 @@ int main(int argc, char* argv[]){
     ////******************************************************************************************////////
     ////******************************************************************************************////////
     
-    /*alloc_info.num_replicas=n_replicas_reader(argv[1]); //qui definisco il numero di repliche.*/
-    /*alloc_info.num_replicas=rep->replicas_total_number;*/
+
    
     printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",rep->replicas_total_number);
     int i3=0;
+    printf("Ecco i valori dei cr:\n");
     for(i3;i3<alloc_info.num_replicas;i3++){
-        printf("Ecco i valori dei cr:\n");
+        
         printf("c%d: %f\n",i3,rep->cr_vet[i3]);
     }
+    
+    
+    printf("%d\n",nd0);
+    
+    
+    
+    
+    
+    
     ////******************************************************************************************////////
     ////******************************************************************************************////////
 
