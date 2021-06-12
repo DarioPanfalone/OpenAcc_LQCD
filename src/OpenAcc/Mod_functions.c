@@ -100,13 +100,13 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                         for(t=0;t<nd3;t++)
                             if(i>def_vet[1] && i<def_vet[2] && z<def_vet[3] && z>def_vet[4] && t<def_vet[5] && t>def_vet[6] && j==nd0-1)
                             {
-                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=c_r;
+                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
                                 
                                 
                             }
                         
                             else
-                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=1;
+                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
                     }
                 }
             }
@@ -129,13 +129,13 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                         for(t=0;t<nd3;t++)
                             if(i>def_vet[1] && i<def_vet[2] && j<def_vet[3] && j>def_vet[4] && t<def_vet[5] && t>def_vet[6] && z==nd0-1)
                             {
-                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=c_r;
+                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
                                 
                                 
                             }
                         
                             else
-                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=1;
+                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
                     }
                 }
             }
@@ -155,13 +155,13 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                         for(t=0;t<nd3;t++)
                             if(i>def_vet[1] && i<def_vet[2] && j<def_vet[3] && j>def_vet[4] && z<def_vet[5] && z>def_vet[6] && t==nd0-1)
                             {
-                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=c_r;
+                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
                                 
                                 
                             }
                         
                             else
-                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=1;
+                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
                     }
                 }
             }
