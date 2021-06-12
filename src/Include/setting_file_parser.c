@@ -935,7 +935,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
      startline=startline+2;
       printf("ach3\n");
     
-    int res1 = scan_group_NV(alloc_info.num_replicas,rp1, filelines, startline, startline+6);
+    int res1 = scan_group_NV(alloc_info.num_replicas,rp1, filelines, startline, startline+7);
     
     re->cr_vet=malloc(alloc_info.num_replicas*sizeof(double));
     
