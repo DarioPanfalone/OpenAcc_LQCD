@@ -967,7 +967,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
  
  
-  printf("ach5\n");
+ 
     
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
 
@@ -977,7 +977,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   
    
     
- 
+  printf("ach1\n");
     free(rp1);
     free(rp2);
     return res;
@@ -1243,7 +1243,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     }
    
   
-    
+      printf("ach2\n");
   
 
     return 0;
