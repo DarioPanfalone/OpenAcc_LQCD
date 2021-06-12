@@ -889,20 +889,48 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     par_info rp[]={
         
         (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"totalnumber",NULL, NULL},
-       
+        (par_info){(void*) &(re->defect_boundary),TYPE_INT,"defect_boundary",NULL, NULL},
+        
 
         
         
     };
     
     
-   int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, startline+2);
+   int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, startline+3);
   
     
     
   
     alloc_info.num_replicas=re->replicas_total_number;
 
+    
+    par_info *rp1;
+    
+    char str0[13];//uno in più perchè deve avere il carattere di fine stringa.
+    
+    for(i2=0;i2<6;i2++){
+        
+        rp1[i2].par= &(re->defect_coordinates[i2]);
+        
+        rp1[i2].type=TYPE_INT;
+        
+        
+        snprintf(str0,13,"defect_size%d",i2);
+        
+        
+        rp1[i2].name=malloc(sizeof(char)*20);
+        //non puoi eguagliare due stringhe perchè sono due puntatori e tu vuoi modificare invece il contenuto della stringa-
+        strcpy(rp1[i2].name,str0);
+        
+        rp1[i2].default_value=NULL;
+        rp1[i2].comment=NULL;
+        
+    }
+     startline=startline+2;
+    
+    
+    int res1 = scan_group_NV(alloc_info.num_replicas,rp1, filelines, startline, startline+6);
     
     re->cr_vet=malloc(alloc_info.num_replicas*sizeof(double));
     
@@ -930,7 +958,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            rp2[i2].comment=NULL;
            
        }
-    startline=startline+1;
+    startline=startline+6;
     
  
  
@@ -945,7 +973,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
    
     
  
-    
+    free(rp1);
     free(rp2);
     return res;
 }

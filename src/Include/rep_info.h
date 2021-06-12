@@ -6,6 +6,8 @@
 typedef struct rep_info_t{
     
     int replicas_total_number;
+    int defect_boundary;
+    int defect_coordinates[6];
     double *cr_vet;
     
     

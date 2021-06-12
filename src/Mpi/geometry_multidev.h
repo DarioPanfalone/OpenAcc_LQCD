@@ -219,7 +219,7 @@ static inline int snum_acc(int lnh_0, int lnh_1, int lnh_2, int lnh_3){
     int ris = lnh_0 + lnh_1 * LNH_VOL1 + lnh_2 * LNH_VOL2 + lnh_3 * LNH_VOL3;
 
     return ris/2;// <---  /2 Pay attention to even/odd  (see init_geo) 
-
+//obviously with this uncast division we get snum_acc(2n,k1,k2,k4)=snum(2n+1,k1,k2,k3)
 }
 
 #pragma acc routine seq
