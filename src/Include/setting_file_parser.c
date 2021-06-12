@@ -978,7 +978,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
    
     
   printf("ach1\n");
-    free(rp1);
+
     free(rp2);
      printf("ach12\n");
     return res;
