@@ -966,8 +966,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
        }
     startline=startline+6;
     
- 
- 
+    
  
     
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
@@ -980,6 +979,12 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
 
 
     free(rp2);
+    //checking right choice of axis.
+    if(re->defect_boundary>3 || re->defect_boundary<0){
+        printf("wrong defect axis choice!\n")
+        res=1;
+    }
+    
     
     return res;
 }
