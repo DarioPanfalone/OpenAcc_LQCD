@@ -62,8 +62,8 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
 void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     int mu;
     int i,j,z,t;
-  
-    
+    printf("cr %f\n",c_r);
+    //dovresti invertire l'ordine di lettura! iniziare da no a n3 e non viceversa!
     switch (def_axis) {
         case 0:
             printf("defect on x's boundary\n");
@@ -79,8 +79,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                     
                             }
                         
-                        else
-                             conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
+                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
                         
                      printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);
                     
@@ -108,8 +107,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                                 
                             }
                         
-                            else
-                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
+                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
                     }
                 }
             }
@@ -137,8 +135,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                                 
                             }
                         
-                            else
-                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
+                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
                     }
                 }
             }
@@ -163,8 +160,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                                 
                             }
                         
-                            else
-                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
+                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
                     }
                 }
             }
