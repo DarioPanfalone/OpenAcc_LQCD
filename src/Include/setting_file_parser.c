@@ -877,7 +877,7 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
 
 
 
-//qui sto solo definendo una funziona
+//qui sto solo definendo una funziona. Here i modified the function by defining a new function "read_replicas_numbers", that will read the replicas_info from the input file.
 
 
 
@@ -936,6 +936,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     
     int res1 = scan_group_NV(6,rp1, filelines, startline, startline+7);
+    if(res1!=0){ res=res1;}
     
     re->cr_vet=malloc(alloc_info.num_replicas*sizeof(double));
     
@@ -970,7 +971,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
  
     
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
-
+  if(res2!=0){ res=res2;}
    
 
         
