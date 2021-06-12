@@ -980,6 +980,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   printf("ach1\n");
     free(rp1);
     free(rp2);
+     printf("ach12\n");
     return res;
 }
 
@@ -1188,6 +1189,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
         totcheck += check;
     }
+    
+    printf("ach2\n");
     if(tagcounts[PMG_DEBUG]==0 ){
         if(!helpmode) read_debug_info(&debug_settings,filelines,0,1);// Just to set default values
         else read_debug_info(&debug_settings,filelines,0,0);// Just to set default values
@@ -1243,7 +1246,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     }
    
   
-      printf("ach2\n");
+      printf("ach20\n");
   
 
     return 0;
