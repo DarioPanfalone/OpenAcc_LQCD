@@ -88,6 +88,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             }
             
         }
+        }
             
             
             
@@ -112,6 +113,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                 }
             }
             
+          }
           }
             
             
@@ -141,6 +143,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             }
             
            }
+           }
             
             
             
@@ -166,7 +169,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             }
             
          }
-            
+         }
             break;
             
             
