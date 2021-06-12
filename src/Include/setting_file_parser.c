@@ -907,6 +907,8 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     par_info *rp1;
     
+    printf("ach1\n");
+    
     char str0[13];//uno in più perchè deve avere il carattere di fine stringa.
     
     for(i2=0;i2<6;i2++){
@@ -915,7 +917,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         
         rp1[i2].type=TYPE_INT;
         
-        
+        printf("ach2\n");
         snprintf(str0,13,"defect_size%d",i2);
         
         
@@ -928,7 +930,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         
     }
      startline=startline+2;
-    
+      printf("ach3\n");
     
     int res1 = scan_group_NV(alloc_info.num_replicas,rp1, filelines, startline, startline+6);
     
@@ -946,7 +948,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
           
            rp2[i2].type=TYPE_DOUBLE;
            
-           
+             printf("ach4\n");
            snprintf(str,10,"cr_value%d",i2);
            
            
@@ -962,7 +964,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
  
  
-
+  printf("ach5\n");
     
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
 
