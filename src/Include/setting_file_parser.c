@@ -981,7 +981,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     free(rp2);
     //checking right choice of axis.
     if(re->defect_boundary>3 || re->defect_boundary<0){
-        printf("wrong defect axis choice!\n")
+        printf("wrong defect axis choice!\n");
         res=1;
     }
     
