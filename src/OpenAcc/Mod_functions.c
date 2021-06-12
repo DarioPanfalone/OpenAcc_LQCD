@@ -66,7 +66,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     
     switch (def_axis) {
         case 0:
-            printf("defect on x's boundary");
+            printf("defect on x's boundary\n");
         for(mu=0;mu<8;mu++){
             for(i=0;i<(nd0/2);i++){
                 for(j=0;j<nd1;j++){
@@ -75,12 +75,15 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             if(j>def_vet[1] && j<def_vet[2] && z<def_vet[3] && z>def_vet[4] && t<def_vet[5] && t>def_vet[6] && i==(nd0/2)-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
-                    
+                             
                     
                             }
                         
                         else
                              conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
+                        
+                     printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);
+                    
                     }
                 }
             }
@@ -92,7 +95,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             break;
             
         case 1:
-            printf("defect on y's boundary");
+            printf("defect on y's boundary\n");
           for(mu=0;mu<8;mu++){
             for(i=0;i<(nd0/2);i++){
                 for(j=0;j<nd1;j++){
@@ -120,7 +123,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             break;
             
         case 2:
-            printf("defect on z's boundary");
+            printf("defect on z's boundary\n");
             
            for(mu=0;mu<8;mu++){
             for(i=0;i<(nd0/2);i++){
@@ -147,7 +150,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             break;
             
         case 3:
-            printf("defect on t's boundary");
+            printf("defect on t's boundary\n");
          for(mu=0;mu<8;mu++){
             for(i=0;i<(nd0/2);i++){
                 for(j=0;j<nd1;j++){
