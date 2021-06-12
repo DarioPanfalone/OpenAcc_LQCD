@@ -984,6 +984,55 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         printf("wrong defect axis choice!\n");
         res=1;
     }
+    int target_def_dim[3];
+    
+    switch (re->defect_boundary) {
+        case 0:
+            target_def_dim[0]=nd1;
+            target_def_dim[1]=nd2;
+            target_def_dim[2]=nd3;
+            
+            break;
+    
+        case 1:
+            target_def_dim[0]=nd0;
+            target_def_dim[1]=nd2;
+            target_def_dim[2]=nd3;
+    
+            break;
+            
+        case 2:
+            target_def_dim[0]=nd0;
+            target_def_dim[1]=nd1;
+            target_def_dim[2]=nd3;
+            
+            break;
+
+        case 3:
+            target_def_dim[0]=nd0;
+            target_def_dim[1]=nd1;
+            target_def_dim[2]=nd2;
+            
+            break;
+
+        default:
+            printf("ERROR WRONG AXIS CHOICE!\n");
+            break;
+            
+    
+    
+    }
+    
+    for(i2=0;i2<3;i2++){
+        
+        
+        
+        
+    if( re->defect_coordinates[2*i2]<0 || re->defect_coordinates[2*i2+1]>target_def_dim[i2] ){
+        printf("wrong defect coordinates choice!\n");
+        res=1;
+    }
+    }
     
     
     return res;

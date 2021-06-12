@@ -53,22 +53,40 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
             conf[mu].K.d[i]=c_r;
             }
     
-    
+    conf[mu].K.d[snum_acc(2*i,j,k,t)]
     return;
 }
-
+*/
+/*
 
 void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
     
-    int a0,af,b0,bf,c0,cf; //the cuboid defect region's sides. a0 start, af end.
-    int pos_def[6];
+    int i,j,z,t;
   
     
     switch (def_axis) {
         case 0:
             printf("defect on x's boundary");
             
-            pos_def[1]=snum_acc(0,def_vet[1],);
+            for(i=0;i<(nd0/2);i++){
+                for(j=0;j<nd1;j++){
+                    for (z=0; z<nd2; z++) {
+                        for(t=0;t<nd3;t++)
+                            if(j>def_vet[1] && j<def_vet[2] && z<def_vet[3] && z>def_vet[4] && t<def_vet[5] && t>def_vet[6] && i==(nd0/2)-1)
+                            {
+                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
+                    
+                    
+                            }
+                        
+                        else
+                             conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;
+                    }
+                }
+            }
+            
+            
+            
             
             
             break;
@@ -76,15 +94,79 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
         case 1:
             printf("defect on y's boundary");
             
+            for(i=0;i<(nd0/2);i++){
+                for(j=0;j<nd1;j++){
+                    for (z=0; z<nd2; z++) {
+                        for(t=0;t<nd3;t++)
+                            if(i>def_vet[1] && i<def_vet[2] && z<def_vet[3] && z>def_vet[4] && t<def_vet[5] && t>def_vet[6] && j==nd0-1)
+                            {
+                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=c_r;
+                                
+                                
+                            }
+                        
+                            else
+                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=1;
+                    }
+                }
+            }
+            
+            
+            
+            
+            
+            
+            
             break;
             
         case 2:
             printf("defect on z's boundary");
             
+            
+            for(i=0;i<(nd0/2);i++){
+                for(j=0;j<nd1;j++){
+                    for (z=0; z<nd2; z++) {
+                        for(t=0;t<nd3;t++)
+                            if(i>def_vet[1] && i<def_vet[2] && j<def_vet[3] && j>def_vet[4] && t<def_vet[5] && t>def_vet[6] && z==nd0-1)
+                            {
+                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=c_r;
+                                
+                                
+                            }
+                        
+                            else
+                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=1;
+                    }
+                }
+            }
+            
+            
+            
+            
+            
             break;
             
         case 3:
             printf("defect on t's boundary");
+            
+            for(i=0;i<(nd0/2);i++){
+                for(j=0;j<nd1;j++){
+                    for (z=0; z<nd2; z++) {
+                        for(t=0;t<nd3;t++)
+                            if(i>def_vet[1] && i<def_vet[2] && j<def_vet[3] && j>def_vet[4] && z<def_vet[5] && z>def_vet[6] && t==nd0-1)
+                            {
+                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=c_r;
+                                
+                                
+                            }
+                        
+                            else
+                                conf[mu].K.d[snum_acc(2*i,j,k,t)]=1;
+                    }
+                }
+            }
+            
+            
             
             break;
             
@@ -98,13 +180,12 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
     
     
     
-    
+    return;
   
 }
 
 
 */
-
 
 
 
