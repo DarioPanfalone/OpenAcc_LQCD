@@ -1241,7 +1241,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         if(check) //check diverso da 0.
             if(0==devinfo.myrank)
                 printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
-               /* return 1; //adjoint exit.*/
+               
         totcheck += check;
     }
     

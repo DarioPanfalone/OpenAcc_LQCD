@@ -57,7 +57,7 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
     return;
 }
 */
-/*
+
 
 void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
     
@@ -185,7 +185,7 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
 }
 
 
-*/
+
 
 
 
