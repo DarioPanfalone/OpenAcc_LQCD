@@ -137,6 +137,16 @@ int main(int argc, char* argv[]){
    
     printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",rep->replicas_total_number);
     int i3=0;
+    
+    printf("il defect è sulla linea %d\n",rep->defect_boundary);
+    
+    printf("Ecco i valori del defect:\n");
+    for(i3;i3<6;i3++){
+        
+        printf("c%d: %d\n",i3,rep->defect_coordinates[i3]);
+    }
+    
+    
     printf("Ecco i valori dei cr:\n");
     for(i3;i3<alloc_info.num_replicas;i3++){
         
@@ -144,7 +154,7 @@ int main(int argc, char* argv[]){
     }
     
     
-    counter_size_function(nd0,nd1,nd2,nd3);
+   /* counter_size_function(nd0,nd1,nd2,nd3);*/
     
     
     
