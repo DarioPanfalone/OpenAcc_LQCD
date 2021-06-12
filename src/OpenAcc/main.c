@@ -154,7 +154,7 @@ int main(int argc, char* argv[]){
     }
     
     
-    counter_size_function(nd0,nd1,nd2,nd3);
+    /*counter_size_function(nd0,nd1,nd2,nd3);*/
     
     
     
