@@ -59,15 +59,15 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
 */
 
 
-void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
-    
+void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
+    int mu;
     int i,j,z,t;
   
     
     switch (def_axis) {
         case 0:
             printf("defect on x's boundary");
-            
+        for(mu=0;mu<8;mu++){
             for(i=0;i<(nd0/2);i++){
                 for(j=0;j<nd1;j++){
                     for (z=0; z<nd2; z++) {
@@ -85,7 +85,7 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
                 }
             }
             
-            
+        }
             
             
             
@@ -93,7 +93,7 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
             
         case 1:
             printf("defect on y's boundary");
-            
+          for(mu=0;mu<8;mu++){
             for(i=0;i<(nd0/2);i++){
                 for(j=0;j<nd1;j++){
                     for (z=0; z<nd2; z++) {
@@ -111,7 +111,7 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
                 }
             }
             
-            
+          }
             
             
             
@@ -122,7 +122,7 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
         case 2:
             printf("defect on z's boundary");
             
-            
+           for(mu=0;mu<8;mu++){
             for(i=0;i<(nd0/2);i++){
                 for(j=0;j<nd1;j++){
                     for (z=0; z<nd2; z++) {
@@ -140,7 +140,7 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
                 }
             }
             
-            
+           }
             
             
             
@@ -148,7 +148,7 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
             
         case 3:
             printf("defect on t's boundary");
-            
+         for(mu=0;mu<8;mu++){
             for(i=0;i<(nd0/2);i++){
                 for(j=0;j<nd1;j++){
                     for (z=0; z<nd2; z++) {
@@ -166,7 +166,7 @@ void init_k(su3_soa * conf,int c_r,int def_axis,int * def_vet){
                 }
             }
             
-            
+         }
             
             break;
             
