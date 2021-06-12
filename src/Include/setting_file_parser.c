@@ -905,16 +905,19 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     alloc_info.num_replicas=re->replicas_total_number;
 
     
-    par_info *rp1;
+    par_info rp1[6];
+    /*rp2=malloc(alloc_info.num_replicas*sizeof(par_info));*/
     
     printf("ach1\n");
     
     char str0[13];//uno in più perchè deve avere il carattere di fine stringa.
     
     for(i2=0;i2<6;i2++){
+          printf("ach1.5\n");
         
         rp1[i2].par= &(re->defect_coordinates[i2]);
         
+            printf("ach1.7\n");
         rp1[i2].type=TYPE_INT;
         
         printf("ach2\n");
