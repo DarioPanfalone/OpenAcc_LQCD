@@ -351,7 +351,7 @@ int main(int argc, char* argv[]){
     int init_result=init_k(conf_acc,c_r,rep->defect_boundary,rep->defect_coordinates);
     printf("success\n");
     if(init_result!=0){printf("Error in Initialization!\n"); return 1;};
-    printing_k_mu(conf_acc);
+    /*printing_k_mu(conf_acc);*/
     
     ///TEST 1//////////////
   /*
