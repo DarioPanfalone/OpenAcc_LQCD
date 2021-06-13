@@ -94,7 +94,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
         }
         }
             
-            printf("counter %d\n",counter);
+            
             
             break;
             
@@ -108,6 +108,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             if(i>=def_vet[0] && i<def_vet[1] && z>=def_vet[2] && z<def_vet[3] && t>=def_vet[4] && t<def_vet[5] && j==nd0-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
+                                   counter=counter+1;
                                 
                                 
                             }
@@ -136,6 +137,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             if(i>=def_vet[0] && i<def_vet[1] && j>=def_vet[2] && j<def_vet[3] && t>=def_vet[4] && t<def_vet[5] && z==nd0-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
+                                   counter=counter+1;
                                 
                                 
                             }
@@ -162,6 +164,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             if(i>=def_vet[0] && i<def_vet[1] && j>=def_vet[2] && j<def_vet[3] && z>=def_vet[4] && z<def_vet[5] && t==nd0-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
+                                   counter=counter+1;
                                 
                                 
                             }
@@ -185,7 +188,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     
     
     
-    
+    printf("counter %d\n",counter);
     return res;
   
 }
