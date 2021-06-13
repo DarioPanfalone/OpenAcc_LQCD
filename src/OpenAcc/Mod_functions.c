@@ -63,15 +63,15 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     int mu;
     int i,j,z,t;
     printf("cr %f\n",c_r);
-    //dovresti invertire l'ordine di lettura! iniziare da no a n3 e non viceversa!
+    //dovresti invertire l'ordine di lettura! iniziare da no a n3 e non viceversa! Se lo fai avrai i siti del vettore k_mu aggiornati in ordine crescente.
     switch (def_axis) {
         case 0:
             printf("defect on x's boundary\n");
         for(mu=0;mu<8;mu++){
-            for(i=0;i<(nd0/2);i++){
-                for(j=0;j<nd1;j++){
-                    for (z=0; z<nd2; z++) {
-                        for(t=0;t<nd3;t++){
+           for(t=0;t<nd3;t++) {
+                for (z=0; z<nd2; z++){
+                     for(j=0;j<nd1;j++){
+                       for(i=0;i<(nd0/2);i++){
                             if(j>def_vet[1] && j<def_vet[2] && z<def_vet[3] && z>def_vet[4] && t<def_vet[5] && t>def_vet[6] && i==(nd0/2)-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
@@ -96,11 +96,11 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         case 1:
             printf("defect on y's boundary\n");
-          for(mu=0;mu<8;mu++){
-            for(i=0;i<(nd0/2);i++){
-                for(j=0;j<nd1;j++){
-                    for (z=0; z<nd2; z++) {
-                        for(t=0;t<nd3;t++){
+            for(mu=0;mu<8;mu++){
+                for(t=0;t<nd3;t++) {
+                    for (z=0; z<nd2; z++){
+                        for(j=0;j<nd1;j++){
+                            for(i=0;i<(nd0/2);i++){
                             if(i>def_vet[1] && i<def_vet[2] && z<def_vet[3] && z>def_vet[4] && t<def_vet[5] && t>def_vet[6] && j==nd0-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
@@ -124,12 +124,11 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         case 2:
             printf("defect on z's boundary\n");
-            
-           for(mu=0;mu<8;mu++){
-            for(i=0;i<(nd0/2);i++){
-                for(j=0;j<nd1;j++){
-                    for (z=0; z<nd2; z++) {
-                        for(t=0;t<nd3;t++){
+            for(mu=0;mu<8;mu++){
+                for(t=0;t<nd3;t++) {
+                    for (z=0; z<nd2; z++){
+                        for(j=0;j<nd1;j++){
+                            for(i=0;i<(nd0/2);i++){
                             if(i>def_vet[1] && i<def_vet[2] && j<def_vet[3] && j>def_vet[4] && t<def_vet[5] && t>def_vet[6] && z==nd0-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
@@ -151,11 +150,11 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         case 3:
             printf("defect on t's boundary\n");
-         for(mu=0;mu<8;mu++){
-            for(i=0;i<(nd0/2);i++){
-                for(j=0;j<nd1;j++){
-                    for (z=0; z<nd2; z++) {
-                        for(t=0;t<nd3;t++){
+            for(mu=0;mu<8;mu++){
+                for(t=0;t<nd3;t++) {
+                    for (z=0; z<nd2; z++){
+                        for(j=0;j<nd1;j++){
+                            for(i=0;i<(nd0/2);i++){
                             if(i>def_vet[1] && i<def_vet[2] && j<def_vet[3] && j>def_vet[4] && z<def_vet[5] && z>def_vet[6] && t==nd0-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
