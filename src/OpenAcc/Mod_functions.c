@@ -63,6 +63,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     int mu;
     int i,j,z,t;
     int res=0;
+    int defect_volume;
     
     
     int counter=0;
@@ -186,9 +187,12 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             break;
     }
     
-    
+    defect_volume=(def_vet[1]-def_vet[0])*(def_vet[3]-def_vet[2])*(def_vet[5]-def_vet[4])*8;
     
     printf("counter %d\n",counter);
+    
+    if(counter!=defect_volume){printf("wrong defect initialization!\n"); res=1;}
+    
     return res;
   
 }
