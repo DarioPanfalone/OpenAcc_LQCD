@@ -66,6 +66,10 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     //dovresti invertire l'ordine di lettura! iniziare da no a n3 e non viceversa! Se lo fai avrai i siti del vettore k_mu aggiornati in ordine crescente.
     
     int counter=0;
+    for(i=0){
+        printf("ed %d\n",def_vet[i]);
+    }
+    
     switch (def_axis) {
         case 0:
             printf("defect on x's boundary\n");
@@ -83,7 +87,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                         
                             else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
                         
-                     printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);
+                     /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                     
                     }
                 }
