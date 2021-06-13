@@ -59,16 +59,14 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
 */
 
 
-void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
+int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     int mu;
     int i,j,z,t;
-    printf("cr %f\n",c_r);
-    //dovresti invertire l'ordine di lettura! iniziare da no a n3 e non viceversa! Se lo fai avrai i siti del vettore k_mu aggiornati in ordine crescente.
+    int res=0;
+    
     
     int counter=0;
-    for(i=0;i<6;i++){
-        printf("ed %d\n",def_vet[i]);
-    }
+   //il case considera le 4 possibili direzioni in cui viene fatto il defect.
     
     switch (def_axis) {
         case 0:
@@ -80,12 +78,12 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                        for(i=0;i<(nd0/2);i++){
                             if(j>=def_vet[0] && j<def_vet[1] && z>=def_vet[2] && z<def_vet[3] && t>=def_vet[4] && t<def_vet[5] && i==((nd0/2)-1))
                             {
-                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
+                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r; //inizializza il vettore
                                 counter=counter+1;
                     
                             }
                         
-                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
+                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;} //else inizializza a 1.
                         
                      /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                     
@@ -181,13 +179,14 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         default:
             printf("ERROR WRONG AXIS CHOICE!\n");
+            res=1;
             break;
     }
     
     
     
     
-    return;
+    return res;
   
 }
 
@@ -251,3 +250,22 @@ int n_replicas_reader(const char* input_filename){
 }
 */
 
+
+void printing_k_mu(su3_soa * conf){
+    int mu,t,z,j,i;
+    
+    for(mu=0;mu<8;mu++){
+        for(t=0;t<nd3;t++) {
+            for (z=0; z<nd2; z++){
+                for(j=0;j<nd1;j++){
+                    for(i=0;i<(nd0/2);i++){
+    
+    printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);
+                    }
+                }
+            }
+            
+        }
+    }
+    return;
+}

@@ -350,6 +350,7 @@ int main(int argc, char* argv[]){
     printf("go\n");
     init_k(conf_acc,c_r,rep->defect_boundary,rep->defect_coordinates);
     printf("success\n");
+    printing_k_mu(conf_acc);
     
     ///TEST 1//////////////
   /*

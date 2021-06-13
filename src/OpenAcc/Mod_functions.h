@@ -19,7 +19,8 @@
 int init_k_test(su3_soa *conf_acc,int c_r);
 int n_replicas_reader(const char* input_filename);
 void counter_size_function(int d0,int d1,int d2,int d3);
-void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet);
+int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet);
+void printing_k_mu(su3_soa * conf);
 
 #endif /* Mod_functions_h */
 
