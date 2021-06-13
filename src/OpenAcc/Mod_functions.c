@@ -66,7 +66,7 @@ void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     //dovresti invertire l'ordine di lettura! iniziare da no a n3 e non viceversa! Se lo fai avrai i siti del vettore k_mu aggiornati in ordine crescente.
     
     int counter=0;
-    for(i=0){
+    for(i=0;i<6;i++){
         printf("ed %d\n",def_vet[i]);
     }
     
