@@ -156,6 +156,8 @@ void mem_alloc_core(){
     
 
     
+    //Allocation of Conf_hasenbusch
+    
     int replicas_counter=0;
     for(replicas_counter=0; replicas_counter<alloc_info.num_replicas; replicas_counter++){
     POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch[replicas_counter], ALIGN,

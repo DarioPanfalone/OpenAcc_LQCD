@@ -330,14 +330,14 @@ int main(int argc, char* argv[]){
     strcpy(aux_name_file,mc_params.save_conf_name); //salva il nome originale della conf in aux_name_file
     //init for starting
     
-    printf("achtung 1\n");
+    
     
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         
         snprintf(rep_str,10,"replica_%d",replicas_counter);//inizializza rep_str
         strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
         
-        printf("achtung 2\n");
+        
 
     if(debug_settings.do_norandom_test){
         if(!read_conf_wrapper(conf_hasenbusch[replicas_counter],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
@@ -360,9 +360,8 @@ int main(int argc, char* argv[]){
 
         }
         else{
-            printf("eec\n");
-              printf("achtung 2.3 %f\n",conf_acc[1].K.d[0]);
-            printf("achtung 2.3 %f\n",conf_hasenbusch[0][1].K.d[0]);
+            
+            
             
             generate_Conf_cold(conf_hasenbusch[replicas_counter],mc_params.eps_gen);
             printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
@@ -371,14 +370,14 @@ int main(int argc, char* argv[]){
         }
     }
         
-        printf("achtung 2.5\n");
+    
         strcpy(mc_params.save_conf_name,aux_name_file);
         
         
     }//for  replicas closing
     
     /////inizializzazione Ku della conf///////////###########################################################################/////////    ////////###########################################################################/////////    /////////###########################################################################/////////    /////////#####################################################/////////
-             printf("achtung 3\n");
+  
     
     double c_r=0.5;
     //poi qui va messo c_r di rep->cr_vet[i]//#########
@@ -417,7 +416,7 @@ int main(int argc, char* argv[]){
 
 
 
-
+    printf("eccolo\n");
 
     double plq,rect;
     double cool_topo_ch[meastopo_params.coolmeasstep/meastopo_params.cool_measinterval+1];
