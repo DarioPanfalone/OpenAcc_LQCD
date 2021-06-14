@@ -359,7 +359,10 @@ int main(int argc, char* argv[]){
                     devinfo.myrank, mc_params.save_conf_name);
 
         }
-        else{ 
+        else{
+            printf("eec\n");
+            printf("achtung 2.3 %f\n",conf_hasenbusch[0][1].K.d[0]);
+            
             generate_Conf_cold(conf_hasenbusch[replicas_counter],mc_params.eps_gen);
             printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                     devinfo.myrank);
