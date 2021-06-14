@@ -390,7 +390,7 @@ int main(int argc, char* argv[]){
      //////////**************************************////////////////////////////
   
 
-#pragma acc update device(conf_hasenbusch[1][0:8])
+#pragma acc update device(conf_hasenbusch[1]([0:8]))
     
     
     
