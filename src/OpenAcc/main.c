@@ -322,18 +322,22 @@ int main(int argc, char* argv[]){
 
     //*****************+ INIZIALIZZAZIONE DELLA CONFIGURAZIONE *************//
     // s
+            printf("achtung 0\n");
     
     int replicas_counter;
     char rep_str [10];
     char aux_name_file[200];
     strcpy(aux_name_file,mc_params.save_conf_name); //salva il nome originale della conf in aux_name_file
     //init for starting
+    
+    printf("achtung 1\n");
+    
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         
         snprintf(rep_str,10,"replica_%d",replicas_counter);//inizializza rep_str
         strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
         
-        
+        printf("achtung 2\n");
 
     if(debug_settings.do_norandom_test){
         if(!read_conf_wrapper(conf_hasenbusch[replicas_counter],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
@@ -368,7 +372,7 @@ int main(int argc, char* argv[]){
     }//for  replicas closing
     
     /////inizializzazione Ku della conf///////////###########################################################################/////////    ////////###########################################################################/////////    /////////###########################################################################/////////    /////////#####################################################/////////
-   
+             printf("achtung 3\n");
     
     double c_r=0.5;
     //poi qui va messo c_r di rep->cr_vet[i]//#########
