@@ -138,7 +138,7 @@ int main(int argc, char* argv[]){
 
 
    
-    printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",rep->replicas_total_number); // further controls.
+    printf("ECCO IL NUMERO DI REPLICHE %d  %d!!!\n",rep->replicas_total_number,alloc_info.num_replicas); // further controls.
     int i3=0;
     
     printf("il defect è sulla linea %d\n",rep->defect_boundary);
