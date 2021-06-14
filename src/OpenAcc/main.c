@@ -366,6 +366,8 @@ int main(int argc, char* argv[]){
             conf_id_iter=0;
         }
     }
+        
+        printf("achtung 2.5\n");
         strcpy(mc_params.save_conf_name,aux_name_file);
         
         
