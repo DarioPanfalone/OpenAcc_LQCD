@@ -159,7 +159,7 @@ void mem_alloc_core(){
     int replicas_counter=0;
     for(replicas_counter=0; replicas_counter<alloc_info.num_replicas; replicas_counter++){
     POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch[replicas_counter], ALIGN,
-                               alloc_info.conf_acc_size*sizeof(su3_soa))
+                           alloc_info.conf_acc_size*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, conf_hasenbusch[replicas_counter]);
     }
 
