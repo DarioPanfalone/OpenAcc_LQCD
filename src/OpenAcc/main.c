@@ -450,7 +450,7 @@ int main(int argc, char* argv[]){
         //-------------------------------------------------// 
         //--------- MISURA ROBA DI GAUGE ------------------//
         if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
-        plq = calc_plaquette_soloopenacc(conf_hasenbusch[1],,local_sums);
+        plq = calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
         rect = calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
         poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[1]);//misura polyakov loop
     
