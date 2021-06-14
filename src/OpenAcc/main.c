@@ -961,6 +961,9 @@ int main(int argc, char* argv[]){
 
     printf("MPI%02d: Double precision free [CORE]\n", devinfo.myrank);
     mem_free_core();
+    
+      printf("achtung22\n");
+    
     printf("MPI%02d: Double precision free [EXTENDED]\n", devinfo.myrank);
     mem_free_extended();
 
