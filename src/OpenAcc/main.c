@@ -1004,6 +1004,6 @@ int main(int argc, char* argv[]){
 #ifdef MULTIDEVICE
     shutdown_multidev();
 #endif
-
+    printf("The End\n");
     return 0;
 }

@@ -355,7 +355,7 @@ void mem_free_core()
     FREECHECK(conf_acc);
 #pragma acc exit data delete(conf_acc)
     
-  /*      printf("achtung1\n");
+  printf("achtung1\n");
     //MOD/////HERE SET conf_hasenbusch FREE.//////////////
     //conf_hasenbusch deallocation.
        int replicas_counter=0; for(replicas_counter=0;replicas_counter<alloc_info.num_replicas;replicas_counter++){
@@ -363,9 +363,10 @@ void mem_free_core()
            printf("lon\n");
 //#pragma acc exit data delete(conf_hasenbusch[replicas_counter:replicas_counter])
     }
+    
     printf("achtung1.5\n");
-    FREECHECK(conf_hasenbusch);
-    */
+   /* FREECHECK(conf_hasenbusch);*/
+    
     printf("achtung2\n");
     
 #pragma acc exit data delete(conf_hasenbusch[0:alloc_info.num_replicas])
