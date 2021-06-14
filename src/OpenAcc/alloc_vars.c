@@ -359,9 +359,10 @@ void mem_free_core()
     //MOD/////HERE SET conf_hasenbusch FREE.//////////////
     //conf_hasenbusch deallocation.
        int replicas_counter=0; for(replicas_counter=0;replicas_counter<alloc_info.num_replicas;replicas_counter++){
-            FREECHECK(conf_hasenbusch[replicas_counter]);
+            free(conf_hasenbusch[replicas_counter]);
+           printf("lon\n");
     }
-    
+    free(conf_hasenbusch);
     
 #pragma acc exit data delete(conf_hasenbusch)
 
