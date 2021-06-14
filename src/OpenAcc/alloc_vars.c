@@ -362,7 +362,9 @@ void mem_free_core()
             free(conf_hasenbusch[replicas_counter]);
            printf("lon\n");
     }
-    free(conf_hasenbusch);
+    free(&conf_hasenbusch);
+    
+    printf("achtung2\n");
     
 #pragma acc exit data delete(conf_hasenbusch)
 
