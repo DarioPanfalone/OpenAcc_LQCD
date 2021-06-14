@@ -571,7 +571,7 @@ int main(int argc, char* argv[]){
                             acc_err);
                 }
             }
-#pragma acc update self(conf_hasenbusch[1][0:8])
+#pragma acc update self(conf_hasenbusch[1])
             id_iter++;
             conf_id_iter++;
             //-------------------------------------------------// 
