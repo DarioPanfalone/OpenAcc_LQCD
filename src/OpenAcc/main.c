@@ -1,5 +1,8 @@
+//here macros are defined
 #define PRINT_DETAILS_INSIDE_UPDATE
 #define ALIGN 128
+
+
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -13,6 +16,11 @@
 #ifdef ONE_FILE_COMPILATION
 #include "../Include/all_include.h"
 #endif
+
+//######################################################################################################################################//
+//############### INCLUTIONS #########################################################################################################//
+//######################################################################################################################################//
+
 
 #include "../DbgTools/dbgtools.h" // DEBUG
 #include "../Include/debug.h"
@@ -64,10 +72,17 @@
 #include <errno.h>
 #include "./Mod_functions.h" //funzioni moddate.
 
+//######################################################################################################################################//
+//######################################################################################################################################//
+
+
 // double level macro, necessary to stringify
 // https://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 #define xstr(s) str(s) 
 #define str(s) #s
+
+
+//definitions outside the main.
 
 int conf_id_iter;
 int verbosity_lv;
@@ -79,26 +94,16 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 
 
 int main(int argc, char* argv[]){
-    
-    
-   //MOD.
-   //*****************************************************************************************************************//
-    /*rep_info  rep;
-    
-    rep.replicas_total_number=0; //default settings
-    int ise=0;
-    for(ise=0;ise<MAXCRLENGTH;ise++){
-        rep.cr_vet[ise]=-1;
-    }*/
-    
-//*****************************************************************************************************************//
-    
-    
-    
-    
+
     
     
     gettimeofday ( &(mc_params.start_time), NULL );
+    
+    
+//######################################################################################################################################//
+//############### FILE READING #########################################################################################################//
+//######################################################################################################################################//
+
     // READ input file.
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
@@ -128,19 +133,17 @@ int main(int argc, char* argv[]){
     }
 
 
-    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]); //il nome del file è argv[1];
-    
-    ////******************************************************************************************////////
-    ////******************************************************************************************////////
+    int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]); //here the reading happens.
     
 
+
    
-    printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",rep->replicas_total_number);
+    printf("ECCO IL NUMERO DI REPLICHE %d!!!\n",rep->replicas_total_number); // further controls.
     int i3=0;
     
     printf("il defect è sulla linea %d\n",rep->defect_boundary);
     
-    printf("Ecco i valori del defect:\n");
+    printf("Ecco i valori del defect:\n"); //defect values.
     for(i3=0;i3<6;i3++){
         
         printf("def%d: %d\n",i3,rep->defect_coordinates[i3]);
@@ -156,14 +159,10 @@ int main(int argc, char* argv[]){
     
     /*counter_size_function(nd0,nd1,nd2,nd3);*/
     
-    
-    
-    
-    
-    
-    ////******************************************************************************************////////
-    ////******************************************************************************************////////
 
+    
+    
+    
 #ifdef MULTIDEVICE
     if(input_file_read_check){
         printf("MPI%02d: input file reading failed, Aborting...\n",devinfo.myrank);
@@ -173,7 +172,7 @@ int main(int argc, char* argv[]){
     devinfo.myrank = 0;
     devinfo.nranks = 1;
 #endif
-//qui  c'è un errore dovrebbe essere se non è 1, ma va beh.
+
     if(input_file_read_check){
         printf("MPI%02d: input file reading failed, aborting...\n",devinfo.myrank);
         exit(1);
@@ -181,6 +180,16 @@ int main(int argc, char* argv[]){
     if(0==devinfo.myrank) print_geom_defines();
     verbosity_lv = debug_settings.input_vbl;
 
+    //######################################################################################################################################//
+    //######################################################################################################################################//
+    
+    
+    //######################################################################################################################################//
+    //############### INITIALIZATION #########################################################################################################//
+    //######################################################################################################################################//
+  
+    
+    //just printing headtitles
     if(0==devinfo.myrank){
         if(0 != mc_params.JarzynskiMode){
             printf("****************************************************\n");
@@ -231,7 +240,7 @@ int main(int argc, char* argv[]){
 #else
     select_init_acc_device(my_device_type, devinfo.single_dev_choice);
 #endif
-    printf("Device Selected : OK \n");
+    printf("Device Selected : OK \n"); //checking printing.
 #endif
 
     unsigned int myseed_default =  (unsigned int) mc_params.seed; 
@@ -251,7 +260,7 @@ int main(int argc, char* argv[]){
 
     // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
     if(init_ferm_params(fermions_parameters)){
-        printf("MPI%02d - Finalizing...\n",devinfo.myrank);
+        printf("MPI%02d - Finalizing...\n",devinfo.myrank); //cp
 #ifdef MULTIDEVICE
         MPI_Finalize();
 #endif
@@ -259,14 +268,16 @@ int main(int argc, char* argv[]){
     }
 #pragma acc enter data copyin(fermions_parameters[0:alloc_info.NDiffFlavs])
     
-///////////////////////////////QUI ALLOCA//////////// PRIMA DI QUI LA CONF NON ESISTE.
+//********************* ALLOCATION OF CONF *******************************************//
+    
     mem_alloc_core(); // Allocation has been done here.
-    mem_alloc_extended();
+    mem_alloc_extended(); //extend alloc.
  
-    //ora la conf_hasenbusch esiste.
+     //************NOW HASENBUSCH CONF EXISTS!!*****************//
+    
     //////direi che il for per la conf va messo qui./////
     
-    ////qui alloca se siamo in single precision/////////////////////
+    //eventual single precision allocation
     printf("\n   MPI%02d - Allocazione della memoria (double) : OK \n\n\n",devinfo.myrank);
     if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
         mem_alloc_core_f();
@@ -277,19 +288,20 @@ int main(int argc, char* argv[]){
         mem_alloc_extended_f();
         printf("\n  MPI%02d - Allocazione della memoria (float) [EXTENDED]: OK \n\n\n",devinfo.myrank);
     }
-    ////////////////////////////////******
-    //VA MESSO QUI IL FOR PER LE CONF_HASENBUSCH
-    //***************************
+   
     
+    //possible conf for cycle position //
     
-       //////direi che il for per la conf va messo qui./////
+     //volendo anche dopo la definzione della tavola dei nn, il ciclo, non serve riderfiniral ogni volta.
+       //direi che il for per la conf va messo qui.///// da qui in avanti -->conf_hasenbusch[i].
     
     printf("\n  MPI%02d - Allocazione della memoria totale: %zu \n\n\n",devinfo.myrank,max_memory_used);
  
     
-    //qui  calcola il borodo della conf /////
-    compute_nnp_and_nnm_openacc();
-#pragma acc enter data copyin(nnp_openacc)
+   //*****************NEAREST NEIGHBOURS DEFINITION!!******************************//
+    
+    compute_nnp_and_nnm_openacc(); //nn def. Here 2 matrices nn(p/m)_openacc[sizeh][4][2] are used to contain nn information. The first index refers to the half-lattice site, the second to the direction, the last to the parity(even or odd half-lattice.).
+#pragma acc enter data copyin(nnp_openacc) //copied on GPU/CPU.
 #pragma acc enter data copyin(nnm_openacc)
     printf("MPI%02d - nn computation : OK \n",devinfo.myrank);
     init_all_u1_phases(backfield_parameters,fermions_parameters);
@@ -303,19 +315,28 @@ int main(int argc, char* argv[]){
 
     printf("MPI%02d - u1_backfield initialization (float & double): OK \n",devinfo.myrank);
 
-    initialize_md_global_variables(md_parameters);//inizializza le variabili globale.
+    initialize_md_global_variables(md_parameters);//md_paramaters init.
     printf("MPI%02d - init md vars : OK \n",devinfo.myrank);
 
+//anche da qui il ciclo.
 
-
-    //################## INIZIALIZZAZIONE DELLA CONFIGURAZIONE #######################
-    // start from saved conf
+    //*****************+ INIZIALIZZAZIONE DELLA CONFIGURAZIONE *************//
+    // s
     
-    
-    
+    int replicas_counter;
+    char rep_str [10];
+    char aux_name_file[200];
+    strcpy(aux_name_file,mc_params.save_conf_name); //salva il nome originale della conf in aux_name_file
+    //init for starting
+    for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+        
+        snprintf(rep_str,10,"replica_%d",replicas_counter);//inizializza rep_str
+        strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
+        
+        
 
     if(debug_settings.do_norandom_test){
-        if(!read_conf_wrapper(conf_acc,"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
+        if(!read_conf_wrapper(conf_hasenbusch[replicas_counter],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
             // READS ALSO THE conf_id_iter
             printf("MPI%02d - Stored Gauge Conf conf_norndtest Read : OK\n",devinfo.myrank);
         }
@@ -327,7 +348,7 @@ int main(int argc, char* argv[]){
         }
     }
     else{
-        if(!read_conf_wrapper(conf_acc,mc_params.save_conf_name,
+        if(!read_conf_wrapper(conf_hasenbusch[replicas_counter],mc_params.save_conf_name,
                     &conf_id_iter,debug_settings.use_ildg)){
             // READS ALSO THE conf_id_iter
             printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",
@@ -335,27 +356,33 @@ int main(int argc, char* argv[]){
 
         }
         else{ 
-            generate_Conf_cold(conf_acc,mc_params.eps_gen);
+            generate_Conf_cold(conf_hasenbusch[replicas_counter],mc_params.eps_gen);
             printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
                     devinfo.myrank);
             conf_id_iter=0;
         }
     }
-    
+        strcpy(mc_params.save_conf_name,aux_name_file);
+        
+        
+    }//for  replicas closing
     
     /////inizializzazione Ku della conf///////////###########################################################################/////////    ////////###########################################################################/////////    /////////###########################################################################/////////    /////////#####################################################/////////
+   
+    
     double c_r=0.5;
     //poi qui va messo c_r di rep->cr_vet[i]//#########
     
     printf("go\n");
-    int init_result=init_k(conf_acc,c_r,rep->defect_boundary,rep->defect_coordinates);
+    int init_result=init_k(conf_hasenbusch[1],c_r,rep->defect_boundary,rep->defect_coordinates);
     printf("success\n");
     if(init_result!=0){printf("Error in Initialization!\n"); return 1;};
-    /*printing_k_mu(conf_acc);*/
+    
+    /*printing_k_mu(conf_hasenbusch[1]);*/
     
     ///TEST 1//////////////
   /*
-    if(init_k_test(conf_acc,c_r)!=0){
+    if(init_k_test(conf_hasenbusch[1],c_r)!=0){
         perror("KU VALUE DOESN'T MATCH!");
         return 0;
     }*/
@@ -363,7 +390,7 @@ int main(int argc, char* argv[]){
      //////////**************************************////////////////////////////
   
 
-#pragma acc update device(conf_acc[0:8])
+#pragma acc update device(conf_hasenbusch[1][0:8])
     
     
     
@@ -372,7 +399,7 @@ int main(int argc, char* argv[]){
 
 
     double max_unitarity_deviation,avg_unitarity_deviation;
-    check_unitarity_host(conf_acc,&max_unitarity_deviation,&avg_unitarity_deviation);
+    check_unitarity_host(conf_hasenbusch[1],&max_unitarity_deviation,&avg_unitarity_deviation);
     printf("\tMPI%02d: Avg_unitarity_deviation on host: %e\n", devinfo.myrank, 
             avg_unitarity_deviation);
     printf("\tMPI%02d: Max_unitarity_deviation on host: %e\n", devinfo.myrank,
@@ -392,22 +419,22 @@ int main(int argc, char* argv[]){
     int accettate_therm_old=0;
     int accettate_metro_old=0;
     int id_iter_offset=conf_id_iter;
-    plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    plq = calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_hasenbusch[1],local_sums);
     printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
             devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
-    rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+    rect = calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_hasenbusch[1],local_sums);
 
 
     printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
             devinfo.myrank, conf_id_iter,rect/GL_SIZE/6.0/3.0/2.0);
 
-    poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
+    poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[1]);//misura polyakov loop
     printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
             devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
 	
     //char confile_dbg[50];
     //sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
-    //dbg_print_su3_soa(conf_acc,confile_dbg,0);
+    //dbg_print_su3_soa(conf_hasenbusch[1],confile_dbg,0);
 
 
     //            MPI_Finalize(); // DEBUG
@@ -423,9 +450,9 @@ int main(int argc, char* argv[]){
         //-------------------------------------------------// 
         //--------- MISURA ROBA DI GAUGE ------------------//
         if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
-        plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-        rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-        poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
+        plq = calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_hasenbusch[1],local_sums);
+        rect = calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_hasenbusch[1],local_sums);
+        poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[1]);//misura polyakov loop
     
 
 	
@@ -437,7 +464,7 @@ int main(int argc, char* argv[]){
         //
         if(0 == devinfo.myrank)  printf("Fermion Measurements: see file %s\n",
                 fm_par.fermionic_outfilename);
-        fermion_measures(conf_acc,fermions_parameters,
+        fermion_measures(conf_hasenbusch[1],fermions_parameters,
                 &fm_par, md_parameters.residue_metro, 
                 md_parameters.max_cg_iterations, id_iter_offset,
                 plq/GL_SIZE/3.0/6.0,
@@ -505,7 +532,7 @@ int main(int argc, char* argv[]){
             }
 
 
-            check_unitarity_device(conf_acc,&max_unitarity_deviation,
+            check_unitarity_device(conf_hasenbusch[1],&max_unitarity_deviation,
                     &avg_unitarity_deviation);
             printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
                     devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
@@ -525,12 +552,12 @@ int main(int argc, char* argv[]){
 
             //--------- CONF UPDATE ----------------//
             if(id_iter<mc_params.therm_ntraj){
-                accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
+                accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[1],
                         md_parameters.residue_metro,md_parameters.residue_md,
                         id_iter-id_iter_offset,
                         accettate_therm,0,md_parameters.max_cg_iterations);
             }else{
-                accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
+                accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[1],
                         md_parameters.residue_metro,md_parameters.residue_md,
                         id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
                         md_parameters.max_cg_iterations);
@@ -544,24 +571,24 @@ int main(int argc, char* argv[]){
                             acc_err);
                 }
             }
-#pragma acc update self(conf_acc[0:8])
+#pragma acc update self(conf_hasenbusch[1][0:8])
             id_iter++;
             conf_id_iter++;
             //-------------------------------------------------// 
 
             //--------- MISURA ROBA DI GAUGE ------------------//
-            plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
+            plq  = calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_hasenbusch[1],local_sums);
+            rect = calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_hasenbusch[1],local_sums);
+            poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[1]);
 	    
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	      su3_soa *conf_to_use;
-	      cool_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
+	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[1],auxbis_conf_hasenbusch[1],topo_loc);
 		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
 		      if(cs==1)
-			conf_to_use=(su3_soa*)conf_acc;
+			conf_to_use=(su3_soa*)conf_hasenbusch[1];
 		      else
-			conf_to_use=(su3_soa*)aux_conf_acc;	
+			conf_to_use=(su3_soa*)aux_conf_hasenbusch[1];
 		      cool_conf(conf_to_use,aux_conf_acc,auxbis_conf_acc);
 		      if(cs%meastopo_params.cool_measinterval==0)
 			cool_topo_ch[cs/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
@@ -587,9 +614,9 @@ int main(int argc, char* argv[]){
 	    }
 	    if(meastopo_params.measstout && conf_id_iter%meastopo_params.stouteach==0){
 		    TOPO_GLOBAL_DONT_TOUCH=1;
-		    stout_wrapper(conf_acc,gstout_conf_acc_arr);
+		    stout_wrapper(conf_hasenbusch[1],gstout_conf_acc_arr);
 		    TOPO_GLOBAL_DONT_TOUCH=0;
-		    stout_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
+		    stout_topo_ch[0]=compute_topological_charge(conf_hasenbusch[1],auxbis_conf_acc,topo_loc);
 		    for(int ss = 0; ss < meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
 	    	    	/* aux_conf_acc = &(gstout_conf_acc_arr[8*ss]); */
 			int topoindx =1+ss/meastopo_params.stout_measinterval; 
@@ -654,7 +681,7 @@ int main(int argc, char* argv[]){
                 strcat(tempname,serial);
                 printf("MPI%02d - Storing conf %s.\n",
                         devinfo.myrank, tempname);
-                save_conf_wrapper(conf_acc,tempname,conf_id_iter,
+                save_conf_wrapper(conf_hasenbusch[1],tempname,conf_id_iter,
                         debug_settings.use_ildg);
                 strcpy(tempname,mc_params.RandGenStatusFilename);
                 sprintf(serial,".%05d",conf_id_iter);
@@ -668,7 +695,7 @@ int main(int argc, char* argv[]){
                 if (debug_settings.SaveAllAtEnd){
                     printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
                             mc_params.save_conf_name);
-                    save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
+                    save_conf_wrapper(conf_hasenbusch[1],mc_params.save_conf_name, conf_id_iter,
                             debug_settings.use_ildg);
                     printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
                             mc_params.RandGenStatusFilename);
@@ -731,7 +758,7 @@ int main(int argc, char* argv[]){
 
             }
 
-            check_unitarity_device(conf_acc,&max_unitarity_deviation,
+            check_unitarity_device(conf_hasenbusch[1],&max_unitarity_deviation,
                     &avg_unitarity_deviation);
             printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
                     devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
@@ -741,7 +768,7 @@ int main(int argc, char* argv[]){
 
             struct timeval tf0, tf1;
             gettimeofday(&tf0, NULL);
-            fermion_measures(conf_acc,fermions_parameters,
+            fermion_measures(conf_hasenbusch[1],fermions_parameters,
                     &fm_par, md_parameters.residue_metro,
                     md_parameters.max_cg_iterations,conf_id_iter,
                     plq/GL_SIZE/3.0/6.0,
@@ -870,13 +897,20 @@ int main(int argc, char* argv[]){
 
     }// while id_iter loop ends here             
 
-
+ //QUI SALVA LA CONF!!
+    
     //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
-
+    for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+      
+        snprintf(rep_str,10,"replica_%d",replicas_counter);//inizializza rep_str
+        strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
+        
+        
+        
     if (debug_settings.SaveAllAtEnd){
         printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
                 mc_params.save_conf_name);
-        save_conf_wrapper(conf_acc,mc_params.save_conf_name, conf_id_iter,
+        save_conf_wrapper(conf_hasenbusch[1],mc_params.save_conf_name, conf_id_iter,
                 debug_settings.use_ildg);
         printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
                 mc_params.RandGenStatusFilename);
@@ -884,7 +918,10 @@ int main(int argc, char* argv[]){
     }else printf(
             "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
     //-------------------------------------------------//
-
+        
+        strcpy(mc_params.save_conf_name,aux_name_file);
+        
+    }//end for replicas.
 
 
     if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd){

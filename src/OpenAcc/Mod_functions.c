@@ -189,7 +189,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     
     defect_volume=(def_vet[1]-def_vet[0])*(def_vet[3]-def_vet[2])*(def_vet[5]-def_vet[4])*8;
     
-    printf("counter %d\n",counter);
+    /*printf("counter %d\n",counter);*/
     
     if(counter!=defect_volume){printf("wrong defect initialization!\n"); res=1;}
     
@@ -202,7 +202,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
 
 
 
-//function that tested the initialization of k_mu  by setting every value to one.
+//function that tested the initialization of k_mu  by setting every value to one. //OUTADATED
 int init_k_test(su3_soa *conf_acc,int c_r){
     int kk2=0;
     int mu1=0;
@@ -216,9 +216,41 @@ int init_k_test(su3_soa *conf_acc,int c_r){
     }
     return 0;
 }
+/* work in progress
+int defect_shifter_function(su3_soa * conf,int def_axis,int * def_vet){
+        int mu;
+    double aux;
+    
+    switch (def_axis){
+            
+         case 0: for(mu=0;mu<8;mu++){
+             for(t=def_vet[4];t<def_vet[5];t++) {
+                 for (z=def_vet[2]; z<def_vet[3]; z++){
+                     for(j=def_vet[0];j<def_vet[1];j++){
+             
+             
+                         conf[mu].K.d[snum_acc((nd0/2)-1),j,z,t)];
+                         
+            
+                    }
+                 }
+             }
+         }
+            break;
+            
+            
+        case 1:
+            
+    }
+    
+    
+    
+    
+    return 0;
+}
 
 
-
+*/
 
 
 
