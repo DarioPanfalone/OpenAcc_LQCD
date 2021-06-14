@@ -361,6 +361,7 @@ int main(int argc, char* argv[]){
         }
         else{
             printf("eec\n");
+              printf("achtung 2.3 %f\n",conf_acc[1].K.d[0]);
             printf("achtung 2.3 %f\n",conf_hasenbusch[0][1].K.d[0]);
             
             generate_Conf_cold(conf_hasenbusch[replicas_counter],mc_params.eps_gen);
