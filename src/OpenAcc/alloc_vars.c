@@ -165,7 +165,7 @@ void mem_alloc_core(){
 
     
     
-    #pragma acc enter data create(conf_hasenbusch[0:alloc_info.num_replicas])
+#pragma acc enter data create(conf_hasenbusch[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
 
     
 ///////////////////////////////////////////////////////////////////
