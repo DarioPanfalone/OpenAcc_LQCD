@@ -357,7 +357,8 @@ void mem_free_core()
     
     
     //MOD/////HERE SET conf_hasenbusch FREE.//////////////
-    for(replicas_counter=0;replicas_counter<alloc_info.num_replicas;replicas_counter++){
+    //conf_hasenbusch deallocation.
+       int replicas_counter=0; for(replicas_counter=0;replicas_counter<alloc_info.num_replicas;replicas_counter++){
             FREECHECK(conf_hasenbusch[replicas_counter]);
     }
     FREECHECK(conf_hasenbusch);
