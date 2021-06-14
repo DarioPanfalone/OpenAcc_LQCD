@@ -390,7 +390,7 @@ int main(int argc, char* argv[]){
      //////////**************************************////////////////////////////
   
 
-#pragma acc update device(conf_hasenbusch[1])
+#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number])
     
     
     
