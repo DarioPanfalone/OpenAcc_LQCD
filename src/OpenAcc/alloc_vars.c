@@ -152,7 +152,7 @@ void mem_alloc_core(){
     
     //MOD////////////////////////////////////////////////
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch, ALIGN,
-                                               alloc_info.num_replicas*alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_acc size fa da size.
+                                               alloc_info.num_replicas*alloc_info.conf_acc_size*sizeof(su3_soa));
     
 
     
@@ -359,10 +359,11 @@ void mem_free_core()
     //MOD/////HERE SET conf_hasenbusch FREE.//////////////
     //conf_hasenbusch deallocation.
        int replicas_counter=0; for(replicas_counter=0;replicas_counter<alloc_info.num_replicas;replicas_counter++){
-            free(conf_hasenbusch[replicas_counter]);
+            FREECHECK(conf_hasenbusch[replicas_counter]);
            printf("lon\n");
     }
-    free(&conf_hasenbusch);
+    printf("achtung1.5\n");
+    FREECHECK(conf_hasenbusch);
     
     printf("achtung2\n");
     
