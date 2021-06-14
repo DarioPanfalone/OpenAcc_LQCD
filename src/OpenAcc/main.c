@@ -583,7 +583,7 @@ int main(int argc, char* argv[]){
 	    
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	      su3_soa *conf_to_use;
-	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[1],auxbis_conf_hasenbusch[1],topo_loc);
+	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[1],auxbis_conf_acc,topo_loc);
 		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
 		      if(cs==1)
 			conf_to_use=(su3_soa*)conf_hasenbusch[1];
