@@ -19,6 +19,7 @@
 #include "../Meas/measure_topo.h"
 
 
+
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
@@ -151,9 +152,21 @@ void mem_alloc_core(){
     
     //MOD////////////////////////////////////////////////
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch, ALIGN,
-                                               alloc_info.num_replicas*alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_accsize fa da size.
-    ALLOCCHECK(allocation_check, conf_hasenbusch);
-#pragma acc enter data create(conf_hasenbusch[0:alloc_info.num_replicas])
+                                               alloc_info.num_replicas*alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_acc size fa da size.
+    
+
+    
+    int replicas_counter=0;
+    for(replicas_counter=0; replicas_counter<alloc_info.num_replicas; replicas_counter++){
+        posix_memalign_wrapper((void **)&conf_hasenbusch[replicas_counter], ALIGN,
+                               alloc_info.conf_acc_size*sizeof(su3_soa));)
+    ALLOCCHECK(allocation_check, conf_hasenbusch[replicas_counter]);
+    }
+
+    
+    
+    #pragma acc enter data create(conf_hasenbusch[0:alloc_info.num_replicas])
+
     
 ///////////////////////////////////////////////////////////////////
 }
