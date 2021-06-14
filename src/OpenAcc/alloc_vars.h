@@ -42,6 +42,9 @@ extern tamat_soa * ipdot_f_old;// for HMC diagnostics
 extern su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases 
                       // in fermion related computation (with or without stouting)
 
+//CONF HASENBUSCH
+extern su3_soa ** conf_hasenbusch;
+
 // STOUTING 
 extern su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth
 extern su3_soa * glocal_staples;
