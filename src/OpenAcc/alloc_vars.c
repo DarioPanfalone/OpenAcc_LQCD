@@ -364,7 +364,7 @@ void mem_free_core()
     
     printf("achtung2\n");
     free(&conf_hasenbusch);
-    &conf_hasenbusch=NULL;
+    
     printf("achtung3\n");
 #pragma acc exit data delete(conf_hasenbusch)
 
