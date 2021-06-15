@@ -366,7 +366,7 @@ void mem_free_core()
     
     
     printf("achtung1.5\n");
-  /*  FREECHECK(conf_hasenbusch);*/4
+  /*  FREECHECK(conf_hasenbusch);*/
     
     printf("achtung2\n");
     
