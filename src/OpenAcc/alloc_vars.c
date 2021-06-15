@@ -361,12 +361,12 @@ void mem_free_core()
        int replicas_counter=0; for(replicas_counter=0;replicas_counter<alloc_info.num_replicas;replicas_counter++){
             FREECHECK(conf_hasenbusch[replicas_counter]);
            printf("lon\n");
-/*#pragma acc exit data delete(conf_hasenbusch[replicas_counter:replicas_counter])*/4
+/*#pragma acc exit data delete(conf_hasenbusch[replicas_counter:replicas_counter])*/
     }
     
     
     printf("achtung1.5\n");
-  /*  FREECHECK(conf_hasenbusch);*/
+  /*  FREECHECK(conf_hasenbusch);*/4
     
     printf("achtung2\n");
     
