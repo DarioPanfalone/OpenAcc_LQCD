@@ -690,7 +690,7 @@ int main(int argc, char* argv[]){
                 strcat(tempname,serial);
                 printf("MPI%02d - Storing conf %s.\n",
                         devinfo.myrank, tempname);
-                save_conf_wrapper(conf_hasenbusch[1],tempname,conf_id_iter,
+                save_conf_wrapper(conf_hasenbusch[0],tempname,conf_id_iter,
                         debug_settings.use_ildg);
                 strcpy(tempname,mc_params.RandGenStatusFilename);
                 sprintf(serial,".%05d",conf_id_iter);
@@ -704,7 +704,7 @@ int main(int argc, char* argv[]){
                 if (debug_settings.SaveAllAtEnd){
                     printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
                             mc_params.save_conf_name);
-                    save_conf_wrapper(conf_hasenbusch[1],mc_params.save_conf_name, conf_id_iter,
+                    save_conf_wrapper(conf_hasenbusch[0],mc_params.save_conf_name, conf_id_iter,
                             debug_settings.use_ildg);
                     printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
                             mc_params.RandGenStatusFilename);
