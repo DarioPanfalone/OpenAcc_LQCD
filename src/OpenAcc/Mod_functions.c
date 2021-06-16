@@ -77,7 +77,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                 for (z=0; z<nd2; z++){
                      for(j=0;j<nd1;j++){
                        for(i=0;i<(nd0/2);i++){
-                            if(j>=def_vet[0] && j<def_vet[1] && z>=def_vet[2] && z<def_vet[3] && t>=def_vet[4] && t<def_vet[5] && i==((nd0/2)-1))
+                            if(j>=0 && j<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && i==((nd0/2)-1))
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r; //inizializza il vettore
                                 counter=counter+1;
@@ -106,7 +106,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<(nd0/2);i++){
-                            if(i>=def_vet[0] && i<def_vet[1] && z>=def_vet[2] && z<def_vet[3] && t>=def_vet[4] && t<def_vet[5] && j==nd1-1)
+                            if(i>=0 && i<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && j==nd1-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
                                    counter=counter+1;
@@ -136,7 +136,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<(nd0/2);i++){
-                            if(i>=def_vet[0] && i<def_vet[1] && j>=def_vet[2] && j<def_vet[3] && t>=def_vet[4] && t<def_vet[5] && z==nd2-1)
+                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && t>=0 && t<def_vet[2] && z==nd2-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
                                    counter=counter+1;
@@ -163,7 +163,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<(nd0/2);i++){
-                            if(i>=def_vet[0] && i<def_vet[1] && j>=def_vet[2] && j<def_vet[3] && z>=def_vet[4] && z<def_vet[5] && t==nd3-1)
+                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && z>=0 && z<def_vet[2] && t==nd3-1)
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
                                    counter=counter+1;
@@ -188,7 +188,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             break;
     }
     
-    defect_volume=(def_vet[1]-def_vet[0])*(def_vet[3]-def_vet[2])*(def_vet[5]-def_vet[4])*8;
+    defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2])*8;
     
    printf("counter %d\n",counter);
     
