@@ -144,7 +144,7 @@ int main(int argc, char* argv[]){
     printf("il defect è sulla linea %d\n",rep->defect_boundary);
     
     printf("Ecco i valori del defect:\n"); //defect values.
-    for(i3=0;i3<6;i3++){
+    for(i3=0;i3<3;i3++){
         
         printf("def%d: %d\n",i3,rep->defect_coordinates[i3]);
     }
