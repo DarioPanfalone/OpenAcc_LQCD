@@ -905,13 +905,13 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     alloc_info.num_replicas=re->replicas_total_number;
 
     
-    par_info rp1[6];
+    par_info rp1[3];
     /*rp2=malloc(alloc_info.num_replicas*sizeof(par_info));*/
     
     
     char str0[13];//uno in più perchè deve avere il carattere di fine stringa.
     
-    for(i2=0;i2<6;i2++){
+    for(i2=0;i2<3;i2++){
     
         
         rp1[i2].par= &(re->defect_coordinates[i2]);
@@ -932,10 +932,10 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         
     }
      startline=startline+2;
-    printf("startline: %d  endline %d\n",startline,startline+7);
+    printf("startline: %d  endline %d\n",startline,startline+4);
     
     
-    int res1 = scan_group_NV(6,rp1, filelines, startline, startline+7);
+    int res1 = scan_group_NV(3,rp1, filelines, startline, startline+4);
     if(res1!=0){ res=res1;}
     
     re->cr_vet=malloc(alloc_info.num_replicas*sizeof(double));
@@ -979,6 +979,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
 
 
     free(rp2);
+    
     //checking right choice of axis.
     if(re->defect_boundary>3 || re->defect_boundary<0){
         printf("wrong defect axis choice!\n");

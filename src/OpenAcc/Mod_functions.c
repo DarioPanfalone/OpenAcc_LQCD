@@ -81,7 +81,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r; //inizializza il vettore
                                 counter=counter+1;
-                      printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);
+                     /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                             }
                         
                             else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;} //else inizializza a 1.
@@ -190,7 +190,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     
     defect_volume=(def_vet[1]-def_vet[0])*(def_vet[3]-def_vet[2])*(def_vet[5]-def_vet[4])*8;
     
-    printf("counter %d\n",counter);
+   /* printf("counter %d\n",counter);*/
     
     if(counter!=defect_volume){printf("wrong defect initialization!\n"); res=1;}
     
