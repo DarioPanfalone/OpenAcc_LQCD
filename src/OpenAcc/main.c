@@ -380,19 +380,19 @@ int main(int argc, char* argv[]){
   
     //Here. I include the K_mu inizialization for each conference.
     
-
+     printf("Initializing K_mu \n");
     
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         
-    printf("go\n");
+    
         
     int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates);
-    printf("success\n");
-        
+   
     if(init_result!=0){printf("Error in Initialization!\n"); return 1;};
     
     }
     
+        printf(" Initialization success\n");
    
     
 
