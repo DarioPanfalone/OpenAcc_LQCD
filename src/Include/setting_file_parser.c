@@ -964,9 +964,9 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
            rp2[i2].comment=NULL;
            
        }
-    startline=startline+6;
+    startline=startline+3;
     
-    
+    printf("fd\n");
  
     
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
