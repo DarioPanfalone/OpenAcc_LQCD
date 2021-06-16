@@ -320,9 +320,9 @@ int main(int argc, char* argv[]){
 
 //anche da qui il ciclo.
 
-    //*****************+ INIZIALIZZAZIONE DELLA CONFIGURAZIONE *************//
-    // s
-            printf("achtung 0\n");
+    //***************** INIZIALIZZAZIONE DELLA CONFIGURAZIONE *************//
+    
+    
     
     int replicas_counter;
     char rep_str [10];
@@ -331,14 +331,14 @@ int main(int argc, char* argv[]){
     //init for starting
     
     
-    
+    //for per aprire o creare i file delle configurazioni.
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         
         snprintf(rep_str,10,"replica_%d",replicas_counter);//inizializza rep_str
         strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
         
         
-
+     
     if(debug_settings.do_norandom_test){
         if(!read_conf_wrapper(conf_hasenbusch[replicas_counter],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
             // READS ALSO THE conf_id_iter
@@ -376,28 +376,25 @@ int main(int argc, char* argv[]){
         
     }//for  replicas closing
     
-    /////inizializzazione Ku della conf///////////###########################################################################/////////    ////////###########################################################################/////////    /////////###########################################################################/////////    /////////#####################################################/////////
+       //*****************inizializzazione Ku della conf****************//
   
+    //Here. I include the K_mu inizialization for each conference.
     
-    double c_r=0.5;
-    //poi qui va messo c_r di rep->cr_vet[i]//#########
+
     
+    for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+        
     printf("go\n");
-    int init_result=init_k(conf_hasenbusch[1],c_r,rep->defect_boundary,rep->defect_coordinates);
+        
+    int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates);
     printf("success\n");
+        
     if(init_result!=0){printf("Error in Initialization!\n"); return 1;};
     
-    /*printing_k_mu(conf_hasenbusch[1]);*/
+    }
     
-    ///TEST 1//////////////
-  /*
-    if(init_k_test(conf_hasenbusch[1],c_r)!=0){
-        perror("KU VALUE DOESN'T MATCH!");
-        return 0;
-    }*/
-    //////////**************************************////////////////////////////
-     //////////**************************************////////////////////////////
-  
+   
+    
 
 #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number])
     
@@ -406,18 +403,31 @@ int main(int argc, char* argv[]){
     //#################################################################################  
 
 
-
+//Here again, the job done for 1 replica simulations it has been turned into a multi conf process.
     double max_unitarity_deviation,avg_unitarity_deviation;
-    check_unitarity_host(conf_hasenbusch[1],&max_unitarity_deviation,&avg_unitarity_deviation);
+    
+     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){ //for start
+         
+    check_unitarity_host(conf_hasenbusch[replicas_counter],&max_unitarity_deviation,&avg_unitarity_deviation);
     printf("\tMPI%02d: Avg_unitarity_deviation on host: %e\n", devinfo.myrank, 
             avg_unitarity_deviation);
     printf("\tMPI%02d: Max_unitarity_deviation on host: %e\n", devinfo.myrank,
             max_unitarity_deviation);
 
+     }// for end
 
+ 
+    //######################################################################################################################################//
+    //######################################################################################################################################//
 
-    printf("eccolo\n");
-
+    
+    
+    //######################################################################################################################################//
+    //############### MEASURES #########################################################################################################//
+    //######################################################################################################################################//
+    
+    
+    
     double plq,rect;
     double cool_topo_ch[meastopo_params.coolmeasstep/meastopo_params.cool_measinterval+1];
     double stout_topo_ch[meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval+1];
@@ -428,30 +438,39 @@ int main(int argc, char* argv[]){
     int accettate_therm_old=0;
     int accettate_metro_old=0;
     int id_iter_offset=conf_id_iter;
-    plq = calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
+    
+   
+    //Plaquette measures and polyakov loop measures.
+  
+    plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
             devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
-    rect = calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
+    rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
 
 
     printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
             devinfo.myrank, conf_id_iter,rect/GL_SIZE/6.0/3.0/2.0);
 
-    poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[1]);//misura polyakov loop
+    poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
     printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
             devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
-	
+
+    
     //char confile_dbg[50];
     //sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
-    //dbg_print_su3_soa(conf_hasenbusch[1],confile_dbg,0);
+    //dbg_print_su3_soa(conf_hasenbusch[0],confile_dbg,0);
 
 
     //            MPI_Finalize(); // DEBUG
     //            return 0 ;      // DEBUG
+    
+    
 
-
+//Here we are in Jarzynski mode.
+    
+    
     if(0 == mc_params.ntraj && 0 == mc_params.JarzynskiMode ){ // MEASURES ONLY
-
+      
         printf("\n#################################################\n");
         printf("\tMEASUREMENTS ONLY ON FILE %s\n", mc_params.save_conf_name);
         printf("\n#################################################\n");
@@ -459,13 +478,13 @@ int main(int argc, char* argv[]){
         //-------------------------------------------------// 
         //--------- MISURA ROBA DI GAUGE ------------------//
         if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
-        plq = calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-        rect = calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-        poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[1]);//misura polyakov loop
+        plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+        rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+        poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
     
 
 	
-	printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
+	    printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
         printf("Rectangle     : %.18lf\n" ,rect/GL_SIZE/3.0/6.0/2.0);
         printf("Polyakov Loop : (%.18lf,%.18lf) \n",creal(poly),cimag(poly));
 
@@ -473,19 +492,20 @@ int main(int argc, char* argv[]){
         //
         if(0 == devinfo.myrank)  printf("Fermion Measurements: see file %s\n",
                 fm_par.fermionic_outfilename);
-        fermion_measures(conf_hasenbusch[1],fermions_parameters,
+        fermion_measures(conf_hasenbusch[0],fermions_parameters,
                 &fm_par, md_parameters.residue_metro, 
                 md_parameters.max_cg_iterations, id_iter_offset,
                 plq/GL_SIZE/3.0/6.0,
                 rect/GL_SIZE/3.0/6.0/2.0);   
 
 
+      
 
 
-
-    }else printf("MPI%02d: Starting generation of Configurations.\n",
+     }else printf("MPI%02d: Starting generation of Configurations.\n",
             devinfo.myrank);
-
+    
+     
     // THERMALIZATION & METRO    ----   UPDATES //
 
     int id_iter=id_iter_offset;
@@ -537,11 +557,11 @@ int main(int argc, char* argv[]){
                 init_all_u1_phases(new_backfield_parameters,fermions_parameters);
 #pragma acc update device(u1_back_phases[0:8*alloc_info.NDiffFlavs])
 #pragma acc update device(u1_back_phases_f[0:8*alloc_info.NDiffFlavs])
-
+                printf("Jarzynski mode's end\n");
             }
 
 
-            check_unitarity_device(conf_hasenbusch[1],&max_unitarity_deviation,
+            check_unitarity_device(conf_hasenbusch[0],&max_unitarity_deviation,
                     &avg_unitarity_deviation);
             printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
                     devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
@@ -560,13 +580,14 @@ int main(int argc, char* argv[]){
             }
 
             //--------- CONF UPDATE ----------------//
+            for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
             if(id_iter<mc_params.therm_ntraj){
-                accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[1],
+                accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
                         md_parameters.residue_metro,md_parameters.residue_md,
                         id_iter-id_iter_offset,
                         accettate_therm,0,md_parameters.max_cg_iterations);
             }else{
-                accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[1],
+                accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
                         md_parameters.residue_metro,md_parameters.residue_md,
                         id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
                         md_parameters.max_cg_iterations);
@@ -586,16 +607,16 @@ int main(int argc, char* argv[]){
             //-------------------------------------------------// 
 
             //--------- MISURA ROBA DI GAUGE ------------------//
-            plq  = calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-            rect = calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-            poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[1]);
+            plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+            rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+            poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
 	    
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	      su3_soa *conf_to_use;
-	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[1],auxbis_conf_acc,topo_loc);
+	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
 		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
 		      if(cs==1)
-			conf_to_use=(su3_soa*)conf_hasenbusch[1];
+			conf_to_use=(su3_soa*)conf_hasenbusch[0];
 		      else
 			conf_to_use=(su3_soa*)aux_conf_acc;
 		      cool_conf(conf_to_use,aux_conf_acc,auxbis_conf_acc);
@@ -623,9 +644,9 @@ int main(int argc, char* argv[]){
 	    }
 	    if(meastopo_params.measstout && conf_id_iter%meastopo_params.stouteach==0){
 		    TOPO_GLOBAL_DONT_TOUCH=1;
-		    stout_wrapper(conf_hasenbusch[1],gstout_conf_acc_arr);
+		    stout_wrapper(conf_hasenbusch[0],gstout_conf_acc_arr);
 		    TOPO_GLOBAL_DONT_TOUCH=0;
-		    stout_topo_ch[0]=compute_topological_charge(conf_hasenbusch[1],auxbis_conf_acc,topo_loc);
+		    stout_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
 		    for(int ss = 0; ss < meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
 	    	    	/* aux_conf_acc = &(gstout_conf_acc_arr[8*ss]); */
 			int topoindx =1+ss/meastopo_params.stout_measinterval; 
@@ -681,6 +702,17 @@ int main(int argc, char* argv[]){
             }
             //-------------------------------------------------// 
 
+       
+            //######################################################################################################################################//
+            //############### SAVING #########################################################################################################//
+            //######################################################################################################################################//
+            
+            
+             //*****************SAVING CONF_STORE****************//
+            
+        //Here Store_conf is saved.
+         //conf[0] is the store_conf.
+            
             //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
             if(conf_id_iter%mc_params.storeconfinterval==0){ 
                 char tempname[50];
@@ -738,6 +770,8 @@ int main(int argc, char* argv[]){
 
 
         if (GPSTATUS_FERMION_MEASURES == mc_params.next_gps){
+    
+            
             //--------- MISURA ROBA FERMIONICA ----------------//
             
             if(0 != mc_params.JarzynskiMode ){ // HALFWAY MEASUREMENTS FOR JARZYNSKI
@@ -767,7 +801,7 @@ int main(int argc, char* argv[]){
 
             }
 
-            check_unitarity_device(conf_hasenbusch[1],&max_unitarity_deviation,
+            check_unitarity_device(conf_hasenbusch[0],&max_unitarity_deviation,
                     &avg_unitarity_deviation);
             printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
                     devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
@@ -777,7 +811,7 @@ int main(int argc, char* argv[]){
 
             struct timeval tf0, tf1;
             gettimeofday(&tf0, NULL);
-            fermion_measures(conf_hasenbusch[1],fermions_parameters,
+            fermion_measures(conf_hasenbusch[0],fermions_parameters,
                     &fm_par, md_parameters.residue_metro,
                     md_parameters.max_cg_iterations,conf_id_iter,
                     plq/GL_SIZE/3.0/6.0,
@@ -797,8 +831,12 @@ int main(int argc, char* argv[]){
                     fprintf(foutfile,"FERMMEASTIME  %f \n",fermionMeasureTiming);
                 fclose(foutfile);
             }
-
+      
+            
+            
             //---- SAVES RNG STATUS TO FILE ----//
+            
+            //RNG STATUS
             if(conf_id_iter%mc_params.storeconfinterval==0){
                 char tempname[50];
                 char serial[10];
@@ -906,7 +944,9 @@ int main(int argc, char* argv[]){
 
     }// while id_iter loop ends here             
 
- //QUI SALVA LA CONF!!
+    //QUI SALVA Le CONF_REPLICAS!!
+    
+     //*****************SAVING CONFS****************//
     
     //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
@@ -919,7 +959,7 @@ int main(int argc, char* argv[]){
     if (debug_settings.SaveAllAtEnd){
         printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
                 mc_params.save_conf_name);
-        save_conf_wrapper(conf_hasenbusch[1],mc_params.save_conf_name, conf_id_iter,
+        save_conf_wrapper(conf_hasenbusch[replicas_counter],mc_params.save_conf_name, conf_id_iter,
                 debug_settings.use_ildg);
         printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
                 mc_params.RandGenStatusFilename);

@@ -1076,7 +1076,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         while(readcheck != NULL){ // saving input file in array of lines
             readcheck = fgets(filelines[lines_read],MAXLINELENGTH,input);
             if(readcheck != NULL){ lines_read++;
-                printf("linea %d",lines_read);
+                
         
             }
         }
