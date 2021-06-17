@@ -991,7 +991,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
        }*/
 
     //MOD X
-    rp2.par=malloc(alloc_info.num_replicas*sizeof(double));
+    rp2->par=malloc(alloc_info.num_replicas*sizeof(double));
     
      for(i2=0;i2<(alloc_info.num_replicas);i2++){
           rp2.par[i2]= &(re->cr_vet[i2]);
