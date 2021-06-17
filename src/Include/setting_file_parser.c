@@ -962,7 +962,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     
     
-  h
+  
     par_info *rp2 ;
     rp2=malloc(sizeof(par_info));
     /*
