@@ -38,7 +38,7 @@
 char input_file_str[MAXLINES*MAXLINELENGTH];
 
 //types that can be found in an input file
-enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES}; //i tipi  che si trovano nel file. é un enum (0,3)
+enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES,TYPE_GOK}; //i tipi  che si trovano nel file. é un enum (0,3)
 const char * type_strings[]={"(int)", "(double)", "(string)" }; //vettore di stringhe non modificabile.
 
 
