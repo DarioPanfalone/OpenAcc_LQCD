@@ -962,7 +962,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     
     
-  
+  h
     par_info *rp2 ;
     rp2=malloc(sizeof(par_info));
     /*
@@ -995,9 +995,9 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     //MOD X
     rp2->par=malloc(alloc_info.num_replicas*sizeof(double));
     
-     for(i2=0;i2<(alloc_info.num_replicas);i2++){
-          rp2->par[i2]= &(re->cr_vet[i2]);
-     }
+    
+          rp2->par= &(re->cr_vet);
+     
           rp2->type=TYPE_VET_D;
          rp2->default_value=NULL;
          rp2->comment=NULL;
