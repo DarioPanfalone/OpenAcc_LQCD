@@ -311,10 +311,10 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 
                                 for(counter=0; counter<par_infos[i].data_length; counter++){
                                 reads = sscanf(filelines[iline],
-                                               "%d",(char*) par_infos[i].par);
+                                               "%d",(double*) par_infos[i].par);
                                 if(reads ==i+2 )
                                     if(0==devinfo.myrank)
-                                        printf("\"%e\"\n", ((char*)par_infos[i].par));
+                                        printf("\"%e\"\n", ((double*)par_infos[i].par));
                                 }
                                 break;
                                 
@@ -960,8 +960,13 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     re->cr_vet=malloc(alloc_info.num_replicas*sizeof(double));
     
+    
+    
   
     par_info *rp2 ;
+    rp2=malloc(sizeof(par_info));
+    /*
+    
     rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
    
     char str[10];//uno in più perchè deve avere il carattere di fine stringa.
@@ -982,8 +987,22 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
           
            rp2[i2].default_value=NULL;
            rp2[i2].comment=NULL;
-           
-       }
+     
+       }*/
+
+    //MOD X
+    rp2.par=malloc(alloc_info.num_replicas*sizeof(double));
+    
+     for(i2=0;i2<(alloc_info.num_replicas);i2++){
+          rp2.par[i2]= &(re->cr_vet[i2]);
+     }
+          rp2.type=TYPE_VET_D;
+         rp2.default_value=NULL;
+         rp2.comment=NULL;
+         rp2.name="cr_values";
+         rp2.data_length=alloc_info.num_replicas;
+    
+    
     startline=startline+3;
     
     printf("fd\n");
