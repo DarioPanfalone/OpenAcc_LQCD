@@ -37,8 +37,8 @@
 
 char input_file_str[MAXLINES*MAXLINELENGTH];
 
-//types that can be found in an input file
-enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES,TYPE_GOK}; //i tipi  che si trovano nel file. é un enum (0,3)
+//types that can be found in an input file   //MOD X
+enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES,TYPE_VET_D}; //i tipi  che si trovano nel file. é un enum (0,3)
 const char * type_strings[]={"(int)", "(double)", "(string)" }; //vettore di stringhe non modificabile.
 
 
@@ -50,6 +50,7 @@ typedef struct par_info_t{
     const char* name; // nome della variabile
     const void* default_value;//il valore di default
     const char* comment; //eventuale commento
+    const int data_length;  //MOD X
 
 }par_info;
 
@@ -210,7 +211,8 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 //FUNZIONE 5
 
 int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
-{   
+{
+    int counter;
     if(startline >= endline){ // goes into 'help mode'
         if(0==devinfo.myrank)for(int ipar = 0;ipar< npars ; ipar++){
             // printing name
@@ -227,6 +229,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 case TYPE_STR:
                     fprintf(helpfile,"%-20s",((const char *) par_infos[ipar].default_value));
                     break;
+                    
             }
             else fprintf(helpfile,"%-20s","(set yours!)");
 
@@ -298,6 +301,23 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                     if(0==devinfo.myrank)
                                         printf("\"%s\"\n", ((char*)par_infos[i].par));
                                 break;
+                                
+                            case TYPE_VET_D:
+
+                                //MOD X
+                                reads = sscanf(filelines[iline],
+                                               "%s",parname);
+                                
+                                
+                                for(counter=0; counter<par_infos[i].data_length; counter++){
+                                reads = sscanf(filelines[iline],
+                                               "%d",(char*) par_infos[i].par);
+                                if(reads ==i+2 )
+                                    if(0==devinfo.myrank)
+                                        printf("\"%e\"\n", ((char*)par_infos[i].par));
+                                }
+                                break;
+                                
                             default: 
                                 if(0==devinfo.myrank)
                                     printf("WARNING, variable type not set in sourcecode.\n");
