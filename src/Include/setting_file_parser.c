@@ -994,13 +994,13 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     rp2->par=malloc(alloc_info.num_replicas*sizeof(double));
     
      for(i2=0;i2<(alloc_info.num_replicas);i2++){
-          rp2.par[i2]= &(re->cr_vet[i2]);
+          rp2->par[i2]= &(re->cr_vet[i2]);
      }
-          rp2.type=TYPE_VET_D;
-         rp2.default_value=NULL;
-         rp2.comment=NULL;
-         rp2.name="cr_values";
-         rp2.data_length=alloc_info.num_replicas;
+          rp2->type=TYPE_VET_D;
+         rp2->default_value=NULL;
+         rp2->comment=NULL;
+         rp2->name="cr_values";
+         rp2->data_length=alloc_info.num_replicas;
     
     
     startline=startline+3;
