@@ -265,7 +265,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
         {
             char * found_something = NULL;
             for(int i =0; i<npars; i++){
-                
+                 printf("achtung31\n");
                 found_something = strstr(filelines[iline],par_infos[i].name);
                 if(found_something){ // looks at the beginning of the line.
                     // found parameter
@@ -273,10 +273,10 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         if(0==devinfo.myrank)
                             printf("WARNING, LINE %-3d: IGNORING %s\n",
                                     iline+1,par_infos[i].name);
-                          printf("achtung34\n");
+                          printf("achtung32\n");
                         break;
                     }
-                    else {
+                    else {   printf("achtung34\n");
                         if(0==devinfo.myrank)
                             printf("%-3d  %s\r\t\t\t\t ",iline+1,par_infos[i].name);
                         int reads = 0;
@@ -336,11 +336,12 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         break;
                     }
                 };
+                 printf("achtung36\n");
             }
             
             if(!found_something){
                 char word[50];
-
+ printf("achtung37\n");
                 int reads = sscanf(filelines[iline],"%s", word);
                
                 if(reads==1){
