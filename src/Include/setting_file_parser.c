@@ -211,7 +211,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 //FUNZIONE 5
 
 int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
-{
+{  printf("achtung0\n");
     int counter;
     if(startline >= endline){ // goes into 'help mode'
         if(0==devinfo.myrank)for(int ipar = 0;ipar< npars ; ipar++){
@@ -258,7 +258,9 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
         int res = 0 ;
 
         int iline = startline+1;
-
+        
+       printf("achtung2\n");
+        
         while(iline < endline )
         {
             char * found_something = NULL;
@@ -305,13 +307,14 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                             case TYPE_VET_D:
 
                                 //MOD X
+                                printf("achtung3\n");
                                 reads = sscanf(filelines[iline],
                                                "%s",parname);
                                 
                                 
                                 for(counter=0; counter<par_infos[i].data_length; counter++){
                                 reads = sscanf(filelines[iline],
-                                               "%d",(double*) par_infos[i].par);
+                                               "%lf",(double*) par_infos[i].par);
                                 if(reads ==i+2 )
                                     if(0==devinfo.myrank)
                                         printf("\"%e\"\n", ((double*)par_infos[i].par));
@@ -1013,7 +1016,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
   if(res2!=0){ res=res2;}
    
-
+    printf("after\n");
         
   
    
