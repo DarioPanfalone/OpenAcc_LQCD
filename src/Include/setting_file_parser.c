@@ -310,17 +310,20 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
 
                                 //MOD X
                                 printf("achtung3\n");
+                                int aux=0;
                                 reads = sscanf(filelines[iline],
                                                "%s",parname);
-                                
+                                if(reads==1){
+                                    aux=aux+reads;}
                                 
                                 for(counter=0; counter<par_infos[i].data_length; counter++){
                                     printf("achtung_sc1\n");
                                 reads = sscanf(filelines[iline],
                                                "%lf",(double*) par_infos[i].par);
+                                    if(reads==1){aux=aux+reads; }
                                     
                                             printf("achtung_sc2\n");
-                                if(reads ==counter+2 )
+                                if(reads==counter+2 )
                                     if(0==devinfo.myrank)
                                         printf("\"%e\"\n", ((double*)par_infos[i].par));
                                     
