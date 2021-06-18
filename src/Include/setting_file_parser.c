@@ -318,10 +318,12 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 if(reads ==counter+2 )
                                     if(0==devinfo.myrank)
                                         printf("\"%e\"\n", ((double*)par_infos[i].par));
+                                    
                                 }
                                 break;
                                 
-                            default: 
+                            default:
+                                 printf("achtung3s\n");
                                 if(0==devinfo.myrank)
                                     printf("WARNING, variable type not set in sourcecode.\n");
                                 break;
