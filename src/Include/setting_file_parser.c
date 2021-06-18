@@ -1013,7 +1013,9 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     printf("fd\n");
  
     
-  int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);
+  /*int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);*/
+  int res2 = scan_group_NV(1,rp2, filelines, startline, endline);
+    
   if(res2!=0){ res=res2;}
    
     printf("after\n");
