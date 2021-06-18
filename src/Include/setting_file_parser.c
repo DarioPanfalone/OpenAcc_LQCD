@@ -315,7 +315,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 for(counter=0; counter<par_infos[i].data_length; counter++){
                                 reads = sscanf(filelines[iline],
                                                "%lf",(double*) par_infos[i].par);
-                                if(reads ==i+2 )
+                                if(reads ==counter+2 )
                                     if(0==devinfo.myrank)
                                         printf("\"%e\"\n", ((double*)par_infos[i].par));
                                 }
