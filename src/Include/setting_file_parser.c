@@ -284,7 +284,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                             printf("%-3d  %s\r\t\t\t\t ",iline+1,par_infos[i].name);
                         int reads = 0;
                         char parname[50];
-                        char str_specifier[100];
+                        char str_specifier[100]="%s %*lf %lf";
 
                         switch(par_infos[i].type){
                             case TYPE_INT: //il case che gli da scannerizza la striga con il nome e il codice.
@@ -327,7 +327,6 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                         printf("%lf\n", par_infos[i].dvet_par[0]);
                                 
                                 for(counter=1; counter<par_infos[i].data_length; counter++){
-                                    str_specifier="%s %*lf %lf";
                               
                                     
                                     reads = sscanf(filelines[iline],
