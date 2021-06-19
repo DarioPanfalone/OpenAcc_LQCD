@@ -1045,7 +1045,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     
     
     
-    printf("vet %f",rp2->dvet_par[0]);
+
     
     startline=startline+3;
     

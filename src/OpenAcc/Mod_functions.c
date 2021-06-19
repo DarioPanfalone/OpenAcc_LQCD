@@ -81,7 +81,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             {
                                 conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r; //inizializza il vettore
                                 counter=counter+1;
-                      printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);
+                     /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                             }
                         
                             else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;} //else inizializza a 1.
