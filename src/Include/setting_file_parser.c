@@ -318,22 +318,31 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 reads = sscanf(filelines[iline],
                                                "%s %lf",parname,par_infos[i].dvet_par[0]);
                                 
-                                printf(" reads %d",reads);
-                                if(reads==1){
+                                printf(" reads %d\n",reads);
+                                if(reads==2){
                                     aux1=aux1+reads;}
                                 
-                                for(counter=0; counter<par_infos[i].data_length; counter++){
+                                if(reads==2 )
+                                    if(0==devinfo.myrank)
+                                        printf("\"%e\"\n", par_infos[i].dvet_par[0]);
+                                
+                                for(counter=1; counter<par_infos[i].data_length; counter++){
+                                    
                                     printf("achtung_sc1\n");
+                                    
                                 reads = sscanf(filelines[iline],
                                                "%lf", par_infos[i].dvet_par[counter]);
+                                    
                                     if(reads==1){aux1=aux1+reads; }
                                     
                                             printf("achtung_sc2\n");
+                                    
                                 if(reads==counter+2 )
                                     if(0==devinfo.myrank)
                                         printf("\"%e\"\n", par_infos[i].dvet_par[counter]);
                                     
                                 }
+                                if(reads==counter+2){reads=2};
                                 break;
                                 
                             default:
