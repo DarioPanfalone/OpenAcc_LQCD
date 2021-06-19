@@ -262,7 +262,6 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
         int iline = startline+1;
         
 
-          int aux1=0;
         
         while(iline < endline )
         {
@@ -322,8 +321,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 reads = sscanf(filelines[iline],
                                                "%s %lf",parname,&(par_infos[i].dvet_par[0]));
                            
-                                if(reads==2){
-                                    aux1=aux1+reads;}
+                                
                                 
                                 if(reads==2 )
                                     if(0==devinfo.myrank)
@@ -339,7 +337,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                     
                                     
                                     
-                                    if(reads==1){aux1=aux1+reads;
+                                    if(reads==2){
                                         strcat(str_specifier_head,str_specifier_add_1);
                                         
                                     }
