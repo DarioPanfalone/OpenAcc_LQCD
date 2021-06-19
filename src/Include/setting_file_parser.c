@@ -326,7 +326,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                     printf("achtung_sc1\n");
                                 reads = sscanf(filelines[iline],
                                                "%lf", par_infos[i].dvet_par[counter]);
-                                    if(reads==1){aux=aux+reads; }
+                                    if(reads==1){aux1=aux1+reads; }
                                     
                                             printf("achtung_sc2\n");
                                 if(reads==counter+2 )
