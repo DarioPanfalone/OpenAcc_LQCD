@@ -51,6 +51,8 @@ typedef struct par_info_t{
     const void* default_value;//il valore di default
     const char* comment; //eventuale commento
     const int data_length;  //MOD X
+    double* dvet_par; //MOD X
+    int* zvet_par // MOD X
 
 }par_info;
 
@@ -319,13 +321,13 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 for(counter=0; counter<par_infos[i].data_length; counter++){
                                     printf("achtung_sc1\n");
                                 reads = sscanf(filelines[iline],
-                                               "%lf",(double*) par_infos[i].par);
+                                               "%lf",(double*) par_infos.dvet_par[counter]);
                                     if(reads==1){aux=aux+reads; }
                                     
                                             printf("achtung_sc2\n");
                                 if(reads==counter+2 )
                                     if(0==devinfo.myrank)
-                                        printf("\"%e\"\n", ((double*)par_infos[i].par));
+                                        printf("\"%e\"\n", par_infos.dvet_par[counter]);
                                     
                                 }
                                 break;
@@ -1011,13 +1013,18 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     rp2->par=malloc(alloc_info.num_replicas*sizeof(double));
     
     
-          rp2[0].par= &(re->cr_vet[0]);
+    rp2->dvet_par=malloc(alloc_info.num_replicas*sizeof(double));
      
           rp2->type=TYPE_VET_D;
          rp2->default_value=NULL;
          rp2->comment=NULL;
          rp2->name="cr_values";
          rp2->data_length=alloc_info.num_replicas;
+    
+    
+    
+    
+    
     
     
     startline=startline+3;
