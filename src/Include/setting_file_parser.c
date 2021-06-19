@@ -324,7 +324,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 
                                 if(reads==2 )
                                     if(0==devinfo.myrank)
-                                        printf("\"%e\"\n", par_infos[i].dvet_par[0]);
+                                        printf("\"%e\"\n", *(par_infos[i].dvet_par[0]));
                                 
                                 for(counter=1; counter<par_infos[i].data_length; counter++){
                                     
