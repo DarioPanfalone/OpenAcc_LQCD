@@ -330,7 +330,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                               
                                     
                                     reads = sscanf(filelines[iline],
-                                               "%s %lf",parname, &(par_infos[i].dvet_par[counter]));
+                                               "%s %*lf %lf",parname, &(par_infos[i].dvet_par[counter]));
                                     
                                     if(reads==1){aux1=aux1+reads; }
                                     
