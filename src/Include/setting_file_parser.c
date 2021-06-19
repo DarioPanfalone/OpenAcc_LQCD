@@ -311,17 +311,17 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                             case TYPE_VET_D:
 
                                 //MOD X
-                                printf("achtung3\n");
+                             
                                 int aux=0;
                          
                                 reads = sscanf(filelines[iline],
-                                               "%s %lf",parname,par_infos[i].dvet_par[counter]);
+                                               "%s %lf",parname,par_infos[i].dvet_par[0]);
                                 
                                 printf(" reads %d",reads);
                                 if(reads==1){
                                     aux=aux+reads;}
                                 
-                                for(counter=0; counter<par_infos[i].data_length; counter++){
+                                for(counter=1; counter<par_infos[i].data_length; counter++){
                                     printf("achtung_sc1\n");
                                 reads = sscanf(filelines[iline],
                                                "%lf", par_infos[i].dvet_par[counter]);
