@@ -321,13 +321,13 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 for(counter=0; counter<par_infos[i].data_length; counter++){
                                     printf("achtung_sc1\n");
                                 reads = sscanf(filelines[iline],
-                                               "%lf",(double*) par_infos.dvet_par[counter]);
+                                               "%lf",(double*) par_infos[i].dvet_par[counter]);
                                     if(reads==1){aux=aux+reads; }
                                     
                                             printf("achtung_sc2\n");
                                 if(reads==counter+2 )
                                     if(0==devinfo.myrank)
-                                        printf("\"%e\"\n", par_infos.dvet_par[counter]);
+                                        printf("\"%e\"\n", par_infos[i].dvet_par[counter]);
                                     
                                 }
                                 break;
