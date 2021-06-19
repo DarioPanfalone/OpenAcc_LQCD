@@ -330,7 +330,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                               
                                     
                                 reads = sscanf(filelines[iline],
-                                               "%lf", par_infos[i].dvet_par[counter]);
+                                               "%lf", &(par_infos[i].dvet_par[counter]));
                                     
                                     if(reads==1){aux1=aux1+reads; }
                                     
@@ -351,7 +351,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 break;
 
                         }
-                        printf("reads %d\n",reads);
+                       
                         if(reads == 2)rc[i]++;
                         else if(0==devinfo.myrank) printf("WARNING, NO VALUE READ!");
                         break;
@@ -1047,10 +1047,17 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   /*int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);*/
   int res2 = scan_group_NV(1,rp2, filelines, startline, endline);
     
+    for (i2=0;i2<alloc_info.num_replicas;i2++){
+        re->cr_vet[i2]=rp2->par[i2];
+    }
+    
+    
+    
   if(res2!=0){ res=res2;}
+    
+    
+    
    
-    printf("after\n");
-        
   
    
 
