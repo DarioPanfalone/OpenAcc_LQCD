@@ -1048,7 +1048,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
   int res2 = scan_group_NV(1,rp2, filelines, startline, endline);
     
     for (i2=0;i2<alloc_info.num_replicas;i2++){
-        re->cr_vet[i2]=rp2->par[i2];
+        re->cr_vet[i2]=rp2->dvet_par[i2];
     }
     
     
