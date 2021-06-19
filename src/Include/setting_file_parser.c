@@ -213,7 +213,7 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 //FUNZIONE 5
 
 int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
-{  printf("achtung0\n");
+{
     int counter;
     if(startline >= endline){ // goes into 'help mode'
         if(0==devinfo.myrank)for(int ipar = 0;ipar< npars ; ipar++){
@@ -261,14 +261,14 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
 
         int iline = startline+1;
         
-       printf("achtung2\n");
+
           int aux1=0;
         
         while(iline < endline )
         {
             char * found_something = NULL;
             for(int i =0; i<npars; i++){
-                 printf("achtung31\n");
+
                 found_something = strstr(filelines[iline],par_infos[i].name);
                 if(found_something){ // looks at the beginning of the line.
                     // found parameter
@@ -276,10 +276,10 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         if(0==devinfo.myrank)
                             printf("WARNING, LINE %-3d: IGNORING %s\n",
                                     iline+1,par_infos[i].name);
-                          printf("achtung32\n");
+           
                         break;
                     }
-                    else {   printf("achtung34\n");
+                    else {  
                         if(0==devinfo.myrank)
                             printf("%-3d  %s\r\t\t\t\t ",iline+1,par_infos[i].name);
                         int reads = 0;
@@ -317,25 +317,24 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                          
                                 reads = sscanf(filelines[iline],
                                                "%s %lf",parname,par_infos[i].dvet_par[0]);
-                                
-                                printf(" reads %d\n",reads);
+                           
                                 if(reads==2){
                                     aux1=aux1+reads;}
                                 
                                 if(reads==2 )
                                     if(0==devinfo.myrank)
-                                        printf("\"%lf\"\n", par_infos[i].dvet_par[0]);
+                                        printf("%lf\n", par_infos[i].dvet_par[0]);
                                 
                                 for(counter=1; counter<par_infos[i].data_length; counter++){
                                     
-                                    printf("achtung_sc1\n");
+                              
                                     
                                 reads = sscanf(filelines[iline],
                                                "%lf", par_infos[i].dvet_par[counter]);
                                     
                                     if(reads==1){aux1=aux1+reads; }
                                     
-                                            printf("achtung_sc2\n");
+                                    
                                     
                                 if(reads==counter+2 )
                                     if(0==devinfo.myrank)
@@ -358,12 +357,12 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         break;
                     }
                 };
-                 printf("achtung36\n");
+        
             }
             
             if(!found_something){
                 char word[50];
- printf("achtung37\n");
+
                 int reads = sscanf(filelines[iline],"%s", word);
                
                 if(reads==1){
