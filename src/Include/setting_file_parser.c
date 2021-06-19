@@ -286,7 +286,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         char parname[50];
                         char str_specifier[100]="%s %*lf %lf";
                         char str_specifier_add_1[6]="%*lf";
-                        char str_specifier_add_1[6]="%lf";
+                        char str_specifier_add_2[6]="%lf";
 
                         switch(par_infos[i].type){
                             case TYPE_INT: //il case che gli da scannerizza la striga con il nome e il codice.
