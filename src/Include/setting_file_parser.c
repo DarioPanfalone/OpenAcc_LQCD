@@ -342,7 +342,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                         printf("\"%e\"\n", par_infos[i].dvet_par[counter]);
                                     
                                 }
-                                if(reads==counter+2){reads=2};
+                                if(reads==counter+2){reads=2;}
                                 break;
                                 
                             default:
