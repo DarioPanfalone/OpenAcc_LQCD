@@ -313,8 +313,10 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 //MOD X
                                 printf("achtung3\n");
                                 int aux=0;
+                         
                                 reads = sscanf(filelines[iline],
-                                               "%s",parname);
+                                               "%s %lf",parname,par_infos[i].dvet_par[counter]);
+                                
                                 printf(" reads %d",reads);
                                 if(reads==1){
                                     aux=aux+reads;}
