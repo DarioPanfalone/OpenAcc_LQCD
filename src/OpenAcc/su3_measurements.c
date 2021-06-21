@@ -336,7 +336,7 @@ double calc_diff_su3_soa_norm(const __restrict su3_soa * tconf,
     double result=0.0;
     double total_result=0.0;
 
-        for(mu=0; mu < 8; mu++) // CHECK IF WORKS
+        for(mu=0; mu < 8; mu++) // CHECK IF IT WORKS
         {
 #pragma acc kernels present(tconf) present(tconf_old)
 #pragma acc loop reduction(+:result)

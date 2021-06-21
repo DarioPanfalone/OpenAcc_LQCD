@@ -41,11 +41,15 @@
 #include <mpi.h>
 #endif 
 
-action_param act_params;
+action_param act_params; //parametri dell'azione action.h
+
+
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro, int max_cg){
 
+    
+    
 #ifdef STOUT_FERMIONS //Per adesso va bene così, ma dopo aggiungerà la topossibilità       
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
     su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_arr_f;
@@ -60,6 +64,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     printf("MPI%02d: UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: starting... \n",
             devinfo.myrank);
     // DEFINIZIONE DI TUTTI I dt NECESSARI PER L'INTEGRATORE OMELYAN
+    
     int iterazioni = id_iter+1;
     double dt_tot;
     double dt_saveoldconf;
@@ -67,7 +72,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     double dt_metropolis;
     gauge_mdtimes = gauge_mdtimes0;
     
-
+//Just Debugging diagnostics
     if(debug_settings.save_diagnostics == 1){
         FILE *foutfile = 
             fopen(debug_settings.diagnostics_filename,"at");
@@ -77,15 +82,16 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 
     int mu;
-    double **minmaxeig; 
+    double **minmaxeig;  //matrix of doubles(actually addresses ) Of Course it has to be allocated.
     minmaxeig = (double**)malloc(alloc_info.NDiffFlavs*sizeof(double*));
     for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++)
         minmaxeig[iflav] = (double*) malloc(2*sizeof(double));
+    
 
-    double p1;
+    double p1; //definition of p1, p2. Acceptance rates
     double p2;
     int accettata;
-    double delta_S;
+    double delta_S; //delta_S
     double action_in,action_fin,action_mom_in,action_mom_fin,action_ferm_in,action_ferm_fin;
 	double action_topo_in,action_topo_fin;
 
@@ -102,7 +108,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     gettimeofday ( &t_saved, NULL );
 
-    // ESTRAZIONI RANDOM
+    // ESTRAZIONI RANDOM //momenta are randomly generated.
     if(debug_settings.do_norandom_test){ // NORANDOM
         printf("NORANDOM mode, loading momenta from memory.\n");
         if(read_thmat_soa(momenta,"momenta_norndtest")){
@@ -121,8 +127,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         copy_momenta_into_old(momenta,momenta_backup);
 
 
-
-    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
+    //HERE A FERMIONIC CYCLE:
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){//iflav start
         for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
             int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
 
@@ -149,7 +155,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #pragma acc update device(ferm_phi_acc[0:alloc_info.NPS_tot])
 
     gconf_as_fermionmatrix_f = conf_acc_f;
-#ifdef STOUT_FERMIONS 
+#ifdef STOUT_FERMIONS  //STOUT FERM DIRECTIVE.
     // DILATION USING STOUTED DIRAC OPERATOR
     // STOUTING...(ALREADY ON DEVICE)
     if(act_params.stout_steps > 0){
@@ -168,7 +174,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #endif
 
     // DILATION OF FIRST_INV RATIONAL APPROXIMATION
-    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){ //start iflav for
         if(verbosity_lv > 2 ) printf("Rat approx rescale (flav=%d)\n",iflav);
 
         if(debug_settings.do_norandom_test){ // NORANDOM
@@ -203,9 +209,10 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #pragma acc update device(approx_fi[0:1])
     }//end for iflav
 
-
+//it goes into this for if metro==1, that means that metropolis will be executed.
     if(metro==1){
         /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
+        
         if(GAUGE_ACTION == 0)// Standard gauge action 
             action_in = BETA_BY_THREE*calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
         if(GAUGE_ACTION == 1){ //Tlsym gauge action
@@ -236,9 +243,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #endif
 
         action_mom_in = 0.0;
-        for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
+        for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);//calculating momenta action.
+        
+        
         action_ferm_in=0;
-        for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
+        for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){ //iflav start
 	  for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
 	    
 	    int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
@@ -261,7 +270,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 
 
-    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
+    for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){ //for iflav.
         for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
             if(0==devinfo.myrank)
                 printf("Calculation of chi for fermion %d, copy %d\n", iflav,ips);
@@ -491,7 +500,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             RationalApprox *approx_li_mother = &(fermions_parameters[iflav].approx_li_mother);
             rescale_rational_approximation(approx_li_mother,approx_li,minmaxeig[iflav]);
 #pragma acc update device(approx_li[0:1])
-        }
+        }//end iflav.
 
        // LAST INV APPROX CALC 
        
@@ -502,7 +511,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                     gconf_as_fermionmatrix_f);
             setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,
                     alloc_info.maxApproxOrder,kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);        }
-        for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
+        for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){ //iflav
             for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
                 int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
                 // USING STOUTED CONF
@@ -512,9 +521,12 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
                         CONVERGENCE_CRITICAL);
                 recombine_shifted_vec3_to_vec3(ferm_shiftmulti_acc, &(ferm_chi_acc[ps_index]), &(ferm_phi_acc[ps_index]),&(fermions_parameters[iflav].approx_li));
             }
-        }
+        }//end iflav
         printf(" MPI%02d - Final Action Computed : OK \n", devinfo.myrank);
 
+        //I should not modify the action computation...well actually yes. I Should modify the way action is computed.
+        //I have only to change the gauge action
+        
         ///////////////   FINAL ACTION COMPUTATION  ////////////////////////////////////////////
         if(GAUGE_ACTION == 0) // Standard gauge action
             action_fin = BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
@@ -541,6 +553,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 	action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
 #endif
         action_mom_fin = 0.0;
+        //action_mom doesn't change by adding the defect.
         for(mu =0;mu<8;mu++)    action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
 
         action_ferm_fin=0;
@@ -553,7 +566,13 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 
         ////////////////////////////////////////////////////////////////////////////////////////
-
+        
+        
+        //******************************************************************************************//
+        //THE METROPOLIS STEP:
+        //******************************************************************************************//
+        
+        
         // delta_S = action_new - action_old
         delta_S  = - (-action_in+action_mom_in+action_ferm_in+action_topo_in) + (-action_fin+action_mom_fin+action_ferm_fin+action_topo_fin);
         if(verbosity_lv > 2 && 0 == devinfo.myrank ){

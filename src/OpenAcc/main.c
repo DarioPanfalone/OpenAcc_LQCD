@@ -380,19 +380,20 @@ int main(int argc, char* argv[]){
   
     //Here. I include the K_mu inizialization for each conference.
     
-     printf("Initializing K_mu \n");
+
+          printf("K_mu Initialization starts\n");
     
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         
-    
+     printf("Initializing K_mu  Replica %d\n",replicas_counter);
         
     int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates);
    
-    if(init_result!=0){printf("Error in Initialization!\n"); return 1;};
+    if(init_result!=0){printf("Error in Initialization Replica %d!\n",replicas_counter); return 1;};
     
     }
     
-        printf(" Initialization success\n");
+        printf(" Initialization K_mu success\n");
    
     
 
@@ -580,6 +581,9 @@ int main(int argc, char* argv[]){
             }
 
             //--------- CONF UPDATE ----------------//
+        
+            //If metro, the second-last parameter, is 0 the update function thermalizes the conf, otherwise( metro=1) it does metropolis.
+            
             for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
             if(id_iter<mc_params.therm_ntraj){
                 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
@@ -591,7 +595,7 @@ int main(int argc, char* argv[]){
                         md_parameters.residue_metro,md_parameters.residue_md,
                         id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
                         md_parameters.max_cg_iterations);
-                if(0==devinfo.myrank){
+                if(0==devinfo.myrank){ //multidevice control
                     int iterations = id_iter-id_iter_offset-accettate_therm +1;
                     double acceptance = (double) accettate_metro / iterations;
                     double acc_err = 
@@ -1003,7 +1007,7 @@ int main(int argc, char* argv[]){
     printf("MPI%02d: Double precision free [CORE]\n", devinfo.myrank);
     mem_free_core();
     
-      printf("achtung22\n");
+ 
     
     printf("MPI%02d: Double precision free [EXTENDED]\n", devinfo.myrank);
     mem_free_extended();
