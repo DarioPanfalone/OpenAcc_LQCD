@@ -58,7 +58,7 @@ double calc_loc_plaquettes_nnptrick(
            
            //MOD****************************************//
            K_mu_nu=(u[mu].K.d[idxh])*(u[nu].K.d[idxpmu])*(u[nu].K.d[idxh])*(u[mu].K.d[idxpnu]); //K_mu_nu computation;
-           tr_local_plaqs=K_mu_nu*tr_local_plaqs[parity].c[idxh]; //
+           tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh]; //
           //*****************************************//
 
 	}  // d0
