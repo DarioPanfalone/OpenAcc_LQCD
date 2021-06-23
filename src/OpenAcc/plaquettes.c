@@ -29,7 +29,7 @@ double calc_loc_plaquettes_nnptrick(
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
           for(d0=0; d0 < nd0; d0++) {
-      printf("foggy %d\n",d0);
+      printf("foggy %d\n",d1);
               
 	  idxh = snum_acc(d0,d1,d2,d3);  // the site on the  half-lattice.
 	  parity = (d0+d1+d2+d3) % 2; //obviously the parity_term

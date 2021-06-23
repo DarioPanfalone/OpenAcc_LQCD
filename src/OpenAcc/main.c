@@ -442,7 +442,7 @@ int main(int argc, char* argv[]){
     
    
     //Plaquette measures and polyakov loop measures.
-    printf("PERIODIC CONF MEASURES \N");
+    printf("PERIODIC CONF MEASURES \n");
   
     plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
