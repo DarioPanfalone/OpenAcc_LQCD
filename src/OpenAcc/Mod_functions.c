@@ -244,7 +244,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             break;
     }
     
-    defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2])*2;
+    defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2]);
     
    printf("counter %d\n",counter);
     
