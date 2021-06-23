@@ -85,7 +85,7 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
 
     gettimeofday ( &t[0], NULL );
     calc_ipdot_gauge_soloopenacc_d3c(tconf_acc_old,local_staples,tipdot,
-            HALO_WIDTH,GAUGE_HALO); 
+            HALO_WIDTH,GAUGE_HALO);  //QUESTA VA ANCHE MODIFICATA PER "OTTIMIZZARE".
     calc_ipdot_gauge_soloopenacc_d3c(tconf_acc_old,local_staples,tipdot,
             nd3-HALO_WIDTH-GAUGE_HALO,GAUGE_HALO); 
 

@@ -9,26 +9,27 @@
 // 1) all the plaquettes on the plane mu-nu are computed and saved locally
 // 2) finally the reduction of the traces is performed
 double calc_loc_plaquettes_nnptrick(
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_plaq,
-        dcomplex_soa * const tr_local_plaqs,
+        __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
+        __restrict su3_soa * const loc_plaq, //la placchetta locale.
+        dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
         const int mu, const int nu)
 {
-
+    double K_mu_nu; //MOD.
+    
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
-  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {//
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
           for(d0=0; d0 < nd0; d0++) {
-	  int idxh,idxpmu,idxpnu;
-	  int parity;
-	  int dir_muA,dir_nuB;
+	  int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
+	  int parity; //parity
+	  int dir_muA,dir_nuB; //mu and nu directions.
 	  int dir_muC,dir_nuD;
-	  idxh = snum_acc(d0,d1,d2,d3);  // r 
-	  parity = (d0+d1+d2+d3) % 2;
+	  idxh = snum_acc(d0,d1,d2,d3);  // the site on the  half-lattice.
+	  parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
 	  
 	  dir_muA = 2*mu +  parity;
 	  dir_muC = 2*mu + !parity;
@@ -36,7 +37,7 @@ double calc_loc_plaquettes_nnptrick(
 	    
 	  dir_nuB = 2*nu + !parity;
 	  dir_nuD = 2*nu +  parity;
-	  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+	  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu //the table that states which is the nearest neighbour.
 	  //       r+nu (C)  r+mu+nu
 	  //          +<---+
 	  // nu       |    ^
@@ -45,13 +46,20 @@ double calc_loc_plaquettes_nnptrick(
 	  // |       r  (A)  r+mu
 	  // +---> mu
 
+      //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
+              
 	  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
 	  
 	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
 	  tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
-	  
+              
+           
+           //MOD****************************************//
+           K_mu_nu=(u[mu].K.d[idxh])*(u[nu].K.d[idxpmu])*(u[nu].K.d[idxh])*(u[mu].K.d[idxpnu]); //K_mu_nu computation;
+           tr_local_plaqs=K_mu_nu*tr_local_plaqs; //
+          //*****************************************//
 
 	}  // d0
       }  // d1
@@ -65,8 +73,8 @@ double calc_loc_plaquettes_nnptrick(
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
   for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
-    res_R_p += creal(tr_local_plaqs[0].c[t]);
-    res_R_p += creal(tr_local_plaqs[1].c[t]);
+    res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
+    res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
   }
 
   //printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);

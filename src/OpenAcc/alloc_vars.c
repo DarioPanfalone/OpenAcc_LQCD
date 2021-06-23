@@ -313,7 +313,7 @@ void mem_alloc_extended()
 #pragma acc enter data create(ferm_shiftmulti_acc[0:alloc_info.maxNeededShifts])
 
 
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&d_local_sums, ALIGN, 2*sizeof(double_soa)); 
+    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&d_local_sums, ALIGN, 2*sizeof(double_soa));  //Here it is! Of course 2: 0 & 1 parity!.
     ALLOCCHECK(allocation_check, d_local_sums) ;
 #pragma acc enter data create(d_local_sums[0:2])
     

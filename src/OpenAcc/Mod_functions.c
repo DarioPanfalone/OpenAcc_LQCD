@@ -64,6 +64,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     int i,j,z,t;
     int res=0;
     int defect_volume;
+    int parity;
     
     
     int counter=0;
@@ -72,28 +73,42 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     switch (def_axis) {
         case 0:
             printf("defect on x's boundary\n");
-        for(mu=0;mu<8;mu++){
+        for(mu=0;mu<4;mu++){
            for(t=0;t<nd3;t++) {
                 for (z=0; z<nd2; z++){
                      for(j=0;j<nd1;j++){
-                       for(i=0;i<(nd0/2);i++){
-                            if(j>=0 && j<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && i==((nd0/2)-1) && (mu==0 || mu==1))
+                       for(i=0;i<nd0;i++){
+                            parity = (nd0+nd1+nd2+nd3) % 2;
+                           
+                            if(j>=0 && j<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && i==((nd0)-1) && mu==0 )
                             {
-                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r; //inizializza il vettore
+                                
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
+                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
+                                    
+                                    
                                 counter=counter+1;
                      /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
-                            }
+                                 }
+                                
+                           
                         
-                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;} //else inizializza a 1.
+                            else{
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1;}
+                                else(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1;}
+                                
+                                
+                                
+                            } //else inizializza a 1.
                         
                      /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
-                    
+                       }
                     }
                 }
             }
             
         }
-        }
+        
             
             
             
@@ -101,27 +116,40 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         case 1:
             printf("defect on y's boundary\n");
-            for(mu=0;mu<8;mu++){
+            for(mu=0;mu<4;mu++){
                 for(t=0;t<nd3;t++) {
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
-                            for(i=0;i<(nd0/2);i++){
-                            if(i>=0 && i<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && j==nd1-1 && (mu==2 || mu==3))
+                            for(i=0;i<nd0;i++){
+                            if(i>=0 && i<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && j==nd1-1 && mu==1 )
                             {
-                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
-                                   counter=counter+1;
-                           
                                 
                                 
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
+                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
+                                
+                                
+                                counter=counter+1;
+                                /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                             }
-                        
-                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
+                                
+                                
+                                
+                            else{
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1;}
+                                else(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1;}
+                                
+                                
+                                
+                            } //else inizializza a 1.
+                                
+                                /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
+                                
                     }
-                }
+              }
             }
-            
           }
-          }
+        }
             
             
             
@@ -131,20 +159,33 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         case 2:
             printf("defect on z's boundary\n");
-            for(mu=0;mu<8;mu++){
+            for(mu=0;mu<4;mu++){
                 for(t=0;t<nd3;t++) {
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
-                            for(i=0;i<(nd0/2);i++){
-                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && t>=0 && t<def_vet[2] && z==nd2-1 && (mu==4 || mu==5))
+                            for(i=0;i<nd0;i++){
+                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && t>=0 && t<def_vet[2] && z==nd2-1 && mu==2 )
                             {
-                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
-                                   counter=counter+1;
+                                
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
+                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
                                 
                                 
+                                counter=counter+1;
+                                /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                             }
-                        
-                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
+                                
+                                
+                                
+                            else{
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1;}
+                                else(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1;}
+                                
+                                
+                                
+                            } //else inizializza a 1.
+                                
+                                /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                     }
                 }
             }
@@ -158,20 +199,34 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         case 3:
             printf("defect on t's boundary\n");
-            for(mu=0;mu<8;mu++){
+            for(mu=0;mu<4;mu++){
                 for(t=0;t<nd3;t++) {
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
-                            for(i=0;i<(nd0/2);i++){
-                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && z>=0 && z<def_vet[2] && t==nd3-1 && (mu==6 || mu==7))
+                            for(i=0;i<nd0;i++){
+                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && z>=0 && z<def_vet[2] && t==nd3-1 && mu==3 )
                             {
-                                conf[mu].K.d[snum_acc(2*i,j,z,t)]=c_r;
-                                   counter=counter+1;
+                                c
+                                
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
+                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
                                 
                                 
+                                counter=counter+1;
+                                /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                             }
-                        
-                            else {conf[mu].K.d[snum_acc(2*i,j,z,t)]=1;}
+                                
+                                
+                                
+                            else{
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1;}
+                                else(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1;}
+                                
+                                
+                                
+                            } //else inizializza a 1.
+                                
+                                /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                     }
                 }
             }
@@ -188,7 +243,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             break;
     }
     
-    defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2])*8;
+    defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2])*2;
     
    printf("counter %d\n",counter);
     
@@ -212,7 +267,7 @@ int init_k_test(su3_soa *conf_acc,int c_r){
             if(conf_acc[mu1].K.d[kk2]!=(1 && c_r)){
                 return 1;
             }
-        printf("%d:ku[%d]:%f\n",mu1,kk2, conf_acc[mu1].K.d[kk2]);
+        printf("%d:ku[%d]:%f\n",mu1,kk2,conf_acc[mu1].K.d[kk2]);
         }
     }
     return 0;
