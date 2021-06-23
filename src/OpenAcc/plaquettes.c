@@ -55,14 +55,14 @@ double calc_loc_plaquettes_nnptrick(
 	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
 	  tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
               
-              printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),+cimag(tr_local_plaqs[parity].c[idxh])*I);
+             /* printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);*/
            //MOD****************************************//
            K_mu_nu=(u[mu].K.d[idxh])*(u[nu].K.d[idxpmu])*(u[nu].K.d[idxh])*(u[mu].K.d[idxpnu]); //K_mu_nu computation;
            tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh]; //
           //*****************************************//
 
-              printf("%f +i%f : (%d,%d,%d,%d) \n ",creal(tr_local_plaqs[parity].c[idxh]),+cimag(tr_local_plaqs[parity].c[idxh])*I,d0,d1,d2,d3);
-              
+              /*printf("%f +i%f : (%d,%d,%d,%d) \n ",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I,d0,d1,d2,d3);*/
+              printf("(%d,%d,%d,%d)\n",d0,d1,d2,d3);
               
 	}  // d0
       }  // d1
