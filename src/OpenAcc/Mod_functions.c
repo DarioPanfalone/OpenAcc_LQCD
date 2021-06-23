@@ -207,7 +207,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             for(i=0;i<nd0;i++){
                             if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && z>=0 && z<def_vet[2] && t==nd3-1 && mu==3 )
                             {
-                                c
+                                
                                 
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
                                 if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
