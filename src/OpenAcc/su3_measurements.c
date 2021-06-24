@@ -213,7 +213,7 @@ double  calc_plaquette_soloopenacc(
             int i_counter=0;
             
             for (i_counter=0; i_counter<sizeh; i_counter++) {
-                printf("ecco (%d) : %f\n",i_counter,local_sums[0].c[i_counter]);
+                printf("ecco (%d) : %f\n",i_counter,tr_local_plaqs[0].c[i_counter]);
             }
             
         }
