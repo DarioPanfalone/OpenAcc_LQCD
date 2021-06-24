@@ -203,20 +203,12 @@ double  calc_plaquette_soloopenacc(
 
     double result=0.0;
     double total_result=0.0;
-     int i_counter=0;
 
     // calcolo il valore della plaquette sommata su tutti i siti a fissato piano mu-nu (6 possibili piani)//(the couple has to be chosen excluding same direction ones.(4 2)binomial coefficient.
     for(int mu=0;mu<3;mu++){
         for(int nu=mu+1;nu<4;nu++){
             // sommo i 6 risultati in tempo
             result  += calc_loc_plaquettes_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here ol the plaquettes of a specific plane'choice are computed.
-            
-           
-            
-            for (i_counter; i_counter<sizeh; i_counter++) {
-                printf("ecco (%d) : %f\n",i_counter,local_sums[0].c[i_counter]);
-            }
-            
         }
     }
 
