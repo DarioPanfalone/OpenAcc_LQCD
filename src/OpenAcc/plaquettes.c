@@ -83,6 +83,9 @@ double calc_loc_plaquettes_nnptrick(
   }
 
   //printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);
+    
+    printf("ecco %f(%d)  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6));
+    
   return res_R_p;
 }// closes routine
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples

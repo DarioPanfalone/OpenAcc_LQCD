@@ -210,11 +210,9 @@ double  calc_plaquette_soloopenacc(
         for(int nu=mu+1;nu<4;nu++){
             // sommo i 6 risultati in tempo
             result  += calc_loc_plaquettes_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here ol the plaquettes of a specific plane's choice are computed.
-            printf("result: %d\n",result);
-            for(i_counter=0;i_counter<sizeh;i_counter++){
-                printf("ecco %f(%d) (%d, %d) \n",creal(tr_local_plaqs[1].c[i_counter]),i_counter,mu,nu);
+           
                 
-            }
+            
         }
     }
     
