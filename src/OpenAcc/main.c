@@ -455,7 +455,7 @@ int main(int argc, char* argv[]){
     }
     
     
-    prtintf("END PLAQUETTE\n");
+    printf("END PLAQUETTE\n");
     rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
 
 
