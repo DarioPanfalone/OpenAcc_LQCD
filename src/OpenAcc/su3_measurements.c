@@ -209,9 +209,10 @@ double  calc_plaquette_soloopenacc(
         for(int nu=mu+1;nu<4;nu++){
             // sommo i 6 risultati in tempo
             result  += calc_loc_plaquettes_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here ol the plaquettes of a specific plane's choice are computed.
+              printf("ecco %f\n",tr_local_plaqs[0].c[5]);
         }
     }
-    printf("ecco %f\n",tr_local_plaqs[0].c[5]);
+    
 
 
 #ifdef MULTIDEVICE
