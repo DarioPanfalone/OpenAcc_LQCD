@@ -25,11 +25,11 @@ double calc_loc_plaquettes_nnptrick(
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {//what?
-#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2) //this is the one who makes the loop go crazy
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
           for(d0=0; d0 < nd0; d0++) {
-      printf("foggy %d\n",d1);
+ 
               
 	  idxh = snum_acc(d0,d1,d2,d3);  // the site on the  half-lattice.
 	  parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
@@ -58,10 +58,10 @@ double calc_loc_plaquettes_nnptrick(
 	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
 	  tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
               
-             /* printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);*/
+           
            //MOD****************************************//
-           K_mu_nu=(u[mu].K.d[idxh])*(u[nu].K.d[idxpmu])*(u[nu].K.d[idxh])*(u[mu].K.d[idxpnu]); //K_mu_nu computation;
-           tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh]; //
+          /* K_mu_nu=(u[mu].K.d[idxh])*(u[nu].K.d[idxpmu])*(u[nu].K.d[idxh])*(u[mu].K.d[idxpnu]); //K_mu_nu computation;
+           tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh]; */
           //*****************************************//
 
               /*printf("%f +i%f : (%d,%d,%d,%d) \n ",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I,d0,d1,d2,d3);*/
@@ -73,6 +73,8 @@ double calc_loc_plaquettes_nnptrick(
     }  // d2
   }  // d3
 
+     printf("%f +i%f \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),cimag(tr_local_plaqs[parity].c[idxh])*I);
+    
   double res_R_p = 0.0;
   double res_I_p = 0.0;
   double resR = 0.0;
