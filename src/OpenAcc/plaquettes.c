@@ -73,7 +73,7 @@ double calc_loc_plaquettes_nnptrick(
     }  // d2
   }  // d3
 
-     printf("%f +i%f \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),cimag(tr_local_plaqs[parity].c[idxh])*I);
+    printf("TEST PLAQUETTE:%f +i%f \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),cimag(tr_local_plaqs[parity].c[idxh])*I);
     
   double res_R_p = 0.0;
   double res_I_p = 0.0;
