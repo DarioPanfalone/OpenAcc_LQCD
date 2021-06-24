@@ -82,7 +82,7 @@ double calc_loc_plaquettes_nnptrick(
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
   for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
     res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
-      printf("%f\n"res_R_p);
+      printf("%f\n",res_R_p);
     res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
   }
 
