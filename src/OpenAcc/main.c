@@ -451,7 +451,7 @@ int main(int argc, char* argv[]){
     //TEST PLAQUETTE
     int i_counter=0;
     for (i_counter; i_counter<sizeh; i_counter++) {
-        printf("ecco (%d) : %f\n",i_counter,local_sums[0][i_counter]);
+        printf("ecco (%d) : %f\n",i_counter,local_sums[0].c[i_counter]);
     }
     
     
