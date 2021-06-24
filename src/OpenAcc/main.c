@@ -449,11 +449,14 @@ int main(int argc, char* argv[]){
             devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
     
     //TEST PLAQUETTE
+   
+    /*
     int i_counter=0;
-    for (i_counter; i_counter<sizeh; i_counter++) {
+    
+    for (i_counter=0; i_counter<sizeh; i_counter++) {
         printf("ecco (%d) : %f\n",i_counter,local_sums[0].c[i_counter]);
     }
-    
+    */
     
     printf("END PLAQUETTE\n");
     rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
