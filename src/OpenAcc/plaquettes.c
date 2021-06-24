@@ -76,19 +76,19 @@ double calc_loc_plaquettes_nnptrick(
   double resR = 0.0;
   int t;  // ONLY GOOD FOR 1D CUT
     
- printf("ecco %f(%d)  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6));
+ printf("ecco0 %f(%d)  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6));
     
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
   for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
     res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
-      printf("%f\n",res_R_p);
+      
     res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
   }
 
   //printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);
     #pragma acc kernels present(tr_local_plaqs)
-    printf("ecco %f(%d)  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6));
+    printf("ecco1 %f(%d)  %d %d \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
     
   return res_R_p;
 }// closes routine
