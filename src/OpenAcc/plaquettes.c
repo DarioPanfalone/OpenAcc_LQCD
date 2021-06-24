@@ -87,7 +87,7 @@ double calc_loc_plaquettes_nnptrick(
   }
 
   //printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);
-    
+    #pragma acc kernels present(tr_local_plaqs)
     printf("ecco %f(%d)  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6));
     
   return res_R_p;
