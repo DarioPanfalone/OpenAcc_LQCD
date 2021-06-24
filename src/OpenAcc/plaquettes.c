@@ -73,7 +73,7 @@ double calc_loc_plaquettes_nnptrick(
     }  // d2
   }  // d3
 
-    printf("TEST PLAQUETTE:%f +i%f \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),cimag(tr_local_plaqs[parity].c[idxh])*I);
+    printf("TEST PLAQUETTE:%f +i%f \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),cimag(tr_local_plaqs[0].c[snum_acc(31,6,6,6)])*I);
     
   double res_R_p = 0.0;
   double res_I_p = 0.0;
@@ -83,6 +83,7 @@ double calc_loc_plaquettes_nnptrick(
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
   for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
     res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
+       printf("PLAQUETTES:%f +i%f \n",creal(tr_local_plaqs[0].c[t]),cimag(tr_local_plaqs[0].c[t])*I);
     res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
   }
 
