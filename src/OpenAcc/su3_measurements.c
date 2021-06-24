@@ -212,7 +212,7 @@ double  calc_plaquette_soloopenacc(
             result  += calc_loc_plaquettes_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here ol the plaquettes of a specific plane's choice are computed.
             printf("result: %d\n",result);
             for(i_counter=0;i_counter<sizeh;i_counter++){
-                printf("ecco %f(%d) (%d, %d) \n",creal(tr_local_plaqs[0].c[5]),i_counter,mu,nu);
+                printf("ecco %f(%d) (%d, %d) \n",creal(tr_local_plaqs[0].c[i_counter]),i_counter,mu,nu);
                 
             }
         }
