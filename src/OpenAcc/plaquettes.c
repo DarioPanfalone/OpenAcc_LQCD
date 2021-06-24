@@ -75,6 +75,9 @@ double calc_loc_plaquettes_nnptrick(
   double res_I_p = 0.0;
   double resR = 0.0;
   int t;  // ONLY GOOD FOR 1D CUT
+    
+ printf("ecco %f(%d)  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6));
+    
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
   for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
