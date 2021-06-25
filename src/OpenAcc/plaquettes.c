@@ -17,10 +17,7 @@ double calc_loc_plaquettes_nnptrick(
     double K_mu_nu; //MOD.
     
   int d0, d1, d2, d3;
-    int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
-    int parity; //parity
-    int dir_muA,dir_nuB; //mu and nu directions.
-    int dir_muC,dir_nuD;
+
     
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
@@ -29,6 +26,11 @@ double calc_loc_plaquettes_nnptrick(
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
           for(d0=0; d0 < nd0; d0++) {
+              
+              int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
+              int parity; //parity
+              int dir_muA,dir_nuB; //mu and nu directions.
+              int dir_muC,dir_nuD;
 
 	  idxh = snum_acc(d0,d1,d2,d3);  // the site on the  half-lattice.
 	  parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
