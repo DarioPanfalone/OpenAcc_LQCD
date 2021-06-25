@@ -88,10 +88,10 @@ double calc_loc_plaquettes_nnptrick(
 
 
   /*  #pragma acc kernels present(tr_local_plaqs)*/
-    #pragma acc update self(tr_local_plaqs[:])
+    #pragma acc update self(tr_local_plaqs[0:sizeh])
     printf("ecco1 %f(%d)  %d %d \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
 /*#pragma acc kernels present(tr_local_plaqs)*/
-    #pragma acc update self(tr_local_plaqs[:])
+    #pragma acc update self(tr_local_plaqs[0:sizeh])
     printf("ecco2 %f(%d)  %d %d \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
     
   return res_R_p;
