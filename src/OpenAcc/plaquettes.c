@@ -59,8 +59,8 @@ double calc_loc_plaquettes_nnptrick(
               
              /* printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);*/
            //MOD****************************************//
-           K_mu_nu=(u[mu].K.d[idxh])*(u[nu].K.d[idxpmu])*(u[nu].K.d[idxh])*(u[mu].K.d[idxpnu]); //K_mu_nu computation;
-           tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+         /*  K_mu_nu=(u[mu].K.d[idxh])*(u[nu].K.d[idxpmu])*(u[nu].K.d[idxh])*(u[mu].K.d[idxpnu]); //K_mu_nu computation;
+           tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];*/
           //*****************************************//
 
               /*printf("%f +i%f : (%d,%d,%d,%d) \n ",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I,d0,d1,d2,d3);*/
@@ -87,9 +87,11 @@ double calc_loc_plaquettes_nnptrick(
   }
 
 
-    #pragma acc kernels present(tr_local_plaqs)
+  /*  #pragma acc kernels present(tr_local_plaqs)*/
+    #pragma acc update self(tr_local_plaqs[:])
     printf("ecco1 %f(%d)  %d %d \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
-#pragma acc kernels present(tr_local_plaqs)
+/*#pragma acc kernels present(tr_local_plaqs)*/
+    #pragma acc update self(tr_local_plaqs[:])
     printf("ecco2 %f(%d)  %d %d \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
     
   return res_R_p;
