@@ -444,7 +444,7 @@ int main(int argc, char* argv[]){
     //Plaquette measures and polyakov loop measures.
     printf("PLAQUETTE START\n");
     
-    plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    plq = calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
             devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
     
