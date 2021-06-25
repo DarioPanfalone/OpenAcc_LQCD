@@ -214,20 +214,7 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
 
 }
 
-/*
-void init_kmu(su3_soa * conf,double c_r){
-    
-    for(int mu=0; mu<8; mu++){
-        conf[]
-        
-        
-    }
-    
-    
-    
-    
-}
-*/
+
 
 
 void generate_vec3_soa_z2noise(__restrict vec3_soa * const vect)

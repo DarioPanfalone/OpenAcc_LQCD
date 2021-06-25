@@ -23,7 +23,7 @@
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
-su3_soa  * conf_acc; // the gauge configuration.
+/*su3_soa  * conf_acc; // the gauge configuration.*/
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
 // if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
@@ -140,13 +140,13 @@ void mem_alloc_core(){
 #endif
     
     
-    
+ /*
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_acc, ALIGN, 
             alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_accsize fa da size.
     ALLOCCHECK(allocation_check, conf_acc);
 #pragma acc enter data create(conf_acc[0:alloc_info.conf_acc_size])
 
-    
+    */
     //sembra che il comando pragma funzioni cosi:
     // #pragma acc enter data create(NOME VARIABILE[0:LUNGHEZZA DELLA VARIABILE])
     
