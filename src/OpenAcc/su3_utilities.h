@@ -1196,6 +1196,25 @@ static inline void conf_left_exp_multiply(
 }
 
 #pragma acc routine seq
+static inline void mat_times_value(su3_soa * mat,int idx,double value){
+    
+    mat->r0.c0[idx] =value*mat->r0.c0[idx] ;
+    mat->r0.c1[idx] =value*mat->r0.c1[idx] ;
+    mat->r0.c2[idx] =value*mat->r0.c2[idx] ;
+    mat->r1.c0[idx] =value*mat->r1.c0[idx] ;
+    mat->r1.c1[idx] =value*mat->r1.c1[idx] ;
+    mat->r1.c2[idx] =value*mat->r1.c2[idx] ;
+    mat->r2.c0[idx] =value*mat->r2.c0[idx] ;
+    mat->r2.c1[idx] =value*mat->r2.c1[idx] ;
+    mat->r2.c2[idx] =value*mat->r2.c2[idx] ;
+    
+    return;
+    
+    
+}
+
+
+#pragma acc routine seq
 static inline void mom_exp_times_conf_soloopenacc_loc(
         const __restrict thmat_soa * const mom,
         __restrict su3_soa *cnf,
