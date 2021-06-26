@@ -175,8 +175,18 @@ void calc_loc_staples_nnptrick_all(
             //MOD****************************************//
              int K_mu_nu_right;
              K_mu_nu_right=(u[dir_nu_1R].K.d[idx_pmu])*(u[dir_mu_2R].K.d[idx_pnu])*(u[dir_nu_3R].K.d[idxh]);
-            loc_stap[dir_link].r0.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c0[idxh];
             
+            loc_stap[dir_link].r0.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c0[idxh];
+            loc_stap[dir_link].r0.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c1[idxh];
+            loc_stap[dir_link].r0.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c2[idxh];
+            
+            loc_stap[dir_link].r1.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c0[idxh];
+            loc_stap[dir_link].r1.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c1[idxh];
+            loc_stap[dir_link].r1.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c2[idxh];
+            
+            loc_stap[dir_link].r2.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c0[idxh];
+            loc_stap[dir_link].r2.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c1[idxh];
+            loc_stap[dir_link].r2.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c2[idxh];
       
             //****************************************//
 
