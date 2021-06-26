@@ -92,7 +92,7 @@ double calc_loc_plaquettes_nnptrick(
     res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
   }
 
-/*
+
   #pragma acc kernels present(tr_local_plaqs)
    
     printf("ecco1 %f(%d)  %d %d  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
@@ -100,7 +100,7 @@ double calc_loc_plaquettes_nnptrick(
 
     printf("ecco2 %f(%d)  %d %d \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
   
-  */
+  
     
   return res_R_p;
 }// closes routine
@@ -173,8 +173,9 @@ void calc_loc_staples_nnptrick_all(
 										 &loc_stap[dir_link], idxh);
             
             //MOD****************************************//
-           /* int K_mu_nu_right;
-             K_mu_nu_right=(u[dir_nu_1R].K.d[idx_pmu])*(u[dir_mu_2R].K.d[idx_pnu])*(u[dir_nu_3R].K.d[idxh]);*/
+             int K_mu_nu_right;
+             K_mu_nu_right=(u[dir_nu_1R].K.d[idx_pmu])*(u[dir_mu_2R].K.d[idx_pnu])*(u[dir_nu_3R].K.d[idxh]);
+            loc_stap[dir_link].r0.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c0[idxh];
             
       
             //****************************************//

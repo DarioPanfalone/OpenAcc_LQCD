@@ -645,6 +645,8 @@ static inline void mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_p
             - ( mat1_00 * mat1_12) ) ;
     mat4->r2.c2[idx_mat4] += C_ZERO * conj( ( mat1_00 * mat1_11 ) 
             - ( mat1_01 * mat1_10) ) ;
+    
+    
 }
 
 // Routine for the computation of the 3 matrices which contributes to the left part of the staple
