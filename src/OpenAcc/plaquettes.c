@@ -92,21 +92,21 @@ double calc_loc_plaquettes_nnptrick(
     res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
   }
 
-
+/*
   #pragma acc kernels present(tr_local_plaqs)
    
-    printf("ecco1 %f(%d)  %d %d %d \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
+    printf("ecco1 %f(%d)  %d %d  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
     #pragma acc kernels present(tr_local_plaqs)
 
     printf("ecco2 %f(%d)  %d %d \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
   
-    
+  */
     
   return res_R_p;
 }// closes routine
 // routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
 
-
+//This function doesn't have a mu, nu parameters. It just compute all staples.
 void calc_loc_staples_nnptrick_all(  
         __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_stap )
@@ -126,16 +126,17 @@ void calc_loc_staples_nnptrick_all(
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3)
-  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) { //for for all lattice sites.
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
 	for(d0=0; d0 < nd0; d0++) {
 
      #pragma acc loop seq 
-	  for(mu=0; mu<4; mu++){
+	  for(mu=0; mu<4; mu++){ //for directions.
       #pragma acc loop seq
-	    for(iter=0; iter<3; iter++){
+	    for(iter=0; iter<3; iter++){ //for dell'iter. The iteration along all possible directions.
+            
 
 	      int nu;
 	      if (mu==0) { nu = iter + 1; }
@@ -145,12 +146,12 @@ void calc_loc_staples_nnptrick_all(
 	      else { //error 
 	      }
 
-	      const int idxh = snum_acc(d0,d1,d2,d3);  // r 
+	      const int idxh = snum_acc(d0,d1,d2,d3);  // r  //the site.
 	      const int parity = (d0+d1+d2+d3) % 2;
 #pragma acc cache (nnp_openacc[idxh:8])
 
 	      const int dir_link = 2*mu + parity;
-	      const int dir_mu_2R = 2*mu + !parity;
+	      const int dir_mu_2R = 2*mu + !parity; //obvious these links are on the neighbour, whose parity is different.
 	      const int dir_mu_2L = 2*mu + !parity;
 	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
@@ -164,10 +165,18 @@ void calc_loc_staples_nnptrick_all(
 
 	      //computation of the Right part of the staple
 
+            
+            //The computation is
 	      mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],       idx_pmu,
 										 &u[dir_mu_2R],       idx_pnu,
 										 &u[dir_nu_3R],       idxh,
 										 &loc_stap[dir_link], idxh);
+            
+            //MOD****************************************//
+            K_mu_nu_right=(u[dir_nu_1R].K.d[idx_pmu])*(u[dir_mu_2R].K.d[idxh_pnu])*(u[dir_nu_3R].K.d[idxh]);
+            
+            mat_times_value(&loc_stap[dir_link],K_mu_nu_right);
+            //****************************************//
 
 	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
 	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu

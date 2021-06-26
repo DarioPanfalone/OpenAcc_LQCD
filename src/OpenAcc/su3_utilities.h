@@ -5,6 +5,7 @@
 #include "./struct_c_def.h"
 #include "./single_types.h"
 #include "./cayley_hamilton.h"
+#include "./Mod_functions.h"
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__

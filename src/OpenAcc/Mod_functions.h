@@ -21,6 +21,7 @@ int n_replicas_reader(const char* input_filename);
 void counter_size_function(int d0,int d1,int d2,int d3);
 int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet);
 void printing_k_mu(su3_soa * conf);
+void mat_times_value(su3_soa * mat,double value);
 
 #endif /* Mod_functions_h */
 
