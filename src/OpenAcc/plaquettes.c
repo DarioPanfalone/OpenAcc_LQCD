@@ -173,9 +173,10 @@ void calc_loc_staples_nnptrick_all(
 										 &loc_stap[dir_link], idxh);
             
             //MOD****************************************//
-            int K_mu_nu_right=(u[dir_nu_1R].K.d[idx_pmu])*(u[dir_mu_2R].K.d[idx_pnu])*(u[dir_nu_3R].K.d[idxh]);
+           /* int K_mu_nu_right;
+             K_mu_nu_right=(u[dir_nu_1R].K.d[idx_pmu])*(u[dir_mu_2R].K.d[idx_pnu])*(u[dir_nu_3R].K.d[idxh]);*/
             
-            mat_times_value(&loc_stap[dir_link],idxh,K_mu_nu_right);
+      
             //****************************************//
 
 	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
