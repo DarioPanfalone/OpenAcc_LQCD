@@ -630,20 +630,23 @@ static inline void mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_p
     mat1_12 = mat1c2_10 * mat2_02 + mat1c2_11 * mat2_12 
         + mat1c2_12 * mat2_22 ;
 
+    int K_mu_nu_right;
+    K_mu_nu_right=(matnu1->K.d[idx_mat_nu1])*(matmu2->K.d[idx_mat_mu2])*(matnu3->K.d[idx_mat_nu3]);
+    
     //Write results inside mat4
-    mat4->r0.c0[idx_mat4] += C_ZERO * mat1_00;
-    mat4->r0.c1[idx_mat4] += C_ZERO * mat1_01;
-    mat4->r0.c2[idx_mat4] += C_ZERO * mat1_02;
+    mat4->r0.c0[idx_mat4] += K_mu_nu_right*C_ZERO * mat1_00;
+    mat4->r0.c1[idx_mat4] += K_mu_nu_right*C_ZERO * mat1_01;
+    mat4->r0.c2[idx_mat4] += K_mu_nu_right*C_ZERO * mat1_02;
 
-    mat4->r1.c0[idx_mat4] += C_ZERO * mat1_10;
-    mat4->r1.c1[idx_mat4] += C_ZERO * mat1_11;
-    mat4->r1.c2[idx_mat4] += C_ZERO * mat1_12;
+    mat4->r1.c0[idx_mat4] +=K_mu_nu_right* C_ZERO * mat1_10;
+    mat4->r1.c1[idx_mat4] += K_mu_nu_right*C_ZERO * mat1_11;
+    mat4->r1.c2[idx_mat4] += K_mu_nu_right*C_ZERO * mat1_12;
 
-    mat4->r2.c0[idx_mat4] += C_ZERO * conj( ( mat1_01 * mat1_12 ) 
+    mat4->r2.c0[idx_mat4] += K_mu_nu_right*C_ZERO * conj( ( mat1_01 * mat1_12 )
             - ( mat1_02 * mat1_11) ) ;
-    mat4->r2.c1[idx_mat4] += C_ZERO * conj( ( mat1_02 * mat1_10 ) 
+    mat4->r2.c1[idx_mat4] += K_mu_nu_right*C_ZERO * conj( ( mat1_02 * mat1_10 )
             - ( mat1_00 * mat1_12) ) ;
-    mat4->r2.c2[idx_mat4] += C_ZERO * conj( ( mat1_00 * mat1_11 ) 
+    mat4->r2.c2[idx_mat4] += K_mu_nu_right*C_ZERO * conj( ( mat1_00 * mat1_11 ) 
             - ( mat1_01 * mat1_10) ) ;
     
     
