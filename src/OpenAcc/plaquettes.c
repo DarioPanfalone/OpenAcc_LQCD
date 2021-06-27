@@ -172,13 +172,7 @@ void calc_loc_staples_nnptrick_all(
 										 &u[dir_nu_3R],       idxh,
 										 &loc_stap[dir_link], idxh);
             
-            //MOD****************************************//
-            /* int K_mu_nu_right;
-             K_mu_nu_right=(u[dir_nu_1R].K.d[idx_pmu])*(u[dir_mu_2R].K.d[idx_pnu])*(u[dir_nu_3R].K.d[idxh]);*/
             
-           
-      
-            //****************************************//
 
 	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
 	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
@@ -263,17 +257,7 @@ void calc_loc_staples_nnptrick_all_bulk(
 										 &u[dir_nu_3R],       idxh,
 										 &loc_stap[dir_link], idxh);
             
-            loc_stap[dir_link].r0.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c0[idxh];
-            loc_stap[dir_link].r0.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c1[idxh];
-            loc_stap[dir_link].r0.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c2[idxh];
-            
-            loc_stap[dir_link].r1.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c0[idxh];
-            loc_stap[dir_link].r1.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c1[idxh];
-            loc_stap[dir_link].r1.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c2[idxh];
-            
-            loc_stap[dir_link].r2.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c0[idxh];
-            loc_stap[dir_link].r2.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c1[idxh];
-            loc_stap[dir_link].r2.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c2[idxh];
+        
             
 	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
 	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
@@ -360,17 +344,7 @@ void calc_loc_staples_nnptrick_all_d3c(
 										 &u[dir_nu_3R],       idxh,
 										 &loc_stap[dir_link], idxh);
             
-            loc_stap[dir_link].r0.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c0[idxh];
-            loc_stap[dir_link].r0.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c1[idxh];
-            loc_stap[dir_link].r0.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r0.c2[idxh];
-            
-            loc_stap[dir_link].r1.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c0[idxh];
-            loc_stap[dir_link].r1.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c1[idxh];
-            loc_stap[dir_link].r1.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r1.c2[idxh];
-            
-            loc_stap[dir_link].r2.c0[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c0[idxh];
-            loc_stap[dir_link].r2.c1[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c1[idxh];
-            loc_stap[dir_link].r2.c2[idxh]=K_mu_nu_right*loc_stap[dir_link].r2.c2[idxh];
+           
 
 	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
 	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
