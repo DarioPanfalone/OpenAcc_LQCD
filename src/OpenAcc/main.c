@@ -587,6 +587,10 @@ int main(int argc, char* argv[]){
             //If metro, the second-last parameter, is 0 the update function thermalizes the conf, otherwise( metro=1) it does metropolis.
             
             for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+                 printf("\n#################################################\n");
+                printf("REPLICA %d:\n",replicas_counter);
+                printf(  "#################################################\n\n");
+                
             if(id_iter<mc_params.therm_ntraj){
                 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
                         md_parameters.residue_metro,md_parameters.residue_md,
