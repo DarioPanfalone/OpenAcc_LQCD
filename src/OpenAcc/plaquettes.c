@@ -192,7 +192,7 @@ void calc_loc_staples_nnptrick_all(
       }  // d1
     }  // d2
   }  // d3
-
+  #pragma acc kernels present(loc_stap)
     printf("ecco (31,6,6,6): %f\n",creal(loc_stap[1].r0.c0[snum_acc(31,6,6,6)]));
     
     
