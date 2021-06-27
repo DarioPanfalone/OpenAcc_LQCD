@@ -193,7 +193,7 @@ void calc_loc_staples_nnptrick_all(
     }  // d2
   }  // d3
 
-    printf("ecco (31,6,6,6): %f\n",real(loc_stap[1].r0.c0[snum_acc(31,6,6,6)]));
+    printf("ecco (31,6,6,6): %f\n",creal(loc_stap[1].r0.c0[snum_acc(31,6,6,6)]));
     
     
 }// closes routine
