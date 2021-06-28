@@ -63,8 +63,8 @@ double calc_loc_plaquettes_nnptrick(
            //MOD****************************************//
               
               //K_mu_nu computation;
-              if (parity==0){K_mu_nu=(u[2*mu].K.d[idxh])*(u[2*nu+1].K.d[idxpmu])*(u[2*nu].K.d[idxh])*(u[2*mu+1].K.d[idxpnu]);}
-              else{K_mu_nu=(u[2*mu+1].K.d[idxh])*(u[2*nu].K.d[idxpmu])*(u[2*nu+1].K.d[idxh])*(u[2*mu].K.d[idxpnu]); }
+              K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
+
               
               tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
           //*****************************************//

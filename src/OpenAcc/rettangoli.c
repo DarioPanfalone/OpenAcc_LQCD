@@ -60,6 +60,16 @@ double calc_loc_rectangles_2x1_nnptrick(
                     mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E 
                     mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
                     tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                    
+                    
+                    //K_mu_nu computation;
+                    double K_mu_nu;
+                    K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                    
+                    
+                    tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+                    //*****************************************//
+                    
 
                 }  // d0          
             }  // d1            
@@ -137,8 +147,8 @@ double calc_loc_rectangles_1x2_nnptrick(
                     
                     //K_mu_nu computation;
                     double K_mu_nu;
-                    if (parity==0){K_mu_nu=(u[2*mu].K.d[idxh])*(u[2*nu+1].K.d[idxpmu])*(u[2*nu].K.d[idxh])*(u[2*mu+1].K.d[idxpnu]);}
-                    else{K_mu_nu=(u[2*mu+1].K.d[idxh])*(u[2*nu].K.d[idxpmu])*(u[2*nu+1].K.d[idxh])*(u[2*mu].K.d[idxpnu]); }
+                    K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu])*(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                 
                     
                     tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
                     //*****************************************//
