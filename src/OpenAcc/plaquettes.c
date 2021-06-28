@@ -198,7 +198,7 @@ void calc_loc_staples_nnptrick_all(
             if(idxh==snum_acc(31,6,6,6) & parity==1 ){
                 /*printf("%d %d\n",iter,nu);*/
                 printf("%d %d\n",mu,nu);
-                 printf("CONTROLLO STAPLE[idxh] K_mu:%f[%d] \n",K_mu,idxh);
+                printf("%f\n",K_mu);
             }
             
             
