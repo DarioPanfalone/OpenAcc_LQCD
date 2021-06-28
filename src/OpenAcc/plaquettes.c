@@ -143,7 +143,7 @@ void calc_loc_staples_nnptrick_all(
 	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
 	      else if (mu==2) { nu = iter + (iter >> 1); }
 	      else if (mu==3) { nu = iter; }
-	      else { //error 
+          else {  printf("NU ERROR!\n");
 	      }
 
 	      const int idxh = snum_acc(d0,d1,d2,d3);  // r  //the site.
