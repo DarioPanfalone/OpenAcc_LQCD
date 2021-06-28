@@ -150,9 +150,14 @@ double calc_loc_rectangles_1x2_nnptrick(
                     K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu])*(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
                  
                     if(idxh==snum_acc(31,6,6,6)&parity==1){
-                        printf("[idxh] K_mu_nu:%f[%d] (mu=%d, nu=%d)\n",(K_mu_nu),idxh,mu,nu);}
+                        printf("[idxh] K_mu_nu:%f[%d] (mu=%d, nu=%d)",(K_mu_nu),idxh,mu,nu);
+                        printf("trace_before: %f  ",creal(tr_local_plaqs[parity].c[idxh]))
+                    }
                     
                     tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+                    
+                    if(idxh==snum_acc(31,6,6,6)&parity==1){
+                        printf("trace_after: %f\n",creal(tr_local_plaqs[parity].c[idxh]));}
                     //*****************************************//
                     
 
