@@ -145,7 +145,8 @@ void calc_loc_staples_nnptrick_all(
 	      else if (mu==3) { nu = iter; }
           else {  printf("NU ERROR!\n");
 	      }
-
+            printf("%d %d\n",iter,nu);
+            
 	      const int idxh = snum_acc(d0,d1,d2,d3);  // r  //the site.
 	      const int parity = (d0+d1+d2+d3) % 2;
 #pragma acc cache (nnp_openacc[idxh:8])
