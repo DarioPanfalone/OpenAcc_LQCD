@@ -134,6 +134,14 @@ double calc_loc_rectangles_1x2_nnptrick(
                     mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
 
                     tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                    
+                    //K_mu_nu computation;
+                    if (parity==0){K_mu_nu=(u[2*mu].K.d[idxh])*(u[2*nu+1].K.d[idxpmu])*(u[2*nu].K.d[idxh])*(u[2*mu+1].K.d[idxpnu]);}
+                    else{K_mu_nu=(u[2*mu+1].K.d[idxh])*(u[2*nu].K.d[idxpmu])*(u[2*nu+1].K.d[idxh])*(u[2*mu].K.d[idxpnu]); }
+                    
+                    tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+                    //*****************************************//
+                    
 
                 }  // d0          
             }  // d1            
