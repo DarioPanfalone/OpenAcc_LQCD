@@ -123,6 +123,7 @@ void calc_loc_staples_nnptrick_all(
 
 
   int d0, d1, d2, d3, mu, iter;
+               double K_mu;//MOD
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3)
@@ -188,7 +189,7 @@ void calc_loc_staples_nnptrick_all(
             
             
             //Adding K_mu(x) to the staple.
-            int K_mu;
+             
             
   
             K_mu=u[dir_link].K.d[idxh];
