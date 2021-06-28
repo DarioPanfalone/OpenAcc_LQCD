@@ -188,6 +188,10 @@ void calc_loc_staples_nnptrick_all(
             
             //Adding K_mu(x) to the staple.
             int K_mu=u[dir_link].K.d[idxh];
+            if(idxh==snum_acc(31,6,6,6) & parity==1 ){
+                 printf("CONTROLLO STAPLE[idxh] K_mu:%f[%d] (mu=%d, nu=%d)",(K_mu),idxh,mu,nu);
+            }
+            
             
             loc_stap[dir_link].r0.c0[idxh] *= K_mu;
             loc_stap[dir_link].r0.c1[idxh] *= K_mu;
@@ -200,6 +204,8 @@ void calc_loc_staples_nnptrick_all(
             loc_stap[dir_link].r2.c0[idxh] *= K_mu;
             loc_stap[dir_link].r2.c1[idxh] *= K_mu;
             loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+            
+            
             
 
 	    }  // mu
