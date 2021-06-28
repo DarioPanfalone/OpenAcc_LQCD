@@ -136,6 +136,7 @@ double calc_loc_rectangles_1x2_nnptrick(
                     tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
                     
                     //K_mu_nu computation;
+                    double K_mu_nu;
                     if (parity==0){K_mu_nu=(u[2*mu].K.d[idxh])*(u[2*nu+1].K.d[idxpmu])*(u[2*nu].K.d[idxh])*(u[2*mu+1].K.d[idxpnu]);}
                     else{K_mu_nu=(u[2*mu+1].K.d[idxh])*(u[2*nu].K.d[idxpmu])*(u[2*nu+1].K.d[idxh])*(u[2*mu].K.d[idxpnu]); }
                     
