@@ -630,7 +630,7 @@ static inline void mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_p
     mat1_12 = mat1c2_10 * mat2_02 + mat1c2_11 * mat2_12 
         + mat1c2_12 * mat2_22 ;
 
-    int K_mu_nu_right=1;
+    double K_mu_nu_right=1;
     K_mu_nu_right=(matnu1->K.d[idx_mat_nu1])*(matmu2->K.d[idx_mat_mu2])*(matnu3->K.d[idx_mat_nu3]);
     
     printf("hob %f\n",K_mu_nu_right);
@@ -739,7 +739,7 @@ static inline void conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_p
     mat1_12 = matc1c2_10 * mat2_02 + matc1c2_11 * mat2_12 
         + matc1c2_12 * mat2_22 ;
     
-    int K_mu_nu_left=1;
+    double K_mu_nu_left=1;
     K_mu_nu_left=(matnu1->K.d[idx_mat_nu1])*(matmu2->K.d[idx_mat_mu2])*(matnu3->K.d[idx_mat_nu3]);
 
     //Write results inside mat4
