@@ -189,7 +189,7 @@ void calc_loc_staples_nnptrick_all(
             
             
             //Adding K_mu(x) to the staple.
-             
+            
             
   
             K_mu=u[dir_link].K.d[idxh];
