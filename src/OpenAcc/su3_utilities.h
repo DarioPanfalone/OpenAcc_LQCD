@@ -633,7 +633,7 @@ static inline void mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_p
     double K_mu_nu_right=1;
     K_mu_nu_right=(matnu1->K.d[idx_mat_nu1])*(matmu2->K.d[idx_mat_mu2])*(matnu3->K.d[idx_mat_nu3]);
     
-    if(idx_mat_nu1==snum_acc(31,31,31,6)){
+    if(idx_mat_nu3==snum_acc(31,31,31,6) ){
     printf("hob %f\n",K_mu_nu_right);
     }
     
