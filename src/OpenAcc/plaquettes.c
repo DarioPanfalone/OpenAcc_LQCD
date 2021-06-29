@@ -167,7 +167,7 @@ void calc_loc_staples_nnptrick_all(
 
 	      //computation of the Right part of the staple
 
-            printf("COUNT\n");
+         
             //The computation is
 	      mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],       idx_pmu,
 										 &u[dir_mu_2R],       idx_pnu,
@@ -200,9 +200,11 @@ void calc_loc_staples_nnptrick_all(
 
                 printf("%d %d\n",mu,nu);
                 printf("%f\n",K_mu);
+                 printf("END COUNT\n");
             }
             
-               printf("END COUNT\n");
+            
+            
             
             loc_stap[dir_link].r0.c0[idxh] *= K_mu;
             loc_stap[dir_link].r0.c1[idxh] *= K_mu;
