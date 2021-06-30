@@ -371,22 +371,3 @@ void printing_k_mu(su3_soa * conf){
     }
     return;
 }
-/*
-void mat_times_value(su3_soa * mat,int idx,double value){
- 
-    // MAT3 = A * B = MAT1 * MAT3^DAG
-    mat->r0.c0[idx] =value*mat->r0.c0[idx] ;
-    mat->r0.c1[idx] =value*mat->r0.c1[idx] ;
-    mat->r0.c2[idx] =value*mat->r0.c2[idx] ;
-    mat->r1.c0[idx] =value*mat->r1.c0[idx] ;
-    mat->r1.c1[idx] =value*mat->r1.c1[idx] ;
-    mat->r1.c2[idx] =value*mat->r1.c2[idx] ;
-    mat->r2.c0[idx] =value*mat->r2.c0[idx] ;
-    mat->r2.c1[idx] =value*mat->r2.c1[idx] ;
-    mat->r2.c2[idx] =value*mat->r2.c2[idx] ;
-
-    return;
-    
-    
-}
-*/

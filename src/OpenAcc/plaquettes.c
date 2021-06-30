@@ -194,7 +194,7 @@ void calc_loc_staples_nnptrick_all(
   
             K_mu=u[dir_link].K.d[idxh];
          
-            
+            /*
         
             if(idxh==snum_acc(31,6,6,6) & parity==1 ){
 
@@ -203,7 +203,7 @@ void calc_loc_staples_nnptrick_all(
                  printf("END COUNT\n");
             }
             
-            
+            */
             
             
             loc_stap[dir_link].r0.c0[idxh] *= K_mu;

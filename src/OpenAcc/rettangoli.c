@@ -159,7 +159,7 @@ double calc_loc_rectangles_1x2_nnptrick(
                     /*
                     if(idxh==snum_acc(31,6,6,6)&parity==1){
                         printf("trace_after: %f\n",creal(tr_local_plaqs[parity].c[idxh]));}
-                     */
+                     
                     //*****************************************//
                     
 
@@ -182,6 +182,12 @@ double calc_loc_rectangles_1x2_nnptrick(
     return res_R_p;
 }// closes routine 
 
+
+
+
+//*****************************************//
+//*****************************************//
+//*****************************************//
 
 
 // Routine for the computation of the 5 matrices which contributes to the staples A-Right and B-Right.
@@ -311,19 +317,27 @@ void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(
             MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
         }
     }
+    
+    //*****************************************//
+    
+    double K_mu_nu=1;
+    K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
+   
+    //*****************************************//
+    
 
-    mat6->r0.c0[idx_mat6] += C_ONE * MAT2.comp[0][0];
-    mat6->r0.c1[idx_mat6] += C_ONE * MAT2.comp[0][1];
-    mat6->r0.c2[idx_mat6] += C_ONE * MAT2.comp[0][2];
+    mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
+    mat6->r0.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][1];
+    mat6->r0.c2[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][2];
 
-    mat6->r1.c0[idx_mat6] += C_ONE * MAT2.comp[1][0];
-    mat6->r1.c1[idx_mat6] += C_ONE * MAT2.comp[1][1];
-    mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
+    mat6->r1.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][0];
+    mat6->r1.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][1];
+    mat6->r1.c2[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][2];
 
     //Compute 3rd result column from the first two
-    mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
-    mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
-    mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+    mat6->r2.c0[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+    mat6->r2.c1[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+    mat6->r2.c2[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
 
 }  // closes PPMMM
 
@@ -456,19 +470,26 @@ void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(
             MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
         }
     }
+    
+    //*****************************************//
+    
+    double K_mu_nu=1;
+    K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
+    
+    //*****************************************//
 
-    mat6->r0.c0[idx_mat6] += C_ONE * MAT2.comp[0][0];
-    mat6->r0.c1[idx_mat6] += C_ONE * MAT2.comp[0][1];
-    mat6->r0.c2[idx_mat6] += C_ONE * MAT2.comp[0][2];
+    mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
+    mat6->r0.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][1];
+    mat6->r0.c2[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][2];
 
-    mat6->r1.c0[idx_mat6] += C_ONE * MAT2.comp[1][0];
-    mat6->r1.c1[idx_mat6] += C_ONE * MAT2.comp[1][1];
-    mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
+    mat6->r1.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][0];
+    mat6->r1.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][1];
+    mat6->r1.c2[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][2];
 
     //Compute 3rd result column from the first two
-    mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
-    mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
-    mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+    mat6->r2.c0[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+    mat6->r2.c1[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+    mat6->r2.c2[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
 }  // closes PMMMP
 
 
@@ -603,20 +624,42 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(
             MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
         }
     }
+    
+    //*****************************************//
+    
+    double K_mu_nu=1;
+    K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
+    
+    //*****************************************//
 
-    mat6->r0.c0[idx_mat6] += C_ONE * MAT2.comp[0][0];
-    mat6->r0.c1[idx_mat6] += C_ONE * MAT2.comp[0][1];
-    mat6->r0.c2[idx_mat6] += C_ONE * MAT2.comp[0][2];
+    mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
+    mat6->r0.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][1];
+    mat6->r0.c2[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][2];
 
-    mat6->r1.c0[idx_mat6] += C_ONE * MAT2.comp[1][0];
-    mat6->r1.c1[idx_mat6] += C_ONE * MAT2.comp[1][1];
-    mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
+    mat6->r1.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][0];
+    mat6->r1.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][1];
+    mat6->r1.c2[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[1][2];
 
     //Compute 3rd result column from the first two
-    mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
-    mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
-    mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+    mat6->r2.c0[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+    mat6->r2.c1[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+    mat6->r2.c2[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
 }  // closes MMMPP
+
+
+
+//*****************************************//
+
+//*****************************************//
+
+//*****************************************//
+
+//*****************************************//
+
+//*****************************************//
+
+
+
 
 void calc_loc_improved_staples_typeA_nnptrick_all(  
         __restrict const su3_soa * const u,
@@ -696,7 +739,26 @@ void calc_loc_improved_staples_typeA_nnptrick_all(
                                     &u[dir_mu_3L],        idx_2mnu,
                                     &u[dir_nu_4L],        idx_2mnu,
                                     &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);							    
+                                    &loc_stap[dir_link],  idxh);
+                            
+                          
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -791,6 +853,24 @@ void calc_loc_improved_staples_typeB_nnptrick_all(
                                     &u[dir_nu_5L],        idx_mnu,
                                     &loc_stap[dir_link],  idxh);
 
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
+                            
                         }  // mu
                     }  // iter
                 }  // d0
@@ -882,7 +962,27 @@ void calc_loc_improved_staples_typeC_nnptrick_all(
                                     &u[dir_mu_3L],        idx_mmu_mnu,
                                     &u[dir_nu_4L],        idx_mmu_mnu,
                                     &u[dir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+                                    &loc_stap[dir_link],  idxh);
+                            
+                            
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -1026,7 +1126,26 @@ void calc_loc_improved_staples_typeABC_nnptrick_all(
                                     &u[Cdir_mu_3L],        idx_mmu_mnu,
                                     &u[Cdir_nu_4L],        idx_mmu_mnu,
                                     &u[Cdir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+                                    &loc_stap[dir_link],  idxh);
+                            
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -1116,7 +1235,26 @@ void calc_loc_improved_staples_typeA_nnptrick_all_bulk(
                                     &u[dir_mu_3L],        idx_2mnu,
                                     &u[dir_nu_4L],        idx_2mnu,
                                     &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);							    
+                                    &loc_stap[dir_link],  idxh);
+                            
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -1210,6 +1348,24 @@ void calc_loc_improved_staples_typeB_nnptrick_all_bulk(
                                     &u[dir_mu_4L],        idx_mnu,
                                     &u[dir_nu_5L],        idx_mnu,
                                     &loc_stap[dir_link],  idxh);
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -1302,7 +1458,26 @@ void calc_loc_improved_staples_typeC_nnptrick_all_bulk(
                                     &u[dir_mu_3L],        idx_mmu_mnu,
                                     &u[dir_nu_4L],        idx_mmu_mnu,
                                     &u[dir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+                                    &loc_stap[dir_link],  idxh);
+                            
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -1446,7 +1621,26 @@ void calc_loc_improved_staples_typeABC_nnptrick_all_bulk(
                                     &u[Cdir_mu_3L],        idx_mmu_mnu,
                                     &u[Cdir_nu_4L],        idx_mmu_mnu,
                                     &u[Cdir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+                                    &loc_stap[dir_link],  idxh);
+                            
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -1536,7 +1730,26 @@ void calc_loc_improved_staples_typeA_nnptrick_all_d3c(
                                     &u[dir_mu_3L],        idx_2mnu,
                                     &u[dir_nu_4L],        idx_2mnu,
                                     &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);							    
+                                    &loc_stap[dir_link],  idxh);
+                            
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -1631,6 +1844,25 @@ void calc_loc_improved_staples_typeB_nnptrick_all_d3c(
                                     &u[dir_mu_4L],        idx_mnu,
                                     &u[dir_nu_5L],        idx_mnu,
                                     &loc_stap[dir_link],  idxh);
+                            
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
 
                         }  // mu
                     }  // iter
@@ -1726,6 +1958,25 @@ void calc_loc_improved_staples_typeC_nnptrick_all_d3c(
                                     &u[dir_mu_5L],        idx_mmu,
                                     &loc_stap[dir_link],  idxh);							    
 
+                            
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
+                            
                         }  // mu
                     }  // iter
                 }  // d0
@@ -1871,6 +2122,25 @@ void calc_loc_improved_staples_typeABC_nnptrick_all_d3c(
                                     &u[Cdir_mu_5L],        idx_mmu,
                                     &loc_stap[dir_link],  idxh);							    
 
+                            //MOD ***************************************************/
+                            //Adding K_mu(x) to the staple.
+                            double K_mu=u[dir_link].K.d[idxh];
+                            
+                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
+                            
+                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
+                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
+                            
+                            //***************************************************/
+                            
+                            
                         }  // mu
                     }  // iter
                 }  // d0
