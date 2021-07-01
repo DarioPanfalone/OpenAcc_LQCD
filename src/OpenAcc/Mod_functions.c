@@ -500,7 +500,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
     
     
     //test
-    prinf("counter:%d\n%",counter);
+    printf("counter:%d\n%",counter);
     
  
     return res;
