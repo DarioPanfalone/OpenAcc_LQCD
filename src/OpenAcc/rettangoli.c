@@ -786,7 +786,8 @@ void calc_loc_improved_staples_typeA_nnptrick_all(
                             loc_stap[dir_link].r2.c2[idxh] *= K_mu;
                             
                             //***************************************************/
-                            if(idx_mat6==snum_acc(31,6,6,6) && parity==1){
+                            //test2
+                            if(idxh==snum_acc(31,6,6,6) && parity==1){
                                 printf("(%d %d)\n",mu,nu);}
                             
                         }  // mu
