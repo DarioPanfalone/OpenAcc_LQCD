@@ -612,7 +612,15 @@ int main(int argc, char* argv[]){
                 }
             }
             }
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number])
+#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number]) //updating conf sul device
+            //-----------------------------------------------//
+             //---------------CONF SWAP---------------------------//
+            
+            replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],su3_soa * conf2,int def_axis,int * def_vet);
+            
+            
+        //-----------------------------------------------//
+            
             id_iter++;
             conf_id_iter++;
             //-------------------------------------------------// 
