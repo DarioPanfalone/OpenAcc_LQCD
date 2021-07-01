@@ -616,7 +616,7 @@ int main(int argc, char* argv[]){
             //-----------------------------------------------//
              //---------------CONF SWAP---------------------------//
             
-            replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],su3_soa * conf2,int def_axis,int * def_vet);
+            replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
             
             
         //-----------------------------------------------//
