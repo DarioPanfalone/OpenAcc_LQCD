@@ -402,7 +402,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
                             }
                             if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
                             printf("beforrre (%d) %f %f",counter,conf1[mu+1].K.d[snum_acc(i,j,k,t)],conf2[mu+1].K.d[snum_acc(i,j,k,t)] );
-                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu+1].K.d[snum_acc(i,j,k,t)];
                             conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
                             printf("aftermath (%d) %f %f\n",counter,conf1[mu+1].K.d[snum_acc(i,j,k,t)],conf2[mu+1].K.d[snum_acc(i,j,k,t)] );
                             }
@@ -428,7 +428,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
                             conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
                         }
                         if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
-                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu+1].K.d[snum_acc(i,j,k,t)];
                             conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
                         }
                         
@@ -455,7 +455,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
                                     conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
                                 }
                                 if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
-                                    conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                                    conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu+1].K.d[snum_acc(i,j,k,t)];
                                     conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
                                 }
                                 
@@ -481,7 +481,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
                             conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
                         }
                         if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
-                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu+1].K.d[snum_acc(i,j,k,t)];
                             conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
                         }
                         
