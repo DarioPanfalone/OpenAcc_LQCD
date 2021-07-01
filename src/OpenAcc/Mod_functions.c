@@ -384,7 +384,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
                 mu=0;
                 for(t=0;t<def_vet[2];t++){
                     for(k=0;k<def_vet[1];k++){
-                        for(j=0;j<def_vet[0],j++){
+                        for(j=0;j<def_vet[0];j++){
                             
                             parity = (i+j+z+t) % 2;
                             
@@ -408,7 +408,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
             mu=1;
             for(t=0;t<def_vet[2];t++){
                 for(k=0;k<def_vet[1];k++){
-                    for(i=0;i<def_vet[0],i++){
+                    for(i=0;i<def_vet[0];i++){
                          parity = (i+j+z+t) % 2;
                         
                         //K_mu_values swap
@@ -434,7 +434,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
             mu=2;
                     for(t=0;t<def_vet[2];t++){
                         for(k=0;k<def_vet[1];k++){
-                            for(j=0;j<def_vet[0],j++){
+                            for(j=0;j<def_vet[0];j++){
                                 
                                 parity = (i+j+z+t) % 2;
                                 
@@ -460,7 +460,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
             mu=3;
             for(t=0;t<def_vet[2];t++){
                 for(k=0;k<def_vet[1];k++){
-                    for(j=0;j<def_vet[0],j++){
+                    for(j=0;j<def_vet[0];j++){
                         
                         parity = (i+j+z+t) % 2;
                         
