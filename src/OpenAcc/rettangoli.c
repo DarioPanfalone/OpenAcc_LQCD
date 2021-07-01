@@ -159,8 +159,8 @@ double calc_loc_rectangles_1x2_nnptrick(
                     /*
                     if(idxh==snum_acc(31,6,6,6)&parity==1){
                         printf("trace_after: %f\n",creal(tr_local_plaqs[parity].c[idxh]));}
-                     
-                    //***************************************** ///
+                     */
+                    //*****************************************//
                     
 
                 }  // d0          
