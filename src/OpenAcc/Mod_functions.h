@@ -22,7 +22,7 @@ void counter_size_function(int d0,int d1,int d2,int d3);
 int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet);
 void printing_k_mu(su3_soa * conf);
 
-
+int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );
 
 #endif /* Mod_functions_h */
 

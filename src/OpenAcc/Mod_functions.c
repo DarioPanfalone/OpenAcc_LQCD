@@ -371,3 +371,126 @@ void printing_k_mu(su3_soa * conf){
     }
     return;
 }
+
+int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
+    double aux;
+    int i,j,k,t,mu,parity;
+    int res=0;
+
+    switch (def_axis){
+            
+        case 0:
+            i=nd0-1;
+                mu=0;
+                for(t=0;t<def_vet[2];t++){
+                    for(k=0;k<def_vet[1];k++){
+                        for(j=0;j<def_vet[0],j++){
+                            
+                            parity = (i+j+z+t) % 2;
+                            
+                            //K_mu_values swap
+                            if (parity==0){aux=conf1[mu].K.d[snum_acc(i,j,k,t)];
+                                conf1[mu].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                                conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
+                            }
+                            if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
+                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                            conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
+                            }
+                            
+                        }
+                    }
+                }
+            break;
+            
+        case 1:
+            j=nd0-1;
+            mu=1;
+            for(t=0;t<def_vet[2];t++){
+                for(k=0;k<def_vet[1];k++){
+                    for(i=0;i<def_vet[0],i++){
+                         parity = (i+j+z+t) % 2;
+                        
+                        //K_mu_values swap
+                        if (parity==0){aux=conf1[mu].K.d[snum_acc(i,j,k,t)];
+                            conf1[mu].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                            conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
+                        }
+                        if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
+                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                            conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
+                        }
+                        
+                        
+                        
+            
+                   }
+                }
+            }
+            break;
+            
+        case 2:
+            k=nd0-1;
+            mu=2;
+                    for(t=0;t<def_vet[2];t++){
+                        for(k=0;k<def_vet[1];k++){
+                            for(j=0;j<def_vet[0],j++){
+                                
+                                parity = (i+j+z+t) % 2;
+                                
+                                //K_mu_values swap
+                                if (parity==0){aux=conf1[mu].K.d[snum_acc(i,j,k,t)];
+                                    conf1[mu].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                                    conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
+                                }
+                                if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
+                                    conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                                    conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
+                                }
+                                
+                                
+                            }
+                        }
+                    }
+                                
+            break;
+            
+        case 3:
+            t=nd0-1;
+            mu=3;
+            for(t=0;t<def_vet[2];t++){
+                for(k=0;k<def_vet[1];k++){
+                    for(j=0;j<def_vet[0],j++){
+                        
+                        parity = (i+j+z+t) % 2;
+                        
+                        //K_mu_values swap
+                        if (parity==0){aux=conf1[mu].K.d[snum_acc(i,j,k,t)];
+                            conf1[mu].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                            conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
+                        }
+                        if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
+                            conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
+                            conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
+                        }
+                        
+                    }
+                }
+            }
+                        
+            break;
+            
+
+        default:
+            printf("ERROR WRONG AXIS CHOICE! (SWAP)\n");
+            res=1;
+            
+    }
+    
+    
+    
+    
+    
+ 
+    return res;
+}
