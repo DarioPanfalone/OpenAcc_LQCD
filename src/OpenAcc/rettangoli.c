@@ -326,7 +326,7 @@ void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(
     //*****************************************//
    
     //test
-    if(idx_mat6==snum_acc(31,6,6,6) ){
+    if(idx_mat6==snum_acc(31,6,6,6) && (idx_mat6%2)!=0 && K_mu_nu!=1){
         
         printf("hob PPMMM %f\n",K_mu_nu);
     }
@@ -488,7 +488,7 @@ void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(
     
     
     //test
-    if(idx_mat6==snum_acc(31,6,6,6) ){
+    if(idx_mat6==snum_acc(31,6,6,6) && (idx_mat6%2)!=0 && K_mu_nu!=1 ){
         
         printf("hob PMMMP %f\n",K_mu_nu);
     }
@@ -650,12 +650,12 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(
     //*****************************************//
     
     //test
-    if(idx_mat6==snum_acc(31,6,6,6) ){
+    if(idx_mat6==snum_acc(31,6,6,6) && (idx_mat6%2)!=0 && K_mu_nu!=1){
         
         printf("hob MMMPP %f\n",K_mu_nu);
     }
     
-    
+
 
     mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
     mat6->r0.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][1];
