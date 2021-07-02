@@ -377,7 +377,7 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
     int i,j,k,t,mu,parity;
     int res=0;
     //test variable
-    int counter=0;
+   /* int counter=0;*/
 
     switch (def_axis){
             
@@ -395,20 +395,20 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
                             
                             //K_mu_values swap
                             if (parity==0){aux=conf1[mu].K.d[snum_acc(i,j,k,t)];
-                            printf("beforrre (%d) %f %f",counter,conf1[mu].K.d[snum_acc(i,j,k,t)],conf2[mu].K.d[snum_acc(i,j,k,t)] );
+                           /* printf("beforrre (%d) %f %f",counter,conf1[mu].K.d[snum_acc(i,j,k,t)],conf2[mu].K.d[snum_acc(i,j,k,t)] );*/
                                 conf1[mu].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
                                 conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
-                            printf("aftermath (%d) %f %f\n",counter,conf1[mu].K.d[snum_acc(i,j,k,t)],conf2[mu].K.d[snum_acc(i,j,k,t)] );
+                         /*   printf("aftermath (%d) %f %f\n",counter,conf1[mu].K.d[snum_acc(i,j,k,t)],conf2[mu].K.d[snum_acc(i,j,k,t)] );*/
                             }
                             if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
-                            printf("beforrre (%d) %f %f",counter,conf1[mu+1].K.d[snum_acc(i,j,k,t)],conf2[mu+1].K.d[snum_acc(i,j,k,t)] );
+                         /*   printf("beforrre (%d) %f %f",counter,conf1[mu+1].K.d[snum_acc(i,j,k,t)],conf2[mu+1].K.d[snum_acc(i,j,k,t)] );*/
                             conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu+1].K.d[snum_acc(i,j,k,t)];
                             conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
-                            printf("aftermath (%d) %f %f\n",counter,conf1[mu+1].K.d[snum_acc(i,j,k,t)],conf2[mu+1].K.d[snum_acc(i,j,k,t)] );
+                        /*    printf("aftermath (%d) %f %f\n",counter,conf1[mu+1].K.d[snum_acc(i,j,k,t)],conf2[mu+1].K.d[snum_acc(i,j,k,t)] );*/
                             }
                             //test
                             
-                            counter=counter+1;
+                           /* counter=counter+1;*/
                         }
                     }
                 }
@@ -451,12 +451,16 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
                                 
                                 //K_mu_values swap
                                 if (parity==0){aux=conf1[mu].K.d[snum_acc(i,j,k,t)];
+                                    printf("beforrre (%d) %f %f",counter,conf1[mu].K.d[snum_acc(i,j,k,t)],conf2[mu].K.d[snum_acc(i,j,k,t)] );
                                     conf1[mu].K.d[snum_acc(i,j,k,t)]=conf2[mu].K.d[snum_acc(i,j,k,t)];
                                     conf2[mu].K.d[snum_acc(i,j,k,t)]=aux;
+                                    printf("aftermath (%d) %f %f\n",counter,conf1[mu].K.d[snum_acc(i,j,k,t)],conf2[mu].K.d[snum_acc(i,j,k,t)] );
                                 }
                                 if(parity!=0){aux=conf1[mu+1].K.d[snum_acc(i,j,k,t)];
+                                    printf("beforrre (%d) %f %f",counter,conf1[mu+1].K.d[snum_acc(i,j,k,t)],conf2[mu+1].K.d[snum_acc(i,j,k,t)] );
                                     conf1[mu+1].K.d[snum_acc(i,j,k,t)]=conf2[mu+1].K.d[snum_acc(i,j,k,t)];
                                     conf2[mu+1].K.d[snum_acc(i,j,k,t)]=aux;
+                                     printf("aftermath (%d) %f %f\n",counter,conf1[mu+1].K.d[snum_acc(i,j,k,t)],conf2[mu+1].K.d[snum_acc(i,j,k,t)] );
                                 }
                                 
                                 
