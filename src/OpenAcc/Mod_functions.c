@@ -372,7 +372,7 @@ void printing_k_mu(su3_soa * conf){
     return;
 }
 
-int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
+int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
     double aux;
     int i,j,k,t,mu,parity;
     int res=0;
@@ -509,3 +509,37 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
  
     return res;
 }
+
+int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
+    vec3_soa * aux;
+    
+        int res=0;
+    int mu=0;
+    
+    for(mu=0;mu<8;mu++){
+        printf("beforrre (%d) %f %f",mu,conf1[mu].K.d[snum_acc(31,6,6,6)],conf2[mu].K.d[snum_acc(31,6,6,6)]);
+        
+        
+        //swap r0
+        aux=conf1[mu].r0;
+        conf1[mu].r0=conf2[mu].r0;
+        conf2[mu].r0=aux;
+        
+        //swap r1
+        aux=conf1[mu].r1;
+        conf1[mu].r1=conf2[mu].r1;
+        conf2[mu].r1=aux;
+        
+        //swap r2
+        aux=conf1[mu].r2;
+        conf1[mu].r2=conf2[mu].r2;
+        conf2[mu].r2=aux;
+        
+    printf("aftermath (%d) %f %f\n",mu,conf1[mu].K.d[snum_acc(31,6,6,6)],conf2[mu].K.d[snum_acc(31,6,6,6)]);
+
+    }
+    
+    return res;
+}
+
+
