@@ -504,14 +504,14 @@ int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet )
     
     
     //test
-    printf("counter:%d\n%",counter);
+   /* printf("counter:%d\n%",counter);*/
     
  
     return res;
 }
 
 int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
-    vec3_soa * aux;
+    vec3_soa  aux;
     
         int res=0;
     int mu=0;
