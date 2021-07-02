@@ -386,6 +386,7 @@ int main(int argc, char* argv[]){
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         
      printf("Initializing K_mu  Replica %d\n",replicas_counter);
+        int mu;
         for (mu=0;mu<8;mu++){
             conf_hasenbusch[replicas_counter][mu].label=replicas_counter;
         }
