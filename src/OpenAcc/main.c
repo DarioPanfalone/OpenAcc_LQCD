@@ -511,6 +511,9 @@ int main(int argc, char* argv[]){
      }else printf("MPI%02d: Starting generation of Configurations.\n",
             devinfo.myrank);
     
+    
+    printf("ECCO LO SWAP TEST PRE UPDATE\n");
+    replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
      
     // THERMALIZATION & METRO    ----   UPDATES //
 
@@ -586,8 +589,7 @@ int main(int argc, char* argv[]){
             }
             
             
-            printf("ECCO LO SWAP TEST PRE UPDATE\n");
-            replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
+            
 
             //--------- CONF UPDATE ----------------//
         
