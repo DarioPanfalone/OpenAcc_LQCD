@@ -377,7 +377,7 @@ int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet )
     int i,j,k,t,mu,parity;
     int res=0;
     //test variable
-   /* int counter=0;*/
+    int counter=0;
 
     switch (def_axis){
             
