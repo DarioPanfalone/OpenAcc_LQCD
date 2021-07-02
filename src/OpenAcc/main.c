@@ -386,7 +386,9 @@ int main(int argc, char* argv[]){
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         
      printf("Initializing K_mu  Replica %d\n",replicas_counter);
-        
+        for (mu=0;mu<8;mu++){
+            conf_hasenbusch[replicas_counter][mu].label=replicas_counter;
+        }
     int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates);
    
     if(init_result!=0){printf("Error in Initialization Replica %d!\n",replicas_counter); return 1;};
@@ -581,6 +583,10 @@ int main(int argc, char* argv[]){
                         act_params.beta);
                 printf(  "#################################################\n\n");
             }
+            
+            
+            printf("ECCO LO SWAP TEST PRE UPDATE\n");
+            replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
 
             //--------- CONF UPDATE ----------------//
         
