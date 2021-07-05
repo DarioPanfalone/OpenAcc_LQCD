@@ -512,18 +512,25 @@ int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet )
 
 int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
     vec3_soa  aux;
-    
+    int aux_label;
         int res=0;
     int mu=0;
     
     for(mu=0;mu<8;mu++){
         printf("beforrre (%d) %.18lf %.18lf",mu,creal(conf1[mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu].r1.c1[snum_acc(31,6,6,6)]));
         
+        //label swap.
+        aux_label=conf1[mu].label;
+        conf1[mu].label=conf2[mu].label;
+        conf2[mu].label=aux_label;
+        
         
         //swap r0
         aux=conf1[mu].r0;
         conf1[mu].r0=conf2[mu].r0;
         conf2[mu].r0=aux;
+        
+        
         
         //swap r1
         aux=conf1[mu].r1;
@@ -543,3 +550,17 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
 }
 
 
+int label_print(su3_soa ** conf_hasen, int replicas_number){
+    int res=0;
+    int i;
+    
+    printf("replicas status:\n");
+    for(i=0;i<replicas_number;i++){
+        printf("replica %d: status %d",i,conf_hasen[replicas_number][0].label);
+        
+    }
+    printf("\n");
+    
+    
+    return res;
+}

@@ -385,7 +385,7 @@ int main(int argc, char* argv[]){
     
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         
-     printf("Initializing K_mu  Replica %d\n",replicas_counter);
+     printf("Initializing K_mu & label Replica %d\n",replicas_counter);
         int mu1;
         for (mu1=0;mu1<8;mu1++){
             conf_hasenbusch[replicas_counter][mu1].label=replicas_counter;
@@ -636,7 +636,7 @@ int main(int argc, char* argv[]){
             }
             }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
-            //-----------------------------------------------//
+             //-----------------------------------------------//
              //---------------CONF SWAP---------------------------//
             printf("ECCO LO SWAP\n");
             replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);

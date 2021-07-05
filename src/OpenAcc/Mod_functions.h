@@ -24,6 +24,7 @@ void printing_k_mu(su3_soa * conf);
 
 int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );
 int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );
+int label_print(su3_soa ** conf_hasen, int replicas_number);
 
 #endif /* Mod_functions_h */
 
