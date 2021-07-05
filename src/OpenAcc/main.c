@@ -333,7 +333,7 @@ int main(int argc, char* argv[]){
     
     //for per aprire o creare i file delle configurazioni.
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
-        
+        printf("replicas counter %d\n",replicas_counter);
         snprintf(rep_str,10,"replica_%d",replicas_counter);//inizializza rep_str
         strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
         
@@ -510,15 +510,16 @@ int main(int argc, char* argv[]){
 
      }else printf("MPI%02d: Starting generation of Configurations.\n",
             devinfo.myrank);
+    int mu;
     for(mu=0;mu<8;m++){
-        printf("beforrre out (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]))
+        printf("beforrre out (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]));
     }
     
     printf("ECCO LO SWAP TEST PRE UPDATE\n");
     replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
-    printf("ECCO LO SWAP TEST PRE UPDATE fuori\n");
+   
     for(mu=0;mu<8;m++){
-     printf("aftermath out (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]));
+     printf("aftermath out (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]));
         
     }
     
@@ -631,9 +632,10 @@ int main(int argc, char* argv[]){
                     printf("Estimated acceptance for this run: %f +- %f\n",acceptance,
                             acc_err);
                 }
+                
             }
             }
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number]) //updating conf sul device
+#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
             //-----------------------------------------------//
              //---------------CONF SWAP---------------------------//
             printf("ECCO LO SWAP\n");
