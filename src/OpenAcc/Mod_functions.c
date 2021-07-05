@@ -556,7 +556,7 @@ int label_print(su3_soa ** conf_hasen, int replicas_number){
     
     printf("replicas status:\n");
     for(i=0;i<replicas_number;i++){
-        printf("replica %d: status %d",i,conf_hasen[replicas_number][0].label);
+        printf("replica %d: status %d",i,conf_hasen[i][0].label);
         
     }
     printf("\n");
