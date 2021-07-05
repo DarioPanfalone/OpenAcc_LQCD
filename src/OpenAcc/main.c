@@ -642,10 +642,10 @@ int main(int argc, char* argv[]){
              //-----------------------------------------------//
              //---------------CONF SWAP---------------------------//
             
-            label_print(conf_hasenbusch, re->replicas_number);
+            label_print(conf_hasenbusch, rep->replicas_number);
             printf("ECCO LO SWAP\n");
             replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
-            label_print(conf_hasenbusch, re->replicas_number);
+            label_print(conf_hasenbusch, rep->replicas_number);
             
         //-----------------------------------------------//
             
