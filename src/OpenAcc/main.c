@@ -638,9 +638,11 @@ int main(int argc, char* argv[]){
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
              //-----------------------------------------------//
              //---------------CONF SWAP---------------------------//
+            
+            label_print(conf_hasenbusch, replicas_number);
             printf("ECCO LO SWAP\n");
             replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
-            
+            label_print(conf_hasenbusch, replicas_number);
             
         //-----------------------------------------------//
             
