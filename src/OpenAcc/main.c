@@ -511,14 +511,14 @@ int main(int argc, char* argv[]){
      }else printf("MPI%02d: Starting generation of Configurations.\n",
             devinfo.myrank);
     int mu;
-    for(mu=0;mu<8;m++){
+    for(mu=0;mu<8;mu++){
         printf("beforrre out (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]));
     }
     
     printf("ECCO LO SWAP TEST PRE UPDATE\n");
     replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
    
-    for(mu=0;mu<8;m++){
+    for(mu=0;mu<8;mu++){
      printf("aftermath out (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]));
         
     }
