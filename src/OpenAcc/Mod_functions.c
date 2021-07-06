@@ -509,7 +509,7 @@ int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet )
  
     return res;
 }
-
+//replicas_swap function: 2 confs defects are exchanged.
 int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
     vec3_soa  aux;
     int aux_label;
@@ -550,13 +550,15 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
 }
 
 
-int label_print(su3_soa ** conf_hasen, int replicas_number){
+//function which print the confs'labels.
+int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_number){
     int res=0;
     int i;
     
-    printf("replicas status:\n");
+    printf("step: &d\n",step_number);
+    
     for(i=0;i<replicas_number;i++){
-        printf("replica %d: status %d\n",i,conf_hasen[i][0].label);
+        fprintf("%d: %d\n",i,conf_hasen[i][0].label);
         
     }
     printf("\n");

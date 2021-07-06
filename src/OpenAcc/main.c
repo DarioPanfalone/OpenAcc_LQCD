@@ -642,10 +642,16 @@ int main(int argc, char* argv[]){
              //-----------------------------------------------//
              //---------------CONF SWAP---------------------------//
             
-            label_print(conf_hasenbusch, rep->replicas_total_number);
+            FILE *file_label;
+            file_label=fopen("./file_label.txt","w");
+            int swap_number=0;
+            
+            label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
             printf("ECCO LO SWAP\n");
             replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
-            label_print(conf_hasenbusch, rep->replicas_total_number);
+            swap_number++;
+            
+            label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
             
         //-----------------------------------------------//
             
