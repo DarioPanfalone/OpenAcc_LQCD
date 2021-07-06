@@ -555,13 +555,13 @@ int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_n
     int res=0;
     int i;
     
-    printf("step: &d\n",step_number);
+    fprintf(file,"step: &d\n",step_number,);
     
     for(i=0;i<replicas_number;i++){
-        fprintf("%d: %d\n",i,conf_hasen[i][0].label);
+        fprintf(file,"%d: %d\n",i,conf_hasen[i][0].label,);
         
     }
-    printf("\n");
+    fprintf(file,"\n",);
     
     
     return res;
