@@ -95,15 +95,7 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 
 int main(int argc, char* argv[]){
 
-    
-    //random test
-    double prova;
-    
-    for(int test=0; test<100;test++){
-        prova=casuale();
-    printf("random test %f\n",prova);
-    }
-    //
+  
     
     gettimeofday ( &(mc_params.start_time), NULL );
     
@@ -432,6 +424,16 @@ int main(int argc, char* argv[]){
     //######################################################################################################################################//
     //######################################################################################################################################//
 
+    
+    
+    //random test
+    double prova;
+    
+    for(int test=0; test<100;test++){
+        prova=casuale();
+        printf("random test %f\n",prova);
+    }
+    //
     
     
     //######################################################################################################################################//
