@@ -100,7 +100,7 @@ int main(int argc, char* argv[]){
     double prova;
     
     for(int test=0; test<100;test++){
-    prova=casuale()
+        prova=casuale();
     printf("random test %f\n",prova);
     }
     //
