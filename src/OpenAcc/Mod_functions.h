@@ -26,5 +26,10 @@ int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet )
 int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );
 int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_number);
 
+
+double calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+double calc_loc_plaquettes_nnptrick_SWAP;
+double  calc_plaquette_soloopenacc_SWAP;
+
 #endif /* Mod_functions_h */
 
