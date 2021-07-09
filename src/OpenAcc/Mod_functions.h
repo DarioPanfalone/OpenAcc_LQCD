@@ -28,8 +28,13 @@ int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_n
 
 
 double calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
-double calc_loc_plaquettes_nnptrick_SWAP;
-double  calc_plaquette_soloopenacc_SWAP;
+double calc_loc_plaquettes_nnptrick_SWAP(  __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
+                                         __restrict su3_soa * const loc_plaq, //la placchetta locale.
+                                         dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
+                                         const int mu, const int nu, int def_axis, int *def_vet);
+double  calc_plaquette_soloopenacc_SWAP( __restrict  su3_soa * const tconf_acc,
+                                        __restrict su3_soa * const local_plaqs,
+                                        dcomplex_soa * const tr_local_plaqs,int def_axis, int improved );
 
 #endif /* Mod_functions_h */
 
