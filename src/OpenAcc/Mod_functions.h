@@ -13,6 +13,8 @@
 #include "./struct_c_def.h"
 #include "./alloc_settings.h"
 #include "./alloc_vars.h"
+#include "../Include/common_defines.h"
+#include "./action.h"
 
 
 
@@ -34,6 +36,7 @@ double calc_loc_plaquettes_rectangles_SWAP(
                                            const int mu, const int nu, int def_axis, int *def_vet);
 
 double calc_loc_plaquettes_nnptrick_SWAP(  __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
+                                             __restrict const su3_soa * const w,
                                          __restrict su3_soa * const loc_plaq, //la placchetta locale.
                                          dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
                                          const int mu, const int nu, int def_axis, int *def_vet);
