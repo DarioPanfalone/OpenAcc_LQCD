@@ -767,7 +767,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         
                         tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
                         //MOD_END
-                        
+                        /*
                             
                         //SECOND MOD
                             
@@ -791,7 +791,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             //SECOND_MOD_END
                             
                             
-                            
+                            */
                             
                             
                        
