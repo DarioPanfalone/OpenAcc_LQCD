@@ -574,7 +574,7 @@ int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_n
 
 
 //Function which chooses the plane and iterate only on useful them.
-/*
+
 
 double  calc_plaquette_soloopenacc_SWAP(
                                    __restrict  su3_soa * const tconf_acc,
@@ -996,7 +996,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
     printf("d\n");
     return 0;
 }
-*/
 
 
 
