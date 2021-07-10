@@ -426,14 +426,7 @@ int main(int argc, char* argv[]){
 
     
     
-    //random test
-    double prova;
-    
-    for(int test=0; test<100;test++){
-        prova=casuale();
-        printf("random test %f\n",prova);
-    }
-    //
+
     
     
     //######################################################################################################################################//
