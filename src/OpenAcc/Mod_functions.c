@@ -595,12 +595,12 @@ double  calc_plaquette_soloopenacc_SWAP(
             for(int nu=mu+1;nu<4;nu++){
                 // sommo i 6 risultati in tempo
                  if(improved==0){
-                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here ol the plaquettes of a specific plane's choice are computed.
+                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                  }
                 
                 
                 if(improved==1){
-                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                 
                     
                 }
@@ -617,11 +617,11 @@ double  calc_plaquette_soloopenacc_SWAP(
                 // sommo i 6 risultati in tempo
                 if(nu!=mu){
                      if(improved==0){
-                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here ol the plaquettes of a specific plane's choice are computed.
+                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                      }
                     
                     if(improved==1){
-                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                         
                         
                     }
@@ -640,10 +640,10 @@ double  calc_plaquette_soloopenacc_SWAP(
                 // sommo i 6 risultati in tempo
                 if(nu!=mu){
                     if(improved==0){
-                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here all the plaquettes of a specific plane's choice are computed.
+                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
                     }
                     if(improved==1){
-                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                         
                         
                     }
@@ -660,10 +660,10 @@ double  calc_plaquette_soloopenacc_SWAP(
             for(int nu=0;nu<3;nu++){
                 // sommo i 6 risultati in tempo
                  if(improved==0){
-                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here all the plaquettes of a specific plane's choice are computed.
+                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
                  }
                 if(improved==1){
-                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                     
                 }
                 
@@ -972,7 +972,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         
         return res_R_p;
     }// closes routine
-    
+
 
 
 double calc_loc_plaquettes_rectangles_SWAP(
@@ -984,7 +984,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
     printf("d\n");
     return 0;
 }
-    
-    
+
+
 
 
