@@ -788,7 +788,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             
                           
-                            
+                            /*
                            
                             //SECOND_MOD_END
                             
