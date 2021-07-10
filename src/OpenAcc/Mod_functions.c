@@ -775,12 +775,13 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
                             mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
                             mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
-                            /*
 
                             
                             //K_mu_nu computation;
                             K_mu_nu=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
                             
+                            /*
+
                             ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
                             tr_local_plaqs[parity].c[idxh] =tr_local_plaqs[parity].c[idxh]-K_mu_nu*( creal(ciao)+cimag(ciao)*I);
                             
