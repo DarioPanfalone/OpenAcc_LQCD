@@ -20,6 +20,7 @@
 #include "../Include/common_defines.h"
 #include "./single_types.h"
 #include "./rettangoli.h"
+#include "./plaquettes.h"
 
 
 
