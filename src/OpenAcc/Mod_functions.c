@@ -787,7 +787,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
                             
-                            
+                             tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
                           
                             /*
                            
