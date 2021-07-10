@@ -702,7 +702,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
     const int mu, const int nu, int def_axis, int *def_vet)
     {
         double K_mu_nu; //MOD.
-        
+        double K_mu_nu2; //MOD.
         int d0, d1, d2, d3;
         
         
@@ -778,7 +778,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 
                             
                             //K_mu_nu computation;
-                            K_mu_nu=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
                             
                            
 
@@ -787,7 +787,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
                             
-                             tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+                            
                           
                             /*
                            
