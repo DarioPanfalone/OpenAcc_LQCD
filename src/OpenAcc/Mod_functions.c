@@ -578,6 +578,7 @@ int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_n
 
 double  calc_plaquette_soloopenacc_SWAP(
                                    __restrict  su3_soa * const tconf_acc,
+                                        __restrict  su3_soa * const tconf_acc2,
                                    __restrict su3_soa * const local_plaqs,
                                    dcomplex_soa * const tr_local_plaqs,int def_axis, int * def_vet, int improved )
 {
@@ -596,12 +597,12 @@ double  calc_plaquette_soloopenacc_SWAP(
             for(int nu=mu+1;nu<4;nu++){
                 // sommo i 6 risultati in tempo
                  if(improved==0){
-                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
+                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                  }
                 
                 
                 if(improved==1){
-                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                 
                     
                 }
@@ -618,11 +619,11 @@ double  calc_plaquette_soloopenacc_SWAP(
                 // sommo i 6 risultati in tempo
                 if(nu!=mu){
                      if(improved==0){
-                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
+                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                      }
                     
                     if(improved==1){
-                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                         
                         
                     }
@@ -641,10 +642,10 @@ double  calc_plaquette_soloopenacc_SWAP(
                 // sommo i 6 risultati in tempo
                 if(nu!=mu){
                     if(improved==0){
-                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
+                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
                     }
                     if(improved==1){
-                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                         
                         
                     }
@@ -661,10 +662,10 @@ double  calc_plaquette_soloopenacc_SWAP(
             for(int nu=0;nu<3;nu++){
                 // sommo i 6 risultati in tempo
                  if(improved==0){
-                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
+                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
                  }
                 if(improved==1){
-                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                     
                 }
                 
@@ -1021,6 +1022,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 
 double calc_loc_plaquettes_rectangles_SWAP(
 __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
+__restrict const su3_soa * const w,
 __restrict su3_soa * const loc_plaq, //la placchetta locale.
 dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
 const int mu, const int nu, int def_axis, int *def_vet)
