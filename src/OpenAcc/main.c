@@ -648,9 +648,15 @@ int main(int argc, char* argv[]){
             FILE *file_label;
             file_label=fopen("./file_label.txt","w");
             int swap_number=0;
-            
+            double Delta_S_SWAP;
             label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
             printf("ECCO LO SWAP\n");
+            
+            calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+            Delta_S_SWAP=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
+            printf("DELTA_S_SWAP: %f\n",Delta_S_SWAP);
+            
+            
             replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
             swap_number++;
             
