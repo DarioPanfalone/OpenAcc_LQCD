@@ -783,8 +783,8 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                            
 
                              d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
-                             /*
-                            tr_local_plaqs[parity].c[idxh] =tr_local_plaqs[parity].c[idxh]-K_mu_nu*( creal(ciao2)+cimag(ciao2)*I);
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)+cimag(ciao2)*I;
                             
                             
                           
