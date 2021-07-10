@@ -39,7 +39,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(  __restrict const su3_soa * const u,//
                                          const int mu, const int nu, int def_axis, int *def_vet);
 double  calc_plaquette_soloopenacc_SWAP( __restrict  su3_soa * const tconf_acc,
                                         __restrict su3_soa * const local_plaqs,
-                                        dcomplex_soa * const tr_local_plaqs,int def_axis, int improved );
+                                        dcomplex_soa * const tr_local_plaqs,int def_axis, int *def_vet, int improved );
 
 #endif /* Mod_functions_h */
 
