@@ -996,7 +996,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
     printf("d\n");
     return 0;
 }
-
+*/
 
 
 
