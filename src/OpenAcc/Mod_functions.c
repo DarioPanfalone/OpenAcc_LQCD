@@ -695,6 +695,7 @@ double  calc_plaquette_soloopenacc_SWAP(
 
 double calc_loc_plaquettes_nnptrick_SWAP(
     __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
+    __restrict const su3_soa * const w,
     __restrict su3_soa * const loc_plaq, //la placchetta locale.
     dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
     const int mu, const int nu, int def_axis, int *def_vet)
@@ -744,12 +745,17 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         
                         //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
                         
+                            //plaquette u
                         mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
                         mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
                         mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                          
                         
                         d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
                         tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
+                    
+                            
+                            
                         
                         // printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);
                         //MOD
@@ -761,6 +767,32 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
                         //MOD_END
                         
+                            
+                        //SECOND MOD
+                            
+                            
+                            //plaquette w
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            
+                            d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            tr_local_plaqs[parity].c[idxh] =tr_local_plaqs[parity].c[idxh]-K_mu_nu*( creal(ciao)+cimag(ciao)*I);
+                            
+                            
+                            
+                            
+                           
+                            //SECOND_MOD_END
+                            
+                            
+                            
+                            
+                            
                        
                         
                 }  // d1
@@ -981,7 +1013,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         }
         
         
-        
+        res_R_p=C_ZERO * BETA_BY_THREE *res_R_p;
         return res_R_p;
     }// closes routine
 
