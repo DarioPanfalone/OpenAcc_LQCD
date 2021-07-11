@@ -431,11 +431,14 @@ int main(int argc, char* argv[]){
     printf("ECCO IL TEST SWAP!!!\n");
     Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
     int vet_prova[3]={nd1-1,nd2-1,nd3-1};
-    
+    int vet_prova_sub[3]={nd1/2,nd2/2,nd3/2};
     double Delta_S_SWAP_1;
     Delta_S_SWAP_1=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova,0);
+    double Delta_S_SWAP_2;
+    Delta_S_SWAP_2=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova_sub,0);
+
     
-    printf("DELTA_S_SWAP: %f(optimus) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_1);
+    printf("DELTA_S_SWAP: %f(optimus)|| %f(casual half) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
     
     
     
