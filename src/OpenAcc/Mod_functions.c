@@ -730,6 +730,8 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
                         idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
                         
+                        parity = 1-parity;
+                            
                         dir_muA = 2*mu +  parity;
                         dir_muC = 2*mu + !parity;
                         idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
