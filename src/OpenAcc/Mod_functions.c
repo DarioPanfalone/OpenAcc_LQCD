@@ -765,7 +765,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
                         
                         
-                        tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+                       
                         //MOD_END
                             
                         //SECOND MOD
@@ -783,9 +783,11 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                            
 
                              d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
-                            ciao2= K_mu_nu2*ciao2;
+                            
                             
                             tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            
+                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
                             
                             
                           
