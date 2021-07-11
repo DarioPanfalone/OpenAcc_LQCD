@@ -728,7 +728,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         
                         idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                         parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
-                      //  idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                        idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
                         
                         dir_muA = 2*mu +  parity;
                         dir_muC = 2*mu + !parity;
