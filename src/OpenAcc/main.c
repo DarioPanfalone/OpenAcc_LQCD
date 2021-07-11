@@ -426,7 +426,7 @@ int main(int argc, char* argv[]){
 
     
     //TEST SWAP!!
-    double Delta_S_SWAP_0
+    double Delta_S_SWAP_0;
     
     printf("ECCO IL TEST SWAP!!!\n");
     Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
