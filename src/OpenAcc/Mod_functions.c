@@ -596,6 +596,7 @@ double  calc_plaquette_soloopenacc_SWAP(
             mu=0;
             for(int nu=mu+1;nu<4;nu++){
                 // sommo i 6 risultati in tempo
+                printf("(%d,%d)",mu,nu);
                  if(improved==0){
                 result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                  }
@@ -727,7 +728,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         
                         idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                         parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
-                        idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                      //  idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
                         
                         dir_muA = 2*mu +  parity;
                         dir_muC = 2*mu + !parity;
