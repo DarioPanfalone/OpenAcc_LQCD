@@ -425,6 +425,22 @@ int main(int argc, char* argv[]){
     //######################################################################################################################################//
 
     
+    //TEST SWAP!!
+    
+    
+    printf("ECCO IL TEST SWAP!!!\n");
+    Delta_S_SWAP=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
+    int vet_prova=[nd1-1,nd2-1,nd3-1];
+    
+    
+    Delta_S_SWAP_1=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova,0);
+    
+    printf("DELTA_S_SWAP: %f(optimus) || %f(full)\n",Delta_S_SWAP,Delta_S_SWAP_1);
+    
+    
+    
+    
+    
     
 
     
@@ -514,20 +530,8 @@ int main(int argc, char* argv[]){
      }else printf("MPI%02d: Starting generation of Configurations.\n",
             devinfo.myrank);
     
-    /*
-    int mu;
-    for(mu=0;mu<8;mu++){
-        printf("beforrre out (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]));
-    }
+
     
-    printf("ECCO LO SWAP TEST PRE UPDATE\n");
-    replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
-   
-    for(mu=0;mu<8;mu++){
-     printf("aftermath out (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]));
-        
-    }
-     */
     
     
     
