@@ -445,7 +445,7 @@ int main(int argc, char* argv[]){
     
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
     
-    int i_mu;
+    int id_mu;
     for(id_mu=0;id_mu<8;id_mu++){
         printf("beforrre (%d) %.18lf %.18lf",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
     
