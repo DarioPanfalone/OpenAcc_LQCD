@@ -429,7 +429,25 @@ int main(int argc, char* argv[]){
     double Delta_S_SWAP_0=0.0;
      double Delta_S_SWAP_1=0.0;
       double Delta_S_SWAP_2=0.0;
+    double S_0_0, S_0_2,S_2_2,S_2_0;
+    double Delta_S_SWAPS=0.0;
     printf("ECCO IL TEST SWAP!!!\n");
+    
+    S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    
+    S_2_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
+    
+    replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
+    
+    S_0_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    
+    S_2_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
+    
+    Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
+    
+    printf("CONFRONTO DELTA_SWAP\n");
+    printf("%f || %f\n",Delta_S_SWAPS,Delta_S_SWAP_2);
+    
     
 
     Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
@@ -441,8 +459,12 @@ int main(int argc, char* argv[]){
     
     Delta_S_SWAP_2=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova_sub,0);
 
+    printf("CONFRONTO DELTA_SWAP\n");
+    printf("%f || %f\n",Delta_S_SWAPS,Delta_S_SWAP_2);
     
-    printf("DELTA_S_SWAP: %f(optimus)|| %f(casual half) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
+    
+
+    printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
     
     
     
