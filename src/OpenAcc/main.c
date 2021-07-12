@@ -432,8 +432,8 @@ int main(int argc, char* argv[]){
     printf("ECCO IL SWAP0!!!\n");
     printf("cecc %f\n",conf_hasenbusch[2][1].K.d[snum_acc(31,6,6,6)]);
     Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
-    int vet_prova[3]={nd1-1,nd2-1,nd3-1};
-    int vet_prova_sub[3]={nd1/2,nd2/2,nd3/2};
+    int vet_prova[3]={nd1-2,nd2-2,nd3-2};
+   
        printf("ECCO IL SWAP1!!!\n");
     double Delta_S_SWAP_1;
     Delta_S_SWAP_1=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova,0);
