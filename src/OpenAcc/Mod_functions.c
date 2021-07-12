@@ -814,7 +814,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                
             case 1:
           d1=nd1-1;
-#pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
                 for(d3=D3_HALO; d3<def_vet[2]-D3_HALO; d3++) {//what?
@@ -905,7 +905,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                 
             case 2:
             d2=nd2-1;
-#pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
                 for(d3=D3_HALO; d3<def_vet[2]+1-D3_HALO; d3++) {//what?
@@ -1000,7 +1000,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                 
             case 3:
           d3=nd3-1-D3_HALO;
-#pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
                 for(d2=0; d2<def_vet[2]+2; d2++) {
