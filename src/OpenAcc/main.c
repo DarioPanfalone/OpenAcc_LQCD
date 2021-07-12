@@ -445,8 +445,15 @@ int main(int argc, char* argv[]){
     
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
     
+    int id_mu;
+    for(id_mu=0;id_mu<8;id_mu++){
+    printf("beforrre (%d) %.18lf %.18lf",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]));
+    
+    printf("aftermath (%d) %.18lf %.18lf\n",mu,creal(conf_hasenbusch[0][mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu].r1.c1[snum_acc(31,6,6,6)]));
+    }
     printf("%f  %f  %f  %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
     printf("CONFRONTO DELTA_SWAP\n");
+    
     
   
     
