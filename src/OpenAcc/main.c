@@ -659,7 +659,7 @@ int main(int argc, char* argv[]){
             FILE *file_label;
             file_label=fopen("./file_label.txt","w");
             int swap_number=0;
-            double Delta_S_SWAP=0;
+            double Delta_S_SWAP=0.0;
             label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
             printf("ECCO LO SWAP\n");
             

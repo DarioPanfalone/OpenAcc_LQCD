@@ -796,12 +796,12 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                    
                             counter++;
                           
-                            /*
+                
                            
                             //SECOND_MOD_END
                             
                             
-                            */
+                          
                             
                             
                        
@@ -867,6 +867,35 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
                             //MOD_END
                             
+                            //SECOND MOD
+                            
+                            
+                            //plaquette w
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            
+                            
+                            
+                            d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            
+                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            
+                            //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
+                            
+                            counter++;
+                            
+                            
+                             
+                             //SECOND_MOD_END
+                            
                             
                             
                         }  // d1
@@ -930,6 +959,39 @@ double calc_loc_plaquettes_nnptrick_SWAP(
  
                             
                             
+                            //SECOND MOD
+                            
+                            
+                            //plaquette w
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            
+                            
+                            
+                            d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            
+                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            
+                            //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
+                            
+                            counter++;
+                            
+                            
+                            
+                            //SECOND_MOD_END
+                            
+                            
+                            
+                            
+                            
                             
                         }  // d1
                     }  // d2
@@ -990,6 +1052,39 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
                             //Mod_end
+                            
+                            
+                            
+                            //SECOND MOD
+                            
+                            
+                            //plaquette w
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            
+                            
+                            
+                            d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            
+                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            
+                            //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
+                            
+                            counter++;
+                            
+                            
+                            
+                            //SECOND_MOD_END
+                            
+                            
                             
                             
                             
