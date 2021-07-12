@@ -706,7 +706,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         double K_mu_nu2; //MOD.
         int d0, d1, d2, d3;
         
-                 int counter;
+    int counter=0;
 
  switch (def_axis){
             case 0:
@@ -809,7 +809,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                 }  // d1
             }  // d2
         }  // d3
-         printf("counter: %d",counter);
+        
                 break;
                
             case 1:
@@ -1026,6 +1026,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         
         
         res_R_p=C_ZERO * BETA_BY_THREE *res_R_p;
+        printf("counter: %d\n",counter);
         return res_R_p;
     }// closes routine
 
