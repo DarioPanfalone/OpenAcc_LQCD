@@ -439,7 +439,7 @@ int main(int argc, char* argv[]){
        int id_mu;
     for(id_mu=0;id_mu<8;id_mu++){
         printf("beforrre (%d) %.18lf %.18lf",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
-    
+    }
     replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
     
     S_0_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
@@ -450,7 +450,7 @@ int main(int argc, char* argv[]){
     
  
     
-   
+   for(id_mu=0;id_mu<8;id_mu++){
     
     printf("aftermath (%d) %.18lf %.18lf\n",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
     }
