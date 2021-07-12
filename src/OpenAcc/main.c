@@ -445,8 +445,10 @@ int main(int argc, char* argv[]){
     
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
     
+    printf("%f  %f  %f  %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
     printf("CONFRONTO DELTA_SWAP\n");
-    printf("%f || %f\n",Delta_S_SWAPS,Delta_S_SWAP_2);
+    
+  
     
     
 
