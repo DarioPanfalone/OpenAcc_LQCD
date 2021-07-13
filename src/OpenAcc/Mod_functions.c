@@ -710,6 +710,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
     int counter=0;
         
         printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
+        printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
 
  switch (def_axis){
             case 0:
