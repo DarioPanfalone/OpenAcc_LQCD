@@ -710,7 +710,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 
  switch (def_axis){
             case 0:
-          d0=nd0-1;
+         // d0=nd0-1;
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
@@ -718,7 +718,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=0; d2<def_vet[1]; d2++) {
                         for(d1=0; d1<def_vet[0]; d1++) {
-                            
+                            for(d0=0;d0<nd0;d0++){  //TEST MOD
                             
                         
                         int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
@@ -803,7 +803,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                           
                             
-                            
+                            }//d0 TEST
                        
                         
                 }  // d1
@@ -1091,6 +1091,8 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         }  // d1
                     }  // d2
                 }  // d3
+         
+         
                 break;
 
 
