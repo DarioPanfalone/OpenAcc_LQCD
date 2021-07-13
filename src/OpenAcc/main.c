@@ -511,7 +511,7 @@ int main(int argc, char* argv[]){
     //Plaquette measures and polyakov loop measures.
     printf("PLAQUETTE START\n");
     //TEST MOD
-    printf("Plaquette  MOD   : %.18lf\n" , Delta_S_0_2/GL_SIZE/BETA_BY_THREE/6.0);
+    printf("Plaquette  MOD   : %.18lf\n" , S_0_2/GL_SIZE/BETA_BY_THREE/6.0);
     
     
     plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
