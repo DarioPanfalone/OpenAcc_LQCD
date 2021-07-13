@@ -708,8 +708,8 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         int d0, d1, d2, d3;
         int D1,D2,D3;
         D1=def_vet[0];
-        D2=def_vet[1]:
-        D3=def_vet[2]
+        D2=def_vet[1];
+        D3=def_vet[2];
         
     int counter=0;
         
