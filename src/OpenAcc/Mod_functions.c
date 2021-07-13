@@ -1127,7 +1127,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         
         
         res_R_p=BETA_BY_THREE *res_R_p;
-        
+        printf("ecco il numero di siti visti %d\n", counter);
         return res_R_p;
     }// closes routine
 
