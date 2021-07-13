@@ -706,22 +706,29 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         double K_mu_nu; //MOD.
         double K_mu_nu2; //MOD.
         int d0, d1, d2, d3;
+        int D1,D2,D3;
+        D1=def_vet[0];
+        D2=def_vet[1]:
+        D3=def_vet[2]
         
     int counter=0;
         
         printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
         printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
 
+        
+        
+        
  switch (def_axis){
             case 0:
          // d0=nd0-1;
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d3=D3_HALO; d3<def_vet[2]-D3_HALO; d3++) {//what?
+                for(d3=D3_HALO; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-                    for(d2=0; d2<def_vet[1]; d2++) {
-                        for(d1=0; d1<def_vet[0]; d1++) {
+                    for(d2=0; d2<D2; d2++) {
+                        for(d1=0; d1<D1; d1++) {
                             for(d0=0;d0<nd0;d0++){  //TEST MOD
                             
                         
