@@ -444,10 +444,11 @@ int main(int argc, char* argv[]){
         printf("beforrre (%d) %.18lf %.18lf\n",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
     }
     replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
+#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
     
-    S_0_2=calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    S_0_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     
-    S_2_0=calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
+    S_2_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
     
