@@ -458,7 +458,7 @@ int main(int argc, char* argv[]){
     
     printf("aftermath (%d) %.18lf %.18lf\n",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
     }
-    printf("%f  %f  %f  %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
+    printf("S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
     printf("CONFRONTO DELTA_SWAP\n");
     
     
@@ -476,11 +476,11 @@ int main(int argc, char* argv[]){
     Delta_S_SWAP_2=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova_sub,0);
 
     printf("CONFRONTO DELTA_SWAP\n");
-    printf("%f || %f\n",Delta_S_SWAPS,Delta_S_SWAP_2);
+    printf("%f (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %f\n",Delta_S_SWAPS,Delta_S_SWAP_2);
     
     
 
-    printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
+    //printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
     
     
     
@@ -552,8 +552,10 @@ int main(int argc, char* argv[]){
         rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
         poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
     
-
-	
+//TEST MOD
+	  printf("Plaquette  MOD   : %.18lf\n" , Delta_S_SWAP_2/GL_SIZE/BETA_BY_THREE/6.0);
+        
+        
 	    printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
         printf("Rectangle     : %.18lf\n" ,rect/GL_SIZE/3.0/6.0/2.0);
         printf("Polyakov Loop : (%.18lf,%.18lf) \n",creal(poly),cimag(poly));
