@@ -445,9 +445,9 @@ int main(int argc, char* argv[]){
     }
     replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
     
-    S_0_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    S_0_2=calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     
-    S_2_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
+    S_2_0=calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
     
