@@ -593,7 +593,8 @@ double  calc_plaquette_soloopenacc_SWAP(
     
     switch (def_axis) {
         case 0:
-            mu=0;
+           // mu=0;  //TEST MOD
+            for(mu=0;mu<3;mu++){
             for(int nu=mu+1;nu<4;nu++){
                 // sommo i 6 risultati in tempo
                 printf("(%d,%d)",mu,nu);
@@ -610,7 +611,7 @@ double  calc_plaquette_soloopenacc_SWAP(
                 
                 
             }
-        
+            }
             
             break;
             
