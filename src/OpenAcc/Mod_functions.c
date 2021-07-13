@@ -701,7 +701,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
     __restrict const su3_soa * const w,
     __restrict su3_soa * const loc_plaq, //la placchetta locale.
     dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
-    const int mu, const int nu, const int def_axis,__restrict  int * const def_vet)
+    const int mu, const int nu, const int def_axis,__restrict const int * const def_vet)
     {
         double K_mu_nu; //MOD.
         double K_mu_nu2; //MOD.
