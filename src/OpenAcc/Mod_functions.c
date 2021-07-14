@@ -1125,7 +1125,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         double resR = 0.0;
         int t;
         
-        
+        printf("SIZE_H %d %d\n",LNH_SIZEH,LOC_SIZEH);
         
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
