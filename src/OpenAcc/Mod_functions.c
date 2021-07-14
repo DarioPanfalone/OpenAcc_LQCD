@@ -807,7 +807,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                           //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                    
-                            counter++;
+                         
                           
                 
                            
@@ -1136,7 +1136,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         
         
         res_R_p=BETA_BY_THREE *res_R_p;
-        printf("ecco il numero di siti visti %d\n", counter);
+    
         return res_R_p;
     }// closes routine
 

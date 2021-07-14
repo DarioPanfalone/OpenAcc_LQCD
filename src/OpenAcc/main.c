@@ -460,8 +460,12 @@ int main(int argc, char* argv[]){
     }
     printf("S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
 
-    
-    
+    int is;
+    for(is=0 is<sizeh;is++){
+        local_sums[0].c[is]=0;
+        local_sums[1].c[is]=0;
+        
+    }
   
     
     
