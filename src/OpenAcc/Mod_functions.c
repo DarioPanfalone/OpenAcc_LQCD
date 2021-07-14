@@ -701,7 +701,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
     __restrict const su3_soa * const w,
     __restrict su3_soa * const loc_plaq, //la placchetta locale.
     dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
-    const int mu, const int nu, const int def_axis,__restrict const int * const def_vet)
+    const int mu, const int nu, const int def_axis, const int * const def_vet)
     {
         double K_mu_nu; //MOD.
         double K_mu_nu2; //MOD.
@@ -722,7 +722,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         
  switch (def_axis){
             case 0:
-         // d0=nd0-1;
+          d0=nd0-1;
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
@@ -730,7 +730,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=0; d2<D2; d2++) {
                         for(d1=0; d1<D1; d1++) {
-                            for(d0=0;d0<nd0;d0++){  //TEST MOD
+                          //  for(d0=0;d0<nd0;d0++){  //TEST MOD
                             
                                 
                         
@@ -816,7 +816,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                           
                             
-                            }//d0 TEST
+                    //        }//d0 TEST
                        
                         
                 }  // d1
