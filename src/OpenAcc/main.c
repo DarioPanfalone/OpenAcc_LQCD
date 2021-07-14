@@ -467,43 +467,31 @@ int main(int argc, char* argv[]){
         
     }
     #pragma acc update device(local_sums[0:2])
+  
     
+    
+
+    Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
     int vet_prova[3]={nd1,nd2,nd3};
-    int volume_aux_vet;
-    volume_aux_vet=vet_prova[0]*vet_prova[1]*vet_prova[2];
-    
-    d_complex ** local_sums_swap;
-    //alloca questo vettore.
-    local_sums_swap=malloc(2*sizeof(d_complex *));
-    for(int is=0;is<2;is++){
-        local_sums_swap[is]=malloc(volume_aux_vet*sizeof(d_complex));
-    } //allocato.
-    //carica sul device.
-#pragma acc enter data create(local_sums_swap[0:2])
-    
-    
-
-    Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,local_sums_swap,rep->defect_boundary,rep->defect_coordinates,0);
-
     
     printf("cosa sono i ndi ?:%d %d %d \n",nd1,nd2,nd3);
     int vet_prova_sub[3]={nd1/2,nd2/2,nd3/2};
     
-   // Delta_S_SWAP_1=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova,0);
+    Delta_S_SWAP_1=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova,0);
 
     
-  //  Delta_S_SWAP_2=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova_sub,0);
+    Delta_S_SWAP_2=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova_sub,0);
 
     printf("CONFRONTO DELTA_SWAP\n");
     printf("%f (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %f (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_1);
     
     
 
-  //  printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
+    printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
     
     
     
-    /////////////////////////////
+    
     
     
 
@@ -726,11 +714,11 @@ int main(int argc, char* argv[]){
             label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
             printf("ECCO LO SWAP\n");
             
-           /*
-           Delta_S_SWAP=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
+            
+            Delta_S_SWAP=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
             printf("DELTA_S_SWAP: %f\n",Delta_S_SWAP);
             
-            */
+            
             replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
             swap_number++;
             
