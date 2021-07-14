@@ -460,7 +460,7 @@ double  calc_plaquette_soloopenacc_SWAP(
            
             for(int nu=mu+1;nu<4;nu++){
                 // sommo i 6 risultati in tempo
-                printf("(%d,%d)",mu,nu);
+                printf("(%d,%d)/n",mu,nu);
                  if(improved==0){
                      if(nu==1){def_vet_2[0]=def_vet[0]+1; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2];}
                      if(nu==2){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1]+1;def_vet_2[2]=def_vet[2];}
@@ -581,7 +581,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
     int counter=0;
         
        
-        //printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
+        printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
         //printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
 
         
