@@ -474,9 +474,9 @@ int main(int argc, char* argv[]){
     
     d_complex ** local_sums_swap;
     //alloca questo vettore.
-    *local_sums_swap=malloc(2*sizeof(d_complex *));
+    local_sums_swap=malloc(2*sizeof(d_complex *));
     for(int is=0;is<2;is++){
-        (*local_sums_swap)[is]=malloc(volume_aux_vet*sizeof(d_complex));
+        (local_sums_swap)[is]=malloc(volume_aux_vet*sizeof(d_complex));
     } //allocato.
     //carica sul device.
 #pragma acc enter data create(local_sums_swap[0:2])
