@@ -466,7 +466,7 @@ int main(int argc, char* argv[]){
         local_sums[1].c[is]=0;
         
     }
-    #pragma acc update device(local_sums[0:1])
+    #pragma acc update device(local_sums[0:2])
   
     
     
