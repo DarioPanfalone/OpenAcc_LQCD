@@ -449,6 +449,7 @@ double  calc_plaquette_soloopenacc_SWAP(
     double result=0.0;
     double total_result=0.0;
     int mu;
+    int def_vet_2[3];
     
     int i_counter=0;
     // calcolo il valore della plaquette sommata su tutti i siti a fissato piano mu-nu (6 possibili piani)//(the couple has to be chosen excluding same direction ones.(4 2)binomial coefficient.
@@ -461,6 +462,9 @@ double  calc_plaquette_soloopenacc_SWAP(
                 // sommo i 6 risultati in tempo
                 printf("(%d,%d)",mu,nu);
                  if(improved==0){
+                     if(nu==1){def_vet_2[0]=def_vet[0]+1; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2];}
+                     if(nu==2){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1]+1;def_vet_2[2]=def_vet[2];}
+                     if(nu==3){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2]+1;}
                 result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                  }
                 
@@ -604,9 +608,9 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         
                         idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                         parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
-                       // idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                        idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
                         
-                       // parity = 1-parity;
+                        parity = 1-parity;
                             
                         dir_muA = 2*mu +  parity;
                         dir_muC = 2*mu + !parity;
