@@ -475,7 +475,7 @@ int main(int argc, char* argv[]){
     d_complex ** local_sums_swap;
     //alloca questo vettore.
     *local_sums_swap=malloc(2*sizeof(d_complex *));
-    for(int is=0;is<2,is++){
+    for(int is=0;is<2;is++){
         (*local_sums_swap)[is]=malloc(volume_aux_vet*sizeof(d_complex));
     } //allocato.
     //carica sul device.
@@ -483,7 +483,7 @@ int main(int argc, char* argv[]){
     
     
 
-    Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
+    Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,local_sums_swap,rep->defect_boundary,rep->defect_coordinates,0);
 
     
     printf("cosa sono i ndi ?:%d %d %d \n",nd1,nd2,nd3);
