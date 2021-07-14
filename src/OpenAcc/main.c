@@ -470,11 +470,11 @@ int main(int argc, char* argv[]){
     
     int vet_prova[3]={nd1,nd2,nd3};
     int volume_aux_vet;
-    volume_aux_vet=vet_prova[0]*vet_prova[1]*vet_prova[2]
+    volume_aux_vet=vet_prova[0]*vet_prova[1]*vet_prova[2];
     
     d_complex ** local_sums_swap;
     //alloca questo vettore.
-    *local_sums_swap=malloc(2*sizeof(d_complex *))
+    *local_sums_swap=malloc(2*sizeof(d_complex *));
     for(int is=0;is<2,is++){
         (*local_sums_swap)[is]=malloc(volume_aux_vet*sizeof(d_complex));
     } //allocato.

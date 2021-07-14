@@ -582,7 +582,7 @@ double  calc_plaquette_soloopenacc_SWAP(
                                    __restrict su3_soa * const local_plaqs,
                                         
                                    dcomplex_soa * const tr_local_plaqs,
-                                        dcomplex ** const tr_local_plaqs_swap,
+                                        d_complex ** const tr_local_plaqs_swap,
                                         int def_axis, int * def_vet, int improved )
 {
     
@@ -704,7 +704,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
     __restrict const su3_soa * const w,
     __restrict su3_soa * const loc_plaq, //la placchetta locale.
     dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
-    dcomplex ** const tr_local_plaqs_swap,
+    d_complex ** const tr_local_plaqs_swap,
     const int mu, const int nu, const int def_axis, const int * const def_vet)
     {
         double K_mu_nu; //MOD.
