@@ -597,11 +597,11 @@ double calc_loc_plaquettes_nnptrick_SWAP(
          
                 for(d3=D3_HALO; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-                    for(d2=0; d2<D2; d2++) {
+                    for(d2=-1; d2<D2; d2++) {
                         for(d1=0; d1<D1; d1++) {
                           //  for(d0=0;d0<nd0;d0++){  //TEST MOD
+                            if(d2==-1){d2=nd2-1;}
                             
-                                
                         
                         int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
                         int parity; //parity
