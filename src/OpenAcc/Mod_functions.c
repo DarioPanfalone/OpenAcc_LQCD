@@ -576,9 +576,27 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         double K_mu_nu2; //MOD.
         int d0, d1, d2, d3;
         int D1,D2,D3;
+        int D1s,D2s,D3s;
+        
+        
+        
+        
         D1=def_vet[0];
         D2=def_vet[1];
         D3=def_vet[2];
+        
+        
+        
+        D0s=0;
+        D1s=0;
+        D2s=0;
+        D3s=0;
+        
+        if(nu=0){D0s=-1;}
+        if(nu=1){D1s=-1;}
+        if(nu=2){D2s=-1;}
+        if(nu=3){D3s=-1;}
+    
         
     int counter=0;
         
@@ -595,10 +613,10 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d3=-1+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
+                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-                    for(d2=-1; d2<D2; d2++) {
-                        for(d1=-1; d1<D1; d1++) {
+                    for(d2=D2s; d2<D2; d2++) {
+                        for(d1=D1s; d1<D1; d1++) {
                           //  for(d0=0;d0<nd0;d0++){  //TEST MOD
                         
                             
@@ -719,14 +737,16 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             int dir_muC,dir_nuD;
                             
                             idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
-                            
-                            if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);}
-                            if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);}
-                            if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);}
+                           
                             
                             
                             parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
-                            idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                            
+                            if(d1==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
+                            if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+d3)%2;}
+                            if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                            
+                          //  idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
                             
                             dir_muA = 2*mu +  parity;
                             dir_muC = 2*mu + !parity;
