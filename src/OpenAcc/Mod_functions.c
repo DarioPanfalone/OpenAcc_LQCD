@@ -613,6 +613,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
             tr_local_plaqs[1].c[is]=0;
             
         }
+#pragma acc update device(tr_local_plaqs[0:2])
         
  switch (def_axis){
             case 0:
