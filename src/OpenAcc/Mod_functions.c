@@ -576,7 +576,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         double K_mu_nu2; //MOD.
         int d0, d1, d2, d3;
         int D1,D2,D3;
-        int D1s,D2s,D3s;
+        int D0s,D1s,D2s,D3s;
         
         
         
