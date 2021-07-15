@@ -596,7 +596,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         
         
         if(nu==1){D1s=-1;D2s=0;D3s=0;}
-        if(nu==2){D1s=0;D2s=-1;D3s=0;}
+        if(nu==2){D1s=-1;D2s=-1;D3s=-1;}
         if(nu==3){D1s=-1;D2s=-1;D3s=-1;}
     
         

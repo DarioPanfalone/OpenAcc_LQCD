@@ -484,7 +484,7 @@ int main(int argc, char* argv[]){
     Delta_S_SWAP_2=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova_sub,0);
 
     printf("CONFRONTO DELTA_SWAP\n");
-    printf("%f (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %f (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_0);
+    printf("%lf (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_0);
     
     
 
