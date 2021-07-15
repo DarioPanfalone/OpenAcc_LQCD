@@ -595,9 +595,9 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         if(nu==0){D0s=-1;}
         
         
-        if(nu==1){D1s=-1;D2s=0;D3s=0;}
-        if(nu==2){D1s=0;D2s=-1;D3s=0;}
-        if(nu==3){D1s=0;D2s=0;D3s=-1;}
+        if(nu==1){D1s=-1;}
+        if(nu==2){D2s=-1;}
+        if(nu==3){D3s=-1;}
     
         
     int counter=0;
@@ -732,10 +732,10 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d3=-1+D3_HALO; d3<def_vet[2]-D3_HALO; d3++) {//what?
+                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-                    for(d2=-1; d2<def_vet[1]; d2++) {
-                        for(d0=-1; d0<def_vet[0]; d0++) {
+                    for(d2=D2s; d2<D2; d2++) {
+                        for(d0=D0s; d0<D1; d0++) {
                             
                             
                             
@@ -750,7 +750,8 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
                             
-                            if(d1==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
+                            //third mod
+                            if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
                             if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+d3)%2;}
                             if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
                             
@@ -831,10 +832,10 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d3=D3_HALO; d3<def_vet[2]+1-D3_HALO; d3++) {//what?
+                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-                    for(d1=0; d1<def_vet[1]+1; d1++) {
-                        for(d0=0; d0<def_vet[0]+1; d0++) {
+                    for(d1=D1s; d1<D2; d1++) {
+                        for(d0=D0s; d0<D1; d0++) {
                             
                             
                             
@@ -845,7 +846,14 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                             parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
-                            idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                           
+                            
+                            
+                            //third mod
+                            if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
+                            if(d1==-1){idxh=snum_acc(d0,nd1-2,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
+                            if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                            
                             
                             dir_muA = 2*mu +  parity;
                             dir_muC = 2*mu + !parity;
@@ -926,10 +934,10 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d2=0; d2<def_vet[2]+2; d2++) {
+                for(d2=D2s; d2<D3; d2++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-                    for(d1=0; d1<def_vet[1]+2; d1++) {
-                        for(d0=0; d0<def_vet[0]+2; d0++) {
+                    for(d1=D1s; d1<D2; d1++) {
+                        for(d0=D0s; d0<D1; d0++) {
                             
                             
                             
@@ -940,7 +948,15 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                             parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
-                            idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                            
+                            //third mod
+                            if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
+                            if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
+                            if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+nd3)%2;}
+                            
+                            
+                            
+                            
                             
                             dir_muA = 2*mu +  parity;
                             dir_muC = 2*mu + !parity;
