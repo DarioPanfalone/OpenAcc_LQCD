@@ -595,14 +595,12 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d3=D3_HALO-1; d3<D3-D3_HALO; d3++) {//what?
+                for(d3=D3_HALO; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-                    for(d2=-1; d2<D2; d2++) {
-                        for(d1=-1; d1<D1; d1++) {
+                    for(d2=0; d2<D2; d2++) {
+                        for(d1=0; d1<D1; d1++) {
                           //  for(d0=0;d0<nd0;d0++){  //TEST MOD
-                            if(d1==-1){d1=nd1-1;}
-                            if(d2==-1){d2=nd2-1;}
-                            if(d3==-1){d3=nd3-1;}
+                            
                                 
                         
                         int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
