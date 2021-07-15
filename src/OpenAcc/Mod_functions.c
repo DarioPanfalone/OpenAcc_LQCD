@@ -600,7 +600,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                     for(d2=-1; d2<D2; d2++) {
                         for(d1=0; d1<D1; d1++) {
                           //  for(d0=0;d0<nd0;d0++){  //TEST MOD
-                            if(d2==-1){d2=nd2-1;}
+                        
                             
                         
                         int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
@@ -609,7 +609,9 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                         int dir_muC,dir_nuD;
                         
                         idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
+                            if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);}
                         parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+                            
                        // idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
                         
                        // parity = 1-parity;
