@@ -607,7 +607,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         //printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
 
         printf("%d %d %d\n",D1s,D2s,D3s);
-        
+        int is;
         for(is=0; is<sizeh;is++){
             tr_local_plaqs[0].c[is]=0;
             tr_local_plaqs[1].c[is]=0;
