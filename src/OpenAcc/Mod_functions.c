@@ -597,13 +597,13 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         
         if(nu==1){D1s=-1;D2s=0;D3s=0;}
         if(nu==2){D1s=-1;D2s=-1;D3s=-1;}
-        if(nu==3){D1s=0;D2s=-1;D3s=-1;}
+        if(nu==3){D1s=0;D2s=0;D3s=-1;}
     
         
     int counter=0;
         
        
-        printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
+       // printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
         //printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
 
         printf("%d %d %d\n",D1s,D2s,D3s);
