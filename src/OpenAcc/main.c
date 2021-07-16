@@ -433,12 +433,16 @@ int main(int argc, char* argv[]){
     double Delta_S_SWAPS=0.0;
     printf("ECCO IL TEST SWAP!!!\n");
     
+    
+    
     S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     
     
     S_2_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
     printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][1].K.d[snum_acc(31,6,6,6)],conf_hasenbusch[2][1].K.d[snum_acc(31,6,6,6)]);
+    printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][3].K.d[snum_acc(31,6,6,6)],conf_hasenbusch[2][3].K.d[snum_acc(31,6,6,6)]);
+    
        int id_mu;
     for(id_mu=0;id_mu<8;id_mu++){
         printf("beforrre (%d) %.18lf %.18lf\n",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
