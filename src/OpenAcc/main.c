@@ -436,7 +436,7 @@ int main(int argc, char* argv[]){
     printf("ECCO IL TEST SWAP!!!\n");
     
     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
-    printing_k_mu(conf_hasenbusch[2]);
+   // printing_k_mu(conf_hasenbusch[2]);
     S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     
     
