@@ -230,13 +230,15 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                                 
                                 
                                 
+                            
+                                
                             else{
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1;}
-                                else{conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1;}
-                                printf("%f\n",conf[2*mu].K.d[snum_acc(i,j,z,t)]);
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1;printf("ecc\n");}
+                                else{conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1; }
+                                //printf("%f\n",conf[2*mu].K.d[snum_acc(i,j,z,t)]);
                                 
                                 
-                            } //else inizializza a 1.
+                            }//else inizializza a 1.
                                 
                                 /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
                     }
