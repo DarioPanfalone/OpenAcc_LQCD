@@ -141,10 +141,10 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             {
                                 
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;
-                                     printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);
+                                    /* printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);*/
                                 } //inizializza il vettore}
                                 if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;
-                                    printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu+1].K.d[snum_acc(i,j,z,t)],parity);
+                                 /*   printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu+1].K.d[snum_acc(i,j,z,t)],parity);*/
                                     
                                 } //inizializza il vettore}
                                 
@@ -157,10 +157,10 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                                 
                             else{
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1; counter2=counter2+1;
-                                     printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);
+                                     /*printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);*/
                                 }
                                 else{conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1; counter2=counter2+1;
-                                    printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu+1].K.d[snum_acc(i,j,z,t)],parity);
+                               /*     printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu+1].K.d[snum_acc(i,j,z,t)],parity);*/
                                     
                                 }
                                 
@@ -634,7 +634,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
        // printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
         //printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
 
-        printf("%d %d %d\n",D1s,D2s,D3s);
+        printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
         int is;
         for(is=0; is<sizeh;is++){
             tr_local_plaqs[0].c[is]=0;
