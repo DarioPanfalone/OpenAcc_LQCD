@@ -880,7 +880,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             //third mod
                             if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
-                            if(d1==-1){idxh=snum_acc(d0,nd1-2,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
+                            if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
                             if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
                             
                             
