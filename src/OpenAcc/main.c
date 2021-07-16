@@ -443,7 +443,7 @@ int main(int argc, char* argv[]){
     S_2_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
     printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][1].K.d[snum_acc(31,6,6,6)],conf_hasenbusch[2][1].K.d[snum_acc(31,6,6,6)]);
-    printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][3].K.d[snum_acc(31,6,6,6)],conf_hasenbusch[2][3].K.d[snum_acc(31,6,6,6)]);
+    printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][3].K.d[snum_acc(6,31,6,6)],conf_hasenbusch[2][3].K.d[snum_acc(6,31,6,6)]);
     
        int id_mu;
     for(id_mu=0;id_mu<8;id_mu++){
