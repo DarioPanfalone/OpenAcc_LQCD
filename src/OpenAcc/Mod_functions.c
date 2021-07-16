@@ -140,8 +140,13 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                             {
                                  parity = (i+j+z+t) % 2;
                                 
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r; printf("%f\n",conf[2*mu].K.d[snum_acc(i,j,z,t)]);} //inizializza il vettore}
-                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
+                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;
+                                      printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);
+                                } //inizializza il vettore}
+                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;
+                                     printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu+1].K.d[snum_acc(i,j,z,t)],parity);
+                                    
+                                } //inizializza il vettore}
                                 
                                 
                                 counter=counter+1;
