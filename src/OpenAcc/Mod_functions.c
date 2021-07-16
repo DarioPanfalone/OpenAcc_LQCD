@@ -136,9 +136,9 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<nd0;i++){
+                                parity = (i+j+z+t) % 2;
                             if(i>=0 && i<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && j==nd1-1 && mu==1 )
                             {
-                                 parity = (i+j+z+t) % 2;
                                 
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;
                                      printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);
@@ -189,9 +189,10 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<nd0;i++){
+                                parity = (i+j+z+t) % 2;
                             if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && t>=0 && t<def_vet[2] && z==nd2-1 && mu==2 )
                             {
-                                 parity = (i+j+z+t) % 2;
+                                
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
                                 if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
                                 
@@ -231,9 +232,10 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<nd0;i++){
+                                 parity = (i+j+z+t) % 2;
                             if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && z>=0 && z<def_vet[2] && t==nd3-1 && mu==3 )
                             {
-                                 parity = (i+j+z+t) % 2;
+                                
                                 
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
                                 if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
