@@ -392,7 +392,8 @@ int main(int argc, char* argv[]){
             conf_hasenbusch[replicas_counter][mu1].label=replicas_counter;
         }
     int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates);
-   
+   #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+        
     if(init_result!=0){printf("Error in Initialization Replica %d!\n",replicas_counter); return 1;};
     
     }
@@ -401,7 +402,7 @@ int main(int argc, char* argv[]){
    
     
 
-#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+
     
     
     
@@ -434,6 +435,7 @@ int main(int argc, char* argv[]){
     double Delta_S_SWAPS=0.0;
     printf("ECCO IL TEST SWAP!!!\n");
     
+    #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
     printing_k_mu(conf_hasenbusch[2]);
     S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     

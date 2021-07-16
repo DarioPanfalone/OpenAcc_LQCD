@@ -278,7 +278,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     
     if(counter!=defect_volume){printf("wrong defect initialization!\n"); res=1;}
     
-    #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+    
     return res;
   
 }
