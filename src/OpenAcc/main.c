@@ -433,7 +433,7 @@ int main(int argc, char* argv[]){
     double Delta_S_SWAPS=0.0;
     printf("ECCO IL TEST SWAP!!!\n");
     
-    printing_k_mu(conf_hasenbusch[0]);
+    printing_k_mu(conf_hasenbusch[2]);
     S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     
     
