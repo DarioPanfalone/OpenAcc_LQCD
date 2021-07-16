@@ -76,6 +76,9 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
    //il case considera le 4 possibili direzioni in cui viene fatto il defect.
     int counter2=0;
     
+    printf("c_r=%f/n",c_r);
+    
+    
     switch (def_axis) {
         case 0:
             printf("defect on x's boundary\n");
