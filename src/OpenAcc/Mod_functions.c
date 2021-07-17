@@ -1090,7 +1090,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         }
         
         
-        res_R_p=BETA_BY_THREE *res_R_p;
+        res_R_p=C_ZERO*BETA_BY_THREE *res_R_p;
     
         return res_R_p;
     }// closes routine
@@ -1104,6 +1104,587 @@ __restrict su3_soa * const loc_plaq, //la placchetta locale.
 dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
 const int mu, const int nu, int def_axis, int *def_vet)
 {
+    
+    __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
+    __restrict const su3_soa * const w,
+    __restrict su3_soa * const loc_plaq, //la placchetta locale.
+    dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
+    
+    const int mu, const int nu, const int def_axis, const int * const def_vet)
+    {
+        double K_mu_nu; //MOD.
+        double K_mu_nu2; //MOD.
+        int d0, d1, d2, d3;
+        int D1,D2,D3;
+        int D0s,D1s,D2s,D3s;
+        
+        
+        
+        
+        D1=def_vet[0];
+        D2=def_vet[1];
+        D3=def_vet[2];
+        
+        
+        
+        D0s=0;
+        D1s=0;
+        D2s=0;
+        D3s=0;
+        
+        if(nu==0){D0s=-1;}
+        
+        
+        if(nu==1){D1s=-1;}
+        if(nu==2){D2s=-1;}
+        if(nu==3){D3s=-1;}
+        
+        
+        int counter=0;
+        
+        
+        // printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
+        //printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
+        
+        printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
+        int is;
+        for(is=0; is<sizeh;is++){
+            tr_local_plaqs[0].c[is]=0;
+            tr_local_plaqs[1].c[is]=0;
+            
+        }
+#pragma acc update device(tr_local_plaqs[0:2])
+        
+        switch (def_axis){
+            case 0:
+                d0=nd0-1;
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc loop independent gang(STAPGANG3)
+                
+                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+                    for(d2=D2s; d2<D2; d2++) {
+                        for(d1=D1s; d1<D1; d1++) {
+                            //  for(d0=0;d0<nd0;d0++){  //TEST MOD
+                            
+                            
+                            
+                            int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
+                            int parity; //parity
+                            int dir_muA,dir_nuB; //mu and nu directions.
+                            int dir_muC,dir_nuD;
+                         
+                            
+                            int dir_muE,dir_nuF; //rectangular adjoints
+                            int idxpmupmu,idxpmupnu;//2x1
+                            int idxpnupnu; //1x2
+                            
+
+                            
+                            idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
+                            parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+                            
+                            if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
+                            if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+d3)%2;}
+                            if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                            
+                            
+                            
+                            // idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                            
+                            // parity = 1-parity;
+                            
+                            dir_muA = 2*mu +  parity;
+                            dir_muC = 2*mu + !parity;
+                            idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                            
+                            dir_nuB = 2*nu + !parity;
+                            dir_nuD = 2*nu +  parity;
+                            idxpnu = nnp_openacc[idxh][nu][parity];// r+nu //the table that states which is the nearest neighbour.
+                            //       r+nu (C)  r+mu+nu
+                            //          +<---+
+                            // nu       |    ^
+                            // ^    (D) V    | (B)
+                            // |        +--->+
+                            // |       r  (A)  r+mu
+                            // +---> mu
+                            
+                            //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
+                            
+                            //plaquette u
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
+                            
+                            
+                            
+                            
+                            // printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);
+                            //MOD
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
+                            
+                            
+                            
+                            //MOD_END
+                            
+                            //SECOND MOD
+                            
+                            
+                            //plaquette w
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            
+                            
+                            
+                            d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            
+                            tr_local_plaqs[parity].c[idxh]=C_ZERO*(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            //SECOND_MOD_END
+                            
+                            
+                            
+                            
+                             //THIRD MOD
+                            dir_muA = 2*mu +  parity;
+                            dir_muB = 2*mu + !parity;
+                            dir_nuC = 2*nu +  parity;
+                            dir_muD = 2*mu +  parity;
+                            dir_muE = 2*mu + !parity;
+                            dir_nuF = 2*nu +  parity;
+                            idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                            idxpmupmu = nnp_openacc[idxpmu][mu][!parity];// r+2mu
+                            idxpmupnu = nnp_openacc[idxpmu][nu][!parity];// r+mu+nu
+                            idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+                            
+                            //       r+nu r+mu+nu r+2mu+nu
+                            //          +<---+<---+
+                            // nu       | (E) (D) ^
+                            // ^    (F) V (A) (B) |  (C)
+                            // |        +--->+--->+
+                            // |       r   r+mu r+2mu
+                            // +---> mu
+                            
+                            //ret u
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_muB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                            mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuC],idxpmupmu);                 // LOC_RECT = LOC_RECT * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muD],idxpmupnu);            // LOC_RECT = LOC_RECT * D
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                            ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            //K_mu_nu computation;
+                            double K_mu_nu_RET;
+                            K_mu_nu_RET=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                            
+                            
+                            
+                            //ret w
+                            
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_muB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                            mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuC],idxpmupmu);                 // LOC_RECT = LOC_RECT * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muD],idxpmupnu);            // LOC_RECT = LOC_RECT * D
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                            ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            //K_mu_nu2 computation;
+                            double K_mu_nu_RET2;
+                            K_mu_nu_RET2=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]+C_ONE*(K_mu_nu_RET-K_mu_nu_RET2)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+                            
+                            
+                            
+                            
+                           
+                            //*****************************************//
+                            
+                            
+                            
+                            
+                            
+                            
+                            //THRID MOD END.
+                            
+                            
+                        }  // d1
+                    }  // d2
+                }  // d3
+                
+                break;
+                
+            case 1:
+                d1=nd1-1;
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc loop independent gang(STAPGANG3)
+                
+                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+                    for(d2=D2s; d2<D2; d2++) {
+                        for(d0=D0s; d0<D1; d0++) {
+                            
+                            
+                            
+                            int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
+                            int parity; //parity
+                            int dir_muA,dir_nuB; //mu and nu directions.
+                            int dir_muC,dir_nuD;
+                            
+                            idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
+                            
+                            
+                            
+                            parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+                            
+                            //third mod
+                            if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
+                            if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+d3)%2;}
+                            if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                            
+                            //  idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                            
+                            dir_muA = 2*mu +  parity;
+                            dir_muC = 2*mu + !parity;
+                            idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                            
+                            dir_nuB = 2*nu + !parity;
+                            dir_nuD = 2*nu +  parity;
+                            idxpnu = nnp_openacc[idxh][nu][parity];// r+nu //the table that states which is the nearest neighbour.
+                            //       r+nu (C)  r+mu+nu
+                            //          +<---+
+                            // nu       |    ^
+                            // ^    (D) V    | (B)
+                            // |        +--->+
+                            // |       r  (A)  r+mu
+                            // +---> mu
+                            
+                            //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
+                            
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
+                            
+                            // printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);
+                            //MOD
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+                            //MOD_END
+                            
+                            //SECOND MOD
+                            
+                            
+                            //plaquette w
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            
+                            
+                            
+                            d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            
+                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            
+                            //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
+                            
+                            
+                            counter++;
+                            
+                            
+                            
+                            //SECOND_MOD_END
+                            
+                            
+                            
+                         
+                            
+                            
+                            
+                            
+                            
+                        }  // d1
+                    }  // d2
+                }  // d3
+                break;
+                
+            case 2:
+                d2=nd2-1;
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc loop independent gang(STAPGANG3)
+                
+                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+                    for(d1=D1s; d1<D2; d1++) {
+                        for(d0=D0s; d0<D1; d0++) {
+                            
+                            
+                            
+                            int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
+                            int parity; //parity
+                            int dir_muA,dir_nuB; //mu and nu directions.
+                            int dir_muC,dir_nuD;
+                            
+                            idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
+                            parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+                            
+                            
+                            
+                            //third mod
+                            if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
+                            if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
+                            if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                            
+                            
+                            dir_muA = 2*mu +  parity;
+                            dir_muC = 2*mu + !parity;
+                            idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                            
+                            dir_nuB = 2*nu + !parity;
+                            dir_nuD = 2*nu +  parity;
+                            idxpnu = nnp_openacc[idxh][nu][parity];// r+nu //the table that states which is the nearest neighbour.
+                            //       r+nu (C)  r+mu+nu
+                            //          +<---+
+                            // nu       |    ^
+                            // ^    (D) V    | (B)
+                            // |        +--->+
+                            // |       r  (A)  r+mu
+                            // +---> mu
+                            
+                            //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
+                            
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
+                            
+                            // printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);
+                            //MOD
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+                            
+                            
+                            
+                            //SECOND MOD
+                            
+                            
+                            //plaquette w
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            
+                            
+                            
+                            d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            
+                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            
+                            //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
+                            
+                            counter++;
+                            
+                            
+                            
+                            //SECOND_MOD_END
+                            
+                            
+                            
+                            
+                            
+                            
+                        }  // d1
+                    }  // d2
+                }  // d3
+                break;
+                
+            case 3:
+                d3=nd3-1-D3_HALO;
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc loop independent gang(STAPGANG3)
+                
+                for(d2=D2s; d2<D3; d2++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+                    for(d1=D1s; d1<D2; d1++) {
+                        for(d0=D0s; d0<D1; d0++) {
+                            
+                            
+                            
+                            int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
+                            int parity; //parity
+                            int dir_muA,dir_nuB; //mu and nu directions.
+                            int dir_muC,dir_nuD;
+                            
+                            idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
+                            parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+                            
+                            //third mod
+                            if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
+                            if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
+                            if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+nd3)%2;}
+                            
+                            
+                            
+                            
+                            
+                            dir_muA = 2*mu +  parity;
+                            dir_muC = 2*mu + !parity;
+                            idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                            
+                            dir_nuB = 2*nu + !parity;
+                            dir_nuD = 2*nu +  parity;
+                            idxpnu = nnp_openacc[idxh][nu][parity];// r+nu //the table that states which is the nearest neighbour.
+                            //       r+nu (C)  r+mu+nu
+                            //          +<---+
+                            // nu       |    ^
+                            // ^    (D) V    | (B)
+                            // |        +--->+
+                            // |       r  (A)  r+mu
+                            // +---> mu
+                            
+                            //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
+                            
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
+                            
+                            // printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);
+                            //MOD
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+                            //Mod_end
+                            
+                            
+                            
+                            //SECOND MOD
+                            
+                            
+                            //plaquette w
+                            mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                            mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                            
+                            
+                            //K_mu_nu computation;
+                            K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                            
+                            
+                            
+                            d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                            
+                            
+                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            
+                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            
+                            //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
+                            
+                            counter++;
+                            
+                            
+                            
+                            //SECOND_MOD_END
+                            
+                            
+                            
+                            
+                            
+                        }  // d1
+                    }  // d2
+                }  // d3
+                
+                
+                break;
+                
+                
+                
+                
+                
+            default:
+                printf("DELTA_S_SWAP 1x1 plaquette ERROR!\n");
+                break;
+                
+                
+                
+        }
+        double res_R_p = 0.0;
+        double res_I_p = 0.0;
+        double resR = 0.0;
+        int t;
+        
+        
+        
+#pragma acc kernels present(tr_local_plaqs)
+#pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
+        for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+            res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
+            
+            res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
+        }
+        
+        
+        res_R_p=BETA_BY_THREE *res_R_p;
+        
+        return res_R_p;
+    
+    
+    
+    
     printf("d\n");
     return 0;
 }

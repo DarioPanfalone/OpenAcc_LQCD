@@ -457,6 +457,7 @@ int main(int argc, char* argv[]){
     S_2_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
+    Delta_S_SWAPS=C_ZERO*Delta_S_SWAPS;
     
  
     printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][1].K.d[snum_acc(31,6,6,6)],conf_hasenbusch[2][1].K.d[snum_acc(31,6,6,6)]);
