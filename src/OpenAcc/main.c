@@ -432,6 +432,7 @@ int main(int argc, char* argv[]){
      double Delta_S_SWAP_1=0.0;
       double Delta_S_SWAP_2=0.0;
     double S_0_0, S_0_2,S_2_2,S_2_0;
+    double S_0_0_RET, S_0_2_RET,S_2_2_RET,S_2_0_RET;
     double Delta_S_SWAPS=0.0;
     printf("ECCO IL TEST SWAP!!!\n");
     
@@ -439,33 +440,40 @@ int main(int argc, char* argv[]){
    // printing_k_mu(conf_hasenbusch[2]);
     S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     
+    S_0_0_RET=C_ZERO*S_0_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    
+    
+    
     
     S_2_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
-    printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][1].K.d[snum_acc(31,6,6,6)],conf_hasenbusch[2][1].K.d[snum_acc(31,6,6,6)]);
-    printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][3].K.d[snum_acc(6,31,6,6)],conf_hasenbusch[2][3].K.d[snum_acc(6,31,6,6)]);
+    S_2_2_RET=C_ZERO*S_2_2+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
-       int id_mu;
-    for(id_mu=0;id_mu<8;id_mu++){
-        printf("beforrre (%d) %.18lf %.18lf\n",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
-    }
-    replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
+    
+    
+    
+   
+    
+    
+replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
 #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
     
     S_0_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    S_0_2_RET=C_ZERO*S_0_2+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    
     
     S_2_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
+    S_2_0_RET=C_ZERO*S_2_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
+    
     Delta_S_SWAPS=C_ZERO*Delta_S_SWAPS;
     
  
-    printf("cr values %f[0] %f[2]\n",conf_hasenbusch[0][1].K.d[snum_acc(31,6,6,6)],conf_hasenbusch[2][1].K.d[snum_acc(31,6,6,6)]);
-   for(id_mu=0;id_mu<8;id_mu++){
-    
     printf("aftermath (%d) %.18lf %.18lf\n",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
     }
     printf("S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
+   printf("RET S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0_RET,S_0_2_RET,S_0_0_RET,S_2_2_RET);
 
     int is;
     //inizializzazione a 0 di local_sums
@@ -492,6 +500,11 @@ int main(int argc, char* argv[]){
 
     printf("CONFRONTO DELTA_SWAP\n");
     printf("%lf (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_0);
+
+    Delta_S_SWAPS=(S_2_0_RET+S_0_2_RET)-(S_0_0_RET+S_2_2_RET);
+
+    printf("CONFRONTO DELTA_SWAP 2\n");
+    printf("%lf RET (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_0);
     
     
 
