@@ -1121,19 +1121,20 @@ const int mu, const int nu, int def_axis, int *def_vet)
         D3=def_vet[2];
         
         
-        
+    
         D0s=0;
         D1s=0;
         D2s=0;
         D3s=0;
-        
+    
+    /*
         if(nu==0){D0s=-1;}
         
         
         if(nu==1){D1s=-1;}
         if(nu==2){D2s=-1;}
         if(nu==3){D3s=-1;}
-        
+        */
         
         int counter=0;
         
