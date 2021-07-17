@@ -490,7 +490,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
 
     Delta_S_SWAPS=(S_2_0_RET+S_0_2_RET)-(S_0_0_RET+S_2_2_RET);
-    Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,vet_prova,rep->defect_coordinates,1);
+    Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,vet_prova,1);
     
     printf("CONFRONTO DELTA_SWAP 2\n");
     printf("%lf RET (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_0);
