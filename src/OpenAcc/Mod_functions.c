@@ -1333,7 +1333,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                             
-                            //THRID MOD END.
+                            //THIRD MOD END.
                                  }
                             
                                  if(d0!=nd0-2){
@@ -1584,10 +1584,10 @@ const int mu, const int nu, int def_axis, int *def_vet)
                                   
                                   
                                   
-                                  //THRID MOD END.
+                                  //THIRD MOD END.
                               }
                               
-                              if(d0!=nd0-2){
+                              if(d1!=nd1-2){
                                   //FOURTH MOD
                                   dir_muA = 2*mu +  parity;
                                   dir_nuB = 2*nu + !parity;
@@ -1834,10 +1834,10 @@ const int mu, const int nu, int def_axis, int *def_vet)
                                     
                                     
                                     
-                                    //THRID MOD END.
+                                    //THIRD MOD END.
                                 }
                                 
-                                if(d0!=nd0-2){
+                                if(d2!=nd2-2){
                                     //FOURTH MOD
                                     dir_muA = 2*mu +  parity;
                                     dir_nuB = 2*nu + !parity;
@@ -2081,10 +2081,10 @@ const int mu, const int nu, int def_axis, int *def_vet)
                                 
                                 
                                 
-                                //THRID MOD END.
+                                //THIRD MOD END.
                             }
                             
-                            if(d0!=nd0-2){
+                            if(d3!=nd3-2){
                                 //FOURTH MOD
                                 dir_muA = 2*mu +  parity;
                                 dir_nuB = 2*nu + !parity;
