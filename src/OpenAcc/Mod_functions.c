@@ -1143,6 +1143,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
         //printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
         
         printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
+    printf("%d %d %d \n",D1,D2,D3);
         int is;
         for(is=0; is<sizeh;is++){
             tr_local_plaqs[0].c[is]=0;
