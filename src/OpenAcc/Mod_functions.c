@@ -1105,13 +1105,8 @@ dcomplex_soa * const tr_local_plaqs, //complex number that states the value of t
 const int mu, const int nu, int def_axis, int *def_vet)
 {
     
-    __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
-    __restrict const su3_soa * const w,
-    __restrict su3_soa * const loc_plaq, //la placchetta locale.
-    dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
+
     
-    const int mu, const int nu, const int def_axis, const int * const def_vet)
-    {
         double K_mu_nu; //MOD.
         double K_mu_nu2; //MOD.
         int d0, d1, d2, d3;
