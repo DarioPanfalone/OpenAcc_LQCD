@@ -1508,7 +1508,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
                             
-                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            tr_local_plaqs[parity].c[idxh]=C_ZERO*(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
                             
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
@@ -1758,7 +1758,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
                             
-                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            tr_local_plaqs[parity].c[idxh]=C_ZERO*(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
                             
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
@@ -2005,7 +2005,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
                             
-                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                            tr_local_plaqs[parity].c[idxh]=C_ZERO*(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
                             
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
