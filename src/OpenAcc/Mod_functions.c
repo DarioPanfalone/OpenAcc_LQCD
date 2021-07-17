@@ -476,7 +476,7 @@ double  calc_plaquette_soloopenacc_SWAP(
     int mu;
     //int def_vet_2[3];
     
-    int i_counter=0;
+    
     // calcolo il valore della plaquette sommata su tutti i siti a fissato piano mu-nu (6 possibili piani)//(the couple has to be chosen excluding same direction ones.(4 2)binomial coefficient.
     
     switch (def_axis) {
@@ -628,7 +628,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         if(nu==3){D3s=-1;}
     
         
-    int counter=0;
+    
         
        
        // printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
@@ -843,7 +843,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
                             
-                            counter++;
+                            
                             
                             
                              
@@ -942,7 +942,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
-                            counter++;
+                            
                             
                             
                             
@@ -1046,7 +1046,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
                             
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
-                            counter++;
+                            
                             
                             
                             
@@ -1136,7 +1136,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
         if(nu==3){D3s=-2;}
     
         
-        int counter=0;
+    
         
         
         // printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
@@ -1162,7 +1162,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=D2s; d2<D2; d2++) {
                         for(d1=D1s; d1<D1; d1++) {
-                             for(d0=nd0-2;d0<nd0;d0++){  //TEST MOD
+                             for(d0=nd0-2;d0<nd0;d0++){
                             
                             
                             
@@ -1268,7 +1268,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                                  //*****************************************//
-                                 if(d1>-2 & d2>-2 &d3>-2){
+                                 if(d1>-2 && d2>-2 && d3>-2){
                              //THIRD MOD
                             dir_muA = 2*mu +  parity;
                             dir_muB = 2*mu + !parity;
@@ -1409,14 +1409,16 @@ const int mu, const int nu, int def_axis, int *def_vet)
                 break;
                 
             case 1:
-                d1=nd1-1;
+                
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
                 
                 for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=D2s; d2<D2; d2++) {
-                        for(d0=D0s; d0<D1; d0++) {
+                        for(d1=nd1-2;d1<nd1;d1++){
+                            
+                          for(d0=D0s; d0<D1; d0++) {
                             
                             
                             
@@ -1435,8 +1437,14 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
                             if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+d3)%2;}
                             if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                              
+                            if(d0==-2){idxh=snum_acc(nd0-2,d1,d2,d3);parity=((nd0-2)+d1+d2+d3)%2;}
+                            if(d2==-2){idxh=snum_acc(d0,d1,nd2-2,d3);parity=(d0+d1+(nd2-2)+d3)%2;}
+                            if(d3==-2){idxh=snum_acc(d0,d1,d2,nd3-2);parity=(d0+d1+d2+(nd3-2))%2;}
+                              
                             
-                            //  idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
+                            
+                              
                             
                             dir_muA = 2*mu +  parity;
                             dir_muC = 2*mu + !parity;
@@ -1496,12 +1504,143 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
                             
-                            counter++;
-                            
+                              
                             
                             
                             //SECOND_MOD_END
                             
+                              //*****************************************//
+                              if( d2>-2 && d3>-2 && d0>-2){
+                                  //THIRD MOD
+                                  dir_muA = 2*mu +  parity;
+                                  dir_muB = 2*mu + !parity;
+                                  dir_nuC = 2*nu +  parity;
+                                  dir_muD = 2*mu +  parity;
+                                  dir_muE = 2*mu + !parity;
+                                  dir_nuF = 2*nu +  parity;
+                                  idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                                  idxpmupmu = nnp_openacc[idxpmu][mu][!parity];// r+2mu
+                                  idxpmupnu = nnp_openacc[idxpmu][nu][!parity];// r+mu+nu
+                                  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+                                  
+                                  //       r+nu r+mu+nu r+2mu+nu
+                                  //          +<---+<---+
+                                  // nu       | (E) (D) ^
+                                  // ^    (F) V (A) (B) |  (C)
+                                  // |        +--->+--->+
+                                  // |       r   r+mu r+2mu
+                                  // +---> mu
+                                  
+                                  //ret u
+                                  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_muB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                  mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuC],idxpmupmu);                 // LOC_RECT = LOC_RECT * C
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muD],idxpmupnu);            // LOC_RECT = LOC_RECT * D
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                  ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                  
+                                  
+                                  //K_mu_nu computation;
+                                  double K_mu_nu_RET;
+                                  K_mu_nu_RET=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                                  
+                                  
+                                  
+                                  //ret w
+                                  
+                                  mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_muB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                  mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuC],idxpmupmu);                 // LOC_RECT = LOC_RECT * C
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muD],idxpmupnu);            // LOC_RECT = LOC_RECT * D
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                  ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                  
+                                  
+                                  //K_mu_nu2 computation;
+                                  double K_mu_nu_RET2;
+                                  K_mu_nu_RET2=(w[dir_muA].K.d[idxh])*(w[dir_muB].K.d[idxpmu])*(w[dir_nuC].K.d[idxpmupmu])*(w[dir_muD].K.d[idxpmupnu])*(w[dir_muE].K.d[idxpnu])*(w[dir_nuF].K.d[idxh]);
+                                  
+                                  //FINAL SUM
+                                  
+                                  tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]+C_ONE*(K_mu_nu_RET-K_mu_nu_RET2)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  //*****************************************//
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  //THRID MOD END.
+                              }
+                              
+                              if(d0!=nd0-2){
+                                  //FOURTH MOD
+                                  dir_muA = 2*mu +  parity;
+                                  dir_nuB = 2*nu + !parity;
+                                  dir_nuC = 2*nu +  parity;
+                                  dir_muD = 2*mu +  parity;
+                                  dir_nuE = 2*nu + !parity;
+                                  dir_nuF = 2*nu +  parity;
+                                  
+                                  idxpmu = nnp_openacc[idxh][mu][parity];      //r+mu
+                                  idxpmupnu = nnp_openacc[idxpmu][nu][!parity];//r+mu+nu
+                                  idxpnu = nnp_openacc[idxh][nu][parity];      //r+nu
+                                  idxpnupnu = nnp_openacc[idxpnu][nu][!parity];//r+nu+nu
+                                  //            (D)
+                                  //    r+2nu +<---+ r+mu+2nu
+                                  //          |    ^
+                                  //      (E) V    | (C)
+                                  //     r+nu +    + r+mu+nu
+                                  // nu       |    ^
+                                  // ^    (F) V    | (B)
+                                  // |        +--->+
+                                  // |       r  (A)  r+mu
+                                  // +---> mu
+                                  
+                                  //ret u
+                                  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                  mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuC],idxpmupnu);                 // LOC_RECT = LOC_RECT * C
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muD],idxpnupnu);            // LOC_RECT = LOC_RECT * D
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                  ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                  
+                                  //K_mu_nu computation;
+                                  double K_mu_nu_RET3;
+                                  K_mu_nu_RET3=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu])*(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                                  
+                                  //ret w
+                                  mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                  mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuC],idxpmupnu);                 // LOC_RECT = LOC_RECT * C
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muD],idxpnupnu);            // LOC_RECT = LOC_RECT * D
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                  ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                  
+                                  
+                                  //K_mu_nu computation;
+                                  double K_mu_nu_RET4;
+                                  K_mu_nu_RET4=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_nuC].K.d[idxpmupnu])*(w[dir_muD].K.d[idxpnupnu])*(w[dir_nuE].K.d[idxpnu])*(w[dir_nuF].K.d[idxh]);
+                                  
+                                  
+                                  
+                                  
+                                  //FINAL SUM
+                                  
+                                  tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]+C_ONE*(K_mu_nu_RET3-K_mu_nu_RET4)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  //FOURTH MOD END.
                             
                             
                          
@@ -1509,21 +1648,22 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                             
-                            
+                             }//d0
                         }  // d1
                     }  // d2
                 }  // d3
                 break;
                 
             case 2:
-                d2=nd2-1;
+                
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
                 
-                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
+                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-                    for(d1=D1s; d1<D2; d1++) {
-                        for(d0=D0s; d0<D1; d0++) {
+                    for(d2=nd2-2;d2<nd2;d2++){
+                        for(d1=D1s; d1<D2; d1++) {
+                            for(d0=D0s; d0<D1; d0++) {
                             
                             
                             
@@ -1541,6 +1681,10 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             if(d0==-1){idxh=snum_acc(nd0-1,d1,d2,d3);parity=((nd0-1)+d1+d2+d3)%2;}
                             if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
                             if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                                
+                            if(d0==-2){idxh=snum_acc(nd0-2,d1,d2,d3);parity=((nd0-2)+d1+d2+d3)%2;}
+                            if(d1==-2){idxh=snum_acc(d0,nd1-2,d2,d3);parity=(d0+(nd1-2)+d2+d3)%2;}
+                            if(d3==-2){idxh=snum_acc(d0,d1,d2,nd3-2);parity=(d0+d1+d2+(nd3-2))%2;}
                             
                             
                             dir_muA = 2*mu +  parity;
@@ -1601,16 +1745,147 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
-                            counter++;
+                            
                             
                             
                             
                             //SECOND_MOD_END
                             
+                                //*****************************************//
+                                if(d1>-2 && d0>-2 && d3>-2){
+                                    //THIRD MOD
+                                    dir_muA = 2*mu +  parity;
+                                    dir_muB = 2*mu + !parity;
+                                    dir_nuC = 2*nu +  parity;
+                                    dir_muD = 2*mu +  parity;
+                                    dir_muE = 2*mu + !parity;
+                                    dir_nuF = 2*nu +  parity;
+                                    idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                                    idxpmupmu = nnp_openacc[idxpmu][mu][!parity];// r+2mu
+                                    idxpmupnu = nnp_openacc[idxpmu][nu][!parity];// r+mu+nu
+                                    idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+                                    
+                                    //       r+nu r+mu+nu r+2mu+nu
+                                    //          +<---+<---+
+                                    // nu       | (E) (D) ^
+                                    // ^    (F) V (A) (B) |  (C)
+                                    // |        +--->+--->+
+                                    // |       r   r+mu r+2mu
+                                    // +---> mu
+                                    
+                                    //ret u
+                                    mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_muB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                    mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuC],idxpmupmu);                 // LOC_RECT = LOC_RECT * C
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muD],idxpmupnu);            // LOC_RECT = LOC_RECT * D
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                    ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                    
+                                    
+                                    //K_mu_nu computation;
+                                    double K_mu_nu_RET;
+                                    K_mu_nu_RET=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                                    
+                                    
+                                    
+                                    //ret w
+                                    
+                                    mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_muB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                    mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuC],idxpmupmu);                 // LOC_RECT = LOC_RECT * C
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muD],idxpmupnu);            // LOC_RECT = LOC_RECT * D
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                    ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                    
+                                    
+                                    //K_mu_nu2 computation;
+                                    double K_mu_nu_RET2;
+                                    K_mu_nu_RET2=(w[dir_muA].K.d[idxh])*(w[dir_muB].K.d[idxpmu])*(w[dir_nuC].K.d[idxpmupmu])*(w[dir_muD].K.d[idxpmupnu])*(w[dir_muE].K.d[idxpnu])*(w[dir_nuF].K.d[idxh]);
+                                    
+                                    //FINAL SUM
+                                    
+                                    tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]+C_ONE*(K_mu_nu_RET-K_mu_nu_RET2)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    //*****************************************//
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    //THRID MOD END.
+                                }
+                                
+                                if(d0!=nd0-2){
+                                    //FOURTH MOD
+                                    dir_muA = 2*mu +  parity;
+                                    dir_nuB = 2*nu + !parity;
+                                    dir_nuC = 2*nu +  parity;
+                                    dir_muD = 2*mu +  parity;
+                                    dir_nuE = 2*nu + !parity;
+                                    dir_nuF = 2*nu +  parity;
+                                    
+                                    idxpmu = nnp_openacc[idxh][mu][parity];      //r+mu
+                                    idxpmupnu = nnp_openacc[idxpmu][nu][!parity];//r+mu+nu
+                                    idxpnu = nnp_openacc[idxh][nu][parity];      //r+nu
+                                    idxpnupnu = nnp_openacc[idxpnu][nu][!parity];//r+nu+nu
+                                    //            (D)
+                                    //    r+2nu +<---+ r+mu+2nu
+                                    //          |    ^
+                                    //      (E) V    | (C)
+                                    //     r+nu +    + r+mu+nu
+                                    // nu       |    ^
+                                    // ^    (F) V    | (B)
+                                    // |        +--->+
+                                    // |       r  (A)  r+mu
+                                    // +---> mu
+                                    
+                                    //ret u
+                                    mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                    mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuC],idxpmupnu);                 // LOC_RECT = LOC_RECT * C
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muD],idxpnupnu);            // LOC_RECT = LOC_RECT * D
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                    ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                    
+                                    //K_mu_nu computation;
+                                    double K_mu_nu_RET3;
+                                    K_mu_nu_RET3=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu])*(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                                    
+                                    //ret w
+                                    mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                    mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuC],idxpmupnu);                 // LOC_RECT = LOC_RECT * C
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muD],idxpnupnu);            // LOC_RECT = LOC_RECT * D
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                    mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                    ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                    
+                                    
+                                    //K_mu_nu computation;
+                                    double K_mu_nu_RET4;
+                                    K_mu_nu_RET4=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_nuC].K.d[idxpmupnu])*(w[dir_muD].K.d[idxpnupnu])*(w[dir_nuE].K.d[idxpnu])*(w[dir_nuF].K.d[idxh]);
+                                    
+                                    
+                                    
+                                    
+                                    //FINAL SUM
+                                    
+                                    tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]+C_ONE*(K_mu_nu_RET3-K_mu_nu_RET4)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    //FOURTH MOD END.
                             
                             
-                            
-                            
+                            }//d0
                             
                         }  // d1
                     }  // d2
@@ -1618,10 +1893,11 @@ const int mu, const int nu, int def_axis, int *def_vet)
                 break;
                 
             case 3:
-                d3=nd3-1-D3_HALO;
+             
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
-                
+            for(d3=nd3-2-D3_HALO;d3<nd3-D3_HALO;d3++){
+                    
                 for(d2=D2s; d2<D3; d2++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d1=D1s; d1<D2; d1++) {
@@ -1642,6 +1918,9 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
                             if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+nd3)%2;}
                             
+                            if(d0==-2){idxh=snum_acc(nd0-2,d1,d2,d3);parity=((nd0-2)+d1+d2+d3)%2;}
+                            if(d1==-2){idxh=snum_acc(d0,nd1-2,d2,d3);parity=(d0+(nd1-2)+d2+d3)%2;}
+                            if(d2==-2){idxh=snum_acc(d0,d1,nd2-2,d3);parity=(d0+d1+(nd2-2)+nd3)%2;}
                             
                             
                             
@@ -1705,15 +1984,146 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             //  printf("DELTA_K_MU_NU= %f-%f= %f  (%d,%d,%d,%d) \n",K_mu_nu,K_mu_nu2,(K_mu_nu-K_mu_nu2),d0,d1,d2,d3);
                             
-                            counter++;
+                            
                             
                             
                             
                             //SECOND_MOD_END
                             
+                            //*****************************************//
+                            if(d1>-2 && d2>-2 && d0>-2){
+                                //THIRD MOD
+                                dir_muA = 2*mu +  parity;
+                                dir_muB = 2*mu + !parity;
+                                dir_nuC = 2*nu +  parity;
+                                dir_muD = 2*mu +  parity;
+                                dir_muE = 2*mu + !parity;
+                                dir_nuF = 2*nu +  parity;
+                                idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                                idxpmupmu = nnp_openacc[idxpmu][mu][!parity];// r+2mu
+                                idxpmupnu = nnp_openacc[idxpmu][nu][!parity];// r+mu+nu
+                                idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+                                
+                                //       r+nu r+mu+nu r+2mu+nu
+                                //          +<---+<---+
+                                // nu       | (E) (D) ^
+                                // ^    (F) V (A) (B) |  (C)
+                                // |        +--->+--->+
+                                // |       r   r+mu r+2mu
+                                // +---> mu
+                                
+                                //ret u
+                                mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_muB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuC],idxpmupmu);                 // LOC_RECT = LOC_RECT * C
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muD],idxpmupnu);            // LOC_RECT = LOC_RECT * D
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                
+                                
+                                //K_mu_nu computation;
+                                double K_mu_nu_RET;
+                                K_mu_nu_RET=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                                
+                                
+                                
+                                //ret w
+                                
+                                mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_muB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuC],idxpmupmu);                 // LOC_RECT = LOC_RECT * C
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muD],idxpmupnu);            // LOC_RECT = LOC_RECT * D
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                
+                                
+                                //K_mu_nu2 computation;
+                                double K_mu_nu_RET2;
+                                K_mu_nu_RET2=(w[dir_muA].K.d[idxh])*(w[dir_muB].K.d[idxpmu])*(w[dir_nuC].K.d[idxpmupmu])*(w[dir_muD].K.d[idxpmupnu])*(w[dir_muE].K.d[idxpnu])*(w[dir_nuF].K.d[idxh]);
+                                
+                                //FINAL SUM
+                                
+                                tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]+C_ONE*(K_mu_nu_RET-K_mu_nu_RET2)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+                                
+                                
+                                
+                                
+                                
+                                //*****************************************//
+                                
+                                
+                                
+                                
+                                
+                                
+                                //THRID MOD END.
+                            }
                             
+                            if(d0!=nd0-2){
+                                //FOURTH MOD
+                                dir_muA = 2*mu +  parity;
+                                dir_nuB = 2*nu + !parity;
+                                dir_nuC = 2*nu +  parity;
+                                dir_muD = 2*mu +  parity;
+                                dir_nuE = 2*nu + !parity;
+                                dir_nuF = 2*nu +  parity;
+                                
+                                idxpmu = nnp_openacc[idxh][mu][parity];      //r+mu
+                                idxpmupnu = nnp_openacc[idxpmu][nu][!parity];//r+mu+nu
+                                idxpnu = nnp_openacc[idxh][nu][parity];      //r+nu
+                                idxpnupnu = nnp_openacc[idxpnu][nu][!parity];//r+nu+nu
+                                //            (D)
+                                //    r+2nu +<---+ r+mu+2nu
+                                //          |    ^
+                                //      (E) V    | (C)
+                                //     r+nu +    + r+mu+nu
+                                // nu       |    ^
+                                // ^    (F) V    | (B)
+                                // |        +--->+
+                                // |       r  (A)  r+mu
+                                // +---> mu
+                                
+                                //ret u
+                                mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuC],idxpmupnu);                 // LOC_RECT = LOC_RECT * C
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muD],idxpnupnu);            // LOC_RECT = LOC_RECT * D
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                
+                                //K_mu_nu computation;
+                                double K_mu_nu_RET3;
+                                K_mu_nu_RET3=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu])*(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                                
+                                //ret w
+                                mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_RECT = A * B
+                                mat1_times_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuC],idxpmupnu);                 // LOC_RECT = LOC_RECT * C
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muD],idxpnupnu);            // LOC_RECT = LOC_RECT * D
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuE],idxpnu);               // LOC_RECT = LOC_RECT * E
+                                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
+                                ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                                
+                                
+                                //K_mu_nu computation;
+                                double K_mu_nu_RET4;
+                                K_mu_nu_RET4=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_nuC].K.d[idxpmupnu])*(w[dir_muD].K.d[idxpnupnu])*(w[dir_nuE].K.d[idxpnu])*(w[dir_nuF].K.d[idxh]);
+                                
+                                
+                                
+                                
+                                //FINAL SUM
+                                
+                                tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]+C_ONE*(K_mu_nu_RET3-K_mu_nu_RET4)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+                                
+                                
+                                
+                                
+                                
+                                
+                                
+                                //FOURTH MOD END.
                             
-                            
+                             }//d0
                             
                         }  // d1
                     }  // d2
@@ -1727,7 +2137,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                 
                 
             default:
-                printf("DELTA_S_SWAP 1x1 plaquette ERROR!\n");
+                printf("DELTA_S_SWAP 2x1/1x2 plaquette ERROR!\n");
                 break;
                 
                 
