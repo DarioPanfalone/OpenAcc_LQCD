@@ -468,25 +468,11 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
     
     Delta_S_SWAPS=C_ZERO*Delta_S_SWAPS;
-    
  
-    printf("aftermath (%d) %.18lf %.18lf\n",id_mu,creal(conf_hasenbusch[0][id_mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][id_mu].r1.c1[snum_acc(31,6,6,6)]));
-    }
     printf("S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
    printf("RET S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0_RET,S_0_2_RET,S_0_0_RET,S_2_2_RET);
 
-    int is;
-    //inizializzazione a 0 di local_sums
-  /*  for(is=0; is<sizeh;is++){
-        local_sums[0].c[is]=0;
-        local_sums[1].c[is]=0;
-        
-    }
-    #pragma acc update device(local_sums[0:2])
-  
-    
-    */
-
+   
     Delta_S_SWAP_0=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
     int vet_prova[3]={nd1,nd2,nd3};
     
