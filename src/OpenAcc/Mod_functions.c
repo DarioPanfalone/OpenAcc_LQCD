@@ -1427,6 +1427,15 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             int dir_muA,dir_nuB; //mu and nu directions.
                             int dir_muC,dir_nuD;
                             
+                              //rectangular adjoints
+                              int dir_muB,dir_muD,dir_nuC;
+                              
+                              
+                              int dir_muE,dir_nuF,dir_nuE; //rectangular adjoints
+                              int idxpmupmu,idxpmupnu;//2x1
+                              int idxpnupnu; //1x2
+                              
+                              
                             idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                             
                             
@@ -1672,6 +1681,14 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             int dir_muA,dir_nuB; //mu and nu directions.
                             int dir_muC,dir_nuD;
                             
+                                //rectangular adjoints
+                                int dir_muB,dir_muD,dir_nuC;
+                                
+                                
+                                int dir_muE,dir_nuF,dir_nuE; //rectangular adjoints
+                                int idxpmupmu,idxpmupnu;//2x1
+                                int idxpnupnu; //1x2
+                                
                             idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                             parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
                             
@@ -1909,6 +1926,14 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             int parity; //parity
                             int dir_muA,dir_nuB; //mu and nu directions.
                             int dir_muC,dir_nuD;
+                            
+                            //rectangular adjoints
+                            int dir_muB,dir_muD,dir_nuC;
+                            
+                            
+                            int dir_muE,dir_nuF,dir_nuE; //rectangular adjoints
+                            int idxpmupmu,idxpmupnu;//2x1
+                            int idxpnupnu; //1x2
                             
                             idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                             parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
