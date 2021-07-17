@@ -1654,7 +1654,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                          
                             
-                            
+                              }
                             
                             
                              }//d0
@@ -1901,7 +1901,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                                     
                                     //FOURTH MOD END.
                             
-                            
+                                }
                             }//d0
                             
                         }  // d1
@@ -1913,9 +1913,8 @@ const int mu, const int nu, int def_axis, int *def_vet)
              
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
-            for(d3=nd3-2-D3_HALO;d3<nd3-D3_HALO;d3++){
-                    
-                for(d2=D2s; d2<D3; d2++) {
+        for(d3=nd3-2-D3_HALO;d3<nd3-D3_HALO;d3++){
+            for(d2=D2s; d2<D3; d2++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d1=D1s; d1<D2; d1++) {
                         for(d0=D0s; d0<D1; d0++) {
@@ -1927,13 +1926,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             int dir_muA,dir_nuB; //mu and nu directions.
                             int dir_muC,dir_nuD;
                             
-                            //rectangular adjoints
-                            int dir_muB,dir_muD,dir_nuC;
-                            
-                            
-                            int dir_muE,dir_nuF,dir_nuE; //rectangular adjoints
-                            int idxpmupmu,idxpmupnu;//2x1
-                            int idxpnupnu; //1x2
                             
                             idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                             parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
@@ -2147,7 +2139,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                                 
                                 
                                 //FOURTH MOD END.
-                            
+                            }
                              }//d0
                             
                         }  // d1
