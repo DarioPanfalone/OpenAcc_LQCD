@@ -1127,14 +1127,14 @@ const int mu, const int nu, int def_axis, int *def_vet)
         D2s=0;
         D3s=0;
     
-    /*
-        if(nu==0){D0s=-1;}
+    
+        if(nu==0){D0s=-2;}
         
         
-        if(nu==1){D1s=-1;}
-        if(nu==2){D2s=-1;}
-        if(nu==3){D3s=-1;}
-        */
+        if(nu==1){D1s=-2;}
+        if(nu==2){D2s=-2;}
+        if(nu==3){D3s=-2;}
+    
         
         int counter=0;
         
@@ -1162,7 +1162,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=D2s; d2<D2; d2++) {
                         for(d1=D1s; d1<D1; d1++) {
-                             for(d0=0;d0<nd0;d0++){  //TEST MOD
+                             for(d0=nd0-2;d0<nd0;d0++){  //TEST MOD
                             
                             
                             
@@ -1187,12 +1187,15 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
                             if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+d3)%2;}
                             if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                                 
+                                 
+                            if(d1==-2){idxh=snum_acc(d0,nd1-2,d2,d3);parity=(d0+(nd1-2)+d2+d3)%2;}
+                            if(d2==-2){idxh=snum_acc(d0,d1,nd2-2,d3);parity=(d0+d1+(nd2-2)+d3)%2;}
+                            if(d3==-2){idxh=snum_acc(d0,d1,d2,nd3-2);parity=(d0+d1+d2+(nd3-2))%2;}
+                                 
                             
                             
-                            
-                            // idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
-                            
-                            // parity = 1-parity;
+                       
                             
                             dir_muA = 2*mu +  parity;
                             dir_muC = 2*mu + !parity;
@@ -1264,6 +1267,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                             
+                                 //*****************************************//
                             
                              //THIRD MOD
                             dir_muA = 2*mu +  parity;
@@ -1332,7 +1336,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             //THRID MOD END.
                             
                             
-                            
+                                 if(d0!=nd0-2){
                             //FOURTH MOD
                             dir_muA = 2*mu +  parity;
                             dir_nuB = 2*nu + !parity;
@@ -1395,6 +1399,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                             //FOURTH MOD END.
+                                 }
                              }//test_mod
                             
                         }  // d1
