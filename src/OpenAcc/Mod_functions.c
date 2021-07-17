@@ -1154,7 +1154,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
         
         switch (def_axis){
             case 0:
-                d0=nd0-1;
+              //mod_test  d0=nd0-1;
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
                 
@@ -1162,7 +1162,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=D2s; d2<D2; d2++) {
                         for(d1=D1s; d1<D1; d1++) {
-                            //  for(d0=0;d0<nd0;d0++){  //TEST MOD
+                             for(d0=0;d0<nd0;d0++){  //TEST MOD
                             
                             
                             
