@@ -1268,7 +1268,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                                  //*****************************************//
-                            
+                                 if(d1>-2 & d2>-2 &d3>-2){
                              //THIRD MOD
                             dir_muA = 2*mu +  parity;
                             dir_muB = 2*mu + !parity;
@@ -1334,7 +1334,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                             //THRID MOD END.
-                            
+                                 }
                             
                                  if(d0!=nd0-2){
                             //FOURTH MOD
