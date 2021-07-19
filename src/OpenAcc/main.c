@@ -509,7 +509,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     
     
     int accettata=0;
-    accettata=metro_SWAP( conf_hasenbusch, 0, 2,rep->defect_boundary,rep->defect_coordinates);
+    accettata=metro_SWAP( conf_hasenbusch, 0, 2,rep->defect_boundary,rep->defect_coordinates)
+    #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
     printf("acpt :%d\n",accettata);
     
      for(mu1=0;mu1<8;mu1++){

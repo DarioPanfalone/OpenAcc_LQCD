@@ -2210,10 +2210,11 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
     }
     else
     {  p1=exp(-Delta_S_SWAP);
-        if(debug_settings.do_norandom_test) p2=0; // NORANDOM
+        /*if(debug_settings.do_norandom_test) p2=0; // NORANDOM
         else{   // NORMAL, RANDOM
-            if(0==devinfo.myrank)p2=casuale();
+            if(0==devinfo.myrank)p2=casuale();*/
         
+        p2=casuale();
         if(p2<p1)
         {
         accettata=1;
@@ -2231,7 +2232,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
     
     if (accettata==1){
         replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],defect_axis,defect_coordinates);
-        #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+        
         
     }
     
