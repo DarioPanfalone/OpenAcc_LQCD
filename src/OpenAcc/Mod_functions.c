@@ -21,6 +21,7 @@
 #include "./single_types.h"
 #include "./rettangoli.h"
 #include "./plaquettes.h"
+#include "../Include/debug.h"
 
 
 
@@ -2197,13 +2198,15 @@ const int mu, const int nu, int def_axis, int *def_vet)
 
 int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defect_axis,int * defect_coordinates)
 {
-   
+    int gauge_param;
+    
+    gauge_param=GAUGE_ACTION;
     
     double p1,p2;
     double Delta_S_SWAP;
     int accettata=0;
     
-      Delta_S_SWAP=-calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],aux_conf_acc,local_sums,defect_axis,defect_coordinates,1);
+      Delta_S_SWAP=-calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],aux_conf_acc,local_sums,defect_axis,defect_coordinates,gauge_param);
     
     printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
     if(Delta_S_SWAP<0){
@@ -2211,9 +2214,9 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
     }
     else
     {  p1=exp(-Delta_S_SWAP);
-        /*if(debug_settings.do_norandom_test) p2=0; // NORANDOM
+        if(debug_settings.do_norandom_test) p2=0; // NORANDOM
         else{   // NORMAL, RANDOM
-            if(0==devinfo.myrank)p2=casuale();*/
+            if(0==devinfo.myrank)p2=casuale()
 
         p2=casuale();
         if(p2<p1)
@@ -2229,6 +2232,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
             
         }
     printf(" p1 p2 :%f %f",p1,p2);
+    }
     }
     
     
