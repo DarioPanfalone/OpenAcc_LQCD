@@ -2200,7 +2200,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
    
     
     
-    int Delta_S_SWAP
+    int Delta_S_SWAP;
     int accettata=0;
     
       Delta_S_SWAP=-calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,1);
