@@ -2205,6 +2205,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
     
       Delta_S_SWAP=-calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],aux_conf_acc,local_sums,defect_axis,defect_coordinates,1);
     
+    printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
     if(Delta_S_SWAP<0){
         accettata=1;
     }
@@ -2213,20 +2214,21 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
         /*if(debug_settings.do_norandom_test) p2=0; // NORANDOM
         else{   // NORMAL, RANDOM
             if(0==devinfo.myrank)p2=casuale();*/
-        
+
         p2=casuale();
         if(p2<p1)
         {
         accettata=1;
             
         }
+        
         else
         {
         accettata=0;
         // configuration reject
             
         }
-            
+    printf(" p1 p2 :%f %f",p1,p2);
     }
     
     
