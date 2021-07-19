@@ -499,11 +499,25 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 
     printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
     
+    //NEW TEST SWAP:
+    int mu1,mu2;
+    for(mu2=0;mu2<5;mu2++){
+    
+    for(mu1=0;mu1<8;mu1++){
+     printf("beforrre (%d) %.18lf %.18lf",mu1,creal(conf1[mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu1].r1.c1[snum_acc(31,6,6,6)]));
+    }
     
     
+    int accettata=0;
+    accettata=metro_SWAP(su3_soa ** conf_hasenbusch, 0, 2,rep->defect_boundary,rep->defect_coordinates);
+    printf("acpt :%d\n",accettata);
+    
+     for(mu1=0;mu1<8;mu1++){
+     printf("aftermath (%d) %.18lf %.18lf\n",mu1,creal(conf1[mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu1].r1.c1[snum_acc(31,6,6,6)]));
+     }
     
     
-    
+    }
 
     
     
@@ -723,6 +737,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             double Delta_S_SWAP=0.0;
             label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
             printf("ECCO LO SWAP\n");
+            
             
             
             Delta_S_SWAP=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);

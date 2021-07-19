@@ -52,3 +52,4 @@ double  calc_plaquette_soloopenacc_SWAP( __restrict  su3_soa * const tconf_acc,
 
 #endif /* Mod_functions_h */
 
+int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defect_axis,int * defect_coordinates);

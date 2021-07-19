@@ -1731,10 +1731,9 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             // printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);
                             //MOD
                             
+                                
                             //K_mu_nu computation;
                             K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
-                            
-                            
                             tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
                             
                             
@@ -2194,6 +2193,60 @@ const int mu, const int nu, int def_axis, int *def_vet)
     printf("d\n");
     return 0;
 }
+
+
+int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defect_axis,int * defect_coordinates)
+{
+   
+    
+    
+    int Delta_S_SWAP
+    int accettata=0;
+    
+      Delta_S_SWAP=-calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,1);
+    
+    if(delta_S<0){
+        accettata=1;
+    }
+    else
+    {  p1=exp(-delta_S);
+        if(debug_settings.do_norandom_test) p2=0; // NORANDOM
+        else{   // NORMAL, RANDOM
+            if(0==devinfo.myrank)p2=casuale();
+        
+        if(p2<p1)
+        {
+        accettata=1;
+            
+        }
+        else
+        {
+        accettata=0;
+        // configuration reject
+            
+        }
+            
+        }
+    }
+    
+    if (accettata==1){
+        replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],rep->defect_boundary,rep->defect_coordinates);
+        #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+        
+    }
+    
+
+
+    
+    
+    
+    
+    
+    
+    return accettata;
+}
+
+
 
 
 
