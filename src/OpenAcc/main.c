@@ -504,7 +504,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     for(mu2=0;mu2<5;mu2++){
     
     for(mu1=0;mu1<8;mu1++){
-     printf("beforrre (%d) %.18lf %.18lf",mu1,creal(conf1[mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu1].r1.c1[snum_acc(31,6,6,6)]));
+     printf("beforrre (%d) %.18lf %.18lf",mu1,creal(conf_hasenbusch[0][mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu1].r1.c1[snum_acc(31,6,6,6)]));
     }
     
     
@@ -513,7 +513,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     printf("acpt :%d\n",accettata);
     
      for(mu1=0;mu1<8;mu1++){
-     printf("aftermath (%d) %.18lf %.18lf\n",mu1,creal(conf1[mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu1].r1.c1[snum_acc(31,6,6,6)]));
+     printf("aftermath (%d) %.18lf %.18lf\n",mu1,creal(conf_hasenbusch[0][mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu1].r1.c1[snum_acc(31,6,6,6)]));
      }
     
     
