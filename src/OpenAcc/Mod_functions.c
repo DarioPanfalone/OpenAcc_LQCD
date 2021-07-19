@@ -2230,7 +2230,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
     }
     
     if (accettata==1){
-        replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],rep->defect_boundary,rep->defect_coordinates);
+        replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],defect_axis,defect_coordinates);
         #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
         
     }
