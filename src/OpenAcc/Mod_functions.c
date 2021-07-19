@@ -2216,9 +2216,9 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
     {  p1=exp(-Delta_S_SWAP);
         if(debug_settings.do_norandom_test) p2=0; // NORANDOM
         else{   // NORMAL, RANDOM
-            if(0==devinfo.myrank)p2=casuale()
-
-        p2=casuale();
+            if(0==devinfo.myrank)p2=casuale();
+        }
+    //MULTIDEVICE MOD??
         if(p2<p1)
         {
         accettata=1;
