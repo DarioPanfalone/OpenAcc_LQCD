@@ -2199,7 +2199,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
 {
    
     
-    double p1,p2
+    double p1,p2;
     double Delta_S_SWAP;
     int accettata=0;
     
