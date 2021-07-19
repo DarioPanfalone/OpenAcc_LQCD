@@ -2199,17 +2199,17 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
 {
    
     
-    
-    int Delta_S_SWAP;
+    double p1,p2
+    double Delta_S_SWAP;
     int accettata=0;
     
       Delta_S_SWAP=-calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],aux_conf_acc,local_sums,defect_axis,defect_coordinates,1);
     
-    if(delta_S<0){
+    if(Delta_S_SWAP<0){
         accettata=1;
     }
     else
-    {  p1=exp(-delta_S);
+    {  p1=exp(-Delta_S_SWAP);
         if(debug_settings.do_norandom_test) p2=0; // NORANDOM
         else{   // NORMAL, RANDOM
             if(0==devinfo.myrank)p2=casuale();
