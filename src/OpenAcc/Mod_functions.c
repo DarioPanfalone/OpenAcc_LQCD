@@ -2227,8 +2227,8 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
             
         }
             
-        }
     }
+    
     
     if (accettata==1){
         replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],defect_axis,defect_coordinates);
