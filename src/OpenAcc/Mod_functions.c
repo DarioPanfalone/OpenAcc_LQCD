@@ -22,6 +22,7 @@
 #include "./rettangoli.h"
 #include "./plaquettes.h"
 #include "../Include/debug.h"
+#include "../Rand/random.h"
 
 
 
@@ -2231,21 +2232,18 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
         // configuration reject
             
         }
-    printf(" p1 p2 :%f %f",p1,p2);
+    printf(" p1 p2 :%f %f\n",p1,p2);
     }
     
     
     
     if (accettata==1){
         replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],defect_axis,defect_coordinates);
-        
-        
-    }
+        }
+    
+   
     
 
-
-    
-    
     
     
     
