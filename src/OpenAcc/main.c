@@ -500,6 +500,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
     
     //NEW TEST SWAP:
+    FILE *file_label;
     int  number_accept; //acceptance number
     int swap_number=0;
     file_label=fopen("./file_label.txt","w");
@@ -737,7 +738,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
              //-----------------------------------------------//
              //---------------CONF SWAP---------------------------//
             
-            FILE *file_label;
+            //FILE *file_label;
            // file_label=fopen("./file_label.txt","w");
             //int swap_number=0;
             double Delta_S_SWAP=0.0;
