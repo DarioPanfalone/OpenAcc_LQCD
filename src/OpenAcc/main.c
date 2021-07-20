@@ -504,6 +504,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     int  number_accept; //acceptance number
     int swap_number=0;
     file_label=fopen("./file_label.txt","w");
+    label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
+
     int mu1,mu2;
     for(mu2=0;mu2<5;mu2++){
     
@@ -515,8 +517,9 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     int accettata=0;
         accettata=metro_SWAP( conf_hasenbusch, 0, 2,rep->defect_boundary,rep->defect_coordinates);
     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
-        label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
         swap_number++;
+        label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
+
 
     printf("acpt :%d\n",accettata);
     
