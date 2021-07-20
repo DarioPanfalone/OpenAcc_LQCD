@@ -541,7 +541,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 
     printf("acpt :%d\n",accettata);
         double mean_accept;
-        mean_accept=acceptance_vector[0]/all_swap_vector[0];
+        mean_accept=(double)acceptance_vector[0]/all_swap_vector[0];
         printf("mean accept:%f\n",mean_accept);
     
      for(mu1=0;mu1<8;mu1++){
