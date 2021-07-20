@@ -2278,9 +2278,9 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch, int replicas_number, int defect_a
     else{
         
         for(i_counter=0;i_counter<replicas_number-1;i_counter++){
-        printf("%d %d\n",replicas_number-i_counter,replicas_number-i_counter-1);
+        printf("%d %d\n",replicas_number-1-i_counter,replicas_number-i_counter-2);
         label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
-        accettata=metro_SWAP( conf_hasenbusch,replicas_number-i_counter, replicas_number-i_counter-1,defect_axis,defect_coordinates);
+        accettata=metro_SWAP( conf_hasenbusch,replicas_number-i_counter-1, replicas_number-i_counter-2,defect_axis,defect_coordinates);
 #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             swap_num++;
         label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
