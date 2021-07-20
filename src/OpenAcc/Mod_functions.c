@@ -2251,6 +2251,46 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
     return accettata;
 }
 
+void All_Conf_SWAP(su3_soa ** conf_hasenbusch, int replicas_number, int defect_axis, int * defect_coordinates, FILE *file_label, int swap_num){
+    double swap_order=casuale();
+    int accettata=0;
+    int i_counter, j_counter;
+ 
+    if(swap_order<=0.5){
+        
+        
+        for(i_counter=0;i_counter<replicas_number-1;i_counter++){
+            printf("%d %d\n",i_counter,i_counter+1);
+            label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
+            accettata=metro_SWAP( conf_hasenbusch, i_counter, i_counter+1,rep->defect_boundary,rep->defect_coordinates);
+            #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
+            swap_num++
+            label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
+            
+        }
+        
+        
+        
+        
+     
+        
+    }
+    else{
+        
+        for(i_counter=0;i_counter<replicas_number-1;i_counter++){
+        printf("%d %d\n",replicas_number-i_counter,replicas_number-i_counter-1);
+        label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
+        accettata=metro_SWAP( conf_hasenbusch,replicas_number-i_counter, replicas_number-i_counter-1,rep->defect_boundary,rep->defect_coordinates);
+#pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
+        swap_num++
+        label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
+        }
+        
+        
+    }
+    
+    return;
+}
 
 
 

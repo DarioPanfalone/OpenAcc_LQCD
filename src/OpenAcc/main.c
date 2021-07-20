@@ -98,8 +98,8 @@ int main(int argc, char* argv[]){
   
     
     gettimeofday ( &(mc_params.start_time), NULL );
-    
-    
+    FILE *file_label;
+     file_label=fopen("./file_label.txt","w");
 //######################################################################################################################################//
 //############### FILE READING #########################################################################################################//
 //######################################################################################################################################//
@@ -500,10 +500,10 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
     
     //NEW TEST SWAP:
-    FILE *file_label;
+    
     int  number_accept; //acceptance number
     int swap_number=0;
-    file_label=fopen("./file_label.txt","w");
+   
     label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
 
     //acceptance vector
@@ -541,7 +541,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 
     printf("acpt :%d\n",accettata);
         double mean_accept;
-        mean_accept=(double)acceptance_vector[0]/all_swap_vector[0];
+        mean_accept=acceptance_vector[0]/all_swap_vector[0];
         printf("mean accept:%f\n",mean_accept);
     
      for(mu1=0;mu1<8;mu1++){
@@ -883,7 +883,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 fclose(goutfile);
             }
             //-------------------------------------------------// 
-
+            fclose(file_label);
        
             //######################################################################################################################################//
             //############### SAVING #########################################################################################################//
