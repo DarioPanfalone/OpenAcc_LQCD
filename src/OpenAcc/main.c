@@ -500,6 +500,9 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     printf("DELTA_S_SWAP: %f(optimus)|| %f(casual 8th) || %f(full)\n",Delta_S_SWAP_0,Delta_S_SWAP_2,Delta_S_SWAP_1);
     
     //NEW TEST SWAP:
+    int  number_accept; //acceptance number
+    int swap_number=0;
+    file_label=fopen("./file_label.txt","w");
     int mu1,mu2;
     for(mu2=0;mu2<5;mu2++){
     
@@ -511,6 +514,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     int accettata=0;
         accettata=metro_SWAP( conf_hasenbusch, 0, 2,rep->defect_boundary,rep->defect_coordinates);
     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+        label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
     printf("acpt :%d\n",accettata);
     
      for(mu1=0;mu1<8;mu1++){
@@ -724,8 +728,9 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                         /iterations;
                     printf("Estimated acceptance for this run: %f +- %f\n",acceptance,
                             acc_err);
+                    
                 }
-                
+                //QUI VA IL CONF SWAP
             }
             }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
@@ -733,10 +738,10 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
              //---------------CONF SWAP---------------------------//
             
             FILE *file_label;
-            file_label=fopen("./file_label.txt","w");
-            int swap_number=0;
+           // file_label=fopen("./file_label.txt","w");
+            //int swap_number=0;
             double Delta_S_SWAP=0.0;
-            label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
+            //label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
             printf("ECCO LO SWAP\n");
             
             
