@@ -506,6 +506,16 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     file_label=fopen("./file_label.txt","w");
     label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
 
+    //acceptance vector
+    int all_swap_vector[rep->replicas_total_number];
+    int acceptance_vector[rep->replicas_total_number];
+    
+    //intialization
+    for(mu1=0;mu1<rep->replicas_total_number;mu1++){
+        all_swap_vector[mu1]=0;
+        acceptance_vector[mu1]=0;
+    }
+    
     int mu1,mu2;
     for(mu2=0;mu2<5;mu2++){
     
@@ -515,13 +525,24 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     
     
     int accettata=0;
+        
         accettata=metro_SWAP( conf_hasenbusch, 0, 2,rep->defect_boundary,rep->defect_coordinates);
+        all_swap_vector[0]++;
+        all_swap_vector[2]++;
+        
+        if(accettata==1){
+            acceptance_vector[0]++;
+            acceptance_vector[2]++;
+        }
     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
         swap_number++;
         label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
 
 
     printf("acpt :%d\n",accettata);
+        double mean_accept;
+        mean_accept=(double)all_swap_vector[0]/all_swap_vector[0];
+        printf("mean accept:%f\n");
     
      for(mu1=0;mu1<8;mu1++){
      printf("aftermath (%d) %.18lf %.18lf\n",mu1,creal(conf_hasenbusch[0][mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu1].r1.c1[snum_acc(31,6,6,6)]));
