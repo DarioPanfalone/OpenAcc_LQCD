@@ -756,7 +756,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
             //swap_number++;
             
-            label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
+           // label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
             
         //-----------------------------------------------//
             
