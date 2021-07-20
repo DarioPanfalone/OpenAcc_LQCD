@@ -487,7 +487,7 @@ double  calc_plaquette_soloopenacc_SWAP(
            
             for(int nu=mu+1;nu<4;nu++){
                 // sommo i 6 risultati in tempo
-                printf("(%d,%d)\n",mu,nu);
+               // printf("(%d,%d)\n",mu,nu);
                  if(improved==0){
                      /*
                      if(nu==1){def_vet_2[0]=def_vet[0]+1; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2];}
@@ -515,7 +515,7 @@ double  calc_plaquette_soloopenacc_SWAP(
             for(int nu=0;nu<4;nu++){
                 // sommo i 6 risultati in tempo
                 if(nu!=mu){
-                      printf("(%d,%d)\n",mu,nu);
+                 //     printf("(%d,%d)\n",mu,nu);
                      if(improved==0){
                 result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                      }
@@ -539,7 +539,7 @@ double  calc_plaquette_soloopenacc_SWAP(
             for(int nu=0;nu<4;nu++){
                 // sommo i 6 risultati in tempo
                 if(nu!=mu){
-                      printf("(%d,%d)\n",mu,nu);
+                   //   printf("(%d,%d)\n",mu,nu);
                     if(improved==0){
                     result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
                     }
@@ -559,7 +559,7 @@ double  calc_plaquette_soloopenacc_SWAP(
         case 3:
             mu=3;
             for(int nu=0;nu<3;nu++){
-                  printf("(%d,%d)\n",mu,nu);
+             //     printf("(%d,%d)\n",mu,nu);
                 // sommo i 6 risultati in tempo
                  if(improved==0){
                     result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
@@ -636,7 +636,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
        // printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
         //printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
 
-        printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
+      //  printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
         int is;
         for(is=0; is<sizeh;is++){
             tr_local_plaqs[0].c[is]=0;
@@ -1144,8 +1144,8 @@ const int mu, const int nu, int def_axis, int *def_vet)
         // printf("%d %d %d\n",def_vet[0],def_vet[1],def_vet[2]);
         //printf("%d %d %d %d\n",nd0,nd1,nd2,nd3);
         
-        printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
-    printf("%d %d %d \n",D1,D2,D3);
+      //  printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
+    //printf("%d %d %d \n",D1,D2,D3);
         int is;
         for(is=0; is<sizeh;is++){
             tr_local_plaqs[0].c[is]=0;
