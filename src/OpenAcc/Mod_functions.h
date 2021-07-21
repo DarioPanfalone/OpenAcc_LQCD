@@ -28,7 +28,7 @@ int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet )
 int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );
 int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_number);
 
-int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defect_axis,int * defect_coordinates);
+
 
 double calc_loc_plaquettes_rectangles_SWAP(
                                            __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
@@ -51,8 +51,16 @@ double  calc_plaquette_soloopenacc_SWAP( __restrict  su3_soa * const tconf_acc,
                                         __restrict su3_soa * const local_plaqs,
                                         dcomplex_soa * const tr_local_plaqs,int def_axis, int *def_vet, int improved );
 
+int metro_SWAP(su3_soa ** conf_hasenbusch,
+               __restrict su3_soa * const loc_plaq, //la placchetta locale.
+               dcomplex_soa * const tr_local_plaqs,
+               int rep_indx1, int rep_indx2,int defect_axis,int * defect_coordinates);
 
-void All_Conf_SWAP(su3_soa ** conf_hasenbusch, int replicas_number, int defect_axis, int * defect_coordinates, FILE *file_label, int *swap_num,int ** all_swap_vet,int ** acceptance_vet);
+void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
+                   __restrict su3_soa * const loc_plaq, //la placchetta locale.
+                   dcomplex_soa * const tr_local_plaqs,
+                   
+                   int replicas_number, int defect_axis, int * defect_coordinates, FILE *file_label, int *swap_num,int ** all_swap_vet,int ** acceptance_vet);
 
 
 #endif /* Mod_functions_h */
