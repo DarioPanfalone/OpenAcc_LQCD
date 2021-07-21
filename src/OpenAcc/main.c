@@ -189,6 +189,15 @@ int main(int argc, char* argv[]){
     //######################################################################################################################################//
   
     
+    int all_swap_vector[rep->replicas_total_number];
+    int acceptance_vector[rep->replicas_total_number];
+    int mu1,mu2;
+    
+    for(mu1=0;mu1<rep->replicas_total_number;mu1++){
+        acceptance_vector[mu1]=0;
+        all_swap_vector[mu1]=0;
+    }
+    
     //just printing headtitles
     if(0==devinfo.myrank){
         if(0 != mc_params.JarzynskiMode){
@@ -506,10 +515,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
    
     label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
 
-    //acceptance vector
-    int all_swap_vector[rep->replicas_total_number];
-    int acceptance_vector[rep->replicas_total_number];
-    int mu1,mu2;
+
+    
     //intialization
     for(mu1=0;mu1<rep->replicas_total_number;mu1++){
         all_swap_vector[mu1]=0;

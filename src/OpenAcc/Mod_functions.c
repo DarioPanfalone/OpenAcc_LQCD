@@ -2219,7 +2219,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
         else{   // NORMAL, RANDOM
             if(0==devinfo.myrank)p2=casuale();
         }
-    //MULTIDEVICE MOD??
+    //MULTIDEVICE MOD
         if(p2<p1)
         {
         accettata=1;
@@ -2251,7 +2251,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,int rep_indx1, int rep_indx2,int defec
     return accettata;
 }
 
-void All_Conf_SWAP(su3_soa ** conf_hasenbusch, int replicas_number, int defect_axis, int * defect_coordinates, FILE *file_label, int swap_num){
+void All_Conf_SWAP(su3_soa ** conf_hasenbusch, int replicas_number, int defect_axis, int * defect_coordinates, FILE *file_label, int swap_num,int ** all_swap_vet,int ** acceptance_vet ){
     double swap_order=casuale();
     int accettata=0;
     int i_counter, j_counter;
@@ -2266,6 +2266,14 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch, int replicas_number, int defect_a
             #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             swap_num++;
             label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
+            all_swap_vet[i_counter]++;
+            all_swap_vet[i_counter+1]++;
+            
+            if (accettata==1){
+                acceptance_vet[i_counter]++;
+                acceptance_vet[i_counter+1]++;
+            }
+        
             
         }
         
@@ -2284,6 +2292,15 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch, int replicas_number, int defect_a
 #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             swap_num++;
         label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
+            all_swap_vet[replicas_number-i_counter-1]++;
+            all_swap_vet[replicas_number-i_counter-2]++;
+            
+            if(accettata==1){
+                acceptance_vet[replicas_number-i_counter-1]++;
+                acceptance_vet[replicas_number-i_counter-2]++;
+            }
+            
+            
         }
         
         
