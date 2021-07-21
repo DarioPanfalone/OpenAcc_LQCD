@@ -769,7 +769,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
                 //QUI VA IL CONF SWAP
                 printf("CONF SWAP HERE!\n ");
-                All_Conf_SWAP(conf_hasenbusch, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,&all_swap_vector,&acceptance_vector);
+                All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,&all_swap_vector,&acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                 
             }
