@@ -770,7 +770,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 //QUI VA IL CONF SWAP
                 printf("CONF SWAP HERE!\n ");
                 All_Conf_SWAP(conf_hasenbusch, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,&all_swap_vector,&acceptance_vector);
-                printf("swap_number %d", swap_number);
+                printf("swap_number %d\n", swap_number);
                 
             }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
@@ -792,9 +792,11 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             printf("===========GAUGE MEASURING============\n");
             //--------- MISURA ROBA DI GAUGE ------------------//
             plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+            printf("con0\n");
             rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+            printf("con0.5\n");
             poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
-	    
+            printf("con1\n");
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	      su3_soa *conf_to_use;
 	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
@@ -884,7 +886,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 }
                 fclose(goutfile);
             }
-            //-------------------------------------------------// 
+            //-------------------------------------------------//
+            
             fclose(file_label);
        
             //######################################################################################################################################//
