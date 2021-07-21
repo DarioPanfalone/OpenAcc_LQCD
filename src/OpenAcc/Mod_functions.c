@@ -2271,6 +2271,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
             label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
             accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1,defect_axis,defect_coordinates);
             #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
+            printf("swap_num %d\n",swap_num);
             swap_num=swap_num+1;
             label_print(conf_hasenbusch, replicas_number,file_label,swap_num);
             all_swap_vet[i_counter]++;
