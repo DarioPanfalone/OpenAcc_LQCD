@@ -192,6 +192,7 @@ int main(int argc, char* argv[]){
     int all_swap_vector[rep->replicas_total_number];
     int acceptance_vector[rep->replicas_total_number];
     int mu1,mu2;
+    double mean_acceptance;
     
     for(mu1=0;mu1<rep->replicas_total_number;mu1++){
         acceptance_vector[mu1]=0;
@@ -768,32 +769,20 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
                 //QUI VA IL CONF SWAP
                 printf("CONF SWAP HERE!\n ");
-                All_Conf_SWAP(conf_hasenbusch, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, swap_number);
+                All_Conf_SWAP(conf_hasenbusch, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, swap_number,&all_swap_vector,&acceptance_vector);
                 printf("swap_number %d", swap_number);
                 
             }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
-             //-----------------------------------------------//
-             //---------------CONF SWAP---------------------------//
-            
-            //FILE *file_label;
-           // file_label=fopen("./file_label.txt","w");
-            //int swap_number=0;
-            double Delta_S_SWAP=0.0;
-            //label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
-            printf("ECCO LO SWAP\n");
-            
-            
-            
-            Delta_S_SWAP=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,rep->defect_boundary,rep->defect_coordinates,0);
-            printf("DELTA_S_SWAP: %f\n",Delta_S_SWAP);
-            
-            
-            replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->defect_coordinates);
-            //swap_number++;
-            
-           // label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
-            
+    
+            if((conf_id_iter%5)==0){
+            for(mu1=0;mu1<rep->replicas_total_number;mu1++){
+                mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
+                printf("replicas %d mean_acceptance\n ",mean_acceptance);
+                
+            }
+                printf("\n");
+            }
         //-----------------------------------------------//
             
             id_iter++;
