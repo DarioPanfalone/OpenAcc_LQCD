@@ -534,7 +534,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     
     int accettata=0;
         
-        accettata=metro_SWAP( conf_hasenbusch, 0, 2,rep->defect_boundary,rep->defect_coordinates);
+        accettata=metro_SWAP( conf_hasenbusch,aux_conf_acc,local_sums, 0, 2,rep->defect_boundary,rep->defect_coordinates);
         all_swap_vector[0]++;
         all_swap_vector[2]++;
         
