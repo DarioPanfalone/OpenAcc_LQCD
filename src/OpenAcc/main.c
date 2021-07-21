@@ -888,7 +888,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
             //-------------------------------------------------//
             
-            fclose(file_label);
+          
        
             //######################################################################################################################################//
             //############### SAVING #########################################################################################################//
@@ -1231,6 +1231,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 #ifdef MULTIDEVICE
     shutdown_multidev();
 #endif
+      fclose(file_label);
     printf("The End\n");
     return 0;
 }
