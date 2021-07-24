@@ -189,10 +189,15 @@ int main(int argc, char* argv[]){
     //######################################################################################################################################//
   
     
-    int all_swap_vector[rep->replicas_total_number];
-    int acceptance_vector[rep->replicas_total_number];
+    int *all_swap_vector;
+    int *acceptance_vector;
     int mu1,mu2;
-    double mean_acceptance;
+    double *mean_acceptance;
+    
+    
+    all_swap_vector=malloc(sizeof(int)*rep->replicas_total_number);
+    acceptance_vector=malloc(sizeof(int)*rep->replicas_total_number);
+    mean_acceptance=malloc(sizeof(double)*rep->replicas_total_number);
     
     for(mu1=0;mu1<rep->replicas_total_number;mu1++){
         acceptance_vector[mu1]=0;
