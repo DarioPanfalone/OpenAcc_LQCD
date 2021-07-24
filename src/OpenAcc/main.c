@@ -795,7 +795,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             printf("con0\n");
             rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
             printf("con0.5\n");
-           // poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
+            printf("geom %d\n",geom_par.tmap);
+            poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
             printf("con1\n");
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	      su3_soa *conf_to_use;
