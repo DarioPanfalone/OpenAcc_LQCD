@@ -523,12 +523,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 
 
     
-    //intialization
-    for(mu1=0;mu1<rep->replicas_total_number;mu1++){
-        all_swap_vector[mu1]=0;
-        acceptance_vector[mu1]=0;
-    }
-    
+  
     
     for(mu2=0;mu2<5;mu2++){
     
@@ -540,12 +535,12 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     int accettata=0;
         
         accettata=metro_SWAP( conf_hasenbusch,aux_conf_acc,local_sums, 0, 2,rep->defect_boundary,rep->defect_coordinates);
-        all_swap_vector[0]++;
-        all_swap_vector[2]++;
+        //all_swap_vector[0]++;
+        //all_swap_vector[2]++;
         
         if(accettata==1){
-            acceptance_vector[0]++;
-            acceptance_vector[2]++;
+          //  acceptance_vector[0]++;
+            //acceptance_vector[2]++;
         }
     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
         swap_number++;
