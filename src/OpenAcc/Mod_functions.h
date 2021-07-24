@@ -60,7 +60,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
                    __restrict su3_soa * const loc_plaq, //la placchetta locale.
                    dcomplex_soa * const tr_local_plaqs,
                    
-                   int replicas_number, int defect_axis, int * defect_coordinates, FILE *file_label, int *swap_num,int ** all_swap_vet,int ** acceptance_vet);
+                   int replicas_number, int defect_axis, int * defect_coordinates, FILE *file_label, int *swap_num,int * all_swap_vet,int * acceptance_vet);
 
 
 #endif /* Mod_functions_h */
