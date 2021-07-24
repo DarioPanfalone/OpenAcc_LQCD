@@ -774,7 +774,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
                 //QUI VA IL CONF SWAP
                 printf("CONF SWAP HERE!\n ");
-                All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,&all_swap_vector,&acceptance_vector);
+                All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                 
             }
@@ -1211,6 +1211,10 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
         mem_free_extended_f();
     }
 
+    free(all_swap_vector);
+    free(acceptance_vector);
+    
+    
     printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)
@@ -1237,6 +1241,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     shutdown_multidev();
 #endif
       fclose(file_label);
+    
     printf("The End\n");
     return 0;
 }
