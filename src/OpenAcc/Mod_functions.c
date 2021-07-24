@@ -2279,7 +2279,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
             label_print(conf_hasenbusch, replicas_number,file_label,*swap_num);
             *all_swap_vet[i_counter]++;
             *all_swap_vet[i_counter+1]++;
-            printf("proposed: all_swap_vet\n",*all_swap_vet[i_counter]);
+            printf("proposed: all_swap_vet %d\n",*all_swap_vet[i_counter]);
             
             if (accettata==1){
                 *acceptance_vet[i_counter]++;
