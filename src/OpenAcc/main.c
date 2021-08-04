@@ -441,7 +441,11 @@ int main(int argc, char* argv[]){
     //######################################################################################################################################//
     //######################################################################################################################################//
 
-  /*
+    int  number_accept; //acceptance number
+    int swap_number=0;
+    
+    
+    /*
     //TEST SWAP!!
     double Delta_S_SWAP_0=0.0;
      double Delta_S_SWAP_1=0.0;
@@ -516,9 +520,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     
     //NEW TEST SWAP:
     
-    int  number_accept; //acceptance number
-    int swap_number=0;
-   
+  
     label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
 
 
@@ -581,9 +583,11 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
    
     //Plaquette measures and polyakov loop measures.
     printf("PLAQUETTE START\n");
+    
+    /*
     //TEST MOD
     printf("Plaquette  MOD   : %.18lf\n" , S_0_2/GL_SIZE/BETA_BY_THREE/6.0/3.0);
-    
+    */
 
     
     
