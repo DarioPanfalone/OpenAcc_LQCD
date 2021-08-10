@@ -29,8 +29,13 @@
 
 //#define TIMING_ALL // if defined many computation times are printed in the output
 
-#define GAUGE_ACT_TLSM
-//#define GAUGE_ACT_WILSON
+//**************************************//
+//ACHTUNG !!!!!! comment the one you don't wanna use and decoment the other one
+
+//#define GAUGE_ACT_TLSM
+#define GAUGE_ACT_WILSON
+
+//**************************************//
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
