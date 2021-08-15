@@ -349,7 +349,7 @@ int main(int argc, char* argv[]){
     //for per aprire o creare i file delle configurazioni.
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         printf("replicas counter %d\n",replicas_counter);
-        snprintf(rep_str,10,"replica_%d",replicas_counter);//inizializza rep_str
+        snprintf(rep_str,20,"replica_%d",replicas_counter);//inizializza rep_str
         strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
         
         
@@ -776,7 +776,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                 
-            }
+            }//end for
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
     
           //  if((conf_id_iter%5)==0){
@@ -796,12 +796,12 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             printf("===========GAUGE MEASURING============\n");
             //--------- MISURA ROBA DI GAUGE ------------------//
             plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-            printf("con0\n");
+            
             rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-            printf("con0.5\n");
+
             printf("geom %d\n",geom_par.tmap);
             poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
-            printf("con1\n");
+ 
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	      su3_soa *conf_to_use;
 	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
@@ -862,7 +862,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 			}
         	        fclose(stoutoutfile);
             	    }
-	    }
+	    }//while end
+            
 
             printf("MPI%02d - Printing gauge obs - only by master rank...\n",
                     devinfo.myrank);
@@ -1143,7 +1144,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
       
-        snprintf(rep_str,10,"replica_%d",replicas_counter);//inizializza rep_str
+        snprintf(rep_str,20,"replica_%d",replicas_counter);//inizializza rep_str
         strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
         
         
