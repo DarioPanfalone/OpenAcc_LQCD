@@ -340,7 +340,7 @@ int main(int argc, char* argv[]){
     
     
     int replicas_counter;
-    char rep_str [10];
+    char rep_str [20];
     char aux_name_file[200];
     strcpy(aux_name_file,mc_params.save_conf_name); //salva il nome originale della conf in aux_name_file
     //init for starting
@@ -797,7 +797,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             //--------- MISURA ROBA DI GAUGE ------------------//
             plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
             
-            rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+            rect = calc_rettangolo_soloopenacc(conf_hasenbuvisch[0],aux_conf_acc,local_sums);
 
             printf("geom %d\n",geom_par.tmap);
             poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
@@ -924,7 +924,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                         devinfo.myrank , tempname);
                 saverand_tofile(tempname);
             }
-
+//
             if(conf_id_iter%mc_params.saveconfinterval==0){
                 if (debug_settings.SaveAllAtEnd){
                     printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
