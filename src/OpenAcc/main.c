@@ -771,6 +771,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 }
                
             }
+#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
                 //QUI VA IL CONF SWAP
                 printf("CONF SWAP HERE!\n ");
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,all_swap_vector,acceptance_vector);
