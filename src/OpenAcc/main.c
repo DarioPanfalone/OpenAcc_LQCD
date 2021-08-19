@@ -798,7 +798,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             //--------- MISURA ROBA DI GAUGE ------------------//
             plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
             
-            rect = calc_rettangolo_soloopenacc(conf_hasenbuvisch[0],aux_conf_acc,local_sums);
+            rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
 
             printf("geom %d\n",geom_par.tmap);
             poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
