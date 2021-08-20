@@ -586,11 +586,11 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     int *accettate_therm_old;
     int *accettate_metro_old;
     int id_iter_offset=conf_id_iter;
-    
-    printf("control 1\n" );
+
     accettate_therm=malloc(sizeof(int)*rep->replicas_total_number);
     accettate_metro=malloc(sizeof(int)*rep->replicas_total_number);
-        printf("control 2\n" );
+    iterations=malloc(sizeof(int)*rep->replicas_total_number);
+    
     
     //inizialization to 0
     int i;
