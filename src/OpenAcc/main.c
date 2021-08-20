@@ -100,6 +100,8 @@ int main(int argc, char* argv[]){
     gettimeofday ( &(mc_params.start_time), NULL );
     FILE *file_label;
      file_label=fopen("./file_label.txt","w");
+     FILE *hmc_acc_file;
+    fopen("./hmc_acc_file.txt","w");
 //######################################################################################################################################//
 //############### FILE READING #########################################################################################################//
 //######################################################################################################################################//
@@ -574,8 +576,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     double stout_topo_ch[meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval+1];
     d_complex poly;
 
-    FILE *hmc_acc_file;
-    fopen(hmc_acc_file,"w");
+   
+    
     
     int *accettate_therm;
     int *accettate_metro;
@@ -590,7 +592,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     accettate_metro=malloc(sizeof(int)*rep->replicas_total_number);
     
     //inizialization to 0
-    int i=0;
+    int i;
     for(i=0;i<rep->replicas_total_number;i++){
         accettate_metro[i]=0;
         accettate_therm[i]=0;
@@ -799,7 +801,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                
-                fprintf(hmc_acc_file,"%");
+        
                 
             }//end for
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
