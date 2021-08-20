@@ -590,6 +590,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     accettate_metro=malloc(sizeof(int)*rep->replicas_total_number);
     
     //inizialization to 0
+    int i=0;
     for(i=0;i<rep->replicas_total_number;i++){
         accettate_metro[i]=0;
         accettate_therm[i]=0;
