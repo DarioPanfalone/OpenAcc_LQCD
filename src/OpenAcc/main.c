@@ -574,12 +574,31 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     double stout_topo_ch[meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval+1];
     d_complex poly;
 
-    int accettate_therm=0;
-    int accettate_metro=0;
-    int accettate_therm_old=0;
-    int accettate_metro_old=0;
+    FILE *hmc_acc_file;
+    fopen(hmc_acc_file,"w");
+    
+    int *accettate_therm;
+    int *accettate_metro;
+    int *iterations;
+    
+    int *accettate_therm_old;
+    int *accettate_metro_old;
     int id_iter_offset=conf_id_iter;
     
+ 
+    accettate_therm=malloc(sizeof(int)*rep->replicas_total_number);
+    accettate_metro=malloc(sizeof(int)*rep->replicas_total_number);
+    
+    //inizialization to 0
+    for(i=0;i<rep->replicas_total_number;i++){
+        accettate_metro[i]=0;
+        accettate_therm[i]=0;
+        iterations[i]=0;
+        accettate_therm_old[i]=0;
+        accettate_metro_old[i]=0;
+    }
+    
+
    
     //Plaquette measures and polyakov loop measures.
     printf("PLAQUETTE START\n");
@@ -723,9 +742,11 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                     &avg_unitarity_deviation);
             printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
                     devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
-            accettate_therm_old = accettate_therm;
-            accettate_metro_old = accettate_metro;
-
+            
+            for (i=0;i<rep->replicas_total_number;i++){
+            accettate_therm_old [i]= accettate_therm[i];
+            accettate_metro_old [i]= accettate_metro[i];
+            }
 
             if(devinfo.myrank ==0 ){
                 printf("\n#################################################\n");
@@ -738,7 +759,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
             
             
-            
+        
 
             //--------- CONF UPDATE ----------------//
         
@@ -750,21 +771,21 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 printf(  "#################################################\n\n");
                 
             if(id_iter<mc_params.therm_ntraj){
-                accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
+                accettate_therm[replicas_counter] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
                         md_parameters.residue_metro,md_parameters.residue_md,
                         id_iter-id_iter_offset,
-                        accettate_therm,0,md_parameters.max_cg_iterations);
+                        accettate_therm[replicas_counter],0,md_parameters.max_cg_iterations);
             }else{
-                accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
+                accettate_metro[replicas_counter] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
                         md_parameters.residue_metro,md_parameters.residue_md,
-                        id_iter-id_iter_offset-accettate_therm,accettate_metro,1,
+                        id_iter-id_iter_offset-accettate_therm[replicas_counter],accettate_metro[replicas_counter],1,
                         md_parameters.max_cg_iterations);
                 if(0==devinfo.myrank){ //multidevice control
-                    int iterations = id_iter-id_iter_offset-accettate_therm +1;
-                    double acceptance = (double) accettate_metro / iterations;
+                     iterations[replicas_counter] = id_iter-id_iter_offset-accettate_therm[replicas_counter] +1;
+                    double acceptance = (double) accettate_metro[replicas_counter] / iterations[replicas_counter];
                     double acc_err = 
-                        sqrt((double)accettate_metro*(iterations-accettate_metro)/iterations)
-                        /iterations;
+                        sqrt((double)accettate_metro[replicas_counter]*(iterations[replicas_counter]-accettate_metro[replicas_counter])/iterations[replicas_counter])
+                        /iterations[replicas_counter];
                     printf("Estimated acceptance for this run: %f +- %f\n",acceptance,
                             acc_err);
                     
@@ -776,17 +797,31 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 printf("CONF SWAP HERE!\n ");
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
+               
+                fprintf(hmc_acc_file,"%");
                 
             }//end for
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
     
           //  if((conf_id_iter%5)==0){
+             fprintf(hmc_acc_file,"%d",conf_id_iter);
+            
+            
+            
+            
+            
+            
+            
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
                 printf("replicas [%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);
                 
+                fprintf(hmc_acc_file,"%d", accettate_therm[mu1]+accettate_metro[mu1]
+                        -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
             }
-                printf("\n");
+            
+            fprintf(hmc_acc_file,"\n");
+            
           //  }
         //-----------------------------------------------//
             
@@ -883,9 +918,13 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                     }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/GL_SIZE/6.0/3.0,rect/GL_SIZE/6.0/3.0/2.0);
 
 
+                    
+                    
                     fprintf(goutfile,"%d\t%d\t",conf_id_iter,
-                            accettate_therm+accettate_metro
-                            -accettate_therm_old-accettate_metro_old);
+                            accettate_therm[0]+accettate_metro[0]
+                            -accettate_therm_old[0]-accettate_metro_old[0]);
+                    
+                    
                     fprintf(goutfile,"%.18lf\t%.18lf\t%.18lf\t%.18lf\n",
                             plq/GL_SIZE/6.0/3.0,
                             rect/GL_SIZE/6.0/3.0/2.0, 
@@ -1243,6 +1282,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     shutdown_multidev();
 #endif
       fclose(file_label);
+    fclose(hmc_acc_file);
     
     printf("The End\n");
     return 0;
