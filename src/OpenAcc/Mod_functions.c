@@ -2305,11 +2305,11 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
             *swap_num=*swap_num+1;
         label_print(conf_hasenbusch, replicas_number,file_label,*swap_num);
             all_swap_vet[replicas_number-i_counter-1]++;
-            all_swap_vet[replicas_number-i_counter-2]++;
+            //all_swap_vet[replicas_number-i_counter-2]++;
             
             if(accettata==1){
                 acceptance_vet[replicas_number-i_counter-1]++;
-                acceptance_vet[replicas_number-i_counter-2]++;
+              //  acceptance_vet[replicas_number-i_counter-2]++;
             }
             
             
