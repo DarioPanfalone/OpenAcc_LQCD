@@ -827,7 +827,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 printf("con %d \n",mu1);
             }
             printf("after  \n");
-            fprintf(hmc_acc_file,"\n");
+           // fprintf(hmc_acc_file," \n");
             
           //  }
         //-----------------------------------------------//
