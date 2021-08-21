@@ -590,7 +590,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     accettate_therm=malloc(sizeof(int)*rep->replicas_total_number);
     accettate_metro=malloc(sizeof(int)*rep->replicas_total_number);
     accettate_therm_old=malloc(sizeof(int)*rep->replicas_total_number);
-        accettate_metro_old=malloc(sizeof(int)*rep->replicas_total_number);
+    accettate_metro_old=malloc(sizeof(int)*rep->replicas_total_number);
     iterations=malloc(sizeof(int)*rep->replicas_total_number);
     
     
@@ -824,8 +824,9 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 fprintf(hmc_acc_file,"%d", accettate_therm[mu1]+accettate_metro[mu1]
                         -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
+                printf("con %d \n",mu1);
             }
-            
+            printf("after  \n");
             fprintf(hmc_acc_file,"\n");
             
           //  }
