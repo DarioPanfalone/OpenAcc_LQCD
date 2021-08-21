@@ -197,8 +197,8 @@ int main(int argc, char* argv[]){
     double mean_acceptance;
     
     
-    all_swap_vector=malloc(sizeof(int)*rep->replicas_total_number);
-    acceptance_vector=malloc(sizeof(int)*rep->replicas_total_number);
+    all_swap_vector=malloc(sizeof(int)*rep->replicas_total_number-1);
+    acceptance_vector=malloc(sizeof(int)*rep->replicas_total_number-1);
 
     
     for(mu1=0;mu1<rep->replicas_total_number;mu1++){
@@ -819,9 +819,10 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
             
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
+                if(mu1<replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
                 printf("replicas [%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);
-                
+                }
                 fprintf(hmc_acc_file,"%d    ", accettate_therm[mu1]+accettate_metro[mu1]
                         -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
                 printf("con %d \n",mu1);
