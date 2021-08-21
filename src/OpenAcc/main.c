@@ -831,22 +831,22 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
           //  }
         //-----------------------------------------------//
-            printf("after 2 \n")
+            printf("after 2 \n");
             id_iter++;
             conf_id_iter++;
             //-------------------------------------------------// 
 
             printf("===========GAUGE MEASURING============\n");
             //--------- MISURA ROBA DI GAUGE ------------------//
-            printf("after3 \n")
+            printf("after3 \n");
             plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-            printf("after 4\n")
+            printf("after 4\n");
             rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-printf("after  5 \n")
+            printf("after  5 \n");
             printf("geom %d\n",geom_par.tmap);
-            printf("after 6 \n")
+            printf("after 6 \n");
             poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
- printf("after 7 \n")
+            printf("after 7 \n");
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	      su3_soa *conf_to_use;
 	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
