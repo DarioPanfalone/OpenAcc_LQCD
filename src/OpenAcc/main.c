@@ -99,11 +99,11 @@ int main(int argc, char* argv[]){
     
     gettimeofday ( &(mc_params.start_time), NULL );
     FILE *file_label;
-     file_label=fopen("./file_label.txt","w");
+     file_label=fopen("./file_label.txt","at");
      FILE *hmc_acc_file;
-    hmc_acc_file=fopen("./hmc_acc_file.txt","w");
+    hmc_acc_file=fopen("./hmc_acc_file.txt","at");
     FILE *swap_acc_file;
-    swap_acc_file=fopen("./swap_acc_file.txt","w");
+    swap_acc_file=fopen("./swap_acc_file.txt","at");
     
 //######################################################################################################################################//
 //############### FILE READING #########################################################################################################//
