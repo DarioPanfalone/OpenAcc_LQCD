@@ -102,6 +102,9 @@ int main(int argc, char* argv[]){
      file_label=fopen("./file_label.txt","w");
      FILE *hmc_acc_file;
     hmc_acc_file=fopen("./hmc_acc_file.txt","w");
+    FILE *swap_acc_file;
+    swap_acc_file=fopen("./swap_acc_file.txt","w");
+    
 //######################################################################################################################################//
 //############### FILE READING #########################################################################################################//
 //######################################################################################################################################//
@@ -811,6 +814,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     
           //  if((conf_id_iter%5)==0){
              fprintf(hmc_acc_file,"%d   ",conf_id_iter);
+            fprintf(swap_acc_file,"%d   ",conf_id_iter);
+            
             
             
             
@@ -823,31 +828,33 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
                 printf("replicas [%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);
                 }
+                fprintf(swap_acc_file,"%d   ",mean_acceptance);
                 fprintf(hmc_acc_file,"%d    ", accettate_therm[mu1]+accettate_metro[mu1]
                         -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
                 printf("con %d \n",mu1);
             }
-            printf("after  \n");
+            
            fprintf(hmc_acc_file," \n");
+           fprintf(swap_acc_file," \n");
             
           //  }
         //-----------------------------------------------//
-            printf("after 2 \n");
+            
             id_iter++;
             conf_id_iter++;
             //-------------------------------------------------// 
 
             printf("===========GAUGE MEASURING============\n");
             //--------- MISURA ROBA DI GAUGE ------------------//
-            printf("after3 \n");
+            
             plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-            printf("after 4\n");
+            
             rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-            printf("after  5 \n");
+           
             printf("geom %d\n",geom_par.tmap);
-            printf("after 6 \n");
+          
             poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
-            printf("after 7 \n");
+            
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	      su3_soa *conf_to_use;
 	      cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
@@ -1293,6 +1300,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 #endif
       fclose(file_label);
     fclose(hmc_acc_file);
+    fclose(swap_acc_file);
     
     printf("The End\n");
     return 0;
