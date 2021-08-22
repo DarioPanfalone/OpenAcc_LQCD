@@ -837,7 +837,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
                 printf("replicas [%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);
                 }
-                fprintf(swap_acc_file,"%d   ",mean_acceptance);
+            
                 fprintf(hmc_acc_file,"%d    ", accettate_therm[mu1]+accettate_metro[mu1]
                         -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
                 fprintf(swap_acc_file,"%d   ",acceptance_vector[mu1]-acceptance_vector_old[mu1]);
