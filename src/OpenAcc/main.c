@@ -198,14 +198,17 @@ int main(int argc, char* argv[]){
     int *acceptance_vector;
     int mu1,mu2;
     double mean_acceptance;
+    int *acceptance_vector_old;
     
     
     all_swap_vector=malloc(sizeof(int)*rep->replicas_total_number-1);
     acceptance_vector=malloc(sizeof(int)*rep->replicas_total_number-1);
+    acceptance_vector_old=malloc(sizeof(int)*rep->replicas_total_number-1);
 
     
     for(mu1=0;mu1<rep->replicas_total_number;mu1++){
         acceptance_vector[mu1]=0;
+        acceptance_vector_old[mu1]=0;
         all_swap_vector[mu1]=0;
     }
     
@@ -803,6 +806,11 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
                 //QUI VA IL CONF SWAP
+                
+                for(mu1=0;mu1<rep->replicas_total_number;mu1++){
+                    acceptance_vector_old[mu1]=acceptance_vector[mu1];
+                }
+                
                 printf("CONF SWAP HERE!\n ");
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
@@ -823,6 +831,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
             
             
+            
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
                 if(mu1<rep->replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
@@ -831,6 +840,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 fprintf(swap_acc_file,"%d   ",mean_acceptance);
                 fprintf(hmc_acc_file,"%d    ", accettate_therm[mu1]+accettate_metro[mu1]
                         -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
+                fprintf(swap_acc_file,"%d   ",acceptance_vector[mu1]-acceptance_vector_old[mu1]);
                 printf("con %d \n",mu1);
             }
             
