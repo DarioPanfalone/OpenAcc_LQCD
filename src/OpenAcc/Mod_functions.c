@@ -2263,7 +2263,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
     int accettata=0;
     int i_counter, j_counter;
  
-    label_print(conf_hasenbusch, replicas_number,file_label,*swap_num);
+    if(*swap_num==0){ label_print(conf_hasenbusch, replicas_number,file_label,*swap_num);}
     if(swap_order<=0.5){
         
         
