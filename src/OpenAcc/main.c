@@ -98,12 +98,19 @@ int main(int argc, char* argv[]){
   
     
     gettimeofday ( &(mc_params.start_time), NULL );
-    FILE *file_label;
-     file_label=fopen("./file_label.txt","at");
-     FILE *hmc_acc_file;
-    hmc_acc_file=fopen("./hmc_acc_file.txt","at");
-    FILE *swap_acc_file;
-    swap_acc_file=fopen("./swap_acc_file.txt","at");
+    
+    
+    
+    FILE *file_label=fopen("./file_label.txt","at");
+    if(!file_label){file_label=fopen("./file_label.txt","wt");}
+    
+    
+     FILE *hmc_acc_file=fopen("./hmc_acc_file.txt","at");
+    if(!hmc_acc_file){hmc_acc_file=fopen("./hmc_acc_file.txt","wt");}
+    
+  
+    FILE *swap_acc_file=fopen("./swap_acc_file.txt","at");
+      if(!swap_acc_file){swap_acc_file=fopen("./swap_acc_file.txt","wt");}
     
 //######################################################################################################################################//
 //############### FILE READING #########################################################################################################//
@@ -835,13 +842,14 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
                 if(mu1<rep->replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
-                printf("replicas [%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);
+                printf("replicas'couple [%d/%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,mu1+1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);
+                     fprintf(swap_acc_file,"%d   ",acceptance_vector[mu1]-acceptance_vector_old[mu1]);
                 }
             
                 fprintf(hmc_acc_file,"%d    ", accettate_therm[mu1]+accettate_metro[mu1]
                         -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
-                fprintf(swap_acc_file,"%d   ",acceptance_vector[mu1]-acceptance_vector_old[mu1]);
-                printf("con %d \n",mu1);
+               
+              
             }
             
            fprintf(hmc_acc_file," \n");
