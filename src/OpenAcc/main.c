@@ -412,7 +412,7 @@ int main(int argc, char* argv[]){
     
 
           printf("K_mu Initialization starts\n");
-    int  vet_aux_bound=[1,1,1];
+    int  vet_aux_bound[3]={1,1,1};
     printf("aux_conf_init\n");
     init_k(aux_conf_acc,1,0,vet_aux_bound);
     init_k(auxbis_conf_acc,1,0,vet_aux_bound);
