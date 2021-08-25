@@ -829,13 +829,15 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }//end for
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
     
+            FILE *hmc_acc_file;
+            FILE *swap_acc_file;
             
             if(rep->replicas_total_number>1){
-            FILE *hmc_acc_file=fopen("./hmc_acc_file.txt","at");
+            hmc_acc_file=fopen("./hmc_acc_file.txt","at");
             if(!hmc_acc_file){hmc_acc_file=fopen("./hmc_acc_file.txt","wt");}
             
             
-            FILE *swap_acc_file=fopen("./swap_acc_file.txt","at");
+            swap_acc_file=fopen("./swap_acc_file.txt","at");
             if(!swap_acc_file){swap_acc_file=fopen("./swap_acc_file.txt","wt");}
             }
             
