@@ -837,9 +837,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
             FILE *swap_acc_file=fopen("./swap_acc_file.txt","at");
             if(!swap_acc_file){swap_acc_file=fopen("./swap_acc_file.txt","wt");}
-            
-             fprintf(hmc_acc_file,"%d\t",conf_id_iter);
-            fprintf(swap_acc_file,"%d\t",conf_id_iter);
+        
             
             
             
@@ -851,7 +849,12 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
              //-----------------------------------------------//
             
             
+            
+            fprintf(hmc_acc_file,"%d\t",conf_id_iter);
+            fprintf(swap_acc_file,"%d\t",conf_id_iter);
+            
             //ACCEPTANCE FILES PRINT
+            
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
                 if(mu1<rep->replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
@@ -1014,20 +1017,31 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                         devinfo.myrank , tempname);
                 saverand_tofile(tempname);
             }
-  /*
+  
             if(conf_id_iter%mc_params.saveconfinterval==0){
+                for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+                
+                    snprintf(rep_str,20,"replica_%d",replicas_counter);//inizializza rep_str
+                    strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
+                
                 if (debug_settings.SaveAllAtEnd){
                     printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
                             mc_params.save_conf_name);
-                    save_conf_wrapper(conf_hasenbusch[0],mc_params.save_conf_name, conf_id_iter,
+                    save_conf_wrapper(conf_hasenbusch[replicas_counter],mc_params.save_conf_name, conf_id_iter,
                             debug_settings.use_ildg);
                     printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
                             mc_params.RandGenStatusFilename);
                     saverand_tofile(mc_params.RandGenStatusFilename);
                 }else printf(
                         "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+                    
+                     strcpy(mc_params.save_conf_name,aux_name_file);
             }
-            */
+            
+            }
+            
+            
+            
             //-------------------------------------------------//
 
             gettimeofday(&tend_cycle, NULL);
@@ -1250,13 +1264,13 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
         saverand_tofile(mc_params.RandGenStatusFilename);
     }else printf(
             "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
-    //-------------------------------------------------//
+    
         
         strcpy(mc_params.save_conf_name,aux_name_file);
         
     }//end for replicas.
 
-
+//-------------------------------------------------//
     if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd){
 /*
 	    printf("Saving global program status...\n");
