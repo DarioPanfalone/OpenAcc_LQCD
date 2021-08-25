@@ -1014,7 +1014,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                         devinfo.myrank , tempname);
                 saverand_tofile(tempname);
             }
-//
+  /*
             if(conf_id_iter%mc_params.saveconfinterval==0){
                 if (debug_settings.SaveAllAtEnd){
                     printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
@@ -1027,6 +1027,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 }else printf(
                         "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
             }
+            */
             //-------------------------------------------------//
 
             gettimeofday(&tend_cycle, NULL);
