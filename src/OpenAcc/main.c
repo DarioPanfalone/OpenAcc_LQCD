@@ -105,12 +105,7 @@ int main(int argc, char* argv[]){
     if(!file_label){file_label=fopen("./file_label.txt","wt");}
     
     
-     FILE *hmc_acc_file=fopen("./hmc_acc_file.txt","at");
-    if(!hmc_acc_file){hmc_acc_file=fopen("./hmc_acc_file.txt","wt");}
     
-  
-    FILE *swap_acc_file=fopen("./swap_acc_file.txt","at");
-      if(!swap_acc_file){swap_acc_file=fopen("./swap_acc_file.txt","wt");}
     
 //######################################################################################################################################//
 //############### FILE READING #########################################################################################################//
@@ -834,7 +829,15 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }//end for
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
     
-          //  if((conf_id_iter%5)==0){
+            
+            
+            FILE *hmc_acc_file=fopen("./hmc_acc_file.txt","at");
+            if(!hmc_acc_file){hmc_acc_file=fopen("./hmc_acc_file.txt","wt");}
+            
+            
+            FILE *swap_acc_file=fopen("./swap_acc_file.txt","at");
+            if(!swap_acc_file){swap_acc_file=fopen("./swap_acc_file.txt","wt");}
+            
              fprintf(hmc_acc_file,"%d\t",conf_id_iter);
             fprintf(swap_acc_file,"%d\t",conf_id_iter);
             
@@ -864,6 +867,9 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
            fprintf(hmc_acc_file,"\n");
            fprintf(swap_acc_file,"\n");
+            
+            fclose(hmc_acc_file);
+            fclose(swap_acc_file);
             
         
         
@@ -1326,8 +1332,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     shutdown_multidev();
 #endif
       fclose(file_label);
-    fclose(hmc_acc_file);
-    fclose(swap_acc_file);
+    
     
     printf("The End\n");
     return 0;
