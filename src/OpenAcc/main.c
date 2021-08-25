@@ -830,14 +830,14 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
     
             
-            
+            if(rep->replicas_total_number>1){
             FILE *hmc_acc_file=fopen("./hmc_acc_file.txt","at");
             if(!hmc_acc_file){hmc_acc_file=fopen("./hmc_acc_file.txt","wt");}
             
             
             FILE *swap_acc_file=fopen("./swap_acc_file.txt","at");
             if(!swap_acc_file){swap_acc_file=fopen("./swap_acc_file.txt","wt");}
-        
+            }
             
             
             
@@ -849,24 +849,28 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
              //-----------------------------------------------//
             
             
-            
+              if(rep->replicas_total_number>1){
             fprintf(hmc_acc_file,"%d\t",conf_id_iter);
             fprintf(swap_acc_file,"%d\t",conf_id_iter);
-            
+              }
             //ACCEPTANCE FILES PRINT
             
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
                 if(mu1<rep->replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
                 printf("replicas'couple [%d/%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,mu1+1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);
-                     fprintf(swap_acc_file,"%d\t",acceptance_vector[mu1]-acceptance_vector_old[mu1]);
+                      if(rep->replicas_total_number>1){
+                          fprintf(swap_acc_file,"%d\t",acceptance_vector[mu1]-acceptance_vector_old[mu1]);}
                 }
             
+                  if(rep->replicas_total_number>1){
                 fprintf(hmc_acc_file,"%d\t", accettate_therm[mu1]+accettate_metro[mu1]
                         -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
-               
+                  }
               
             }
+            
+              if(rep->replicas_total_number>1){
             
            fprintf(hmc_acc_file,"\n");
            fprintf(swap_acc_file,"\n");
@@ -874,7 +878,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             fclose(hmc_acc_file);
             fclose(swap_acc_file);
             
-        
+              }
         
             
           
