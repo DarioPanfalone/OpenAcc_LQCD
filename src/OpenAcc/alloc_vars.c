@@ -364,7 +364,7 @@ void mem_free_core()
 
     }
     
-    #pragma acc exit data delete(conf_hasenbusch[0:alloc_info.num_replicas])
+#pragma acc exit data delete(conf_hasenbusch[0:alloc_info.num_replicas][0:8])
     
 
     FREECHECK(conf_hasenbusch);
