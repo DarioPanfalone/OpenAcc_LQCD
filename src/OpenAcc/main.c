@@ -841,11 +841,14 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
             
             
+            //-----------------------------------------------//
+            
+            id_iter++;
+            conf_id_iter++;
+             //-----------------------------------------------//
             
             
-            
-            
-            
+            //ACCEPTANCE FILES PRINT
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
                 if(mu1<rep->replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
@@ -862,11 +865,10 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
            fprintf(hmc_acc_file,"\n");
            fprintf(swap_acc_file,"\n");
             
-          //  }
-        //-----------------------------------------------//
+        
+        
             
-            id_iter++;
-            conf_id_iter++;
+          
             //-------------------------------------------------// 
 
             printf("===========GAUGE MEASURING============\n");
