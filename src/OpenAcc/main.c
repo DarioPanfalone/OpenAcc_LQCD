@@ -100,7 +100,9 @@ int main(int argc, char* argv[]){
     gettimeofday ( &(mc_params.start_time), NULL );
     
     
-   
+    FILE *hmc_acc_file;
+    FILE *swap_acc_file;
+    FILE *file_label;
     
     
     
@@ -829,9 +831,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             printf("debug_control\n");
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
     
-            FILE *hmc_acc_file;
-            FILE *swap_acc_file;
-            FILE *file_label;
+       
             
             if(rep->replicas_total_number>1){
             fopen("./file_label.txt","at");
@@ -860,6 +860,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
               if(rep->replicas_total_number>1){
             fprintf(hmc_acc_file,"%d\t",conf_id_iter);
             fprintf(swap_acc_file,"%d\t",conf_id_iter);
+                  
            label_print(conf_hasenbusch, rep->replicas_total_number,file_label,conf_id_iter);
               }
             //ACCEPTANCE FILES PRINT
