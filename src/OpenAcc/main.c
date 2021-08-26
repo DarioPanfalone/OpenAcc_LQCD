@@ -100,9 +100,7 @@ int main(int argc, char* argv[]){
     gettimeofday ( &(mc_params.start_time), NULL );
     
     
-    
-    FILE *file_label=fopen("./file_label.txt","at");
-    if(!file_label){file_label=fopen("./file_label.txt","wt");}
+   
     
     
     
@@ -821,7 +819,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 }
                 
                 printf("CONF SWAP HERE!\n ");
-                All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates,file_label, &swap_number,all_swap_vector,acceptance_vector);
+                All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                
         
@@ -831,6 +829,12 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
     
             FILE *hmc_acc_file;
             FILE *swap_acc_file;
+            FILE *file_label;
+            
+            if(rep->replicas_total_number>1){
+            fopen("./file_label.txt","at");
+            if(!file_label){file_label=fopen("./file_label.txt","wt");}
+            }
             
             if(rep->replicas_total_number>1){
             hmc_acc_file=fopen("./hmc_acc_file.txt","at");
@@ -854,6 +858,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
               if(rep->replicas_total_number>1){
             fprintf(hmc_acc_file,"%d\t",conf_id_iter);
             fprintf(swap_acc_file,"%d\t",conf_id_iter);
+           label_print(conf_hasenbusch, rep->replicas_total_number,file_label,conf_id_iter);
               }
             //ACCEPTANCE FILES PRINT
             
@@ -873,12 +878,15 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
             
               if(rep->replicas_total_number>1){
+                  
+                  
             
            fprintf(hmc_acc_file,"\n");
            fprintf(swap_acc_file,"\n");
             
             fclose(hmc_acc_file);
             fclose(swap_acc_file);
+            fclose(file_label);
             
               }
         
@@ -1352,7 +1360,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 #ifdef MULTIDEVICE
     shutdown_multidev();
 #endif
-      fclose(file_label);
+
     
     
     printf("The End\n");

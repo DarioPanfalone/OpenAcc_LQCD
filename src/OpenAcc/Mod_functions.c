@@ -2258,12 +2258,12 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
                    __restrict su3_soa * const loc_plaq, //la placchetta locale.
                    dcomplex_soa * const tr_local_plaqs,
                    
-                   int replicas_number, int defect_axis, int * defect_coordinates, FILE *file_label, int* swap_num,int * all_swap_vet,int * acceptance_vet ){
+                   int replicas_number, int defect_axis, int * defect_coordinates, int* swap_num,int * all_swap_vet,int * acceptance_vet ){
     double swap_order=casuale();
     int accettata=0;
     int i_counter, j_counter;
  
-    if(*swap_num==0){ label_print(conf_hasenbusch, replicas_number,file_label,*swap_num);}
+   
     if(swap_order<=0.5){
         
         
@@ -2276,7 +2276,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
             printf("proposed: all_swap_vet %d\n",all_swap_vet[i_counter]);
             
             *swap_num=*swap_num+1;
-            label_print(conf_hasenbusch, replicas_number,file_label,*swap_num);
+           
             all_swap_vet[i_counter]++;
             //all_swap_vet[i_counter+1]++;
             printf("proposed: all_swap_vet %d\n",all_swap_vet[i_counter]);
@@ -2303,7 +2303,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
         accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2,defect_axis,defect_coordinates);
 #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             *swap_num=*swap_num+1;
-        label_print(conf_hasenbusch, replicas_number,file_label,*swap_num);
+        
             //all_swap_vet[replicas_number-i_counter-1]++;
             all_swap_vet[replicas_number-i_counter-2]++;
             
