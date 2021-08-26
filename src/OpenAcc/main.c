@@ -825,6 +825,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
         
                 
             }//end for
+            
+            printf("debug_control\n");
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
     
             FILE *hmc_acc_file;
@@ -854,7 +856,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             conf_id_iter++;
              //-----------------------------------------------//
             
-            
+              printf("debug_control 2\n");
               if(rep->replicas_total_number>1){
             fprintf(hmc_acc_file,"%d\t",conf_id_iter);
             fprintf(swap_acc_file,"%d\t",conf_id_iter);
@@ -862,6 +864,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
               }
             //ACCEPTANCE FILES PRINT
             
+            
+             printf("debug_control 3\n");
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
                 if(mu1<rep->replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
