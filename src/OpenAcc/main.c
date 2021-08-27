@@ -845,8 +845,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             if(!hmc_acc_file){hmc_acc_file=fopen(acc_info->hmc_file_name,"wt");}
             
             
-            swap_acc_file=fopen(acc->swap_file_name,"at");
-            if(!swap_acc_file){swap_acc_file=fopen(acc->swap_file_name,"wt");}
+            swap_acc_file=fopen(acc_info->swap_file_name,"at");
+            if(!swap_acc_file){swap_acc_file=fopen(acc_info->swap_file_name,"wt");}
             }
             
             
