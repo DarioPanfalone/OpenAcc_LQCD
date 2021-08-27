@@ -1136,7 +1136,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
 
 //********************************************************************************************************************************************//
 
-int read_acceptance_numbers(acc_info * acp,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
+int read_acceptance_numbers(accept_info * acp,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
 
 
     par_info tp[]= {
