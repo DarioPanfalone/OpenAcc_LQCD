@@ -833,30 +833,36 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             printf("debug_control\n");
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
     
-       
-            
-            if(rep->replicas_total_number>1){
-            file_label=fopen(acc_info->file_label_name,"at");
-            if(!file_label){file_label=fopen(acc_info->file_label_name,"wt");}
-            }
-            
-            if(rep->replicas_total_number>1){
-            hmc_acc_file=fopen(acc_info->hmc_file_name,"at");
-            if(!hmc_acc_file){hmc_acc_file=fopen(acc_info->hmc_file_name,"wt");}
-            
-            
-            swap_acc_file=fopen(acc_info->swap_file_name,"at");
-            if(!swap_acc_file){swap_acc_file=fopen(acc_info->swap_file_name,"wt");}
-            }
+            id_iter++;
+            conf_id_iter++;
             
             
             
             
             //-----------------------------------------------//
             
-            id_iter++;
-            conf_id_iter++;
+           
              //-----------------------------------------------//
+            printf("MPI%02d - Printing acc obs - only by master rank...\n",
+                   devinfo.myrank);
+            if(devinfo.myrank ==0){
+                
+                if(rep->replicas_total_number>1){
+                    file_label=fopen(acc_info->file_label_name,"at");
+                    if(!file_label){file_label=fopen(acc_info->file_label_name,"wt");}
+                }
+                
+                if(rep->replicas_total_number>1){
+                    hmc_acc_file=fopen(acc_info->hmc_file_name,"at");
+                    if(!hmc_acc_file){hmc_acc_file=fopen(acc_info->hmc_file_name,"wt");}
+                    
+                    
+                    swap_acc_file=fopen(acc_info->swap_file_name,"at");
+                    if(!swap_acc_file){swap_acc_file=fopen(acc_info->swap_file_name,"wt");}
+                }
+                
+                
+            
             
               printf("debug_control 2\n");
               if(rep->replicas_total_number>1){
@@ -899,7 +905,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
               }
         
-            
+            }
           
             //-------------------------------------------------// 
 
