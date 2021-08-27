@@ -810,8 +810,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                     double acc_err = 
                         sqrt((double)accettate_metro[replicas_counter]*(iterations[replicas_counter]-accettate_metro[replicas_counter])/iterations[replicas_counter])
                         /iterations[replicas_counter];
-                    printf("Estimated acceptance for this run: %f +- %f\n",acceptance,
-                            acc_err);
+                    printf("Estimated acceptance for this run [replica %d]: %f +- %f\n. Iterations: %d",replicas_counter,acceptance,
+                            acc_err, iterations[replicas_counter]);
                     
                 }
                

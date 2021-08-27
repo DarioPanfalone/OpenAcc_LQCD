@@ -16,6 +16,7 @@
 #include "./fermion_parameters.h"
 #include "./hash.h"
 #include "./rep_info.h"
+#include "./acceptances_info.h"
 #include "./montecarlo_parameters.h"
 #include "./setting_file_parser.h"
 #include "./inverter_tricks.h"
@@ -73,7 +74,8 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "DebugSettings"          ,  // 10
     "InverterTricks"         ,  // 11
     "TestSettings"           ,   // 12
-    "Replicas numbers"          //13
+    "Replicas numbers"       ,   //13
+    "AcceptancesMeasuresSettings" //14
 };
 enum pmg_types {  //ricorda enum gli da valore da 0 a n-1. Perciò l'ultimo è davvero il numero di tutti i gruppi. qui va aggiunto replicas. (MOD)
     PMG_ACTION         ,
@@ -90,6 +92,7 @@ enum pmg_types {  //ricorda enum gli da valore da 0 a n-1. Perciò l'ultimo è d
     PMG_INVERTER_TRICKS,
     PMG_TESTS          ,
     PMG_REPLICAS       ,
+    PMG_ACCEPTANCES
     NPMGTYPES};
     
 
@@ -1132,6 +1135,27 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
 }
 
 //********************************************************************************************************************************************//
+
+int read_acceptance_numbers(acc_info * acp,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
+
+
+    par_info tp[]= {
+        //ti è un puntatore a test_info.
+        
+        //qui si definisce questo vettore tp, che  ha come elementi, struct par_info e come elementi, 1 indirizzo in cui ti punta a deodoeiteration. 2 Type int, nome del coso, NULL(dovrebbe essere il default value), NULL(un eventuale commento).
+        (par_info){(void*) &(acp->hmc_file_name),TYPE_STR,"Hmc_file_name",NULL, NULL},
+        (par_info){(void*) &(acp->swap_file_name),TYPE_STR,"Swap_file_name",NULL, NULL},
+        (par_info){(void*) &(acp->file_label_name),TYPE_STR,"Label_file_name",NULL,NULL},
+
+    };
+
+    int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
+    
+    if(!res) {printf("ERROR: wrong acceptances'filename reading!!\n");}
+    
+    return res;
+
+}
 //********************************************************************************************************************************************//
 
 
@@ -1326,6 +1350,12 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 check = read_replicas_numbers(rep,filelines,startline,endline) ;
               
                 break;
+                
+            case PMG_ACCEPTANCES       :
+                check = read_acceptance_numbers(acc_info,filelines,startline,endline) ;
+                
+                break;
+
             default:
                 printf("TAG TYPE NOT RECOGNIZED\n");
                 return 1;
