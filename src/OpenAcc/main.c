@@ -780,6 +780,9 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
             
             
+            for(mu1=0;mu1<rep->replicas_total_number-1;mu1++){
+                acceptance_vector_old[mu1]=acceptance_vector[mu1];
+            }
         
 
             //--------- CONF UPDATE ----------------//
@@ -816,9 +819,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
                 //QUI VA IL CONF SWAP
                 
-                for(mu1=0;mu1<rep->replicas_total_number-1;mu1++){
-                    acceptance_vector_old[mu1]=acceptance_vector[mu1];
-                }
+             
                 
                 printf("CONF SWAP HERE!\n ");
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates, &swap_number,all_swap_vector,acceptance_vector);
@@ -859,9 +860,11 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
               printf("debug_control 2\n");
               if(rep->replicas_total_number>1){
             fprintf(hmc_acc_file,"%d\t",conf_id_iter);
+                               printf("debug_control 2.3\n");
             fprintf(swap_acc_file,"%d\t",conf_id_iter);
-                  
+                  printf("debug_control 2.5\n");
            label_print(conf_hasenbusch, rep->replicas_total_number,file_label,conf_id_iter);
+                               printf("debug_control 2.7\n");
               }
             //ACCEPTANCE FILES PRINT
             
