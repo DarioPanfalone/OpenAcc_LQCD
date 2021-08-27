@@ -92,7 +92,7 @@ enum pmg_types {  //ricorda enum gli da valore da 0 a n-1. Perciò l'ultimo è d
     PMG_INVERTER_TRICKS,
     PMG_TESTS          ,
     PMG_REPLICAS       ,
-    PMG_ACCEPTANCES
+    PMG_ACCEPTANCES    ,
     NPMGTYPES};
     
 
