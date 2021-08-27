@@ -1151,7 +1151,7 @@ int read_acceptance_numbers(accept_info * acp,char filelines[MAXLINES][MAXLINELE
 
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
     
-    if(!res) {printf("ERROR: wrong acceptances'filename reading!!\n");}
+    if(res!=1) {printf("ERROR: wrong acceptances'filename reading!!\n");}
     
     return res;
 

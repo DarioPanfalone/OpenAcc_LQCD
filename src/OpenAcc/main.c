@@ -836,17 +836,17 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
        
             
             if(rep->replicas_total_number>1){
-            file_label=fopen("./file_label.txt","at");
-            if(!file_label){file_label=fopen("./file_label.txt","wt");}
+            file_label=fopen(acc_info->file_label_name,"at");
+            if(!file_label){file_label=fopen(acc_info->file_label_name,"wt");}
             }
             
             if(rep->replicas_total_number>1){
-            hmc_acc_file=fopen("./hmc_acc_file.txt","at");
-            if(!hmc_acc_file){hmc_acc_file=fopen("./hmc_acc_file.txt","wt");}
+            hmc_acc_file=fopen(acc_info->hmc_file_name,"at");
+            if(!hmc_acc_file){hmc_acc_file=fopen(acc_info->hmc_file_name,"wt");}
             
             
-            swap_acc_file=fopen("./swap_acc_file.txt","at");
-            if(!swap_acc_file){swap_acc_file=fopen("./swap_acc_file.txt","wt");}
+            swap_acc_file=fopen(acc->swap_file_name,"at");
+            if(!swap_acc_file){swap_acc_file=fopen(acc->swap_file_name,"wt");}
             }
             
             
