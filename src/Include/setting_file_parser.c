@@ -1223,7 +1223,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         printf("last\n");
         rep =(rep_info*) malloc(sizeof(rep_info)); //funziona?
         
-       
+        acc_info =(acceptances_info*) malloc(sizeof(acceptances_info));
         
         
         // see global var in /Include/fermion_parameters.
