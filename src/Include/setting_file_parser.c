@@ -1351,7 +1351,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
               
                 break;
                 
-            case PMG_ACCEPTANCES       :
+            case PMG_ACCEPTANCES :
                 check = read_acceptance_numbers(acc_info,filelines,startline,endline) ;
                 
                 break;
