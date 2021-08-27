@@ -835,7 +835,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
        
             
             if(rep->replicas_total_number>1){
-            fopen("./file_label.txt","at");
+            file_label=fopen("./file_label.txt","at");
             if(!file_label){file_label=fopen("./file_label.txt","wt");}
             }
             
