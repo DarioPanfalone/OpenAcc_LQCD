@@ -306,7 +306,8 @@ int init_k_test(su3_soa *conf_acc,int c_r){
             if(conf_acc[mu1].K.d[kk2]!=(1 && c_r)){
                 return 1;
             }
-        printf("%d:ku[%d]:%f\n",mu1,kk2,conf_acc[mu1].K.d[kk2]);
+            if(conf_acc[mu1].K.d[kk2]==c_r){
+                printf("%d:ku[%d]:%f\n",mu1,kk2,conf_acc[mu1].K.d[kk2]);}
         }
     }
     return 0;

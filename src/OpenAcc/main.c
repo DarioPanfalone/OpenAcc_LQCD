@@ -425,10 +425,17 @@ int main(int argc, char* argv[]){
             conf_hasenbusch[replicas_counter][mu1].label=replicas_counter;
         }
     int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates);
-   #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+  
         
     if(init_result!=0){printf("Error in Initialization Replica %d!\n",replicas_counter); return 1;};
     
+    }
+    
+     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+    
+    for(i=0;i<rep->replicas_total_number;i++){
+        printf("test replica %d\n",i);
+        init_k_test(conf_hasenbusch[i],cr_vet[i]);
     }
     
         printf(" Initialization K_mu success\n");
