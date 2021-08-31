@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # This script does some work for converting
 
 from sys import argv,exit
