@@ -433,9 +433,9 @@ int main(int argc, char* argv[]){
     
      #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
     
-    for(i=0;i<rep->replicas_total_number;i++){
-        printf("test replica %d\n",i);
-        init_k_test(conf_hasenbusch[i],cr_vet[i]);
+    for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+        printf("test replica %d\n",replicas_counter);
+        init_k_test(conf_hasenbusch[replicas_counter],cr_vet[replicas_counter]);
     }
     
         printf(" Initialization K_mu success\n");
