@@ -1,5 +1,5 @@
-#!/usr/bin/python2 
-# This script does some work for converting 
+#!/usr/bin/python2.7
+# This script does some work for converting
 
 from sys import argv,exit
 import os 
