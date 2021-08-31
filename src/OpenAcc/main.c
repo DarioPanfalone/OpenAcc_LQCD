@@ -435,7 +435,7 @@ int main(int argc, char* argv[]){
     
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
         printf("test replica %d\n",replicas_counter);
-        init_k_test(conf_hasenbusch[replicas_counter],cr_vet[replicas_counter]);
+        init_k_test(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter]);
     }
     
         printf(" Initialization K_mu success\n");
