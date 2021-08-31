@@ -303,12 +303,15 @@ int init_k_test(su3_soa *conf_acc,int c_r){
     int mu1=0;
     for(mu1=0;mu1<8;mu1++){
         for(kk2=0;kk2<sizeh;kk2++){
+            
             if(conf_acc[mu1].K.d[kk2]!=(1 && c_r)){
                 return 1;
             }
+            
             if(conf_acc[mu1].K.d[kk2]==c_r){
                 printf("%d:ku[%d]:%f\n",mu1,kk2,conf_acc[mu1].K.d[kk2]);}
         }
+         printf("%d:ku[%d]:%f\n",mu1,kk2,conf_acc[mu1].K.d[kk2]);
     }
     return 0;
 }
