@@ -461,8 +461,8 @@ int main(int argc, char* argv[]){
         
         for(mu1=0;mu1<8;mu1++){
             for(mu2=0;mu2<sizeh;mu2++){
-                if(conf_hasenbusch[replicas_counter][mu1].K.d[mu2]==cr_vet[replicas_counter]){
-                printf("%d %d %d %f\n",replicas_counter,mu1,mu2,conf_hasenbusch[replicas_counter][mu1].K.d[mu2])
+                if(conf_hasenbusch[replicas_counter][mu1].K.d[mu2]==rep->cr_vet[replicas_counter]){
+                    printf("%d %d %d %f\n",replicas_counter,mu1,mu2,conf_hasenbusch[replicas_counter][mu1].K.d[mu2]);
                 }
                 
             }
