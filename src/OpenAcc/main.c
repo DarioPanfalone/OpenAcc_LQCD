@@ -434,7 +434,7 @@ int main(int argc, char* argv[]){
      #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
     
     for(replicas_counter=1;replicas_counter<rep->replicas_total_number;replicas_counter++){
-        printf("test replica %d\n",replicas_counter);
+        printf("test replica %d cr %d\n",replicas_counter,rep->cr_vet[replicas_counter]);
         printf("%f\n",conf_hasenbusch[replicas_counter][1].K.d[7]);
         printf("%f\n",conf_hasenbusch[replicas_counter][0].K.d[15]);
         init_k_test(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter]);
