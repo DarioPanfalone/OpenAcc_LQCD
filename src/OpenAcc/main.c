@@ -458,7 +458,15 @@ int main(int argc, char* argv[]){
         printf("test replica %d cr %f\n",replicas_counter,rep->cr_vet[replicas_counter]);
         printf("%f\n",conf_hasenbusch[replicas_counter][1].K.d[7]);
         printf("%f\n",conf_hasenbusch[replicas_counter][0].K.d[15]);
-        init_k_test(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter]);
+        
+        for(mu1=0;mu1<8;mu1++){
+            for(mu2=0;mu2<sizeh;mu2++){
+                if(conf_hasenbusch[replicas_counter][mu1].K.d[mu2]==cr_vet[replicas_counter]){
+                printf("%d %d %d %f\n",replicas_counter,mu1,mu2,conf_hasenbusch[replicas_counter][mu1].K.d[mu2])
+                }
+                
+            }
+        }
     }
     
      printf(" Initialization K_mu success\n");

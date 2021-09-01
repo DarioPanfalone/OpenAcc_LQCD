@@ -301,9 +301,11 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
 int init_k_test(su3_soa *conf_acc,double c_r){
     int kk2=0;
     int mu1=0;
+    
+
     for(mu1=0;mu1<8;mu1++){
         for(kk2=0;kk2<sizeh;kk2++){
-            
+        
             if(conf_acc[mu1].K.d[kk2]!=(1 && c_r)){
                 return 1;
             }
