@@ -298,7 +298,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
 
 
 //function that tested the initialization of k_mu  by setting every value to one. //OUTADATED
-int init_k_test(su3_soa *conf_acc,int c_r){
+int init_k_test(su3_soa *conf_acc,double c_r){
     int kk2=0;
     int mu1=0;
     for(mu1=0;mu1<8;mu1++){
