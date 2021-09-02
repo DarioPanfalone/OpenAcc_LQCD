@@ -412,9 +412,13 @@ int main(int argc, char* argv[]){
     printf("aux_conf_init\n");
     init_k(aux_conf_acc,1,0,vet_aux_bound);
     init_k(auxbis_conf_acc,1,0,vet_aux_bound);
+    init_k(conf_acc_bkp,1,0,vet_aux_bound);
+     init_k(conf_acc_bkp,1,0,glocal_staples);
     
     #pragma acc update device(aux_conf_acc[0:8])
      #pragma acc update device(auxbis_conf_acc[0:8])
+     #pragma acc update device(conf_acc_bkp[0:8])
+    #pragma acc update device(glocal_staples[0:8])
     
     
     printf("Ecco i valori dei cr:\n");
