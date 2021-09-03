@@ -33,7 +33,7 @@ void calc_ipdot_gauge_soloopenacc_std(
 #endif
 
     set_su3_soa_to_zero(local_staples);
-    calc_loc_staples_nnptrick_all(tconf_acc,local_staples,aux_conf); //CALCOLO STAPLES DA MODIFICARE.
+    calc_loc_staples_nnptrick_all(tconf_acc,local_staples,aux_conf_acc); //CALCOLO STAPLES DA MODIFICARE.
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
@@ -70,7 +70,7 @@ void calc_ipdot_gauge_soloopenacc_tlsm(
 #endif
 
     set_su3_soa_to_zero(local_staples);
-    calc_loc_staples_nnptrick_all(tconf_acc,local_staples);
+    calc_loc_staples_nnptrick_all(tconf_acc,local_staples,aux_conf_acc);
 
     // QUESTA CHE FA TUTTO IN UNA BOTTA SEMBRA ANDARE PIU' PIANO
     //    calc_loc_improved_staples_typeABC_nnptrick_all(tconf_acc,local_staples);
