@@ -55,7 +55,7 @@ su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases
 //CONF HASENBUSCH
 
 su3_soa ** conf_hasenbusch;
-su3_soa*staple_aux_conf ;
+
 
 
 // STOUTING 
