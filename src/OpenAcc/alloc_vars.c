@@ -57,6 +57,7 @@ su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases
 su3_soa ** conf_hasenbusch;
 
 
+
 // STOUTING 
 su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth
 su3_soa * glocal_staples;

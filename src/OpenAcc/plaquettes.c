@@ -109,7 +109,8 @@ double calc_loc_plaquettes_nnptrick(
 //This function doesn't have a mu, nu parameters. It just compute all staples.
 void calc_loc_staples_nnptrick_all(  
         __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap )
+        __restrict su3_soa * const loc_stap,
+           __restrict su3_soa * const aux_loc_stap,  )
 {
   //       r+mu-nu  r+mu   r+mu+nu
   //          +<-----+----->+
@@ -124,6 +125,9 @@ void calc_loc_staples_nnptrick_all(
 
   int d0, d1, d2, d3, mu, iter;
                double K_mu;//MOD
+    
+    
+    
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3)
