@@ -32,7 +32,8 @@ void calc_ipdot_gauge_soloopenacc_std(
     gettimeofday ( &t1, NULL );
 #endif
 
-    set_su3_soa_to_zero(local_staples);
+    set_su3_soa_to_zero(local_staples); //trovato. Qui manda a zero le local staples
+    print("LOCAL STAPLES SET TO ZERO\n");
     calc_loc_staples_nnptrick_all(tconf_acc,local_staples); //CALCOLO STAPLES DA MODIFICARE.
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 
