@@ -1101,7 +1101,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
         }
         
         
-        res_R_p=C_ZERO*BETA_BY_THREE *res_R_p;
+        res_R_p=BETA_BY_THREE *res_R_p;
     
         return res_R_p;
     }// closes routine
