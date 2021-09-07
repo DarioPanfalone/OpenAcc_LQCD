@@ -474,7 +474,7 @@ int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_n
 //Function which chooses the plane and iterate only on useful them.
 
 
-double  calc_plaquette_soloopenacc_SWAP(
+double  calc_Delta_soloopenacc_SWAP(
                                    __restrict  su3_soa * const tconf_acc,
                                         __restrict  su3_soa * const tconf_acc2,
                                    __restrict su3_soa * const local_plaqs,
@@ -503,12 +503,12 @@ double  calc_plaquette_soloopenacc_SWAP(
                      if(nu==2){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1]+1;def_vet_2[2]=def_vet[2];}
                      if(nu==3){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2]+1;}
                       */
-                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
+                result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                  }
                 
                 
                 if(improved==1){
-                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                    result  += calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                 
                     
                 }
@@ -526,11 +526,11 @@ double  calc_plaquette_soloopenacc_SWAP(
                 if(nu!=mu){
                  //     printf("(%d,%d)\n",mu,nu);
                      if(improved==0){
-                result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
+                result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                      }
                     
                     if(improved==1){
-                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                        result  += calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                         
                         
                     }
@@ -550,10 +550,10 @@ double  calc_plaquette_soloopenacc_SWAP(
                 if(nu!=mu){
                    //   printf("(%d,%d)\n",mu,nu);
                     if(improved==0){
-                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
+                    result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
                     }
                     if(improved==1){
-                        result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                        result  += calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                         
                         
                     }
@@ -571,10 +571,10 @@ double  calc_plaquette_soloopenacc_SWAP(
              //     printf("(%d,%d)\n",mu,nu);
                 // sommo i 6 risultati in tempo
                  if(improved==0){
-                    result  += calc_loc_plaquettes_nnptrick_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
+                    result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here all the plaquettes of a specific plane's choice are computed.
                  }
                 if(improved==1){
-                    result  += calc_loc_plaquettes_rectangles_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                    result  += calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
                     
                 }
                 
@@ -603,7 +603,7 @@ double  calc_plaquette_soloopenacc_SWAP(
 }
 
 
-double calc_loc_plaquettes_nnptrick_SWAP(
+double calc_Delta_S_Wilson_SWAP(
     __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
     __restrict const su3_soa * const w,
     __restrict su3_soa * const loc_plaq, //la placchetta locale.
@@ -1108,7 +1108,7 @@ double calc_loc_plaquettes_nnptrick_SWAP(
 
 
 
-double calc_loc_plaquettes_rectangles_SWAP(
+double calc_Delta_S_Symanzik_SWAP(
 __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
 __restrict const su3_soa * const w,
 __restrict su3_soa * const loc_plaq, //la placchetta locale.
@@ -2219,7 +2219,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     double Delta_S_SWAP;
     int accettata=0;
     
-      Delta_S_SWAP=calc_plaquette_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);
+      Delta_S_SWAP=calc_Delta_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);
     
     printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
     if(Delta_S_SWAP<0){
