@@ -2224,6 +2224,8 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
     if(Delta_S_SWAP<0){
         accettata=1;
+        printf(" p1 p2 :%f %f\n",p1,p2);
+
     }
     else
     {  p1=exp(-Delta_S_SWAP);
@@ -2279,8 +2281,9 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
         for(i_counter=0;i_counter<replicas_number-1;i_counter++){
             printf("%d %d\n",i_counter,i_counter+1);
             
-            accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1,defect_axis,defect_coordinates);
             #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
+            accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1,defect_axis,defect_coordinates);
+            #pragma acc update self(conf_hasenbusch[0:replicas_number][0:8])
             
             printf("proposed: all_swap_vet %d\n",all_swap_vet[i_counter]);
             
@@ -2298,19 +2301,15 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
             
         }
         
-        
-        
-        
-     
-        
     }
     else{
         
         for(i_counter=0;i_counter<replicas_number-1;i_counter++){
         printf("%d %d\n",replicas_number-1-i_counter,replicas_number-i_counter-2);
-        
+            
+         #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
         accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2,defect_axis,defect_coordinates);
-#pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
+        #pragma acc update self(conf_hasenbusch[0:replicas_number][0:8])
             *swap_num=*swap_num+1;
         
             //all_swap_vet[replicas_number-i_counter-1]++;

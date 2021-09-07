@@ -860,7 +860,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 }
                
             }
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
+#pragma acc update self(conf_hasenbusch[replicas_counter][0:8]) //updating conf sulla gpu.
                 //QUI VA IL CONF SWAP
                 
              
@@ -874,7 +874,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }//end for
             
             printf("debug_control\n");
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sul device
+#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
     
             id_iter++;
             conf_id_iter++;
