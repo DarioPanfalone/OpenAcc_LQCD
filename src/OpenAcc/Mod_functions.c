@@ -2251,7 +2251,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     
     
     
-    if (accettata==1){
+    if (accettata==1 &&  0==devinfo.myrank){
         replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],defect_axis,defect_coordinates);
         }
     
@@ -2284,8 +2284,11 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
             accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1,defect_axis,defect_coordinates);
             #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             
-            printf("proposed: all_swap_vet %d\n",all_swap_vet[i_counter]);
-            
+          
+            if(0==devinfo.myrank){
+                
+                printf("proposed: all_swap_vet %d\n",all_swap_vet[i_counter]);
+                
             *swap_num=*swap_num+1;
            
             all_swap_vet[i_counter]++;
@@ -2296,7 +2299,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
                 acceptance_vet[i_counter]++;
              //   acceptance_vet[i_counter+1]++;
             }
-        
+         }
             
         }
         
@@ -2310,6 +2313,8 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
         
         accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2,defect_axis,defect_coordinates);
 #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
+            
+             if(0==devinfo.myrank){
             *swap_num=*swap_num+1;
         
             //all_swap_vet[replicas_number-i_counter-1]++;
@@ -2320,8 +2325,8 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
                acceptance_vet[replicas_number-i_counter-2]++;
             }
             
-            
         }
+     }
         
         
     }
