@@ -2335,7 +2335,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
 }
 
 
-void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf, int step){
+void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     set_su3_soa_to_su3_soa(&tconf_acc,&taux_conf);// conf_aux=conf_acc
     
     
