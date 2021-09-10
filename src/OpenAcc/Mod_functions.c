@@ -2335,5 +2335,73 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
 }
 
 
+void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf, int step){
+    set_su3_soa_to_su3_soa(&tconf_acc,&taux_conf);// conf_aux=conf_acc
+    
+    
+    int i,j,z,t; int idxh=0;
+    int parity=0;
+    int mu=0;
+    for(mu=0;mu<4;mu++){
+        for(t=0;t<nd3;t++) {
+            for (z=0; z<nd2; z++){
+                for(j=0;j<nd1;j++){
+                    for(i=0;i<nd0;i++){
+        
+                        idxh=snum_acc(i,j,z,k);
+                        parity= (i+j+z+t) % 2;
+            
+            idxpnu = nnp_openacc[idxh][mu][parity];// r+nu //the table that states which is the nearest neighbour.
+            
+            if(parity==0){
+                tconf_acc[2*mu]->r0.c0[idxh]=taux_acc[2*mu]->r0.c0[idxpnu];
+                tconf_acc[2*mu]->r0.c1[idxh]=taux_acc[2*mu]->r0.c1[idxpnu];
+                tconf_acc[2*mu]->r0.c2[idxh]=taux_acc[2*mu]->r0.c2[idxpnu];
+                
+                tconf_acc[2*mu]->r1.c0[idxh]=taux_acc[2*mu]->r0.c0[idxpnu];
+                tconf_acc[2*mu]->r1.c1[idxh]=taux_acc[2*mu]->r0.c1[idxpnu];
+                tconf_acc[2*mu]->r1.c2[idxh]=taux_acc[2*mu]->r0.c2[idxpnu];
+                
+                
+                tconf_acc[2*mu]->r2.c0[idxh]=taux_acc[2*mu]->r2.c0[idxpnu];
+                tconf_acc[2*mu]->r2.c1[idxh]=taux_acc[2*mu]->r2.c1[idxpnu];
+                tconf_acc[2*mu]->r2.c2[idxh]=taux_acc[2*mu]->r2.c2[idxpnu];
+                
+                        }
+             if(parity==1){
+                 
+                 tconf_acc[2*mu+1]->r0.c0[idxh]=taux_acc[2*mu+1]->r0.c0[idxpnu];
+                 tconf_acc[2*mu+1]->r0.c1[idxh]=taux_acc[2*mu+1]->r0.c1[idxpnu];
+                 tconf_acc[2*mu+1]->r0.c2[idxh]=taux_acc[2*mu+1]->r0.c2[idxpnu];
+                 
+                 tconf_acc[2*mu+1]->r1.c0[idxh]=taux_acc[2*mu+1]->r0.c0[idxpnu];
+                 tconf_acc[2*mu+1]->r1.c1[idxh]=taux_acc[2*mu+1]->r0.c1[idxpnu];
+                 tconf_acc[2*mu+1]->r1.c2[idxh]=taux_acc[2*mu+1]->r0.c2[idxpnu];
+                 
+                 
+                 tconf_acc[2*mu+1]->r2.c0[idxh]=taux_acc[2*mu+1]->r2.c0[idxpnu];
+                 tconf_acc[2*mu+1]->r2.c1[idxh]=taux_acc[2*mu+1]->r2.c1[idxpnu];
+                 tconf_acc[2*mu+1]->r2.c2[idxh]=taux_acc[2*mu+1]->r2.c2[idxpnu];
+                 
+                 
+                 
+             }
+                        
+                        
+                        
+                    }//close for x
+                }//y
+            }//z
+        }//t
+        
+       
+        
+    }//mu
+    
+    return;
+}
+    
+    
+    
 
 

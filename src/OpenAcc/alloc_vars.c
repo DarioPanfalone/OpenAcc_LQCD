@@ -27,7 +27,8 @@ su3_soa  * conf_acc; // the gauge configuration.
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
 // if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
-su3_soa  * auxbis_conf_acc; // auxiliary 
+su3_soa  * auxbis_conf_acc; // auxiliary
+su3_soa  * auxtris_conf_acc;
 double_soa * u1_back_phases; //Background,staggered,chempot phases
                              // 8 for each flavour
 
@@ -215,9 +216,16 @@ void mem_alloc_extended()
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check, aux_conf_acc );
 #pragma acc enter data create(aux_conf_acc[0:8])
+    
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, auxbis_conf_acc ) ;
 #pragma acc enter data create(auxbis_conf_acc[0:8])
+    
+    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&auxtris_conf_acc, ALIGN, 8*sizeof(su3_soa));
+    ALLOCCHECK(allocation_check, auxtris_conf_acc ) ;
+#pragma acc enter data create(auxtris_conf_acc[0:8])
+    
+    
 
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
         ALLOCCHECK(allocation_check, conf_acc_bkp) ;
@@ -408,7 +416,10 @@ void mem_free_extended()
     FREECHECK(aux_conf_acc);          
 #pragma acc exit data delete(aux_conf_acc)          
     FREECHECK(auxbis_conf_acc);       
-#pragma acc exit data delete(auxbis_conf_acc)       
+#pragma acc exit data delete(auxbis_conf_acc)
+    
+    FREECHECK(auxtris_conf_acc);
+#pragma acc exit data delete(auxtris_conf_acc)
 
 
     if(alloc_info.stoutAllocations){
