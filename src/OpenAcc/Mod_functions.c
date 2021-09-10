@@ -2355,34 +2355,34 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf, int step){
             idxpnu = nnp_openacc[idxh][mu][parity];// r+nu //the table that states which is the nearest neighbour.
             
             if(parity==0){
-                tconf_acc[2*mu]->r0.c0[idxh]=taux_acc[2*mu]->r0.c0[idxpnu];
-                tconf_acc[2*mu]->r0.c1[idxh]=taux_acc[2*mu]->r0.c1[idxpnu];
-                tconf_acc[2*mu]->r0.c2[idxh]=taux_acc[2*mu]->r0.c2[idxpnu];
+                tconf_acc[2*mu]->r0.c0[idxh]=taux_conf[2*mu]->r0.c0[idxpnu];
+                tconf_acc[2*mu]->r0.c1[idxh]=taux_conf[2*mu]->r0.c1[idxpnu];
+                tconf_acc[2*mu]->r0.c2[idxh]=taux_conf[2*mu]->r0.c2[idxpnu];
                 
-                tconf_acc[2*mu]->r1.c0[idxh]=taux_acc[2*mu]->r0.c0[idxpnu];
-                tconf_acc[2*mu]->r1.c1[idxh]=taux_acc[2*mu]->r0.c1[idxpnu];
-                tconf_acc[2*mu]->r1.c2[idxh]=taux_acc[2*mu]->r0.c2[idxpnu];
+                tconf_acc[2*mu]->r1.c0[idxh]=taux_conf[2*mu]->r0.c0[idxpnu];
+                tconf_acc[2*mu]->r1.c1[idxh]=taux_conf[2*mu]->r0.c1[idxpnu];
+                tconf_acc[2*mu]->r1.c2[idxh]=taux_conf[2*mu]->r0.c2[idxpnu];
                 
                 
-                tconf_acc[2*mu]->r2.c0[idxh]=taux_acc[2*mu]->r2.c0[idxpnu];
-                tconf_acc[2*mu]->r2.c1[idxh]=taux_acc[2*mu]->r2.c1[idxpnu];
-                tconf_acc[2*mu]->r2.c2[idxh]=taux_acc[2*mu]->r2.c2[idxpnu];
+                tconf_acc[2*mu]->r2.c0[idxh]=taux_conf[2*mu]->r2.c0[idxpnu];
+                tconf_acc[2*mu]->r2.c1[idxh]=taux_conf[2*mu]->r2.c1[idxpnu];
+                tconf_acc[2*mu]->r2.c2[idxh]=taux_conf[2*mu]->r2.c2[idxpnu];
                 
                         }
              if(parity==1){
                  
-                 tconf_acc[2*mu+1]->r0.c0[idxh]=taux_acc[2*mu+1]->r0.c0[idxpnu];
-                 tconf_acc[2*mu+1]->r0.c1[idxh]=taux_acc[2*mu+1]->r0.c1[idxpnu];
-                 tconf_acc[2*mu+1]->r0.c2[idxh]=taux_acc[2*mu+1]->r0.c2[idxpnu];
+                 tconf_acc[2*mu+1]->r0.c0[idxh]=taux_conf[2*mu+1]->r0.c0[idxpnu];
+                 tconf_acc[2*mu+1]->r0.c1[idxh]=taux_conf[2*mu+1]->r0.c1[idxpnu];
+                 tconf_acc[2*mu+1]->r0.c2[idxh]=taux_conf[2*mu+1]->r0.c2[idxpnu];
                  
-                 tconf_acc[2*mu+1]->r1.c0[idxh]=taux_acc[2*mu+1]->r0.c0[idxpnu];
-                 tconf_acc[2*mu+1]->r1.c1[idxh]=taux_acc[2*mu+1]->r0.c1[idxpnu];
-                 tconf_acc[2*mu+1]->r1.c2[idxh]=taux_acc[2*mu+1]->r0.c2[idxpnu];
+                 tconf_acc[2*mu+1]->r1.c0[idxh]=taux_conf[2*mu+1]->r0.c0[idxpnu];
+                 tconf_acc[2*mu+1]->r1.c1[idxh]=taux_conf[2*mu+1]->r0.c1[idxpnu];
+                 tconf_acc[2*mu+1]->r1.c2[idxh]=taux_conf[2*mu+1]->r0.c2[idxpnu];
                  
                  
-                 tconf_acc[2*mu+1]->r2.c0[idxh]=taux_acc[2*mu+1]->r2.c0[idxpnu];
-                 tconf_acc[2*mu+1]->r2.c1[idxh]=taux_acc[2*mu+1]->r2.c1[idxpnu];
-                 tconf_acc[2*mu+1]->r2.c2[idxh]=taux_acc[2*mu+1]->r2.c2[idxpnu];
+                 tconf_acc[2*mu+1]->r2.c0[idxh]=taux_conf[2*mu+1]->r2.c0[idxpnu];
+                 tconf_acc[2*mu+1]->r2.c1[idxh]=taux_conf[2*mu+1]->r2.c1[idxpnu];
+                 tconf_acc[2*mu+1]->r2.c2[idxh]=taux_conf[2*mu+1]->r2.c2[idxpnu];
                  
                  
                  
