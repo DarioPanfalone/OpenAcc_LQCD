@@ -2342,13 +2342,14 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf, int step){
     int i,j,z,t; int idxh=0;
     int parity=0;
     int mu=0;
+    int idxpnu;
     for(mu=0;mu<4;mu++){
         for(t=0;t<nd3;t++) {
             for (z=0; z<nd2; z++){
                 for(j=0;j<nd1;j++){
                     for(i=0;i<nd0;i++){
         
-                        idxh=snum_acc(i,j,z,k);
+                        idxh=snum_acc(i,j,z,t);
                         parity= (i+j+z+t) % 2;
             
             idxpnu = nnp_openacc[idxh][mu][parity];// r+nu //the table that states which is the nearest neighbour.
