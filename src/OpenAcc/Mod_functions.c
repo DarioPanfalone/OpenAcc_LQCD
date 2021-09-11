@@ -23,6 +23,7 @@
 #include "./plaquettes.h"
 #include "../Include/debug.h"
 #include "../Rand/random.h"
+#include <time.h>
 
 
 
@@ -2341,13 +2342,11 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     
 
     
-    int e1,e2;
+    int e1;
     
-    e1=casuale();
-    printf("%d\n",e1);
-    e2=casuale();
-    printf("%d\n",e2);
-    e2=e2+e1;
+    e1=rand()%4;
+    
+
     
     printf("Mu is  %d\n",e2);
     
@@ -2356,6 +2355,8 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     int parity=0;
     int mu=0;
     int idxpnu;
+    
+    
     
     mu=e2;
 
