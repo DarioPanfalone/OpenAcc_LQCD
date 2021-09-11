@@ -2348,7 +2348,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     
 
     
-    printf("Mu is  %d\n",e2);
+    printf("Mu is  %d\n",e1);
     
     
     int i,j,z,t; int idxh=0;
