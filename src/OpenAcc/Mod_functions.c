@@ -2358,7 +2358,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     
     
     
-    mu=e2;
+    mu=e1;
 
         for(t=0;t<nd3;t++) {
             for (z=0; z<nd2; z++){
