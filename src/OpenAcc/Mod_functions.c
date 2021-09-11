@@ -2338,12 +2338,22 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
 void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     set_su3_soa_to_su3_soa(&tconf_acc,&taux_conf);// conf_aux=conf_acc
     
+    int e1,e2;
+    
+    e1=casuale();
+    e2=casuale();
+    e2=e2+e1;
+    
+    printf("Mu is %d\n",e2);
+    
     
     int i,j,z,t; int idxh=0;
     int parity=0;
     int mu=0;
     int idxpnu;
-    for(mu=0;mu<4;mu++){
+    
+    mu=e2;
+
         for(t=0;t<nd3;t++) {
             for (z=0; z<nd2; z++){
                 for(j=0;j<nd1;j++){
@@ -2397,7 +2407,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
         
        
         
-    }//mu
+
     
     return;
 }

@@ -412,12 +412,14 @@ int main(int argc, char* argv[]){
     printf("aux_conf_init\n");
     init_k(aux_conf_acc,1,0,vet_aux_bound);
     init_k(auxbis_conf_acc,1,0,vet_aux_bound);
+    init_k(auxtris_conf_acc,1,0,vet_aux_bound);
     /*
     init_k(conf_acc_bkp,1,0,vet_aux_bound);
      init_k(glocal_staples,1,0,vet_aux_bound);
     */
     #pragma acc update device(aux_conf_acc[0:8])
-     #pragma acc update device(auxbis_conf_acc[0:8])
+    #pragma acc update device(auxbis_conf_acc[0:8])
+    #pragma acc update device(auxtris_conf_acc[0:8])
    /*  #pragma acc update device(conf_acc_bkp[0:8])
     #pragma acc update device(glocal_staples[0:8])
     */
@@ -871,6 +873,18 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                
+                
+                //TRASLAZIONE CONF  PERIODICA.
+                
+                for(mu1=0;mu1<8;mu1++);
+                printf("before trasl: [mu1] %d\n",mu1,conf_hasenbusch[mu1].r0.c0[snum_acc(1,1,1,1)]);
+                 }
+                
+      trasl_conf(conf_hasenbusch[0],auxtris_conf_acc);
+        
+            for(mu1=0;mu1<8;mu1++);
+            printf("after trasl: [mu1] %d\n",mu1,conf_hasenbusch[mu1].r0.c0[snum_acc(1,1,1,1)]);
+        }
         
                 
             }//end for
