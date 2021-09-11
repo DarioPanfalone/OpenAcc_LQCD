@@ -873,19 +873,23 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                
-                
+              #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
                 //TRASLAZIONE CONF  PERIODICA.
                 
                 for(mu1=0;mu1<8;mu1++){
                 printf("before trasl: [mu1] %d %d\n",mu1,conf_hasenbusch[0][mu1].r0.c0[snum_acc(1,1,1,1)]);
                  }
                 
-      trasl_conf(conf_hasenbusch[0],auxtris_conf_acc);
-        
+      trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
+                
+        #pragma acc update device(conf_hasenbusch[0:r1][0:8]) //updating conf traslata sul device
+                
                 for(mu1=0;mu1<8;mu1++){
             printf("after trasl: [mu1] %d %d\n",mu1,conf_hasenbusch[0][mu1].r0.c0[snum_acc(1,1,1,1)]);
         }
+                
         
+                
                 
             }//end for
             
