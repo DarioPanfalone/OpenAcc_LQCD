@@ -882,7 +882,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
       trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
                 
-        #pragma acc update device(conf_hasenbusch[0:r1][0:8]) //updating conf traslata sul device
+        #pragma acc update device(conf_hasenbusch[0:1][0:8]) //updating conf traslata sul device
                 
                 for(mu1=0;mu1<8;mu1++){
             printf("after trasl: [mu1] %d %d\n",mu1,conf_hasenbusch[0][mu1].r0.c0[snum_acc(1,1,1,1)]);
