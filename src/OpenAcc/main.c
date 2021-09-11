@@ -875,6 +875,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                
               #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
                 //TRASLAZIONE CONF  PERIODICA.
+
+#pragma acc update device(auxtris_conf_acc[0:8]) //updating conf traslata sul device
                 
                 for(mu1=0;mu1<8;mu1++){
                 printf("before trasl: [mu1] %d %d\n",mu1,conf_hasenbusch[0][mu1].r0.c0[snum_acc(1,1,1,1)]);
