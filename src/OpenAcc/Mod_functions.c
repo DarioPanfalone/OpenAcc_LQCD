@@ -2344,10 +2344,12 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     int e1,e2;
     
     e1=casuale();
+    printf("%d\n",e1);
     e2=casuale();
+    printf("%d\n",e2);
     e2=e2+e1;
     
-    printf("Mu is %d\n",e2);
+    printf("Mu is  %d\n",e2);
     
     
     int i,j,z,t; int idxh=0;
