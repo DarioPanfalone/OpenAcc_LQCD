@@ -876,13 +876,13 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 //TRASLAZIONE CONF  PERIODICA.
                 
-                for(mu1=0;mu1<8;mu1++);
+                for(mu1=0;mu1<8;mu1++){
                 printf("before trasl: [mu1] %d %d\n",mu1,conf_hasenbusch[0][mu1].r0.c0[snum_acc(1,1,1,1)]);
                  }
                 
       trasl_conf(conf_hasenbusch[0],auxtris_conf_acc);
         
-            for(mu1=0;mu1<8;mu1++);
+                for(mu1=0;mu1<8;mu1++){
             printf("after trasl: [mu1] %d %d\n",mu1,conf_hasenbusch[0][mu1].r0.c0[snum_acc(1,1,1,1)]);
         }
         
