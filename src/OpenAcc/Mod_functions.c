@@ -2349,6 +2349,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
 
     
     printf("Mu is  %d\n",e1);
+  
     
     
     int i,j,z,t; int idxh=0;
@@ -2356,7 +2357,10 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     int mu=0;
     int idxpnu;
     
+    printf("conf e conf aux :%f || %f\n", tconf_acc[2*mu].r0.c0[snum_acc(1,1,1,1)],taux_conf[2*mu].r0.c0[snum_acc(1,1,1,1)]);
+    printf("conf e conf aux :%f || %f\n", tconf_acc[2*mu].r0.c0[snum_acc(2,1,1,1)],taux_conf[2*mu].r0.c0[snum_acc(2,1,1,1)]);
     
+    printf("conf e conf aux :%f || %f\n", tconf_acc[2*mu].r0.c0[snum_acc(1,1,5,1)],taux_conf[2*mu].r0.c0[snum_acc(1,1,5,1)]);
     
     mu=e1;
 
