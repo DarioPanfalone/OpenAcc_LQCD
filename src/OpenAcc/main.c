@@ -887,7 +887,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 
              set_su3_soa_to_su3_soa(conf_hasenbusch[0],auxtris_conf_acc);
-
+                set_su3_soa_to_zero(auxtris_conf_acc);
                 
             printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],auxtris_conf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]);
                 
