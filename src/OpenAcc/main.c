@@ -879,8 +879,10 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 //TRASLAZIONE CONF  PERIODICA.
 
+                int var1=snum_acc(1,1,1,1);
+                int var2=nnp_openacc[snum_acc(1,1,1,1)][0][0];
                 
-                   printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],mu1,auxtris_conf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]);
+                   printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[var1],mu1,auxtris_conf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]);
                       printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],mu1,auxbis_conf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]);
                 
                 
