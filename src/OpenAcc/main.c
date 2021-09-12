@@ -875,12 +875,25 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 printf("swap_number %d\n", swap_number);
                
               #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
+                
+                
                 //TRASLAZIONE CONF  PERIODICA.
 
                 
                    printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],mu1,auxtris_conf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]);
+                      printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],mu1,auxbis_conf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]);
+                
                 
              set_su3_soa_to_su3_soa(conf_hasenbusch[0],auxtris_conf_acc);
+
+                
+            printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],mu1,auxtris_conf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]);
+                
+                
+                            set_su3_soa_to_su3_soa(conf_hasenbusch[0],auxbis_conf_acc);
+                
+                
+            printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],mu1,auxbis_conf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]);
                 
                 for(mu1=0;mu1<4;mu1++){
                  
