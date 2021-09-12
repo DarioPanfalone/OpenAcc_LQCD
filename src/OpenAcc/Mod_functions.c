@@ -2412,7 +2412,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
         }//t
         
        
-    #pragma acc update device(tconf_acc[0:1][0:8])
+    #pragma acc update device(tconf_acc[0:8])
 
     
     return;
