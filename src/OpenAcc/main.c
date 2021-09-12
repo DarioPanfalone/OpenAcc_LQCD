@@ -877,7 +877,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
               #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
                 //TRASLAZIONE CONF  PERIODICA.
 
-
+             set_su3_soa_to_su3_soa(conf_hasenbusch[0],auxtris_conf_acc);
                 
                 for(mu1=0;mu1<4;mu1++){
                  
@@ -886,7 +886,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                    
                  }
                 
-                set_su3_soa_to_su3_soa(conf_hasenbusch[0],auxtris_conf_acc);
+   
                       trasl_conf(conf_hasenbusch[0],auxtris_conf_acc);
                 
        
