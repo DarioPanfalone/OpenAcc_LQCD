@@ -919,8 +919,6 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                     
                 }
                 
-                */
-     
  
         
                 
