@@ -884,7 +884,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 
                 
-             set_su3_soa_to_su3_soa(conf_hasenbusch[0],auxtris_conf_acc);
+           //  set_su3_soa_to_su3_soa(conf_hasenbusch[0],auxtris_conf_acc);
                
         
                 

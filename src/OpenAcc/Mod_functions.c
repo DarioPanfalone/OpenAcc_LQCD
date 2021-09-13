@@ -2339,7 +2339,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
 void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
         printf("CONF 0 TRASL\n");
     
-   // set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
+   set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
     
 
     
@@ -2358,11 +2358,8 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     int mu=0;
     int idxpnu;
     
-    printf("conf e conf aux :%f || %f\n", tconf_acc[2*mu].r0.c0[snum_acc(1,1,1,1)],taux_conf[2*mu].r0.c0[snum_acc(1,1,1,1)]);
-    printf("conf e conf aux :%f || %f\n", tconf_acc[2*mu].r0.c0[snum_acc(2,1,1,1)],taux_conf[2*mu].r0.c0[snum_acc(2,1,1,1)]);
-    
-    printf("conf e conf aux :%f || %f\n", tconf_acc[2*mu].r0.c0[snum_acc(1,1,5,1)],taux_conf[2*mu].r0.c0[snum_acc(1,1,5,1)]);
-    
+    printf("conf e conf aux :%f || %f\n", creal( tconf_acc[2*mu].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[2*mu].r0.c0[snum_acc(1,1,1,1)]));
+  
     for(mu=0;mu<4;mu++){
 
         for(t=0;t<nd3;t++) {
