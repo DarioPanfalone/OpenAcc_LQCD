@@ -2343,13 +2343,13 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     
 
     
-    int e1;
+    int dir;
     
-    e1=rand()%4;
+    dir=rand()%4;
     
 
     
-    printf("Mu is  %d\n",e1);
+    printf("Mu is  %d\n",dir);
   
     
     
@@ -2363,7 +2363,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
     
     printf("conf e conf aux :%f || %f\n", tconf_acc[2*mu].r0.c0[snum_acc(1,1,5,1)],taux_conf[2*mu].r0.c0[snum_acc(1,1,5,1)]);
     
-    mu=e1;
+    for(mu=0;mu<4;mu++){
 
         for(t=0;t<nd3;t++) {
             for (z=0; z<nd2; z++){
@@ -2373,7 +2373,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
                         idxh=snum_acc(i,j,z,t);
                         parity= (i+j+z+t) % 2;
             
-            idxpnu = nnm_openacc[idxh][mu][parity];// r-nu //the table that states which is the nearest neighbour.
+            idxpnu = nnm_openacc[idxh][dir][parity];// r-nu //the table that states which is the nearest neighbour.
             
             if(parity==0){
                 tconf_acc[2*mu].r0.c0[idxh]=taux_conf[2*mu].r0.c0[idxpnu];
@@ -2415,7 +2415,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
                 }//y
             }//z
         }//t
-        
+    }//mu
        
     #pragma acc update device(tconf_acc[0:8])
 
