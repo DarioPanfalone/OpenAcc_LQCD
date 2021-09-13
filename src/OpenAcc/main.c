@@ -863,7 +863,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 }
                
             }
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
+#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu
                 
 
                 //QUI VA IL CONF SWAP
@@ -874,7 +874,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                
-              #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
+              #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu
                 
                 
                 //TRASLAZIONE CONF  PERIODICA.
@@ -903,7 +903,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
    
                       trasl_conf(conf_hasenbusch[0],auxtris_conf_acc);
                 
-       
+        #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
                 
                 for(mu1=0;mu1<4;mu1++){
                     
@@ -927,16 +927,16 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
             
             printf("debug_control\n");
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
+#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu
     
             id_iter++;
             conf_id_iter++;
             
             
-            
+         
             for(mu1=0;mu1<4;mu1++){
                 
-                printf("after trasl: [mu1] %f %f || %d\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
+                printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
                 
                 
             }
