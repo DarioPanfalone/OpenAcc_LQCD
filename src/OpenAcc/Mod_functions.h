@@ -23,7 +23,8 @@ int n_replicas_reader(const char* input_filename);
 void counter_size_function(int d0,int d1,int d2,int d3);
 int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet);
 void printing_k_mu(su3_soa * conf);
-void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf);
+void trasl_conf( __restrict const su3_soa *  const tconf_acc,
+                 __restrict const su3_soa *  const taux_conf);
 
 int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );
 int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );

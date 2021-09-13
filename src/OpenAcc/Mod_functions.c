@@ -2336,7 +2336,8 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
 }
 
 
-void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
+void trasl_conf( __restrict const su3_soa *  const tconf_acc,
+                 __restrict const su3_soa *  const taux_conf){
         printf("CONF 0 TRASL\n");
     
    set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
@@ -2372,7 +2373,10 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
             
             idxpnu = nnm_openacc[idxh][dir][parity];// r-nu //the table that states which is the nearest neighbour.
             
+                        if (dir==0){printf("%d %d %d %d\n",mu,2*mu,2*mu+1,idxh);}
+                        
             if(parity==0){
+                    if (dir==0){printf("toc\n");}
                 tconf_acc[2*mu].r0.c0[idxh]=taux_conf[2*mu].r0.c0[idxpnu];
                 tconf_acc[2*mu].r0.c1[idxh]=taux_conf[2*mu].r0.c1[idxpnu];
                 tconf_acc[2*mu].r0.c2[idxh]=taux_conf[2*mu].r0.c2[idxpnu];
@@ -2414,7 +2418,7 @@ void trasl_conf(su3_soa * tconf_acc,su3_soa * taux_conf){
         }//t
     }//mu
        
-    #pragma acc update device(tconf_acc[0:8])
+   // #pragma acc update device(tconf_acc[0:8])
 
     
     return;
