@@ -882,21 +882,14 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 int var1=snum_acc(1,1,1,1);
                 int var2=nnp_openacc[snum_acc(1,1,1,1)][0][0];
                 
-                   printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[var1],auxtris_conf_acc[0].r0.c0[2]);
-                      printf("del: [mu1] %f %f || %f\n",mu1,conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],auxbis_conf_acc[0].r0.c0[2]);
                 
                 
              set_su3_soa_to_su3_soa(conf_hasenbusch[0],auxtris_conf_acc);
-                set_su3_soa_to_zero(auxtris_conf_acc);
-                set_su3_soa_to_zero(auxbis_conf_acc);
+               
+        
                 
                 
-            printf("del: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],auxtris_conf_acc[0].r0.c0[2]));
-                
-                
-                
-                
-            printf("del: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][0].r0.c0[snum_acc(1,1,1,1)],auxbis_conf_acc[0].r0.c0[2]));
+            
                 
                 
             
