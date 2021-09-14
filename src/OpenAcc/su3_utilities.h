@@ -1199,19 +1199,19 @@ static inline void assign_su3_soa_to_su3_soa_component_trasl(
                                                        int idx,int idx1)
 {
     
-    matrix_comp_out->r0.c0[idx] =  matrix_comp_in->r0.c0[idx1];
-    matrix_comp_out->r0.c1[idx] =  matrix_comp_in->r0.c1[idx1];
-    matrix_comp_out->r0.c2[idx] =  matrix_comp_in->r0.c2[idx1];
+    matrix_comp_out->r0.c0[idx1] =  matrix_comp_in->r0.c0[idx];
+    matrix_comp_out->r0.c1[idx1] =  matrix_comp_in->r0.c1[idx];
+    matrix_comp_out->r0.c2[idx1] =  matrix_comp_in->r0.c2[idx];
     
-    matrix_comp_out->r1.c0[idx] =  matrix_comp_in->r1.c0[idx1];
-    matrix_comp_out->r1.c1[idx] =  matrix_comp_in->r1.c1[idx1];
-    matrix_comp_out->r1.c2[idx] =  matrix_comp_in->r1.c2[idx1];
+    matrix_comp_out->r1.c0[idx1] =  matrix_comp_in->r1.c0[idx];
+    matrix_comp_out->r1.c1[idx1] =  matrix_comp_in->r1.c1[idx];
+    matrix_comp_out->r1.c2[idx1] =  matrix_comp_in->r1.c2[idx];
     
     
     
-    matrix_comp_out->r2.c0[idx] =  matrix_comp_in->r2.c0[idx1];
-    matrix_comp_out->r2.c1[idx] =  matrix_comp_in->r2.c1[idx1];
-    matrix_comp_out->r2.c2[idx] =  matrix_comp_in->r2.c2[idx1];
+    matrix_comp_out->r2.c0[idx1] =  matrix_comp_in->r2.c0[idx];
+    matrix_comp_out->r2.c1[idx1] =  matrix_comp_in->r2.c1[idx];
+    matrix_comp_out->r2.c2[idx1] =  matrix_comp_in->r2.c2[idx];
     
 }
 
