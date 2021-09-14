@@ -2335,7 +2335,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
     return;
 }
 
-
+/*
 void trasl_conf( __restrict const su3_soa *  const tconf_acc,
                  __restrict const su3_soa *  const taux_conf){
         printf("CONF 0 TRASL\n");
@@ -2424,8 +2424,34 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     
     return;
 }
+*/
+    
+void trasl_conf( __restrict const su3_soa *  const tconf_acc,
+                __restrict const su3_soa *  const taux_conf){
+    printf("CONF 0 TRASL\n");
+    
+    set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
     
     
     
+    int dir;
+    
+    dir=rand()%4;
+    
+    
+    
+    printf("Mu is  %d\n",dir);
+    
+    printf("conf e conf aux :%f || %f\n", creal( tconf_acc[2*mu].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[2*mu].r0.c0[snum_acc(1,1,1,1)]));
+    
+    set_su3_soa_to_su3_soa_trasl( taux_conf,tconf_acc, dir);
+  
+    printf("conf e conf aux :%f || %f\n", creal( tconf_acc[2*mu].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[2*mu].r0.c0[snum_acc(1,1,1,1)]));
+    
+    // #pragma acc update device(tconf_acc[0:8])
+    
+    
+    return;
+}
 
 

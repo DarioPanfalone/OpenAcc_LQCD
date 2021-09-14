@@ -95,6 +95,34 @@ void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
   }
 }
 
+
+void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
+                            __restrict su3_soa * const matrix_out,int dir)
+{
+    int hd0, d1, d2, d3;
+    for(d3=0; d3<nd3; d3++) {
+        for(d2=0; d2<nd2; d2++) {
+            for(d1=0; d1<nd1; d1++) {
+                for(hd0=0; hd0 < nd0h; hd0++) {
+                    int d0,idxh,parity,idxpmu;
+                    d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
+                    idxh = snum_acc(d0,d1,d2,d3);
+                     parity=(d0+d1+d2+d3)%2;
+                    idxpmu=nnm_openacc[idxh][dir][parity];
+                    assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[0],&matrix_out[0],idxh,idxpmu);
+                    assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[1],&matrix_out[1],idxh,idxpmu);
+                    assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[2],&matrix_out[2],idxh,idxpmu);
+                    assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[3],&matrix_out[3],idxh,idxpmu);
+                    assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[4],&matrix_out[4],idxh,idxpmu);
+                    assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[5],&matrix_out[5],idxh,idxpmu);
+                    assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[6],&matrix_out[6],idxh,idxpmu);
+                    assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[7],&matrix_out[7],idxh,idxpmu);
+                }
+            }
+        }
+    }
+}
+
 void set_su3_soa_to_su3_soa_device(__restrict const su3_soa * const matrix_in,
 			     	   __restrict su3_soa * const matrix_out)
 {

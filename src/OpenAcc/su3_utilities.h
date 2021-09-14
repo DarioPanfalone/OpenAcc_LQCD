@@ -36,6 +36,10 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix);
 void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
         __restrict su3_soa * const matrix_out);
 
+void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
+                            __restrict su3_soa * const matrix_out,int dir);
+
+
 void set_su3_soa_to_su3_soa_device(__restrict const su3_soa * const matrix_in,
 			     	   __restrict su3_soa * const matrix_out);
 
@@ -1158,6 +1162,36 @@ static inline void assign_su3_soa_to_su3_soa_component(
   matrix_comp_out->r1.c2[idx] =  matrix_comp_in->r1.c2[idx];
 
 }
+
+
+
+//MOD
+#pragma acc routine seq
+static inline void assign_su3_soa_to_su3_soa_component_trasl(
+                                                       __restrict const su3_soa * const matrix_comp_in,
+                                                       __restrict su3_soa * const matrix_comp_out,
+                                                       int idx,int idx1)
+{
+    
+    matrix_comp_out->r0.c0[idx] =  matrix_comp_in->r0.c0[idx1];
+    matrix_comp_out->r0.c1[idx] =  matrix_comp_in->r0.c1[idx1];
+    matrix_comp_out->r0.c2[idx] =  matrix_comp_in->r0.c2[idx1];
+    
+    matrix_comp_out->r1.c0[idx] =  matrix_comp_in->r1.c0[idx1];
+    matrix_comp_out->r1.c1[idx] =  matrix_comp_in->r1.c1[idx1];
+    matrix_comp_out->r1.c2[idx] =  matrix_comp_in->r1.c2[idx1];
+    
+    
+    
+    matrix_comp_out->r2.c0[idx] =  matrix_comp_in->r2.c0[idx1];
+    matrix_comp_out->r2.c1[idx] =  matrix_comp_in->r2.c1[idx1];
+    matrix_comp_out->r2.c2[idx] =  matrix_comp_in->r2.c2[idx1];
+    
+}
+
+
+
+
 
 #pragma acc routine seq
 static inline void thmat1_plus_tamat2_times_factor_into_thmat1(
