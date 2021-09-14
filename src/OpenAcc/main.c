@@ -883,8 +883,12 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 int var2=nnp_openacc[snum_acc(1,1,1,1)][0][0];
                 
                 
-             
-                   
+                
+                
+                prinf("nnm_openacc test\n");
+                printf("idx=snum_acc(1,1,1,1) || nnm_openacc[idx][dir=0][par=0]: %d || %d\n", snum_acc(1,1,1,1),nnm_openacc[snum_acc(1,1,1,1)][0][0]);
+                printf("idx=snum_acc(0,0,0,0) || nnm_openacc[idx][dir=0][par=0]: %d || %d\n", snum_acc(0,0,0,0),nnm_openacc[snum_acc(0,0,0,0)][0][0]);
+                printf("idx=snum_acc(0,0,0,1) || nnm_openacc[idx][dir=0][par=1]: %d || %d\n", snum_acc(0,0,0,1),nnm_openacc[snum_acc(0,0,0,1)][0][1]);
         
                 
                 
