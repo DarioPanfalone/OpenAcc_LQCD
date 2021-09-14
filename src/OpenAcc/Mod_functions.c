@@ -2373,7 +2373,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
             
             idxpnu = nnm_openacc[idxh][dir][parity];// r-nu //the table that states which is the nearest neighbour.
             
-                        if (dir==0){printf("%d %d %d %d\n",mu,idxh,parity,idxpnu);}
+                      printf("%d %d %d %d\n",mu,parity,idxh,idxpnu);
                         
             if(parity==0){
                 tconf_acc[2*mu].r0.c0[idxh]=taux_conf[2*mu].r0.c0[idxpnu];
