@@ -2443,7 +2443,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     
     printf("dir0 %f",dir0);
 
-    printf("dir0 %f",dir0);
+
     
 
     if(dir0<=0.25){dir=0;}
