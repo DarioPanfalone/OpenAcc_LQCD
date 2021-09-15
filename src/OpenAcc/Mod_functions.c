@@ -2440,7 +2440,11 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
    // dir=rand()%4;
     
     dir0=casuale();
+    
+    printf("dir0 %f",dir0);
     dir0=dir0+casuale();
+    printf("dir0 %f",dir0);
+    
 
     if(dir0<=0.25){dir=0;}
     if(dir0>0.25 && dir0<=0.5){dir=1;}
