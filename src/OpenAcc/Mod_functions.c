@@ -2430,7 +2430,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
                 __restrict const su3_soa *  const taux_conf){
     printf("CONF 0 TRASL\n");
     
-    set_su3_soa_to_su3_soa_sp(tconf_acc,taux_conf);// conf_aux=conf_acc
+    set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
     
     
     
