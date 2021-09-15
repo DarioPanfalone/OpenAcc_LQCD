@@ -2442,7 +2442,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     dir0=casuale();
     
     printf("dir0 %f",dir0);
-    dir0=dir0+casuale();
+
     printf("dir0 %f",dir0);
     
 
