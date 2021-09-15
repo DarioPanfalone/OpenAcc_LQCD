@@ -106,14 +106,14 @@ void set_su3_soa_to_su3_soa_sp( __restrict const su3_soa * const matrix_in,
                     int d0,idxh;
                     d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
                     idxh = snum_acc(d0,d1,d2,d3);
-                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[0],&matrix_out[0],idxh);
-                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[1],&matrix_out[1],idxh);
-                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[2],&matrix_out[2],idxh);
-                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[3],&matrix_out[3],idxh);
-                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[4],&matrix_out[4],idxh);
-                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[5],&matrix_out[5],idxh);
-                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[6],&matrix_out[6],idxh);
-                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[7],&matrix_out[7],idxh);
+                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[0],&matrix_out[1],idxh);
+                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[1],&matrix_out[0],idxh);
+                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[2],&matrix_out[3],idxh);
+                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[3],&matrix_out[2],idxh);
+                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[4],&matrix_out[5],idxh);
+                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[5],&matrix_out[4],idxh);
+                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[6],&matrix_out[7],idxh);
+                    assign_su3_soa_to_su3_soa_component_sp(&matrix_in[7],&matrix_out[6],idxh);
                 }
             }
         }
