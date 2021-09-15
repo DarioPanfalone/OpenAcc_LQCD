@@ -1167,7 +1167,7 @@ static inline void assign_su3_soa_to_su3_soa_component(
 
 }
 
-
+#pragma acc routine seq
 static inline void assign_su3_soa_to_su3_soa_component_sp(
                                                        __restrict const su3_soa * const matrix_comp_in,
                                                        __restrict su3_soa * const matrix_comp_out,
