@@ -685,7 +685,7 @@ double calc_Delta_S_Wilson_SWAP(
                             
                             if(d1==-1+D3_HALO){idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];!parity;}
                             if(d2==-1+D3_HALO){idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];!parity;}
-                            if(d3==-1+D3_HALO){idxh=nnm_openacc[snum_acc(d0,d1,d2,0)][3][parity];!parity;}
+                            if(d3==-1+D3_HALO){idxh=nnm_openacc[snum_acc(d0,d1,d2,D3_HALO)][3][parity];!parity;}
                             
                        // idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
                         
