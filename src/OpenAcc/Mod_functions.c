@@ -661,7 +661,7 @@ double calc_Delta_S_Wilson_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
+                for(d3=D3s; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=D2s; d2<D2; d2++) {
                         for(d1=D1s; d1<D1; d1++) {
@@ -763,6 +763,9 @@ double calc_Delta_S_Wilson_SWAP(
                         
                 }  // d1
             }  // d2
+                 
+                    if(d3==D3s){d3=d3+D3_HALO};
+                    
         }  // d3
         
                 break;
@@ -2220,7 +2223,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     double Delta_S_SWAP;
     int accettata=0;
     
-    if(0==devinfo.myrank){ Delta_S_SWAP=calc_Delta_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);}
+  Delta_S_SWAP=calc_Delta_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);
     
     printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
     if(Delta_S_SWAP<0){
