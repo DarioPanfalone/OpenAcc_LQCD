@@ -2220,7 +2220,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     double Delta_S_SWAP;
     int accettata=0;
     
- Delta_S_SWAP=calc_Delta_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);
+    if(0==devinfo.myrank){ Delta_S_SWAP=calc_Delta_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);}
     
     printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
     if(Delta_S_SWAP<0){
