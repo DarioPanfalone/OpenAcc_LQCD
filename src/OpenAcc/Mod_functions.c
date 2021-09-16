@@ -661,7 +661,7 @@ double calc_Delta_S_Wilson_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d3=D3s; d3<D3-D3_HALO; d3++) {//what?
+                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=D2s; d2<D2; d2++) {
                         for(d1=D1s; d1<D1; d1++) {
@@ -677,11 +677,15 @@ double calc_Delta_S_Wilson_SWAP(
                         idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                         parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
 
+                            /*
                             if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
                             if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+d3)%2;}
                             if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
+                            */
                             
-                            
+                            if(d1==-1){idxh=nnm_openacc[snum_acc(d0,d1,d2,d3)][1][parity];!parity;}
+                            if(d1==-1){idxh=nnm_openacc[snum_acc(d0,d1,d2,d3)][2][parity];!parity;}
+                            if(d1==-1){idxh=nnm_openacc[snum_acc(d0,d1,d2,d3)][3][parity];!parity;}
                             
                        // idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
                         
