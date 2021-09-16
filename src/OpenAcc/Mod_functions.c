@@ -763,7 +763,7 @@ double calc_Delta_S_Wilson_SWAP(
                         
                 }  // d1
             }  // d2
-                    if(d3==D3s){d3=d3+D3_HALO};
+                    if(d3==D3s){d3=d3+D3_HALO;}
         }  // d3
         
                 break;
