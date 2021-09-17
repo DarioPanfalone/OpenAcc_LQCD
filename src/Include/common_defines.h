@@ -66,6 +66,7 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 #define C_ZEROF         (5.0f*ONE_BY_THREEF)
 #define C_ONE          (-0.25*ONE_BY_THREE)
 #define C_ONEF          (-0.25f*ONE_BY_THREEF)
+#define PLAQ_EXTENT    2
 #endif
 
 #ifdef GAUGE_ACT_WILSON
@@ -74,6 +75,7 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 #define C_ZEROF         1.0f
 #define C_ONE          0.0
 #define C_ONEF          0.0f
+#define PLAQ_EXTENT    1
 #endif
 
 
