@@ -632,12 +632,12 @@ double calc_Delta_S_Wilson_SWAP(
         D2s=0;
         D3s=0;
         
-        if(nu==0){D0s=-PLAQ_EXTENT;}
+        if(nu==0){D0s=-1;}
         
         
-        if(nu==1){D1s=-PLAQ_EXTENT;}
-        if(nu==2){D2s=-PLAQ_EXTENT;}
-        if(nu==3){D3s=-PLAQ_EXTENT;}
+        if(nu==1){D1s=-1;}
+        if(nu==2){D2s=-1;}
+        if(nu==3){D3s=-1;}
     
         
     
