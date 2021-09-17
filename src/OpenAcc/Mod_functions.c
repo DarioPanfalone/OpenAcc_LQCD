@@ -632,12 +632,12 @@ double calc_Delta_S_Wilson_SWAP(
         D2s=0;
         D3s=0;
         
-        if(nu==0){D0s=-1;}
+        if(nu==0){D0s=-PLAQ_EXTENT;}
         
         
-        if(nu==1){D1s=-1;}
-        if(nu==2){D2s=-1;}
-        if(nu==3){D3s=-1;}
+        if(nu==1){D1s=-PLAQ_EXTENT;}
+        if(nu==2){D2s=-PLAQ_EXTENT;}
+        if(nu==3){D3s=-PLAQ_EXTENT;}
     
         
     
@@ -661,7 +661,7 @@ double calc_Delta_S_Wilson_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
          
-                for(d3=D3s+D3_HALO; d3<D3-D3_HALO; d3++) {//what?
+                for(d3=D3s; d3<D3-D3_HALO; d3++) {//what?
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
                     for(d2=D2s; d2<D2; d2++) {
                         for(d1=D1s; d1<D1; d1++) {
@@ -2459,10 +2459,23 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     
     printf("Mu is  %d\n",dir);
     
+    
+    
     printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
+    
+    
+#ifdef MULTIDEVICE
+    communicate_su3_borders(tconf_acc, GAUGE_HALO);
+#endif
     
     set_su3_soa_to_su3_soa_trasl( taux_conf,tconf_acc, dir);
   
+    
+#ifdef MULTIDEVICE
+    communicate_su3_borders(tconf_acc, GAUGE_HALO);  
+#endif
+    
+    
     printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
     
     // #pragma acc update device(tconf_acc[0:8])
