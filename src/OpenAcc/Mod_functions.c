@@ -2434,6 +2434,11 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
                 __restrict const su3_soa *  const taux_conf){
     printf("CONF 0 TRASL\n");
     
+#ifdef MULTIDEVICE
+    communicate_su3_borders(tconf_acc, GAUGE_HALO);
+#endif
+    
+    
     set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
     
     
@@ -2441,20 +2446,20 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
  double dir0;
    int dir=0;
     
-   // dir=rand()%4;
+    dir=rand()%4;
     
     dir0=casuale();
     
     printf("dir0 %f",dir0);
 
-/*
+
     
 
     if(dir0<=0.25){dir=0;}
     if(dir0>0.25 && dir0<=0.5){dir=1;}
     if(dir0>0.5 && dir0<=0.75){dir=2;}
     if(dir0>0.75){dir=3;}
-    */
+    
     
     
     printf("Mu is  %d\n",dir);
@@ -2464,10 +2469,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
     
     
-#ifdef MULTIDEVICE
-    communicate_su3_borders(tconf_acc, GAUGE_HALO);
-#endif
-    
+
     set_su3_soa_to_su3_soa_trasl( taux_conf,tconf_acc, dir);
   
     

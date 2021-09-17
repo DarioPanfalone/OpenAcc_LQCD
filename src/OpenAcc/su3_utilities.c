@@ -107,9 +107,9 @@ void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
 		  int idxh,parity,idxpdir, mu;
                     idxh = snum_acc(d0,d1,d2,d3);
 		    parity=(d0+d1+d2+d3)%2;
-                    idxpdir=nnp_openacc[idxh][dir][parity];
+                    idxpdir=nnm_openacc[idxh][dir][parity];
 		    for(mu=0;mu<4;mu++)
-		      assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[(2*mu)+parity],&matrix_out[(2*mu)+1-parity],idxh,idxpdir);
+		      assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[(2*mu)+parity],&matrix_out[(2*mu)+1-parity],idxpdir,idxh);
                 }
             }
         }
