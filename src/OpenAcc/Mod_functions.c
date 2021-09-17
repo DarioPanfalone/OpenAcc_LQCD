@@ -2446,7 +2446,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
  double dir0;
    int dir=0;
     
-    dir=rand()%4;
+    
     
     dir0=casuale();
     

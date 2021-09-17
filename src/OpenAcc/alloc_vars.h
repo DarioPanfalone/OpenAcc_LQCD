@@ -18,7 +18,7 @@ extern su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered
                                 // if the metro test fails.
 extern su3_soa  * aux_conf_acc; // auxiliary 
 extern su3_soa  * auxbis_conf_acc; // auxiliary
-extern su3_soa  * auxtris_conf_acc; // auxiliary
+
 extern double_soa * u1_back_phases; //Background,staggered,chempot phases
                                     // 8 for each flavour
 extern double_soa * mag_obs_re;     // Real part of the 'algebra-prefix'
