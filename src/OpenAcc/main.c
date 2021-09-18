@@ -909,14 +909,19 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 
                         printf("plaq before trasl %18.18lf",plq1);
-                      trasl_conf(conf_hasenbusch[0],auxtris_conf_acc);
-                plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-                        printf("plaq after trasl %18.18lf",plq1);
+                      trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
+              
+                
                 
                 
                 
                 
         #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
+                
+                  plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+                   printf("plaq after trasl %18.18lf",plq1);
+                
+                
                 
                 for(mu1=0;mu1<4;mu1++){
                     
