@@ -909,7 +909,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 
                         printf("plaq before trasl %18.18lf",plq1);
-                      trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
+                     /* trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);*/
               
                 
                 
