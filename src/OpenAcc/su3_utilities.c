@@ -110,7 +110,7 @@ void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
                     idxmdir=nnm_openacc[idxh][dir][parity];
                    
 		    for(mu=0;mu<4;mu++)
-                 printf("%d idxh %d idxmir  %d mu %d parity %d \n",idxh,idxmir,mu);
+                 printf("%d idxh %d idxdmir  %d mu %d parity %d \n",idxh,idxmdir,mu);
 		      assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[(2*mu)+parity],&matrix_out[(2*mu)+1-parity],idxmdir,idxh);
                 }
             }
