@@ -413,7 +413,7 @@ int main(int argc, char* argv[]){
     printf("aux_conf_init\n");
     init_k(aux_conf_acc,1,0,vet_aux_bound);
     init_k(auxbis_conf_acc,1,0,vet_aux_bound);
-    init_k(auxtris_conf_acc,1,0,vet_aux_bound);
+   
     /*
     init_k(conf_acc_bkp,1,0,vet_aux_bound);
      init_k(glocal_staples,1,0,vet_aux_bound);
