@@ -432,8 +432,9 @@ int main(int argc, char* argv[]){
     }
     
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
-        
-     printf("Initializing K_mu & label Replica %d\n",replicas_counter);
+     
+        if(0==devinfo.myrank){
+            printf("Initializing K_mu & label Replica %d\n",replicas_counter);}
         
         int mu1;
         for (mu1=0;mu1<8;mu1++){
@@ -445,16 +446,13 @@ int main(int argc, char* argv[]){
     if(init_result!=0){printf("Error in Initialization Replica %d!\n",replicas_counter); return 1;};
     
     }
-    printf("Ecco i valori dei cr:\n");
-    for(i3=0;i3<rep->replicas_total_number;i3++){
-        
-        printf("c%d: %f\n",i3,rep->cr_vet[i3]);
-    }
+    
+ 
     
     
      #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
     
-    
+    /*
     printf("Ecco i valori dei cr:\n");
     for(i3=0;i3<rep->replicas_total_number;i3++){
         
@@ -476,6 +474,7 @@ int main(int argc, char* argv[]){
             }
         }
     }
+    */
     
      printf(" Initialization K_mu success\n");
    
@@ -895,7 +894,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
                 
                 
-            
+                if(0==devinfo.myrank){
                 for(mu1=0;mu1<4;mu1++){
                  
                     printf("before trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
@@ -903,12 +902,16 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                    
                  }
                 
+                
                 double plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
                 
                 
                 
                 
                         printf("plaq before trasl %18.18lf",plq1);
+                }
+                
+                
                       trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
               
                 
@@ -919,6 +922,8 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
         #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
                 
                   plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+                
+                if(0==devinfo.myrank){
                    printf("plaq after trasl %18.18lf",plq1);
                 
                 
@@ -929,14 +934,14 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                     
                     
                 }
-                
+                }
  
         
                 
                 
             }//end for
             
-            
+            if(0==devinfo.myrank){
             for(mu1=0;mu1<4;mu1++){
                 
                 printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
@@ -945,13 +950,14 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             }
             
             printf("debug_control\n");
+            }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu
     
             id_iter++;
             conf_id_iter++;
             
             
-         
+            if(0==devinfo.myrank){
             for(mu1=0;mu1<4;mu1++){
                 
                 printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
@@ -959,7 +965,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
             }
             
-            
+            }
             
             //-----------------------------------------------//
             

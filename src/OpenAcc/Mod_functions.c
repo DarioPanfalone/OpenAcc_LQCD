@@ -2450,7 +2450,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     
     if(0==devinfo.myrank){dir0=casuale();}
     
-    printf("dir0 %f",dir0);
+   
 
 
     
@@ -2460,14 +2460,14 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     if(dir0>0.5 && dir0<=0.75){dir=2;}
     if(dir0>0.75){dir=3;}
     
-    
-    
+    if(0==devinfo.myrank){
+     printf("dir0 %f",dir0);
     printf("Mu is  %d\n",dir);
     
     
     
     printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
-    
+    }
     
 
     set_su3_soa_to_su3_soa_trasl( taux_conf,tconf_acc, dir);
@@ -2477,11 +2477,11 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     communicate_su3_borders(tconf_acc, GAUGE_HALO);  
 #endif
     
-    
+    if(0==devinfo.myrank){
     printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
     
         printf("conf %d e nnp %d\n",creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(nnp_openacc[tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]][dir][0]));
-    
+    }
     // #pragma acc update device(tconf_acc[0:8])
     
     
