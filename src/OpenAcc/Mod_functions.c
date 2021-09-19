@@ -688,7 +688,7 @@ double calc_Delta_S_Wilson_SWAP(
                             if(d3==-1+D3_HALO){parity = (d0+d1+d2+D3_HALO) % 2; idxh=nnm_openacc[snum_acc(d0,d1,d2,D3_HALO)][3][parity];parity=!parity;}
                             
                        // idxh=nnm_openacc[idxh][nu][parity]; // the previous one. //MOD
-                        
+                        l
                        // parity = 1-parity;
                             
                         dir_muA = 2*mu +  parity;
