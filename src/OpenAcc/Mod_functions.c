@@ -2480,7 +2480,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     if(0==devinfo.myrank){
     printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
     
-        printf("conf %f e nnp %f\n",creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(nnp_openacc[tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]][dir][0]));
+        printf("conf %f e nnp %f\n",creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(tconf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][dir][1]]));
     }
     // #pragma acc update device(tconf_acc[0:8])
     
