@@ -893,6 +893,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
             
                 
+                   double plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
                 
                 if(0==devinfo.myrank){
                 for(mu1=0;mu1<4;mu1++){
@@ -903,7 +904,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                  }
                 
                 
-                double plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+             
                 
                 
                 
