@@ -117,8 +117,8 @@ void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
                 }//mu for
             }//d0
         }//d1//
-    }d2//
-}d3//
+    }//d2
+}//d3
     
     return;
 }
