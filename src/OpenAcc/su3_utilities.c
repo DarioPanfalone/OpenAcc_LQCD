@@ -100,11 +100,13 @@ void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
                             __restrict su3_soa * const matrix_out,int dir)
 {
     int d0, d1, d2, d3;
+     int idxh,parity,idxmdir, mu;
+    
     for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(d0=0; d0 < nd0; d0++) {
-		  int idxh,parity,idxmdir, mu;
+		 
                     idxh = snum_acc(d0,d1,d2,d3);
 		    parity=(d0+d1+d2+d3)%2;
                     idxmdir=nnm_openacc[idxh][dir][parity];
