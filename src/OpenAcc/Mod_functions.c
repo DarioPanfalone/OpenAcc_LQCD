@@ -2448,7 +2448,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     
     
     
-    dir0=casuale();
+    if(0==devinfo.myrank){dir0=casuale();}
     
     printf("dir0 %f",dir0);
 
