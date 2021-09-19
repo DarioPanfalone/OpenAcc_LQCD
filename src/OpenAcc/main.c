@@ -925,7 +925,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                   plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
                 
                 if(0==devinfo.myrank){
-                   printf("plaq after trasl %18.18lf",plq1);
+                   printf("plaq after trasl %18.18lf\n",plq1);
                 
                 
                 

@@ -102,7 +102,7 @@ void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
     int d0, d1, d2, d3;
      int idxh,parity,idxmdir, mu;
     
-    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+    for(d3=0; d3<nd3; d3++) {
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(d0=0; d0 < nd0; d0++) {
