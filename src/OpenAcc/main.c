@@ -925,7 +925,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 for(mu1=0;mu1<4;mu1++){
                     
-                    printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
+                    printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
                     
                     
                 }
@@ -939,7 +939,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
             
             for(mu1=0;mu1<4;mu1++){
                 
-                printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
+                printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
                 
                 
             }
@@ -954,7 +954,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
          
             for(mu1=0;mu1<4;mu1++){
                 
-                printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
+                printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
                 
                 
             }
