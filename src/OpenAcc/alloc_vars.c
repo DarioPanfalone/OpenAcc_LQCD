@@ -23,7 +23,7 @@
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
-//su3_soa  * conf_acc; // the gauge configuration.
+su3_soa  * conf_acc; // the gauge configuration.
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
 // if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 

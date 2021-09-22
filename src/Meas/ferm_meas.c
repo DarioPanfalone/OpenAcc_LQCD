@@ -161,8 +161,7 @@ void fermion_measures( su3_soa * tconf_acc,
     conf_to_use = tconf_acc;
 #endif
     if(inverter_tricks.useMixedPrecision){ 
-       // conf_to_use_f = conf_acc_f;// global variable
-        conf_to_use_f = conf_hasenbusch_f[0];// global variable
+        conf_to_use_f = conf_acc_f;// global variable
         convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f); 
     }
 
