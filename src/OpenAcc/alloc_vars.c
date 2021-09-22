@@ -154,7 +154,7 @@ void mem_alloc_core(){
     
     //MOD////////////////////////////////////////////////
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch, ALIGN,
-                                               alloc_info.num_replicas*alloc_info.conf_acc_size*sizeof(su3_soa));
+                                               alloc_info.num_replicas*sizeof(su3_soa*));
     
 
     
