@@ -154,7 +154,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     }// end for iflav
 #pragma acc update device(ferm_phi_acc[0:alloc_info.NPS_tot])
 
-    gconf_as_fermionmatrix_f = conf_hasenbusch[0]_f;
+    gconf_as_fermionmatrix_f = conf_hasenbusch[replicas_counter]_f;
 #ifdef STOUT_FERMIONS  //STOUT FERM DIRECTIVE.
     // DILATION USING STOUTED DIRAC OPERATOR
     // STOUTING...(ALREADY ON DEVICE)
@@ -357,7 +357,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             }
         }
 
-        multistep_2MN_SOLOOPENACC_f(ipdot_acc_f,tconf_acc_f,
+        multistep_2MN_SOLOOPENACC_f(ipdot_acc_f,conf_hasenbusch_f[replicas_counter],
 #if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr_f,
 #endif
