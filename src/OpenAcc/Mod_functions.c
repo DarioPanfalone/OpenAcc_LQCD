@@ -81,11 +81,16 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     
     printf("c_r=%f\n",c_r);
     
+    int mu_max=4;
+    
+#ifdef MULTIDEVICE
+    if(devinfo.async_comm_gauge) mu_max *=2 ;
+#endif
     
     switch (def_axis) {
         case 0:
             printf("defect on x's boundary\n");
-        for(mu=0;mu<4;mu++){
+        for(mu=0;mu<mu_max;mu++){
            for(t=0;t<nd3;t++) {
                 for (z=0; z<nd2; z++){
                      for(j=0;j<nd1;j++){
@@ -134,7 +139,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         case 1:
             printf("defect on y's boundary\n");
-            for(mu=0;mu<4;mu++){
+            for(mu=0;mu<mu_max;mu++){
                 for(t=0;t<nd3;t++) {
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
@@ -187,7 +192,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             
         case 2:
             printf("defect on z's boundary\n");
-            for(mu=0;mu<4;mu++){
+            for(mu=0;mu<mu_max;mu++){
                 for(t=0;t<nd3;t++) {
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
@@ -230,7 +235,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
         case 3:
             printf("defect on t's boundary\n");
             
-            for(mu=0;mu<4;mu++){
+            for(mu=0;mu<mu_max;mu++){
                 for(t=0;t<nd3;t++) {
                     for (z=0; z<nd2; z++){
                         for(j=0;j<nd1;j++){
