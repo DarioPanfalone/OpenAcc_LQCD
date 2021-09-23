@@ -86,6 +86,8 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_gauge) mu_max *=2 ;
 #endif
+    printf("%d %d %d %d \n",nd0,nd1,nd2,nd3);
+    
     
     switch (def_axis) {
         case 0:
