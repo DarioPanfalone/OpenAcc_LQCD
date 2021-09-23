@@ -88,9 +88,11 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     if(devinfo.async_comm_gauge) mu_max *=2 ;
 #endif
     */
-    
+     int def_correction=0;
     switch (def_axis) {
         case 0:
+		def_correction=nd3*devinfo.myrank;
+                printf("def correction : %d\n",def_correction);
             printf("defect on x's boundary\n");
         for(mu=0;mu<mu_max;mu++){
            for(t=0;t<nd3;t++) {
@@ -99,7 +101,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                        for(i=0;i<nd0;i++){
                             parity = (i+j+z+t) % 2;
                            
-                            if(j>=0 && j<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && i==((nd0)-1) && mu==0 )
+                            if(j>=0 && j<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2]-def_correction && i==((nd0)-1) && mu==0  )
                             {
                                 
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;
@@ -288,7 +290,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
             break;
     }
     
-    defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2]);
+   // defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2]-def_correction);
     
     /*
     #ifdef MULTIDEVICE
@@ -296,10 +298,10 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     #endif
     
    */
-   printf("counter %d\n",counter);
-    printf("counter2 %d\n",counter2);
+   printf("counter %d rank %d\n",counter,devinfo.myrank);
+    printf("counter2 %d rank %d\n",counter2,devinfo.myrank);
     
-    if(counter!=defect_volume){printf("wrong defect initialization!\n"); res=1;}
+   // if(counter!=defect_volume){printf("wrong defect initialization!\n"); res=1;}
     
     
     return res;
