@@ -82,12 +82,12 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     printf("c_r=%f\n",c_r);
     
     int mu_max=4;
-    
+
+    /*
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_gauge) mu_max *=2 ;
 #endif
-    printf("%d %d %d %d \n",nd0,nd1,nd2,nd3);
-    
+    */
     
     switch (def_axis) {
         case 0:
@@ -99,7 +99,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                        for(i=0;i<nd0;i++){
                             parity = (i+j+z+t) % 2;
                            
-                            if(j>=0 && j<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && i==((nd0)-1) && mu%4==0 )
+                            if(j>=0 && j<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && i==((nd0)-1) && mu==0 )
                             {
                                 
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;
@@ -147,7 +147,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<nd0;i++){
                                 parity = (i+j+z+t) % 2;
-                            if(i>=0 && i<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && j==nd1-1 && mu%4==1 )
+                            if(i>=0 && i<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && j==nd1-1 && mu==1 )
                             {
                                 
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;
@@ -200,7 +200,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<nd0;i++){
                                 parity = (i+j+z+t) % 2;
-                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && t>=0 && t<def_vet[2] && z==nd2-1 && mu%4==2 )
+                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && t>=0 && t<def_vet[2] && z==nd2-1 && mu==2 )
                             {
                                 
                                 if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
@@ -243,7 +243,7 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
                         for(j=0;j<nd1;j++){
                             for(i=0;i<nd0;i++){
                                  parity = (i+j+z+t) % 2;
-                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && z>=0 && z<def_vet[2] && t==nd3-1 && mu%4==3 )
+                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && z>=0 && z<def_vet[2] && t==nd3-1 && mu==3 )
                             {
                                 
                                 
@@ -290,11 +290,12 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     
     defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2]);
     
+    /*
     #ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge) defect_volume *= 2;
+     if(devinfo.async_comm_gauge)defect_volume *= 2
     #endif
     
-    
+   */
    printf("counter %d\n",counter);
     printf("counter2 %d\n",counter2);
     
