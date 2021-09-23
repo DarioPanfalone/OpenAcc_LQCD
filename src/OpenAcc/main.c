@@ -441,16 +441,17 @@ int main(int argc, char* argv[]){
             conf_hasenbusch[replicas_counter][mu1].label=replicas_counter;
         }
     int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates);
-  
+    
+#ifdef MULTIDEVICE
+    if(devinfo.async_comm_gauge) init_result+=init_k(&conf_hasenbusch[replicas_counter][8],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates);
+#endif
         
-    if(init_result!=0){printf("Error in Initialization Replica %d!\n",replicas_counter); return 1;};
+    if(init_result!=0)
+      {printf("Error in Initialization Replica %d!\n",replicas_counter); return 1;};
     
     }
     
- 
-    
-    
-     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:alloc_info.conf_acc_size])
     
     
     printf("Ecco i valori dei cr:\n");
