@@ -287,8 +287,9 @@ int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
     }
     
     defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2]);
+    
     #ifdef MULTIDEVICE
-    defect_volume *= 2
+    if(devinfo.async_comm_gauge) defect_volume *= 2;
     #endif
     
     
