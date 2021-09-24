@@ -1124,7 +1124,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
         
         
         
-    if( re->defect_coordinates[i2]<0 || re->defect_coordinates[i2]>target_def_dim[i2] ){
+    if( re->defect_coordinates[i2]<0 /*|| re->defect_coordinates[i2]>target_def_dim[i2]*/ ){
         printf("wrong defect coordinates choice!\n");
         res=1;
     }
