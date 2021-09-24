@@ -66,251 +66,91 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
 }
 */
 
+int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet){
 
-int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet){
-    int mu;
-    int i,j,z,t;
-    int res=0;
-    int defect_volume;
-    int parity;
-    
-    
-    int counter=0;
-   //il case considera le 4 possibili direzioni in cui viene fatto il defect.
-    int counter2=0;
-    
-    printf("c_r=%f\n",c_r);
-    
-    int mu_max=4;
+  int mu;
+  int i;
+  int parity,condition;
+  int def_vet_4d[4];
+  int perp_dir[4][3] = {{ 1, 2, 3}, { 0, 2, 3}, { 0, 1, 3}, { 0, 1, 2}};
 
-    /*
-#ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge) mu_max *=2 ;
-#endif
-    */
-    
-    switch (def_axis) {
-        case 0:
-            printf("defect on x's boundary\n");
-        for(mu=0;mu<mu_max;mu++){
-           for(t=0;t<nd3;t++) {
-                for (z=0; z<nd2; z++){
-                     for(j=0;j<nd1;j++){
-                       for(i=0;i<nd0;i++){
-                            parity = (i+j+z+t) % 2;
-                           
-                            if(j>=0 && j<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && i==((nd0)-1) && mu==0 )
-                            {
-                                
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;
-                                    printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);
-                                } //inizializza il vettore
-                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;
-                                    printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu+1].K.d[snum_acc(i,j,z,t)],parity);
-                                } //inizializza il vettore
-                                    
-                                
-                                counter=counter+1;
-                                
-                                ;
-                     /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
-                                 }
-                                
-                           
-                        
-                            else{
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1; counter2=counter2+1;}
-                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1; counter2=counter2+1; }
-                                
-                                
-                                
-                            } //else inizializza a 1.
-                        
+  int map[4] = {geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap};
+  int def_axis_mapped=map[def_axis];
+  //NB: def_axis map: 0 -> x, 1 -> y, 2 -> z, 3 -> t
+  //same for def_vet_4d.
+  //it should be kept in mind: when you choose def_axis, the def_vet mapping follow that order.
+  //So, if def_axis = 0, def_vet[0] is defect extent along y, def_vet[1(2)] along z(t).
+  //if def_axis = 1, def_vet[0] is along x, def_vet[1(2)] along z(t), and so on...
+  //This is independent on the physical axis map on the lattice.
+  //If, in input, defect_boundary = 0(1-2-3), def_axis will be x(y-z-t) EVER.
 
-                       }
-                    }
-                }
-            }
-            
-        }
-        
-            
-            
-            
-            break;
-            
-        case 1:
-            printf("defect on y's boundary\n");
-            for(mu=0;mu<mu_max;mu++){
-                for(t=0;t<nd3;t++) {
-                    for (z=0; z<nd2; z++){
-                        for(j=0;j<nd1;j++){
-                            for(i=0;i<nd0;i++){
-                                parity = (i+j+z+t) % 2;
-                            if(i>=0 && i<def_vet[0] && z>=0 && z<def_vet[1] && t>=0 && t<def_vet[2] && j==nd1-1 && mu==1 )
-                            {
-                                
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;
-                                    /* printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);*/
-                                } //inizializza il vettore}
-                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;
-                                 /*   printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu+1].K.d[snum_acc(i,j,z,t)],parity);*/
-                                    
-                                } //inizializza il vettore}
-                                
-                                
-                                counter=counter+1;
-                                
-                            }
-                                
-                                
-                                
-                            else{
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1; counter2=counter2+1;
-                                     /*printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu].K.d[snum_acc(i,j,z,t)],parity);*/
-                                }
-                                else{conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1; counter2=counter2+1;
-                               /*     printf("(%d,%d,%d,%d):  k_mu[%d]=%f (%d)parity\n",i,j,z,t,snum_acc(i,j,z,t),conf[2*mu+1].K.d[snum_acc(i,j,z,t)],parity);*/
-                                    
-                                }
-                                
-                                
-                                
-                            } //else inizializza a 1.
-                                
-                                /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
-                                
-                    }
-              }
-            }
-          }
-        }
-            
-            
-            
-            
-            
-            break;
-            
-        case 2:
-            printf("defect on z's boundary\n");
-            for(mu=0;mu<mu_max;mu++){
-                for(t=0;t<nd3;t++) {
-                    for (z=0; z<nd2; z++){
-                        for(j=0;j<nd1;j++){
-                            for(i=0;i<nd0;i++){
-                                parity = (i+j+z+t) % 2;
-                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && t>=0 && t<def_vet[2] && z==nd2-1 && mu==2 )
-                            {
-                                
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
-                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
-                                
-                                
-                                counter=counter+1;
-                                /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
-                            }
-                                
-                                
-                                
-                            else{
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1; counter2=counter2+1;}
-                                
-                                else{conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1; counter2=counter2+1;}
-                                
-                                
-                                
-                            } //else inizializza a 1.
-                                
-                                /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
-                    }
-                }
-            }
-            
-           }
-      }
-            
-            
-            
-            break;
-            
-        case 3:
-            printf("defect on t's boundary\n");
-            
-            for(mu=0;mu<mu_max;mu++){
-                for(t=0;t<nd3;t++) {
-                    for (z=0; z<nd2; z++){
-                        for(j=0;j<nd1;j++){
-                            for(i=0;i<nd0;i++){
-                                 parity = (i+j+z+t) % 2;
-                            if(i>=0 && i<def_vet[0] && j>=0 && j<def_vet[1] && z>=0 && z<def_vet[2] && t==nd3-1 && mu==3 )
-                            {
-                                
-                                
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
-                                if(parity!=0){conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=c_r;} //inizializza il vettore}
-                                
-                                
-                                counter=counter+1;
-                                /* printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
-                            }
-                                
-                                
-                                
-                            
-                                
-                            else{
-                                if (parity==0){conf[2*mu].K.d[snum_acc(i,j,z,t)]=1;
-                                    counter2=counter2+1;
-                                }
-                                else{conf[2*mu+1].K.d[snum_acc(i,j,z,t)]=1;
-                                   // counter2=counter2+1;
-                                   
-                                }
-                                
-                                
-                            }//else inizializza a 1.
-                                
-                                /*printf("(%d,%d,%d,%d):     k_mu[%d]=%f\n",2*i,j,z,t,snum_acc(2*i,j,z,t),conf[mu].K.d[snum_acc(2*i,j,z,t)]);*/
-                    }
-                }
-            }
-            
-         }
-        }
-            break;
-            
-            
-            
-        default:
-            printf("ERROR WRONG AXIS CHOICE!\n");
-            res=1;
-            break;
-    }
-    
-    defect_volume=(def_vet[0])*(def_vet[1])*(def_vet[2]);
-    
-    /*
-    #ifdef MULTIDEVICE
-     if(devinfo.async_comm_gauge)defect_volume *= 2
-    #endif
-    
-   */
-   printf("counter %d\n",counter);
-    printf("counter2 %d\n",counter2);
-    
-    if(counter!=defect_volume){printf("wrong defect initialization!\n"); res=1;}
-    
-    
-    return res;
+  def_vet_4d[def_axis]=1;
+  for(i=0;i<3;i++)
+    def_vet_4d[perp_dir[def_axis][i]]=def_vet[i];
   
+  int x_mind = (geom_par.xmap==def_axis)? geom_par.gnx-1 : 0;
+  int y_mind = (geom_par.ymap==def_axis)? geom_par.gny-1 : 0;
+  int z_mind = (geom_par.zmap==def_axis)? geom_par.gnz-1 : 0;
+  int t_mind = (geom_par.tmap==def_axis)? geom_par.gnt-1 : 0;
+
+  int x_maxd = x_mind + def_vet_4d[0];
+  int y_maxd = y_mind + def_vet_4d[1];
+  int z_maxd = z_mind + def_vet_4d[2];
+  int t_maxd = t_mind + def_vet_4d[3];
+  
+  int tnx = geom_par.gnx;
+  int tny = geom_par.gny;
+  int tnz = geom_par.gnz;
+  int tnt = geom_par.gnt;
+  //int count=0;
+  int d[4], idxh, x, y, z, t;
+  for(d[3]=0; d[3] < nd3; d[3]++)
+    for(d[2]=0; d[2] < nd2; d[2]++)
+      for(d[1]=0; d[1] < nd1; d[1]++)
+	for(d[0]=0; d[0] < nd0; d[0]++){
+	  
+	  idxh = snum_acc(d[0],d[1],d[2],d[3]);
+	  
+	  x = d[geom_par.xmap];
+	  y = d[geom_par.ymap];
+	  z = d[geom_par.zmap];
+	  t = d[geom_par.tmap];
+
+#ifdef MULTIDEVICE
+	  x+= devinfo.origin_0123[geom_par.xmap]        //x is now physical x-coordinate
+	    - devinfo.halo_widths0123[geom_par.xmap];   //(for every MPI Rank).
+	  y+= devinfo.origin_0123[geom_par.ymap]
+	    - devinfo.halo_widths0123[geom_par.ymap];
+	  z+= devinfo.origin_0123[geom_par.zmap]
+	    - devinfo.halo_widths0123[geom_par.zmap];
+	  t+= devinfo.origin_0123[geom_par.tmap]
+	    - devinfo.halo_widths0123[geom_par.tmap];
+
+	  if(x>tnx-1)  x-= tnx ; if(x<0)  x+= tnx ; //this guarantees boundary conditions.
+	  if(y>tny-1)  y-= tny ; if(y<0)  y+= tny ; 
+	  if(z>tnz-1)  z-= tnz ; if(z<0)  z+= tnz ; 
+	  if(t>tnt-1)  t-= tnt ; if(t<0)  t+= tnt ; 
+
+#endif                  
+
+	  parity = (x+y+z+t)%2; 
+
+	  for(mu=0;mu<4;mu++)
+	    conf[2*mu+parity].K.d[idxh] = 1;
+
+	  condition = (x >= x_mind) && (y >= y_mind) && (z >= z_mind) && (t >= t_mind) &&
+	    (x < x_maxd) && (y < y_maxd) && (z < z_maxd) && (t < t_maxd);
+
+	  if(condition){
+	    conf[2*def_axis_mapped+parity].K.d[idxh] = c_r;
+	    //count ++;
+	  }
+
+	}//lattice loop
+  //printf("MPI%d: condition satisfied %d times.\n",devinfo.myrank,count);
 }
 
-
-
-
-
-
+/*
 //function that tested the initialization of k_mu  by setting every value to one. //OUTADATED
 int init_k_test(su3_soa *conf_acc,double c_r){
     int kk2=0;
@@ -320,7 +160,7 @@ int init_k_test(su3_soa *conf_acc,double c_r){
     for(mu1=0;mu1<8;mu1++){
         for(kk2=0;kk2<sizeh;kk2++){
         
-            if(conf_acc[mu1].K.d[kk2]!=(1 && c_r)){
+            if(conf_acc[mu1].K.d[kk2]!=1 && conf_acc[mu1].K.d[kk2]!=c_r){
                 return 1;
             }
             
@@ -334,6 +174,7 @@ int init_k_test(su3_soa *conf_acc,double c_r){
     }
     return 0;
 }
+*/
 /* work in progress
 int defect_shifter_function(su3_soa * conf,int def_axis,int * def_vet){
         int mu;
