@@ -2299,8 +2299,8 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     
 #ifdef MULTIDEVICE
     communicate_su3_borders(tconf_acc, GAUGE_HALO);
-#endif
     #pragma acc update self(tconf_acc[0:8])
+#endif
     
     set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
     
@@ -2343,13 +2343,13 @@ printf("%d GAUGE_HALO %d D3_HALO \n",GAUGE_HALO,D3_HALO);
 
 
     set_su3_soa_to_su3_soa_trasl( taux_conf,tconf_acc, dir);
-  
+#pragma acc update device(tconf_acc[0:8])  
     
 #ifdef MULTIDEVICE
     communicate_su3_borders(tconf_acc, GAUGE_HALO);  
+    #pragma acc update self(tconf_acc[0:8])
 #endif
 
-#pragma acc update self(tconf_acc[0:8])
 
     if(0==devinfo.myrank){
     printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));

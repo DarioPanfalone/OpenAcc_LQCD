@@ -896,13 +896,46 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                    double plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
                 
-                if(0==devinfo.myrank){
-                for(mu1=0;mu1<4;mu1++){
                  
-                    printf("before trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
                     
-                   
-                 }
+                                 if(0==devinfo.myrank){
+                   printf("plaq after trasl %18.18lf\n",plq1);
+
+
+                 printf("sito 1111\n");
+                for(mu1=0;mu1<4;mu1++){
+                    printf("before trasl:[mu1] %d ||nnm  %f || site  %f ||nnp  %f\n",mu1,creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnm_openacc[snum_acc(1,1,1,1)][mu1][0]]),creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
+
+
+                
+                }
+ 
+                printf("sito 0000\n");
+                        for(mu1=0;mu1<4;mu1++){
+
+
+                    printf("before trasl: [mu1] %d ||nnm  %f || site %f ||nnp  %f\n",mu1,creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnm_openacc[snum_acc(0,0,0,0)][mu1][0]]),creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(0,0,0,0)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(0,0,0,0)][mu1][0]]));
+
+
+                }
+
+
+                printf("sito 000nd3-1\n");
+                        for(mu1=0;mu1<4;mu1++){
+
+
+                    printf("before trasl: [mu1] %d ||nnm  %f || site %f ||nnp  %f\n",mu1,creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnm_openacc[snum_acc(0,0,0,nd3-1)][mu1][0]]),creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(0,0,0,nd3-1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(0,0,0,nd3-1)][mu1][0]]));
+
+
+                }
+
+
+
+			printf("plaq before trasl %18.18lf",plq1);
+
+                }
+
+  
                 
                 
              
@@ -910,8 +943,6 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 
                 
-                        printf("plaq before trasl %18.18lf",plq1);
-                }
                 
                 
                       trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
@@ -921,7 +952,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
                 
                 
-        #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla gpu
+       /*#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])*/ //updating conf sulla gpu
                 
                   plq1 = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
                 
@@ -929,45 +960,50 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                    printf("plaq after trasl %18.18lf\n",plq1);
                 
                 
-                
+                 printf("sito 1111\n");
                 for(mu1=0;mu1<4;mu1++){
                     
-                    printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
+                    printf("after trasl:[mu1] %d ||nnm  %f || site  %f ||nnp  %f\n",mu1,creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnm_openacc[snum_acc(1,1,1,1)][mu1][0]]),creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
                     
                     
-                }
+                
                 }
  
-        
+		printf("sito 0000\n");
+                        for(mu1=0;mu1<4;mu1++){
+				
+
+                    printf("after trasl: [mu1] %d ||nnm  %f || site  %f ||nnp  %f\n",mu1,creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnm_openacc[snum_acc(0,0,0,0)][mu1][0]]),creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(0,0,0,0)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(0,0,0,0)][mu1][0]]));
+
+
+                }
+
+
+
+			         printf("sito 000nd3-1\n");
+                        for(mu1=0;mu1<4;mu1++){
+
+
+                    printf("before trasl: [mu1] %d ||nnm  %f || site %f ||nnp  %f\n",mu1,creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnm_openacc[snum_acc(0,0,0,nd3-1)][mu1][0]]),creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(0,0,0,nd3-1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(0,0,0,nd3-1)][mu1][0]]));
+
+
+                }
+
+                }
+
+
                 
                 
             }//end for
+                
             
-            if(0==devinfo.myrank){
-            for(mu1=0;mu1<4;mu1++){
-                
-                printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
-                
-                
-            }
-            
-            printf("debug_control\n");
-            }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu
     
             id_iter++;
             conf_id_iter++;
             
+                
             
-            if(0==devinfo.myrank){
-            for(mu1=0;mu1<4;mu1++){
-                
-                printf("after trasl: [mu1] %d %f || %f\n",mu1,creal(conf_hasenbusch[0][2*mu1].r0.c0[snum_acc(1,1,1,1)]),creal(conf_hasenbusch[0][2*mu1+1].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][mu1][0]]));
-                
-                
-            }
-            
-            }
             
             //-----------------------------------------------//
             
@@ -994,19 +1030,14 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
                 
             
             
-              printf("debug_control 2\n");
               if(rep->replicas_total_number>1){
             fprintf(hmc_acc_file,"%d\t",conf_id_iter);
-                               printf("debug_control 2.3\n");
             fprintf(swap_acc_file,"%d\t",conf_id_iter);
-                  printf("debug_control 2.5\n");
            label_print(conf_hasenbusch, rep->replicas_total_number,file_label,conf_id_iter);
-                               printf("debug_control 2.7\n");
               }
             //ACCEPTANCE FILES PRINT
             
             
-             printf("debug_control 3\n");
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
                 if(mu1<rep->replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
