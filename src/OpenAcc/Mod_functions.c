@@ -502,11 +502,13 @@ double calc_Delta_S_Wilson_SWAP(
 
       //  printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
         int is;
+/*
+	 if(0==devinfo.myrank){
         for(is=0; is<sizeh;is++){
             tr_local_plaqs[0].c[is]=0;
             tr_local_plaqs[1].c[is]=0;
             
-        }
+        }}*/
 #pragma acc update device(tr_local_plaqs[0:2])
         
  switch (def_axis){
@@ -527,9 +529,9 @@ double calc_Delta_S_Wilson_SWAP(
                         int parity; //parity
                         int dir_muA,dir_nuB; //mu and nu directions.
                         int dir_muC,dir_nuD;
-                        
+
                         idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
-                        parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+                        parity = (d0+d1+d2+(d3-D3_HALO)) % 2; //obviously the parity_term
 
                             /*
                             if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
@@ -569,7 +571,7 @@ double calc_Delta_S_Wilson_SWAP(
                           
                         
                         d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
-                        tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
+                        d_complex aux = creal(ciao)+cimag(ciao)*I;
                     
                             
                             
@@ -601,11 +603,11 @@ double calc_Delta_S_Wilson_SWAP(
                              d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
                             
                             
-                            tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                            aux+=-creal(ciao2)-cimag(ciao2)*I;
                             
-                            tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                           tr_local_plaqs[parity].c[idxh]+=/*(K_mu_nu-K_mu_nu2)*/aux;
                             
-                            
+  	  
                    
                          
                           
@@ -962,7 +964,14 @@ double calc_Delta_S_Wilson_SWAP(
         
         
         res_R_p=BETA_BY_THREE *res_R_p;
-    
+        for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+            printf("rank %d  site %d value %f  \n",devinfo.myrank,t,creal(tr_local_plaqs[0].c[t]));
+     
+        }
+
+
+
+
         return res_R_p;
     }// closes routine
 
@@ -2291,7 +2300,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
 #ifdef MULTIDEVICE
     communicate_su3_borders(tconf_acc, GAUGE_HALO);
 #endif
-    
+    #pragma acc update self(tconf_acc[0:8])
     
     set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
     
@@ -2304,7 +2313,10 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     
     if(0==devinfo.myrank){dir0=casuale();}
     
-   
+   #ifdef MULTIDEVICE
+                MPI_Bcast((void*) &dir0,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+                printf("MPI%02d dir0 : %f \n",devinfo.myrank,dir0);
+#endif
 
 
     
@@ -2324,13 +2336,21 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
     }
     
 
+         printf("dir0 %f,rank %d",dir0,devinfo.myrank);
+    printf("Mu is  %d\n",dir);
+
+printf("%d GAUGE_HALO %d D3_HALO \n",GAUGE_HALO,D3_HALO);
+
+
     set_su3_soa_to_su3_soa_trasl( taux_conf,tconf_acc, dir);
   
     
 #ifdef MULTIDEVICE
     communicate_su3_borders(tconf_acc, GAUGE_HALO);  
 #endif
-    
+
+#pragma acc update self(tconf_acc[0:8])
+
     if(0==devinfo.myrank){
     printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
     
