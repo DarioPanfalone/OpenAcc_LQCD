@@ -326,10 +326,50 @@ int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_n
 }
 
 
+
+double  calc_Delta_S_soloopenacc_SWAP(
+                                      __restrict  su3_soa * const tconf_acc,
+                                      __restrict  su3_soa * const tconf_acc2,
+                                      __restrict su3_soa * const local_plaqs,
+                                      dcomplex_soa * const tr_local_plaqs,int def_axis, int * def_vet, int improved )
+{
+    double result=0.0;
+    double total_result=0.0;
+    int mu;
+    mu=def_axis;
+    
+    for(int nu=0;nu<4;nu++){
+        // sommo i 6 risultati in tempo
+        if(nu!=mu){
+            //     printf("(%d,%d)\n",mu,nu);
+            if(improved==0){
+                result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
+            }
+            
+            if(improved==1){
+                result  += calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                
+            }
+            
+ 
+ 	}
+  }	
+#ifdef MULTIDEVICE
+        MPI_Allreduce((void*)&result,(void*)&total_result,
+                      1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+        total_result = result;
+#endif
+        return total_result;
+    
+    
+}
+
+
 //Function which chooses the plane and iterate only on useful them.
 
-
-double  calc_Delta_soloopenacc_SWAP(
+/*
+double  calc_Delta_S_soloopenacc_SWAP(
                                    __restrict  su3_soa * const tconf_acc,
                                         __restrict  su3_soa * const tconf_acc2,
                                    __restrict su3_soa * const local_plaqs,
@@ -353,11 +393,11 @@ double  calc_Delta_soloopenacc_SWAP(
                 // sommo i 6 risultati in tempo
                // printf("(%d,%d)\n",mu,nu);
                  if(improved==0){
-                     /*
-                     if(nu==1){def_vet_2[0]=def_vet[0]+1; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2];}
-                     if(nu==2){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1]+1;def_vet_2[2]=def_vet[2];}
-                     if(nu==3){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2]+1;}
-                      */
+                     
+                   //  if(nu==1){def_vet_2[0]=def_vet[0]+1; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2];}
+                   //  if(nu==2){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1]+1;def_vet_2[2]=def_vet[2];}
+                   //  if(nu==3){def_vet_2[0]=def_vet[0]; def_vet_2[1]=def_vet[1];def_vet_2[2]=def_vet[2]+1;}
+                      
                 result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
                  }
                 
@@ -456,7 +496,7 @@ double  calc_Delta_soloopenacc_SWAP(
     return total_result;
     
 }
-
+*/
 
 double calc_Delta_S_Wilson_SWAP(
     __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
@@ -965,7 +1005,7 @@ double calc_Delta_S_Wilson_SWAP(
         
         res_R_p=BETA_BY_THREE *res_R_p;
         for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
-            printf("rank %d  site %d value %f  \n",devinfo.myrank,t,creal(tr_local_plaqs[0].c[t]));
+           // printf("rank %d  site %d value %f  \n",devinfo.myrank,t,creal(tr_local_plaqs[0].c[t]));
      
         }
 
@@ -2087,8 +2127,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     double p1,p2;
     double Delta_S_SWAP;
     int accettata=0;
-    
-  Delta_S_SWAP=calc_Delta_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);
+    Delta_S_SWAP=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);
     
     printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
     if(Delta_S_SWAP<0){
@@ -2101,8 +2140,13 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
         if(debug_settings.do_norandom_test) p2=0; // NORANDOM
         else{   // NORMAL, RANDOM
             if(0==devinfo.myrank)p2=casuale();
-        }
-    //MULTIDEVICE MOD
+       
+#ifdef MULTIDEVICE
+                MPI_Bcast((void*) &p2,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+                printf("MPI%02d p2 : %f, p1 %f \n",devinfo.myrank, p2,p1);
+#endif       
+
+	}
         if(p2<p1)
         {
         accettata=1;
@@ -2139,7 +2183,16 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
                    dcomplex_soa * const tr_local_plaqs,
                    
                    int replicas_number, int defect_axis, int * defect_coordinates, int* swap_num,int * all_swap_vet,int * acceptance_vet ){
-    double swap_order=casuale();
+    double swap_order;
+
+   if(0==devinfo.myrank){swap_order=casuale();}
+
+    #ifdef MULTIDEVICE
+                MPI_Bcast((void*) &swap_order,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+                printf("MPI%02d swap_order : %f \n",devinfo.myrank,swap_order);
+#endif
+
+
     int accettata=0;
     int i_counter, j_counter;
  

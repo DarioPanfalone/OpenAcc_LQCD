@@ -48,7 +48,7 @@ double calc_Delta_S_Wilson_SWAP(  __restrict const su3_soa * const u,//for an un
 
 
 
-double  calc_Delta_soloopenacc_SWAP( __restrict  su3_soa * const tconf_acc,
+double  calc_Delta_S_soloopenacc_SWAP( __restrict  su3_soa * const tconf_acc,
                                           __restrict  su3_soa * const tconf_acc2,
                                         __restrict su3_soa * const local_plaqs,
                                         dcomplex_soa * const tr_local_plaqs,int def_axis, int *def_vet, int improved );
