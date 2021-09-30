@@ -335,12 +335,17 @@ double  calc_Delta_S_soloopenacc_SWAP(
 {
     double result=0.0;
     double total_result=0.0;
-    int mu;
-    mu=def_axis;
-    
-    for(int nu=0;nu<4;nu++){
+    int mu,nu;
+   int map[4] = {geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap};
+  int def_axis_mapped=map[def_axis];
+    mu=def_axis_mapped;
+    int perp_dir[4][3] = {{ 1, 2, 3}, { 0, 2, 3}, { 0, 1, 3}, { 0, 1, 2}};
+    int counter=0;
+
+
+    for(counter=0;counter<3;counter++){
         // sommo i 6 risultati in tempo
-        if(nu!=mu){
+        nu=perp_dir[def_axis_mapped][counter];
             //     printf("(%d,%d)\n",mu,nu);
             if(improved==0){
                 result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
@@ -352,7 +357,7 @@ double  calc_Delta_S_soloopenacc_SWAP(
             }
             
  
- 	}
+ 	
   }	
 #ifdef MULTIDEVICE
         MPI_Allreduce((void*)&result,(void*)&total_result,
@@ -531,7 +536,7 @@ double calc_Delta_S_Wilson_SWAP(
         
         if(nu==1){D1s=-1;}
         if(nu==2){D2s=-1;}
-        if(nu==3){D3s=-PLAQ_EXTENT;}
+    /*    if(nu==3){D3s=-PLAQ_EXTENT;}*/
     
         
     
@@ -542,13 +547,14 @@ double calc_Delta_S_Wilson_SWAP(
 
       //  printf("%d %d %d %d\n",D0s,D1s,D2s,D3s);
         int is;
-/*
+
+#pragma acc update self(tr_local_plaqs[0:2])
 	 if(0==devinfo.myrank){
         for(is=0; is<sizeh;is++){
             tr_local_plaqs[0].c[is]=0;
             tr_local_plaqs[1].c[is]=0;
             
-        }}*/
+        }}
 #pragma acc update device(tr_local_plaqs[0:2])
         
  switch (def_axis){
