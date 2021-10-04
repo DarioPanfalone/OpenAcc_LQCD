@@ -200,7 +200,6 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
 
 	  if(condition){
 
-if(devinfo.myrank==1){printf("%d\n",d[i]);}
 
      for(int nu=0; nu<4;nu++){
           for (i=0; i<4; i++)
@@ -209,7 +208,8 @@ if(devinfo.myrank==1){printf("%d\n",d[i]);}
                    def->defect_swap_min[nu][i] = d[i];
 		   #ifdef GAUGE_ACT_TLSM
                    def->defect_swap_min_TLSM[nu][i] = d[i];
-		   #endif
+	           #endif
+		   if(devinfo.myrank==1){printf("min %d %d\n",i,d[i]);}
               }
               
               if ( d[i] >  def->defect_swap_max[nu][i] && d[i]>=devinfo.halo_widths0123[i] && d[i]<=nd[i]-devinfo.halo_widths0123[i]) {
@@ -217,9 +217,9 @@ if(devinfo.myrank==1){printf("%d\n",d[i]);}
 		  #ifdef GAUGE_ACT_TLSM
                   def->defect_swap_max_TLSM[nu][i] = d[i];
 		  #endif
+		  if(devinfo.myrank==1){printf("max %d %d\n",i,d[i]);}
               }
 	  } 
-
 
         }
 
