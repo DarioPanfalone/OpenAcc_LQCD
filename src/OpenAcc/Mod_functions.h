@@ -15,19 +15,19 @@
 #include "./alloc_vars.h"
 #include "../Include/common_defines.h"
 #include "./action.h"
+#include "../Include/defect_info.h"
 
-
-
+void mat_alloc(int *** a, unsigned n, unsigned m );
 int init_k_test(su3_soa *conf_acc,double c_r);
 int n_replicas_reader(const char* input_filename);
 void counter_size_function(int d0,int d1,int d2,int d3);
-int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet);
+int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vet,defect_info * def);
 void printing_k_mu(su3_soa * conf);
 void trasl_conf( __restrict const su3_soa *  const tconf_acc,
                  __restrict const su3_soa *  const taux_conf);
 
 int replicas_swap_1(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );
-int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet );
+int replicas_swap(su3_soa * conf1,su3_soa * conf2);
 int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_number);
 
 

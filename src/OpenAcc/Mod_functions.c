@@ -23,6 +23,8 @@
 #include "./plaquettes.h"
 #include "../Include/debug.h"
 #include "../Rand/random.h"
+#include "../Include/defect_info.h"
+
 #include <time.h>
 
 
@@ -66,7 +68,30 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
 }
 */
 
-int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet){
+void mat_alloc(int *** a, unsigned n, unsigned m ) {
+    int i;
+    
+   
+    
+    *a=malloc(n*sizeof(int * ));
+    for (i=0; i<n; i++)
+    {(*a)[i]=malloc(m*sizeof(int));
+        }
+    
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info * def){
 
   int mu;
   int i;
@@ -76,6 +101,35 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet){
 
   int map[4] = {geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap};
   int def_axis_mapped=map[def_axis];
+  def->def_axis_mapped=def_axis_mapped;
+
+
+    //INITIALIZZATION
+    int nd[4]={nd0-1,nd1-1,nd2-1,nd3-1};
+    for(int nu=0; nu<4;nu++){
+        for (i=0; i<3; i++)
+        {
+            def->defect_swap_max[nu][i]=0;
+            def->defect_swap_min[nu][i]=nd[i];
+	     #ifdef GAUGE_ACT_TLSM
+	     def->defect_swap_max_TLSM[nu][i]=0;
+            def->defect_swap_min_TLSM[nu][i] = nd[i];
+             #endif
+
+
+        }
+	  def->defect_swap_max[nu][3]=D3_HALO;
+            def->defect_swap_min[nu][3]=nd[3]-D3_HALO;
+             #ifdef GAUGE_ACT_TLSM
+             def->defect_swap_max_TLSM[nu][3]=D3_HALO;
+            def->defect_swap_min_TLSM[nu][3] = nd[3]-D3_HALO;
+             #endif
+
+
+    }
+
+
+
   //NB: def_axis map: 0 -> x, 1 -> y, 2 -> z, 3 -> t
   //same for def_vet_4d.
   //it should be kept in mind: when you choose def_axis, the def_vet mapping follow that order.
@@ -84,10 +138,13 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet){
   //This is independent on the physical axis map on the lattice.
   //If, in input, defect_boundary = 0(1-2-3), def_axis will be x(y-z-t) EVER.
 
+
   def_vet_4d[def_axis]=1;
   for(i=0;i<3;i++)
     def_vet_4d[perp_dir[def_axis][i]]=def_vet[i];
-  
+   def->nu_vector[i]=perp_dir[def_axis];
+ 
+
   int x_mind = (geom_par.xmap==def_axis)? geom_par.gnx-1 : 0;
   int y_mind = (geom_par.ymap==def_axis)? geom_par.gny-1 : 0;
   int z_mind = (geom_par.zmap==def_axis)? geom_par.gnz-1 : 0;
@@ -142,11 +199,73 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet){
 	    (x < x_maxd) && (y < y_maxd) && (z < z_maxd) && (t < t_maxd);
 
 	  if(condition){
+
+if(devinfo.myrank==1){printf("%d\n",d[i]);}
+
+     for(int nu=0; nu<4;nu++){
+          for (i=0; i<4; i++)
+          {
+              if ( d[i] <def->defect_swap_min[nu][i] && d[i]>=devinfo.halo_widths0123[i] && d[i]<=nd[i]-devinfo.halo_widths0123[i]){
+                   def->defect_swap_min[nu][i] = d[i];
+		   #ifdef GAUGE_ACT_TLSM
+                   def->defect_swap_min_TLSM[nu][i] = d[i];
+		   #endif
+              }
+              
+              if ( d[i] >  def->defect_swap_max[nu][i] && d[i]>=devinfo.halo_widths0123[i] && d[i]<=nd[i]-devinfo.halo_widths0123[i]) {
+                  def->defect_swap_max[nu][i] = d[i];
+		  #ifdef GAUGE_ACT_TLSM
+                  def->defect_swap_max_TLSM[nu][i] = d[i];
+		  #endif
+              }
+	  } 
+
+
+        }
+
 	    conf[2*def_axis_mapped+parity].K.d[idxh] = c_r;
 	    //count ++;
+	    
+
 	  }
 
+	  
+	  
+/*
+  for(int nu=0; nu<4;nu++){
+ 
+	     if(devinfo.myrank==0){
+          def->defect_swap_min[nu][nu]+=-PLAQ_EXTENT;
+          }
+  }
+*/
+
 	}//lattice loop
+
+  if(devinfo.myrank==1){
+ printf("defect_swap_max: rank %d\n",devinfo.myrank);
+
+    for(int nu=0;nu<4;nu++){
+            printf("nu:%d||",nu);
+        for(i=0;i<4;i++){
+    printf("%d||",def->defect_swap_max[nu][i]);
+
+        }
+        printf("\n");
+    }
+
+    printf("defect_swap_min: rank %d\n",devinfo.myrank);
+
+    for(int nu=0;nu<4;nu++){
+        printf("nu:%d||",nu);
+        for(i=0;i<4;i++){
+            printf("%d||",def->defect_swap_min[nu][i]);
+
+        }
+        printf("\n");
+    }
+
+  }
   //printf("MPI%d: condition satisfied %d times.\n",devinfo.myrank,count);
 }
 
@@ -268,7 +387,7 @@ void printing_k_mu(su3_soa * conf){
     return;
 }
 
-int replicas_swap(su3_soa * conf1,su3_soa * conf2,int def_axis,int * def_vet ){
+int replicas_swap(su3_soa * conf1,su3_soa * conf2){
     vec3_soa  aux;
     int aux_label;
         int res=0;
@@ -2171,9 +2290,8 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     
     
     if (accettata==1){
-        replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],defect_axis,defect_coordinates);
-        }
-    
+     replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2]);
+    }
    
     
 
