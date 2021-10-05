@@ -62,7 +62,6 @@
 #include "./su3_utilities.h"
 #include "./update_versatile.h"
 #include "./alloc_settings.h"
-#include "../Include/defect_info.h"
 
 #ifdef __GNUC__
 #include "sys/time.h"
@@ -350,19 +349,21 @@ int main(int argc, char* argv[]){
 //anche da qui il ciclo.
 
     //***************** INIZIALIZZAZIONE DELLA CONFIGURAZIONE *************//
-     def =(defect_info*) malloc(sizeof(defect_info));
+    defect_info def; 
+    //def =(defect_info*) malloc(sizeof(defect_info));
     /*printf("%d\n",def->def_axis_mapped);
 def->defect_swap_min=malloc(4*sizeof( int *));
 for(mu1=1;mu1<4; mu1++){
 def->defect_swap_min[mu1]=malloc(4*sizeof (int));
 
 }*/
-     mat_alloc(def->defect_swap_min, 4, 4 );
+ /*    mat_alloc(def->defect_swap_min, 4, 4 );
      mat_alloc(&def->defect_swap_max, 4, 4 );
      #ifdef GAUGE_ACT_TLSM
     mat_alloc(&def->defect_swap_min_TLSM, 4, 4 );
      mat_alloc(&def->defect_swap_max_TLSM, 4, 4 );
      #endif
+     */
     int replicas_counter;
     char rep_str [20];
     char aux_name_file[200];
@@ -425,8 +426,8 @@ def->defect_swap_min[mu1]=malloc(4*sizeof (int));
     printf("aux_conf_init\n");
     
 
-    init_k(aux_conf_acc,1,0,vet_aux_bound,def);
-    init_k(auxbis_conf_acc,1,0,vet_aux_bound,def);
+    init_k(aux_conf_acc,1,0,vet_aux_bound,&def);
+    init_k(auxbis_conf_acc,1,0,vet_aux_bound,&def);
    
     /*
     init_k(conf_acc_bkp,1,0,vet_aux_bound);
@@ -454,10 +455,10 @@ def->defect_swap_min[mu1]=malloc(4*sizeof (int));
         for (mu1=0;mu1<8;mu1++){
             conf_hasenbusch[replicas_counter][mu1].label=replicas_counter;
         }
-    int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,def);
+    int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def);
     
 #ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge) init_result+=init_k(&conf_hasenbusch[replicas_counter][8],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,def);
+    if(devinfo.async_comm_gauge) init_result+=init_k(&conf_hasenbusch[replicas_counter][8],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def);
 #endif
         
     if(init_result!=0)

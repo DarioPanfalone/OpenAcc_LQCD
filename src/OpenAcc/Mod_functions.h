@@ -15,7 +15,24 @@
 #include "./alloc_vars.h"
 #include "../Include/common_defines.h"
 #include "./action.h"
-#include "../Include/defect_info.h"
+
+
+typedef struct defect_info_t{
+
+    int  defect_swap_min[4][4];
+    int  defect_swap_max[4][4];
+    #ifdef GAUGE_ACT_TLSM
+    int  defect_swap_min_TLSM[4][4];
+    int  defect_swap_max_TLSM[4][4];
+    #endif
+    int def_axis_mapped;
+    int nu_vector[3];
+
+
+
+}defect_info;
+extern defect_info *def;
+
 
 void mat_alloc(int *** a, unsigned n, unsigned m );
 int init_k_test(su3_soa *conf_acc,double c_r);

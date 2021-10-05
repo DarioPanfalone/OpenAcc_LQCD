@@ -23,7 +23,6 @@
 #include "./plaquettes.h"
 #include "../Include/debug.h"
 #include "../Rand/random.h"
-#include "../Include/defect_info.h"
 
 #include <time.h>
 
@@ -95,7 +94,7 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
 
   int mu;
   int i;
-  int parity,condition;
+  int parity,condition,condition_2;
   int def_vet_4d[4];
   int perp_dir[4][3] = {{ 1, 2, 3}, { 0, 2, 3}, { 0, 1, 3}, { 0, 1, 2}};
 
@@ -159,7 +158,8 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
   int tny = geom_par.gny;
   int tnz = geom_par.gnz;
   int tnt = geom_par.gnt;
-  //int count=0;
+  int count=0;
+  
   int d[4], idxh, x, y, z, t;
   for(d[3]=0; d[3] < nd3; d[3]++)
     for(d[2]=0; d[2] < nd2; d[2]++)
@@ -197,52 +197,84 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
 
 	  condition = (x >= x_mind) && (y >= y_mind) && (z >= z_mind) && (t >= t_mind) &&
 	    (x < x_maxd) && (y < y_maxd) && (z < z_maxd) && (t < t_maxd);
+	  
+
+	  condition_2=(  d[0]<=nd[0]-devinfo.halo_widths0123[0] &&d[1]<=nd[1]-devinfo.halo_widths0123[1] &&  d[2]<=nd[2]-devinfo.halo_widths0123[2] &&  d[3]<=nd[3]-devinfo.halo_widths0123[3]);
 
 	  if(condition){
 
 
      for(int nu=0; nu<4;nu++){
           for (i=0; i<4; i++)
-          {
-              if ( d[i] <def->defect_swap_min[nu][i] && d[i]>=devinfo.halo_widths0123[i] && d[i]<=nd[i]-devinfo.halo_widths0123[i]){
+         {
+              if ( d[i] <def->defect_swap_min[nu][i] && d[i]>=devinfo.halo_widths0123[i] && condition_2 ){
                    def->defect_swap_min[nu][i] = d[i];
 		   #ifdef GAUGE_ACT_TLSM
                    def->defect_swap_min_TLSM[nu][i] = d[i];
 	           #endif
-		   if(devinfo.myrank==1){printf("min %d %d\n",i,d[i]);}
-              }
+                        count ++;
+	      }
               
-              if ( d[i] >  def->defect_swap_max[nu][i] && d[i]>=devinfo.halo_widths0123[i] && d[i]<=nd[i]-devinfo.halo_widths0123[i]) {
+              if ( d[i] >  def->defect_swap_max[nu][i] && d[i]>=devinfo.halo_widths0123[i] && condition_2) {
                   def->defect_swap_max[nu][i] = d[i];
 		  #ifdef GAUGE_ACT_TLSM
                   def->defect_swap_max_TLSM[nu][i] = d[i];
 		  #endif
-		  if(devinfo.myrank==1){printf("max %d %d\n",i,d[i]);}
-              }
+                         count ++;
+	      }
 	  } 
 
         }
 
 	    conf[2*def_axis_mapped+parity].K.d[idxh] = c_r;
-	    //count ++;
 	    
 
 	  }
 
+
+	
+
 	  
-	  
-/*
-  for(int nu=0; nu<4;nu++){
  
-	     if(devinfo.myrank==0){
-          def->defect_swap_min[nu][nu]+=-PLAQ_EXTENT;
-          }
-  }
-*/
 
 	}//lattice loop
+     if(count==0){
+              for(int nu=0; nu<4;nu++){
+                      for (i=0; i<4; i++){
+                  def->defect_swap_min[nu][i] = 0;
+                 def->defect_swap_max[nu][i] = 0; 
 
-  if(devinfo.myrank==1){
+                  #ifdef GAUGE_ACT_TLSM
+                  
+		  def->defect_swap_min_TLSM[nu][i] = 0;
+                  def->defect_swap_max_TLSM[nu][i] = 0;
+                  #endif
+              }
+          }
+
+     }	      
+     if(0==devinfo.myrank){
+
+     def->defect_swap_min[0][0] += -1;
+     def->defect_swap_min[1][1] += -1;
+     def->defect_swap_min[2][2] += -1;
+     def->defect_swap_min[3][3] += -1;
+                   #ifdef GAUGE_ACT_TLSM
+     for(i=0;i<4;i++){
+                   def->defect_swap_min_TLSM[i][0] +=-1;
+     }
+		   def->defect_swap_min_TLSM[1][1] +=-2 ;
+		   def->defect_swap_min_TLSM[2][2] +=-2 ;
+		   def->defect_swap_min_TLSM[3][3] +=-2 ;
+                   #endif
+
+     }
+
+
+
+
+   printf("rank %d count: %d\n",devinfo.myrank,count);
+
  printf("defect_swap_max: rank %d\n",devinfo.myrank);
 
     for(int nu=0;nu<4;nu++){
@@ -264,8 +296,33 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
         }
         printf("\n");
     }
+#ifdef GAUGE_ACT_TLSM
+  
+ printf("defect_swap_max_tlsm: rank %d\n",devinfo.myrank);
 
-  }
+    for(int nu=0;nu<4;nu++){
+            printf("nu:%d||",nu);
+        for(i=0;i<4;i++){
+    printf("%d||",def->defect_swap_max_TLSM[nu][i]);
+
+        }
+        printf("\n");
+    }
+                     
+
+    printf("defect_swap_min_tlsm: rank %d\n",devinfo.myrank);
+
+    for(int nu=0;nu<4;nu++){
+        printf("nu:%d||",nu);
+        for(i=0;i<4;i++){
+            printf("%d||",def->defect_swap_min_TLSM[nu][i]);
+
+        }
+        printf("\n");
+    }
+
+#endif
+
   //printf("MPI%d: condition satisfied %d times.\n",devinfo.myrank,count);
 }
 
