@@ -426,8 +426,8 @@ def->defect_swap_min[mu1]=malloc(4*sizeof (int));
     printf("aux_conf_init\n");
     
 
-    init_k(aux_conf_acc,1,0,vet_aux_bound,&def);
-    init_k(auxbis_conf_acc,1,0,vet_aux_bound,&def);
+    init_k(aux_conf_acc,1,0,vet_aux_bound,&def,1);
+    init_k(auxbis_conf_acc,1,0,vet_aux_bound,&def,1);
    
     /*
     init_k(conf_acc_bkp,1,0,vet_aux_bound);
@@ -455,10 +455,10 @@ def->defect_swap_min[mu1]=malloc(4*sizeof (int));
         for (mu1=0;mu1<8;mu1++){
             conf_hasenbusch[replicas_counter][mu1].label=replicas_counter;
         }
-    int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def);
+    int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def,replicas_counter);
     
 #ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge) init_result+=init_k(&conf_hasenbusch[replicas_counter][8],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def);
+    if(devinfo.async_comm_gauge) init_result+=init_k(&conf_hasenbusch[replicas_counter][8],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def,1);
 #endif
         
     if(init_result!=0)
@@ -886,7 +886,7 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2],rep->defect_boundary,rep->de
              
                 
                 printf("CONF SWAP HERE!\n ");
-                All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,rep->defect_boundary, rep->defect_coordinates, &swap_number,all_swap_vector,acceptance_vector);
+                All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,&def, &swap_number,all_swap_vector,acceptance_vector);
                 printf("swap_number %d\n", swap_number);
                
               #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu

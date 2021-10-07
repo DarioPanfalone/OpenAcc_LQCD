@@ -67,18 +67,6 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
 }
 */
 
-void mat_alloc(int *** a, unsigned n, unsigned m ) {
-    int i;
-    
-   
-    
-    *a=malloc(n*sizeof(int * ));
-    for (i=0; i<n; i++)
-    {(*a)[i]=malloc(m*sizeof(int));
-        }
-    
-    return;
-}
 
 
 
@@ -90,7 +78,7 @@ void mat_alloc(int *** a, unsigned n, unsigned m ) {
 
 
 
-int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info * def){
+int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info * def,int defect_info_config){
 
   int mu;
   int i;
@@ -100,19 +88,22 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
 
   int map[4] = {geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap};
   int def_axis_mapped=map[def_axis];
-  def->def_axis_mapped=def_axis_mapped;
+if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
 
 
     //INITIALIZZATION
     int nd[4]={nd0-1,nd1-1,nd2-1,nd3-1};
+    if(defect_info_config==0){   
     for(int nu=0; nu<4;nu++){
         for (i=0; i<3; i++)
         {
             def->defect_swap_max[nu][i]=0;
             def->defect_swap_min[nu][i]=nd[i];
 	     #ifdef GAUGE_ACT_TLSM
-	     def->defect_swap_max_TLSM[nu][i]=0;
-            def->defect_swap_min_TLSM[nu][i] = nd[i];
+	    for(int j=0;j<2;j++){
+	     def->defect_swap_max_TLSM[nu][i][j]=0;
+            def->defect_swap_min_TLSM[nu][i][j] = nd[i];
+	    }
              #endif
 
 
@@ -120,11 +111,15 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
 	  def->defect_swap_max[nu][3]=D3_HALO;
             def->defect_swap_min[nu][3]=nd[3]-D3_HALO;
              #ifdef GAUGE_ACT_TLSM
-             def->defect_swap_max_TLSM[nu][3]=D3_HALO;
-            def->defect_swap_min_TLSM[nu][3] = nd[3]-D3_HALO;
-             #endif
+	     for(int j=0;j<2;j++){
+
+             def->defect_swap_max_TLSM[nu][3][j]=D3_HALO;
+            def->defect_swap_min_TLSM[nu][3][j] = nd[3]-D3_HALO;
+	     }
+	    #endif
 
 
+    }
     }
 
 
@@ -141,7 +136,7 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
   def_vet_4d[def_axis]=1;
   for(i=0;i<3;i++)
     def_vet_4d[perp_dir[def_axis][i]]=def_vet[i];
-   def->nu_vector[i]=perp_dir[def_axis];
+      if(defect_info_config==0){ def->def_mapped_perp_dir[i]=perp_dir[def_axis_mapped];}
  
 
   int x_mind = (geom_par.xmap==def_axis)? geom_par.gnx-1 : 0;
@@ -203,29 +198,33 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
 
 	  if(condition){
 
-
+    if(defect_info_config==0){
      for(int nu=0; nu<4;nu++){
           for (i=0; i<4; i++)
          {
               if ( d[i] <def->defect_swap_min[nu][i] && d[i]>=devinfo.halo_widths0123[i] && condition_2 ){
                    def->defect_swap_min[nu][i] = d[i];
 		   #ifdef GAUGE_ACT_TLSM
-                   def->defect_swap_min_TLSM[nu][i] = d[i];
-	           #endif
+		    for(int j=0;j<2;j++){
+                   def->defect_swap_min_TLSM[nu][i][j] = d[i];
+		    }
+                   #endif
                         count ++;
 	      }
               
               if ( d[i] >  def->defect_swap_max[nu][i] && d[i]>=devinfo.halo_widths0123[i] && condition_2) {
                   def->defect_swap_max[nu][i] = d[i];
 		  #ifdef GAUGE_ACT_TLSM
-                  def->defect_swap_max_TLSM[nu][i] = d[i];
-		  #endif
+		   for(int j=0;j<2;j++){
+                  def->defect_swap_max_TLSM[nu][i][j] = d[i];
+		   }	
+                    #endif
                          count ++;
 	      }
 	  } 
 
         }
-
+    }
 	    conf[2*def_axis_mapped+parity].K.d[idxh] = c_r;
 	    
 
@@ -238,6 +237,8 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
  
 
 	}//lattice loop
+
+    if(defect_info_config==0){
      if(count==0){
               for(int nu=0; nu<4;nu++){
                       for (i=0; i<4; i++){
@@ -245,14 +246,34 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
                  def->defect_swap_max[nu][i] = 0; 
 
                   #ifdef GAUGE_ACT_TLSM
-                  
-		  def->defect_swap_min_TLSM[nu][i] = 0;
-                  def->defect_swap_max_TLSM[nu][i] = 0;
+                   for(int j=0;j<2;j++){
+		  def->defect_swap_min_TLSM[nu][i][j] = 0;
+                  def->defect_swap_max_TLSM[nu][i][j] = 0;
+		   }
                   #endif
               }
           }
 
-     }	      
+     }	
+
+     else{
+              for(int nu=0; nu<4;nu++){
+                      for (i=0; i<4; i++){
+                 def->defect_swap_max[nu][i] += 1;
+
+                  #ifdef GAUGE_ACT_TLSM
+ for(int j=0;j<2;j++){
+                  def->defect_swap_max_TLSM[nu][i][j] += 1;
+ }
+                  #endif
+              }
+          }
+
+     }
+    
+
+
+
      if(0==devinfo.myrank){
 
      def->defect_swap_min[0][0] += -1;
@@ -261,11 +282,20 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
      def->defect_swap_min[3][3] += -1;
                    #ifdef GAUGE_ACT_TLSM
      for(i=0;i<4;i++){
-                   def->defect_swap_min_TLSM[i][0] +=-1;
+                   def->defect_swap_min_TLSM[i][def_axis_mapped][1] +=-1;//plaq 2x1
+
+
      }
-		   def->defect_swap_min_TLSM[1][1] +=-2 ;
-		   def->defect_swap_min_TLSM[2][2] +=-2 ;
-		   def->defect_swap_min_TLSM[3][3] +=-2 ;
+
+ for(i=1;i<4;i++){
+  def->defect_swap_min_TLSM[perp_dir[def_axis_mapped][i]][perp_dir[def_axis_mapped][i]][1] +=-1 ;
+  def->defect_swap_min_TLSM[perp_dir[def_axis_mapped][i]][perp_dir[def_axis_mapped][i]][0] +=-2;
+ }	
+
+
+
+
+
                    #endif
 
      }
@@ -320,9 +350,11 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
         }
         printf("\n");
     }
+    
 
 #endif
 
+    }
   //printf("MPI%d: condition satisfied %d times.\n",devinfo.myrank,count);
 }
 
@@ -507,28 +539,25 @@ double  calc_Delta_S_soloopenacc_SWAP(
                                       __restrict  su3_soa * const tconf_acc,
                                       __restrict  su3_soa * const tconf_acc2,
                                       __restrict su3_soa * const local_plaqs,
-                                      dcomplex_soa * const tr_local_plaqs,int def_axis, int * def_vet, int improved )
+                                      dcomplex_soa * const tr_local_plaqs,defect_info * def, int improved )
 {
     double result=0.0;
     double total_result=0.0;
-    int mu,nu;
-   int map[4] = {geom_par.xmap,geom_par.ymap,geom_par.zmap,geom_par.tmap};
-  int def_axis_mapped=map[def_axis];
-    mu=def_axis_mapped;
-    int perp_dir[4][3] = {{ 1, 2, 3}, { 0, 2, 3}, { 0, 1, 3}, { 0, 1, 2}};
+    int mu,nu,i;
+    mu=def->def_axis_mapped;
     int counter=0;
 
 
     for(counter=0;counter<3;counter++){
         // sommo i 6 risultati in tempo
-        nu=perp_dir[def_axis_mapped][counter];
+        nu=def->def_mapped_perp_dir[i];
             //     printf("(%d,%d)\n",mu,nu);
             if(improved==0){
-                result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet); //here ol the plaquettes of a specific plane's choice are computed.
+                result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def); //here ol the plaquettes of a specific plane's choice are computed.
             }
             
             if(improved==1){
-                result  += calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def_axis,def_vet);
+                result  += calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def);
                 
             }
             
@@ -679,6 +708,175 @@ double  calc_Delta_S_soloopenacc_SWAP(
 }
 */
 
+
+double calc_Delta_S_Wilson_SWAP(
+                                __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
+                                __restrict const su3_soa * const w,
+                                __restrict su3_soa * const loc_plaq, //la placchetta locale.
+                                dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
+                                
+                                const int mu, const int nu, defect_info * def)
+{
+
+
+
+    double K_mu_nu; //MOD.
+    double K_mu_nu2; //MOD.
+    int d0, d1, d2, d3;
+    int D1,D2,D3,D0;
+    int D0s,D1s,D2s,D3s;
+    int i;
+    
+    D1s=def->defect_swap_min[nu][def->def_mapped_perp_dir[0]];
+    D2s=def->defect_swap_min[nu][def->def_mapped_perp_dir[1]];
+    D3s=def->defect_swap_min[nu][def->def_mapped_perp_dir[2]];
+    
+    D1=def->defect_swap_max[nu][def->def_mapped_perp_dir[0]];
+    D2=def->defect_swap_max[nu][def->def_mapped_perp_dir[1]];
+    D3=def->defect_swap_max[nu][def->def_mapped_perp_dir[2]];
+    
+    
+    d0=def->defect_swap_min[def->def_axis_mapped][def->def_axis_mapped];
+    
+    
+    for(i=0; i<sizeh;i++){
+        tr_local_plaqs[0].c[i]=0;
+        tr_local_plaqs[1].c[i]=0;
+        
+    }
+#pragma acc update device(tr_local_plaqs[0:2])
+ 
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
+#pragma acc loop independent gang(STAPGANG3)
+    
+    for(d3=D3s; d3<D3; d3++) {//what?
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+        for(d2=D2s; d2<D2; d2++) {
+            for(d1=D1s; d1<D1; d1++) {
+               
+                
+                
+                
+                int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
+                int parity; //parity
+                int dir_muA,dir_nuB; //mu and nu directions.
+                int dir_muC,dir_nuD;
+                
+                idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
+                parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+                
+          
+                
+                if(d1==-1){ parity = (d0+d2+d3) % 2; idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];parity=!parity;}
+                if(d2==-1){parity = (d0+d1+d3) % 2; idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];parity=!parity;}
+                if(d3==-1){parity = (d0+d1+d2) % 2; idxh=nnm_openacc[snum_acc(d0,d1,d2,0)][3][parity];parity=!parity;}
+                
+              
+                
+       
+                
+                dir_muA = 2*mu +  parity;
+                dir_muC = 2*mu + !parity;
+                idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+                
+                dir_nuB = 2*nu + !parity;
+                dir_nuD = 2*nu +  parity;
+                idxpnu = nnp_openacc[idxh][nu][parity];// r+nu //the table that states which is the nearest neighbour.
+                //       r+nu (C)  r+mu+nu
+                //          +<---+
+                // nu       |    ^
+                // ^    (D) V    | (B)
+                // |        +--->+
+                // |       r  (A)  r+mu
+                // +---> mu
+                
+                //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
+                
+                //plaquette u
+                mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                
+                
+                d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
+                
+                
+                
+                
+                // printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);
+                //MOD
+                
+                //K_mu_nu computation;
+                K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
+                
+                
+                
+                //MOD_END
+                
+                //SECOND MOD
+                
+                
+                //plaquette w
+                mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
+                mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
+                
+                
+                //K_mu_nu computation;
+                K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
+                
+                
+                
+                d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+                
+                
+                tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
+                
+                tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
+                
+                
+                
+                
+                
+                
+                
+     
+                
+                
+                
+                
+                
+                
+            }  // d1
+        }  // d2
+        
+    }  // d3
+double res_R_p = 0.0;
+double res_I_p = 0.0;
+double resR = 0.0;
+int t;
+
+
+
+#pragma acc kernels present(tr_local_plaqs)
+#pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
+for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+    res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
+    
+    res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
+}
+
+
+res_R_p=BETA_BY_THREE *res_R_p;
+
+return res_R_p;
+    
+    
+}
+
+
+/*
 double calc_Delta_S_Wilson_SWAP(
     __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
     __restrict const su3_soa * const w,
@@ -712,7 +910,7 @@ double calc_Delta_S_Wilson_SWAP(
         
         if(nu==1){D1s=-1;}
         if(nu==2){D2s=-1;}
-    /*    if(nu==3){D3s=-PLAQ_EXTENT;}*/
+        if(nu==3){D3s=-PLAQ_EXTENT;}
     
         
     
@@ -755,11 +953,11 @@ double calc_Delta_S_Wilson_SWAP(
                         idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                         parity = (d0+d1+d2+(d3-D3_HALO)) % 2; //obviously the parity_term
 
-                            /*
+                            
                             if(d1==-1){idxh=snum_acc(d0,nd1-1,d2,d3);parity=(d0+(nd1-1)+d2+d3)%2;}
                             if(d2==-1){idxh=snum_acc(d0,d1,nd2-1,d3);parity=(d0+d1+(nd2-1)+d3)%2;}
                             if(d3==-1){idxh=snum_acc(d0,d1,d2,nd3-1);parity=(d0+d1+d2+(nd3-1))%2;}
-                            */
+                            
                             
                             if(d1==-1){ parity = (d0+d2+d3) % 2; idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];parity=!parity;}
                             if(d2==-1){parity = (d0+d1+d3) % 2; idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];parity=!parity;}
@@ -827,7 +1025,7 @@ double calc_Delta_S_Wilson_SWAP(
                             
                             aux+=-creal(ciao2)-cimag(ciao2)*I;
                             
-                           tr_local_plaqs[parity].c[idxh]+=/*(K_mu_nu-K_mu_nu2)*/aux;
+                           tr_local_plaqs[parity].c[idxh]+=K_mu_nu-K_mu_nu2)aux;
                             
   	  
                    
@@ -1197,6 +1395,9 @@ double calc_Delta_S_Wilson_SWAP(
         return res_R_p;
     }// closes routine
 
+*/
+
+
 
 
 double calc_Delta_S_Symanzik_SWAP(
@@ -1204,10 +1405,10 @@ __restrict const su3_soa * const u,//for an unknown reason the vet conf is calle
 __restrict const su3_soa * const w,
 __restrict su3_soa * const loc_plaq, //la placchetta locale.
 dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
-const int mu, const int nu, int def_axis, int *def_vet)
+const int mu, const int nu, defect_info *def)
 {
     
-
+/*
     
         double K_mu_nu; //MOD.
         double K_mu_nu2; //MOD.
@@ -1369,7 +1570,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                             
-                                 //*****************************************//
                                  if(d1>-2 && d2>-2 && d3>-2){
                              //THIRD MOD
                             dir_muA = 2*mu +  parity;
@@ -1428,7 +1628,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             
                            
-                            //*****************************************//
                             
                             
                             
@@ -1620,7 +1819,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             //SECOND_MOD_END
                             
-                              //*****************************************//
                               if( d2>-2 && d3>-2 && d0>-2){
                                   //THIRD MOD
                                   dir_muA = 2*mu +  parity;
@@ -1678,8 +1876,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                                   
                                   
                                   
-                                  
-                                  //*****************************************//
                                   
                                   
                                   
@@ -1869,7 +2065,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             //SECOND_MOD_END
                             
-                                //*****************************************//
                                 if(d1>-2 && d0>-2 && d3>-2){
                                     //THIRD MOD
                                     dir_muA = 2*mu +  parity;
@@ -1928,7 +2123,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                                     
                                     
                                     
-                                    //*****************************************//
                                     
                                     
                                     
@@ -2116,7 +2310,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                             
                             //SECOND_MOD_END
                             
-                            //*****************************************//
                             if(d1>-2 && d2>-2 && d0>-2){
                                 //THIRD MOD
                                 dir_muA = 2*mu +  parity;
@@ -2175,7 +2368,6 @@ const int mu, const int nu, int def_axis, int *def_vet)
                                 
                                 
                                 
-                                //*****************************************//
                                 
                                 
                                 
@@ -2290,6 +2482,7 @@ const int mu, const int nu, int def_axis, int *def_vet)
         return res_R_p;
     
     
+*/
     
     
     printf("d\n");
@@ -2297,10 +2490,32 @@ const int mu, const int nu, int def_axis, int *def_vet)
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int metro_SWAP(su3_soa ** conf_hasenbusch,
                __restrict su3_soa * const loc_plaq, //la placchetta locale.
                dcomplex_soa * const tr_local_plaqs,
-               int rep_indx1, int rep_indx2,int defect_axis,int * defect_coordinates)
+            int rep_indx1, int rep_indx2,defect_info * def )
 {
     int gauge_param;
     
@@ -2309,8 +2524,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     double p1,p2;
     double Delta_S_SWAP;
     int accettata=0;
-    Delta_S_SWAP=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,defect_axis,defect_coordinates,gauge_param);
-    
+    Delta_S_SWAP=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,def,gauge_param);
     printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
     if(Delta_S_SWAP<0){
         accettata=1;
@@ -2359,11 +2573,12 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     return accettata;
 }
 
+
 void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
                    __restrict su3_soa * const loc_plaq, //la placchetta locale.
                    dcomplex_soa * const tr_local_plaqs,
                    
-                   int replicas_number, int defect_axis, int * defect_coordinates, int* swap_num,int * all_swap_vet,int * acceptance_vet ){
+                   int replicas_number,  defect_info * def, int* swap_num,int * all_swap_vet,int * acceptance_vet ){
     double swap_order;
 
    if(0==devinfo.myrank){swap_order=casuale();}
@@ -2384,7 +2599,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
         for(i_counter=0;i_counter<replicas_number-1;i_counter++){
             printf("%d %d\n",i_counter,i_counter+1);
             
-            accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1,defect_axis,defect_coordinates);
+            accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1, def);
             #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             
           
@@ -2414,7 +2629,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
         for(i_counter=0;i_counter<replicas_number-1;i_counter++){
         printf("%d %d\n",replicas_number-1-i_counter,replicas_number-i_counter-2);
         
-        accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2,defect_axis,defect_coordinates);
+        accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2, def);
 #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             
             *swap_num=*swap_num+1;
