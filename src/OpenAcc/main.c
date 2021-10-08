@@ -497,7 +497,29 @@ def->defect_swap_min[mu1]=malloc(4*sizeof (int));
     
 
 
-    
+ printf("defect_swap_max: rank %d\n",devinfo.myrank);
+
+    for(int nu=0;nu<4;nu++){
+	      if(nu!=def.def_axis_mapped){
+            printf("nu:%d||",nu);
+        for(int i=0;i<4;i++){
+    printf("%d||",def.defect_swap_max[nu][i]);}
+    printf("\n");
+        }
+    }
+
+    printf("defect_swap_min: rank %d\n",devinfo.myrank);
+
+    for(int nu=0;nu<4;nu++){
+	      if(nu!=def.def_axis_mapped){
+        printf("nu:%d||",nu);
+        for(int i=0;i<4;i++){
+            printf("%d||",def.defect_swap_min[nu][i]);}
+    printf("\n");
+        }
+    }
+
+  printf("debug1: %d\n",def.def_mapped_perp_dir[0]);    
     
     
     //#################################################################################  

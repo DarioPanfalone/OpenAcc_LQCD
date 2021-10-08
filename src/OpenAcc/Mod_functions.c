@@ -82,7 +82,7 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info 
 
   int mu;
   int i;
-  int parity,condition,condition_2;
+  int parity,condition,condition_2=1,condition_3=1;
   int def_vet_4d[4];
   int perp_dir[4][3] = {{ 1, 2, 3}, { 0, 2, 3}, { 0, 1, 3}, { 0, 1, 2}};
 
@@ -134,10 +134,10 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
 
 
   def_vet_4d[def_axis]=1;
-  for(i=0;i<3;i++)
+  for(i=0;i<3;i++){
     def_vet_4d[perp_dir[def_axis][i]]=def_vet[i];
-      if(defect_info_config==0){ def->def_mapped_perp_dir[i]=perp_dir[def_axis_mapped];}
- 
+      if(defect_info_config==0){ def->def_mapped_perp_dir[i]=perp_dir[def_axis_mapped][i];}
+  }
 
   int x_mind = (geom_par.xmap==def_axis)? geom_par.gnx-1 : 0;
   int y_mind = (geom_par.ymap==def_axis)? geom_par.gny-1 : 0;
@@ -193,8 +193,10 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
 	  condition = (x >= x_mind) && (y >= y_mind) && (z >= z_mind) && (t >= t_mind) &&
 	    (x < x_maxd) && (y < y_maxd) && (z < z_maxd) && (t < t_maxd);
 	  
-
+#ifdef MULTIDEVICE
 	  condition_2=(  d[0]<=nd[0]-devinfo.halo_widths0123[0] &&d[1]<=nd[1]-devinfo.halo_widths0123[1] &&  d[2]<=nd[2]-devinfo.halo_widths0123[2] &&  d[3]<=nd[3]-devinfo.halo_widths0123[3]);
+
+#endif
 
 	  if(condition){
 
@@ -202,7 +204,11 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
      for(int nu=0; nu<4;nu++){
           for (i=0; i<4; i++)
          {
-              if ( d[i] <def->defect_swap_min[nu][i] && d[i]>=devinfo.halo_widths0123[i] && condition_2 ){
+		 #ifdef MULTIDEVICE
+		 condition_3=(d[i]>=devinfo.halo_widths0123[i]);
+                 #endif
+
+              if ( d[i] <def->defect_swap_min[nu][i]  &&  condition_3  && condition_2 ){
                    def->defect_swap_min[nu][i] = d[i];
 		   #ifdef GAUGE_ACT_TLSM
 		    for(int j=0;j<2;j++){
@@ -212,7 +218,7 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
                         count ++;
 	      }
               
-              if ( d[i] >  def->defect_swap_max[nu][i] && d[i]>=devinfo.halo_widths0123[i] && condition_2) {
+              if ( d[i] >  def->defect_swap_max[nu][i] && condition_3 && condition_2) {
                   def->defect_swap_max[nu][i] = d[i];
 		  #ifdef GAUGE_ACT_TLSM
 		   for(int j=0;j<2;j++){
@@ -274,23 +280,22 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
 
 
 
-     if(0==devinfo.myrank){
 
      def->defect_swap_min[0][0] += -1;
      def->defect_swap_min[1][1] += -1;
      def->defect_swap_min[2][2] += -1;
-     def->defect_swap_min[3][3] += -1;
+if(0==devinfo.myrank){ def->defect_swap_min[3][3] += -1;}
                    #ifdef GAUGE_ACT_TLSM
      for(i=0;i<4;i++){
-                   def->defect_swap_min_TLSM[i][def_axis_mapped][1] +=-1;//plaq 2x1
+  if(0==devinfo.myrank || def_axis_mapped!=3 ){ def->defect_swap_min_TLSM[i][def_axis_mapped][1] +=-1;//plaq 2x1
 
 
      }
 
  for(i=1;i<4;i++){
-  def->defect_swap_min_TLSM[perp_dir[def_axis_mapped][i]][perp_dir[def_axis_mapped][i]][1] +=-1 ;
-  def->defect_swap_min_TLSM[perp_dir[def_axis_mapped][i]][perp_dir[def_axis_mapped][i]][0] +=-2;
- }	
+ if(0==devinfo.myrank || perp_dir[def_axis_mapped][i]!=3 ){ def->defect_swap_min_TLSM[perp_dir[def_axis_mapped][i]][perp_dir[def_axis_mapped][i]][1] +=-1 ;}
+if(0==devinfo.myrank || perp_dir[def_axis_mapped][i]!=3 ){ def->defect_swap_min_TLSM[perp_dir[def_axis_mapped][i]][perp_dir[def_axis_mapped][i]][0] +=-2;}
+}	
 
 
 
@@ -298,7 +303,7 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
 
                    #endif
 
-     }
+     
 
 
 
@@ -308,23 +313,23 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
  printf("defect_swap_max: rank %d\n",devinfo.myrank);
 
     for(int nu=0;nu<4;nu++){
+	     if(nu!=def->def_axis_mapped){
             printf("nu:%d||",nu);
         for(i=0;i<4;i++){
-    printf("%d||",def->defect_swap_max[nu][i]);
-
+    printf("%d||",def->defect_swap_max[nu][i]);}
+    printf("\n");
         }
-        printf("\n");
     }
 
     printf("defect_swap_min: rank %d\n",devinfo.myrank);
 
     for(int nu=0;nu<4;nu++){
+	     if(nu!=def->def_axis_mapped){
         printf("nu:%d||",nu);
         for(i=0;i<4;i++){
-            printf("%d||",def->defect_swap_min[nu][i]);
-
+            printf("%d||",def->defect_swap_min[nu][i]);}
+    printf("\n");
         }
-        printf("\n");
     }
 #ifdef GAUGE_ACT_TLSM
   
@@ -722,23 +727,22 @@ double calc_Delta_S_Wilson_SWAP(
 
     double K_mu_nu; //MOD.
     double K_mu_nu2; //MOD.
-    int d0, d1, d2, d3;
-    int D1,D2,D3,D0;
-    int D0s,D1s,D2s,D3s;
+    int d0,d1,d2,d3;
+    int D_max[4];
+    int D_min[4];
+    int d[4];
     int i;
-    
-    D1s=def->defect_swap_min[nu][def->def_mapped_perp_dir[0]];
-    D2s=def->defect_swap_min[nu][def->def_mapped_perp_dir[1]];
-    D3s=def->defect_swap_min[nu][def->def_mapped_perp_dir[2]];
-    
-    D1=def->defect_swap_max[nu][def->def_mapped_perp_dir[0]];
-    D2=def->defect_swap_max[nu][def->def_mapped_perp_dir[1]];
-    D3=def->defect_swap_max[nu][def->def_mapped_perp_dir[2]];
-    
-    
-    d0=def->defect_swap_min[def->def_axis_mapped][def->def_axis_mapped];
-    
-    
+  printf("debug1: %d\n",def->def_mapped_perp_dir[0]);
+
+
+for(i=0;i<4;i++){
+
+    D_min[i]=def->defect_swap_min[nu][i];
+    D_max[i]=def->defect_swap_max[nu][i];
+    printf("%d | %d | %d",i,D_min[i],D_max[i]);
+}
+    printf("\n");
+
     for(i=0; i<sizeh;i++){
         tr_local_plaqs[0].c[i]=0;
         tr_local_plaqs[1].c[i]=0;
@@ -749,12 +753,18 @@ double calc_Delta_S_Wilson_SWAP(
 #pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
     
-    for(d3=D3s; d3<D3; d3++) {//what?
+    for(d3=D_min[3]; d3< D_max[3]; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-        for(d2=D2s; d2<D2; d2++) {
-            for(d1=D1s; d1<D1; d1++) {
-               
-                
+        for(d2=D_min[2]; d2< D_max[2]; d2++) {
+            for(d1=D_min[1]; d1< D_max[1]; d1++) {
+               for(d0=D_min[0]; d0< D_max[0]; d0++) {
+           
+      // for(d[3]=0; d[3] < nd3; d[3]++)
+   // for(d[2]=0; d[2] < nd2; d[2]++)
+    //  for(d[1]=0; d[1] < nd1; d[1]++)
+      //  for(d[0]=0; d[0] < nd0; d[0]++){
+
+           
                 
                 
                 int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
@@ -769,7 +779,7 @@ double calc_Delta_S_Wilson_SWAP(
                 
                 if(d1==-1){ parity = (d0+d2+d3) % 2; idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];parity=!parity;}
                 if(d2==-1){parity = (d0+d1+d3) % 2; idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];parity=!parity;}
-                if(d3==-1){parity = (d0+d1+d2) % 2; idxh=nnm_openacc[snum_acc(d0,d1,d2,0)][3][parity];parity=!parity;}
+                if(d0==-1){parity = (d3+d1+d2) % 2; idxh=nnm_openacc[snum_acc(0,d1,d2,d3)][0][parity];parity=!parity;}
                 
               
                 
@@ -846,7 +856,7 @@ double calc_Delta_S_Wilson_SWAP(
                 
                 
                 
-                
+	       } //d0  
                 
             }  // d1
         }  // d2
