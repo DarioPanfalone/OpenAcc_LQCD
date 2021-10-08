@@ -548,15 +548,15 @@ double  calc_Delta_S_soloopenacc_SWAP(
 {
     double result=0.0;
     double total_result=0.0;
-    int mu,nu,i;
+    int mu,nu;
     mu=def->def_axis_mapped;
     int counter=0;
 
 
     for(counter=0;counter<3;counter++){
         // sommo i 6 risultati in tempo
-        nu=def->def_mapped_perp_dir[i];
-            //     printf("(%d,%d)\n",mu,nu);
+        nu=def->def_mapped_perp_dir[counter];
+                printf("(%d,%d)\n",mu,nu);
             if(improved==0){
                 result  += calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def); //here ol the plaquettes of a specific plane's choice are computed.
             }
@@ -730,18 +730,16 @@ double calc_Delta_S_Wilson_SWAP(
     int d0,d1,d2,d3;
     int D_max[4];
     int D_min[4];
-    int d[4];
     int i;
-  printf("debug1: %d\n",def->def_mapped_perp_dir[0]);
+  printf("nu: %d\n",nu);
 
 
 for(i=0;i<4;i++){
 
     D_min[i]=def->defect_swap_min[nu][i];
     D_max[i]=def->defect_swap_max[nu][i];
-    printf("%d | %d | %d",i,D_min[i],D_max[i]);
+    printf("%d | %d | %d \n",i,D_min[i],D_max[i]);
 }
-    printf("\n");
 
     for(i=0; i<sizeh;i++){
         tr_local_plaqs[0].c[i]=0;
@@ -759,10 +757,6 @@ for(i=0;i<4;i++){
             for(d1=D_min[1]; d1< D_max[1]; d1++) {
                for(d0=D_min[0]; d0< D_max[0]; d0++) {
            
-      // for(d[3]=0; d[3] < nd3; d[3]++)
-   // for(d[2]=0; d[2] < nd2; d[2]++)
-    //  for(d[1]=0; d[1] < nd1; d[1]++)
-      //  for(d[0]=0; d[0] < nd0; d[0]++){
 
            
                 
