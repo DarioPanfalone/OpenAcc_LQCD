@@ -32,7 +32,7 @@ typedef struct defect_info_t{
 
 }defect_info;
 extern defect_info *def;
-
+extern defect_info *pef;
 
 int init_k_test(su3_soa *conf_acc,double c_r);
 int n_replicas_reader(const char* input_filename);

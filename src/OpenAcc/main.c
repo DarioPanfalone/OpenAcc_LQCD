@@ -349,7 +349,8 @@ int main(int argc, char* argv[]){
 //anche da qui il ciclo.
 
     //***************** INIZIALIZZAZIONE DELLA CONFIGURAZIONE *************//
-    defect_info def; 
+    defect_info def;
+    defect_info pef; 
     //def =(defect_info*) malloc(sizeof(defect_info));
     /*printf("%d\n",def->def_axis_mapped);
 def->defect_swap_min=malloc(4*sizeof( int *));
@@ -596,15 +597,62 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2]);
 
    
 
-   
+
+int i2;    
+    
+
+   pef.def_axis_mapped=def.def_axis_mapped;
+  for( i2=0; i2<3;i2++){
+
+	  pef.def_mapped_perp_dir[i2]=def.def_mapped_perp_dir[i2];
+          
+  }
+int nd[4]={nd0,nd1,nd2,nd3};
+
+
+
+for( i3=0; i3<4;i3++){
+  for( i2=0; i2<4;i2++){
+ pef.defect_swap_min[i3][i2]=0;
+ pef.defect_swap_max[i3][i2]=nd[i2];
+ }
+}
+
+
+
+ printf("ALL LATTICE  defect_swap_max: rank %d\n",devinfo.myrank);
+
+    for(int nu=0;nu<4;nu++){
+              if(nu!=pef.def_axis_mapped){
+            printf("nu:%d||",nu);
+        for(int i=0;i<4;i++){
+    printf("%d||",pef.defect_swap_max[nu][i]);}
+    printf("\n");
+        }
+    }
+
+    printf("WHOLE LATTICE  defect_swap_min: rank %d\n",devinfo.myrank);
+
+    for(int nu=0;nu<4;nu++){
+              if(nu!=pef.def_axis_mapped){
+        printf("nu:%d||",nu);
+        for(int i=0;i<4;i++){
+            printf("%d||",pef.defect_swap_min[nu][i]);}
+    printf("\n");
+        }
+    }
+
+
+																									
+   Delta_S_SWAP_1=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&pef,0);
     Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,0);
     
 
 
     
 
-    printf("CONFRONTO DELTA_SWAP\n");
-    printf("%lf (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_0);
+    printf("CONFRONTO DELTA_SWAP\n");								
+    printf("%lf (S_2_0+S_0_2)-(S_0_0+S_2_2)  || %lf (DELTA_S_FULL_RET) ||   %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_1,Delta_S_SWAP_0);
     
 /*
     Delta_S_SWAPS=(S_2_0_RET+S_0_2_RET)-(S_0_0_RET+S_2_2_RET);

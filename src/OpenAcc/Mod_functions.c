@@ -279,7 +279,7 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
     
 
 
-
+if(count!=0){
 
      def->defect_swap_min[0][0] += -1;
      def->defect_swap_min[1][1] += -1;
@@ -290,6 +290,7 @@ if(0==devinfo.myrank){ def->defect_swap_min[3][3] += -1;}
   if(0==devinfo.myrank || def_axis_mapped!=3 ){ def->defect_swap_min_TLSM[i][def_axis_mapped][1] +=-1;//plaq 2x1
 
 
+     }
      }
 
  for(i=1;i<4;i++){
@@ -306,7 +307,7 @@ if(0==devinfo.myrank || perp_dir[def_axis_mapped][i]!=3 ){ def->defect_swap_min_
      
 
 
-
+}
 
    printf("rank %d count: %d\n",devinfo.myrank,count);
 
@@ -728,11 +729,15 @@ double calc_Delta_S_Wilson_SWAP(
     double K_mu_nu; //MOD.
     double K_mu_nu2; //MOD.
     int d0,d1,d2,d3;
-    int D_max[4];
-    int D_min[4];
+  //  int D_max[4];
+   //int D_min[4];
     int i;
   printf("nu: %d\n",nu);
-
+/*
+ #pragma acc  enter data create(D_max[0:4])
+#pragma acc  enter data create(D_min[0:4])
+#pragma acc update device(D_max[0:4])
+#pragma acc update device(D_max[0:4])
 
 for(i=0;i<4;i++){
 
@@ -741,6 +746,25 @@ for(i=0;i<4;i++){
     printf("%d | %d | %d \n",i,D_min[i],D_max[i]);
 }
 
+*/
+int D0_min,D1_min,D2_min,D3_min;
+int D0_max,D1_max,D2_max,D3_max;
+
+
+
+
+D0_min=def->defect_swap_min[nu][0];
+D1_min=def->defect_swap_min[nu][1];
+D2_min=def->defect_swap_min[nu][2];
+D3_min=def->defect_swap_min[nu][3];
+
+D0_max=def->defect_swap_max[nu][0];
+D1_max=def->defect_swap_max[nu][1];
+D2_max=def->defect_swap_max[nu][2];
+D3_max=def->defect_swap_max[nu][3];
+
+
+
     for(i=0; i<sizeh;i++){
         tr_local_plaqs[0].c[i]=0;
         tr_local_plaqs[1].c[i]=0;
@@ -748,19 +772,34 @@ for(i=0;i<4;i++){
     }
 #pragma acc update device(tr_local_plaqs[0:2])
  
-#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
-#pragma acc loop independent gang(STAPGANG3)
-    
-    for(d3=D_min[3]; d3< D_max[3]; d3++) {
-#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-        for(d2=D_min[2]; d2< D_max[2]; d2++) {
-            for(d1=D_min[1]; d1< D_max[1]; d1++) {
-               for(d0=D_min[0]; d0< D_max[0]; d0++) {
-           
 
+
+
+
+
+printf("|%d %d||%d %d| |%d %d| |%d %d| \n",D0_min, D0_max, D1_min, D1_max,D2_min, D2_max,D3_min, D3_max);
+
+
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)/* present(D_max) present(D_min)*/
+#pragma acc loop independent gang(STAPGANG3)
+  
+
+                   for(d3=D3_min; d3< D3_max; d3++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+            for(d2=D2_min; d2< D2_max; d2++) {
+                for(d1=D1_min; d1< D1_max; d1++) {
+                    for(d0=D0_min; d0< D0_max; d0++) {
            
-                
-                
+/*  
+                   for(d3=D_min[3]; d3< D_max[3]; d3++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+            for(d2=D_min[2]; d2< D_max[2]; d2++) {
+                for(d1=D_min[1]; d1< D_max[1]; d1++) {
+                    for(d0=D_min[0]; d0< D_max[0]; d0++) {
+  */            
+  
+
+			    
                 int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
                 int parity; //parity
                 int dir_muA,dir_nuB; //mu and nu directions.
@@ -769,12 +808,12 @@ for(i=0;i<4;i++){
                 idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
                 parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
                 
-          
                 
-                if(d1==-1){ parity = (d0+d2+d3) % 2; idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];parity=!parity;}
-                if(d2==-1){parity = (d0+d1+d3) % 2; idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];parity=!parity;}
-                if(d0==-1){parity = (d3+d1+d2) % 2; idxh=nnm_openacc[snum_acc(0,d1,d2,d3)][0][parity];parity=!parity;}
-                
+			   
+                if(d1==-1){printf("%d %d %d %d\n",d0,d1,d2,d3);parity = (d0+d2+d3) % 2; idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];parity=!parity;}
+                if(d2==-1){printf("%d %d %d %d\n",d0,d1,d2,d3);parity = (d0+d1+d3) % 2; idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];parity=!parity;}
+                if(d0==-1){printf("%d %d %d %d\n",d0,d1,d2,d3);parity = (d3+d1+d2) % 2; idxh=nnm_openacc[snum_acc(0,d1,d2,d3)][0][parity];parity=!parity;}
+                if(d3==-1){printf("%d %d %d %d\n",d0,d1,d2,d3);parity = (d0+d1+d2) % 2; idxh=nnm_openacc[snum_acc(d0,d1,d2,0)][3][parity];parity=!parity;}
               
                 
        
@@ -843,9 +882,8 @@ for(i=0;i<4;i++){
                 
                 
                 
-                
-                
-     
+   //                 printf("(%d %d %d %d)\n",d0,d1,d2,d3);           
+   
                 
                 
                 
