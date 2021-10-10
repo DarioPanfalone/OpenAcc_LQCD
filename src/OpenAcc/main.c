@@ -575,7 +575,7 @@ def->defect_swap_min[mu1]=malloc(4*sizeof (int));
     
    
 
-  Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,0);  
+ // Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,0);  
     
 replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2]);
 #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
@@ -644,10 +644,9 @@ for( i3=0; i3<4;i3++){
 
 
 																									
-   Delta_S_SWAP_1=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&pef,0);
     Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,0);
     
-
+ Delta_S_SWAP_1=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&pef,0);
 
     
 

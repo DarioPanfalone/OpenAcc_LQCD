@@ -185,8 +185,9 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
 
 #endif                  
 
-	  parity = (x+y+z+t)%2; 
+//	  parity = (x+y+z+t)%2; 
 
+	  parity=(d[0]+d[1]+d[2]+d[3])%2;
 	  for(mu=0;mu<4;mu++)
 	    conf[2*mu+parity].K.d[idxh] = 1;
 
@@ -232,6 +233,7 @@ if(defect_info_config==0){  def->def_axis_mapped=def_axis_mapped;}
         }
     }
 	    conf[2*def_axis_mapped+parity].K.d[idxh] = c_r;
+	    printf("%d %d %d %d || %d %d %d %d\n",d[0],d[1],d[2],d[3],x,y,z,t);
 	    
 
 	  }
@@ -880,9 +882,8 @@ printf("|%d %d||%d %d| |%d %d| |%d %d| \n",D0_min, D0_max, D1_min, D1_max,D2_min
                 
                 
                 
-                
-                
-   //                 printf("(%d %d %d %d)\n",d0,d1,d2,d3);           
+  																																																              
+                    printf("( %d %d %d  %d parity %d idxh %d K_mu_nu %lf K_mu_nu %lf mu %d nu %d k_mu(conf1) %f k_mu(conf2) %f \n",d0,d1,d2,d3,parity,idxh,K_mu_nu,K_mu_nu2,mu,nu,u[dir_muA].K.d[idxh],w[dir_muA].K.d[idxh]);           
    
                 
                 
