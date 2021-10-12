@@ -616,6 +616,9 @@ for( i3=0; i3<4;i3++){
  pef.defect_swap_min[i3][i2]=0;
  pef.defect_swap_max[i3][i2]=nd[i2];
  }
+  pef.defect_swap_min[i3][3]+=1;
+  pef.defect_swap_max[i3][3]+=-1;
+
 }
 
 
@@ -641,6 +644,7 @@ for( i3=0; i3<4;i3++){
     printf("\n");
         }
     }
+
 
 
 																									
