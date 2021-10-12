@@ -885,11 +885,12 @@ printf("|%d %d||%d %d| |%d %d| |%d %d| \n",D0_min, D0_max, D1_min, D1_max,D2_min
                 
                 
                 
-  																																																              
-    if(K_mu_nu2 !=1){                printf("( %d %d %d  %d parity %d idxh %d K_mu_nu %lf K_mu_nu %lf mu %d nu %d k_mu(conf1) %f k_mu(conf2) %f \n",d0,d1,d2,d3,parity,idxh,K_mu_nu,K_mu_nu2,mu,nu,u[dir_muA].K.d[idxh],w[dir_muA].K.d[idxh]);           
+ /* 																																																              
+    if(K_mu_nu2 !=1){                printf("( %d %d %d  %d parity %d idxh %d K_mu_nu %lf K_mu_nu %lf mu %d nu %d k_mu(conf1) %f k_mu(conf2) %f\n ",d0,d1,d2,d3,parity,idxh,K_mu_nu,K_mu_nu2,mu,nu,u[dir_muA].K.d[idxh],w[dir_muA].K.d[idxh]);           
     
+    printf("tracce: conf0 %f conf 2%f\n",creal(tr_local_plaqs[parity].c[idxh]));
     }
-                
+   */             
                 
                 
 	       } //d0  
@@ -907,11 +908,13 @@ int t;
 
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
-for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
+for(t=0; t  <sizeh; t++) {
     res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
     
     res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
 }
+
+									
 
 
 res_R_p=BETA_BY_THREE *res_R_p;
