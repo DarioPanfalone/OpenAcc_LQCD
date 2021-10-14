@@ -22,8 +22,8 @@ typedef struct defect_info_t{
     int  defect_swap_min[4][4];
     int  defect_swap_max[4][4];
     #ifdef GAUGE_ACT_TLSM
-    int  defect_swap_min_TLSM[4][4][2]; //cause mind that in symanzik action you have 2 different plaquette : 1x2 & 2x1
-    int  defect_swap_max_TLSM[4][4][2];
+    int  defect_swap_min_TLSM[2][4][4]; //cause mind that in symanzik action you have 2 different plaquette : 1x2 & 2x1
+    int  defect_swap_max_TLSM[2][4][4];
     #endif
     int def_axis_mapped;
     int def_mapped_perp_dir[3];
@@ -47,13 +47,14 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2);
 int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_number);
 
 
-
+   #ifdef GAUGE_ACT_TLSM
 double calc_Delta_S_Symanzik_SWAP(
                                            __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
                                            __restrict const su3_soa * const w,
                                            __restrict su3_soa * const loc_plaq, //la placchetta locale.
                                            dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
                                            const int mu, const int nu, defect_info * def);
+#endif
 
 double calc_Delta_S_Wilson_SWAP(  __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
                                              __restrict const su3_soa * const w,

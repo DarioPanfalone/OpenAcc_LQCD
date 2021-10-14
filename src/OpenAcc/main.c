@@ -581,18 +581,16 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2]);
 #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
     
     S_0_2=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-   // S_0_2_RET=C_ZERO*S_0_2+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+   S_0_2_RET=C_ZERO*S_0_2+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     
     
     S_2_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
-   // S_2_0_RET=C_ZERO*S_2_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
+    S_2_0_RET=C_ZERO*S_2_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[2],aux_conf_acc,local_sums);
     
     Delta_S_SWAPS=(S_2_0+S_0_2)-(S_0_0+S_2_2);
     
-   // Delta_S_SWAPS=C_ZERO*Delta_S_SWAPS;
  
     printf("S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
-  // printf("RET S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0_RET,S_0_2_RET,S_0_0_RET,S_2_2_RET);
 
 
    
@@ -615,11 +613,31 @@ for( i3=0; i3<4;i3++){
   for( i2=0; i2<4;i2++){
  pef.defect_swap_min[i3][i2]=0;
  pef.defect_swap_max[i3][i2]=nd[i2];
+
+  #ifdef GAUGE_ACT_TLSM
+for(int j=0;j<2;j++){
+ pef.defect_swap_min_TLSM[j][i3][i2]=0;
+ pef.defect_swap_max_TLSM[j][i3][i2]=nd[i2];
+}
+#endif
+
  }
+  #ifdef MULTIDEVICE
   pef.defect_swap_min[i3][3]+=1;
   pef.defect_swap_max[i3][3]+=-1;
 
+  #ifdef GAUGE_ACT_TLSM
+  for(int j=0;j<2;j++){
+  pef.defect_swap_min_TLSM[j][i3][3]+=1;
+  pef.defect_swap_max_TLSM[j][i3][3]+=-1;
 }
+#endif
+
+  #endif
+}
+
+
+
 
 
 
@@ -648,23 +666,27 @@ for( i3=0; i3<4;i3++){
 
 
 																									
-    Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,0);
+ Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,0);
     
  Delta_S_SWAP_1=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&pef,0);
 
     
 
-    printf("CONFRONTO DELTA_SWAP\n");								
+    printf("CONFRONTO DELTA_SWAP WILSON\n");								
     printf("%lf (S_2_0+S_0_2)-(S_0_0+S_2_2)  || %lf (DELTA_S_FULL_RET) ||   %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_1,Delta_S_SWAP_0);
     
-/*
+    #ifdef GAUGE_ACT_TLSM
+    printf("RET S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0_RET,S_0_2_RET,S_0_0_RET,S_2_2_RET);
     Delta_S_SWAPS=(S_2_0_RET+S_0_2_RET)-(S_0_0_RET+S_2_2_RET);
     Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,1);
-    
-    printf("CONFRONTO DELTA_SWAP 2\n");
-    printf("%lf RET (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||    %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_0);
-    
-    
+    Delta_S_SWAP_1=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&pef,1);
+
+
+    printf("CONFRONTO DELTA_SWAP SYMANZIK\n");
+    printf("%lf  (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||%lf (DELTA_S_FULL_RET) ||    %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_1,Delta_S_SWAP_0);
+    #endif 
+
+/*    
 
     
     //NEW TEST SWAP:
