@@ -823,7 +823,7 @@ void send_lnh_subconf_to_rank(global_su3_soa *gl_soa_conf,
                         int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
 
                         tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
-                        //      gtsp = (target_loc_origin_parity + tsprlo )%2;
+												//      gtsp = (target_loc_origin_parity + tsprlo )%2;
 
                         //      printf("%d %d  %d  %d  %d  %d  %d ",dir, tg_lnh_t, tg_lnh_z, tg_lnh_y, tg_lnh_x, target_gl_snum, tsprlo);
                         single_su3 aux;
@@ -970,7 +970,7 @@ if(verbosity_lv > 3) printf("MPI%02d -send_lnh_subconf_to_buffer()\n", devinfo.m
                         int target_lnh_snum = snum_acc(tg_lnh_0, tg_lnh_1, tg_lnh_2, tg_lnh_3);
 
                         tsprlo = (D0_HALO+D1_HALO+D2_HALO+D3_HALO+ tg_lnh_3+tg_lnh_2+tg_lnh_1+tg_lnh_0)%2;
-                        //      gtsp = (target_loc_origin_parity + tsprlo )%2;
+												//      gtsp = (target_loc_origin_parity + tsprlo )%2;
 
                         //      printf("%d %d  %d  %d  %d  %d  %d ",dir, tg_lnh_t, tg_lnh_z, tg_lnh_y, tg_lnh_x, target_gl_snum, tsprlo);
                         single_su3 aux;

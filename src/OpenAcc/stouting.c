@@ -24,7 +24,7 @@ extern int TOPO_GLOBAL_DONT_TOUCH;
 
 #define SELECT_STOUT_STEPS (TOPO_GLOBAL_DONT_TOUCH == 1? act_params.topo_stout_steps : act_params.stout_steps)
 
-#define TRANSFER_THICKNESS 2
+#define TRANSFER_THICKNESS GAUGE_HALO
 
 #if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
 void stout_wrapper(__restrict const su3_soa * const tconf_acc,
