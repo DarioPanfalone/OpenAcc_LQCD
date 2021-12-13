@@ -26,10 +26,6 @@
 
 #include <time.h>
 
-
-
-
-
 /////funzione aggiunta//////////////////////
 //per ora la metto qui poi la sposto in struct_def.h
 
@@ -66,17 +62,6 @@ void init_k_values(su3_soa * conf,int c_r,int * pos_def){
     return;
 }
 */
-
-
-
-
-
-
-
-
-
-
-
 
 int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info * def,int defect_info_config){
 
@@ -189,10 +174,6 @@ int	  parity_fis = (x+y+z+t)%2;
 
 int 	  parity_log=(d[0]+d[1]+d[2]+d[3])%2;
  parity = parity_log;
-
-#if defined(GAUGE_ACT_WILSON) && defined(MULTIDEVICE)
-	parity = !parity_log; 
-#endif
 
 	  for(mu=0;mu<4;mu++)
 	    conf[2*mu+parity].K.d[idxh] = 1;
