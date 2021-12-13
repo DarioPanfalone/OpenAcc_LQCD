@@ -555,8 +555,9 @@ def->defect_swap_min[mu1]=malloc(4*sizeof (int));
     double S_0_0, S_0_2,S_2_2,S_2_0;
     double S_0_0_RET, S_0_2_RET,S_2_2_RET,S_2_0_RET;
     double Delta_S_SWAPS=0.0;
+   
+if ( rep->replicas_total_number > 1 ) { 
     printf("ECCO IL TEST SWAP!!!\n");
-    
     #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
    // printing_k_mu(conf_hasenbusch[2]);
     S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
@@ -591,23 +592,16 @@ replicas_swap(conf_hasenbusch[0],conf_hasenbusch[2]);
     
  
     printf("S_2_0 %f  S_0_2 %f  S_0_0 %f  S_2_2 %f\n",S_2_0,S_0_2,S_0_0,S_2_2);
-
-
+}
    
 
 
 int i2;    
-    
-
    pef.def_axis_mapped=def.def_axis_mapped;
   for( i2=0; i2<3;i2++){
-
 	  pef.def_mapped_perp_dir[i2]=def.def_mapped_perp_dir[i2];
-          
   }
 int nd[4]={nd0,nd1,nd2,nd3};
-
-
 
 for( i3=0; i3<4;i3++){
   for( i2=0; i2<4;i2++){
@@ -664,13 +658,10 @@ for(int j=0;j<2;j++){
     }
 
 
-
-																									
+if (rep -> replicas_total_number > 3 ){
  Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,0);
     
  Delta_S_SWAP_1=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&pef,0);
-
-    
 
     printf("CONFRONTO DELTA_SWAP WILSON\n");								
     printf("%lf (S_2_0+S_0_2)-(S_0_0+S_2_2)  || %lf (DELTA_S_FULL_RET) ||   %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_1,Delta_S_SWAP_0);
@@ -685,7 +676,7 @@ for(int j=0;j<2;j++){
     printf("CONFRONTO DELTA_SWAP SYMANZIK\n");
     printf("%lf  (S_2_0+S_0_2)-(S_0_0+S_2_2)  ||%lf (DELTA_S_FULL_RET) ||    %lf (DELTA_S)  \n",Delta_S_SWAPS,Delta_S_SWAP_1,Delta_S_SWAP_0);
     #endif 
-
+}
 /*    
 
     
