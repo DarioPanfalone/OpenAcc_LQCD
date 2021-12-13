@@ -782,18 +782,21 @@ for(int j=0;j<2;j++){
     //TEST MOD
     printf("Plaquette  MOD   : %.18lf\n" , S_0_2/GL_SIZE/BETA_BY_THREE/6.0/3.0);
     */
-
-    
     
     plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
             devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
     
     printf("PLAQUETTE END\n");
-    
-    rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+
+    //rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+		#if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
+    	rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
     printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
             devinfo.myrank, conf_id_iter,rect/GL_SIZE/6.0/3.0/2.0);
+		#else
+    	printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
+	#endif
 
     poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
     printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
@@ -822,10 +825,15 @@ for(int j=0;j<2;j++){
         //-------------------------------------------------// 
         //--------- MISURA ROBA DI GAUGE ------------------//
         if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
-        plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-        rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+        
+				plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+        //rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+        #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
+    			rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+				#else
+    			printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
+				#endif 
         poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
-    
 
         
         
@@ -865,7 +873,7 @@ for(int j=0;j<2;j++){
     init_global_program_status(); 
 
     printf("run_condition: %d\n",mc_params.run_condition) ;
-  
+  	if ( 0 != mc_params.ntraj ) {
     while ( RUN_CONDITION_TERMINATE != mc_params.run_condition)
     {
 
@@ -1181,11 +1189,11 @@ for(int j=0;j<2;j++){
             //--------- MISURA ROBA DI GAUGE ------------------//
             
             plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-            
-            rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-           
-            printf("geom %d\n",geom_par.tmap);
-          
+            #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
+    					rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+						#else
+    					printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
+						#endif
             poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
             
 	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
@@ -1455,7 +1463,6 @@ for(int j=0;j<2;j++){
             //-------------------------------------------------//
 
         }
-
         // determining next thing to do
         if(0 == conf_id_iter % fm_par.measEvery)
             mc_params.next_gps = GPSTATUS_FERMION_MEASURES;
@@ -1518,12 +1525,18 @@ for(int j=0;j<2;j++){
                 mc_params.run_condition = RUN_CONDITION_TERMINATE;
             }
             // program exits if MTraj is reached
-            if( id_iter > (mc_params.ntraj+id_iter_offset)){
+            if( id_iter >= (mc_params.ntraj+id_iter_offset)){
                 printf("%s - NTraj=%d reached, job done!",
                         devinfo.myrankstr, mc_params.ntraj);
                 printf("%s - shutting down now.\n", devinfo.myrankstr);
                 mc_params.run_condition = RUN_CONDITION_TERMINATE;
             }
+						if (0==mc_params.ntraj) {
+                printf("%s - NTraj=%d reached, job done!",
+                        devinfo.myrankstr, mc_params.ntraj);
+                printf("%s - shutting down now.\n", devinfo.myrankstr);
+						mc_params.run_condition = RUN_CONDITION_TERMINATE;
+						}
 
         }
 #ifdef MULTIDEVICE
@@ -1536,13 +1549,13 @@ for(int j=0;j<2;j++){
                 devinfo.myrank, mc_params.next_gps);
 
 #endif
-
-    }// while id_iter loop ends here             
+    } // while id_iter loop ends here             
+	} // closes if (0 != mc_params.ntraj)
 
     //QUI SALVA Le CONF_REPLICAS!!
     
      //*****************SAVING CONFS****************//
-    
+
     //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
     for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
       

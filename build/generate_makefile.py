@@ -1,4 +1,5 @@
-#!/usr/bin/python2.7
+#!/usr/bin/python2
+
 import os.path as path
 from sys import exit,argv,stderr,stdout
 
