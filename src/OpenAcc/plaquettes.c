@@ -66,7 +66,7 @@ double calc_loc_plaquettes_nnptrick(
               K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
 
               
-              tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
+              tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
           //*****************************************//
 
               /*printf("%f +i%f : (%d,%d,%d,%d) \n ",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I,d0,d1,d2,d3);*/
@@ -120,7 +120,7 @@ void calc_loc_staples_nnptrick_all(
 
 
   int d0, d1, d2, d3, mu, iter;
-               double K_mu;//MOD
+  double K_mu;//MOD
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3)
@@ -202,22 +202,8 @@ void calc_loc_staples_nnptrick_all(
             
             */
             
-            
-            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-            
-            
-            
-
+						// k_{mu nu}(x) * staple_{mu nu}(x)
+           	gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
 	    }  // mu
 	  }  // iter
 
@@ -306,25 +292,11 @@ void calc_loc_staples_nnptrick_all_bulk(
 										 &u[dir_nu_3L],       idx_mnu,
 										 &loc_stap[dir_link], idxh);
             
-            //Adding K_mu(x) to the staple.
+            // Adding K_mu(x) to the staple
             double K_mu=u[dir_link].K.d[idxh];
-            
-            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-            
-            
-            
-          
 
+						// k_{mu nu}(x) * staple_{mu nu}(x)
+           	gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
 	    }  // mu
 	  }  // iter
 
@@ -412,19 +384,9 @@ void calc_loc_staples_nnptrick_all_d3c(
             
             //Adding K_mu(x) to the staple.
             double K_mu=u[dir_link].K.d[idxh];
-            
-            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-
+           
+						// k_{mu nu}(x) * staple_{mu nu}(x) 
+           	gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
 	    }  // mu
 	  }  // iter
 
@@ -514,19 +476,8 @@ void calc_loc_staples_nnptrick_all_only_even(
             //Adding K_mu(x) to the staple.
             double K_mu=u[dir_link].K.d[idxh];
             
-            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-            
-            
+						// k_{mu nu}(x) * staple_{mu nu}(x) 
+           	gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
 	    }  // mu
 	  }  // iter
 
@@ -611,18 +562,8 @@ void calc_loc_staples_nnptrick_all_only_odd(
             //Adding K_mu(x) to the staple.
             double K_mu=u[dir_link].K.d[idxh];
             
-            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-            
-            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-
+						// k_{mu nu}(x) * staple_{mu nu}(x) 
+           	gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
 	    }  // mu
 	  }  // iter
 

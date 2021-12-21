@@ -999,9 +999,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
     if(res1!=0){ res=res1;}
     
     re->cr_vet=malloc(alloc_info.num_replicas*sizeof(double));
-    
-    
-    
+    re->label=malloc(alloc_info.num_replicas*sizeof(int));
   
     par_info *rp2 ;
     rp2=malloc(sizeof(par_info));

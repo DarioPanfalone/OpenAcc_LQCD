@@ -23,6 +23,7 @@
 #include "./plaquettes.h"
 #include "../Include/debug.h"
 #include "../Rand/random.h"
+#include "../Include/rep_info.h"
 
 #include <time.h>
 
@@ -46,22 +47,6 @@ void counter_size_function(int d0,int d1, int d2, int d3){
     
     return;
 }
-
-/*
-void init_k_values(su3_soa * conf,int c_r,int * pos_def){
-
-
-    for(mu=0;mu<8;mu++){
-        for(i=0; i<sizeh; i++ ){
-            
-            
-            conf[mu].K.d[i]=c_r;
-            }
-    
-    conf[mu].K.d[snum_acc(2*i,j,k,t)]
-    return;
-}
-*/
 
 int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vet, defect_info * def,int defect_info_config){
 
@@ -378,105 +363,6 @@ if(0==devinfo.myrank || perp_dir[def_axis_mapped][i]!=3 ){ def->defect_swap_min_
   //printf("MPI%d: condition satisfied %d times.\n",devinfo.myrank,count);
 }
 
-/*
-//function that tested the initialization of k_mu  by setting every value to one. //OUTADATED
-int init_k_test(su3_soa *conf_acc,double c_r){
-    int kk2=0;
-    int mu1=0;
-    
-
-    for(mu1=0;mu1<8;mu1++){
-        for(kk2=0;kk2<sizeh;kk2++){
-        
-            if(conf_acc[mu1].K.d[kk2]!=1 && conf_acc[mu1].K.d[kk2]!=c_r){
-                return 1;
-            }
-            
-            if(conf_acc[mu1].K.d[kk2]==c_r){
-                printf("trovato\n");
-                printf("%d:ku[%d]:%f\n",mu1,kk2,conf_acc[mu1].K.d[kk2]);}
-        }
-         printf("%d:ku[%d]:%f\n",mu1,kk2,conf_acc[mu1].K.d[kk2]);
-        printf("%d\n",kk2);
-        
-    }
-    return 0;
-}
-*/
-/* work in progress
-int defect_shifter_function(su3_soa * conf,int def_axis,int * def_vet){
-        int mu;
-    double aux;
-    
-    switch (def_axis){
-            
-         case 0: for(mu=0;mu<8;mu++){
-             for(t=def_vet[4];t<def_vet[5];t++) {
-                 for (z=def_vet[2]; z<def_vet[3]; z++){
-                     for(j=def_vet[0];j<def_vet[1];j++){
-             
-             
-                         conf[mu].K.d[snum_acc((nd0/2)-1),j,z,t)];
-                         
-            
-                    }
-                 }
-             }
-         }
-            break;
-            
-            
-        case 1:
-            
-    }
-    
-    
-    
-    
-    return 0;
-}
-
-
-*/
-
-
-
-
-//Outdated and useless function. Once used before a better mod of the setting_parser_file.c
-/*
-int n_replicas_reader(const char* input_filename){
-    int value_nr;
-    int trovato=0;
-    int i=0;
-    char riga[20];
-    char riga2[20]="Replicas number";
-    FILE *input = fopen(input_filename,"r"); //questo ovviamente apre il file
-    printf("LETTURA DEL NUMERO DI REPLICHE\n");
-    while(trovato==0){
-        fgets(riga,20,input);
-      //  printf("ecc %d\n",i);
- 
-        //i=i+1;
-        if(strncmp(riga,riga2,15)==0){
-          fscanf(input,"%d",&value_nr );
-            trovato=1;
-        }
-        
-        
-        
-        
-        
-    }
-    
-    
-    
-    fclose(input);
-    
-    return value_nr;
-}
-*/
-
-
 void printing_k_mu(su3_soa * conf){
     int mu,t,z,j,i;
     
@@ -496,27 +382,22 @@ void printing_k_mu(su3_soa * conf){
     return;
 }
 
-int replicas_swap(su3_soa * conf1,su3_soa * conf2){
+void replicas_swap(su3_soa * conf1, su3_soa * conf2, int lab1, int lab2, rep_info * hpt_params){
     vec3_soa  aux;
     int aux_label;
-        int res=0;
     int mu=0;
     
+		aux_label=hpt_params->label[lab1];
+		hpt_params->label[lab1] = hpt_params->label[lab2];
+		hpt_params->label[lab2] = aux_label;
+
     for(mu=0;mu<8;mu++){
-       // printf("beforrre (%d) %.18lf %.18lf",mu,creal(conf1[mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu].r1.c1[snum_acc(31,6,6,6)]));
-        
-        //label swap.
-        aux_label=conf1[mu].label;
-        conf1[mu].label=conf2[mu].label;
-        conf2[mu].label=aux_label;
-        
+       // printf("before swap (%d) %.18lf %.18lf",mu,creal(conf1[mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu].r1.c1[snum_acc(31,6,6,6)]));
         
         //swap r0
         aux=conf1[mu].r0;
         conf1[mu].r0=conf2[mu].r0;
         conf2[mu].r0=aux;
-        
-        
         
         //swap r1
         aux=conf1[mu].r1;
@@ -528,29 +409,21 @@ int replicas_swap(su3_soa * conf1,su3_soa * conf2){
         conf1[mu].r2=conf2[mu].r2;
         conf2[mu].r2=aux;
         
-   // printf("aftermath (%d) %.18lf %.18lf\n",mu,creal(conf1[mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu].r1.c1[snum_acc(31,6,6,6)]));
-
+   // printf("after swap (%d) %.18lf %.18lf\n",mu,creal(conf1[mu].r1.c1[snum_acc(31,6,6,6)]),creal(conf2[mu].r1.c1[snum_acc(31,6,6,6)]));
     }
-    
-    return res;
 }
 
 
 //function which print the confs'labels.
-int label_print(su3_soa ** conf_hasen, int replicas_number,FILE *file,int step_number){
-    int res=0;
+void label_print(rep_info * hpt_params, FILE *file, int step_number){
+
     int i;
-    
-    fprintf(file,"%d    ",step_number);
-    
-    for(i=0;i<replicas_number;i++){
-        fprintf(file,"%d    ",conf_hasen[i][0].label);
-        
+
+    fprintf(file,"%d    ",step_number);    
+    for(i=0;i<hpt_params->replicas_total_number;i++){
+        fprintf(file,"%d    ", hpt_params->label[i]);
     }
-  
     fprintf(file,"\n");
-    
-    return res;
 }
 
 
@@ -2884,32 +2757,10 @@ const int mu, const int nu, defect_info *def)
 }
 */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int metro_SWAP(su3_soa ** conf_hasenbusch,
                __restrict su3_soa * const loc_plaq, //la placchetta locale.
                dcomplex_soa * const tr_local_plaqs,
-            int rep_indx1, int rep_indx2,defect_info * def )
+            int rep_indx1, int rep_indx2,defect_info * def, rep_info * hpt_params)
 {
     int gauge_param;
     
@@ -2955,25 +2806,23 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     
     
     if (accettata==1){
-     replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2]);
+     replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params);
     }
-   
-    
-
-    
-    
-    
     
     return accettata;
 }
 
 
-void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
-                   __restrict su3_soa * const loc_plaq, //la placchetta locale.
-                   dcomplex_soa * const tr_local_plaqs,
-                   
-                   int replicas_number,  defect_info * def, int* swap_num,int * all_swap_vet,int * acceptance_vet ){
-    double swap_order;
+void All_Conf_SWAP( su3_soa ** conf_hasenbusch,
+										__restrict su3_soa * const loc_plaq, //la placchetta locale.
+										dcomplex_soa * const tr_local_plaqs, 
+                 		defect_info * def, 
+										int* swap_num,
+										int * all_swap_vet,
+										int * acceptance_vet, rep_info * hpt_params){
+
+		double swap_order;
+		int replicas_number = hpt_params->replicas_total_number;
 
    if(0==devinfo.myrank){swap_order=casuale();}
 
@@ -2993,7 +2842,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
         for(i_counter=0;i_counter<replicas_number-1;i_counter++){
             printf("%d %d\n",i_counter,i_counter+1);
             
-            accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1, def);
+            accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1, def, hpt_params);
             #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             
           
@@ -3023,7 +2872,7 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
         for(i_counter=0;i_counter<replicas_number-1;i_counter++){
         printf("%d %d\n",replicas_number-1-i_counter,replicas_number-i_counter-2);
         
-        accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2, def);
+        accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2, def, hpt_params);
 #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             
             *swap_num=*swap_num+1;

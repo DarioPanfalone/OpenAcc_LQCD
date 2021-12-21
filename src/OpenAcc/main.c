@@ -449,13 +449,8 @@ int main(int argc, char* argv[]){
     
   for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
      
-    if(0==devinfo.myrank){
-      printf("Initializing K_mu & label Replica %d\n",replicas_counter);}
-        
-    int mu1;
-    for (mu1=0;mu1<8;mu1++){
-      conf_hasenbusch[replicas_counter][mu1].label=replicas_counter;
-    }
+    if(0==devinfo.myrank){printf("Initializing K_mu & label Replica %d\n",replicas_counter);}
+    rep->label[replicas_counter]=replicas_counter;
     int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vet[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def,replicas_counter);
     
 #ifdef MULTIDEVICE
@@ -683,7 +678,7 @@ int main(int argc, char* argv[]){
     
        int accettata=0;
         
-       accettata=metro_SWAP( conf_hasenbusch,aux_conf_acc,local_sums, 0, 2,rep->defect_boundary,rep->defect_coordinates);
+       accettata=metro_SWAP( conf_hasenbusch,aux_conf_acc,local_sums, 0, 2, rep);
        //all_swap_vector[0]++;
        //all_swap_vector[2]++;
         
@@ -962,7 +957,7 @@ int main(int argc, char* argv[]){
              
                 
 	    printf("CONF SWAP HERE!\n ");
-	    All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, rep->replicas_total_number,&def, &swap_number,all_swap_vector,acceptance_vector);
+	    All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, &def, &swap_number,all_swap_vector,acceptance_vector, rep);
 	    printf("swap_number %d\n", swap_number);
                
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu
@@ -1124,7 +1119,7 @@ int main(int argc, char* argv[]){
 	    if(rep->replicas_total_number>1){
 	      fprintf(hmc_acc_file,"%d\t",conf_id_iter);
 	      fprintf(swap_acc_file,"%d\t",conf_id_iter);
-	      label_print(conf_hasenbusch, rep->replicas_total_number,file_label,conf_id_iter);
+	      label_print(rep, file_label, conf_id_iter);
 	    }
             //ACCEPTANCE FILES PRINT
             
@@ -1605,7 +1600,10 @@ int main(int argc, char* argv[]){
 
   free(all_swap_vector);
   free(acceptance_vector);
-    
+
+	// freeing rep_info vectors
+	free(rep->cr_vet);
+  free(rep->label);
     
   printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);
 #pragma acc exit data delete(nnp_openacc)
