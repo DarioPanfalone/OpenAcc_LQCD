@@ -32,8 +32,8 @@
 //**************************************//
 //ACHTUNG !!!!!! comment the one you don't wanna use and decoment the other one
 
-//#define GAUGE_ACT_TLSM
-#define GAUGE_ACT_WILSON
+#define GAUGE_ACT_TLSM
+//#define GAUGE_ACT_WILSON
 
 //**************************************//
 

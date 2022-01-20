@@ -72,7 +72,7 @@
 #include "../Include/stringify.h"
 
 #include <errno.h>
-#include "./Mod_functions.h" //funzioni moddate.
+#include "./HPT_utilities.h"
 #include <time.h>
 
 //######################################################################################################################################//
@@ -165,13 +165,6 @@ int main(int argc, char* argv[]){
         
     printf("c%d: %f\n",i3,rep->cr_vet[i3]);
   }
-    
-    
-  /*counter_size_function(nd0,nd1,nd2,nd3);*/
-    
-
-    
-    
     
 #ifdef MULTIDEVICE
   if(input_file_read_check){
@@ -489,9 +482,6 @@ int main(int argc, char* argv[]){
     
     
   printf(" Initialization K_mu success\n");
-   
-    
-
 
   printf("defect_swap_max: rank %d\n",devinfo.myrank);
 
@@ -538,187 +528,127 @@ int main(int argc, char* argv[]){
   //######################################################################################################################################//
   //######################################################################################################################################//
 
-  int number_accept; //acceptance number
   int swap_number=0;
-    
-    
-  /*    
+
+  /*
   //TEST SWAP!!
-  double Delta_S_SWAP_0=0.0;
-  double Delta_S_SWAP_1=0.0;
-  double Delta_S_SWAP_2=0.0;
-  double S_0_0, S_0_1,S_1_1,S_1_0;
-  //double S_0_0_RET, S_0_1_RET,S_1_1_RET,S_1_0_RET;
-  double Delta_S_SWAPS=0.0;
+  double Delta_S_SWAP_BEST=0.0;
+  double Delta_S_SWAP_STUPID=0.0;
+  double Delta_S_SWAP_LAT=0.0;
+	double Delta_S_SWAP_BEST_SWAPPED_LOL=0.0;
+  double S_0_0, S_0_1, S_1_1, S_1_0;
    
-  if ( rep->replicas_total_number > 1 ) { 
-  printf("ECCO IL TEST SWAP!!!\n");
-  #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+  if ( rep->replicas_total_number > 1 ) {
+    printf("ECCO IL TEST SWAP!!!\n");
+#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
   
-  S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-  //S_0_0_RET=C_ZERO*S_0_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-    
-  S_1_1=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-  //S_1_1_RET=C_ZERO*S_1_1+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
+    S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+#ifdef GAUGE_ACT_TLSM
+    S_0_0=C_ZERO*S_0_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+#endif
 
-  // Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[2],aux_conf_acc,local_sums,&def,0);  
-    
-  replicas_swap(conf_hasenbusch[0],conf_hasenbusch[1]);
-  #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
-    
-  S_0_1=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-  //S_0_1_RET=C_ZERO*S_0_1+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-    
-  S_1_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-  //S_1_0_RET=C_ZERO*S_1_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-    
-  Delta_S_SWAPS=(S_1_0+S_0_1)-(S_0_0+S_1_1);
+    S_1_1=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
+#ifdef GAUGE_ACT_TLSM  
+		S_1_1=C_ZERO*S_1_1+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
+#endif
 
-  printf("S_1_0 %f  S_0_1 %f  S_0_0 %f  S_1_1 %f\n",S_1_0,S_0_1,S_0_0,S_1_1);
+    Delta_S_SWAP_BEST=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[1],aux_conf_acc,local_sums,&def);  
+    Delta_S_SWAP_BEST_SWAPPED_LOL=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[1],conf_hasenbusch[0],aux_conf_acc,local_sums,&def);  
+    
+    replicas_swap(conf_hasenbusch[0],conf_hasenbusch[1], 0, 1, rep);
+#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+    
+    S_0_1=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+#ifdef GAUGE_ACT_TLSM
+    S_0_1=C_ZERO*S_0_1+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+#endif
+
+    S_1_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
+#ifdef GAUGE_ACT_TLSM
+    S_1_0=C_ZERO*S_1_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
+#endif
+    printf("ECCO IL TEST DOUBLE:\n%.15lg %.15lg %.15lg %.15lg\n",S_1_0,S_0_1,S_0_0,S_1_1);
+    Delta_S_SWAP_STUPID=(S_1_0+S_0_1)-(S_0_0+S_1_1);
   }
+
+	//get back to original replicas setup
+	replicas_swap(conf_hasenbusch[0],conf_hasenbusch[1], 0, 1, rep);
+	#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
 
   int i2;    
   pef.def_axis_mapped=def.def_axis_mapped;
   for( i2=0; i2<3;i2++){
-  pef.def_mapped_perp_dir[i2]=def.def_mapped_perp_dir[i2];
+    pef.def_mapped_perp_dir[i2]=def.def_mapped_perp_dir[i2];
   }
   int nd[4]={nd0,nd1,nd2,nd3};
 
   for( i3=0; i3<4;i3++){
-  for( i2=0; i2<4;i2++){
-  pef.defect_swap_min[i3][i2]=0;
-  pef.defect_swap_max[i3][i2]=nd[i2];
+    for( i2=0; i2<4;i2++){
+      pef.defect_swap_min[i3][i2]=0;
+      pef.defect_swap_max[i3][i2]=nd[i2];
 
-  #ifdef GAUGE_ACT_TLSM
-  for(int j=0;j<2;j++){
-  pef.defect_swap_min_TLSM[j][i3][i2]=0;
-  pef.defect_swap_max_TLSM[j][i3][i2]=nd[i2];
-  }
-  #endif
+#ifdef GAUGE_ACT_TLSM
+      for(int j=0;j<2;j++){
+	pef.defect_swap_min_TLSM[j][i3][i2]=0;
+	pef.defect_swap_max_TLSM[j][i3][i2]=nd[i2];
+      }
+#endif
 
-  }
-  #ifdef MULTIDEVICE
-  pef.defect_swap_min[i3][3]+=1;
-  pef.defect_swap_max[i3][3]+=-1;
-
-  #ifdef GAUGE_ACT_TLSM
-  for(int j=0;j<2;j++){
-  pef.defect_swap_min_TLSM[j][i3][3]+=1;
-  pef.defect_swap_max_TLSM[j][i3][3]+=-1;
-  }
-  #endif
-
-  #endif
+    }
+#ifdef MULTIDEVICE
+    pef.defect_swap_min[i3][3]+=PLAQ_EXTENT;
+    pef.defect_swap_max[i3][3]+=-PLAQ_EXTENT;
+#ifdef GAUGE_ACT_TLSM
+    for(int j=0;j<2;j++){
+      pef.defect_swap_min_TLSM[j][i3][3]+=PLAQ_EXTENT;
+      pef.defect_swap_max_TLSM[j][i3][3]+=-PLAQ_EXTENT;
+    }
+#endif
+#endif
   }
 
   printf("ALL LATTICE  defect_swap_max: rank %d\n",devinfo.myrank);
 
   for(int nu=0;nu<4;nu++){
-  if(nu!=pef.def_axis_mapped){
-  printf("nu:%d||",nu);
-  for(int i=0;i<4;i++){
-  printf("%d||",pef.defect_swap_max[nu][i]);}
-  printf("\n");
-  }
+    if(nu!=pef.def_axis_mapped){
+      printf("nu:%d||",nu);
+      for(int i=0;i<4;i++){
+	printf("%d||",pef.defect_swap_max[nu][i]);}
+      printf("\n");
+    }
   }
 
   printf("WHOLE LATTICE  defect_swap_min: rank %d\n",devinfo.myrank);
 
   for(int nu=0;nu<4;nu++){
-  if(nu!=pef.def_axis_mapped){
-  printf("nu:%d||",nu);
-  for(int i=0;i<4;i++){
-  printf("%d||",pef.defect_swap_min[nu][i]);}
-  printf("\n");
+    if(nu!=pef.def_axis_mapped){
+      printf("nu:%d||",nu);
+      for(int i=0;i<4;i++){
+	printf("%d||",pef.defect_swap_min[nu][i]);}
+      printf("\n");
+    }
   }
-  }
-
 
   if (rep -> replicas_total_number > 1 ){
-  Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[1],aux_conf_acc,local_sums,&def,0);
-  
-  Delta_S_SWAP_1=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[1],aux_conf_acc,local_sums,&pef,0);
-
-  printf("CONFRONTO DELTA_SWAP WILSON\n");								
-  printf("%lf (S_1_0+S_0_1)-(S_0_0+S_1_1)  || %lf (DELTA_S_FULL_LAT) ||   %lf (DELTA_S_BEST)  \n",Delta_S_SWAPS,Delta_S_SWAP_1,Delta_S_SWAP_0);
+    Delta_S_SWAP_LAT=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[1],aux_conf_acc,local_sums,&pef);
+    double Delta_S_SWAP_LAT_SWAPPED_LOL=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[1],conf_hasenbusch[0],aux_conf_acc,local_sums,&pef);
     
-
-  #ifdef GAUGE_ACT_TLSM
-  printf("RET S_1_0 %f  S_0_1 %f  S_0_0 %f  S_1_1 %f\n",S_1_0_RET,S_0_1_RET,S_0_0_RET,S_1_1_RET);
-  Delta_S_SWAPS=(S_1_0_RET+S_0_1_RET)-(S_0_0_RET+S_1_1_RET);
-  Delta_S_SWAP_0=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[1],aux_conf_acc,local_sums,&def,1);
-  Delta_S_SWAP_1=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[1],aux_conf_acc,local_sums,&pef,1);
-
-
-  printf("CONFRONTO DELTA_SWAP SYMANZIK\n");
-  printf("%lf  (S_1_0+S_0_1)-(S_0_0+S_1_1)  ||%lf (DELTA_S_FULL_LAT) ||    %lf (DELTA_S_BEST)  \n",Delta_S_SWAPS,Delta_S_SWAP_1,Delta_S_SWAP_0);
-  #endif 
-
-  }
-  */
+		printf("CONFRONTO DELTA_SWAP\n");
+    printf("%.15lg        (S_1_0+S_0_1)-(S_0_0+S_1_1)\n%.15lg         (DELTA_S_FULL_LAT)\n%.15lg         (DELTA_S_BEST)\n",Delta_S_SWAP_STUPID,Delta_S_SWAP_LAT,Delta_S_SWAP_BEST);
+    printf("CONFRONTO LOL\n%.15lg         (DELTA_S_FULL_LAT)\n%.15lg         (DELTA_S_BEST)\n",Delta_S_SWAP_LAT_SWAPPED_LOL,Delta_S_SWAP_BEST_SWAPPED_LOL);
+	}
 
   //--------------- END TEST SWAP ---------------//
-
-
-
-  /*   //NEW TEST SWAP:
-    
-       label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
-
-
-    
-  
-    
-       for(mu2=0;mu2<5;mu2++){
-    
-       for(mu1=0;mu1<8;mu1++){
-       printf("beforrre (%d) %.18lf %.18lf\n",mu1,creal(conf_hasenbusch[0][mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu1].r1.c1[snum_acc(31,6,6,6)]));
-       }
-    
-    
-       int accettata=0;
-        
-       accettata=metro_SWAP( conf_hasenbusch,aux_conf_acc,local_sums, 0, 2, rep);
-       //all_swap_vector[0]++;
-       //all_swap_vector[2]++;
-        
-       if(accettata==1){
-       //  acceptance_vector[0]++;
-       //acceptance_vector[2]++;
-       }
-       #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
-       swap_number++;
-       label_print(conf_hasenbusch, rep->replicas_total_number,file_label,swap_number);
-
-
-       printf("acpt :%d\n",accettata);
-       double mean_accept;
-       mean_accept=(double)acceptance_vector[0]/all_swap_vector[0];
-       printf("mean accept:%f\n",mean_accept);
-    
-       for(mu1=0;mu1<8;mu1++){
-       printf("aftermath (%d) %.18lf %.18lf\n",mu1,creal(conf_hasenbusch[0][mu1].r1.c1[snum_acc(31,6,6,6)]),creal(conf_hasenbusch[2][mu1].r1.c1[snum_acc(31,6,6,6)]));
-       }
-    
-    
-       }
-
   */
-    
   //######################################################################################################################################//
   //############### MEASURES #########################################################################################################//
   //######################################################################################################################################//
-    
-    
     
   double plq,rect;
   double cool_topo_ch[meastopo_params.coolmeasstep/meastopo_params.cool_measinterval+1];
   double stout_topo_ch[meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval+1];
   d_complex poly;
 
-   
-    
-    
   int *accettate_therm;
   int *accettate_metro;
   int *iterations;
@@ -1575,19 +1505,11 @@ int main(int argc, char* argv[]){
     save_global_program_status(mc_params); // THIS FUNCTION IN SOME CASES DOES NOT WORK
   }
 
-
-
-
   printf("MPI%02d: Double precision free [CORE]\n", devinfo.myrank);
   mem_free_core();
     
- 
-    
   printf("MPI%02d: Double precision free [EXTENDED]\n", devinfo.myrank);
   mem_free_extended();
-
-
-    
 
   if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
     printf("MPI%02d: Single precision free [CORE]\n", devinfo.myrank);
@@ -1601,8 +1523,8 @@ int main(int argc, char* argv[]){
   free(all_swap_vector);
   free(acceptance_vector);
 
-	// freeing rep_info vectors
-	free(rep->cr_vet);
+  // freeing rep_info vectors
+  free(rep->cr_vet);
   free(rep->label);
     
   printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);

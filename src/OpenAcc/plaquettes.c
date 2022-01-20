@@ -14,11 +14,9 @@ double calc_loc_plaquettes_nnptrick(
         dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
         const int mu, const int nu)
 {
-    double K_mu_nu; //MOD.
-    
+    //double K_mu_nu; //MOD.
   int d0, d1, d2, d3;
 
-    
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {//what?
@@ -63,7 +61,7 @@ double calc_loc_plaquettes_nnptrick(
            //MOD****************************************//
               
               //K_mu_nu computation;
-              K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
+              double K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
 
               
               tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
@@ -573,9 +571,5 @@ void calc_loc_staples_nnptrick_all_only_odd(
   }  // d3
 
 }// closes routine
-
-
-
-
 
 #endif
