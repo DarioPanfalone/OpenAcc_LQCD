@@ -145,26 +145,7 @@ int main(int argc, char* argv[]){
 
   int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]); //here the reading happens.
     
-
-  printf("ECCO I NOMI DEI FILE\n: %s %s %s \n",acc_info->hmc_file_name,acc_info->swap_file_name,acc_info->file_label_name);
-   
-  printf("ECCO IL NUMERO DI REPLICHE %d  %d!!!\n",rep->replicas_total_number,alloc_info.num_replicas); // further controls.
   int i3=0;
-    
-  printf("il defect è sulla linea %d\n",rep->defect_boundary);
-    
-  printf("Ecco i valori del defect:\n"); //defect values.
-  for(i3=0;i3<3;i3++){
-        
-    printf("def%d: %d\n",i3,rep->defect_coordinates[i3]);
-  }
-    
-    
-  printf("Ecco i valori dei cr:\n");
-  for(i3=0;i3<alloc_info.num_replicas;i3++){
-        
-    printf("c%d: %f\n",i3,rep->cr_vec[i3]);
-  }
     
 #ifdef MULTIDEVICE
   if(input_file_read_check){
