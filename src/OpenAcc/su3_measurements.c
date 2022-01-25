@@ -18,12 +18,9 @@
 #endif
 
 
-
 void check_unitarity_device( __restrict const su3_soa * const u, double * max_unitarity_deviation, double *avg_unitarity_deviation){
 
-
     // removing stag phases
-
 
     double r = 0;
     double rmax = 0;
@@ -205,19 +202,11 @@ double  calc_plaquette_soloopenacc(
     double total_result=0.0;
 
     int i_counter=0;
-    // calcolo il valore della plaquette sommata su tutti i siti a fissato piano mu-nu (6 possibili piani)//(the couple has to be chosen excluding same direction ones.(4 2)binomial coefficient.
     for(int mu=0;mu<3;mu++){
         for(int nu=mu+1;nu<4;nu++){
-            // sommo i 6 risultati in tempo
             result  += calc_loc_plaquettes_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu); //here all the plaquettes of a specific plane's choice are computed.
-           
-            
-            
-            
         }
     }
-    
-
 
 #ifdef MULTIDEVICE
      MPI_Allreduce((void*)&result,(void*)&total_result,
@@ -226,10 +215,7 @@ double  calc_plaquette_soloopenacc(
      total_result = result;
 #endif
     return total_result;
-
 }
-
-
 
 double calc_force_norm(const __restrict tamat_soa * tipdot)
 {

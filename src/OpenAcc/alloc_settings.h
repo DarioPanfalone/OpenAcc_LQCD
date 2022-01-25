@@ -1,8 +1,6 @@
 #ifndef ALLOC_SETTINGS_H_
 #define ALLOC_SETTINGS_H_
 
-
-
 typedef struct alloc_settings_t{
 
     int NDiffFlavs; // set in Include/setting_file_parser.c, from input file 
@@ -18,13 +16,10 @@ typedef struct alloc_settings_t{
     int singlePrecExtendedAllocations;
     int stoutAllocations;
     
-    int num_replicas; //numero di repliche dell'hasenbush
+    int num_replicas;
 
 }alloc_settings;
 
 extern alloc_settings alloc_info;
-
-
-
 
 #endif

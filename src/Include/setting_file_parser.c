@@ -8,7 +8,7 @@
 #include "../OpenAcc/action.h"
 #include "../OpenAcc/md_parameters.h"
 #include "../OpenAcc/backfield.h"
-#include "../OpenAcc/geometry.h" // for MULTIDEVICE to be defined or not
+#include "../OpenAcc/geometry.h" 
 #include "../OpenAcc/su3_measurements.h"
 #include "../RationalApprox/rationalapprox.h"
 #include "./common_defines.h"
@@ -22,6 +22,7 @@
 #include "./inverter_tricks.h"
 #include "../tests_and_benchmarks/test_and_benchmarks.h"
 #include "../OpenAcc/alloc_settings.h"
+#include "../OpenAcc/geometry.h"
 
 #include <stdio.h>
 #include <strings.h>
@@ -34,50 +35,44 @@
 #define MAXLINES 300
 #define MAXLINELENGTH 500 // pretty long to accomodate all the comments
 
-
-
 char input_file_str[MAXLINES*MAXLINELENGTH];
 
-//types that can be found in an input file   //MOD X
-enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES,TYPE_VET_D}; //i tipi  che si trovano nel file. é un enum (0,3)
-const char * type_strings[]={"(int)", "(double)", "(string)" }; //vettore di stringhe non modificabile.
+enum dtype {TYPE_INT, TYPE_DOUBLE, TYPE_STR, NUM_TYPES,TYPE_VET_D};
+const char * type_strings[]={"(int)", "(double)", "(string)" };
 
 
-//qui è definita questa struct, che verrà usata per leggere i valori dal file.
-typedef struct par_info_t{
-
-    void* par;  //The void pointer in C is a pointer which is not associated with any data types. It points to some data location in the storage means points to the address of variables.
-    enum dtype type; //da il tipo
-    const char* name; // nome della variabile
-    const void* default_value;//il valore di default
-    const char* comment; //eventuale commento
-    const int data_length;  //MOD X
-    double* dvet_par; //MOD X
-    int* zvet_par // MOD X
-
-}par_info;
+typedef struct par_info_t {
+    void* par;
+    enum dtype type;
+    const char* name;
+    const void* default_value;
+    const char* comment;
+    const int data_length;
+    double* dvet_par;
+    int* zvet_par;
+} par_info;
 
 #define MAXPMG 20
 
-//definisce il nome dei gruppi di variabili.(MOD)
+
 const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
-    "ActionParameters",         // 0 
-    "FlavourParameters",        // 1   
-    "BackgroundFieldParameters",// 2            
-    "MDParameters",             // 3
-    "MontecarloParameters",     // 4       
-    "GaugeMeasuresSettings",    // 5
-    "FermionMeasuresSettings",  // 6
-    "TopoMeasuresSettings"   ,  // 7
-    "DeviceSettings"         ,  // 8
-    "Geometry"               ,  // 9
-    "DebugSettings"          ,  // 10
-    "InverterTricks"         ,  // 11
-    "TestSettings"           ,   // 12
-    "Replicas numbers"       ,   //13
-    "AcceptancesMeasuresSettings" //14
+    "ActionParameters",            // 0 
+    "FlavourParameters",           // 1   
+    "BackgroundFieldParameters",   // 2            
+    "MDParameters",                // 3
+    "MontecarloParameters",        // 4       
+    "GaugeMeasuresSettings",       // 5
+    "FermionMeasuresSettings",     // 6
+    "TopoMeasuresSettings"   ,     // 7
+    "DeviceSettings"         ,     // 8
+    "Geometry"               ,     // 9
+    "DebugSettings"          ,     // 10
+    "InverterTricks"         ,     // 11
+    "TestSettings"           ,     // 12
+    "Replicas numbers"       ,     //13
+    "AcceptancesMeasuresSettings"  //14
 };
-enum pmg_types {  //ricorda enum gli da valore da 0 a n-1. Perciò l'ultimo è davvero il numero di tutti i gruppi. qui va aggiunto replicas. (MOD)
+enum pmg_types {
     PMG_ACTION         ,
     PMG_FERMION        ,
     PMG_BACKGROUND     ,
@@ -85,7 +80,7 @@ enum pmg_types {  //ricorda enum gli da valore da 0 a n-1. Perciò l'ultimo è d
     PMG_MC             ,
     PMG_GMEAS          ,
     PMG_FMEAS          ,
-    PMG_TMEAS	       ,
+    PMG_TMEAS	         ,
     PMG_DEVICE         ,
     PMG_GEOMETRY       ,
     PMG_DEBUG          ,
@@ -95,48 +90,34 @@ enum pmg_types {  //ricorda enum gli da valore da 0 a n-1. Perciò l'ultimo è d
     PMG_ACCEPTANCES    ,
     NPMGTYPES};
     
-
-FILE * helpfile; //definisce l'help file.
+FILE * helpfile;
 char IGNORE_IT[50];
-
-//FUNZIONE 1: appiccica tutto e ridà la launghezza totale del file in caratteri. (NON MOD)
-
-// just to save it in the conf
-//i parametri sono la matrice con dentro il contenuto del file input, un int  del numero massimo di linee che è di interesse scrivere, il nome del file da mandare in input
-
 
 int prepare_string_from_stringarray(char file_lines[MAXLINES][MAXLINELENGTH], 
         int maxlines,
         char* input_filename_to_write){
 
-    int iline;int totlen = 0; //contatori
+    int iline;int totlen = 0;
     for(iline = 0; iline < maxlines ; iline++){
-        strcat(input_filename_to_write,file_lines[iline]); //aggiunge le righe una a una.
+        strcat(input_filename_to_write,file_lines[iline]); 
         totlen += strlen(file_lines[iline]);
     }
     return totlen;
-
 }
-
-//FUNZIONE 2: Funzione che cancella i commenti.(trova # ed elimina cioò che viene dopo.) (NON MOD)
 
 void erase_comments(char file_lines[MAXLINES][MAXLINELENGTH], int maxlines)
 {
-    //cerca le righe fino a maxlines.
     for(int i = 0; i<maxlines; i++){
-        char* start_comment_ptr = index(file_lines[i],'#' ); //questa funzione index appartiene a strings.h e restituisce la stringa che inizia con #
-        //immagino che l'if cosi voglia dire, se la funzione è definita.
+        char* start_comment_ptr = index(file_lines[i],'#' );
         if(start_comment_ptr){
-            int comment_start = start_comment_ptr - file_lines[i]; //se il carattere # si trova al 15 carattere della riga, il risulatato sarà 15
+            int comment_start = start_comment_ptr - file_lines[i];
             file_lines[i][comment_start] = '\n';
-            file_lines[i][comment_start+1] = '\0'; //it stands for null.
+            file_lines[i][comment_start+1] = '\0';
             for(int j = comment_start+2; j < MAXLINELENGTH; j++)
                 file_lines[i][j] = ' ';
         }
     }
 }
-
-//FUNZIONE 3: funzione che serve per l'omonimia tra parametri. Non mi serve. (NON MOD)
 
 void reorder_par_infos(int npar, par_info * par_infos ){
     // this is necessary if a parameter name is contained in another
@@ -169,12 +150,9 @@ void reorder_par_infos(int npar, par_info * par_infos ){
     }
 }
 
-//FUNZIONE 4: CERCA I GRUPPI DI PARAMETRI E RESTITUISCE IL NUMERO DI GRUPPI TROVATI.(NO MOD.)
-
-//ovviamente a parametro gli passa par_macro_groups_names[], quindi mi basta modificare questo parametro. e anche ntagstofind.
 int scan_group_V(int ntagstofind, const char **strtofind, 
-        int *tagcount, //Vettore definito per contare i gruppi.
-        int *taglines, int *tagtypes, int maxnres, //maxres massimo numero dei risultati
+        int *tagcount,
+        int *taglines, int *tagtypes, int maxnres,
         char filelines[MAXLINES][MAXLINELENGTH], 
         int startline, int endline)
 {
@@ -185,21 +163,21 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 
     if(0==devinfo.myrank)
         printf("Scanning for parameter macro groups..\n");
-    for(int i =0; i<ntagstofind; i++) tagcount[i] = 0; //manda a zero gli elementi di quel vettore.
+    for(int i =0; i<ntagstofind; i++) tagcount[i] = 0;
     for(int i =0; i<maxnres; i++){// initializing output arrays
-        taglines[i] = -1; //inizializza i vettori in output a -1.
+        taglines[i] = -1;
         tagtypes[i] = -1;
     }
     int nres = 0;
-    int iline = startline; //linea da cui parte la ricerca. //ricorda filelines è la matrice in cui viene copiato il file.
+    int iline = startline;
     while(iline<endline && nres < maxnres ){
         char * found_something;
         for(int itype =0; itype <ntagstofind; itype++){
-            found_something = strstr(filelines[iline],strtofind[itype]); //strtofind è un'altra matrice che viene data da input.
+            found_something = strstr(filelines[iline],strtofind[itype]);
             if(found_something){
                 printf("Found group %s on line %d\n",strtofind[itype], iline);
-                taglines[nres] = iline; //alla fine tagline è un vettore che segna la posizione dei gruppi di macro.
-                tagtypes[nres] = itype; //tagtypes è una roba che segna il type segnato.
+                taglines[nres] = iline;
+                tagtypes[nres] = itype;
                 nres++;
                 tagcount[itype]++;
             }
@@ -212,8 +190,6 @@ int scan_group_V(int ntagstofind, const char **strtofind,
 
     return nres;
 }
-
-//FUNZIONE 5
 
 int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
@@ -256,16 +232,13 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
 
         reorder_par_infos(npars, par_infos);
 
-
         int * rc = (int *) malloc(npars*sizeof(int));
         for(int i =0; i<npars; i++) rc[i] = 0;
 
         int res = 0 ;
 
         int iline = startline+1;
-        
 
-        
         while(iline < endline )
         {
             char * found_something = NULL;
@@ -278,7 +251,6 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         if(0==devinfo.myrank)
                             printf("WARNING, LINE %-3d: IGNORING %s\n",
                                     iline+1,par_infos[i].name);
-           
                         break;
                     }
                     else {
@@ -292,7 +264,7 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         char str_specifier_head[200]="%s %*lf";
 
                         switch(par_infos[i].type){
-                            case TYPE_INT: //il case che gli da scannerizza la striga con il nome e il codice.
+                            case TYPE_INT:
                                 reads = sscanf(filelines[iline],
                                         "%s %d",parname,(int*)par_infos[i].par);
                                 if(reads == 2) 
@@ -317,14 +289,8 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 
                             case TYPE_VET_D:
 
-                                //MOD X
-                             
-                              
-                         
                                 reads = sscanf(filelines[iline],
                                                "%s %lf",parname,&(par_infos[i].dvet_par[0]));
-                           
-                                
                                 
                                 if(reads==2 )
                                     if(0==devinfo.myrank)
@@ -338,14 +304,9 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                     reads = sscanf(filelines[iline],
                                                str_specifier,parname, &(par_infos[i].dvet_par[counter]));
                                     
-                                    
-                                    
                                     if(reads==2){
                                         strcat(str_specifier_head,str_specifier_add_1);
-                                        
                                     }
-                                    
-                                    
                                     
                                 if(reads==counter+2 )
                                     if(0==devinfo.myrank)
@@ -356,11 +317,9 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                                 break;
                                 
                             default:
-                                
                                 if(0==devinfo.myrank)
                                     printf("WARNING, variable type not set in sourcecode.\n");
                                 break;
-
                         }
                        
                         if(reads == 2)rc[i]++;
@@ -368,12 +327,10 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                         break;
                     }
                 };
-        
             }
             
             if(!found_something){
                 char word[50];
-
                 int reads = sscanf(filelines[iline],"%s", word);
                
                 if(reads==1){
@@ -384,14 +341,11 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
                 }
             }
 
-
             iline++; 
             res = 1;
             for(int i =0; i<npars; i++)
                 res = res && rc[i];
         }
-
-
 
         if(! res){
             res = 1;
@@ -442,17 +396,9 @@ int scan_group_NV(int npars,par_info* par_infos,char filelines[MAXLINES][MAXLINE
     }// else normal mode
 }
 
-
-//FUNZIONE 6: Legge le informazioni relative ai flavour. //questo ferm_param non si capisce dove lo definisce va beh meno male che per ora i fermioni non servono.
-
 int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     // see /Include/fermion_parameters.h
-    
-    //vediamo che definisce par_info utilizzando la struttura flpar
-    //basta passargli dentro filelines, inizio e fine righe.
-
     par_info fp[]={
         (par_info){(void*) &(flpar->ferm_mass       ),TYPE_DOUBLE, "Mass"          , NULL,NULL},
         (par_info){(void*) &(flpar->degeneracy      ),TYPE_INT   , "Degeneracy"    , NULL,NULL},
@@ -461,21 +407,8 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
         (par_info){(void*) &(flpar->ferm_charge     ),TYPE_DOUBLE, "Charge"        , NULL,NULL},
         (par_info){(void*) &(flpar->ferm_im_chem_pot),TYPE_DOUBLE, "MuOverPiT"     , NULL,NULL}};
 
-    // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(fp)/sizeof(par_info),fp, filelines, startline, endline);
-
 }
-
-
-
-
-
-
-
-
-
-
-
 
 //anche qui questo action_param non ho capito dove lo definisce.
 int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
@@ -500,37 +433,29 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
 		(par_info){(void*) &(act_par->topo_rho)        , TYPE_DOUBLE, "TopoRho"       , NULL, NULL}
 	};			   
 				   
-    // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
 
     if(startline<endline){
         if(act_par->stout_rho != RHO ){ 
-
             if(0==devinfo.myrank){
                 printf("Error, input file stout_rho != RHO \n");
                 printf("  Either modify the input file, or recompile changing RHO\n");
                 printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
             }
             res = 1;
-
         }
-
         if(act_par->topo_rho != TOPO_RHO ){ 
-
             if(0==devinfo.myrank){
                 printf("Error, input file topo_rho != TOPO_RHO \n");
                 printf("  Either modify the input file, or recompile changing TOPO_RHO\n");
                 printf(" (input) topo_rho = %f, (code) TOPO_RHO = %f\n", act_par->topo_rho,TOPO_RHO);
             }
             res = 1;
-
         }
     }
     return res;
-
-
-
 }
+
 int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
@@ -544,13 +469,11 @@ int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH],
         (par_info){(void*) &(bfpar->by ),TYPE_DOUBLE, "by", (const void*) &default_value  ,NULL},
         (par_info){(void*) &(bfpar->bz ),TYPE_DOUBLE, "bz", (const void*) &default_value  ,NULL}};
 
-    // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(bfp)/sizeof(par_info),bfp, filelines, startline, endline);
-
 }
+
 int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     // see /OpenAcc/md_integrator.h
     const double tlendef = 1.0;
     const double expmaxeigenv_def = 5.5 ; 
@@ -577,10 +500,9 @@ int read_md_info(md_param *mdpar,char filelines[MAXLINES][MAXLINELENGTH], int st
         (par_info){(void*) &(mdpar->recycleInvsForce),TYPE_INT, "recycleInvsForce" , (const void*) &recycleInvsForceDef,recycleInvsForce_comment},
         (par_info){(void*) &(mdpar->extrapolateInvsForce),TYPE_INT, "extrapolateInvsForce", (const void*) &extrapolateInvsForceDef,extrapolateInvsForce_comment}};
 
-    // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(mdp)/sizeof(par_info),mdp, filelines, startline, endline);
-
 }
+
 int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
 
     const int singlePInvAccelMultiInvDef = 0;
@@ -595,12 +517,9 @@ int read_inv_tricks_info(inv_tricks *invinfo,char filelines[MAXLINES][MAXLINELEN
         (par_info){(void*) &(invinfo->useMixedPrecision),TYPE_INT,"useMixedPrecision", (const void*) &useMixedPrecisionDef,NULL},
         (par_info){(void*) &(invinfo->restartingEvery),TYPE_INT,"restartingEvery", (const void*) &restartingEveryDef,NULL},
         (par_info){(void*) &(invinfo->mixedPrecisionDelta), TYPE_DOUBLE, "mixedPrecisionDelta", (const void*)&mixedPrecisionDeltaDef,NULL}};
+
     return scan_group_NV(sizeof(iip)/sizeof(par_info),iip, filelines, startline, endline);
-
 }
-
-
-
 
 int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
@@ -620,10 +539,8 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
     const char eps_gen_comment[] = "#The level of randomness in creating a new random gauge conf";
     const char store_conf_name_comment[] = "#This is the prefix of the filenames of the gauge conf files which will be saved (with an index).";
     const char save_conf_name_comment[] = "#This is the name of the starting gauge conf file. THIS FILE WILL BE OVERWRITTEN.";
-    const char seed_comment[] = 
-        "# set this to 42 \n\
-#(https://en.wikipedia.org/wiki/Phrases_from_The_Hitchhiker\%27s_Guide_to_the_Galaxy#Answer_to_the_Ultimate_Question_of_Life.2C_the_Universe.2C_and_Everything_.2842.29)";
-    const char RandGenStatusFilename_comment[] = "# The status of the random number generator will be saved in a file named like this (plus suffixes).\n\
+    const char seed_comment[] = "# set this to 42 \n\ #(https://en.wikipedia.org/wiki/Phrases_from_The_Hitchhiker\%27s_Guide_to_the_Galaxy#Answer_to_the_Ultimate_Question_of_Life.2C_the_Universe.2C_and_Everything_.2842.29)";
+		const char RandGenStatusFilename_comment[] = "# The status of the random number generator will be saved in a file named like this (plus suffixes).\n\
 # In correspondence of every stored gauge conf, the random number generator statuses will be saved for each MPI rank.\n\
 # With these files, the gauge conf and the right setting file (like this one) reproducibility should be assured.";
 
@@ -647,16 +564,11 @@ int read_mc_info(mc_params_t *mcpar,char filelines[MAXLINES][MAXLINELENGTH], int
         (par_info){(void*) &(mcpar->statusFileName),            TYPE_STR,   "StatusFileName"      , (const void*) &statusFileName_def,statusFileName_comment}
     };
 
-    // from here on, you should not have to modify anything.
-
     return scan_group_NV(sizeof(mcp)/sizeof(par_info),mcp, filelines, startline, endline);
-
 }
-
 
 int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     const int useildg_def = 1;
     const int input_vbl_def = 2;
     const int SaveAllAtEnd_def = 1;
@@ -671,9 +583,8 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
 
     const char SaveAllAtEnd_comment[] = "# Set this to 0 if you want the program not to save its state at the end\n\
 # (or it may overwrite some files and you won't be able to reproduce bugs/do other things)";
-    // see /Meas
-    
-    //è un vettore di par_info.
+
+		// see /Meas
     par_info gmp[]= {
         (par_info){(void*) &(dbg_settings->use_ildg),              TYPE_INT,"UseILDG"                , (const void*) &useildg_def,NULL},
         (par_info){(void*) &(dbg_settings->input_vbl),             TYPE_INT,"VerbosityLv"            , (const void*) &input_vbl_def,NULL},
@@ -689,40 +600,25 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
             
     };
 
-
-
-
-    // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
-
 }
-
-
-
-
 
 int read_gaugemeas_info(char *outfilename,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     // see /Meas
     par_info gmp[]= {
         (par_info){(void*) outfilename ,TYPE_STR, "GaugeOutfilename", NULL, NULL}};
 
-
-    // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(gmp)/sizeof(par_info),gmp, filelines, startline, endline);
-
 }
+
 int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     const int doubleinv_def = 0;
     const int measEvery_def = 1;
     const char measEvery_comment[] = "#Fermionic measurements will be performed once very MeasEvery times.";
     const int printPlaqAndRect_def = 0;
     const char printPlaqAndRect_comment[] = "# Each measurement line will contain the value of the plaquette and the rectangle - reweighting will then be easier.";
-
-
 
     par_info fmp[]={
         (par_info){(void*) &(fmpars->fermionic_outfilename),       TYPE_STR,"FermionicOutfilename",        NULL ,                       NULL},
@@ -734,16 +630,11 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
     
     };
 
-
-    // from here on, you should not have to modify anything.
     return scan_group_NV(sizeof(fmp)/sizeof(par_info),fmp, filelines, startline, endline);
-
 }
-
 
 int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     const int meascool_def = 0;
     const char pathcool_def[] = "TopoCool";
     const int coolmeasstep_def = 1;
@@ -762,11 +653,6 @@ int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXL
     const int stouteach_def = 1;
     const char stouteach_comment[] = "# Stouted Topological charge will be measured every StoutMeasEach MC step.";
 
-
-
-
-
-
     par_info tomp[]={
         (par_info){(void*) &(meastopars->meascool),       	       TYPE_INT,"MeasCool"            ,(const void*) &meascool_def,         NULL},
         (par_info){(void*) &(meastopars->pathcool),                    TYPE_STR,"PathCool"            ,(const void*) &pathcool_def,         NULL},
@@ -782,8 +668,6 @@ int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXL
         (par_info){(void*) &(meastopars->stouteach),               TYPE_INT,"StoutMeasEach"       ,(const void*) &stouteach_def,stouteach_comment},
     };
 
-
-    // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(tomp)/sizeof(par_info),tomp, filelines, startline, endline);
     if(startline<endline){
         if(meastopars->measrhostout != TOPO_RHO ){ 
@@ -799,11 +683,8 @@ int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXL
     return res;
 }
 
-
-
 int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     // notice that pre_init_multidev1D or any relevant function
     // must have been called before, in order to get nranks
     // from MPI_Init()
@@ -817,7 +698,6 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
 #endif
     
     const char nranks_read_comment[] = "# NRanks has been set at make time with the NR3 variable.";
-
 
     par_info tp[]= {
 #ifndef MULTIDEVICE        
@@ -833,7 +713,6 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
 #endif
         (par_info){(void*) &(di->nranks_read),       TYPE_INT,"NRanks",           NULL, nranks_read_comment}};
 
-    // from here on, you should not have to modify anything.
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
     if(!helpmode){
@@ -854,12 +733,10 @@ int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], i
 #endif
     }
     return res;
-
 }
 
 int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     // see /OpenAcc/backfield.h
     const int nx_def   = nd0; 
     const int ny_def   = nd1; 
@@ -889,17 +766,11 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
         if (1 == set_geom_glv(gpar) ) res = 1 ;
 
     return res;
-
 }
-//devo solo capire dove test_info e questi type cosi sono definiti.
-
-
 
 int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-
     int helpmode = (int) (startline == endline);
-
     const int saveResults_def = 0;
     const char saveResults_comment[] = "\
 # set to 1 if you want to save all results (the results of Deo Doe or the result of \n\
@@ -911,9 +782,6 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
 # In benchmark mode, a fake rationan approximation will be used in CG-M.\n";
 
     par_info tp[]= {
-        //ti è un puntatore a test_info.
-        
-        //qui si definisce questo vettore tp, che  ha come elementi, struct par_info e come elementi, 1 indirizzo in cui ti punta a deodoeiteration. 2 Type int, nome del coso, NULL(dovrebbe essere il default value), NULL(un eventuale commento).
         (par_info){(void*) &(ti->deoDoeIterations),       TYPE_INT,"DeoDoeIterations",NULL, NULL},
         (par_info){(void*) &(ti->multiShiftInverterRepetitions),TYPE_INT,"MultiShiftInverterRepetitions",NULL, NULL},
         (par_info){(void*) &(ti->fakeShift),TYPE_DOUBLE,"FakeShift",NULL,fakeShift_comment},
@@ -922,321 +790,174 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
     
     };
 
-    // from here on, you should not have to modify anything.
- 
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
 
     if(!res) ti->parametersAreSet = 1; 
 
     return res;
-
 }
-//********************************************************************************************************************************************//
-//********************************************************************************************************************************************//
-
-
-
-
-//qui sto solo definendo una funziona. Here i modified the function by defining a new function "read_replicas_numbers", that will read the replicas_info from the input file.
-
-
 
 int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
-    
-    
-    int i2=0;
 
     par_info rp[]={
-        
         (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"totalnumber",NULL, NULL},
         (par_info){(void*) &(re->defect_boundary),TYPE_INT,"defect_boundary",NULL, NULL},
-        
-
-        
-        
     };
-    printf("startline: %d  endline %d\n",startline,startline+3);
+
     
    int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, startline+3);
   
-    
-    
-  
     alloc_info.num_replicas=re->replicas_total_number;
-
-    
     par_info rp1[3];
-    /*rp2=malloc(alloc_info.num_replicas*sizeof(par_info));*/
     
+    char str0[13];
     
-    char str0[13];//uno in più perchè deve avere il carattere di fine stringa.
-    
-    for(i2=0;i2<3;i2++){
-    
+    for(int i2=0;i2<3;i2++){
         
         rp1[i2].par= &(re->defect_coordinates[i2]);
         
-        
         rp1[i2].type=TYPE_INT;
-        
        
         snprintf(str0,13,"defect_size%d",i2);
         
-        
         rp1[i2].name=malloc(sizeof(char)*20);
-        //non puoi eguagliare due stringhe perchè sono due puntatori e tu vuoi modificare invece il contenuto della stringa-
         strcpy(rp1[i2].name,str0);
         
         rp1[i2].default_value=NULL;
         rp1[i2].comment=NULL;
-        
     }
-     startline=startline+2;
-    printf("startline: %d  endline %d\n",startline,startline+4);
-    
+
+    startline=startline+2;
     
     int res1 = scan_group_NV(3,rp1, filelines, startline, startline+4);
     if(res1!=0){ res=res1;}
     
-    re->cr_vet=malloc(alloc_info.num_replicas*sizeof(double));
+    re->cr_vec=malloc(alloc_info.num_replicas*sizeof(double));
     re->label=malloc(alloc_info.num_replicas*sizeof(int));
   
     par_info *rp2 ;
     rp2=malloc(sizeof(par_info));
-    /*
-    
-    rp2=malloc(alloc_info.num_replicas*sizeof(par_info));
-   
-    char str[10];//uno in più perchè deve avere il carattere di fine stringa.
-    
-       for(i2=0;i2<(alloc_info.num_replicas);i2++){
-           
-           rp2[i2].par= &(re->cr_vet[i2]);
-          
-           rp2[i2].type=TYPE_DOUBLE;
-           
-    
-           snprintf(str,10,"cr_value%d",i2);
-           
-           
-            rp2[i2].name=malloc(sizeof(char)*20);
-         //non puoi eguagliare due stringhe perchè sono due puntatori e tu vuoi modificare invece il contenuto della stringa-
-           strcpy(rp2[i2].name,str);
-          
-           rp2[i2].default_value=NULL;
-           rp2[i2].comment=NULL;
-     
-       }*/
-    
-   
-
-    //MOD X
     rp2->par=malloc(alloc_info.num_replicas*sizeof(double));
-    
-    
     rp2->dvet_par=malloc(alloc_info.num_replicas*sizeof(double));
      
-          rp2->type=TYPE_VET_D;
-         rp2->default_value=NULL;
-         rp2->comment=NULL;
-         rp2->name="cr_values";
-         rp2->data_length=alloc_info.num_replicas;
-    
-    
-    
-    
-    
-
+    rp2->type=TYPE_VET_D;
+    rp2->default_value=NULL;
+    rp2->comment=NULL;
+    rp2->name="cr_values";
+    rp2->data_length=alloc_info.num_replicas;
     
     startline=startline+3;
     
-    printf("fd\n");
- 
-    
-  /*int res2 = scan_group_NV(alloc_info.num_replicas,rp2, filelines, startline, endline);*/
   int res2 = scan_group_NV(1,rp2, filelines, startline, endline);
-    
-    for (i2=0;i2<alloc_info.num_replicas;i2++){
-        re->cr_vet[i2]=rp2->dvet_par[i2];
+    for (int i2=0;i2<alloc_info.num_replicas;i2++){
+        re->cr_vec[i2]=rp2->dvet_par[i2];
     }
-    
-    
     
   if(res2!=0){ res=res2;}
-    
-    
-    
-   
-  
-   
-
-
     free(rp2);
     
-    //checking right choice of axis.
+    // check defect boundary values
     if(re->defect_boundary>3 || re->defect_boundary<0){
-        printf("wrong defect axis choice!\n");
+        printf("ERROR: defect boundary must be 0,1,2 or 3\n");
         res=1;
     }
-    int target_def_dim[3];
-    
-    switch (re->defect_boundary) {
-        case 0:
-            target_def_dim[0]=nd1;
-            target_def_dim[1]=nd2;
-            target_def_dim[2]=nd3;
-            
-            break;
-    
-        case 1:
-            target_def_dim[0]=nd0;
-            target_def_dim[1]=nd2;
-            target_def_dim[2]=nd3;
-    
-            break;
-            
-        case 2:
-            target_def_dim[0]=nd0;
-            target_def_dim[1]=nd1;
-            target_def_dim[2]=nd3;
-            
-            break;
 
-        case 3:
-            target_def_dim[0]=nd0;
-            target_def_dim[1]=nd1;
-            target_def_dim[2]=nd2;
-            
-            break;
-
-        default:
-            printf("ERROR WRONG AXIS CHOICE!\n");
-            break;
-            
-    
-    
-    }
-    
-    for(i2=0;i2<3;i2++){
-        
-        
-        
-        
-    if( re->defect_coordinates[i2]<0 /*|| re->defect_coordinates[i2]>target_def_dim[i2]*/ ){
-        printf("wrong defect coordinates choice!\n");
-        res=1;
-    }
-    }
-    
-    
+		// check that defect length is smaller than lattice size along the corresponding direction	
+		int perp_dir[4][3] = { {1, 2, 3}, {0, 2, 3}, {0, 1, 3}, {0, 1, 2} };
+		int lat_size[4];
+		lat_size[0] = geom_par.gnx;
+		lat_size[1] = geom_par.gny;
+		lat_size[2] = geom_par.gnz;
+		lat_size[3] = geom_par.gnt;
+		for (int j=0; j<3; j++) {
+			if (re->defect_coordinates[j] >= lat_size[perp_dir[re->defect_boundary][j]]) {
+				res=1;
+				printf("ERROR: defect length along dir %d exceeds corresponding lattice size\n", perp_dir[re->defect_boundary][j]);
+			}
+		}
     return res;
 }
 
-//********************************************************************************************************************************************//
-
 int read_acceptance_numbers(accept_info * acp,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
 
-
     par_info tp[]= {
-        //ti è un puntatore a test_info.
-        
-        //qui si definisce questo vettore tp, che  ha come elementi, struct par_info e come elementi, 1 indirizzo in cui ti punta a deodoeiteration. 2 Type int, nome del coso, NULL(dovrebbe essere il default value), NULL(un eventuale commento).
         (par_info){(void*) &(acp->hmc_file_name),TYPE_STR,"Hmc_file_name",NULL, NULL},
         (par_info){(void*) &(acp->swap_file_name),TYPE_STR,"Swap_file_name",NULL, NULL},
         (par_info){(void*) &(acp->file_label_name),TYPE_STR,"Label_file_name",NULL,NULL},
-
     };
 
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
     
-    if(res!=1) {printf("ERROR: wrong acceptances'filename reading!!\n");}
+    if(res!=1) {printf("ERROR: problem in reading acc filenames\n");}
     
     return res;
-
 }
-//********************************************************************************************************************************************//
-
-
-
-
-//LE FUNZIONI PRECEDENTI INVECE LEGGONO E STAMPANO A VIDEO.
-//QUESTA FUNZIONE LEGGE DA FILE E DA IL VALORE AD ALLOC_INFO.
 
 int set_global_vars_and_fermions_from_input_file(const char* input_filename)
 {
 
-    // Opening filenames and reading it
+    // Open files and read them
     int helpmode = 0;
     int i2=0;
-    char filelines[MAXLINES][MAXLINELENGTH]; //questi sono delle stringhe.
-    FILE *input = fopen(input_filename,"r"); //questo ovviamente apre il file
+    char filelines[MAXLINES][MAXLINELENGTH];
+    FILE *input = fopen(input_filename,"r");
     if (input == NULL){
-
         printf("MPI%02d: Could not open file %s \n",devinfo.myrank,input_filename );
         if(0==devinfo.myrank){
-            printf("writing an template_input file for your convenience.\n" );
+            printf("Creating a template inputfile\n" );
         }
         helpmode = 1;
     }
 
-    
-    //in questa parte legge il file  e lo copia in taglines.
     int lines_read = 0;
 
-    int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES]; //qui definisce
+    int tagpositions[MAXPMG], tagtypes[MAXPMG],tagcounts[NPMGTYPES];
     int found_tags = 0;
     fermions_parameters = NULL;
     if (! helpmode){//reading input file 
         char *readcheck = filelines[0];
-        while(readcheck != NULL){ // saving input file in array of lines
+        while(readcheck != NULL){ // saving input file in string array
             readcheck = fgets(filelines[lines_read],MAXLINELENGTH,input);
             if(readcheck != NULL){ lines_read++;
-                
-        
             }
         }
         
-        fclose(input); //qui chiude il file
+        fclose(input);
 
         if(0==devinfo.myrank)
-            printf("lines read: %d\n", lines_read); //printa il numero di linee lette.
-       
+            printf("lines read: %d\n", lines_read);
 
-        int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str); // mi da la lunghezza totale di quanto letto.
+        int totlen = prepare_string_from_stringarray(filelines,lines_read,input_file_str);
 
         if(0==devinfo.myrank)
             printf("Written %d characters into input_file_str\n",totlen);
 
+        // erase comments 
+        erase_comments(filelines,lines_read);
 
-        // erasing comments 
-        erase_comments(filelines,lines_read);  //cancella i commmenti da tutte le linee.
-
-        //scanning for macro parameter families //cerca tutti itag
-        found_tags = scan_group_V(NPMGTYPES,par_macro_groups_names,  //trova i tag. //il numero di type da trovare viene definito dall'enum di sopra.
+        // scanning for macro parameter families
+        found_tags = scan_group_V(NPMGTYPES,par_macro_groups_names,
                 tagcounts,
-                tagpositions,tagtypes,MAXPMG, //MAXPMG é definito 20
+                tagpositions,tagtypes,MAXPMG,
                 filelines,0,lines_read );
-
         
         printf("last\n");
-        rep =(rep_info*) malloc(sizeof(rep_info)); //funziona?
-        
-        acc_info =(accept_info*) malloc(sizeof(accept_info));
-        
+
+        rep = (rep_info*) malloc(sizeof(rep_info));
+        acc_info = (accept_info*) malloc(sizeof(accept_info));
         
         // see global var in /Include/fermion_parameters.
         // setting alloc_info.NDiffFlavs first
-        alloc_info.NDiffFlavs = tagcounts[PMG_FERMION]; //tagcount PMG_Fermions è il numero di flavour
-        
+        alloc_info.NDiffFlavs = tagcounts[PMG_FERMION];        
         if(alloc_info.NDiffFlavs==0)
         {
-            fermions_parameters = NULL; //se non trova i parametri fermionici
+            fermions_parameters = NULL;
             if(0==devinfo.myrank){
                 printf("NO FERMIONS FOUND, ");
                 printf("SIMULATING PURE GAUGE THEORY...\n");
             }
         }
-        else fermions_parameters = (ferm_param*) malloc(alloc_info.NDiffFlavs*sizeof(ferm_param)); //altrimenti nullo.
+        else fermions_parameters = (ferm_param*) malloc(alloc_info.NDiffFlavs*sizeof(ferm_param));
     }
     else
     {   // goes into help mode
@@ -1247,14 +968,12 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
             tagcounts[ifake_tag] = 1;
             tagtypes[ifake_tag] = ifake_tag ; // so we have a tag for each 
             // type anyway
-
         }
         if(0==devinfo.myrank)
             helpfile = fopen("template_input", "w");
     }
 
-
-    // check if all parameter groups were found (neglecting optional goups) //qui controlla che tutti i parametri siano stati trovati.
+    // check if all parameter groups were found (neglecting optional groups)
     int check = 1;
     if(!helpmode){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
@@ -1269,15 +988,13 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         }
     }
 
-
     int fermion_count = 0;
     // note 'check' is reused here
     int totcheck = 0;
     
-    //qui inizia un grande for dove si analizzano tutti i gruppi di variabili.
     for(int igroup  = 0 ; igroup < found_tags; igroup++){
-        int startline = tagpositions[igroup]; //la startline ovviamente è data dalle posizioni dei gruppi. //ovvero dalla riga dove quel gruppo si trova. A ogni iterazione la startline cambia.
-        int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
+        int startline = tagpositions[igroup];
+				int endline = (igroup<found_tags-1)?tagpositions[igroup+1]:lines_read;
 
         if(helpmode){
             if(0==devinfo.myrank){
@@ -1290,8 +1007,6 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                     par_macro_groups_names[tagtypes[igroup]],
                     startline, endline);
         }
-
-       
 
         switch(tagtypes[igroup]){
             case PMG_ACTION     :
@@ -1359,26 +1074,22 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 return 1;
                 break;
         }
-        if(check) //check diverso da 0.
+        if(check)
             if(0==devinfo.myrank)
                 printf("Problem in group %s\n", par_macro_groups_names[tagtypes[igroup]]);
-               
         totcheck += check;
     }
-    
 
     if(tagcounts[PMG_DEBUG]==0 ){
         if(!helpmode) read_debug_info(&debug_settings,filelines,0,1);// Just to set default values
         else read_debug_info(&debug_settings,filelines,0,0);// Just to set default values
     }
 
-
     alloc_info.stoutAllocations = act_params.stout_steps > 0 || act_params.topo_stout_steps > 0 || meastopo_params.stoutmeasstep > 0;
     if(devinfo.myrank == 0 )
         printf("Set alloc_info.stoutAllocations to %d\n",  alloc_info.stoutAllocations );
 
-
-    // check == 1 means at least a parameter was not found.
+    // check == 1 means at least one parameter was not found.
     if(totcheck!=0 || helpmode ){
         
         if(helpmode && 0 == devinfo.myrank) fclose(helpfile);
@@ -1417,21 +1128,8 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         //    fclose(input_renamed);
 
         //}
-
-
     }
-   
-  
-    
-  
-
     return 0;
-
 }
 
-
-
-
 #endif
-
-

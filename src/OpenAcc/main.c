@@ -401,10 +401,10 @@ int main(int argc, char* argv[]){
 #pragma acc update device(aux_conf_acc[0:8])
 #pragma acc update device(auxbis_conf_acc[0:8])
     
-	if (verbosity_lv>9 && 0==devinfo,myrank){
+	if( (verbosity_lv>9) && (0==devinfo.myrank) ){
 		printf("Boundary conditions coeffs c(r):\n");
   	for(i3=0;i3<rep->replicas_total_number;i3++)
-    	printf("c%d: %f\n",i3,rep->cr_vec[i3]);
+    	printf("c(%d) = %.15lg\n", i3, rep->cr_vec[i3]);
   }
     
   for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
@@ -433,122 +433,8 @@ int main(int argc, char* argv[]){
 
   }// for end
 
- 
-  //######################################################################################################################################//
-  //######################################################################################################################################//
-
   int swap_number=0;
 
-  /*
-  //TEST SWAP!!
-  double Delta_S_SWAP_BEST=0.0;
-  double Delta_S_SWAP_STUPID=0.0;
-  double Delta_S_SWAP_LAT=0.0;
-	double Delta_S_SWAP_BEST_SWAPPED_LOL=0.0;
-  double S_0_0, S_0_1, S_1_1, S_1_0;
-   
-  if ( rep->replicas_total_number > 1 ) {
-    printf("ECCO IL TEST SWAP!!!\n");
-#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
-  
-    S_0_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-#ifdef GAUGE_ACT_TLSM
-    S_0_0=C_ZERO*S_0_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-#endif
-
-    S_1_1=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-#ifdef GAUGE_ACT_TLSM  
-		S_1_1=C_ZERO*S_1_1+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-#endif
-
-    Delta_S_SWAP_BEST=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[1],aux_conf_acc,local_sums,&def);  
-    Delta_S_SWAP_BEST_SWAPPED_LOL=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[1],conf_hasenbusch[0],aux_conf_acc,local_sums,&def);  
-    
-    replicas_swap(conf_hasenbusch[0],conf_hasenbusch[1], 0, 1, rep);
-#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
-    
-    S_0_1=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-#ifdef GAUGE_ACT_TLSM
-    S_0_1=C_ZERO*S_0_1+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-#endif
-
-    S_1_0=BETA_BY_THREE*calc_plaquette_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-#ifdef GAUGE_ACT_TLSM
-    S_1_0=C_ZERO*S_1_0+C_ONE*BETA_BY_THREE*calc_rettangolo_soloopenacc(conf_hasenbusch[1],aux_conf_acc,local_sums);
-#endif
-    printf("ECCO IL TEST DOUBLE:\n%.15lg %.15lg %.15lg %.15lg\n",S_1_0,S_0_1,S_0_0,S_1_1);
-    Delta_S_SWAP_STUPID=(S_1_0+S_0_1)-(S_0_0+S_1_1);
-  }
-
-	//get back to original replicas setup
-	replicas_swap(conf_hasenbusch[0],conf_hasenbusch[1], 0, 1, rep);
-	#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
-
-  int i2;    
-  pef.def_axis_mapped=def.def_axis_mapped;
-  for( i2=0; i2<3;i2++){
-    pef.def_mapped_perp_dir[i2]=def.def_mapped_perp_dir[i2];
-  }
-  int nd[4]={nd0,nd1,nd2,nd3};
-
-  for( i3=0; i3<4;i3++){
-    for( i2=0; i2<4;i2++){
-      pef.defect_swap_min[i3][i2]=0;
-      pef.defect_swap_max[i3][i2]=nd[i2];
-
-#ifdef GAUGE_ACT_TLSM
-      for(int j=0;j<2;j++){
-	pef.defect_swap_min_TLSM[j][i3][i2]=0;
-	pef.defect_swap_max_TLSM[j][i3][i2]=nd[i2];
-      }
-#endif
-
-    }
-#ifdef MULTIDEVICE
-    pef.defect_swap_min[i3][3]+=PLAQ_EXTENT;
-    pef.defect_swap_max[i3][3]+=-PLAQ_EXTENT;
-#ifdef GAUGE_ACT_TLSM
-    for(int j=0;j<2;j++){
-      pef.defect_swap_min_TLSM[j][i3][3]+=PLAQ_EXTENT;
-      pef.defect_swap_max_TLSM[j][i3][3]+=-PLAQ_EXTENT;
-    }
-#endif
-#endif
-  }
-
-  printf("ALL LATTICE  defect_swap_max: rank %d\n",devinfo.myrank);
-
-  for(int nu=0;nu<4;nu++){
-    if(nu!=pef.def_axis_mapped){
-      printf("nu:%d||",nu);
-      for(int i=0;i<4;i++){
-	printf("%d||",pef.defect_swap_max[nu][i]);}
-      printf("\n");
-    }
-  }
-
-  printf("WHOLE LATTICE  defect_swap_min: rank %d\n",devinfo.myrank);
-
-  for(int nu=0;nu<4;nu++){
-    if(nu!=pef.def_axis_mapped){
-      printf("nu:%d||",nu);
-      for(int i=0;i<4;i++){
-	printf("%d||",pef.defect_swap_min[nu][i]);}
-      printf("\n");
-    }
-  }
-
-  if (rep -> replicas_total_number > 1 ){
-    Delta_S_SWAP_LAT=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[0],conf_hasenbusch[1],aux_conf_acc,local_sums,&pef);
-    double Delta_S_SWAP_LAT_SWAPPED_LOL=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[1],conf_hasenbusch[0],aux_conf_acc,local_sums,&pef);
-    
-		printf("CONFRONTO DELTA_SWAP\n");
-    printf("%.15lg        (S_1_0+S_0_1)-(S_0_0+S_1_1)\n%.15lg         (DELTA_S_FULL_LAT)\n%.15lg         (DELTA_S_BEST)\n",Delta_S_SWAP_STUPID,Delta_S_SWAP_LAT,Delta_S_SWAP_BEST);
-    printf("CONFRONTO LOL\n%.15lg         (DELTA_S_FULL_LAT)\n%.15lg         (DELTA_S_BEST)\n",Delta_S_SWAP_LAT_SWAPPED_LOL,Delta_S_SWAP_BEST_SWAPPED_LOL);
-	}
-
-  //--------------- END TEST SWAP ---------------//
-  */
   //######################################################################################################################################//
   //############### MEASURES #########################################################################################################//
   //######################################################################################################################################//
@@ -586,18 +472,12 @@ int main(int argc, char* argv[]){
   //Plaquette measures and polyakov loop measures.
   printf("PLAQUETTE START\n");
     
-  /*
-  //TEST MOD
-  printf("Plaquette  MOD   : %.18lf\n" , S_0_1/GL_SIZE/BETA_BY_THREE/6.0/3.0);
-  */
-    
   plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
   printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
 	 devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
     
   printf("PLAQUETTE END\n");
 
-  //rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
   rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
   printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
@@ -610,19 +490,7 @@ int main(int argc, char* argv[]){
   printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
 	 devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
 
-    
-  //char confile_dbg[50];
-  //sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
-  //dbg_print_su3_soa(conf_hasenbusch[0],confile_dbg,0);
-
-
-  //            MPI_Finalize(); // DEBUG
-  //            return 0 ;      // DEBUG
-    
-    
-
   //Here we are in Jarzynski mode.
-    
     
   if(0 == mc_params.ntraj && 0 == mc_params.JarzynskiMode ){ // MEASURES ONLY
       
@@ -635,15 +503,12 @@ int main(int argc, char* argv[]){
     if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
         
     plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
-    //rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
 #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
     rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
 #else
     printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
 #endif 
     poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
-
-        
         
     printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
     printf("Rectangle     : %.18lf\n" ,rect/GL_SIZE/3.0/6.0/2.0);
@@ -659,20 +524,8 @@ int main(int argc, char* argv[]){
 		     plq/GL_SIZE/3.0/6.0,
 		     rect/GL_SIZE/3.0/6.0/2.0);   
 
-
-      
-
-
   }else printf("MPI%02d: Starting generation of Configurations.\n",
 	       devinfo.myrank);
-    
-
-    
-    
-    
-    
-    
-    
      
   // THERMALIZATION & METRO    ----   UPDATES //
 
@@ -701,9 +554,6 @@ int main(int argc, char* argv[]){
 	    if(-1 == mc_params.JarzynskiMode)
 	      new_backfield_parameters.bz = backfield_parameters.bz -
 		(double) id_iter/mc_params.MaxConfIdIter;
-
-
-
 
 	    if(0==devinfo.myrank){
 

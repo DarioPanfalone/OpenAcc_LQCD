@@ -137,7 +137,6 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info 
 #endif
 
 	  if(condition){
-	    //printf("rank %d,parity %d parity_fis %d parity_log %d %d %d %d %d\n",devinfo.myrank,parity,parity_fis,parity_log,d[0],d[1],d[2],d[3]);
 	    if(defect_info_config==0){
 	      for(int nu=0; nu<4;nu++){
 		for (i=0; i<4; i++){
@@ -191,7 +190,7 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info 
     }	
     else{ // (part of) the defect sits on this MPI Rank
     
-      // adjust max extremes to correctly enter the for loop guard  
+      // adjust max extremes to correctly express the for loop guard  
       for(int nu=0; nu<4;nu++){
 	for (i=0; i<4; i++){
 	  def->defect_swap_max[nu][i] += 1; // max must enter in the guard of a for loop as for(i=min; i< (max+1) ; i++) in order to have i going from min to max
@@ -319,11 +318,13 @@ void printing_k_mu(su3_soa * conf){
   }
 }
 
+// swap conf pointers for a given couple
 void replicas_swap(su3_soa * conf1, su3_soa * conf2, int lab1, int lab2, rep_info * hpt_params){
   vec3_soa  aux;
   int aux_label;
   int mu=0;
-    
+
+	// swap labels
   aux_label=hpt_params->label[lab1];
   hpt_params->label[lab1] = hpt_params->label[lab2];
   hpt_params->label[lab2] = aux_label;
@@ -347,7 +348,7 @@ void replicas_swap(su3_soa * conf1, su3_soa * conf2, int lab1, int lab2, rep_inf
 }
 
 
-//function which print the confs'labels.
+// print conf labels
 void label_print(rep_info * hpt_params, FILE *file, int step_number){
 
   int i;
@@ -372,10 +373,12 @@ double calc_Delta_S_soloopenacc_SWAP(
 
   for(counter=0;counter<3;counter++){
     nu=def->def_mapped_perp_dir[counter];
-    printf("(%d,%d)\n",mu,nu);
-    result += C_ZERO*calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def);
+		
+		// result = C_0 * delta_S_plaq_1x1
+    result += C_ZERO * calc_Delta_S_Wilson_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def);
 #ifdef GAUGE_ACT_TLSM
-    result +=C_ONE*calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def);
+		// result + C_1 * ( delta_S_rect_1x2 + delta_S_rect_2x1 )
+    result += C_ONE * calc_Delta_S_Symanzik_SWAP(tconf_acc,tconf_acc2,local_plaqs,tr_local_plaqs,mu,nu,def);
 #endif
   }
 #ifdef MULTIDEVICE
@@ -387,17 +390,17 @@ double calc_Delta_S_soloopenacc_SWAP(
   return total_result;
 }
 
+// compute delta_S_plaq = (beta/3) * sum delta_K_1x1 delta_Tr(plaq_1x1)
 double calc_Delta_S_Wilson_SWAP(__restrict const su3_soa * const u,
                                 __restrict const su3_soa * const w,
                                 __restrict su3_soa * const loc_plaq,
                                 dcomplex_soa * const tr_local_plaqs,
                                 const int mu, const int nu, defect_info * def)
 {
-  double K_mu_nu; //MOD.
-  double K_mu_nu2; //MOD.
+  double K_mu_nu;
+  double K_mu_nu2;
   int d0,d1,d2,d3;
   int i;
-  printf("nu: %d\n",nu);
 
   int D0_min,D1_min,D2_min,D3_min;
   int D0_max,D1_max,D2_max,D3_max;
@@ -418,24 +421,23 @@ double calc_Delta_S_Wilson_SWAP(__restrict const su3_soa * const u,
   }
 #pragma acc update device(tr_local_plaqs[0:2])
 
-  printf("|%d %d||%d %d| |%d %d| |%d %d| \n",D0_min, D0_max, D1_min, D1_max,D2_min, D2_max,D3_min, D3_max);
-
-#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)/* present(D_max) present(D_min)*/
+#pragma acc kernels present(u) present(w) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
-  for(d3=D3_min; d3< D3_max; d3++) {
+  for(d3=D3_min; d3<D3_max; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-    for(d2=D2_min; d2< D2_max; d2++) {
-      for(d1=D1_min; d1< D1_max; d1++) {
-	for(d0=D0_min; d0< D0_max; d0++) {
+    for(d2=D2_min; d2<D2_max; d2++) {
+      for(d1=D1_min; d1<D1_max; d1++) {
+	for(d0=D0_min; d0<D0_max; d0++) {
                 
-	  int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
-	  int parity; //parity
-	  int dir_muA,dir_nuB; //mu and nu directions.
+	  int idxh,idxpmu,idxpnu;
+	  int parity;
+	  int dir_muA,dir_nuB;
 	  int dir_muC,dir_nuD;
                 
-	  idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
-	  parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
-			   
+	  idxh = snum_acc(d0,d1,d2,d3); // site r
+	  parity = (d0+d1+d2+d3) % 2;
+
+		// impose periodic boundary conditions
 	  if(d1==-1){parity = (d0+d2+d3) % 2; idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];parity=!parity;}
 	  if(d2==-1){parity = (d0+d1+d3) % 2; idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];parity=!parity;}
 	  if(d0==-1){parity = (d3+d1+d2) % 2; idxh=nnm_openacc[snum_acc(0,d1,d2,d3)][0][parity];parity=!parity;}
@@ -443,11 +445,11 @@ double calc_Delta_S_Wilson_SWAP(__restrict const su3_soa * const u,
                 
 	  dir_muA = 2*mu +  parity;
 	  dir_muC = 2*mu + !parity;
-	  idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
+	  idxpmu = nnp_openacc[idxh][mu][parity]; // r+mu
                 
 	  dir_nuB = 2*nu + !parity;
 	  dir_nuD = 2*nu +  parity;
-	  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu //the table that states which is the nearest neighbour.
+	  idxpnu = nnp_openacc[idxh][nu][parity]; // r+nu
                 
 	  //       r+nu (C)  r+mu+nu
 	  //          +<---+
@@ -457,32 +459,29 @@ double calc_Delta_S_Wilson_SWAP(__restrict const su3_soa * const u,
 	  // |       r  (A)  r+mu
 	  // +---> mu
                 
-	  //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
-                
 	  //plaquette u
-	  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+	  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);  // LOC_PLAQ = A * B
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
                 
-	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
+	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh); // tr(plaq_u)
 	  tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
                 
-	  //K_mu_nu computation;
+	  // K_{mu nu} u
 	  K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
                 
 	  //plaquette w
-	  mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
+	  mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_plaq[parity],idxh);  // LOC_PLAQ = A * B
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&w[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
                 
-	  //K_mu_nu computation;
+	  // k_{mu nu} w
 	  K_mu_nu2=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_muC].K.d[idxpnu])*(w[dir_nuD].K.d[idxh]);
                 
 	  d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
                 
-	  tr_local_plaqs[parity].c[idxh]=tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I;
-	  tr_local_plaqs[parity].c[idxh]=(K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh];
-                
+	  tr_local_plaqs[parity].c[idxh] = tr_local_plaqs[parity].c[idxh]-creal(ciao2)-cimag(ciao2)*I; // tr(plaq)_u - tr(plaq)_w 
+	  tr_local_plaqs[parity].c[idxh] = (K_mu_nu-K_mu_nu2)*tr_local_plaqs[parity].c[idxh]; // delta_K * Delta_Tr_plaq = - delta_S
 	}  //d0  
       }  // d1
     }  // d2
@@ -495,15 +494,15 @@ double calc_Delta_S_Wilson_SWAP(__restrict const su3_soa * const u,
 
 #pragma acc kernels present(tr_local_plaqs)
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
-  for(t=0; t  <sizeh; t++) {
+  for(t=0; t<sizeh; t++) {
     res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
     res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
   }
-  res_R_p= -BETA_BY_THREE*res_R_p; // WATCH OUT! The minus sign is because Delta_S = - beta/3 sum_{sites} Delta_K * Delta_Tr_plaq
-
+  res_R_p *= BETA_BY_THREE; // Delta_S = (beta/3) sum Delta_K * Delta_Tr_plaq
   return res_R_p;
 }
 
+// compute delta_S = (beta/3) sum [ delta_K_rect_1x2 * Delta_Tr(rect)_1x2 + term with 1x2 -> 2x1 ]
 #ifdef GAUGE_ACT_TLSM
 double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
                                   __restrict const su3_soa * const w,
@@ -511,8 +510,8 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
                                   dcomplex_soa * const tr_local_rects,
                                   const int mu, const int nu, defect_info * def)
 {
-  double K_mu_nu; //MOD.
-  double K_mu_nu2; //MOD.
+  double K_mu_nu;
+  double K_mu_nu2;
   int d0, d1, d2, d3;
   int D0_min,D1_min,D2_min,D3_min;
   int D0_max,D1_max,D2_max,D3_max;
@@ -528,15 +527,15 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
   D2_min=def->defect_swap_min_TLSM[1][nu][2];
   D3_min=def->defect_swap_min_TLSM[1][nu][3];
 
-  int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
-  int parity; //parity
-  int dir_muA,dir_nuB; //mu and nu directions.
+  int idxh,idxpmu,idxpnu;
+  int parity;
+  int dir_muA,dir_nuB;
   int dir_muC,dir_nuD;
 
   int dir_muB,dir_muD,dir_nuC;
   int dir_muE,dir_nuF,dir_nuE;
-  int idxpmupmu,idxpmupnu;//2x1
-  int idxpnupnu; //1x2
+  int idxpmupmu,idxpmupnu; // 2x1
+  int idxpnupnu; // 1x2
 
   int is;
   for(is=0; is<sizeh;is++){
@@ -544,8 +543,6 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
     tr_local_rects[1].c[is]=0;
   }
 #pragma acc update device(tr_local_rects[0:2])
-  if(verbosity_lv>8)
-    printf("2x1 |%d %d||%d %d| |%d %d| |%d %d| \n",D0_min, D0_max, D1_min, D1_max,D2_min, D2_max,D3_min, D3_max);
 
   // ---------------------2x1--------------------------
 #pragma acc kernels present(u) present(w) present(loc_rects) present(tr_local_rects)
@@ -556,8 +553,8 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
       for(d1=D1_min; d1< D1_max; d1++) {
 	for(d0=D0_min; d0< D0_max; d0++) {
 
-	  idxh = snum_acc(d0,d1,d2,d3);// the site on the half-lattice.
-	  parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+	  idxh = snum_acc(d0,d1,d2,d3);
+	  parity = (d0+d1+d2+d3) % 2; 
 
 	  if(d1==-1){parity = (d0+d2+d3) % 2; idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];parity=!parity;}
 	  if(d2==-1){parity = (d0+d1+d3) % 2; idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];parity=!parity;}
@@ -570,10 +567,10 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
 	  dir_muD = 2*mu +  parity;
 	  dir_muE = 2*mu + !parity;
 	  dir_nuF = 2*nu +  parity;
-	  idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
-	  idxpmupmu = nnp_openacc[idxpmu][mu][!parity];// r+2mu
+	  idxpmu = nnp_openacc[idxh][mu][parity]; // r+mu
+	  idxpmupmu = nnp_openacc[idxpmu][mu][!parity]; // r+2mu
 	  idxpmupnu = nnp_openacc[idxpmu][nu][!parity];// r+mu+nu
-	  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+	  idxpnu = nnp_openacc[idxh][nu][parity]; // r+nu
 
 	  //       r+nu r+mu+nu r+2mu+nu
 	  //          +<---+<---+
@@ -591,7 +588,7 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
 	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_rects[parity],idxh);
 
-	  //K_mu_nu_RECT computation;
+	  //K_mu_nu_RECT 2x1 u
 	  double K_mu_nu_RECT;
 	  K_mu_nu_RECT=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
 
@@ -603,10 +600,10 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
 	  d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_rects[parity],idxh);
 
-	  //K_mu_nu_RECT2 computation;
+	  //K_mu_nu_RECT 2x1 w 
 	  double K_mu_nu_RECT2;
 	  K_mu_nu_RECT2=(w[dir_muA].K.d[idxh])*(w[dir_muB].K.d[idxpmu])*(w[dir_nuC].K.d[idxpmupmu])*(w[dir_muD].K.d[idxpmupnu])*(w[dir_muE].K.d[idxpnu])*(w[dir_nuF].K.d[idxh]);
-	  tr_local_rects[parity].c[idxh] += (K_mu_nu_RECT-K_mu_nu_RECT2)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+	  tr_local_rects[parity].c[idxh] += (K_mu_nu_RECT-K_mu_nu_RECT2)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I); // delta_K_2x1 * delta_Tr_rect_2x1 = -delta_S_2x1
 	}  //d0
       }  // d1
     }  // d2
@@ -643,9 +640,6 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
   }
 #pragma acc update device(tr_local_rects[0:2])
 
-  if(verbosity_lv>8)
-    printf("1x2|%d %d||%d %d| |%d %d| |%d %d| \n",D0_min, D0_max, D1_min, D1_max,D2_min, D2_max,D3_min, D3_max);
-   
 #pragma acc kernels present(u) present(w) present(loc_rects) present(tr_local_rects)
 #pragma acc loop independent gang(STAPGANG3) 
   for(d3=D3_min; d3< D3_max; d3++) {
@@ -654,8 +648,8 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
       for(d1=D1_min; d1< D1_max; d1++) {
 	for(d0=D0_min; d0< D0_max; d0++) {
 
-	  idxh = snum_acc(d0,d1,d2,d3);// the site on the  half-lattice.
-	  parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+	  idxh = snum_acc(d0,d1,d2,d3);
+	  parity = (d0+d1+d2+d3) % 2;
 
 	  if(d1==-1){parity = (d0+d2+d3) % 2; idxh=nnm_openacc[snum_acc(d0,0,d2,d3)][1][parity];parity=!parity;}
 	  if(d2==-1){parity = (d0+d1+d3) % 2; idxh=nnm_openacc[snum_acc(d0,d1,0,d3)][2][parity];parity=!parity;}
@@ -674,10 +668,10 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
 	  dir_nuE = 2*nu + !parity;
 	  dir_nuF = 2*nu +  parity;
 
-	  idxpmu = nnp_openacc[idxh][mu][parity];      //r+mu
-	  idxpmupnu = nnp_openacc[idxpmu][nu][!parity];//r+mu+nu
-	  idxpnu = nnp_openacc[idxh][nu][parity];      //r+nu
-	  idxpnupnu = nnp_openacc[idxpnu][nu][!parity];//r+nu+nu
+	  idxpmu = nnp_openacc[idxh][mu][parity];       // r+mu
+	  idxpmupnu = nnp_openacc[idxpmu][nu][!parity]; // r+mu+nu
+	  idxpnu = nnp_openacc[idxh][nu][parity];       // r+nu
+	  idxpnupnu = nnp_openacc[idxpnu][nu][!parity]; // r+nu+nu
                         
 	  //            (D)
 	  //    r+2nu +<---+ r+mu+2nu
@@ -690,7 +684,7 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
 	  // |       r  (A)  r+mu
 	  // +---> mu
 
-	  //rect 1x2 u
+	  // rect 1x2 u
 	  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_rects[parity],idxh);   // LOC_RECT = A * B
 	  mat1_times_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&u[dir_nuC],idxpmupnu);                 // LOC_RECT = LOC_RECT * C
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&u[dir_muD],idxpnupnu);            // LOC_RECT = LOC_RECT * D
@@ -698,22 +692,23 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
 	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_rects[parity],idxh);
 
-	  //K_mu_nu_RECT3 computation;
+	  // K_mu_nu_RECT3 1x2 u
 	  double K_mu_nu_RECT3;
 	  K_mu_nu_RECT3=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu])*(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
-	  //rect 1x2 w
+	  
+		// rect 1x2 w
 	  mat1_times_mat2_into_mat3_absent_stag_phases(&w[dir_muA],idxh,&w[dir_nuB],idxpmu,&loc_rects[parity],idxh);   // LOC_RECT = A * B
 	  mat1_times_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&w[dir_nuC],idxpmupnu);                 // LOC_RECT = LOC_RECT * C
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&w[dir_muD],idxpnupnu);            // LOC_RECT = LOC_RECT * D
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&w[dir_nuE],idxpnu);               // LOC_RECT = LOC_RECT * E
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_rects[parity],idxh,&w[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
-	  d_complex  ciao2 = matrix_trace_absent_stag_phase(&loc_rects[parity],idxh);
+	  d_complex ciao2 = matrix_trace_absent_stag_phase(&loc_rects[parity],idxh);
 
-	  //K_mu_nu_RECT4 computation;
+	  // K_mu_nu_RECT4 1x2 w
 	  double K_mu_nu_RECT4;
 	  K_mu_nu_RECT4=(w[dir_muA].K.d[idxh])*(w[dir_nuB].K.d[idxpmu])*(w[dir_nuC].K.d[idxpmupnu])*(w[dir_muD].K.d[idxpnupnu])*(w[dir_nuE].K.d[idxpnu])*(w[dir_nuF].K.d[idxh]);
 
-	  tr_local_rects[parity].c[idxh] += (K_mu_nu_RECT3-K_mu_nu_RECT4)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I);
+	  tr_local_rects[parity].c[idxh] += (K_mu_nu_RECT3-K_mu_nu_RECT4)*( creal(ciao)+cimag(ciao)*I-creal(ciao2)-cimag(ciao2)*I); // delta_K_1x2 delta_Tr_rect_1x2 = - delta_S_1x2
 	} //d0
       } // d1
     } // d2
@@ -725,20 +720,20 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
     res_R_p += creal(tr_local_rects[0].c[t]); //even sites rectangles
     res_R_p += creal(tr_local_rects[1].c[t]); //odd sites rectangles
   }
-  res_R_p = -BETA_BY_THREE *res_R_p; // WATCH OUT! The minus sign comes from Delta_S = - beta/3 sum Delta_K * Delta_Tr_Rect
+  res_R_p *= BETA_BY_THREE; // Delta_S_Symanzik = (beta/3) sum ( Delta_K_1x2 * Delta_Tr_Rect_1x2 + same term with 1x2 -> 2x1 )
   return res_R_p;
 }
 #endif
 
 int metro_SWAP(su3_soa ** conf_hasenbusch,
-               __restrict su3_soa * const loc_plaq, //la placchetta locale.
+               __restrict su3_soa * const loc_plaq,
                dcomplex_soa * const tr_local_plaqs,
 	       int rep_indx1, int rep_indx2,defect_info * def, rep_info * hpt_params)
 {    
   double p1,p2;
   double Delta_S_SWAP;
   int accettata=0;
-  Delta_S_SWAP=calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,def);
+  Delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,def);
   if(verbosity_lv>8)
     printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
   if(Delta_S_SWAP<0){
@@ -750,7 +745,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
     {  p1=exp(-Delta_S_SWAP);
       if(debug_settings.do_norandom_test) p2=0; // NORANDOM
       else{   // NORMAL, RANDOM
-	if(0==devinfo.myrank)p2=casuale();
+	if(0==devinfo.myrank) { p2=casuale(); }
 #ifdef MULTIDEVICE
 	MPI_Bcast((void*) &p2,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 	if(verbosity_lv>8)
@@ -775,9 +770,8 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
   return accettata;
 }
 
-
 void All_Conf_SWAP( su3_soa ** conf_hasenbusch,
-		    __restrict su3_soa * const loc_plaq, //la placchetta locale.
+		    __restrict su3_soa * const loc_plaq,
 		    dcomplex_soa * const tr_local_plaqs, 
 		    defect_info * def, 
 		    int* swap_num,
@@ -801,59 +795,39 @@ void All_Conf_SWAP( su3_soa ** conf_hasenbusch,
   if(swap_order<=0.5){
         
     for(i_counter=0;i_counter<replicas_number-1;i_counter++){
-      if(verbosity_lv>4)
-	printf("%d %d\n",i_counter,i_counter+1);
+      if(verbosity_lv>4) { printf("proposing swap %d %d\n",i_counter,i_counter+1); }
             
       accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1, def, hpt_params);
 #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
-      if(verbosity_lv>4)
-	printf("proposed: all_swap_vect %d\n",all_swap_vet[i_counter]);
-            
       *swap_num=*swap_num+1;
-           
       all_swap_vet[i_counter]++;
-      //all_swap_vet[i_counter+1]++;
-      if(verbosity_lv>4)
-	printf("proposed: all_swap_vet %d\n",all_swap_vet[i_counter]);
             
-      if (accettata==1){
-	acceptance_vet[i_counter]++;
-	//   acceptance_vet[i_counter+1]++;
-      }
+      if (accettata==1){ acceptance_vet[i_counter]++; }
     }
   }
   else{
     for(i_counter=0;i_counter<replicas_number-1;i_counter++){
-      if(verbosity_lv>4)
-	printf("%d %d\n",replicas_number-1-i_counter,replicas_number-i_counter-2);
         
       accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2, def, hpt_params);
 #pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
             
       *swap_num=*swap_num+1;
-        
-      //all_swap_vet[replicas_number-i_counter-1]++;
       all_swap_vet[replicas_number-i_counter-2]++;
             
-      if(accettata==1){
-	// acceptance_vet[replicas_number-i_counter-1]++;
-	acceptance_vet[replicas_number-i_counter-2]++;
-      }
+      if(accettata==1) { acceptance_vet[replicas_number-i_counter-2]++; }
     }
   }
 }
     
 void trasl_conf( __restrict const su3_soa *  const tconf_acc,
 		 __restrict const su3_soa *  const taux_conf){
-  if(verbosity_lv>4)
-    printf("CONF 0 TRASL\n");
     
 #ifdef MULTIDEVICE
   communicate_su3_borders(tconf_acc, GAUGE_HALO);
 #pragma acc update self(tconf_acc[0:8])
 #endif
     
-  set_su3_soa_to_su3_soa(tconf_acc,taux_conf);// conf_aux=conf_acc
+  set_su3_soa_to_su3_soa(tconf_acc,taux_conf); // conf_aux=conf_acc
     
   double dir0;
   int dir=0;
@@ -870,17 +844,6 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
   if(dir0>0.5 && dir0<=0.75){dir=2;}
   if(dir0>0.75){dir=3;}
     
-  if(verbosity_lv>4){
-    if(0==devinfo.myrank){
-      printf("dir0 %f",dir0);
-      printf("Mu is  %d\n",dir);
-      
-      printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
-    }
-    printf("dir0 %f,rank %d",dir0,devinfo.myrank);
-    printf("Mu is  %d\n",dir);
-    printf("%d GAUGE_HALO %d D3_HALO \n",GAUGE_HALO,D3_HALO);
-  }
   set_su3_soa_to_su3_soa_trasl( taux_conf,tconf_acc, dir);
 #pragma acc update device(tconf_acc[0:8])  
     
@@ -888,13 +851,6 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
   communicate_su3_borders(tconf_acc, GAUGE_HALO);  
 #pragma acc update self(tconf_acc[0:8])
 #endif
-
-  if(verbosity_lv>4)
-    if(0==devinfo.myrank){
-      printf("conf e conf aux :%f || %f\n", creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(taux_conf[0].r0.c0[snum_acc(1,1,1,1)]));
-      
-      printf("conf %f e nnp %f\n",creal( tconf_acc[0].r0.c0[snum_acc(1,1,1,1)]),creal(tconf_acc[0].r0.c0[nnp_openacc[snum_acc(1,1,1,1)][dir][1]]));
-    }
 }
 
 #endif

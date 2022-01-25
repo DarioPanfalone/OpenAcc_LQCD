@@ -301,9 +301,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     }//end for iflav
 
-
-
-
     // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
     struct timeval md_start, md_end;
     int multishift_iterations_before_md = multishift_invert_iterations ;  

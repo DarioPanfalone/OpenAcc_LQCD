@@ -15,7 +15,6 @@
  #include "../OpenAcc/deviceinit.h"
 #endif
 
-
 // multiply the whole configuration for the staggered phases field
 // (only the first two lines)
 //void mult_conf_times_stag_phases( __restrict su3_soa * const u);
@@ -27,9 +26,6 @@
 // multiply the whole configuration for the staggered phases field
 //void mult_conf_times_stag_phases_nodev( __restrict su3_soa * const u);
 
-
-
-
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix);
 
 //copy matrix in into matrix out, this has to happen on the host
@@ -38,7 +34,6 @@ void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
 
 void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
                             __restrict su3_soa * const matrix_out,int dir);
-
 
 void set_su3_soa_to_su3_soa_device(__restrict const su3_soa * const matrix_in,
 			     	   __restrict su3_soa * const matrix_out);
@@ -637,12 +632,6 @@ static inline void mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_p
     double K_mu_nu_right=1;
     K_mu_nu_right=(matnu1->K.d[idx_mat_nu1])*(matmu2->K.d[idx_mat_mu2])*(matnu3->K.d[idx_mat_nu3]);
     
-    /*
-    if(idx_mat_nu3==snum_acc(31,6,6,6) ){
-        printf("COUNT\n");
-    printf("hob right %f\n",K_mu_nu_right);
-    }*/
-    
     //Write results inside mat4
     mat4->r0.c0[idx_mat4] += K_mu_nu_right*C_ZERO * mat1_00;
     mat4->r0.c1[idx_mat4] += K_mu_nu_right*C_ZERO * mat1_01;
@@ -658,8 +647,6 @@ static inline void mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_p
             - ( mat1_00 * mat1_12) ) ;
     mat4->r2.c2[idx_mat4] += K_mu_nu_right*C_ZERO * conj( ( mat1_00 * mat1_11 )
             - ( mat1_01 * mat1_10) ) ;
-    
-    
 }
 
 // Routine for the computation of the 3 matrices which contributes to the left part of the staple
@@ -751,12 +738,6 @@ static inline void conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_p
     double K_mu_nu_left=1;
     K_mu_nu_left=(matnu1->K.d[idx_mat_nu1])*(matmu2->K.d[idx_mat_mu2])*(matnu3->K.d[idx_mat_nu3]);
     
-    /*
-    if(idx_mat_nu3==snum_acc(31,6,6,6) ){
-        
-        printf("hob left %f\n",K_mu_nu_left);
-    }*/
-
     //Write results inside mat4
     mat4->r0.c0[idx_mat4] +=K_mu_nu_left*C_ZERO * mat1_00;
     mat4->r0.c1[idx_mat4] += K_mu_nu_left*C_ZERO * mat1_01;
@@ -1164,7 +1145,6 @@ static inline void assign_su3_soa_to_su3_soa_component(
 }
 
 
-//MOD
 #pragma acc routine seq
 static inline void assign_su3_soa_to_su3_soa_component_trasl(
                                                        __restrict const su3_soa * const matrix_comp_in,
@@ -1181,16 +1161,11 @@ static inline void assign_su3_soa_to_su3_soa_component_trasl(
     matrix_comp_out->r1.c2[idx1] =  matrix_comp_in->r1.c2[idx];
     
     /*
-    
     matrix_comp_out->r2.c0[idx1] =  matrix_comp_in->r2.c0[idx];
     matrix_comp_out->r2.c1[idx1] =  matrix_comp_in->r2.c1[idx];
     matrix_comp_out->r2.c2[idx1] =  matrix_comp_in->r2.c2[idx];
     */
 }
-
-
-
-
 
 #pragma acc routine seq
 static inline void thmat1_plus_tamat2_times_factor_into_thmat1(
@@ -1207,7 +1182,6 @@ static inline void thmat1_plus_tamat2_times_factor_into_thmat1(
   thm1->rc11[idx] += fact * tam2->ic11[idx];  // double
   
 }
-
 
 #pragma acc routine seq
 static inline void conf_left_exp_multiply(

@@ -19,7 +19,6 @@
 #include "../Meas/measure_topo.h"
 
 
-
 #define ALIGN 128
 global_su3_soa  * conf_rw; // the gauge configuration, only for read-write
 global_vec3_soa  * ferm_rw; // a global fermion, only for read-write
@@ -52,12 +51,8 @@ tamat_soa * ipdot_f_old;// for HMC diagnostics
 su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases 
 // in fermion related computation (with or without stouting)
 
-
-//CONF HASENBUSCH
-
+// replicas for parallel tempering are stored in this array
 su3_soa ** conf_hasenbusch;
-
-
 
 // STOUTING 
 su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth
@@ -149,16 +144,9 @@ void mem_alloc_core(){
 #pragma acc enter data create(conf_acc[0:alloc_info.conf_acc_size])
 
    */
-    //sembra che il comando pragma funzioni cosi:
-    // #pragma acc enter data create(NOME VARIABILE[0:LUNGHEZZA DELLA VARIABILE])
     
-    //MOD////////////////////////////////////////////////
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch, ALIGN,
                                                alloc_info.num_replicas*sizeof(su3_soa*));
-    
-
-    
-    //Allocation of Conf_hasenbusch
     
     int replicas_counter=0;
     for(replicas_counter=0; replicas_counter<alloc_info.num_replicas; replicas_counter++){
@@ -166,23 +154,14 @@ void mem_alloc_core(){
                            alloc_info.conf_acc_size*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, conf_hasenbusch[replicas_counter]);
     }
-
-    
-    
 #pragma acc enter data create(conf_hasenbusch[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
-
-    
-///////////////////////////////////////////////////////////////////
 }
-
 
 void mem_alloc_extended()
 {
     printf("\n\n[EXTENDED] Allocating resources for alloc_info.NPS_tot=%d pseudofermions in total, with alloc_info.maxApproxOrder=%d, alloc_info.maxNeededShifts=%d\n", 
             alloc_info.NPS_tot, alloc_info.maxApproxOrder,alloc_info.maxNeededShifts);
     int allocation_check;  
-
-
 
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&mag_obs_re, ALIGN,
             alloc_info.NDiffFlavs*8*sizeof(double_soa));   
@@ -220,9 +199,6 @@ void mem_alloc_extended()
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa));
     ALLOCCHECK(allocation_check, auxbis_conf_acc ) ;
 #pragma acc enter data create(auxbis_conf_acc[0:8])
-    
-
-    
 
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_acc_bkp, ALIGN, 8*sizeof(su3_soa));
         ALLOCCHECK(allocation_check, conf_acc_bkp) ;
@@ -352,9 +328,6 @@ void mem_free_core()
     FREECHECK(aux1);                
 #pragma acc exit data delete(aux1)                
 
-
-
-
     FREECHECK(u1_back_phases);        
 #pragma acc exit data delete(u1_back_phases)        
 
@@ -362,33 +335,15 @@ void mem_free_core()
     FREECHECK(conf_acc);
 #pragma acc exit data delete(conf_acc)*/
    
-
-    //MOD/////HERE SET conf_hasenbusch FREE.//////////////
-    //conf_hasenbusch deallocation.
        int replicas_counter=0; for(replicas_counter=0;replicas_counter<alloc_info.num_replicas;replicas_counter++){
             FREECHECK(conf_hasenbusch[replicas_counter]);
-       
-
     }
-    
 #pragma acc exit data delete(conf_hasenbusch[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
-    
-
     FREECHECK(conf_hasenbusch);
-    
-
-    
-/*#pragma acc exit data delete(conf_hasenbusch)*/
-    
-
-
 }
-
-
 
 void mem_free_extended()
 {
-
 
     printf("[EXTENDED] Deallocation.\n");
 
@@ -415,9 +370,6 @@ void mem_free_extended()
 #pragma acc exit data delete(aux_conf_acc)          
     FREECHECK(auxbis_conf_acc);       
 #pragma acc exit data delete(auxbis_conf_acc)
-    
-
-
 
     if(alloc_info.stoutAllocations){
         FREECHECK(gstout_conf_acc_arr);   
@@ -431,7 +383,6 @@ void mem_free_extended()
         FREECHECK(aux_th);                
 #pragma acc exit data delete(aux_th)                
     }
-
 
     FREECHECK(conf_acc_bkp);          
 #pragma acc exit data delete(conf_acc_bkp)          
@@ -465,7 +416,5 @@ void mem_free_extended()
 }
 
 #undef FREECHECK
-
-
 
 #endif

@@ -8,19 +8,13 @@
  #define __restrict
 #endif
 
-
-
 double calc_loc_rectangles_2x1_nnptrick( 
         __restrict const su3_soa * const u,__restrict su3_soa * const loc_plaq, 
         dcomplex_soa * const tr_local_plaqs,const int mu,	const int nu);
 
-
-
 double calc_loc_rectangles_2x1_nnptrick(  
         __restrict const su3_soa * const u,__restrict su3_soa * const loc_plaq,
         dcomplex_soa * const tr_local_plaqs,const int mu,const int nu);
-
-
 
 #pragma acc routine seq
 void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(  
@@ -98,13 +92,7 @@ void calc_loc_improved_staples_typeABC_nnptrick_all_d3c(
         __restrict su3_soa * const loc_stap,
         int offset3, int thickness3 );
 
-
-
-
 #endif
-
-
-
 
 double  calc_rettangolo_soloopenacc( 
         __restrict const  su3_soa * const tconf_acc,

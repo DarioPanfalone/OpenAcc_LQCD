@@ -97,32 +97,23 @@ void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
 
 
 void set_su3_soa_to_su3_soa_trasl( __restrict const su3_soa * const matrix_in,
-                            __restrict su3_soa * const matrix_out,int dir)
-{
-    int d0, d1, d2, d3;
-     int idxh,parity,idxmdir, mu;
-    
-    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-		 
-                    idxh = snum_acc(d0,d1,d2,d3);
-		    parity=(d0+d1+d2+d3)%2;
-                    idxmdir=nnm_openacc[idxh][dir][parity];
-                   
-                   /*  printf("%d idxh %d idxdmir  %d mu || parity %d \n",idxh,idxmdir,mu,parity);
-                     printf("%d  dir\n",dir);*/
-                    for(mu=0;mu<4;mu++){
-                     
-		      assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[(2*mu)+1-parity],&matrix_out[(2*mu)+parity],idxmdir,idxh);
-                }//mu for
-            }//d0
-        }//d1//
-    }//d2
-}//d3
-    
-    return;
+                            __restrict su3_soa * const matrix_out,int dir){
+	int d0, d1, d2, d3;
+	int idxh,parity,idxmdir, mu;
+	for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+		for(d2=0; d2<nd2; d2++) {
+			for(d1=0; d1<nd1; d1++) {
+				for(d0=0; d0 < nd0; d0++) {
+					idxh = snum_acc(d0,d1,d2,d3);
+					parity=(d0+d1+d2+d3)%2;
+					idxmdir=nnm_openacc[idxh][dir][parity];         
+					for(mu=0;mu<4;mu++){
+						assign_su3_soa_to_su3_soa_component_trasl(&matrix_in[(2*mu)+1-parity],&matrix_out[(2*mu)+parity],idxmdir,idxh);
+					} // mu
+				} // d0
+			} // d1
+		} // d2
+	} // d3
 }
 
 void set_su3_soa_to_su3_soa_device(__restrict const su3_soa * const matrix_in,
@@ -605,8 +596,3 @@ void mom_exp_times_conf_soloopenacc_d3c(
 #endif
 
 #endif
-
-
-
-
-

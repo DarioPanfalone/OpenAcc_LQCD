@@ -9,29 +9,28 @@
 // 1) all the plaquettes on the plane mu-nu are computed and saved locally
 // 2) finally the reduction of the traces is performed
 double calc_loc_plaquettes_nnptrick(
-        __restrict const su3_soa * const u,//for an unknown reason the vet conf is called u. this is a vector odf su3_soa.
-        __restrict su3_soa * const loc_plaq, //la placchetta locale.
-        dcomplex_soa * const tr_local_plaqs, //complex number that states the value of the trace. Of course is a vector of the struct dcomplex_soa.
+        __restrict const su3_soa * const u,
+        __restrict su3_soa * const loc_plaq, 
+        dcomplex_soa * const tr_local_plaqs,
         const int mu, const int nu)
 {
-    //double K_mu_nu; //MOD.
   int d0, d1, d2, d3;
 
 #pragma acc kernels present(u) present(loc_plaq) present(tr_local_plaqs)
 #pragma acc loop independent gang(STAPGANG3)
-  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {//what?
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
           for(d0=0; d0 < nd0; d0++) {
               
-              int idxh,idxpmu,idxpnu; //idxh is the half-lattice position, idxpmu and idxpnu the nearest neighbours.
-              int parity; //parity
-              int dir_muA,dir_nuB; //mu and nu directions.
+              int idxh,idxpmu,idxpnu;
+              int parity;
+              int dir_muA,dir_nuB;
               int dir_muC,dir_nuD;
 
-	  idxh = snum_acc(d0,d1,d2,d3);  // the site on the  half-lattice.
-	  parity = (d0+d1+d2+d3) % 2; //obviously the parity_term
+	  idxh = snum_acc(d0,d1,d2,d3);
+	  parity = (d0+d1+d2+d3) % 2;
 	  
 	  dir_muA = 2*mu +  parity;
 	  dir_muC = 2*mu + !parity;
@@ -39,7 +38,8 @@ double calc_loc_plaquettes_nnptrick(
 	    
 	  dir_nuB = 2*nu + !parity;
 	  dir_nuD = 2*nu +  parity;
-	  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu //the table that states which is the nearest neighbour.
+	  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+
 	  //       r+nu (C)  r+mu+nu
 	  //          +<---+
 	  // nu       |    ^
@@ -48,8 +48,6 @@ double calc_loc_plaquettes_nnptrick(
 	  // |       r  (A)  r+mu
 	  // +---> mu
 
-      //(&u[dir_muA] & &u[dir_nuB] States which part of the the conf will be used. It is important to pass them as pointer, cause loc_plaq has to be modified.
-              
 	  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&loc_plaq[parity],idxh);   // LOC_PLAQ = A * B
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muC],idxpnu);              // LOC_PLAQ = LOC_PLAQ * C
 	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuD],idxh);                // LOC_PLAQ = LOC_PLAQ * D
@@ -57,19 +55,10 @@ double calc_loc_plaquettes_nnptrick(
 	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
 	  tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
               
-             /* printf("%f +i%f ||",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I);*/
-           //MOD****************************************//
+    //K_mu_nu computation;
+    double K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
               
-              //K_mu_nu computation;
-              double K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
-
-              
-              tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
-          //*****************************************//
-
-              /*printf("%f +i%f : (%d,%d,%d,%d) \n ",creal(tr_local_plaqs[parity].c[idxh]),cimag(tr_local_plaqs[parity].c[idxh])*I,d0,d1,d2,d3);*/
-              /*printf("(%d,%d,%d,%d)\n",d0,d1,d2,d3);*/
-              
+    tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
 	}  // d0
       }  // d1
     }  // d2
@@ -83,25 +72,12 @@ double calc_loc_plaquettes_nnptrick(
 #pragma acc loop reduction(+:res_R_p) reduction(+:res_I_p)
   for(t=(LNH_SIZEH-LOC_SIZEH)/2; t  < (LNH_SIZEH+LOC_SIZEH)/2; t++) {
     res_R_p += creal(tr_local_plaqs[0].c[t]); //even sites plaquettes
-      
     res_R_p += creal(tr_local_plaqs[1].c[t]); //odd sites plaquettes
   }
-
-/*
-  #pragma acc kernels present(tr_local_plaqs)
-   
-    printf("ecco1 %f(%d)  %d %d  \n",creal(tr_local_plaqs[1].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
-    #pragma acc kernels present(tr_local_plaqs)
-
-    printf("ecco2 %f(%d)  %d %d \n",creal(tr_local_plaqs[0].c[snum_acc(31,6,6,6)]),snum_acc(31,6,6,6),mu,nu);
-  */
-  
-    
   return res_R_p;
 }// closes routine
-// routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
 
-//This function doesn't have a mu, nu parameters. It just compute all staples.
+// routine to compute the staples for each site on a given plane mu-nu and sum the result to the local stored staples
 void calc_loc_staples_nnptrick_all(  
         __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_stap )
@@ -118,7 +94,7 @@ void calc_loc_staples_nnptrick_all(
 
 
   int d0, d1, d2, d3, mu, iter;
-  double K_mu;//MOD
+  double K_mu;
 
 #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3)
@@ -129,10 +105,9 @@ void calc_loc_staples_nnptrick_all(
 	for(d0=0; d0 < nd0; d0++) {
 
      #pragma acc loop seq 
-	  for(mu=0; mu<4; mu++){ //for directions.
+	  for(mu=0; mu<4; mu++){
       #pragma acc loop seq
-	    for(iter=0; iter<3; iter++){ //for dell'iter. The iteration along all possible directions.
-            
+	    for(iter=0; iter<3; iter++){
 
 	      int nu;
 	      if (mu==0) { nu = iter + 1; }
@@ -142,13 +117,12 @@ void calc_loc_staples_nnptrick_all(
           else {  printf("NU ERROR!\n");
 	      }
             
-            
-	      const int idxh = snum_acc(d0,d1,d2,d3);  // r  //the site.
+	      const int idxh = snum_acc(d0,d1,d2,d3);  // r
 	      const int parity = (d0+d1+d2+d3) % 2;
 #pragma acc cache (nnp_openacc[idxh:8])
 
 	      const int dir_link = 2*mu + parity;
-	      const int dir_mu_2R = 2*mu + !parity; //obvious these links are on the neighbour, whose parity is different.
+	      const int dir_mu_2R = 2*mu + !parity;
 	      const int dir_mu_2L = 2*mu + !parity;
 	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
@@ -161,16 +135,12 @@ void calc_loc_staples_nnptrick_all(
 	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
 
 	      //computation of the Right part of the staple
-
          
             //The computation is
 	      mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(&u[dir_nu_1R],       idx_pmu,
 										 &u[dir_mu_2R],       idx_pnu,
 										 &u[dir_nu_3R],       idxh,
 										 &loc_stap[dir_link], idxh);
-            
-           
-            
 
 	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
 	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
@@ -182,23 +152,9 @@ void calc_loc_staples_nnptrick_all(
 										 &u[dir_nu_3L],       idx_mnu,
 										 &loc_stap[dir_link], idxh);
             
-            
             //Adding K_mu(x) to the staple.
-            
-            
   
             K_mu=u[dir_link].K.d[idxh];
-         
-            /*
-        
-            if(idxh==snum_acc(31,6,6,6) & parity==1 ){
-
-                printf("%d %d\n",mu,nu);
-                printf("%f\n",K_mu);
-                 printf("END COUNT\n");
-            }
-            
-            */
             
 						// k_{mu nu}(x) * staple_{mu nu}(x)
            	gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
@@ -209,10 +165,6 @@ void calc_loc_staples_nnptrick_all(
       }  // d1
     }  // d2
   }  // d3
- /* #pragma acc kernels present(loc_stap)
-    printf("ecco (31,6,6,6): %f\n",creal(loc_stap[1].r0.c0[snum_acc(31,6,6,6)]));*/
-    
-    
 }// closes routine
 
 #ifdef MULTIDEVICE
@@ -229,7 +181,6 @@ void calc_loc_staples_nnptrick_all_bulk(
   // |       r-nu    r     r+nu
   // +---> nu       
   //            r is idxh in the following      
-
 
   int d0, d1, d2, d3, mu, iter;
 
@@ -277,8 +228,6 @@ void calc_loc_staples_nnptrick_all_bulk(
 										 &u[dir_mu_2R],       idx_pnu,
 										 &u[dir_nu_3R],       idxh,
 										 &loc_stap[dir_link], idxh);
-            
-        
             
 	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
 	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu

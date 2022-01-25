@@ -31,7 +31,6 @@ typedef struct defect_info_t{
 } defect_info;
 
 extern defect_info *def;
-extern defect_info *pef; // just for DEBUG purposes, to be removed
 
 void counter_size_function(int d0,int d1,int d2,int d3);
 int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vec,defect_info * def,int defect_info_config);
@@ -71,6 +70,5 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
                    dcomplex_soa * const tr_local_plaqs,                   
                    defect_info * def, 
 									 int *swap_num,int * all_swap_vet, int * acceptance_vet, rep_info *hpt_params);
-
 
 #endif
