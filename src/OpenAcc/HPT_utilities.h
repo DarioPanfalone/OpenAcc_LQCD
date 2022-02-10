@@ -33,7 +33,7 @@ typedef struct defect_info_t{
 extern defect_info *def;
 
 void counter_size_function(int d0,int d1,int d2,int d3);
-int init_k(su3_soa * conf,double c_r,int def_axis,int * def_vec,defect_info * def,int defect_info_config);
+void init_k(su3_soa * conf,double c_r,int def_axis,int * def_vec,defect_info * def,int defect_info_config);
 void printing_k_mu(su3_soa * conf);
 void trasl_conf( __restrict const su3_soa *  const tconf_acc,
                  __restrict const su3_soa *  const taux_conf);

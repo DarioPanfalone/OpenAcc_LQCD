@@ -92,22 +92,14 @@ int verbosity_lv;
 
 extern int TOPO_GLOBAL_DONT_TOUCH; 
 
-
-
-
-
 int main(int argc, char* argv[]){
-
-  
-    
+ 
   gettimeofday ( &(mc_params.start_time), NULL );
-    
     
   FILE *hmc_acc_file;
   FILE *swap_acc_file;
   FILE *file_label;
-    
-    
+ 
   srand(time(NULL));
     
   //######################################################################################################################################//
@@ -142,10 +134,7 @@ int main(int argc, char* argv[]){
     printf("****************************************************\n");
   }
 
-
   int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]); //here the reading happens.
-    
-  int i3=0;
     
 #ifdef MULTIDEVICE
   if(input_file_read_check){
@@ -167,23 +156,19 @@ int main(int argc, char* argv[]){
   //######################################################################################################################################//
   //######################################################################################################################################//
     
-    
   //######################################################################################################################################//
   //############### INITIALIZATION #########################################################################################################//
   //######################################################################################################################################//
   
-    
   int *all_swap_vector;
   int *acceptance_vector;
   int mu1,mu2;
   double mean_acceptance;
   int *acceptance_vector_old;
     
-    
   all_swap_vector=malloc(sizeof(int)*rep->replicas_total_number-1);
   acceptance_vector=malloc(sizeof(int)*rep->replicas_total_number-1);
   acceptance_vector_old=malloc(sizeof(int)*rep->replicas_total_number-1);
-
     
   for(mu1=0;mu1<rep->replicas_total_number-1;mu1++){
     acceptance_vector[mu1]=0;
@@ -218,14 +203,9 @@ int main(int argc, char* argv[]){
     }
   }
 
-
-
-
   if(verbosity_lv > 2) 
     printf("MPI%02d, Input file read and initialized multidev1D...\n",
 	   devinfo.myrank);
-
-
 
 #ifndef __GNUC__
   //////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
@@ -254,11 +234,7 @@ int main(int argc, char* argv[]){
   strcat(mc_params.RandGenStatusFilename,myrank_string);
 #endif
 
-
-
-
   initrand_fromfile(mc_params.RandGenStatusFilename,myseed_default);
-
 
   // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
   if(init_ferm_params(fermions_parameters)){
@@ -275,11 +251,7 @@ int main(int argc, char* argv[]){
   mem_alloc_core(); // Allocation has been done here.
   mem_alloc_extended(); //extend alloc.
  
-  //************NOW HASENBUSCH CONF EXISTS!!*****************//
-    
-  //////direi che il for per la conf va messo qui./////
-    
-  //eventual single precision allocation
+  // single/double precision allocation
   printf("\n   MPI%02d - Allocazione della memoria (double) : OK \n\n\n",devinfo.myrank);
   if(inverter_tricks.useMixedPrecision || md_parameters.singlePrecMD){
     mem_alloc_core_f();
@@ -291,14 +263,7 @@ int main(int argc, char* argv[]){
     printf("\n  MPI%02d - Allocazione della memoria (float) [EXTENDED]: OK \n\n\n",devinfo.myrank);
   }
    
-    
-  //possible conf for cycle position //
-    
-  //volendo anche dopo la definzione della tavola dei nn, il ciclo, non serve riderfiniral ogni volta.
-  //direi che il for per la conf va messo qui.///// da qui in avanti -->conf_hasenbusch[i].
-    
   printf("\n  MPI%02d - Allocazione della memoria totale: %zu \n\n\n",devinfo.myrank,max_memory_used);
- 
     
   //*****************NEAREST NEIGHBOURS DEFINITION!!******************************//
     
@@ -320,42 +285,19 @@ int main(int argc, char* argv[]){
   initialize_md_global_variables(md_parameters);//md_paramaters init.
   printf("MPI%02d - init md vars : OK \n",devinfo.myrank);
 
-  //anche da qui il ciclo.
-
   //***************** INIZIALIZZAZIONE DELLA CONFIGURAZIONE *************//
   defect_info def;
-  defect_info pef; 
-  //def =(defect_info*) malloc(sizeof(defect_info));
-  /*printf("%d\n",def->def_axis_mapped);
-    def->defect_swap_min=malloc(4*sizeof( int *));
-    for(mu1=1;mu1<4; mu1++){
-    def->defect_swap_min[mu1]=malloc(4*sizeof (int));
-
-    }*/
-  /*    mat_alloc(def->defect_swap_min, 4, 4 );
-	mat_alloc(&def->defect_swap_max, 4, 4 );
-	#ifdef GAUGE_ACT_TLSM
-	mat_alloc(&def->defect_swap_min_TLSM, 4, 4 );
-	mat_alloc(&def->defect_swap_max_TLSM, 4, 4 );
-	#endif
-  */
-  int replicas_counter;
   char rep_str [20];
   char aux_name_file[200];
-  strcpy(aux_name_file,mc_params.save_conf_name); //salva il nome originale della conf in aux_name_file
-  //init for starting
+  strcpy(aux_name_file,mc_params.save_conf_name);
     
-    
-  //for per aprire o creare i file delle configurazioni.
-  for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
-    printf("replicas counter %d\n",replicas_counter);
-    snprintf(rep_str,20,"replica_%d",replicas_counter);//inizializza rep_str
-    strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
-        
-        
-     
+  for(int r=0;r<rep->replicas_total_number;r++){
+    printf("replicas counter %d\n",r);
+    snprintf(rep_str,20,"replica_%d",r);
+		strcat(mc_params.save_conf_name,rep_str);
+ 
     if(debug_settings.do_norandom_test){
-      if(!read_conf_wrapper(conf_hasenbusch[replicas_counter],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
+      if(!read_conf_wrapper(conf_hasenbusch[r],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
 	// READS ALSO THE conf_id_iter
 	printf("MPI%02d - Stored Gauge Conf conf_norndtest Read : OK\n",devinfo.myrank);
       }
@@ -367,71 +309,66 @@ int main(int argc, char* argv[]){
       }
     }
     else{
-      if(!read_conf_wrapper(conf_hasenbusch[replicas_counter],mc_params.save_conf_name,
+      if(!read_conf_wrapper(conf_hasenbusch[r],mc_params.save_conf_name,
 			    &conf_id_iter,debug_settings.use_ildg)){
 	// READS ALSO THE conf_id_iter
 	printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",
 	       devinfo.myrank, mc_params.save_conf_name);
-
       }
       else{
             
-            
-            
-	generate_Conf_cold(conf_hasenbusch[replicas_counter],mc_params.eps_gen);
+	generate_Conf_cold(conf_hasenbusch[r],mc_params.eps_gen);
 	printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
 	       devinfo.myrank);
 	conf_id_iter=0;
       }
     }
-        
-    
     strcpy(mc_params.save_conf_name,aux_name_file);
-        
-        
-  }//for  replicas closing
+  }
     
-  //******************K_mu(x) initialization for each replica ***************//
+  //*****************kk_mu(x) initialization for each replica ***************//
   
   int vec_aux_bound[3]={1,1,1};
 
+	if (0==devinfo.myrank) printf("############## AUX CONF INIT_K ############\n");
   init_k(aux_conf_acc,1,0,vec_aux_bound,&def,1);
   init_k(auxbis_conf_acc,1,0,vec_aux_bound,&def,1);
-   
+	if (0==devinfo.myrank) printf("###########################################\n");
+
 #pragma acc update device(aux_conf_acc[0:8])
 #pragma acc update device(auxbis_conf_acc[0:8])
     
-	if( (verbosity_lv>9) && (0==devinfo.myrank) ){
+	if( (verbosity_lv>2) && (0==devinfo.myrank) ){
 		printf("Boundary conditions coeffs c(r):\n");
-  	for(i3=0;i3<rep->replicas_total_number;i3++)
-    	printf("c(%d) = %.15lg\n", i3, rep->cr_vec[i3]);
+  	for(int i=0;i<rep->replicas_total_number;i++)
+    	printf("c(%d) = %.15lg\n", i, rep->cr_vec[i]);
   }
-    
-  for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
-    rep->label[replicas_counter]=replicas_counter;
-    int init_result=init_k(conf_hasenbusch[replicas_counter],rep->cr_vec[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def,replicas_counter);
+
+  if (0==devinfo.myrank) printf("############## REPLICA INIT_K ############\n"); 
+  for(int r=0;r<rep->replicas_total_number;r++){
+  if (0==devinfo.myrank) printf("############## REPLICA %d INIT_K ############\n",r); 
+    rep->label[r]=r;
+    init_k(conf_hasenbusch[r],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,r);
 #ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge) init_result+=init_k(&conf_hasenbusch[replicas_counter][8],rep->cr_vec[replicas_counter],rep->defect_boundary,rep->defect_coordinates,&def,1);
+    if(devinfo.async_comm_gauge) init_k(&conf_hasenbusch[r][8],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,1);
 #endif
-    if(init_result!=0)
-      {printf("Error in k_mu initialization for replica %d!\n",replicas_counter); return 1;};
-  }
 #pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:alloc_info.conf_acc_size])
-    
+	}
+  if (0==devinfo.myrank) printf("##############################################\n");
   //#################################################################################  
 
 
   double max_unitarity_deviation,avg_unitarity_deviation;
     
-  for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){ //for start
+  for(int r=0;r<rep->replicas_total_number;r++){ //for start
          
-    check_unitarity_host(conf_hasenbusch[replicas_counter],&max_unitarity_deviation,&avg_unitarity_deviation);
+    check_unitarity_host(conf_hasenbusch[r],&max_unitarity_deviation,&avg_unitarity_deviation);
     printf("\tMPI%02d: Avg_unitarity_deviation on host: %e\n", devinfo.myrank, 
 	   avg_unitarity_deviation);
     printf("\tMPI%02d: Max_unitarity_deviation on host: %e\n", devinfo.myrank,
 	   max_unitarity_deviation);
 
-  }// for end
+  }
 
   int swap_number=0;
 
@@ -457,7 +394,6 @@ int main(int argc, char* argv[]){
   accettate_therm_old=malloc(sizeof(int)*rep->replicas_total_number);
   accettate_metro_old=malloc(sizeof(int)*rep->replicas_total_number);
   iterations=malloc(sizeof(int)*rep->replicas_total_number);
-    
     
   //inizialization to 0
   int i;
@@ -489,6 +425,44 @@ int main(int argc, char* argv[]){
   poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
   printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
 	 devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
+
+	//--------------- DEBUG --------------------------//
+
+	printf("SWAP_DEBOIAG_GREPPA_QUI\n");
+	for(int i=0; i<(rep->replicas_total_number-1); i++) {
+	int rep_indx1=i;
+	int rep_indx2=i+1;
+	double delta_S_STUPID=0.0;
+	// ACTION OLD
+	double S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+	double S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+	#ifdef GAUGE_ACT_TLSM
+	S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+	S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+	#endif
+	delta_S_STUPID -= (S_1 + S_2);  
+
+	replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, rep);
+	#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8]) // swap conf
+
+	// ACTION NEW
+	S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+	S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+	#ifdef GAUGE_ACT_TLSM
+	S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+	S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+	#endif
+	delta_S_STUPID += (S_1 + S_2);
+	
+	replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, rep);
+	#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8]) // go back
+
+	double delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums, &def);
+
+	if(0==devinfo.myrank) printf("(%d<->%d) %.15lg %.15lg\n", rep_indx1, rep_indx1+1, delta_S_SWAP, delta_S_STUPID);
+	}
+
+	//--------------- END DEBUG ----------------------//
 
   //Here we are in Jarzynski mode.
     
@@ -537,7 +511,6 @@ int main(int argc, char* argv[]){
   if ( 0 != mc_params.ntraj ) {
     while ( RUN_CONDITION_TERMINATE != mc_params.run_condition)
       {
-
         if(GPSTATUS_UPDATE == mc_params.next_gps){
 	  struct timeval tstart_cycle,tend_cycle;
 	  gettimeofday(&tstart_cycle, NULL);
@@ -599,40 +572,36 @@ int main(int argc, char* argv[]){
 	    printf(  "#################################################\n\n");
 	  }
             
-            
 	  for(mu1=0;mu1<rep->replicas_total_number-1;mu1++){
 	    acceptance_vector_old[mu1]=acceptance_vector[mu1];
 	  }
-        
 
 	  //--------- CONF UPDATE ----------------//
         
-	  for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+	  for(int r=0;r<rep->replicas_total_number;r++){
 	    printf("\n#################################################\n");
-	    printf("REPLICA %d:\n",replicas_counter);
+	    printf("REPLICA %d:\n",r);
 	    printf(  "#################################################\n\n");
                 
             if(id_iter<mc_params.therm_ntraj){
-	      accettate_therm[replicas_counter] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
+	      accettate_therm[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[r],
 										   md_parameters.residue_metro,md_parameters.residue_md,
 										   id_iter-id_iter_offset,
-										   accettate_therm[replicas_counter],0,md_parameters.max_cg_iterations);
+										   accettate_therm[r],0,md_parameters.max_cg_iterations);
             }else{
-	      accettate_metro[replicas_counter] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[replicas_counter],
+	      accettate_metro[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[r],
 										   md_parameters.residue_metro,md_parameters.residue_md,
-										   id_iter-id_iter_offset-accettate_therm[replicas_counter],accettate_metro[replicas_counter],1,
+										   id_iter-id_iter_offset-accettate_therm[r],accettate_metro[r],1,
 										   md_parameters.max_cg_iterations);
 	      if(0==devinfo.myrank){ //multidevice control
-		iterations[replicas_counter] = id_iter-id_iter_offset-accettate_therm[replicas_counter] +1;
-		double acceptance = (double) accettate_metro[replicas_counter] / iterations[replicas_counter];
+		iterations[r] = id_iter-id_iter_offset-accettate_therm[r] +1;
+		double acceptance = (double) accettate_metro[r] / iterations[r];
 		double acc_err = 
-		  sqrt((double)accettate_metro[replicas_counter]*(iterations[replicas_counter]-accettate_metro[replicas_counter])/iterations[replicas_counter])
-		  /iterations[replicas_counter];
-		printf("Estimated acceptance for this run [replica %d]: %f +- %f\n. Iterations: %d",replicas_counter,acceptance,
-		       acc_err, iterations[replicas_counter]);
-                    
+		  sqrt((double)accettate_metro[r]*(iterations[r]-accettate_metro[r])/iterations[r])
+		  /iterations[r];
+		printf("Estimated acceptance for this run [replica %d]: %f +- %f\n. Iterations: %d",r,acceptance,
+		       acc_err, iterations[r]);
 	      }
-               
             }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu
 
@@ -651,7 +620,7 @@ int main(int argc, char* argv[]){
 	  conf_id_iter++;
             
 	  //-----------------------------------------------//
-	  printf("MPI%02d - Printing acc obs - only by master rank...\n",
+	  printf("MPI%02d - Printing acceptances - only by master rank...\n",
 		 devinfo.myrank);
 	  if(devinfo.myrank ==0){
                 
@@ -664,7 +633,6 @@ int main(int argc, char* argv[]){
 	      hmc_acc_file=fopen(acc_info->hmc_file_name,"at");
 	      if(!hmc_acc_file){hmc_acc_file=fopen(acc_info->hmc_file_name,"wt");}
                     
-                    
 	      swap_acc_file=fopen(acc_info->swap_file_name,"at");
 	      if(!swap_acc_file){swap_acc_file=fopen(acc_info->swap_file_name,"wt");}
 	    }
@@ -675,11 +643,10 @@ int main(int argc, char* argv[]){
 	      label_print(rep, file_label, conf_id_iter);
 	    }
             // PRINT ACCEPTANCES
-            
             for(mu1=0;mu1<rep->replicas_total_number;mu1++){
 	      if(mu1<rep->replicas_total_number-1){
                 mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
-                if(0==devinfo.myrank){ printf("replicas'couple [%d/%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,mu1+1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);}
+                if(0==devinfo.myrank){ printf("replica couple [%d/%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,mu1+1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);}
 		if(rep->replicas_total_number>1){
 		  fprintf(swap_acc_file,"%d\t",acceptance_vector[mu1]-acceptance_vector_old[mu1]);}
 	      }
@@ -837,15 +804,15 @@ int main(int argc, char* argv[]){
 	  }
   
 	  if(conf_id_iter%mc_params.saveconfinterval==0){
-	    for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+	    for(int r=0;r<rep->replicas_total_number;r++){
                 
-	      snprintf(rep_str,20,"replica_%d",replicas_counter);
+	      snprintf(rep_str,20,"replica_%d",r);
 	      strcat(mc_params.save_conf_name,rep_str);
                 
 	      if (debug_settings.SaveAllAtEnd){
 		printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
 		       mc_params.save_conf_name);
-		save_conf_wrapper(conf_hasenbusch[replicas_counter],mc_params.save_conf_name, conf_id_iter,
+		save_conf_wrapper(conf_hasenbusch[r],mc_params.save_conf_name, conf_id_iter,
 				  debug_settings.use_ildg);
 		printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
 		       mc_params.RandGenStatusFilename);
@@ -1066,15 +1033,15 @@ int main(int argc, char* argv[]){
   //*****************SAVING CONFS****************//
 
   //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
-  for(replicas_counter=0;replicas_counter<rep->replicas_total_number;replicas_counter++){
+  for(int r=0;r<rep->replicas_total_number;r++){
       
-    snprintf(rep_str,20,"replica_%d",replicas_counter);//inizializza rep_str
+    snprintf(rep_str,20,"replica_%d",r);//inizializza rep_str
     strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
         
     if (debug_settings.SaveAllAtEnd){
       printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
 	     mc_params.save_conf_name);
-      save_conf_wrapper(conf_hasenbusch[replicas_counter],mc_params.save_conf_name, conf_id_iter,
+      save_conf_wrapper(conf_hasenbusch[r],mc_params.save_conf_name, conf_id_iter,
 			debug_settings.use_ildg);
       printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
 	     mc_params.RandGenStatusFilename);

@@ -60,7 +60,6 @@ double calc_loc_rectangles_2x1_nnptrick(
                     mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
                     tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
                     
-                    
                     //K_mu_nu computation;
                     double K_mu_nu;
                     K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);

@@ -167,7 +167,6 @@ void conf_times_staples_ta_part(
 	  for(mu=0;mu<4;mu++){ 
 	    dir_link = 2*mu + parity;
 	    mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh);
-
 	  }
 
 	}  // d0

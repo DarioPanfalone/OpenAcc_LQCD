@@ -23,9 +23,12 @@
 #include "../Rand/random.h"
 #include "../Include/rep_info.h"
 
+// just for debugging purposes -> to be removed
+#include "./su3_measurements.h"
+
 #include <time.h>
 
-int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info * def,int defect_info_config){
+void init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info * def,int defect_info_config){
   
   int mu, i, parity, condition, condition_2=1, condition_3=1;
   int def_vec_4d[4] = {0};
@@ -92,9 +95,9 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info 
   int count=0;
   
   int d[4], idxh, x, y, z, t;
-  for(d[3]=0; d[3]<nd3; d[3]++)
-    for(d[2]=0; d[2]<nd2; d[2]++)
-      for(d[1]=0; d[1]<nd1; d[1]++)
+	for(d[3]=0; d[3]<nd3; d[3]++)
+	for(d[2]=0; d[2]<nd2; d[2]++)
+	for(d[1]=0; d[1]<nd1; d[1]++)
 	for(d[0]=0; d[0]<nd0; d[0]++){
 	  
 	  idxh = snum_acc(d[0],d[1],d[2],d[3]);
@@ -105,8 +108,8 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info 
 	  t = d[geom_par.tmap];
 
 #ifdef MULTIDEVICE
-	  x+= devinfo.origin_0123[geom_par.xmap]       // x is now physical x-coordinate for every MPI Rank
-	    - devinfo.halo_widths0123[geom_par.xmap];
+	  x+= devinfo.origin_0123[geom_par.xmap]
+	    - devinfo.halo_widths0123[geom_par.xmap]; // x is now physical x-coordinate for every MPI Rank, same for y,z and t
 	  y+= devinfo.origin_0123[geom_par.ymap]
 	    - devinfo.halo_widths0123[geom_par.ymap];
 	  z+= devinfo.origin_0123[geom_par.zmap]
@@ -120,61 +123,59 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info 
 	  if(t>tnt-1)  t-= tnt ; if(t<0)  t+= tnt ;
 #endif                  
 
-	  //int parity_fis = (x+y+z+t)%2;
-	  int parity_log=(d[0]+d[1]+d[2]+d[3])%2;
+	  //int parity_fis = (x+y+z+t)%2; // physical parity - NOT USED
+	  int parity_log=(d[0]+d[1]+d[2]+d[3])%2; // logic parity -> USED
 	  parity = parity_log;
 
 	  // start with K=1 for every link
-	  for(mu=0;mu<4;mu++) { conf[2*mu+parity].K.d[idxh] = 1; }
+	  for(mu=0;mu<4;mu++) { conf[2*mu+parity].K.d[idxh] = 1.0; }
 
 	  // check if (x,y,z,t) is on defect
 	  condition = (x >= x_mind) && (y >= y_mind) && (z >= z_mind) && (t >= t_mind) && (x < x_maxd) && (y < y_maxd) && (z < z_maxd) && (t < t_maxd);
 
 #ifdef MULTIDEVICE
-	  // check if site is on the right halo (must use logic coords)
+	  // check if site is NOT on the right halo (must use logic coords to this end)
 	  condition_2 = ( d[0]<=nd[0]-devinfo.halo_widths0123[0] && d[1]<=nd[1]-devinfo.halo_widths0123[1]
-			  && d[2]<=nd[2]-devinfo.halo_widths0123[2] && d[3]<=nd[3]-devinfo.halo_widths0123[3]);
+										&& d[2]<=nd[2]-devinfo.halo_widths0123[2] && d[3]<=nd[3]-devinfo.halo_widths0123[3]);
+		// check if site is NOT on the left halo (must use logic coords to this end)
+		condition_3 = ( d[0]>=devinfo.halo_widths0123[0] && d[1]>=devinfo.halo_widths0123[1]
+										&& d[2]>=devinfo.halo_widths0123[2] && d[3]>=devinfo.halo_widths0123[3] );
 #endif
 
 	  if(condition){
-	    if(defect_info_config==0){
-	      for(int nu=0; nu<4;nu++){
-		for (i=0; i<4; i++){
-#ifdef MULTIDEVICE
-		  // check if i-th coord of the site is on the left halo (must use logic coords)
-		  condition_3=(d[i]>=devinfo.halo_widths0123[i]);
-#endif
-		  // find logic min coord of the defect along dir i only if site is not on halos
-		  if ( d[i] < def->defect_swap_min[nu][i] && condition_3 && condition_2 ){
-		    def->defect_swap_min[nu][i] = d[i];
-#ifdef GAUGE_ACT_TLSM
-		    for(int j=0;j<2;j++){
-		      def->defect_swap_min_TLSM[j][nu][i] = d[i];
-		    }
-#endif
-		    count ++; // count sites where delta_S_SWAP =/= 0
-		  }
-		  // find logic max coord of the defect along dir i only if site is not on halos
-		  if ( d[i] > def->defect_swap_max[nu][i] && condition_3 && condition_2 ){
-		    def->defect_swap_max[nu][i] = d[i];
-#ifdef GAUGE_ACT_TLSM
-		    for(int j=0;j<2;j++){
-		      def->defect_swap_max_TLSM[j][nu][i] = d[i];
-		    }	
-#endif
-		    count ++;
-		  }
-		} 
-	      }
-	    }
-	    conf[2*def_axis_mapped+parity].K.d[idxh] = c_r;
-	    if(verbosity_lv>8)
-	      printf("%d %d %d %d || %d %d %d %d\n",d[0],d[1],d[2],d[3],x,y,z,t);
+
+		// find min and max coordinates of sites beloning to the defect and not belonging to the halos
+			if(defect_info_config==0){
+				for(int nu=0; nu<4;nu++){
+					for (i=0; i<4; i++){
+						// find logic min coord of the defect along dir i only if site is not on halos
+						if ( d[i] < def->defect_swap_min[nu][i] && condition_3 && condition_2 ){
+							def->defect_swap_min[nu][i] = d[i];
+							#ifdef GAUGE_ACT_TLSM
+							for(int j=0;j<2;j++) def->defect_swap_min_TLSM[j][nu][i] = d[i];
+							#endif
+		  			}
+						// find logic max coord of the defect along dir i only if site is not on halos
+						if ( d[i] > def->defect_swap_max[nu][i] && condition_3 && condition_2 ){
+							def->defect_swap_max[nu][i] = d[i];
+							#ifdef GAUGE_ACT_TLSM
+							for(int j=0;j<2;j++) def->defect_swap_max_TLSM[j][nu][i] = d[i];
+							#endif
+						}
+				}
+			}
+		}
+			if (condition_3 && condition_2) count++; // count number of sites belonging to the defect and not the halos sitting on the current MPI Rank
+	    conf[2*def_axis_mapped+parity].K.d[idxh] = c_r; // give the right value of c(r) also to links living on the halos (if the live on the defect)
+	    if(verbosity_lv>1)
+	      printf("This site lives on the defect || logic: %d %d %d %d || cart: %d %d %d %d || c(r)=%lf\n",d[0],d[1],d[2],d[3],x,y,z,t,c_r);
 	  }
 	} // close loop on lattice sites
 
+	printf("MPI%02d: num of defect sites on the bulk = %d\n", devinfo.myrank, count);
+
   if(defect_info_config==0){
-    if(count==0){ // if no site belong the defect for this MPI Rank ==> min=max=0
+    if(count==0){ // if no site (halos excluded) belong the defect for this MPI Rank ==> min=max=0
       for(int nu=0; nu<4;nu++){
 	for (i=0; i<4; i++){
 	  def->defect_swap_min[nu][i] = 0;
@@ -193,7 +194,7 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info 
       // adjust max extremes to correctly express the for loop guard  
       for(int nu=0; nu<4;nu++){
 	for (i=0; i<4; i++){
-	  def->defect_swap_max[nu][i] += 1; // max must enter in the guard of a for loop as for(i=min; i< (max+1) ; i++) in order to have i going from min to max
+	  def->defect_swap_max[nu][i] += 1; // max must enter in the guard of a for loop as for(i=min; i<(max+1); i++) in order to have i going from min to max
 #ifdef GAUGE_ACT_TLSM
 	  for(int j=0;j<2;j++){
 	    def->defect_swap_max_TLSM[j][nu][i] += 1; // same as above
@@ -298,9 +299,9 @@ int init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info 
       	printf("\n");
       }
 #endif
-    } // close if (if(verbosity_lv > 8)
-  } // close if (defect_info_config==0)
-} // routine end
+    } // close if(verbosity_lv > 8)
+  } // close if(defect_info_config==0)
+}
 
 void printing_k_mu(su3_soa * conf){
   int mu,t,z,j,i;
@@ -729,44 +730,67 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
                __restrict su3_soa * const loc_plaq,
                dcomplex_soa * const tr_local_plaqs,
 	       int rep_indx1, int rep_indx2,defect_info * def, rep_info * hpt_params)
-{    
+{
+	// DEBUG
+	#pragma acc update self(conf_hasenbusch[0:hpt_params->replicas_total_number][0:8]) // update cpu
+        printf("replicas_total_number: %d\n", hpt_params->replicas_total_number);
+	double delta_S_STUPID=0.0;
+	// ACTION OLD
+	double S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+	if(0==devinfo.myrank) printf("rep_indx1: %d; S_1 = %.15lg\n", rep_indx1, S_1);
+	double S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+	if(0==devinfo.myrank) printf("rep_indx2: %d; replicas_total_number: %d; S_2 = %.15lg\n", rep_indx2, hpt_params->replicas_total_number, S_2);
+	#ifdef GAUGE_ACT_TLSM
+	S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+	S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+	#endif
+	delta_S_STUPID -= (S_1 + S_2);  
+	if(0==devinfo.myrank) printf("delta_S_Stupid parziale = %.15lg\n", delta_S_STUPID);
+
+	replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params); // swap K_1 <-> K_2
+	#pragma acc update device(conf_hasenbusch[0:hpt_params->replicas_total_number][0:8]) // after swap update gpu
+	
+	// ACTION NEW
+	S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+	if(0==devinfo.myrank) printf("rep_indx1: %d; S_1 = %.15lg\n", rep_indx1, S_1);
+	S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+	if(0==devinfo.myrank) printf("rep_indx2: %d; replicas_total_number: %d; S_2 = %.15lg\n", rep_indx2, hpt_params->replicas_total_number, S_2);
+	#ifdef GAUGE_ACT_TLSM
+	S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+	S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+	#endif
+	delta_S_STUPID += (S_1 + S_2);
+	if(0==devinfo.myrank) printf("delta_S_Stupid finale = %.15lg\n", delta_S_STUPID);
+	
+	replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params); // go back
+	#pragma acc update device(conf_hasenbusch[0:hpt_params->replicas_total_number][0:8]) // update gpu
+// END DEBUG
+    
   double p1,p2;
   double Delta_S_SWAP;
-  int accettata=0;
+  int accettata = 0;
   Delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,def);
-  if(verbosity_lv>8)
-    printf("DELTA_SWAP:%f\n",Delta_S_SWAP);
-  if(Delta_S_SWAP<0){
+  if(verbosity_lv>8 && 0==devinfo.myrank) printf("DELTA_S_SWAP(r1=%d,r2=%d):%.15lg\n",rep_indx1, rep_indx2, Delta_S_SWAP);
+  if(Delta_S_SWAP < 0) { // delta_S < 0 ==> exp(-Delta_S) > 1
     accettata=1;
-    if(verbosity_lv>8)
-      printf(" p1 p2 :%f %f\n",p1,p2);
+    if(verbosity_lv>8 && 0==devinfo.myrank) printf("DELTA_S_SWAP < 0 => swap accepted");
   }
-  else
-    {  p1=exp(-Delta_S_SWAP);
-      if(debug_settings.do_norandom_test) p2=0; // NORANDOM
-      else{   // NORMAL, RANDOM
-	if(0==devinfo.myrank) { p2=casuale(); }
-#ifdef MULTIDEVICE
-	MPI_Bcast((void*) &p2,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-	if(verbosity_lv>8)
-	  printf("MPI%02d p2 : %f, p1 %f \n",devinfo.myrank, p2,p1);
-#endif       
-      }
-      if(p2<p1)
-        {
-	  accettata=1;
-        }
-      else
-        {
-	  accettata=0;
-	  // configuration reject
-        }
-      if(verbosity_lv>8)
-	printf(" p1 p2 :%f %f\n",p1,p2);
-    }
-  if (accettata==1){
-    replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params);
-  }
+  else {
+		p1=exp(-Delta_S_SWAP);
+		if(debug_settings.do_norandom_test) p2=0.0; // NORANDOM
+		else {   // NORMAL, RANDOM
+			if(0==devinfo.myrank) p2=casuale();
+			#ifdef MULTIDEVICE
+				MPI_Bcast((void*) &p2,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
+			#endif
+		}
+		if(verbosity_lv>8 && 0==devinfo.myrank) printf("p_metro = %.15lg, p_extracted= %.15lg\n", p1, p2);
+		if (p2<p1) accettata=1;
+	}
+  if (accettata==1) replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params);
+
+	// DEBUG AO
+	if(0==devinfo.myrank) printf("(%d<->%d) %.15lg %.15lg %d\n", rep_indx1, rep_indx2, delta_S_STUPID, Delta_S_SWAP, accettata);
   return accettata;
 }
 
@@ -785,37 +809,36 @@ void All_Conf_SWAP( su3_soa ** conf_hasenbusch,
 
 #ifdef MULTIDEVICE
   MPI_Bcast((void*) &swap_order,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-  if(verbosity_lv>8)
-    printf("MPI%02d swap_order : %f \n",devinfo.myrank,swap_order);
 #endif
 
   int accettata=0;
   int i_counter, j_counter;
    
   if(swap_order<=0.5){
-        
+		// proposed swaps order: 0 <-> 1, 1 <-> 2, ..., N_r-2 <-> N_r-1
     for(i_counter=0;i_counter<replicas_number-1;i_counter++){
-      if(verbosity_lv>4) { printf("proposing swap %d %d\n",i_counter,i_counter+1); }
-            
-      accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, i_counter, i_counter+1, def, hpt_params);
-#pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
+      if(verbosity_lv>4 && 0==devinfo.myrank) printf("proposing swap %d %d\n",i_counter,i_counter+1);      
+      accettata=metro_SWAP(conf_hasenbusch, loc_plaq, tr_local_plaqs, i_counter, i_counter+1, def, hpt_params);
+			#pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
       *swap_num=*swap_num+1;
       all_swap_vet[i_counter]++;
-            
-      if (accettata==1){ acceptance_vet[i_counter]++; }
+      if (accettata==1) acceptance_vet[i_counter]++;
     }
+		// DEBUG AO
+		if (0==devinfo.myrank) printf(" TEST_SWAP_DEBUG ASCENDENTE (0->N_r-1)\n");
   }
   else{
+		// proposed swaps order: N_r-1 <-> N_r-2, ..., 2 <-> 1, 1 <-> 0 
     for(i_counter=0;i_counter<replicas_number-1;i_counter++){
-        
+      if(verbosity_lv>4 && 0==devinfo.myrank) printf("proposing swap %d %d\n",i_counter,i_counter+1);      
       accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2, def, hpt_params);
-#pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
-            
+			#pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])      
       *swap_num=*swap_num+1;
       all_swap_vet[replicas_number-i_counter-2]++;
-            
-      if(accettata==1) { acceptance_vet[replicas_number-i_counter-2]++; }
+      if(accettata==1) acceptance_vet[replicas_number-i_counter-2]++;
     }
+		// DEBUG AO
+		if (0==devinfo.myrank) printf(" TEST_SWAP_DEBUG DISCENDENTE (N_r-1->0)\n");
   }
 }
     
