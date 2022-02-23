@@ -46,20 +46,16 @@ action_param act_params; //parametri dell'azione action.h
 
 
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
-        double res_metro, double res_md, int id_iter,int acc,int metro, int max_cg){
+        double res_metro, double res_md, int id_iter,int acc,int metro, int max_cg){    
 
-    
-    
-#ifdef STOUT_FERMIONS //Per adesso va bene così, ma dopo aggiungerà la topossibilità       
-    su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
-    su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_arr_f;
-#endif
-#ifdef NORANDOM
-    printf("MIP%02d: WELCOME! NORANDOM MODE. (UPDATE_SOLOACC_UNOSTEP_VERSATILE())\n",
+	#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO) 
+	su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
+	su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_arr_f;
+	#endif
+	#ifdef NORANDOM
+		printf("MIP%02d: WELCOME! NORANDOM MODE. (UPDATE_SOLOACC_UNOSTEP_VERSATILE())\n",
             devinfo.myrank);
 #endif
-
-
 
     printf("MPI%02d: UPDATE_SOLOACC_UNOSTEP_VERSATILE_TLSM_STDFERM: starting... \n",
             devinfo.myrank);
@@ -372,8 +368,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         if(verbosity_lv > 1) printf("MPI%02d: SINGLE -> DOUBLE PRECISION conversion done.\n",devinfo.myrank );
 
     } 
-    else{
-
+    else{ // DOUBLE PRECISION MD STARTS HERE
         printf("DOUBLE PRECISION MOLECULAR DYNAMICS...\n");
 
         multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
@@ -397,8 +392,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     double mdtime = (double)(md_end.tv_sec - md_start.tv_sec) + 
         ((double)(md_end.tv_usec - md_start.tv_usec)/1.0e6);
-
-
 
     if(devinfo.myrank == 0){
 
@@ -446,10 +439,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         mem_free_core();
         mem_free_extended();
         exit(0);
-
     }
-
-
 
     if(verbosity_lv > 1) printf("MPI%02d - MOLECULAR DYNAMICS COMPLETED \n", 
             devinfo.myrank);

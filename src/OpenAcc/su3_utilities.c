@@ -584,14 +584,92 @@ void mom_exp_times_conf_soloopenacc_d3c(
 	    //conf_left_exp_multiply(&conf_old[dir_link],idxh,&expo,&aux,&mom_aux);
 	    //project_on_su3(&conf_new[dir_link],idxh,&mom_aux);
 	  }
-	  
         }  // d0
       }  // d1
     }  // d2
   }  // d3
-
 }
 
 #endif
+
+// each staple must be multiplied for k_mu(x), the coefficient associated to the U_mu(x) link
+// this function is to be called after the full computation of the staple and before the computation of ipdot_gauge
+void add_defect_coeffs_to_staple(
+								__restrict const su3_soa * const u,
+								__restrict su3_soa * const loc_stap)
+{
+	#pragma acc kernels present(u) present(loc_stap)
+	#pragma acc loop independent gang(STAPGANG3)
+	for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+		#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+		for(int d2=0; d2<nd2; d2++) {
+			for(int d1=0; d1<nd1; d1++) {
+				for(int d0=0; d0<nd0; d0++) {   
+					int idxh = snum_acc(d0,d1,d2,d3);
+					int parity = (d0+d1+d2+d3) % 2;
+					#pragma acc loop seq
+					for(int mu=0; mu<4; mu++) {
+						const int dir_link = 2*mu + parity;
+						double K_mu = u[dir_link].K.d[idxh];
+						gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
+					}
+				}
+			}
+		}
+	}
+}
+
+// same as <add_defect_coeffs_to_staple> but only for links living on the bulk
+void add_defect_coeffs_to_staple_bulk( 
+				__restrict const su3_soa * const u,
+				__restrict su3_soa * const loc_stap)
+{
+	#pragma acc kernels present(u) present(loc_stap)
+	#pragma acc loop independent gang(STAPGANG3)
+	for(int d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++) {
+		#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+		for(int d2=0; d2<nd2; d2++) {
+			for(int d1=0; d1<nd1; d1++) {
+				for(int d0=0; d0<nd0; d0++) {   
+					int idxh = snum_acc(d0,d1,d2,d3);
+					int parity = (d0+d1+d2+d3) % 2;
+					#pragma acc loop seq
+					for(int mu=0; mu<4; mu++) {
+						const int dir_link = 2*mu + parity;
+						double K_mu = u[dir_link].K.d[idxh];
+						gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
+					}
+				}
+			}
+		}
+	}
+}
+
+// same as <add_defect_coeffs_to_staple> but only for links living on the borders
+void add_defect_coeffs_to_staple_d3c(
+				__restrict const su3_soa * const u,
+				__restrict su3_soa * const loc_stap,
+				int offset, int thickness)
+{
+	#pragma acc kernels present(u) present(loc_stap)
+	#pragma acc loop independent gang(STAPGANG3)
+	for(int d3=offset; d3<offset+thickness; d3++) {
+		#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+		for(int d2=0; d2<nd2; d2++) {
+			for(int d1=0; d1<nd1; d1++) {
+				for(int d0=0; d0<nd0; d0++) {   
+					int idxh = snum_acc(d0,d1,d2,d3);
+					int parity = (d0+d1+d2+d3) % 2;
+					#pragma acc loop seq
+					for(int mu=0; mu<4; mu++) {
+						const int dir_link = 2*mu + parity;
+						double K_mu = u[dir_link].K.d[idxh];
+						gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);
+					}
+				}
+			}
+		}
+	}
+}
 
 #endif

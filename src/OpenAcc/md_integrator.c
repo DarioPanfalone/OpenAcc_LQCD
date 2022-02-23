@@ -141,9 +141,6 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
     if(verbosity_lv > 2 && 0 == devinfo.myrank) printf("\tMPI%02d - End of async bloc, index %d\n",
                 devinfo.myrank, omelyan_index);
 
-
-
-
     // DIAGNOSTICS - PERFORMANCE MEASUREMENTS
     int di;
     for(di = 0 ; di<7; di++)
@@ -163,8 +160,6 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
     gauge_mdtimes.communicationsTime       += dtcom;
     gauge_mdtimes.count++ ;
 
-
-
     if(verbosity_lv > 2 && 0 == devinfo.myrank){
         printf("\t|          Function              \t|Border\t|Bulk\t|\n");
         printf("\t| Calc ipdot                     \t|%e|%e|\n",dt[0],dt[4] );
@@ -172,16 +167,13 @@ void multistep_2MN_gauge_async_bloc(su3_soa *tconf_acc_old, su3_soa *tconf_acc_n
         printf("\t| mom_exp_times_conf_soloopenacc \t|%e|%e|\n",dt[2],dt[6] );
         printf("\t| Communications starting        \t|%e|\n",dt[3] );
         printf("\t| Communications total           \t|%e|\n",dtcom );
-
     }
-
 }
 #endif 
 
+void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta){
 
-void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
-{
-    if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_GAUGE_ASYNC\n");
+	if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF MULTISTEP_2MN_GAUGE_ASYNC\n");
 
 #if defined(USE_MPI_CUDA_AWARE) || defined(__GNUC__)
     int md;
@@ -225,8 +217,6 @@ void multistep_2MN_gauge_async(su3_soa *tconf_acc,su3_soa *local_staples,tamat_s
     MPI_Finalize();
     exit(1);
 #endif 
-
-
 }
 #endif
 
@@ -283,8 +273,6 @@ void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
     gettimeofday ( &t[4], NULL );
     if(verbosity_lv > 3) printf("\tMPI%02d - End of bloc, index %d\n",
                 devinfo.myrank, omelyan_index);
-
-    
     
     // DIAGNOSTICS - PERFORMANCE MEASUREMENTS
     int di;
@@ -307,9 +295,7 @@ void multistep_2MN_gauge_bloc(su3_soa *tconf_acc,
         printf("\t| Mom sum mult                   \t|%e|\n",dt[1] );
         printf("\t| mom_exp_times_conf_soloopenacc \t|%e|\n",dt[2] );
         printf("\t| Communications total           \t|%e|\n",dtcom );
-
     }
-
 }
 
 void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *tipdot,thmat_soa *tmomenta)
@@ -467,7 +453,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 */
 
 
-void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
+void multistep_2MN_SOLOOPENACC(tamat_soa * tipdot_acc,
         su3_soa  * tconf_acc,
 #if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
         su3_soa  * tstout_conf_acc_arr, // huge parking for stouting
@@ -524,7 +510,6 @@ void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
 	
 	if(verbosity_lv > 4) printf("MPI%02d - Calculated first topological force\n", 
 				    devinfo.myrank);
-	
       }
 
     mom_sum_mult(tmomenta,tipdot_acc,deltas_Omelyan,0);

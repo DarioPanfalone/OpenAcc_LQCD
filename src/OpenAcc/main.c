@@ -2,8 +2,6 @@
 #define PRINT_DETAILS_INSIDE_UPDATE
 #define ALIGN 128
 
-
-
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
 #define __restrict
@@ -18,9 +16,8 @@
 #endif
 
 //######################################################################################################################################//
-//############### INCLUTIONS #########################################################################################################//
+//############### INCLUDES #############################################################################################################//
 //######################################################################################################################################//
-
 
 #include "../DbgTools/dbgtools.h" // DEBUG
 #include "../Include/debug.h"
@@ -83,7 +80,6 @@
 // https://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 #define xstr(s) str(s) 
 #define str(s) #s
-
 
 //definitions outside the main.
 
@@ -267,8 +263,8 @@ int main(int argc, char* argv[]){
     
   //*****************NEAREST NEIGHBOURS DEFINITION!!******************************//
     
-  compute_nnp_and_nnm_openacc(); //nn def. Here 2 matrices nn(p/m)_openacc[sizeh][4][2] are used to contain nn information. The first index refers to the half-lattice site, the second to the direction, the last to the parity(even or odd half-lattice.).
-#pragma acc enter data copyin(nnp_openacc) //copied on GPU/CPU.
+  compute_nnp_and_nnm_openacc();
+#pragma acc enter data copyin(nnp_openacc)
 #pragma acc enter data copyin(nnm_openacc)
   printf("MPI%02d - nn computation : OK \n",devinfo.myrank);
   init_all_u1_phases(backfield_parameters,fermions_parameters);
@@ -326,7 +322,7 @@ int main(int argc, char* argv[]){
     strcpy(mc_params.save_conf_name,aux_name_file);
   }
     
-  //*****************kk_mu(x) initialization for each replica ***************//
+  //***************** K_mu(x) initialization for each replica ***************//
   
   int vec_aux_bound[3]={1,1,1};
 
@@ -357,17 +353,14 @@ int main(int argc, char* argv[]){
   if (0==devinfo.myrank) printf("##############################################\n");
   //#################################################################################  
 
-
   double max_unitarity_deviation,avg_unitarity_deviation;
     
-  for(int r=0;r<rep->replicas_total_number;r++){ //for start
-         
+  for(int r=0;r<rep->replicas_total_number;r++){
     check_unitarity_host(conf_hasenbusch[r],&max_unitarity_deviation,&avg_unitarity_deviation);
     printf("\tMPI%02d: Avg_unitarity_deviation on host: %e\n", devinfo.myrank, 
 	   avg_unitarity_deviation);
     printf("\tMPI%02d: Max_unitarity_deviation on host: %e\n", devinfo.myrank,
 	   max_unitarity_deviation);
-
   }
 
   int swap_number=0;
@@ -426,41 +419,47 @@ int main(int argc, char* argv[]){
   printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
 	 devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
 
-	//--------------- DEBUG --------------------------//
+	//--------------- DEBUG SWAP --------------------------//
 
-	printf("SWAP_DEBOIAG_GREPPA_QUI\n");
+	/*printf("SWAP_DEBOIAG_GREPPA_QUI\n");
 	for(int i=0; i<(rep->replicas_total_number-1); i++) {
-	int rep_indx1=i;
-	int rep_indx2=i+1;
-	double delta_S_STUPID=0.0;
-	// ACTION OLD
-	double S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-	double S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
-	#ifdef GAUGE_ACT_TLSM
-	S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-	S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
-	#endif
-	delta_S_STUPID -= (S_1 + S_2);  
-
-	replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, rep);
-	#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8]) // swap conf
-
-	// ACTION NEW
-	S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-	S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
-	#ifdef GAUGE_ACT_TLSM
-	S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-	S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
-	#endif
-	delta_S_STUPID += (S_1 + S_2);
-	
-	replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, rep);
-	#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8]) // go back
-
-	double delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums, &def);
-
-	if(0==devinfo.myrank) printf("(%d<->%d) %.15lg %.15lg\n", rep_indx1, rep_indx1+1, delta_S_SWAP, delta_S_STUPID);
+		int rep_indx1=i;
+		int rep_indx2=i+1;
+		double delta_S_STUPID=0.0;
+		// ACTION OLD
+		double S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+		double S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+		#ifdef GAUGE_ACT_TLSM
+		S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+		S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+		#endif
+		delta_S_STUPID -= (S_1 + S_2);  
+		// swap conf
+		replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, rep);
+		#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+		// ACTION NEW
+		S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+		S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+		#ifdef GAUGE_ACT_TLSM
+		S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
+		S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+		#endif
+		delta_S_STUPID += (S_1 + S_2);
+		// go back
+		replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, rep);
+		#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+		// compute delta_S_SWAP smart
+		double delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums, &def);
+		// compare
+		if(0==devinfo.myrank) printf("(%d<->%d) %.15lg %.15lg\n", rep_indx1, rep_indx1+1, delta_S_SWAP, delta_S_STUPID);
 	}
+	// shut down program
+	mem_free_core();
+	mem_free_extended();
+	#ifdef MULTIDEVICE
+	shutdown_multidev();
+	#endif
+	exit(1);*/
 
 	//--------------- END DEBUG ----------------------//
 
@@ -576,34 +575,55 @@ int main(int argc, char* argv[]){
 	    acceptance_vector_old[mu1]=acceptance_vector[mu1];
 	  }
 
-	  //--------- CONF UPDATE ----------------//
+	  //--------- REPLICAS UPDATE - HPT STEP ----------------//
         
 	  for(int r=0;r<rep->replicas_total_number;r++){
 	    printf("\n#################################################\n");
 	    printf("REPLICA %d:\n",r);
-	    printf(  "#################################################\n\n");
-                
-            if(id_iter<mc_params.therm_ntraj){
-	      accettate_therm[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[r],
+	    printf("#################################################\n\n");
+
+			//######### ACTION BEFORE #########################################
+			
+			if (verbosity_lv>10){
+				double action;
+				action  = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[r], aux_conf_acc, local_sums);
+				#ifdef GAUGE_ACT_TLSM
+				action += - C_ONE  * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[r], aux_conf_acc, local_sums);
+				#endif
+				printf("ACTION BEFORE HMC STEP REPLICA %d: %.15lg\n", r, action);
+			}
+
+			//########### HMC STEP #############################################
+			if(id_iter<mc_params.therm_ntraj){
+				accettate_therm[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[r],
 										   md_parameters.residue_metro,md_parameters.residue_md,
 										   id_iter-id_iter_offset,
 										   accettate_therm[r],0,md_parameters.max_cg_iterations);
-            }else{
-	      accettate_metro[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[r],
+			}
+			else{
+				accettate_metro[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[r],
 										   md_parameters.residue_metro,md_parameters.residue_md,
-										   id_iter-id_iter_offset-accettate_therm[r],accettate_metro[r],1,
-										   md_parameters.max_cg_iterations);
-	      if(0==devinfo.myrank){ //multidevice control
-		iterations[r] = id_iter-id_iter_offset-accettate_therm[r] +1;
-		double acceptance = (double) accettate_metro[r] / iterations[r];
-		double acc_err = 
-		  sqrt((double)accettate_metro[r]*(iterations[r]-accettate_metro[r])/iterations[r])
-		  /iterations[r];
-		printf("Estimated acceptance for this run [replica %d]: %f +- %f\n. Iterations: %d",r,acceptance,
-		       acc_err, iterations[r]);
-	      }
-            }
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) //updating conf sulla cpu
+										   id_iter-id_iter_offset-accettate_therm[r],
+												accettate_metro[r],1,md_parameters.max_cg_iterations);
+				if(0==devinfo.myrank){
+					iterations[r] = id_iter-id_iter_offset-accettate_therm[r]+1;
+					double acceptance = (double) accettate_metro[r] / iterations[r];
+					double acc_err = sqrt((double)accettate_metro[r]*(iterations[r]-accettate_metro[r])/iterations[r])/iterations[r];
+					printf("Estimated HMC acceptance for this run [replica %d]: %f +- %f\n. Iterations: %d",r,acceptance, acc_err, iterations[r]);
+				}
+			}
+#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+
+			//############# ACTION AFTER ######################################################
+
+			if (verbosity_lv>10){
+				double action;
+				action  = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[r], aux_conf_acc, local_sums);
+				#ifdef GAUGE_ACT_TLSM
+				action += - C_ONE  * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[r], aux_conf_acc, local_sums);
+				#endif
+				printf("ACTION AFTER HMC STEP REPLICA %d: %.15lg\n", r, action);
+			}
 
       // CONF SWAP 
 	    if (0==devinfo.myrank) {printf("CONF SWAP PROPOSED\n");}
@@ -613,9 +633,11 @@ int main(int argc, char* argv[]){
                 
 	    // PERIODIC CONF TRANSLATION
 	    trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
-	  }//end for on replicas
+	  }
 #pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) 
-    
+
+		//####################################################    
+
 	  id_iter++;
 	  conf_id_iter++;
             

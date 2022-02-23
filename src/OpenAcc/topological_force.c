@@ -20,12 +20,10 @@
 
 int TOPO_GLOBAL_DONT_TOUCH = 0;
 
-//#define DEBUG_LOLLO
+// #define DEBUG_LOLLO
 #ifdef DEBUG_LOLLO
  #include "./cayley_hamilton.h"
  #include "./alloc_vars.h"
-
-
 
 #define ALLOLLOCHECK(control_int,var)  if(control_int != 0 ) \
     printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var);\
@@ -426,10 +424,10 @@ if(devinfo.myrank == 0){
       single_tamat_times_scalar_into_tamat(&ba,&i_gell_mann_matr[igen],eps/2+0*I);
       
       single_su3 exp_mod;
-      CH_exponential_antihermitian_nissalike(&exp_mod,&ba);
+      CH_exponential_antihermitian_nissalike(&exp_mod,&ba); // exp( -i eps Gell-Man/2 )
       rebuild3row(&exp_mod);
       
-      //change +, compute action
+      //change -, compute action
       single_su3 shilink;
       single_su3xsu3(&shilink, &exp_mod, &sto);
       single_su3_into_su3_soa(&tconf_acc[0], 0, &shilink);
@@ -440,8 +438,8 @@ if(devinfo.myrank == 0){
 #else
       double act_minus = compute_topo_action(tconf_acc);
 #endif
-      //change -, compute action
-      gl3_dagger(&exp_mod);
+      //change +, compute action
+      gl3_dagger(&exp_mod); // exp( i eps Gell-Mann/2 )
       single_su3xsu3(&shilink, &exp_mod, &sto);
       single_su3_into_su3_soa(&tconf_acc[0], 0, &shilink);
       
@@ -461,12 +459,16 @@ if(devinfo.myrank == 0){
 #else
       double check_ori_act = compute_topo_action(tconf_acc);
 #endif
-      /* printf("plus = %+016.016le ",act_plus); */
-      /* printf("ori = %+016.016le ",check_ori_act); */
-      /* printf("minus = %+016.016le\n",act_minus);	     */
+      /*
+			printf("plus = %+016.016le ",act_plus);
+      printf("ori = %+016.016le ",check_ori_act);
+      printf("minus = %+016.016le\n",act_minus);
+			*/
 	    
-      double gr_plus = -(act_plus-ori_act)/eps;
-      double gr_minus = -(ori_act-act_minus)/eps;
+      //double gr_plus = -(act_plus-ori_act)/eps;
+      //double gr_minus = -(ori_act-act_minus)/eps;
+      double gr_plus  =  (act_plus  - ori_act)/eps; //   [S(U+eps)-S(U)]/eps = dS/dU + O(eps)
+			double gr_minus = -(act_minus - ori_act)/eps; // - [S(U-eps)-S(U)]/eps = dS/dU + O(eps)
       single_tamat_times_scalar_add_to_tamat(&posi,&i_gell_mann_matr[igen],gr_plus+0*I);
       single_tamat_times_scalar_add_to_tamat(&nega,&i_gell_mann_matr[igen],gr_minus+0*I);
 
@@ -480,12 +482,6 @@ if(devinfo.myrank == 0){
   printf("Ringrazia Iddio se si assomigliano almeno un po'\n");
   mem_free_core();
   mem_free_extended();
-  #ifndef __GNUC__
-    //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
-    shutdown_acc_device(my_device_type);
-    /////////////////////////////////////////////////////////////////////////////////////////////////
-#endif
-
 
 #ifdef MULTIDEVICE
     shutdown_multidev();

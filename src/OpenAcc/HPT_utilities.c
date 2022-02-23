@@ -23,9 +23,6 @@
 #include "../Rand/random.h"
 #include "../Include/rep_info.h"
 
-// just for debugging purposes -> to be removed
-#include "./su3_measurements.h"
-
 #include <time.h>
 
 void init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info * def,int defect_info_config){
@@ -231,7 +228,7 @@ void init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info
 #endif
     }
 
-    // print max and mins for each case, useful for debugging purposes
+    // print max and mins for each case
     if(verbosity_lv>8){
       printf("rank %d count: %d\n",devinfo.myrank,count);
       // 1x1 plaquettee
@@ -263,41 +260,48 @@ void init_k(su3_soa * conf, double c_r, int def_axis, int * def_vec, defect_info
       // max
       printf("defect_swap_max_tlsm 1x2: rank %d\n",devinfo.myrank);
       for(int nu=0;nu<4;nu++){
+				if(nu!=def_axis_mapped){
       	printf("nu:%d||",nu);
       	for(i=0;i<4;i++){
 	  printf("%d||",def->defect_swap_max_TLSM[0][nu][i]);
       	}
       	printf("\n");
       }
+			}
       // min
       printf("defect_swap_min_tlsm 1x2: rank %d\n",devinfo.myrank);
       for(int nu=0;nu<4;nu++){
+				if(nu!=def_axis_mapped){
       	printf("nu:%d||",nu);
       	for(i=0;i<4;i++){
 	  printf("%d||",def->defect_swap_min_TLSM[0][nu][i]);
       	}
       	printf("\n");
       }
-
+			}
       // 2x1 rectangle
       // max
       printf("defect_swap_max_tlsm 2x1: rank %d\n",devinfo.myrank);
       for(int nu=0;nu<4;nu++){
+				if(nu!=def_axis_mapped){
       	printf("nu:%d||",nu);
       	for(i=0;i<4;i++){
 	  printf("%d||",def->defect_swap_max_TLSM[1][nu][i]);
       	}
       	printf("\n");
       }
+			}
       //min
       printf("defect_swap_min_tlsm 2x1: rank %d\n",devinfo.myrank);
       for(int nu=0;nu<4;nu++){
+				if(nu!=def_axis_mapped){
       	printf("nu:%d||",nu);
       	for(i=0;i<4;i++){
 	  printf("%d||",def->defect_swap_min_TLSM[1][nu][i]);
       	}
       	printf("\n");
       }
+			}
 #endif
     } // close if(verbosity_lv > 8)
   } // close if(defect_info_config==0)
@@ -347,7 +351,6 @@ void replicas_swap(su3_soa * conf1, su3_soa * conf2, int lab1, int lab2, rep_inf
     conf2[mu].r2=aux;
   }
 }
-
 
 // print conf labels
 void label_print(rep_info * hpt_params, FILE *file, int step_number){
@@ -731,41 +734,6 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
                dcomplex_soa * const tr_local_plaqs,
 	       int rep_indx1, int rep_indx2,defect_info * def, rep_info * hpt_params)
 {
-	// DEBUG
-	#pragma acc update self(conf_hasenbusch[0:hpt_params->replicas_total_number][0:8]) // update cpu
-        printf("replicas_total_number: %d\n", hpt_params->replicas_total_number);
-	double delta_S_STUPID=0.0;
-	// ACTION OLD
-	double S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-	if(0==devinfo.myrank) printf("rep_indx1: %d; S_1 = %.15lg\n", rep_indx1, S_1);
-	double S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
-	if(0==devinfo.myrank) printf("rep_indx2: %d; replicas_total_number: %d; S_2 = %.15lg\n", rep_indx2, hpt_params->replicas_total_number, S_2);
-	#ifdef GAUGE_ACT_TLSM
-	S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-	S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
-	#endif
-	delta_S_STUPID -= (S_1 + S_2);  
-	if(0==devinfo.myrank) printf("delta_S_Stupid parziale = %.15lg\n", delta_S_STUPID);
-
-	replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params); // swap K_1 <-> K_2
-	#pragma acc update device(conf_hasenbusch[0:hpt_params->replicas_total_number][0:8]) // after swap update gpu
-	
-	// ACTION NEW
-	S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-	if(0==devinfo.myrank) printf("rep_indx1: %d; S_1 = %.15lg\n", rep_indx1, S_1);
-	S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
-	if(0==devinfo.myrank) printf("rep_indx2: %d; replicas_total_number: %d; S_2 = %.15lg\n", rep_indx2, hpt_params->replicas_total_number, S_2);
-	#ifdef GAUGE_ACT_TLSM
-	S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-	S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
-	#endif
-	delta_S_STUPID += (S_1 + S_2);
-	if(0==devinfo.myrank) printf("delta_S_Stupid finale = %.15lg\n", delta_S_STUPID);
-	
-	replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params); // go back
-	#pragma acc update device(conf_hasenbusch[0:hpt_params->replicas_total_number][0:8]) // update gpu
-// END DEBUG
-    
   double p1,p2;
   double Delta_S_SWAP;
   int accettata = 0;
@@ -788,9 +756,6 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
 		if (p2<p1) accettata=1;
 	}
   if (accettata==1) replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params);
-
-	// DEBUG AO
-	if(0==devinfo.myrank) printf("(%d<->%d) %.15lg %.15lg %d\n", rep_indx1, rep_indx2, delta_S_STUPID, Delta_S_SWAP, accettata);
   return accettata;
 }
 

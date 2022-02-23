@@ -61,11 +61,9 @@ double calc_loc_rectangles_2x1_nnptrick(
                     tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
                     
                     //K_mu_nu computation;
-                    double K_mu_nu;
-                    K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu])*(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
-                    
-                    tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
-
+                    double K_mu_nu = (u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu]) * 
+																			(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                    tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
                 }  // d0          
             }  // d1            
         }  // d2              
@@ -138,14 +136,13 @@ double calc_loc_rectangles_1x2_nnptrick(
                     tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
                     
                     //K_mu_nu computation;
-                    double K_mu_nu;
-                    K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu])*(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
-                 
-                    tr_local_plaqs[parity].c[idxh]=K_mu_nu*tr_local_plaqs[parity].c[idxh];
-                }  // d0          
-            }  // d1            
-        }  // d2              
-    }  // d3                
+                    double K_mu_nu = (u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu]) * 
+																			(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
+                    tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
+                } // d0
+            } // d1
+        } // d2
+    } // d3
 
     double res_R_p = 0.0;
     double res_I_p = 0.0;
@@ -288,8 +285,7 @@ void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(
         }
     }
     
-    double K_mu_nu=1;
-    K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
+    double K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
 
     mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
     mat6->r0.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][1];
@@ -303,9 +299,7 @@ void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(
     mat6->r2.c0[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
     mat6->r2.c1[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
     mat6->r2.c2[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
-
 }  // closes PPMMM
-
 
 // Routine for the computation of the 5 matrices which contributes to the staples C-Right and B-Left.
 // mat6 += mat1 * hermitian_conjugate(mat2) * hermitian_conjugate(mat3) * hermitian_conjugate(mat4) * mat5
@@ -434,8 +428,7 @@ void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(
         }
     }
     
-    double K_mu_nu=1;
-    K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
+    double K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
     
     mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
     mat6->r0.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][1];
@@ -584,8 +577,7 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(
         }
     }
     
-    double K_mu_nu=1;
-    K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
+    double K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
     
     mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
     mat6->r0.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][1];
@@ -605,1449 +597,1282 @@ void calc_loc_improved_staples_typeA_nnptrick_all(
         __restrict const su3_soa * const u,
         __restrict su3_soa * const loc_stap )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang(IMPSTAPGANG3)
-    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang(IMPSTAPGANG3)
+  for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_nu_1L = 2*nu +  parity;
-                            const int dir_nu_2L = 2*nu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_nu_4L = 2*nu +  parity;
-                            const int dir_nu_5L = 2*nu + !parity;
-                            const int dir_nu_1R = 2*nu + !parity;
-                            const int dir_nu_2R = 2*nu +  parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_nu_4R = 2*nu + !parity;
-                            const int dir_nu_5R = 2*nu +  parity;
+	      const int dir_nu_1L = 2*nu +  parity;
+	      const int dir_nu_2L = 2*nu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_nu_4L = 2*nu +  parity;
+	      const int dir_nu_5L = 2*nu + !parity;
+	      const int dir_nu_1R = 2*nu + !parity;
+	      const int dir_nu_2R = 2*nu +  parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_nu_4R = 2*nu + !parity;
+	      const int dir_nu_5R = 2*nu +  parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];  // r+mu+nu
-                            const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
-                            const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
-                            const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];  // r+mu+nu
+	      const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
+	      const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
+	      const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu
 
-                            // IMPROVEMENT TYPE A
-                            //   AR is of type PPMMM
-                            //   AL is of type MMMPP
-                            //    r+mu-2nu  r+mu-nu  r+mu   r+mu+nu  r+mu+2nu
-                            //          +<-----+<-----+----->+----->+
-                            //          |  2L     1L  ^  1R     2R  |
-                            // mu    3L |             |             | 3R
-                            // ^        V  4L     5L  |  5R     4R  V
-                            // |        +----->+----->+<-----+<-----+ 
-                            // |     r-2nu    r-nu    r     r+nu     r+2nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE A
+	      //   AR is of type PPMMM
+	      //   AL is of type MMMPP
+	      //    r+mu-2nu  r+mu-nu  r+mu   r+mu+nu  r+mu+2nu
+	      //          +<-----+<-----+----->+----->+
+	      //          |  2L     1L  ^  1R     2R  |
+	      // mu    3L |             |             | 3R
+	      // ^        V  4L     5L  |  5R     4R  V
+	      // |        +----->+----->+<-----+<-----+ 
+	      // |     r-2nu    r-nu    r     r+nu     r+2nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
-                                    &u[dir_nu_2R],        idx_pmu_pnu,
-                                    &u[dir_mu_3R],        idx_2pnu,
-                                    &u[dir_nu_4R],        idx_pnu,
-                                    &u[dir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Right part of the staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
+							    &u[dir_nu_2R],        idx_pmu_pnu,
+							    &u[dir_mu_3R],        idx_2pnu,
+							    &u[dir_nu_4R],        idx_pnu,
+							    &u[dir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //computation of the Left  part of the staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
-                                    &u[dir_nu_2L],        idx_pmu_2mnu,
-                                    &u[dir_mu_3L],        idx_2mnu,
-                                    &u[dir_nu_4L],        idx_2mnu,
-                                    &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
+							    &u[dir_nu_2L],        idx_pmu_2mnu,
+							    &u[dir_mu_3L],        idx_2mnu,
+							    &u[dir_nu_4L],        idx_2mnu,
+							    &u[dir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
                             
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
 
 void calc_loc_improved_staples_typeB_nnptrick_all(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap )
+						  __restrict const su3_soa * const u,
+						  __restrict su3_soa * const loc_stap )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang(IMPSTAPGANG3)
-    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang(IMPSTAPGANG3)
+  for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_mu_1L = 2*mu + !parity;
-                            const int dir_nu_2L = 2*nu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_mu_4L = 2*mu + !parity;
-                            const int dir_nu_5L = 2*nu + !parity;
-                            const int dir_mu_1R = 2*mu + !parity;
-                            const int dir_nu_2R = 2*nu +  parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_mu_4R = 2*mu + !parity;
-                            const int dir_nu_5R = 2*nu +  parity;
+	      const int dir_mu_1L = 2*mu + !parity;
+	      const int dir_nu_2L = 2*nu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_mu_4L = 2*mu + !parity;
+	      const int dir_nu_5L = 2*nu + !parity;
+	      const int dir_mu_1R = 2*mu + !parity;
+	      const int dir_nu_2R = 2*nu +  parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_mu_4R = 2*mu + !parity;
+	      const int dir_nu_5R = 2*nu +  parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];             // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];             // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];             // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;            // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];     // r+mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
-                            const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
-                            const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];             // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;            // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];     // r+mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
+	      const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
+	      const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
 
 
-                            // IMPROVEMENT TYPE B      
-                            //   BR is of type PPMMM
-                            //   BL is of type PMMMP
-                            //      r+2mu-nu r+2mu   r+2mu+nu
-                            //          +<-----+----->+
-                            //          |  2L  ^  2R  |
-                            //       3L |    1L|1R    | 3R
-                            //          V      |      V
-                            //  r+mu-nu +     r+mu    + r+mu+nu
-                            //          |      ^      |
-                            // mu    4L |      |      | 4R
-                            // ^        V  5L  |  5R  V
-                            // |        +----->+<-----+
-                            // |       r-nu    r     r+nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE B      
+	      //   BR is of type PPMMM
+	      //   BL is of type PMMMP
+	      //      r+2mu-nu r+2mu   r+2mu+nu
+	      //          +<-----+----->+
+	      //          |  2L  ^  2R  |
+	      //       3L |    1L|1R    | 3R
+	      //          V      |      V
+	      //  r+mu-nu +     r+mu    + r+mu+nu
+	      //          |      ^      |
+	      // mu    4L |      |      | 4R
+	      // ^        V  5L  |  5R  V
+	      // |        +----->+<-----+
+	      // |       r-nu    r     r+nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1R],        idx_pmu,
-                                    &u[dir_nu_2R],        idx_2pmu,
-                                    &u[dir_mu_3R],        idx_pmu_pnu,
-                                    &u[dir_mu_4R],        idx_pnu,
-                                    &u[dir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Right part of the staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1R],        idx_pmu,
+							    &u[dir_nu_2R],        idx_2pmu,
+							    &u[dir_mu_3R],        idx_pmu_pnu,
+							    &u[dir_mu_4R],        idx_pnu,
+							    &u[dir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Left  part of the staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1L],        idx_pmu,
-                                    &u[dir_nu_2L],        idx_2pmu_mnu,
-                                    &u[dir_mu_3L],        idx_pmu_mnu,
-                                    &u[dir_mu_4L],        idx_mnu,
-                                    &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1L],        idx_pmu,
+							    &u[dir_nu_2L],        idx_2pmu_mnu,
+							    &u[dir_mu_3L],        idx_pmu_mnu,
+							    &u[dir_mu_4L],        idx_mnu,
+							    &u[dir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
 
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 
 }// closes routine
 
 void calc_loc_improved_staples_typeC_nnptrick_all(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap )
+						  __restrict const su3_soa * const u,
+						  __restrict su3_soa * const loc_stap )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang(IMPSTAPGANG3)
-    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang(IMPSTAPGANG3)
+  for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_nu_1L = 2*nu +  parity;
-                            const int dir_mu_2L = 2*mu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_nu_4L = 2*nu +  parity;
-                            const int dir_mu_5L = 2*mu + !parity;
-                            const int dir_nu_1R = 2*nu + !parity;
-                            const int dir_mu_2R = 2*mu + !parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_nu_4R = 2*nu + !parity;
-                            const int dir_mu_5R = 2*mu + !parity;
+	      const int dir_nu_1L = 2*nu +  parity;
+	      const int dir_mu_2L = 2*mu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_nu_4L = 2*nu +  parity;
+	      const int dir_mu_5L = 2*mu + !parity;
+	      const int dir_nu_1R = 2*nu + !parity;
+	      const int dir_mu_2R = 2*mu + !parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_nu_4R = 2*nu + !parity;
+	      const int dir_mu_5R = 2*mu + !parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
-                            const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
-                            const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
+	      const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
+	      const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
 
 
-                            // IMPROVEMENT TYPE C
-                            //   CR is of type PMMMP
-                            //   CL is of type MMMPP
-                            //       r+mu-nu  r+mu   r+mu+nu
-                            //          +<-----+----->+
-                            //          |  1L  ^  1R  |
-                            //       2L |      |      | 2R
-                            //          V      |      V
-                            //     r-nu +      r      + r+nu
-                            //          |      ^      |
-                            // mu    3L |    5L|5R    | 3R
-                            // ^        V  4L  |  4R  V
-                            // |        +----->+<-----+
-                            // |    r-mu-nu   r-mu   r-mu+nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE C
+	      //   CR is of type PMMMP
+	      //   CL is of type MMMPP
+	      //       r+mu-nu  r+mu   r+mu+nu
+	      //          +<-----+----->+
+	      //          |  1L  ^  1R  |
+	      //       2L |      |      | 2R
+	      //          V      |      V
+	      //     r-nu +      r      + r+nu
+	      //          |      ^      |
+	      // mu    3L |    5L|5R    | 3R
+	      // ^        V  4L  |  4R  V
+	      // |        +----->+<-----+
+	      // |    r-mu-nu   r-mu   r-mu+nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
-                                    &u[dir_mu_2R],        idx_pnu,
-                                    &u[dir_mu_3R],        idx_mmu_pnu,
-                                    &u[dir_nu_4R],        idx_mmu,
-                                    &u[dir_mu_5R],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Right part of the staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
+							    &u[dir_mu_2R],        idx_pnu,
+							    &u[dir_mu_3R],        idx_mmu_pnu,
+							    &u[dir_nu_4R],        idx_mmu,
+							    &u[dir_mu_5R],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //computation of the Left  part of the staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
-                                    &u[dir_mu_2L],        idx_mnu,
-                                    &u[dir_mu_3L],        idx_mmu_mnu,
-                                    &u[dir_nu_4L],        idx_mmu_mnu,
-                                    &u[dir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);
-                            
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	      //computation of the Left  part of the staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
+							    &u[dir_mu_2L],        idx_mnu,
+							    &u[dir_mu_3L],        idx_mmu_mnu,
+							    &u[dir_nu_4L],        idx_mmu_mnu,
+							    &u[dir_mu_5L],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
  
 void calc_loc_improved_staples_typeABC_nnptrick_all(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap )
+						    __restrict const su3_soa * const u,
+						    __restrict su3_soa * const loc_stap )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang(IMPSTAPGANG3)
-    for(d3=D3_HALO; d3<nd3-D3_HALO; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang(IMPSTAPGANG3)
+  for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
+	      const int Adir_nu_1L = 2*nu +  parity;
+	      const int Adir_nu_2L = 2*nu + !parity;
+	      const int Adir_mu_3L = 2*mu +  parity;
+	      const int Adir_nu_4L = 2*nu +  parity;
+	      const int Adir_nu_5L = 2*nu + !parity;
+	      const int Adir_nu_1R = 2*nu + !parity;
+	      const int Adir_nu_2R = 2*nu +  parity;
+	      const int Adir_mu_3R = 2*mu +  parity;
+	      const int Adir_nu_4R = 2*nu + !parity;
+	      const int Adir_nu_5R = 2*nu +  parity;
 
-                            const int dir_link = 2*mu + parity;
-
-                            const int Adir_nu_1L = 2*nu +  parity;
-                            const int Adir_nu_2L = 2*nu + !parity;
-                            const int Adir_mu_3L = 2*mu +  parity;
-                            const int Adir_nu_4L = 2*nu +  parity;
-                            const int Adir_nu_5L = 2*nu + !parity;
-                            const int Adir_nu_1R = 2*nu + !parity;
-                            const int Adir_nu_2R = 2*nu +  parity;
-                            const int Adir_mu_3R = 2*mu +  parity;
-                            const int Adir_nu_4R = 2*nu + !parity;
-                            const int Adir_nu_5R = 2*nu +  parity;
-
-                            const int Bdir_mu_1L = 2*mu + !parity;
-                            const int Bdir_nu_2L = 2*nu + !parity;
-                            const int Bdir_mu_3L = 2*mu +  parity;
-                            const int Bdir_mu_4L = 2*mu + !parity;
-                            const int Bdir_nu_5L = 2*nu + !parity;
-                            const int Bdir_mu_1R = 2*mu + !parity;
-                            const int Bdir_nu_2R = 2*nu +  parity;
-                            const int Bdir_mu_3R = 2*mu +  parity;
-                            const int Bdir_mu_4R = 2*mu + !parity;
-                            const int Bdir_nu_5R = 2*nu +  parity;
+	      const int Bdir_mu_1L = 2*mu + !parity;
+	      const int Bdir_nu_2L = 2*nu + !parity;
+	      const int Bdir_mu_3L = 2*mu +  parity;
+	      const int Bdir_mu_4L = 2*mu + !parity;
+	      const int Bdir_nu_5L = 2*nu + !parity;
+	      const int Bdir_mu_1R = 2*mu + !parity;
+	      const int Bdir_nu_2R = 2*nu +  parity;
+	      const int Bdir_mu_3R = 2*mu +  parity;
+	      const int Bdir_mu_4R = 2*mu + !parity;
+	      const int Bdir_nu_5R = 2*nu +  parity;
 
 
-                            const int Cdir_nu_1L = 2*nu +  parity;
-                            const int Cdir_mu_2L = 2*mu + !parity;
-                            const int Cdir_mu_3L = 2*mu +  parity;
-                            const int Cdir_nu_4L = 2*nu +  parity;
-                            const int Cdir_mu_5L = 2*mu + !parity;
-                            const int Cdir_nu_1R = 2*nu + !parity;
-                            const int Cdir_mu_2R = 2*mu + !parity;
-                            const int Cdir_mu_3R = 2*mu +  parity;
-                            const int Cdir_nu_4R = 2*nu + !parity;
-                            const int Cdir_mu_5R = 2*mu + !parity;
+	      const int Cdir_nu_1L = 2*nu +  parity;
+	      const int Cdir_mu_2L = 2*mu + !parity;
+	      const int Cdir_mu_3L = 2*mu +  parity;
+	      const int Cdir_nu_4L = 2*nu +  parity;
+	      const int Cdir_mu_5L = 2*mu + !parity;
+	      const int Cdir_nu_1R = 2*nu + !parity;
+	      const int Cdir_mu_2R = 2*mu + !parity;
+	      const int Cdir_mu_3R = 2*mu +  parity;
+	      const int Cdir_nu_4R = 2*nu + !parity;
+	      const int Cdir_mu_5R = 2*mu + !parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
-                            const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
-                            const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
-                            const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
-                            const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
-                            const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
-                            const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
-                            const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu              
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
+	      const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
+	      const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
+	      const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
+	      const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
+	      const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
+	      const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
+	      const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu              
 
-                            // IMPROVEMENT TYPE ABC
-                            //computation of the Right part of the A staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1R],        idx_pmu,
-                                    &u[Adir_nu_2R],        idx_pmu_pnu,
-                                    &u[Adir_mu_3R],        idx_2pnu,
-                                    &u[Adir_nu_4R],        idx_pnu,
-                                    &u[Adir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
+	      // IMPROVEMENT TYPE ABC
+	      //computation of the Right part of the A staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1R],        idx_pmu,
+							    &u[Adir_nu_2R],        idx_pmu_pnu,
+							    &u[Adir_mu_3R],        idx_2pnu,
+							    &u[Adir_nu_4R],        idx_pnu,
+							    &u[Adir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Left  part of the A staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1L],        idx_pmu_mnu,
-                                    &u[Adir_nu_2L],        idx_pmu_2mnu,
-                                    &u[Adir_mu_3L],        idx_2mnu,
-                                    &u[Adir_nu_4L],        idx_2mnu,
-                                    &u[Adir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the A staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1L],        idx_pmu_mnu,
+							    &u[Adir_nu_2L],        idx_pmu_2mnu,
+							    &u[Adir_mu_3L],        idx_2mnu,
+							    &u[Adir_nu_4L],        idx_2mnu,
+							    &u[Adir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Right part of the B staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1R],        idx_pmu,
-                                    &u[Bdir_nu_2R],        idx_2pmu,
-                                    &u[Bdir_mu_3R],        idx_pmu_pnu,
-                                    &u[Bdir_mu_4R],        idx_pnu,
-                                    &u[Bdir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Right part of the B staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1R],        idx_pmu,
+							    &u[Bdir_nu_2R],        idx_2pmu,
+							    &u[Bdir_mu_3R],        idx_pmu_pnu,
+							    &u[Bdir_mu_4R],        idx_pnu,
+							    &u[Bdir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Left  part of the B staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1L],        idx_pmu,
-                                    &u[Bdir_nu_2L],        idx_2pmu_mnu,
-                                    &u[Bdir_mu_3L],        idx_pmu_mnu,
-                                    &u[Bdir_mu_4L],        idx_mnu,
-                                    &u[Bdir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the B staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1L],        idx_pmu,
+							    &u[Bdir_nu_2L],        idx_2pmu_mnu,
+							    &u[Bdir_mu_3L],        idx_pmu_mnu,
+							    &u[Bdir_mu_4L],        idx_mnu,
+							    &u[Bdir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Right part of the C staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1R],        idx_pmu,
-                                    &u[Cdir_mu_2R],        idx_pnu,
-                                    &u[Cdir_mu_3R],        idx_mmu_pnu,
-                                    &u[Cdir_nu_4R],        idx_mmu,
-                                    &u[Cdir_mu_5R],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Right part of the C staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1R],        idx_pmu,
+							    &u[Cdir_mu_2R],        idx_pnu,
+							    &u[Cdir_mu_3R],        idx_mmu_pnu,
+							    &u[Cdir_nu_4R],        idx_mmu,
+							    &u[Cdir_mu_5R],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //computation of the Left  part of the C staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1L],        idx_pmu_mnu,
-                                    &u[Cdir_mu_2L],        idx_mnu,
-                                    &u[Cdir_mu_3L],        idx_mmu_mnu,
-                                    &u[Cdir_nu_4L],        idx_mmu_mnu,
-                                    &u[Cdir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the C staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1L],        idx_pmu_mnu,
+							    &u[Cdir_mu_2L],        idx_mnu,
+							    &u[Cdir_mu_3L],        idx_mmu_mnu,
+							    &u[Cdir_nu_4L],        idx_mmu_mnu,
+							    &u[Cdir_mu_5L],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);
                             
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
 
 #ifdef MULTIDEVICE
 void calc_loc_improved_staples_typeA_nnptrick_all_bulk(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap )
+						       __restrict const su3_soa * const u,
+						       __restrict su3_soa * const loc_stap )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang(IMPSTAPGANG3)
-    for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang(IMPSTAPGANG3)
+  for(int d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_nu_1L = 2*nu +  parity;
-                            const int dir_nu_2L = 2*nu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_nu_4L = 2*nu +  parity;
-                            const int dir_nu_5L = 2*nu + !parity;
-                            const int dir_nu_1R = 2*nu + !parity;
-                            const int dir_nu_2R = 2*nu +  parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_nu_4R = 2*nu + !parity;
-                            const int dir_nu_5R = 2*nu +  parity;
+	      const int dir_nu_1L = 2*nu +  parity;
+	      const int dir_nu_2L = 2*nu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_nu_4L = 2*nu +  parity;
+	      const int dir_nu_5L = 2*nu + !parity;
+	      const int dir_nu_1R = 2*nu + !parity;
+	      const int dir_nu_2R = 2*nu +  parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_nu_4R = 2*nu + !parity;
+	      const int dir_nu_5R = 2*nu +  parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];  // r+mu+nu
-                            const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
-                            const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
-                            const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];  // r+mu+nu
+	      const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
+	      const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
+	      const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu
 
-                            // IMPROVEMENT TYPE A
-                            //   AR is of type PPMMM
-                            //   AL is of type MMMPP
-                            //    r+mu-2nu  r+mu-nu  r+mu   r+mu+nu  r+mu+2nu
-                            //          +<-----+<-----+----->+----->+
-                            //          |  2L     1L  ^  1R     2R  |
-                            // mu    3L |             |             | 3R
-                            // ^        V  4L     5L  |  5R     4R  V
-                            // |        +----->+----->+<-----+<-----+ 
-                            // |     r-2nu    r-nu    r     r+nu     r+2nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE A
+	      //   AR is of type PPMMM
+	      //   AL is of type MMMPP
+	      //    r+mu-2nu  r+mu-nu  r+mu   r+mu+nu  r+mu+2nu
+	      //          +<-----+<-----+----->+----->+
+	      //          |  2L     1L  ^  1R     2R  |
+	      // mu    3L |             |             | 3R
+	      // ^        V  4L     5L  |  5R     4R  V
+	      // |        +----->+----->+<-----+<-----+ 
+	      // |     r-2nu    r-nu    r     r+nu     r+2nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
-                                    &u[dir_nu_2R],        idx_pmu_pnu,
-                                    &u[dir_mu_3R],        idx_2pnu,
-                                    &u[dir_nu_4R],        idx_pnu,
-                                    &u[dir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Right part of the staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
+							    &u[dir_nu_2R],        idx_pmu_pnu,
+							    &u[dir_mu_3R],        idx_2pnu,
+							    &u[dir_nu_4R],        idx_pnu,
+							    &u[dir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //computation of the Left  part of the staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
-                                    &u[dir_nu_2L],        idx_pmu_2mnu,
-                                    &u[dir_mu_3L],        idx_2mnu,
-                                    &u[dir_nu_4L],        idx_2mnu,
-                                    &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
+							    &u[dir_nu_2L],        idx_pmu_2mnu,
+							    &u[dir_mu_3L],        idx_2mnu,
+							    &u[dir_nu_4L],        idx_2mnu,
+							    &u[dir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
                             
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 
 }// closes routine
 
 void calc_loc_improved_staples_typeB_nnptrick_all_bulk(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap )
+						       __restrict const su3_soa * const u,
+						       __restrict su3_soa * const loc_stap )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang(IMPSTAPGANG3)
-    for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang(IMPSTAPGANG3)
+  for(int d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_mu_1L = 2*mu + !parity;
-                            const int dir_nu_2L = 2*nu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_mu_4L = 2*mu + !parity;
-                            const int dir_nu_5L = 2*nu + !parity;
-                            const int dir_mu_1R = 2*mu + !parity;
-                            const int dir_nu_2R = 2*nu +  parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_mu_4R = 2*mu + !parity;
-                            const int dir_nu_5R = 2*nu +  parity;
+	      const int dir_mu_1L = 2*mu + !parity;
+	      const int dir_nu_2L = 2*nu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_mu_4L = 2*mu + !parity;
+	      const int dir_nu_5L = 2*nu + !parity;
+	      const int dir_mu_1R = 2*mu + !parity;
+	      const int dir_nu_2R = 2*nu +  parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_mu_4R = 2*mu + !parity;
+	      const int dir_nu_5R = 2*nu +  parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];             // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];             // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];             // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;            // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];     // r+mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
-                            const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
-                            const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];             // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;            // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];     // r+mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
+	      const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
+	      const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
 
 
-                            // IMPROVEMENT TYPE B      
-                            //   BR is of type PPMMM
-                            //   BL is of type PMMMP
-                            //      r+2mu-nu r+2mu   r+2mu+nu
-                            //          +<-----+----->+
-                            //          |  2L  ^  2R  |
-                            //       3L |    1L|1R    | 3R
-                            //          V      |      V
-                            //  r+mu-nu +     r+mu    + r+mu+nu
-                            //          |      ^      |
-                            // mu    4L |      |      | 4R
-                            // ^        V  5L  |  5R  V
-                            // |        +----->+<-----+
-                            // |       r-nu    r     r+nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE B      
+	      //   BR is of type PPMMM
+	      //   BL is of type PMMMP
+	      //      r+2mu-nu r+2mu   r+2mu+nu
+	      //          +<-----+----->+
+	      //          |  2L  ^  2R  |
+	      //       3L |    1L|1R    | 3R
+	      //          V      |      V
+	      //  r+mu-nu +     r+mu    + r+mu+nu
+	      //          |      ^      |
+	      // mu    4L |      |      | 4R
+	      // ^        V  5L  |  5R  V
+	      // |        +----->+<-----+
+	      // |       r-nu    r     r+nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1R],        idx_pmu,
-                                    &u[dir_nu_2R],        idx_2pmu,
-                                    &u[dir_mu_3R],        idx_pmu_pnu,
-                                    &u[dir_mu_4R],        idx_pnu,
-                                    &u[dir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Right part of the staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1R],        idx_pmu,
+							    &u[dir_nu_2R],        idx_2pmu,
+							    &u[dir_mu_3R],        idx_pmu_pnu,
+							    &u[dir_mu_4R],        idx_pnu,
+							    &u[dir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Left  part of the staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1L],        idx_pmu,
-                                    &u[dir_nu_2L],        idx_2pmu_mnu,
-                                    &u[dir_mu_3L],        idx_pmu_mnu,
-                                    &u[dir_mu_4L],        idx_mnu,
-                                    &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1L],        idx_pmu,
+							    &u[dir_nu_2L],        idx_2pmu_mnu,
+							    &u[dir_mu_3L],        idx_pmu_mnu,
+							    &u[dir_mu_4L],        idx_mnu,
+							    &u[dir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
                             
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
 
 void calc_loc_improved_staples_typeC_nnptrick_all_bulk(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap )
+						       __restrict const su3_soa * const u,
+						       __restrict su3_soa * const loc_stap )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang(IMPSTAPGANG3)
-    for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang(IMPSTAPGANG3)
+  for(int d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_nu_1L = 2*nu +  parity;
-                            const int dir_mu_2L = 2*mu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_nu_4L = 2*nu +  parity;
-                            const int dir_mu_5L = 2*mu + !parity;
-                            const int dir_nu_1R = 2*nu + !parity;
-                            const int dir_mu_2R = 2*mu + !parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_nu_4R = 2*nu + !parity;
-                            const int dir_mu_5R = 2*mu + !parity;
+	      const int dir_nu_1L = 2*nu +  parity;
+	      const int dir_mu_2L = 2*mu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_nu_4L = 2*nu +  parity;
+	      const int dir_mu_5L = 2*mu + !parity;
+	      const int dir_nu_1R = 2*nu + !parity;
+	      const int dir_mu_2R = 2*mu + !parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_nu_4R = 2*nu + !parity;
+	      const int dir_mu_5R = 2*mu + !parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
-                            const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
-                            const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
+	      const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
+	      const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
 
 
-                            // IMPROVEMENT TYPE C
-                            //   CR is of type PMMMP
-                            //   CL is of type MMMPP
-                            //       r+mu-nu  r+mu   r+mu+nu
-                            //          +<-----+----->+
-                            //          |  1L  ^  1R  |
-                            //       2L |      |      | 2R
-                            //          V      |      V
-                            //     r-nu +      r      + r+nu
-                            //          |      ^      |
-                            // mu    3L |    5L|5R    | 3R
-                            // ^        V  4L  |  4R  V
-                            // |        +----->+<-----+
-                            // |    r-mu-nu   r-mu   r-mu+nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE C
+	      //   CR is of type PMMMP
+	      //   CL is of type MMMPP
+	      //       r+mu-nu  r+mu   r+mu+nu
+	      //          +<-----+----->+
+	      //          |  1L  ^  1R  |
+	      //       2L |      |      | 2R
+	      //          V      |      V
+	      //     r-nu +      r      + r+nu
+	      //          |      ^      |
+	      // mu    3L |    5L|5R    | 3R
+	      // ^        V  4L  |  4R  V
+	      // |        +----->+<-----+
+	      // |    r-mu-nu   r-mu   r-mu+nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
-                                    &u[dir_mu_2R],        idx_pnu,
-                                    &u[dir_mu_3R],        idx_mmu_pnu,
-                                    &u[dir_nu_4R],        idx_mmu,
-                                    &u[dir_mu_5R],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Right part of the staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
+							    &u[dir_mu_2R],        idx_pnu,
+							    &u[dir_mu_3R],        idx_mmu_pnu,
+							    &u[dir_nu_4R],        idx_mmu,
+							    &u[dir_mu_5R],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //computation of the Left  part of the staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
-                                    &u[dir_mu_2L],        idx_mnu,
-                                    &u[dir_mu_3L],        idx_mmu_mnu,
-                                    &u[dir_nu_4L],        idx_mmu_mnu,
-                                    &u[dir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
+							    &u[dir_mu_2L],        idx_mnu,
+							    &u[dir_mu_3L],        idx_mmu_mnu,
+							    &u[dir_nu_4L],        idx_mmu_mnu,
+							    &u[dir_mu_5L],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);
                             
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
  
 void calc_loc_improved_staples_typeABC_nnptrick_all_bulk(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap )
+							 __restrict const su3_soa * const u,
+							 __restrict su3_soa * const loc_stap )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang(IMPSTAPGANG3)
-    for(d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang(IMPSTAPGANG3)
+  for(int d3=D3_HALO+GAUGE_HALO; d3<nd3-D3_HALO-GAUGE_HALO; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
+	      const int Adir_nu_1L = 2*nu +  parity;
+	      const int Adir_nu_2L = 2*nu + !parity;
+	      const int Adir_mu_3L = 2*mu +  parity;
+	      const int Adir_nu_4L = 2*nu +  parity;
+	      const int Adir_nu_5L = 2*nu + !parity;
+	      const int Adir_nu_1R = 2*nu + !parity;
+	      const int Adir_nu_2R = 2*nu +  parity;
+	      const int Adir_mu_3R = 2*mu +  parity;
+	      const int Adir_nu_4R = 2*nu + !parity;
+	      const int Adir_nu_5R = 2*nu +  parity;
 
-                            const int dir_link = 2*mu + parity;
-
-                            const int Adir_nu_1L = 2*nu +  parity;
-                            const int Adir_nu_2L = 2*nu + !parity;
-                            const int Adir_mu_3L = 2*mu +  parity;
-                            const int Adir_nu_4L = 2*nu +  parity;
-                            const int Adir_nu_5L = 2*nu + !parity;
-                            const int Adir_nu_1R = 2*nu + !parity;
-                            const int Adir_nu_2R = 2*nu +  parity;
-                            const int Adir_mu_3R = 2*mu +  parity;
-                            const int Adir_nu_4R = 2*nu + !parity;
-                            const int Adir_nu_5R = 2*nu +  parity;
-
-                            const int Bdir_mu_1L = 2*mu + !parity;
-                            const int Bdir_nu_2L = 2*nu + !parity;
-                            const int Bdir_mu_3L = 2*mu +  parity;
-                            const int Bdir_mu_4L = 2*mu + !parity;
-                            const int Bdir_nu_5L = 2*nu + !parity;
-                            const int Bdir_mu_1R = 2*mu + !parity;
-                            const int Bdir_nu_2R = 2*nu +  parity;
-                            const int Bdir_mu_3R = 2*mu +  parity;
-                            const int Bdir_mu_4R = 2*mu + !parity;
-                            const int Bdir_nu_5R = 2*nu +  parity;
+	      const int Bdir_mu_1L = 2*mu + !parity;
+	      const int Bdir_nu_2L = 2*nu + !parity;
+	      const int Bdir_mu_3L = 2*mu +  parity;
+	      const int Bdir_mu_4L = 2*mu + !parity;
+	      const int Bdir_nu_5L = 2*nu + !parity;
+	      const int Bdir_mu_1R = 2*mu + !parity;
+	      const int Bdir_nu_2R = 2*nu +  parity;
+	      const int Bdir_mu_3R = 2*mu +  parity;
+	      const int Bdir_mu_4R = 2*mu + !parity;
+	      const int Bdir_nu_5R = 2*nu +  parity;
 
 
-                            const int Cdir_nu_1L = 2*nu +  parity;
-                            const int Cdir_mu_2L = 2*mu + !parity;
-                            const int Cdir_mu_3L = 2*mu +  parity;
-                            const int Cdir_nu_4L = 2*nu +  parity;
-                            const int Cdir_mu_5L = 2*mu + !parity;
-                            const int Cdir_nu_1R = 2*nu + !parity;
-                            const int Cdir_mu_2R = 2*mu + !parity;
-                            const int Cdir_mu_3R = 2*mu +  parity;
-                            const int Cdir_nu_4R = 2*nu + !parity;
-                            const int Cdir_mu_5R = 2*mu + !parity;
+	      const int Cdir_nu_1L = 2*nu +  parity;
+	      const int Cdir_mu_2L = 2*mu + !parity;
+	      const int Cdir_mu_3L = 2*mu +  parity;
+	      const int Cdir_nu_4L = 2*nu +  parity;
+	      const int Cdir_mu_5L = 2*mu + !parity;
+	      const int Cdir_nu_1R = 2*nu + !parity;
+	      const int Cdir_mu_2R = 2*mu + !parity;
+	      const int Cdir_mu_3R = 2*mu +  parity;
+	      const int Cdir_nu_4R = 2*nu + !parity;
+	      const int Cdir_mu_5R = 2*mu + !parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
-                            const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
-                            const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
-                            const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
-                            const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
-                            const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
-                            const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
-                            const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu              
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
+	      const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
+	      const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
+	      const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
+	      const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
+	      const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
+	      const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
+	      const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu              
 
 
 
-                            // IMPROVEMENT TYPE ABC
-                            //computation of the Right part of the A staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1R],        idx_pmu,
-                                    &u[Adir_nu_2R],        idx_pmu_pnu,
-                                    &u[Adir_mu_3R],        idx_2pnu,
-                                    &u[Adir_nu_4R],        idx_pnu,
-                                    &u[Adir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
+	      // IMPROVEMENT TYPE ABC
+	      //computation of the Right part of the A staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1R],        idx_pmu,
+							    &u[Adir_nu_2R],        idx_pmu_pnu,
+							    &u[Adir_mu_3R],        idx_2pnu,
+							    &u[Adir_nu_4R],        idx_pnu,
+							    &u[Adir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Left  part of the A staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1L],        idx_pmu_mnu,
-                                    &u[Adir_nu_2L],        idx_pmu_2mnu,
-                                    &u[Adir_mu_3L],        idx_2mnu,
-                                    &u[Adir_nu_4L],        idx_2mnu,
-                                    &u[Adir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
-
-
-
-                            //computation of the Right part of the B staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1R],        idx_pmu,
-                                    &u[Bdir_nu_2R],        idx_2pmu,
-                                    &u[Bdir_mu_3R],        idx_pmu_pnu,
-                                    &u[Bdir_mu_4R],        idx_pnu,
-                                    &u[Bdir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
-
-                            //computation of the Left  part of the B staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1L],        idx_pmu,
-                                    &u[Bdir_nu_2L],        idx_2pmu_mnu,
-                                    &u[Bdir_mu_3L],        idx_pmu_mnu,
-                                    &u[Bdir_mu_4L],        idx_mnu,
-                                    &u[Bdir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the A staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1L],        idx_pmu_mnu,
+							    &u[Adir_nu_2L],        idx_pmu_2mnu,
+							    &u[Adir_mu_3L],        idx_2mnu,
+							    &u[Adir_nu_4L],        idx_2mnu,
+							    &u[Adir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
 
 
 
-                            //computation of the Right part of the C staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1R],        idx_pmu,
-                                    &u[Cdir_mu_2R],        idx_pnu,
-                                    &u[Cdir_mu_3R],        idx_mmu_pnu,
-                                    &u[Cdir_nu_4R],        idx_mmu,
-                                    &u[Cdir_mu_5R],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Right part of the B staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1R],        idx_pmu,
+							    &u[Bdir_nu_2R],        idx_2pmu,
+							    &u[Bdir_mu_3R],        idx_pmu_pnu,
+							    &u[Bdir_mu_4R],        idx_pnu,
+							    &u[Bdir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Left  part of the C staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1L],        idx_pmu_mnu,
-                                    &u[Cdir_mu_2L],        idx_mnu,
-                                    &u[Cdir_mu_3L],        idx_mmu_mnu,
-                                    &u[Cdir_nu_4L],        idx_mmu_mnu,
-                                    &u[Cdir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the B staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1L],        idx_pmu,
+							    &u[Bdir_nu_2L],        idx_2pmu_mnu,
+							    &u[Bdir_mu_3L],        idx_pmu_mnu,
+							    &u[Bdir_mu_4L],        idx_mnu,
+							    &u[Bdir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
+
+	      //computation of the Right part of the C staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1R],        idx_pmu,
+							    &u[Cdir_mu_2R],        idx_pnu,
+							    &u[Cdir_mu_3R],        idx_mmu_pnu,
+							    &u[Cdir_nu_4R],        idx_mmu,
+							    &u[Cdir_mu_5R],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);							    
+
+	      //computation of the Left  part of the C staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1L],        idx_pmu_mnu,
+							    &u[Cdir_mu_2L],        idx_mnu,
+							    &u[Cdir_mu_3L],        idx_mmu_mnu,
+							    &u[Cdir_nu_4L],        idx_mmu_mnu,
+							    &u[Cdir_mu_5L],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);
                             
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
 
 void calc_loc_improved_staples_typeA_nnptrick_all_d3c(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap,
-        int offset3, int thickness3 )
+						      __restrict const su3_soa * const u,
+						      __restrict su3_soa * const loc_stap,
+						      int offset3, int thickness3 )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang
-    for(d3=offset3; d3<offset3+thickness3; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang
+  for(int d3=offset3; d3<offset3+thickness3; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_nu_1L = 2*nu +  parity;
-                            const int dir_nu_2L = 2*nu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_nu_4L = 2*nu +  parity;
-                            const int dir_nu_5L = 2*nu + !parity;
-                            const int dir_nu_1R = 2*nu + !parity;
-                            const int dir_nu_2R = 2*nu +  parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_nu_4R = 2*nu + !parity;
-                            const int dir_nu_5R = 2*nu +  parity;
+	      const int dir_nu_1L = 2*nu +  parity;
+	      const int dir_nu_2L = 2*nu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_nu_4L = 2*nu +  parity;
+	      const int dir_nu_5L = 2*nu + !parity;
+	      const int dir_nu_1R = 2*nu + !parity;
+	      const int dir_nu_2R = 2*nu +  parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_nu_4R = 2*nu + !parity;
+	      const int dir_nu_5R = 2*nu +  parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];  // r+mu+nu
-                            const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
-                            const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
-                            const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];  // r+mu+nu
+	      const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
+	      const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
+	      const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu
 
-                            // IMPROVEMENT TYPE A
-                            //   AR is of type PPMMM
-                            //   AL is of type MMMPP
-                            //    r+mu-2nu  r+mu-nu  r+mu   r+mu+nu  r+mu+2nu
-                            //          +<-----+<-----+----->+----->+
-                            //          |  2L     1L  ^  1R     2R  |
-                            // mu    3L |             |             | 3R
-                            // ^        V  4L     5L  |  5R     4R  V
-                            // |        +----->+----->+<-----+<-----+ 
-                            // |     r-2nu    r-nu    r     r+nu     r+2nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE A
+	      //   AR is of type PPMMM
+	      //   AL is of type MMMPP
+	      //    r+mu-2nu  r+mu-nu  r+mu   r+mu+nu  r+mu+2nu
+	      //          +<-----+<-----+----->+----->+
+	      //          |  2L     1L  ^  1R     2R  |
+	      // mu    3L |             |             | 3R
+	      // ^        V  4L     5L  |  5R     4R  V
+	      // |        +----->+----->+<-----+<-----+ 
+	      // |     r-2nu    r-nu    r     r+nu     r+2nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
-                                    &u[dir_nu_2R],        idx_pmu_pnu,
-                                    &u[dir_mu_3R],        idx_2pnu,
-                                    &u[dir_nu_4R],        idx_pnu,
-                                    &u[dir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Right part of the staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
+							    &u[dir_nu_2R],        idx_pmu_pnu,
+							    &u[dir_mu_3R],        idx_2pnu,
+							    &u[dir_nu_4R],        idx_pnu,
+							    &u[dir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //computation of the Left  part of the staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
-                                    &u[dir_nu_2L],        idx_pmu_2mnu,
-                                    &u[dir_mu_3L],        idx_2mnu,
-                                    &u[dir_nu_4L],        idx_2mnu,
-                                    &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
+							    &u[dir_nu_2L],        idx_pmu_2mnu,
+							    &u[dir_mu_3L],        idx_2mnu,
+							    &u[dir_nu_4L],        idx_2mnu,
+							    &u[dir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
                             
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
 
 void calc_loc_improved_staples_typeB_nnptrick_all_d3c(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap,
-        int offset3, int thickness3 )
+						      __restrict const su3_soa * const u,
+						      __restrict su3_soa * const loc_stap,
+						      int offset3, int thickness3 )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang
-    for(d3=offset3; d3<offset3+thickness3; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang
+  for(int d3=offset3; d3<offset3+thickness3; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_mu_1L = 2*mu + !parity;
-                            const int dir_nu_2L = 2*nu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_mu_4L = 2*mu + !parity;
-                            const int dir_nu_5L = 2*nu + !parity;
-                            const int dir_mu_1R = 2*mu + !parity;
-                            const int dir_nu_2R = 2*nu +  parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_mu_4R = 2*mu + !parity;
-                            const int dir_nu_5R = 2*nu +  parity;
+	      const int dir_mu_1L = 2*mu + !parity;
+	      const int dir_nu_2L = 2*nu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_mu_4L = 2*mu + !parity;
+	      const int dir_nu_5L = 2*nu + !parity;
+	      const int dir_mu_1R = 2*mu + !parity;
+	      const int dir_nu_2R = 2*nu +  parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_mu_4R = 2*mu + !parity;
+	      const int dir_nu_5R = 2*nu +  parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];             // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];             // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];             // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;            // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];     // r+mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
-                            const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
-                            const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];             // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;            // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];     // r+mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
+	      const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
+	      const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
 
-                            // IMPROVEMENT TYPE B      
-                            //   BR is of type PPMMM
-                            //   BL is of type PMMMP
-                            //      r+2mu-nu r+2mu   r+2mu+nu
-                            //          +<-----+----->+
-                            //          |  2L  ^  2R  |
-                            //       3L |    1L|1R    | 3R
-                            //          V      |      V
-                            //  r+mu-nu +     r+mu    + r+mu+nu
-                            //          |      ^      |
-                            // mu    4L |      |      | 4R
-                            // ^        V  5L  |  5R  V
-                            // |        +----->+<-----+
-                            // |       r-nu    r     r+nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE B      
+	      //   BR is of type PPMMM
+	      //   BL is of type PMMMP
+	      //      r+2mu-nu r+2mu   r+2mu+nu
+	      //          +<-----+----->+
+	      //          |  2L  ^  2R  |
+	      //       3L |    1L|1R    | 3R
+	      //          V      |      V
+	      //  r+mu-nu +     r+mu    + r+mu+nu
+	      //          |      ^      |
+	      // mu    4L |      |      | 4R
+	      // ^        V  5L  |  5R  V
+	      // |        +----->+<-----+
+	      // |       r-nu    r     r+nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1R],        idx_pmu,
-                                    &u[dir_nu_2R],        idx_2pmu,
-                                    &u[dir_mu_3R],        idx_pmu_pnu,
-                                    &u[dir_mu_4R],        idx_pnu,
-                                    &u[dir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Right part of the staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1R],        idx_pmu,
+							    &u[dir_nu_2R],        idx_2pmu,
+							    &u[dir_mu_3R],        idx_pmu_pnu,
+							    &u[dir_mu_4R],        idx_pnu,
+							    &u[dir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Left  part of the staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1L],        idx_pmu,
-                                    &u[dir_nu_2L],        idx_2pmu_mnu,
-                                    &u[dir_mu_3L],        idx_pmu_mnu,
-                                    &u[dir_mu_4L],        idx_mnu,
-                                    &u[dir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_mu_1L],        idx_pmu,
+							    &u[dir_nu_2L],        idx_2pmu_mnu,
+							    &u[dir_mu_3L],        idx_pmu_mnu,
+							    &u[dir_mu_4L],        idx_mnu,
+							    &u[dir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
                             
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
 
 void calc_loc_improved_staples_typeC_nnptrick_all_d3c(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap,
-        int offset3, int thickness3 )
+						      __restrict const su3_soa * const u,
+						      __restrict su3_soa * const loc_stap,
+						      int offset3, int thickness3 )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang
-    for(d3=offset3; d3<offset3+thickness3; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang
+  for(int d3=offset3; d3<offset3+thickness3; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
-
-                            const int dir_link = 2*mu + parity;
-                            const int dir_nu_1L = 2*nu +  parity;
-                            const int dir_mu_2L = 2*mu + !parity;
-                            const int dir_mu_3L = 2*mu +  parity;
-                            const int dir_nu_4L = 2*nu +  parity;
-                            const int dir_mu_5L = 2*mu + !parity;
-                            const int dir_nu_1R = 2*nu + !parity;
-                            const int dir_mu_2R = 2*mu + !parity;
-                            const int dir_mu_3R = 2*mu +  parity;
-                            const int dir_nu_4R = 2*nu + !parity;
-                            const int dir_mu_5R = 2*mu + !parity;
+	      const int dir_nu_1L = 2*nu +  parity;
+	      const int dir_mu_2L = 2*mu + !parity;
+	      const int dir_mu_3L = 2*mu +  parity;
+	      const int dir_nu_4L = 2*nu +  parity;
+	      const int dir_mu_5L = 2*mu + !parity;
+	      const int dir_nu_1R = 2*nu + !parity;
+	      const int dir_mu_2R = 2*mu + !parity;
+	      const int dir_mu_3R = 2*mu +  parity;
+	      const int dir_nu_4R = 2*nu + !parity;
+	      const int dir_mu_5R = 2*mu + !parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
-                            const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
-                            const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
+	      const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
+	      const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
 
 
-                            // IMPROVEMENT TYPE C
-                            //   CR is of type PMMMP
-                            //   CL is of type MMMPP
-                            //       r+mu-nu  r+mu   r+mu+nu
-                            //          +<-----+----->+
-                            //          |  1L  ^  1R  |
-                            //       2L |      |      | 2R
-                            //          V      |      V
-                            //     r-nu +      r      + r+nu
-                            //          |      ^      |
-                            // mu    3L |    5L|5R    | 3R
-                            // ^        V  4L  |  4R  V
-                            // |        +----->+<-----+
-                            // |    r-mu-nu   r-mu   r-mu+nu
-                            // +---> nu
-                            //            r is idxh in the following
+	      // IMPROVEMENT TYPE C
+	      //   CR is of type PMMMP
+	      //   CL is of type MMMPP
+	      //       r+mu-nu  r+mu   r+mu+nu
+	      //          +<-----+----->+
+	      //          |  1L  ^  1R  |
+	      //       2L |      |      | 2R
+	      //          V      |      V
+	      //     r-nu +      r      + r+nu
+	      //          |      ^      |
+	      // mu    3L |    5L|5R    | 3R
+	      // ^        V  4L  |  4R  V
+	      // |        +----->+<-----+
+	      // |    r-mu-nu   r-mu   r-mu+nu
+	      // +---> nu
+	      //            r is idxh in the following
 
-                            //computation of the Right part of the staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
-                                    &u[dir_mu_2R],        idx_pnu,
-                                    &u[dir_mu_3R],        idx_mmu_pnu,
-                                    &u[dir_nu_4R],        idx_mmu,
-                                    &u[dir_mu_5R],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Right part of the staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1R],        idx_pmu,
+							    &u[dir_mu_2R],        idx_pnu,
+							    &u[dir_mu_3R],        idx_mmu_pnu,
+							    &u[dir_nu_4R],        idx_mmu,
+							    &u[dir_mu_5R],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //computation of the Left  part of the staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
-                                    &u[dir_mu_2L],        idx_mnu,
-                                    &u[dir_mu_3L],        idx_mmu_mnu,
-                                    &u[dir_nu_4L],        idx_mmu_mnu,
-                                    &u[dir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
+	      //computation of the Left  part of the staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[dir_nu_1L],        idx_pmu_mnu,
+							    &u[dir_mu_2L],        idx_mnu,
+							    &u[dir_mu_3L],        idx_mmu_mnu,
+							    &u[dir_nu_4L],        idx_mmu_mnu,
+							    &u[dir_mu_5L],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
  
 void calc_loc_improved_staples_typeABC_nnptrick_all_d3c(  
-        __restrict const su3_soa * const u,
-        __restrict su3_soa * const loc_stap,
-        int offset3, int thickness3 )
+							__restrict const su3_soa * const u,
+							__restrict su3_soa * const loc_stap,
+							int offset3, int thickness3 )
 {
-    int d0, d1, d2, d3, mu, iter;
-#pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang
-    for(d3=offset3; d3<offset3+thickness3; d3++){
-#pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
-        for(d2=0; d2<nd2; d2++) {
-            for(d1=0; d1<nd1; d1++) {
-                for(d0=0; d0 < nd0; d0++) {
-#pragma acc loop seq
-                    for(mu=0; mu<4; mu++){
-#pragma acc loop seq
-                        for(iter=0; iter<3; iter++){
+  #pragma acc kernels present(u) present(loc_stap) present(nnp_openacc) present(nnm_openacc)
+  #pragma acc loop independent gang
+  for(int d3=offset3; d3<offset3+thickness3; d3++){
+    #pragma acc loop independent tile(IMPSTAPTILE0,IMPSTAPTILE1,IMPSTAPTILE2)
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+	for(int d0=0; d0 < nd0; d0++) {
+	  const int idxh = snum_acc(d0,d1,d2,d3);  // r
+	  const int parity = (d0+d1+d2+d3) % 2;
+          #pragma acc loop seq
+	  for(int mu=0; mu<4; mu++){
+	    const int dir_link = 2*mu + parity;
+            #pragma acc loop seq
+	    for(int iter=0; iter<3; iter++){
 
-                            int nu;
-                            if (mu==0) { nu = iter + 1; }
-                            else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
-                            else if (mu==2) { nu = iter + (iter >> 1); }
-                            else if (mu==3) { nu = iter; }
-                            else { //error
-                            }
+	      int nu;
+	      if (mu==0) { nu = iter + 1; }
+	      else if (mu==1) { nu = iter + (iter & 1) + (iter >> 1); }
+	      else if (mu==2) { nu = iter + (iter >> 1); }
+	      else if (mu==3) { nu = iter; }
+	      else { //error
+	      }
 
-                            const int idxh = snum_acc(d0,d1,d2,d3);  // r
-                            const int parity = (d0+d1+d2+d3) % 2;
+	      const int Adir_nu_1L = 2*nu +  parity;
+	      const int Adir_nu_2L = 2*nu + !parity;
+	      const int Adir_mu_3L = 2*mu +  parity;
+	      const int Adir_nu_4L = 2*nu +  parity;
+	      const int Adir_nu_5L = 2*nu + !parity;
+	      const int Adir_nu_1R = 2*nu + !parity;
+	      const int Adir_nu_2R = 2*nu +  parity;
+	      const int Adir_mu_3R = 2*mu +  parity;
+	      const int Adir_nu_4R = 2*nu + !parity;
+	      const int Adir_nu_5R = 2*nu +  parity;
 
-                            const int dir_link = 2*mu + parity;
-
-                            const int Adir_nu_1L = 2*nu +  parity;
-                            const int Adir_nu_2L = 2*nu + !parity;
-                            const int Adir_mu_3L = 2*mu +  parity;
-                            const int Adir_nu_4L = 2*nu +  parity;
-                            const int Adir_nu_5L = 2*nu + !parity;
-                            const int Adir_nu_1R = 2*nu + !parity;
-                            const int Adir_nu_2R = 2*nu +  parity;
-                            const int Adir_mu_3R = 2*mu +  parity;
-                            const int Adir_nu_4R = 2*nu + !parity;
-                            const int Adir_nu_5R = 2*nu +  parity;
-
-                            const int Bdir_mu_1L = 2*mu + !parity;
-                            const int Bdir_nu_2L = 2*nu + !parity;
-                            const int Bdir_mu_3L = 2*mu +  parity;
-                            const int Bdir_mu_4L = 2*mu + !parity;
-                            const int Bdir_nu_5L = 2*nu + !parity;
-                            const int Bdir_mu_1R = 2*mu + !parity;
-                            const int Bdir_nu_2R = 2*nu +  parity;
-                            const int Bdir_mu_3R = 2*mu +  parity;
-                            const int Bdir_mu_4R = 2*mu + !parity;
-                            const int Bdir_nu_5R = 2*nu +  parity;
+	      const int Bdir_mu_1L = 2*mu + !parity;
+	      const int Bdir_nu_2L = 2*nu + !parity;
+	      const int Bdir_mu_3L = 2*mu +  parity;
+	      const int Bdir_mu_4L = 2*mu + !parity;
+	      const int Bdir_nu_5L = 2*nu + !parity;
+	      const int Bdir_mu_1R = 2*mu + !parity;
+	      const int Bdir_nu_2R = 2*nu +  parity;
+	      const int Bdir_mu_3R = 2*mu +  parity;
+	      const int Bdir_mu_4R = 2*mu + !parity;
+	      const int Bdir_nu_5R = 2*nu +  parity;
 
 
-                            const int Cdir_nu_1L = 2*nu +  parity;
-                            const int Cdir_mu_2L = 2*mu + !parity;
-                            const int Cdir_mu_3L = 2*mu +  parity;
-                            const int Cdir_nu_4L = 2*nu +  parity;
-                            const int Cdir_mu_5L = 2*mu + !parity;
-                            const int Cdir_nu_1R = 2*nu + !parity;
-                            const int Cdir_mu_2R = 2*mu + !parity;
-                            const int Cdir_mu_3R = 2*mu +  parity;
-                            const int Cdir_nu_4R = 2*nu + !parity;
-                            const int Cdir_mu_5R = 2*mu + !parity;
+	      const int Cdir_nu_1L = 2*nu +  parity;
+	      const int Cdir_mu_2L = 2*mu + !parity;
+	      const int Cdir_mu_3L = 2*mu +  parity;
+	      const int Cdir_nu_4L = 2*nu +  parity;
+	      const int Cdir_mu_5L = 2*mu + !parity;
+	      const int Cdir_nu_1R = 2*nu + !parity;
+	      const int Cdir_mu_2R = 2*mu + !parity;
+	      const int Cdir_mu_3R = 2*mu +  parity;
+	      const int Cdir_nu_4R = 2*nu + !parity;
+	      const int Cdir_mu_5R = 2*mu + !parity;
 
 #pragma acc cache (nnp_openacc[idxh:8])
-                            const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
+	      const int idx_pmu = nnp_openacc[idxh][mu][parity];          // r+mu
 #pragma acc cache (nnm_openacc[idx_pmu:8])
-                            const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
-                            const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
-                            const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
-                            const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
-                            const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
-                            const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
-                            const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
-                            const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
-                            const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
-                            const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
-                            const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
-                            const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu              
+	      const int idx_pnu = nnp_openacc[idxh][nu][parity];          // r+nu
+	      const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
+	      const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
+	      const int idx_mmu = nnm_openacc[idxh][mu][parity];          // r-mu
+	      const int idx_mmu_pnu = nnp_openacc[idx_mmu][nu][!parity];  // r-mu+nu
+	      const int idx_mmu_mnu = nnm_openacc[idx_mmu][nu][!parity];  // r-mu-nu
+	      const int idx_pmu_pnu = nnp_openacc[idx_pmu][nu][!parity];     // r+mu+nu
+	      const int idx_2pmu = nnp_openacc[idx_pmu][mu][!parity];        // r+2mu
+	      const int idx_2pmu_mnu = nnp_openacc[idx_pmu_mnu][mu][parity]; // r+2mu-nu
+	      const int idx_2pnu = nnp_openacc[idx_pnu][nu][!parity];     // r+2nu
+	      const int idx_pmu_2mnu = nnm_openacc[idx_pmu_mnu][nu][parity];  // r+mu-2nu
+	      const int idx_2mnu = nnm_openacc[idx_mnu][nu][!parity] ;         // r-2nu              
 
+	      // IMPROVEMENT TYPE ABC
+	      //computation of the Right part of the A staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1R],        idx_pmu,
+							    &u[Adir_nu_2R],        idx_pmu_pnu,
+							    &u[Adir_mu_3R],        idx_2pnu,
+							    &u[Adir_nu_4R],        idx_pnu,
+							    &u[Adir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
+	      //computation of the Left  part of the A staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1L],        idx_pmu_mnu,
+							    &u[Adir_nu_2L],        idx_pmu_2mnu,
+							    &u[Adir_mu_3L],        idx_2mnu,
+							    &u[Adir_nu_4L],        idx_2mnu,
+							    &u[Adir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
 
-                            // IMPROVEMENT TYPE ABC
-                            //computation of the Right part of the A staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1R],        idx_pmu,
-                                    &u[Adir_nu_2R],        idx_pmu_pnu,
-                                    &u[Adir_mu_3R],        idx_2pnu,
-                                    &u[Adir_nu_4R],        idx_pnu,
-                                    &u[Adir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Right part of the B staple
+	      PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1R],        idx_pmu,
+							    &u[Bdir_nu_2R],        idx_2pmu,
+							    &u[Bdir_mu_3R],        idx_pmu_pnu,
+							    &u[Bdir_mu_4R],        idx_pnu,
+							    &u[Bdir_nu_5R],        idxh,
+							    &loc_stap[dir_link],  idxh);
 
-                            //computation of the Left  part of the A staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Adir_nu_1L],        idx_pmu_mnu,
-                                    &u[Adir_nu_2L],        idx_pmu_2mnu,
-                                    &u[Adir_mu_3L],        idx_2mnu,
-                                    &u[Adir_nu_4L],        idx_2mnu,
-                                    &u[Adir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
+	      //computation of the Left  part of the B staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1L],        idx_pmu,
+							    &u[Bdir_nu_2L],        idx_2pmu_mnu,
+							    &u[Bdir_mu_3L],        idx_pmu_mnu,
+							    &u[Bdir_mu_4L],        idx_mnu,
+							    &u[Bdir_nu_5L],        idx_mnu,
+							    &loc_stap[dir_link],  idxh);
 
+	      //computation of the Right part of the C staple
+	      PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1R],        idx_pmu,
+							    &u[Cdir_mu_2R],        idx_pnu,
+							    &u[Cdir_mu_3R],        idx_mmu_pnu,
+							    &u[Cdir_nu_4R],        idx_mmu,
+							    &u[Cdir_mu_5R],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);							    
 
+	      //computation of the Left  part of the C staple
+	      MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1L],        idx_pmu_mnu,
+							    &u[Cdir_mu_2L],        idx_mnu,
+							    &u[Cdir_mu_3L],        idx_mmu_mnu,
+							    &u[Cdir_nu_4L],        idx_mmu_mnu,
+							    &u[Cdir_mu_5L],        idx_mmu,
+							    &loc_stap[dir_link],  idxh);							    
 
-                            //computation of the Right part of the B staple
-                            PPMMM_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1R],        idx_pmu,
-                                    &u[Bdir_nu_2R],        idx_2pmu,
-                                    &u[Bdir_mu_3R],        idx_pmu_pnu,
-                                    &u[Bdir_mu_4R],        idx_pnu,
-                                    &u[Bdir_nu_5R],        idxh,
-                                    &loc_stap[dir_link],  idxh);
-
-                            //computation of the Left  part of the B staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Bdir_mu_1L],        idx_pmu,
-                                    &u[Bdir_nu_2L],        idx_2pmu_mnu,
-                                    &u[Bdir_mu_3L],        idx_pmu_mnu,
-                                    &u[Bdir_mu_4L],        idx_mnu,
-                                    &u[Bdir_nu_5L],        idx_mnu,
-                                    &loc_stap[dir_link],  idxh);
-
-
-
-                            //computation of the Right part of the C staple
-                            PMMMP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1R],        idx_pmu,
-                                    &u[Cdir_mu_2R],        idx_pnu,
-                                    &u[Cdir_mu_3R],        idx_mmu_pnu,
-                                    &u[Cdir_nu_4R],        idx_mmu,
-                                    &u[Cdir_mu_5R],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
-
-                            //computation of the Left  part of the C staple
-                            MMMPP_5mat_prod_addto_mat6_absent_stag_phases(&u[Cdir_nu_1L],        idx_pmu_mnu,
-                                    &u[Cdir_mu_2L],        idx_mnu,
-                                    &u[Cdir_mu_3L],        idx_mmu_mnu,
-                                    &u[Cdir_nu_4L],        idx_mmu_mnu,
-                                    &u[Cdir_mu_5L],        idx_mmu,
-                                    &loc_stap[dir_link],  idxh);							    
-
-                            //Adding K_mu(x) to the staple.
-                            double K_mu=u[dir_link].K.d[idxh];
-                            
-                            loc_stap[dir_link].r0.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r0.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r1.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r1.c2[idxh] *= K_mu;
-                            
-                            loc_stap[dir_link].r2.c0[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c1[idxh] *= K_mu;
-                            loc_stap[dir_link].r2.c2[idxh] *= K_mu;
-                        }  // mu
-                    }  // iter
-                }  // d0
-            }  // d1
-        }  // d2
-    }  // d3
-
+	    }  // iter
+	    // In the end, each staple has to be multiplied by the K_mu(x) of the link emanating the staples
+	    // N.B. This factor is common both for the left and for the right staples, and common for all values of nu
+	    //double K_mu=u[dir_link].K.d[idxh];
+	    //gl3_times_double_factor(&(loc_stap[dir_link]), idxh, K_mu);                
+	  }  // mu
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
 }// closes routine
 
 #endif
 
-double  calc_rettangolo_soloopenacc( 
-        __restrict const su3_soa * const tconf_acc, 
-        __restrict su3_soa * const local_plaqs, 
-        dcomplex_soa * const tr_local_plaqs)
+double calc_rettangolo_soloopenacc( 
+				    __restrict const su3_soa * const tconf_acc, 
+				    __restrict su3_soa * const local_plaqs, 
+				    dcomplex_soa * const tr_local_plaqs)
 {
-    double temp=0.0;
-    double total_result=0.0;
-    // calculation of reactangle on the 6 planes
-    for(int mu=0;mu<3;mu++){
-        for(int nu=mu+1;nu<4;nu++){
-            temp  += calc_loc_rectangles_2x1_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
-            temp  += calc_loc_rectangles_1x2_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
-        }
+  double temp=0.0;
+  double total_result=0.0;
+  // calculation of reactangle on the 6 planes
+  for(int mu=0;mu<3;mu++){
+    for(int nu=mu+1;nu<4;nu++){
+      temp  += calc_loc_rectangles_2x1_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
+      temp  += calc_loc_rectangles_1x2_nnptrick(tconf_acc,local_plaqs,tr_local_plaqs,mu,nu);
     }
-
+  }
 #ifdef MULTIDEVICE
-     MPI_Allreduce((void*)&temp,(void*)&total_result,
-             1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce((void*)&temp,(void*)&total_result,
+		1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 #else
-     total_result = temp;
+  total_result = temp;
 #endif 
-    return total_result;
+  return total_result;
 }
 
 #endif
