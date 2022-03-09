@@ -20,6 +20,7 @@
 #include "../Include/fermion_parameters.h"
 #include "../Include/montecarlo_parameters.h"
 #include "../Include/inverter_tricks.h"
+#include "../Include/memory_wrapper.h"
 #include "../Include/setting_file_parser.h"
 #include "../Include/tell_geom_defines.h"
 #include "../Meas/ferm_meas.h"
@@ -209,6 +210,7 @@ int main(int argc, char* argv[]){
         mem_alloc_extended_f();
         printf("\n  MPI%02d - Allocazione della memoria (float) [EXTENDED]: OK \n\n\n",devinfo.myrank);
     }
+    printf("\n  MPI%02d - Allocazione della memoria totale: %zu \n\n\n",devinfo.myrank,max_memory_used);
     compute_nnp_and_nnm_openacc();
 #pragma acc enter data copyin(nnp_openacc)
 #pragma acc enter data copyin(nnm_openacc)
@@ -747,6 +749,17 @@ int main(int argc, char* argv[]){
     printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)
+
+    printf("\n  MPI%02d - Prima dello shutdown, memoria allocata: %zu \n\n\n",devinfo.myrank,memory_used);
+    
+    struct memory_allocated_t *all=memory_allocated_base;
+    
+    while(all!=NULL)
+      {
+	printf("\n  MPI%02d - Va disallocato: %s di taglia %zu (o va conteggiato)\n\n\n",devinfo.myrank,all->varname,all->size);
+	//free_wrapper(all->ptr);
+	all=all->next;
+    };
 
 #ifndef __GNUC__
     //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////

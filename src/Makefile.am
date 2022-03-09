@@ -62,6 +62,8 @@ __common_sources = \
 	Include/stringify.h \
 	Include/tell_geom_defines.c \
 	Include/tell_geom_defines.h \
+	Include/memory_wrapper.c \
+	Include/memory_wrapper.h \
 	Meas/baryon_number_utilities.c \
 	Meas/baryon_number_utilities.h \
 	Meas/ferm_meas.c \

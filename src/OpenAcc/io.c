@@ -517,7 +517,7 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf,
 
 
     // writing ildg binary data, that is conf
-    len = geom_par.gnx * geom_par.gny * geom_par.gnz * geom_par.gnt *4*3*3*2*8;
+    len = (uint64_t) geom_par.gnx * geom_par.gny * geom_par.gnz * geom_par.gnt *4*3*3*2*8;
     missing_bytes = (off_t)(len%8==0?0:8-len%8);
     len64 = len + missing_bytes;
     if(verbosity_lv > 3) printf("Writing ildg-binary-data, %" PRIu64 
