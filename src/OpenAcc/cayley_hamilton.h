@@ -49,13 +49,13 @@ static inline double Tr_i_times_QA_sq_soa( __restrict const tamat_soa * const QA
 
 #pragma acc routine seq
 static inline void CH_exponential_antihermitian_soa_nissalike(
-        __restrict su3_soa * const exp_out,
-        __restrict tamat_soa * const QA,const int idx)
+        __restrict su3_soa * exp_out,
+        __restrict const tamat_soa * QA,const int idx)
 {
   // exp( - QA) , where Q=i*QA ==> exp(-QA) = exp(i*Q)
   //        ~~>  QA is anti-hermitian
   //        ~~>  hence Q=i*QA is hermitian
-  //   based on Sez. III of http://arXiv.org/abs/hep-lat/0311018v1
+  //   based on Sec. III of http://arXiv.org/abs/hep-lat/0311018v1
 
   double c0 = det_i_times_QA_soa(QA,idx); //(14) // cosi calcolo direttamente il det(Q)
   double c1  = 0.5 * Tr_i_times_QA_sq_soa(QA,idx); // (15)
@@ -182,7 +182,7 @@ static inline void CH_exponential_antihermitian_soa_nissalike(
 }
 
 #pragma acc routine seq
-inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, __restrict single_tamat * const QA, single_su3 * const out){
+static inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2, __restrict single_tamat * const QA, single_su3 * const out){
 // this is a degree 2 polynomial in Q= iQA, that is
 // P = f0 + f1 * Q + f2 * Q^2 = f0 + i * f1 * QA - f2 * QA^2
 
@@ -218,7 +218,7 @@ inline void Itamat_2ndDeg_poly_no3rdrow(d_complex f0, d_complex f1, d_complex f2
 
 }
 #pragma acc routine seq
-inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out){
+static inline void Itamat_2ndDeg_poly(d_complex f0, d_complex f1, d_complex f2, single_tamat * QA, single_su3 * out){
    // See comments in Itamat_2ndDeg_poly_no3rdrow(f0,f1,f2,QA,out);
    
     Itamat_2ndDeg_poly_no3rdrow(f0,f1,f2,QA,out);

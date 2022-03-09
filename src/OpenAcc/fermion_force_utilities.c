@@ -17,9 +17,9 @@ void set_tamat_soa_to_zero( __restrict tamat_soa * const matrix)
 {
     int mu, idxh;
 #pragma acc kernels present(matrix)
-#pragma acc loop independent // gang(nd3)
+#pragma acc loop independent gang(8)
     for(mu=0; mu<8; mu++) {
-#pragma acc loop independent // gang(nd3)
+#pragma acc loop independent vector(32)
         for(idxh=0; idxh<sizeh; idxh++) {
             assign_zero_to_tamat_soa_component(&matrix[mu],idxh);
 
@@ -38,9 +38,8 @@ void direct_product_of_fermions_into_auxmat(
     //LOOP SUI SITI PARI
     int hd0, d1, d2, d3;
 #pragma acc kernels present(loc_s) present(loc_h)  present(approx) present(aux_u)
-#pragma acc loop independent gang(STAPGANG3)
+#pragma acc loop independent gang vector tile(STAPTILE0,STAPTILE1,STAPTILE2,STAPGANG3)
     for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(hd0=0; hd0 < nd0h; hd0++) {
@@ -66,9 +65,8 @@ void direct_product_of_fermions_into_auxmat(
 
     //LOOP SUI SITI DISPARI
 #pragma acc kernels present(loc_s) present(loc_h)  present(approx) present(aux_u)
-#pragma acc loop independent gang(STAPGANG3)
+#pragma acc loop independent gang vector tile(STAPTILE0,STAPTILE1,STAPTILE2,STAPGANG3)
     for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
         for(d2=0; d2<nd2; d2++) {
             for(d1=0; d1<nd1; d1++) {
                 for(hd0=0; hd0 < nd0h; hd0++) {
@@ -101,9 +99,8 @@ void multiply_conf_times_force_and_take_ta_nophase(
 #pragma acc kernels present(u) present(auxmat) present(ipdot) 
 #pragma acc loop independent
     for(dir = 0; dir< 8 ; dir++){
-#pragma acc loop independent gang(STAPGANG3)
+#pragma acc loop independent gang vector tile(STAPTILE0,STAPTILE1,STAPTILE2,STAPGANG3)
         for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
             for(d2=0; d2<nd2; d2++) {
                 for(d1=0; d1<nd1; d1++) {
                     for(hd0=0; hd0 < nd0h; hd0++) {
@@ -132,9 +129,8 @@ void multiply_backfield_times_force(
 #pragma acc kernels present(args) present(auxmat) present(pseudo_ipdot) 
 #pragma acc loop independent
     for(dirindex = 0 ; dirindex < 8 ; dirindex++){
-#pragma acc loop independent gang(STAPGANG3)
+#pragma acc loop independent gang vector tile(STAPTILE0,STAPTILE1,STAPTILE2,STAPGANG3)
         for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
             for(d2=0; d2<nd2; d2++) {
                 for(d1=0; d1<nd1; d1++) {
                     for(hd0=0; hd0 < nd0h; hd0++) {
@@ -164,9 +160,8 @@ void accumulate_gl3soa_into_gl3soa(
 #pragma acc kernels present(auxmat) present(pseudo_ipdot)
 #pragma acc loop independent
     for(dirindex = 0 ; dirindex < 8 ; dirindex++){
-#pragma acc loop independent gang(STAPGANG3)
+#pragma acc loop independent gang vector tile(STAPTILE0,STAPTILE1,STAPTILE2,STAPGANG3)
         for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
             for(d2=0; d2<nd2; d2++) {
                 for(d1=0; d1<nd1; d1++) {
                     for(hd0=0; hd0 < nd0h; hd0++) {
@@ -200,7 +195,6 @@ void ker_openacc_compute_fermion_force(
 
     }
 }
-
 
 
 #endif

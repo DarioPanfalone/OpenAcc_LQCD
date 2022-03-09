@@ -43,8 +43,8 @@ void conf_times_staples_ta_part(
         __restrict tamat_soa * const tipdot);
 
 void RHO_times_conf_times_staples_ta_part(
-        __restrict const su3_soa * const u,       
-        __restrict const su3_soa * const loc_stap,
+        __restrict const su3_soa * u,       
+        __restrict const su3_soa * loc_stap,
         __restrict tamat_soa * const tipdot);
 
 void mom_sum_mult( __restrict thmat_soa * const mom,

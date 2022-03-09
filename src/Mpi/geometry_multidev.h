@@ -289,7 +289,7 @@ the considered direction is not paralelized))
 */
 
 #pragma acc routine seq
-inline vec4int xyzt_rank(int rank){
+static inline vec4int xyzt_rank(int rank){
 
     vec4int rank4int;
 
@@ -301,9 +301,8 @@ inline vec4int xyzt_rank(int rank){
     return rank4int;
 
 }
-
 #pragma acc routine seq
-inline int rank_from_0123_rank(int rank_0, int rank_1, 
+static inline int rank_from_0123_rank(int rank_0, int rank_1, 
                                int rank_2, int rank_3){
 
     return rank_0 + ( NRANKS_D0 * (rank_1 + NRANKS_D1 * (rank_2  + NRANKS_D2 * rank_3)));
