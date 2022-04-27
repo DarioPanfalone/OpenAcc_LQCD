@@ -376,13 +376,13 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
 
 int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-    // see OpenAcc/su3_measurements.h
-    const double stout_rho_def = RHO;
+	const double stout_rho_def = 0.15;
 	const int topo_action_def = 0;
 	const double barrier_def = 2.0;
 	const double width_def = 0.1;
 	const char topo_file_path_def[] = "ToPotential";
 	const int topo_stout_steps_def = 0;
+	const double topo_stout_rho_def = 0.15;
 	const char topo_act_comment[] = "#Set to 1 to enable multicanonical topological potential.";
     par_info ap[]={
         (par_info){(void*) &(act_par->beta)            , TYPE_DOUBLE, "Beta"          , NULL, NULL},
@@ -393,38 +393,11 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
 		(par_info){(void*) &(act_par->width)           , TYPE_DOUBLE, "Width"         , (const void*) &width_def, NULL},
 		(par_info){(void*) &(act_par->topo_file_path)  , TYPE_STR   , "TopoPath"      , (const void*) &topo_file_path_def, NULL},
 		(par_info){(void*) &(act_par->topo_stout_steps), TYPE_INT   , "TopoStoutSteps", (const void*) &topo_stout_steps_def, NULL},
-		(par_info){(void*) &(act_par->topo_rho)        , TYPE_DOUBLE, "TopoRho"       , NULL, NULL}
+		(par_info){(void*) &(act_par->topo_rho)        , TYPE_DOUBLE, "TopoRho"       , (const void*) &stout_rho_def, NULL}
 	};			   
 				   
     // from here on, you should not have to modify anything.
-    int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
-
-    if(startline<endline){
-        if(act_par->stout_rho != RHO ){ 
-
-            if(0==devinfo.myrank){
-                printf("Error, input file stout_rho != RHO \n");
-                printf("  Either modify the input file, or recompile changing RHO\n");
-                printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
-            }
-            res = 1;
-
-        }
-
-        if(act_par->topo_rho != TOPO_RHO ){ 
-
-            if(0==devinfo.myrank){
-                printf("Error, input file topo_rho != TOPO_RHO \n");
-                printf("  Either modify the input file, or recompile changing TOPO_RHO\n");
-                printf(" (input) topo_rho = %f, (code) TOPO_RHO = %f\n", act_par->topo_rho,TOPO_RHO);
-            }
-            res = 1;
-
-        }
-    }
-    return res;
-
-
+    return scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
 
 }
 int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
@@ -640,7 +613,7 @@ int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXL
     
     const int measstout_def = 0;
     const char pathstout_def[] = "TopoStout";
-    const double measrhostout_def = TOPO_RHO;
+    const double measrhostout_def = 0.1;
     const char measrhostout_comment[]="# MeasStoutRho can't be changed, it have to be equal to StoutRho, which is setted in src/Include/common_defines.h";
     const int stoutmeasstep_def = 1;
     const int stout_measinterval_def = 1;
@@ -670,19 +643,7 @@ int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXL
 
 
     // from here on, you should not have to modify anything.
-    int res = scan_group_NV(sizeof(tomp)/sizeof(par_info),tomp, filelines, startline, endline);
-    if(startline<endline){
-        if(meastopars->measrhostout != TOPO_RHO ){ 
-
-            if(0==devinfo.myrank){
-                printf("Error, input file MeasStoutRho != TOPO_RHO \n");
-                printf("  Either modify the input file, or recompile changing TOPO_RHO\n");
-                printf(" (input) topo_rho = %f, (code) TOPO_RHO = %f\n", meastopars->measrhostout,TOPO_RHO);
-            }
-            res = 1;
-        }
-    }
-    return res;
+    return scan_group_NV(sizeof(tomp)/sizeof(par_info),tomp, filelines, startline, endline);
 }
 
 

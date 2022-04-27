@@ -13,8 +13,6 @@
 #include "./struct_c_def.h"
 #include "./single_types.h"
 
-extern int TOPO_GLOBAL_DONT_TOUCH;
-
 // reunitarize the conf by brute force
 void unitarize_conf( __restrict su3_soa * const u)
 {
@@ -193,9 +191,8 @@ void conf_times_staples_ta_part_addto_tamat(
 void RHO_times_conf_times_staples_ta_part(
         __restrict const su3_soa * const u,
         __restrict const su3_soa * const loc_stap,
-        __restrict tamat_soa * const tipdot)
+        __restrict tamat_soa * const tipdot, int istopo) //istopo = {0,1} -> rho={fermrho,toporho}
 {
-
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(loc_stap) present(tipdot)
 #pragma acc loop independent gang(STAPGANG3)
@@ -212,7 +209,7 @@ void RHO_times_conf_times_staples_ta_part(
 	  parity = (d0+d1+d2+d3) % 2;
 	  for(mu=0;mu<4;mu++){ 
 	    dir_link = 2*mu + parity;
-	    RHO_times_mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh);
+	    RHO_times_mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh,istopo);
 
 	  }
 

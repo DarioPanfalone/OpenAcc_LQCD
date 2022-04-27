@@ -20,6 +20,7 @@ typedef struct action_param_t{
 extern double grid[];
 
 extern action_param act_params;
+double gl_stout_rho, gl_topo_rho;
 
 #define BETA_BY_THREE  (act_params.beta*ONE_BY_THREE)
 

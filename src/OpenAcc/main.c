@@ -72,12 +72,6 @@
 int conf_id_iter;
 int verbosity_lv;
 
-extern int TOPO_GLOBAL_DONT_TOUCH; 
-
-
-
-
-
 int main(int argc, char* argv[]){
 
     gettimeofday ( &(mc_params.start_time), NULL );
@@ -111,7 +105,7 @@ int main(int argc, char* argv[]){
 
 
     int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]);
-
+		
 #ifdef MULTIDEVICE
     if(input_file_read_check){
         printf("MPI%02d: input file reading failed, Aborting...\n",devinfo.myrank);
@@ -126,7 +120,8 @@ int main(int argc, char* argv[]){
         printf("MPI%02d: input file reading failed, aborting...\n",devinfo.myrank);
         exit(1);
     }
-    if(0==devinfo.myrank) print_geom_defines();
+
+		if(0==devinfo.myrank) print_geom_defines();
     verbosity_lv = debug_settings.input_vbl;
 
     if(0==devinfo.myrank){
@@ -221,7 +216,13 @@ int main(int argc, char* argv[]){
         printf("\n  MPI%02d - Allocazione della memoria (float) [EXTENDED]: OK \n\n\n",devinfo.myrank);
     }
     printf("\n  MPI%02d - Allocazione della memoria totale: %zu \n\n\n",devinfo.myrank,max_memory_used);
-    compute_nnp_and_nnm_openacc();
+
+		gl_stout_rho=act_params.stout_rho;
+		gl_topo_rho=act_params.topo_rho;
+#pragma acc enter data copyin(gl_stout_rho)
+#pragma acc enter data copyin(gl_topo_rho)
+
+		compute_nnp_and_nnm_openacc();
 #pragma acc enter data copyin(nnp_openacc)
 #pragma acc enter data copyin(nnm_openacc)
     printf("MPI%02d - nn computation : OK \n",devinfo.myrank);
@@ -492,9 +493,7 @@ int main(int argc, char* argv[]){
             	    }
 	    }
 	    if(meastopo_params.measstout && conf_id_iter%meastopo_params.stouteach==0){
-		    TOPO_GLOBAL_DONT_TOUCH=1;
-		    stout_wrapper(conf_acc,gstout_conf_acc_arr);
-		    TOPO_GLOBAL_DONT_TOUCH=0;
+		    stout_wrapper(conf_acc,gstout_conf_acc_arr,1);
 		    stout_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
 		    for(int ss = 0; ss < meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
 	    	    	/* aux_conf_acc = &(gstout_conf_acc_arr[8*ss]); */
@@ -837,6 +836,8 @@ int main(int argc, char* argv[]){
     printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)
+#pragma acc exit data delete(gl_stout_rho)
+#pragma acc exit data delete(gl_topo_rho)
 
     printf("\n  MPI%02d - Prima dello shutdown, memoria allocata: %zu \n\n\n",devinfo.myrank,memory_used);
     

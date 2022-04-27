@@ -10,7 +10,6 @@
 #endif
 
 
-
 void exp_minus_QA_times_conf(__restrict const su3_soa * const tu,
 			     __restrict tamat_soa * const QA,
                  __restrict su3_soa * const tu_out,
@@ -21,7 +20,8 @@ void stout_isotropic(
         __restrict su3_soa * const uprime,          // --> output conf [stouted]
         __restrict su3_soa * const local_staples,   // --> parking variable
         __restrict su3_soa * const auxiliary,       // --> parking variable
-        __restrict tamat_soa * const tipdot);       // --> parking variable
+        __restrict tamat_soa * const tipdot,       // --> parking variable
+				const int istopo); //istopo = {0,1} -> rho={fermrho,toporho}
 
 
 void compute_lambda(__restrict thmat_soa * const L, // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
@@ -33,15 +33,16 @@ __restrict su3_soa   * const TMP  // variabile di parcheggio
 
 #if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
 void stout_wrapper(__restrict const su3_soa * const tconf_acc,
-        __restrict su3_soa * tstout_conf_acc_arr);
+									 __restrict su3_soa * tstout_conf_acc_arr, const int istopo);//istopo=1 -> stout steps = topological stout steps; istopo=0 -> stout steps = fermionic stout steps;
 #endif
 
 void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput  (una cosa che serve per calcolare la forza fermionica successiva)
  __restrict const su3_soa   * const U,  // la configurazione di gauge --> input
  __restrict su3_soa   * const S,  // entra Sigma primo (input: fermforce del passo precedente) ED esce Sigma --> sia input che ouput
  __restrict const tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
- __restrict su3_soa   * const TMP // variabile di parcheggio
-		   );
+__restrict su3_soa   * const TMP, // variabile di parcheggio
+const int istopo //istopo = {0,1} -> rho={fermrho,toporho}
+);
 
 
 #endif

@@ -19,8 +19,6 @@
 #include <mpi.h>
 #endif
 
-extern int TOPO_GLOBAL_DONT_TOUCH;
-
 
 char gauge_outfilename[50];
 char gauge_outfile_header[100];

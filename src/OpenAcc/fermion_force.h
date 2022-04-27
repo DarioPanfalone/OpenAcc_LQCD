@@ -16,7 +16,8 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
 							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
 							   __restrict tamat_soa  * QA, // la var globale e' aux_ta
 							   __restrict const su3_soa    * const U, // la var globale e' .... per adesso conf_acc
-							   __restrict su3_soa    * const TMP// la var globale e' aux_conf_acc //PARCHEGGIO??
+								 __restrict su3_soa    * const TMP,// la var globale e' aux_conf_acc //PARCHEGGIO??
+								 const int istopo //istopo = {0,1} -> rho={fermrho,toporho}
 							   );
 
 void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
