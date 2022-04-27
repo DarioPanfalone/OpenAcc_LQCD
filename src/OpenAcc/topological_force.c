@@ -18,8 +18,6 @@
 #include "../Mpi/communications.h"
 #endif 
 
-int TOPO_GLOBAL_DONT_TOUCH = 0;
-
 //#define DEBUG_LOLLO
 #ifdef DEBUG_LOLLO
  #include "./cayley_hamilton.h"
@@ -341,7 +339,6 @@ void calc_ipdot_topo(__restrict su3_soa const * const tconf_acc,
 		     __restrict su3_soa * const local_staples,
 		     __restrict tamat_soa * const tipdot_acc)
 {
-  TOPO_GLOBAL_DONT_TOUCH = 1;
   set_su3_soa_to_zero(local_staples);
   __restrict su3_soa * conf_to_use; // CONF TO USE IN CALCULATION OF TOPO FORCE
   //  __restrict su3_soa_f * conf_to_use_f; // CONF TO USE IN CALCULATION OF TOPO FORCE
@@ -349,7 +346,7 @@ void calc_ipdot_topo(__restrict su3_soa const * const tconf_acc,
 
 #ifdef STOUT_TOPO
   if(act_params.topo_stout_steps > 0){
-    stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+    stout_wrapper(tconf_acc,tstout_conf_acc_arr,1);
     conf_to_use = &(tstout_conf_acc_arr[8*(act_params.topo_stout_steps-1)]);
   }
   else conf_to_use=(su3_soa*)tconf_acc;
@@ -364,18 +361,16 @@ void calc_ipdot_topo(__restrict su3_soa const * const tconf_acc,
     conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
 
     compute_sigma_from_sigma_prime_backinto_sigma_prime(local_staples,aux_th,aux_ta,
-							conf_to_use,taux_conf_acc);
+																												conf_to_use,taux_conf_acc,1);
   }    
   if(act_params.topo_stout_steps > 0 ){
     compute_sigma_from_sigma_prime_backinto_sigma_prime(local_staples,aux_th,aux_ta,
-							tconf_acc, taux_conf_acc );
+																												tconf_acc, taux_conf_acc,1);
 
   }
 #endif
 
   conf_times_staples_ta_part_addto_tamat(tconf_acc,local_staples,tipdot_acc);  
-
-TOPO_GLOBAL_DONT_TOUCH = 0;
 
 
 //DEBUG

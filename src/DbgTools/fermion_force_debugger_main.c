@@ -74,7 +74,7 @@ int main(){
 #ifdef STOUT_FERMIONS 
     // USO DELLA VERSIONE STOUTATA GIA' PER LO STIRACCHIAMENTO
     // STOUTING...(ALREADY ON DEVICE)
-    stout_wrapper(conf_acc,tstout_conf_acc_arr);
+    stout_wrapper(conf_acc,tstout_conf_acc_arr,0);
     gconf_as_fermionmatrix = &tstout_conf_acc_arr[8*(STOUT_STEPS-1)];
 #else
     gconf_as_fermionmatrix = conf_acc;
@@ -174,7 +174,7 @@ int main(){
 
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
-    stout_wrapper(conf_acc,tstout_conf_acc_arr);
+    stout_wrapper(conf_acc,tstout_conf_acc_arr,0);
     gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
 #else
     gconf_as_fermionmatrix = conf_acc;

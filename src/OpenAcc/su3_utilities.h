@@ -5,7 +5,7 @@
 #include "./struct_c_def.h"
 #include "./single_types.h"
 #include "./cayley_hamilton.h"
-
+#include "./action.h"
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
  #define __restrict
@@ -14,7 +14,6 @@
  #include <accelmath.h>
  #include "../OpenAcc/deviceinit.h"
 #endif
-
 
 // multiply the whole configuration for the staggered phases field
 // (only the first two lines)
@@ -52,7 +51,7 @@ void conf_times_staples_ta_part_addto_tamat(
 void RHO_times_conf_times_staples_ta_part(
         __restrict const su3_soa * const u,       
         __restrict const su3_soa * const loc_stap,
-        __restrict tamat_soa * const tipdot);
+        __restrict tamat_soa * const tipdot, int istopo); //istopo = {0,1} -> rho={fermrho,toporho}
 
 void mom_sum_mult( __restrict thmat_soa * const mom,
         __restrict const tamat_soa * const ipdot, const double * factor,
@@ -872,8 +871,9 @@ static inline void mat1_times_mat2_addto_tamat3(
 static inline void RHO_times_mat1_times_mat2_into_tamat3(
         __restrict const su3_soa * const mat1, const int idx_mat1,
         __restrict const su3_soa * const mat2, const int idx_mat2,
-        __restrict tamat_soa * const mat3,     const int idx_mat3)
+        __restrict tamat_soa * const mat3,     const int idx_mat3, int istopo)
 {
+	const double RHO=(istopo)?(double)gl_topo_rho:(double)gl_stout_rho;
   //Load the first two rows of mat1 (that is a link variable)
   d_complex mat1_00 = mat1->r0.c0[idx_mat1];
   d_complex mat1_01 = mat1->r0.c1[idx_mat1];
@@ -912,7 +912,7 @@ static inline void RHO_times_mat1_times_mat2_into_tamat3(
   mat1_11 = mat1_20*mat2_01+mat1_21*mat2_11+mat1_22*mat2_21; // mat3_21
   mat1_12 = mat1_20*mat2_02+mat1_21*mat2_12+mat1_22*mat2_22; // mat3_22
 
-  // oltre a moltiplicare per RHO devo anche dividere per C_ZERO
+  // oltre a moltiplicare per rho devo anche dividere per C_ZERO
   // perche' le staples che entrano qui dentro sono le staples * C_ZERO 
   // --> lo devo togliere!!
   double tmp = RHO/C_ZERO;

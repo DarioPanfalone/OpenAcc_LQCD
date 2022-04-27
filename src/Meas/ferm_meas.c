@@ -153,7 +153,7 @@ void fermion_measures( su3_soa * tconf_acc,
 
 
     if(act_params.stout_steps > 0){
-        stout_wrapper(tconf_acc ,gstout_conf_acc_arr);
+			  stout_wrapper(tconf_acc ,gstout_conf_acc_arr,0);
         conf_to_use = &gstout_conf_acc_arr[8*(act_params.stout_steps-1)];
     }
     else conf_to_use = tconf_acc;

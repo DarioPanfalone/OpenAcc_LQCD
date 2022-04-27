@@ -153,7 +153,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // DILATION USING STOUTED DIRAC OPERATOR
     // STOUTING...(ALREADY ON DEVICE)
     if(act_params.stout_steps > 0){
-        stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
 
@@ -222,7 +222,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     // DILATION USING STOUTED DIRAC OPERATOR
     // STOUTING...(ALREADY ON DEVICE)
     if(act_params.stout_steps > 0){
-        stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
 
@@ -452,7 +452,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
     if(act_params.stout_steps > 0){
-        stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
     }
@@ -529,7 +529,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
     if(act_params.stout_steps > 0){
-        stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
     }
