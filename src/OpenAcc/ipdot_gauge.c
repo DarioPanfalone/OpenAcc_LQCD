@@ -37,11 +37,15 @@ void calc_ipdot_gauge_soloopenacc_std(
     calc_loc_staples_nnptrick_all(tconf_acc,local_staples);
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 
-    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+    if(md_dbg_print_count < debug_settings.md_dbg_print_max_count 
+            && 1 == debug_settings.md_dbg_be_verbose ){
         char genericfilename[50];
+        // staples
         sprintf(genericfilename,"std_staples_%d_%d",
                 devinfo.myrank, md_dbg_print_count);
         dbgprint_gl3_soa(local_staples,genericfilename,1000);
+
+        // tipdot
         sprintf(genericfilename,"std_tipdot_staples_%d_%d",
                 devinfo.myrank, md_dbg_print_count);
         print_tamat_soa(tipdot,genericfilename);
@@ -82,7 +86,8 @@ void calc_ipdot_gauge_soloopenacc_tlsm(
 
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
 
-    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count
+            && 1 == debug_settings.md_dbg_be_verbose ){
         char genericfilename[50];
         sprintf(genericfilename,"impr_staples_%d_%d",
                 devinfo.myrank, md_dbg_print_count);
@@ -196,7 +201,8 @@ void calc_ipdot_gauge_soloopenacc_std_bulk(
     calc_loc_staples_nnptrick_all_bulk(tconf_acc,local_staples);
     conf_times_staples_ta_part_bulk(tconf_acc,local_staples,tipdot);
 
-    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count
+            && 1 == debug_settings.md_dbg_be_verbose ){
         char genericfilename[50];
         sprintf(genericfilename,"std_staples_%d_%d_bulk",
                 devinfo.myrank, md_dbg_print_count);
@@ -238,7 +244,8 @@ void calc_ipdot_gauge_soloopenacc_tlsm_bulk(
     
     conf_times_staples_ta_part_bulk(tconf_acc,local_staples,tipdot);
 
-    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count
+            && 1 == debug_settings.md_dbg_be_verbose ){
         char genericfilename[50];
         sprintf(genericfilename,"impr_staples_%d_%d",
                 devinfo.myrank, md_dbg_print_count);
@@ -288,7 +295,8 @@ void calc_ipdot_gauge_soloopenacc_std_d3c(
     conf_times_staples_ta_part_d3c(tconf_acc,local_staples,tipdot,
             offset3,thickness3);
     
-    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count
+            && 1 == debug_settings.md_dbg_be_verbose ){
         char genericfilename[50];
         sprintf(genericfilename,"std_staples_%d_%d_d3c",
                 devinfo.myrank, md_dbg_print_count);
@@ -335,7 +343,8 @@ void calc_ipdot_gauge_soloopenacc_tlsm_d3c(
             offset3,thickness3);
 
 
-    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
+    if(md_dbg_print_count<debug_settings.md_dbg_print_max_count
+            && 1 == debug_settings.md_dbg_be_verbose ){
         char genericfilename[50];
         sprintf(genericfilename,"impr_staples_%d_%d_d3c",
                 devinfo.myrank, md_dbg_print_count);
