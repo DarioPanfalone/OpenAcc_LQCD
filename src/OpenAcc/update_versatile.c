@@ -46,7 +46,7 @@ action_param act_params;
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro, int max_cg){
 
-#ifdef STOUT_FERMIONS //Per adesso va bene così, ma dopo aggiungerà la topossibilità       
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)       
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
     su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_arr_f;
 #endif
@@ -152,8 +152,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef STOUT_FERMIONS 
     // DILATION USING STOUTED DIRAC OPERATOR
     // STOUTING...(ALREADY ON DEVICE)
-    if(act_params.stout_steps > 0){
-			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
+    if ( (act_params.stout_steps > 0 ) && (alloc_info.NDiffFlavs > 0) ){
+  			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
 
@@ -221,7 +221,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef STOUT_FERMIONS 
     // DILATION USING STOUTED DIRAC OPERATOR
     // STOUTING...(ALREADY ON DEVICE)
-    if(act_params.stout_steps > 0){
+    if ( (act_params.stout_steps > 0) && (alloc_info.NDiffFlavs > 0) ){
 			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
@@ -451,7 +451,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
-    if(act_params.stout_steps > 0){
+    if ( (act_params.stout_steps > 0) && (alloc_info.NDiffFlavs > 0) ){
 			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
@@ -528,7 +528,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 	
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
-    if(act_params.stout_steps > 0){
+    if ( (act_params.stout_steps > 0) && (alloc_info.NDiffFlavs > 0) ){
 			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);

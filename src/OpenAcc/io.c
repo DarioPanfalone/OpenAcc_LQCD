@@ -404,8 +404,10 @@ int read_su3_soa_ildg_binary(
             int d[4];
             for(dir = 0; dir<4;dir++) d[dir] = xs[geom_par.d0123map[dir]];
 
-            int parity = (xl+yl+zl+tl)%2;// parity = (d0+d1+d2+d3)%2;
-
+            int parity = (xl+yl+zl+tl)%2; // parity = (d0+d1+d2+d3)%2;
+						#if defined(MULTIDEVICE) && defined(GAUGE_ACT_WILSON)
+							parity = !parity;
+						#endif
             //            printf("d0 %d d1 %d d2 %d d3 %d\n", d[0],d[1],d[2],d[3]);//DEBUG
             //            printf("x  %d y  %d z  %d t  %d\n", xs[0],xs[1],xs[2],xs[3]);//DEBUG
 
@@ -581,7 +583,9 @@ int print_su3_soa_ildg_binary(global_su3_soa * const conf, const char* nomefile,
             int idxh = snum_acc(d[0],d[1],d[2],d[3]);
 #endif
             int parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
-
+						#if defined(MULTIDEVICE) && defined(GAUGE_ACT_WILSON)
+							parity = !parity;
+						#endif
             for(dir=0;dir<4;dir++){
 
                 int dirmachine = geom_par.xyztmap[dir];

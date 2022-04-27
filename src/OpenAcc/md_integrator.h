@@ -16,7 +16,7 @@ void multistep_2MN_gauge(su3_soa *tconf_acc,su3_soa *local_staples,tamat_soa *ti
 
 void multistep_2MN_SOLOOPENACC( tamat_soa * tipdot_acc,
         su3_soa  * tconf_acc,
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
         su3_soa  * tstout_conf_acc_arr, // huge parking for stouting
 #endif
         su3_soa  * tauxbis_conf_acc, 

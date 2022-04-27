@@ -7,9 +7,8 @@ cd $cur_dir
 
 ../build/generate_makefile.py ../src/OpenAcc/main.c > makefile
 
-if [ "$1" == "clean" ]
-   then
-           make clean
+if [ "$1" == "clean" ]; then
+	make clean
 fi
 
 make
