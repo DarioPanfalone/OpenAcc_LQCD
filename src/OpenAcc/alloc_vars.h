@@ -38,6 +38,7 @@ extern double_soa * mag_obs_im;     // Imaginary part of the 'algebra-prefix'
                                     // of magnetization observable 
                                     // 8 for each flavour
 
+extern double_soa * topo_loc; //topological charge auxiliary
 
 extern thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 extern int momenta_backupped;

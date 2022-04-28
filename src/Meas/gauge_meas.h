@@ -12,16 +12,15 @@
  #define M_PI 3.14159265358979323846
 #endif
 
-
 extern char gauge_outfilename[50];
 extern char gauge_outfile_header[100];
 
 
 #pragma acc routine seq
-static inline void comp_U_U_Udag_Udag(__restrict su3_soa * const mat1, int idx_mat1,
-				      __restrict su3_soa * const mat2, int idx_mat2,
-				      __restrict su3_soa * const mat3, int idx_mat3,
-				      __restrict su3_soa * const mat4, int idx_mat4,
+static inline void comp_U_U_Udag_Udag(__restrict su3_soa const * const mat1, int idx_mat1,
+				      __restrict su3_soa const * const mat2, int idx_mat2,
+				      __restrict su3_soa const * const mat3, int idx_mat3,
+				      __restrict su3_soa const * const mat4, int idx_mat4,
 				      __restrict su3_soa * const out , int idx_out){
 
   d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
@@ -107,10 +106,10 @@ static inline void comp_U_U_Udag_Udag(__restrict su3_soa * const mat1, int idx_m
 }
 
 #pragma acc routine seq
-static inline void comp_and_add_U_Udag_Udag_U(__restrict su3_soa * const mat1, int idx_mat1,
-					      __restrict su3_soa * const mat2, int idx_mat2,
-					      __restrict su3_soa * const mat3, int idx_mat3,
-					      __restrict su3_soa * const mat4, int idx_mat4,
+static inline void comp_and_add_U_Udag_Udag_U(__restrict su3_soa const * const mat1, int idx_mat1,
+					      __restrict su3_soa const * const mat2, int idx_mat2,
+					      __restrict su3_soa const * const mat3, int idx_mat3,
+					      __restrict su3_soa const * const mat4, int idx_mat4,
 					      __restrict su3_soa * const out , int idx_out){
   d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
   d_complex B00,B01,B02,B10,B11,B12,B20,B21,B22;
@@ -195,10 +194,10 @@ static inline void comp_and_add_U_Udag_Udag_U(__restrict su3_soa * const mat1, i
 }
 
 #pragma acc routine seq
-static inline void comp_and_add_Udag_Udag_U_U(__restrict su3_soa * const mat1, int idx_mat1,
-					      __restrict su3_soa * const mat2, int idx_mat2,
-					      __restrict su3_soa * const mat3, int idx_mat3,
-					      __restrict su3_soa * const mat4, int idx_mat4,
+static inline void comp_and_add_Udag_Udag_U_U(__restrict su3_soa const * const mat1, int idx_mat1,
+					      __restrict su3_soa const * const mat2, int idx_mat2,
+					      __restrict su3_soa const * const mat3, int idx_mat3,
+					      __restrict su3_soa const * const mat4, int idx_mat4,
 					      __restrict su3_soa * const out , int idx_out){
   d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
   d_complex B00,B01,B02,B10,B11,B12,B20,B21,B22;
@@ -283,10 +282,10 @@ static inline void comp_and_add_Udag_Udag_U_U(__restrict su3_soa * const mat1, i
 }
 
 #pragma acc routine seq
-static inline void comp_and_add_Udag_U_U_Udag(__restrict su3_soa * const mat1, int idx_mat1,
-					      __restrict su3_soa * const mat2, int idx_mat2,
-					      __restrict su3_soa * const mat3, int idx_mat3,
-					      __restrict su3_soa * const mat4, int idx_mat4,
+static inline void comp_and_add_Udag_U_U_Udag(__restrict su3_soa const * const mat1, int idx_mat1,
+					      __restrict su3_soa const * const mat2, int idx_mat2,
+					      __restrict su3_soa const * const mat3, int idx_mat3,
+					      __restrict su3_soa const * const mat4, int idx_mat4,
 					      __restrict su3_soa * const out , int idx_out){
   
   d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
@@ -423,20 +422,20 @@ static inline void combine_fourleaves_to_get_loc_q(__restrict su3_soa * const Qm
 
 }
 
-/*
 
-void compute_local_topological_charge(  __restrict su3_soa * const u,
+
+void compute_local_topological_charge(  __restrict const su3_soa * const u,
 					__restrict su3_soa * const quadri,
 					double_soa * const loc_q,
 					int mu, int nu);
 
 double reduce_loc_top_charge(double_soa * const loc_q);
 
-double compute_topological_charge(__restrict su3_soa * const u,
+double compute_topological_charge(__restrict const su3_soa * const u,
 				  __restrict su3_soa * const quadri,
 				  double_soa * const loc_q);
 
-*/
+
 
 
 #endif

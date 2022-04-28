@@ -8,12 +8,12 @@
  #define __restrict
 #endif
 
-void compute_cooled_even_links(__restrict su3_soa   * const U, __restrict su3_soa   * const STAP);
+void compute_cooled_even_links(__restrict su3_soa   * const U,__restrict su3_soa   * const Ucool,  __restrict su3_soa   * const STAP);
 
-void compute_cooled_odd_links(__restrict su3_soa   * const U,
+void compute_cooled_odd_links(__restrict su3_soa   * const U,__restrict su3_soa   * const Ucool, 
 			      __restrict su3_soa   * const STAP);
 
-void cool_conf(__restrict su3_soa   * const U,
+void cool_conf(__restrict su3_soa   * const U,__restrict su3_soa   * const Ucool, 
 	       __restrict su3_soa   * const TMP);
 
 #endif

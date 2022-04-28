@@ -16,6 +16,7 @@
 #include "./alloc_vars.h"
 #include "./struct_c_def.h"
 #include "./alloc_settings.h"
+#include "../Meas/measure_topo.h"
 
 
 #define ALIGN 128
@@ -49,6 +50,7 @@ double_soa * mag_obs_im;     // Imaginary part of the 'algebra-prefix'
                              // of magnetization observable 
                              // 8 for each flavour
 
+double_soa * topo_loc; //topological charge auxiliary
 
 thmat_soa * momenta;// GAUGE FIELD EVOLUTION
 thmat_soa * momenta_backup;// GAUGE FIELD EVOLUTION - REVERSIBILITY TEST
@@ -184,6 +186,10 @@ void mem_alloc_extended()
     ALLOCCHECK(allocation_check, mag_obs_im);
 #pragma acc enter data create(mag_obs_im[0:alloc_info.NDiffFlavs*8])
 
+    allocation_check = POSIX_MEMALIGN_WRAPPER((void **)&topo_loc,ALIGN,
+		    2*sizeof(double_soa));
+#pragma acc enter data create(topo_loc[0:2])  
+
 
     //the double bracket in the setfree macro MUST be there (because of operators precedence)
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa)); 
@@ -232,24 +238,34 @@ void mem_alloc_extended()
     // STOUTING
     if(alloc_info.stoutAllocations){ // not always the same as act_params.stout_steps,
                                      // e.g., in benchmarks
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&gstout_conf_acc_arr, ALIGN, act_params.stout_steps*8*sizeof(su3_soa)); 
-    ALLOCCHECK(allocation_check,gstout_conf_acc_arr ) ;
-#pragma acc enter data create(gstout_conf_acc_arr[0:8*act_params.stout_steps])
+      /*
+      int  allocation_steps = act_params.stout_steps;
+      if(allocation_steps<act_params.topo_stout_steps)
+	allocation_steps=act_params.topo_stout_steps;
+      if(allocation_steps<meastopo_params.stoutmeasstep)
+	allocation_steps=meastopo_params.stoutmeasstep;
+      */
+      int  allocation_steps = (act_params.stout_steps>act_params.topo_stout_steps?
+			       act_params.stout_steps:act_params.topo_stout_steps);
+      
+      allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&gstout_conf_acc_arr, ALIGN, allocation_steps*8*sizeof(su3_soa)); 
+      ALLOCCHECK(allocation_check,gstout_conf_acc_arr ) ;
+#pragma acc enter data create(gstout_conf_acc_arr[0:8*allocation_steps])
 
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); 
-    ALLOCCHECK(allocation_check, glocal_staples) ;
+      allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&glocal_staples, ALIGN, 8*sizeof(su3_soa)); 
+      ALLOCCHECK(allocation_check, glocal_staples) ;
 #pragma acc enter data create(glocal_staples[0:8])
 
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); 
-    ALLOCCHECK(allocation_check, gipdot) ;
+      allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&gipdot, ALIGN, 8*sizeof(tamat_soa)); 
+      ALLOCCHECK(allocation_check, gipdot) ;
 #pragma acc enter data create(gipdot[0:8])
 
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); 
-    ALLOCCHECK(allocation_check, aux_th ) ;
+      allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_th, ALIGN, 8*sizeof(thmat_soa)); 
+      ALLOCCHECK(allocation_check, aux_th ) ;
 #pragma acc enter data create(aux_th[0:8])
 
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); 
-    ALLOCCHECK(allocation_check, aux_ta ) ;
+      allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_ta, ALIGN, 8*sizeof(tamat_soa)); 
+      ALLOCCHECK(allocation_check, aux_ta ) ;
 #pragma acc enter data create(aux_ta[0:8])
     }
 
@@ -406,6 +422,8 @@ void mem_free_extended()
     }
     
     // REDUCTIONS
+		FREECHECK(topo_loc);
+#pragma acc exit data delete(topo_loc)            
     FREECHECK(local_sums);            
 #pragma acc exit data delete(local_sums)            
     FREECHECK(d_local_sums);          

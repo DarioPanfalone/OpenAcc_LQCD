@@ -34,8 +34,14 @@ __common_generated_sources = \
 	OpenAcc/sp_su3_measurements.h  \
 	OpenAcc/sp_su3_utilities.c  \
 	OpenAcc/sp_su3_utilities.h  \
+  OpenAcc/sp_topological_action.c \
+	OpenAcc/sp_topological_action.h \
+  OpenAcc/sp_topological_force.c \
+	OpenAcc/sp_topological_force.h \
 	DbgTools/sp_dbgtools.h  \
 	DbgTools/sp_dbgtools.c  \
+	Meas/sp_gauge_meas.c \
+	Meas/sp_gauge_meas.h \
 	Mpi/sp_communications.h  \
 	Mpi/sp_communications.c 
 
@@ -74,6 +80,8 @@ __common_sources = \
 	Meas/magnetic_susceptibility_utilities.h \
 	Meas/polyakov.c \
 	Meas/polyakov.h \
+	Meas/measure_topo.c \
+	Meas/measure_topo.h \
 	Mpi/communications.c \
 	Mpi/communications.h \
 	Mpi/dbgtools.h \
@@ -146,6 +154,10 @@ __common_sources = \
 	OpenAcc/su3_measurements.h \
 	OpenAcc/su3_utilities.c \
 	OpenAcc/su3_utilities.h \
+  OpenAcc/topological_action.c \
+	OpenAcc/topological_action.h \
+  OpenAcc/topological_force.c \
+	OpenAcc/topological_force.h \
 	OpenAcc/update_versatile.c \
 	OpenAcc/update_versatile.h \
 	Rand/random.c \

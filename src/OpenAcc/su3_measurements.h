@@ -22,7 +22,7 @@ void copy_ipdot_into_old(  const __restrict tamat_soa * tipdot,
                   __restrict tamat_soa * tipdot_old);
 
 
-double invert_momenta( __restrict thmat_soa * mom);
+void invert_momenta( __restrict thmat_soa * mom);
 
 double calc_sum_momenta_norm(const __restrict thmat_soa * tmomenta,  
         const __restrict thmat_soa * tmomenta_old);

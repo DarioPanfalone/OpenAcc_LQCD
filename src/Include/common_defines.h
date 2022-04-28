@@ -1,7 +1,6 @@
 #ifndef COMMON_DEFINES_H_
 #define COMMON_DEFINES_H_
 
-
 //#define BACKFIELD
 //#define IMCHEMPOT
 
@@ -13,6 +12,16 @@
 #if defined(BACKFIELD) || defined (IMCHEMPOT)
   #define PHASE_MAT_VEC_MULT 
 #endif
+
+//keep these commented if you are using M100
+/*
+#define conj __builtin_conj
+#define creal __builtin_creal
+#define cimag __builtin_cimag
+#define conjf __builtin_conjf
+#define crealf __builtin_crealf
+#define cimagf __builtin_cimagf
+*/
 
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
 #define DIM_BLOCK_Y 8 // This should divide ny
@@ -27,8 +36,8 @@
 #ifdef STOUT_FERMIONS
 #define STOUT_STEPS 2
 #endif
-#define RHO 0.15
-#define RHOF 0.15f
+
+#define STOUT_TOPO
 
 #define ONE_BY_THREE   0.33333333333333333333333
 #define ONE_BY_THREEF   0.33333333333333333333333f

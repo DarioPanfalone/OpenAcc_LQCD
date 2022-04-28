@@ -3,6 +3,7 @@
 
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
+#include "../Meas/measure_topo.h"
 #include "../Mpi/multidev.h"
 #include "../OpenAcc/action.h"
 #include "../OpenAcc/md_parameters.h"
@@ -57,11 +58,12 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "MontecarloParameters",     // 4       
     "GaugeMeasuresSettings",    // 5
     "FermionMeasuresSettings",  // 6
-    "DeviceSettings"         ,  // 7
-    "Geometry"               ,  // 8
-    "DebugSettings"          ,  // 9
-    "InverterTricks"         ,  // 10
-    "TestSettings"              // 11
+    "TopoMeasuresSettings"   ,  // 7
+    "DeviceSettings"         ,  // 8
+    "Geometry"               ,  // 9
+    "DebugSettings"          ,  // 10
+    "InverterTricks"         ,  // 11
+    "TestSettings"              // 12
 };
 enum pmg_types {
     PMG_ACTION         ,
@@ -71,6 +73,7 @@ enum pmg_types {
     PMG_MC             ,
     PMG_GMEAS          ,
     PMG_FMEAS          ,
+    PMG_TMEAS	       ,
     PMG_DEVICE         ,
     PMG_GEOMETRY       ,
     PMG_DEBUG          ,
@@ -374,33 +377,28 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
 
 int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-    // see OpenAcc/su3_measurements.h
-    const double stout_rho_def = RHO;
-
+	const double stout_rho_def = 0.15;
+	const int topo_action_def = 0;
+	const double barrier_def = 2.0;
+	const double width_def = 0.1;
+	const char topo_file_path_def[] = "ToPotential";
+	const int topo_stout_steps_def = 0;
+	const double topo_stout_rho_def = 0.15;
+	const char topo_act_comment[] = "#Set to 1 to enable multicanonical topological potential.";
     par_info ap[]={
-        (par_info){(void*) &(act_par->beta)       ,TYPE_DOUBLE,"Beta"      , NULL,NULL},
-        (par_info){(void*) &(act_par->stout_steps),TYPE_INT   ,"StoutSteps", NULL,NULL},
-        (par_info){(void*) &(act_par->stout_rho)  ,TYPE_DOUBLE,"StoutRho"  , (const void*) &stout_rho_def,NULL}};
-
-
+        (par_info){(void*) &(act_par->beta)            , TYPE_DOUBLE, "Beta"          , NULL, NULL},
+        (par_info){(void*) &(act_par->stout_steps)     , TYPE_INT   , "StoutSteps"    , NULL, NULL},
+        (par_info){(void*) &(act_par->stout_rho)       , TYPE_DOUBLE, "StoutRho"      , (const void*) &stout_rho_def, NULL},
+		(par_info){(void*) &(act_par->topo_action)     , TYPE_INT   , "TopoAct"       , (const void*) &topo_action_def, topo_act_comment},
+		(par_info){(void*) &(act_par->barrier)         , TYPE_DOUBLE, "Barrier"       , (const void*) &barrier_def, NULL},
+		(par_info){(void*) &(act_par->width)           , TYPE_DOUBLE, "Width"         , (const void*) &width_def, NULL},
+		(par_info){(void*) &(act_par->topo_file_path)  , TYPE_STR   , "TopoPath"      , (const void*) &topo_file_path_def, NULL},
+		(par_info){(void*) &(act_par->topo_stout_steps), TYPE_INT   , "TopoStoutSteps", (const void*) &topo_stout_steps_def, NULL},
+		(par_info){(void*) &(act_par->topo_rho)        , TYPE_DOUBLE, "TopoRho"       , (const void*) &stout_rho_def, NULL}
+	};			   
+				   
     // from here on, you should not have to modify anything.
-    int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
-
-    if(startline<endline)
-        if(act_par->stout_rho != RHO ){ 
-
-            if(0==devinfo.myrank){
-                printf("Error, input file stout_rho != RHO \n");
-                printf("  Either modify the input file, or recompile changing RHO\n");
-                printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
-            }
-            res = 1;
-
-        }
-
-    return res;
-
-
+    return scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
 
 }
 int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
@@ -605,6 +603,56 @@ int read_fermmeas_info(ferm_meas_params * fmpars,char filelines[MAXLINES][MAXLIN
     return scan_group_NV(sizeof(fmp)/sizeof(par_info),fmp, filelines, startline, endline);
 
 }
+
+
+int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
+{
+
+    const int meascool_def = 0;
+    const char pathcool_def[] = "TopoCool";
+    const int coolmeasstep_def = 1;
+    const int cool_measinterval_def = 1;
+    const char cool_measinterval_comment[] = "# Cooled Topological charge will be measured every CoolMeasInterval cooling steps.";
+    const int cooleach_def = 1;
+    const char cooleach_comment[] = "# Cooled Topological charge will be measured every CoolMeasEach MC step.";
+    
+    const int measstout_def = 0;
+    const char pathstout_def[] = "TopoStout";
+    const double measrhostout_def = 0.1;
+    const char measrhostout_comment[]="# MeasStoutRho can't be changed, it have to be equal to StoutRho, which is setted in src/Include/common_defines.h";
+    const int stoutmeasstep_def = 1;
+    const int stout_measinterval_def = 1;
+    const char stout_measinterval_comment[] = "# Stouted Topological charge will be measured every StoutMeasInterval cooling steps.";
+    const int stouteach_def = 1;
+    const char stouteach_comment[] = "# Stouted Topological charge will be measured every StoutMeasEach MC step.";
+
+
+
+
+
+
+    par_info tomp[]={
+        (par_info){(void*) &(meastopars->meascool),       	       TYPE_INT,"MeasCool"            ,(const void*) &meascool_def,         NULL},
+        (par_info){(void*) &(meastopars->pathcool),                    TYPE_STR,"PathCool"            ,(const void*) &pathcool_def,         NULL},
+        (par_info){(void*) &(meastopars->coolmeasstep),                    TYPE_INT,"CoolMeasSteps"       ,(const void*) &coolmeasstep_def,         NULL},
+        (par_info){(void*) &(meastopars->cool_measinterval),           TYPE_INT,"CoolMeasInterval"    ,(const void*) &cool_measinterval_def,cool_measinterval_comment},
+        (par_info){(void*) &(meastopars->cooleach),                TYPE_INT,"CoolMeasEach"        ,(const void*) &cooleach_def,cooleach_comment},
+
+        (par_info){(void*) &(meastopars->measstout),       	       TYPE_INT,"MeasStout"           ,(const void*) &measstout_def,         NULL},
+        (par_info){(void*) &(meastopars->pathstout),                   TYPE_STR,"PathStout"           ,(const void*) &pathstout_def,         NULL},
+        (par_info){(void*) &(meastopars->measrhostout),       	    TYPE_DOUBLE,"MeasStoutRho"        ,(const void*) &measrhostout_def,measrhostout_comment},
+        (par_info){(void*) &(meastopars->stoutmeasstep),                   TYPE_INT,"StoutMeasSteps"      ,(const void*) &stoutmeasstep_def,         NULL},
+        (par_info){(void*) &(meastopars->stout_measinterval),          TYPE_INT,"StoutMeasInterval"   ,(const void*) &stout_measinterval_def,stout_measinterval_comment},
+        (par_info){(void*) &(meastopars->stouteach),               TYPE_INT,"StoutMeasEach"       ,(const void*) &stouteach_def,stouteach_comment},
+    };
+
+
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(tomp)/sizeof(par_info),tomp, filelines, startline, endline);
+}
+
+
+
 int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
 
@@ -871,6 +919,10 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 check = read_fermmeas_info(&fm_par,
                         filelines,startline,endline);
                 break; 
+            case PMG_TMEAS     : 
+                check = read_topomeas_info(&meastopo_params,
+                        filelines,startline,endline);
+                break; 
             case PMG_DEVICE     : 
                 check = read_device_setting(&devinfo,
                         filelines,startline,endline);
@@ -907,7 +959,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     }
 
 
-    alloc_info.stoutAllocations = act_params.stout_steps > 0 ;
+    alloc_info.stoutAllocations = act_params.stout_steps > 0 || act_params.topo_stout_steps > 0 || meastopo_params.stoutmeasstep > 0;
     if(devinfo.myrank == 0 )
         printf("Set alloc_info.stoutAllocations to %d\n",  alloc_info.stoutAllocations );
 

@@ -40,7 +40,6 @@ void unitarize_conf( __restrict su3_soa * const u)
 }
 
 
-
 void set_su3_soa_to_zero( __restrict su3_soa * const matrix)
 {
   int hd0, d1, d2, d3;
@@ -74,6 +73,34 @@ void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
 {
   int hd0, d1, d2, d3;
   for(d3=0; d3<nd3; d3++) {
+    for(d2=0; d2<nd2; d2++) {
+      for(d1=0; d1<nd1; d1++) {
+	for(hd0=0; hd0 < nd0h; hd0++) {
+	  int d0,idxh;
+          d0 = 2*hd0 + ((d1+d2+d3) & 0x1);
+          idxh = snum_acc(d0,d1,d2,d3);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[0],&matrix_out[0],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[1],&matrix_out[1],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[2],&matrix_out[2],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[3],&matrix_out[3],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[4],&matrix_out[4],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[5],&matrix_out[5],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[6],&matrix_out[6],idxh);
+	  assign_su3_soa_to_su3_soa_component(&matrix_in[7],&matrix_out[7],idxh);
+	}
+      }
+    }
+  }
+}
+
+void set_su3_soa_to_su3_soa_device(__restrict const su3_soa * const matrix_in,
+			     	   __restrict su3_soa * const matrix_out)
+{
+  int hd0, d1, d2, d3;
+#pragma acc kernels present(matrix_in) present(matrix_out)
+#pragma acc loop independent gang(STAPGANG3)
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(d2=0; d2<nd2; d2++) {
       for(d1=0; d1<nd1; d1++) {
 	for(hd0=0; hd0 < nd0h; hd0++) {
@@ -128,7 +155,7 @@ void conf_times_staples_ta_part(
 }// closes routine
 
 // tamattamat
-void RHO_times_conf_times_staples_ta_part(
+void conf_times_staples_ta_part_addto_tamat(
         __restrict const su3_soa * const u,
         __restrict const su3_soa * const loc_stap,
         __restrict tamat_soa * const tipdot)
@@ -150,7 +177,39 @@ void RHO_times_conf_times_staples_ta_part(
 	  parity = (d0+d1+d2+d3) % 2;
 	  for(mu=0;mu<4;mu++){ 
 	    dir_link = 2*mu + parity;
-	    RHO_times_mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh);
+	    mat1_times_mat2_addto_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh);
+
+	  }
+
+	}  // d0
+      }  // d1
+    }  // d2
+  }  // d3
+
+}// closes routine
+// tamattamat
+void RHO_times_conf_times_staples_ta_part(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot, int istopo) //istopo = {0,1} -> rho={fermrho,toporho}
+{
+  int d0, d1, d2, d3;
+#pragma acc kernels present(u) present(loc_stap) present(tipdot)
+#pragma acc loop independent gang(STAPGANG3)
+  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+    for(d2=0; d2<nd2; d2++) {
+      for(d1=0; d1<nd1; d1++) {
+	for(d0=0; d0 < nd0; d0++) {
+	  int idxh;
+	  int parity;
+	  int dir_link;
+	  int mu;
+	  idxh = snum_acc(d0,d1,d2,d3);  // r 
+	  parity = (d0+d1+d2+d3) % 2;
+	  for(mu=0;mu<4;mu++){ 
+	    dir_link = 2*mu + parity;
+	    RHO_times_mat1_times_mat2_into_tamat3(&u[dir_link],idxh,&loc_stap[dir_link],idxh,&tipdot[dir_link],idxh,istopo);
 
 	  }
 

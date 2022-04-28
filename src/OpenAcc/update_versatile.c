@@ -30,6 +30,7 @@
 #include "../tests_and_benchmarks/test_and_benchmarks.h"
 #include "./alloc_settings.h"
 #include "./update_versatile.h"
+#include "./topological_action.h"
 
 #ifdef __GNUC__
 #include "sys/time.h"
@@ -44,7 +45,7 @@ action_param act_params;
 int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         double res_metro, double res_md, int id_iter,int acc,int metro, int max_cg){
 
-#ifdef STOUT_FERMIONS        
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)       
     su3_soa *tstout_conf_acc_arr = gstout_conf_acc_arr;
     su3_soa_f *tstout_conf_acc_arr_f = gstout_conf_acc_arr_f;
 #endif
@@ -84,6 +85,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     int accettata;
     double delta_S;
     double action_in,action_fin,action_mom_in,action_mom_fin,action_ferm_in,action_ferm_fin;
+	double action_topo_in,action_topo_fin;
 
     struct timeval t_start, t_saved,t_end;
     gettimeofday ( &t_start, NULL ); 
@@ -148,8 +150,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #ifdef STOUT_FERMIONS 
     // DILATION USING STOUTED DIRAC OPERATOR
     // STOUTING...(ALREADY ON DEVICE)
-    if(act_params.stout_steps > 0){
-        stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+    if ( (act_params.stout_steps > 0 ) && (alloc_info.NDiffFlavs > 0) ){
+  			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
 
@@ -200,7 +202,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     }//end for iflav
 
 
-
     if(metro==1){
         /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
         if(GAUGE_ACTION == 0)// Standard gauge action 
@@ -209,29 +210,52 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             action_in = C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
             action_in += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
         }
+		
+	if(verbosity_lv>3 && act_params.topo_action==1)printf("\tComputing topological action\n");
+
+#ifdef STOUT_TOPO
+	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+
+#ifdef STOUT_FERMIONS 
+    // DILATION USING STOUTED DIRAC OPERATOR
+    // STOUTING...(ALREADY ON DEVICE)
+    if ( (act_params.stout_steps > 0) && (alloc_info.NDiffFlavs > 0) ){
+			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
+        gconf_as_fermionmatrix = 
+            &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+
+        if(md_parameters.singlePrecMD)
+            convert_double_to_float_su3_soa(gconf_as_fermionmatrix,gconf_as_fermionmatrix_f);
+    }
+    else gconf_as_fermionmatrix = tconf_acc;
+#endif
+#else
+	action_topo_in = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
+#endif
+
         action_mom_in = 0.0;
         for(mu =0;mu<8;mu++)  action_mom_in += calc_momenta_action(momenta,d_local_sums,mu);
         action_ferm_in=0;
         for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){
-            for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
-
-                int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-                action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
-            }
+	  for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+	    
+	    int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+	    action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
+	  }
         }// end for iflav
         ///////////////////////////////////////////////////////////////////////////////////////
         printf("MPI%02d - Initial Action Computed : OK \n", devinfo.myrank);
     }
-
-
+    
+    
     multishift_invert_iterations = 0 ; 
     // FIRST INV APPROX CALC --> calculation of CHI fermion
-
+    
     inverter_package ip;
     setup_inverter_package_sp(&ip,gconf_as_fermionmatrix_f,k_p_shiftferm_f,alloc_info.maxApproxOrder,
-            kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
+			      kloc_r_f,kloc_h_f,kloc_s_f,kloc_p_f,aux1_f);  
     setup_inverter_package_dp(&ip,gconf_as_fermionmatrix,  k_p_shiftferm,  alloc_info.maxApproxOrder,
-            kloc_r,  kloc_h,  kloc_s,  kloc_p);  
+			      kloc_r,  kloc_h,  kloc_s,  kloc_p);  
 
 
 
@@ -323,7 +347,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         }
 
         multistep_2MN_SOLOOPENACC_f(ipdot_acc_f,tconf_acc_f,
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr_f,
 #endif
                 auxbis_conf_acc_f, // globale
@@ -345,7 +369,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         printf("DOUBLE PRECISION MOLECULAR DYNAMICS...\n");
 
         multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr,
 #endif
                 auxbis_conf_acc, // globale
@@ -382,7 +406,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         invert_momenta(momenta);
 
         multistep_2MN_SOLOOPENACC(ipdot_acc,tconf_acc,
-#ifdef STOUT_FERMIONS
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr,
 #endif
                 auxbis_conf_acc, // globale
@@ -425,8 +449,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
-    if(act_params.stout_steps > 0){
-        stout_wrapper(tconf_acc,tstout_conf_acc_arr);
+    if ( (act_params.stout_steps > 0) && (alloc_info.NDiffFlavs > 0) ){
+			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
         gconf_as_fermionmatrix = 
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
     }
@@ -496,7 +520,24 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
             action_fin = C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
             action_fin += C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(tconf_acc,aux_conf_acc,local_sums);
         }
-
+	
+#ifdef STOUT_TOPO
+	action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc,tstout_conf_acc_arr);
+	
+#ifdef STOUT_FERMIONS
+    // STOUTING...(ALREADY ON DEVICE)
+    if ( (act_params.stout_steps > 0) && (alloc_info.NDiffFlavs > 0) ){
+			stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);
+        gconf_as_fermionmatrix = 
+            &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
+    }
+    else gconf_as_fermionmatrix = tconf_acc;
+#else
+    gconf_as_fermionmatrix = tconf_acc;
+#endif
+#else
+	action_topo_fin = (act_params.topo_action==0)? 0.0 : compute_topo_action(tconf_acc);
+#endif
         action_mom_fin = 0.0;
         for(mu =0;mu<8;mu++)    action_mom_fin += calc_momenta_action(momenta,d_local_sums,mu);
 
@@ -512,10 +553,12 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         ////////////////////////////////////////////////////////////////////////////////////////
 
         // delta_S = action_new - action_old
-        delta_S  = - (-action_in+action_mom_in+action_ferm_in) + (-action_fin+action_mom_fin+action_ferm_fin);
+        delta_S  = - (-action_in+action_mom_in+action_ferm_in+action_topo_in) + (-action_fin+action_mom_fin+action_ferm_fin+action_topo_fin);
         if(verbosity_lv > 2 && 0 == devinfo.myrank ){
             printf("MPI%02d-iterazione %i:  Gauge_ACTION  (in and out) = %.18lf , %.18lf\n",
                     devinfo.myrank,iterazioni,-action_in,-action_fin);
+			printf("MPI%02d-iterazione %i:  Topol_ACTION  (in and out) = %.18lf , %.18lf\n",
+                    devinfo.myrank,iterazioni,+action_topo_in,+action_topo_fin);
             printf("MPI%02d-iterazione %i:  Momen_ACTION  (in and out) = %.18lf , %.18lf\n",
                     devinfo.myrank,iterazioni,action_mom_in,action_mom_fin);
             printf("MPI%02d-iterazione %i:  Fermi_ACTION  (in and out) = %.18lf , %.18lf\n",

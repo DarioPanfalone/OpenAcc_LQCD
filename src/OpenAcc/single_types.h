@@ -4,6 +4,7 @@
 #include <complex.h>
 #include "./struct_c_def.h"
 #include <stdio.h>
+#include <math.h>
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
@@ -37,6 +38,7 @@ typedef struct single_thmat_t {
   double rc00;   // Re(comp_00)
   double rc11;   // Re(comp_11)
 } single_thmat;
+
 
 // 3rd row reconstruction on site
 #pragma acc routine seq
@@ -122,7 +124,7 @@ static inline void gl3_to_thmat(single_su3 * in , single_thmat * out){
 
 //extraction from soas
 #pragma acc routine seq
-static inline void single_su3_from_su3_soa( __restrict const su3_soa * const mat, const int idx_mat,						  single_su3 * Omat){
+static inline void single_su3_from_su3_soa( __restrict const su3_soa * const mat, const int idx_mat, single_su3 * Omat){
   Omat->comp[0][0] = mat->r0.c0[idx_mat];
   Omat->comp[0][1] = mat->r0.c1[idx_mat];
   Omat->comp[0][2] = mat->r0.c2[idx_mat];
@@ -132,7 +134,7 @@ static inline void single_su3_from_su3_soa( __restrict const su3_soa * const mat
 
 }
 #pragma acc routine seq
-static inline void single_su3_from_global_su3_soa( __restrict const global_su3_soa * const mat, const int idx_mat,						  single_su3 * Omat){
+static inline void single_su3_from_global_su3_soa( __restrict const global_su3_soa * const mat, const int idx_mat, single_su3 * Omat){
   Omat->comp[0][0] = mat->r0.c0[idx_mat];
   Omat->comp[0][1] = mat->r0.c1[idx_mat];
   Omat->comp[0][2] = mat->r0.c2[idx_mat];
@@ -209,7 +211,16 @@ static inline void single_su3_addinto_su3_soa( __restrict su3_soa * const mat, c
   mat->r1.c2[idx_mat] += Imat->comp[1][2];
 }
 #pragma acc routine seq
-static inline void single_gl3_into_su3_soa( __restrict su3_soa * const mat, const int idx_mat,						   single_su3 * Imat){
+static inline void single_su3_subtinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat,  single_su3 * Imat){
+  mat->r0.c0[idx_mat] -= Imat->comp[0][0];
+  mat->r0.c1[idx_mat] -= Imat->comp[0][1];
+  mat->r0.c2[idx_mat] -= Imat->comp[0][2];
+  mat->r1.c0[idx_mat] -= Imat->comp[1][0];
+  mat->r1.c1[idx_mat] -= Imat->comp[1][1];
+  mat->r1.c2[idx_mat] -= Imat->comp[1][2];
+}
+#pragma acc routine seq
+static inline void single_gl3_into_su3_soa( __restrict su3_soa * const mat, const int idx_mat, single_su3 * Imat){
 
  single_su3_into_su3_soa(mat,idx_mat,Imat);
   mat->r2.c0[idx_mat] = Imat->comp[2][0];
@@ -217,7 +228,7 @@ static inline void single_gl3_into_su3_soa( __restrict su3_soa * const mat, cons
   mat->r2.c2[idx_mat] = Imat->comp[2][2];
 }
 #pragma acc routine seq
-static inline void single_gl3_into_global_su3_soa( __restrict global_su3_soa * const mat, const int idx_mat,						   single_su3 * Imat){
+static inline void single_gl3_into_global_su3_soa( __restrict global_su3_soa * const mat, const int idx_mat, single_su3 * Imat){
 
  single_su3_into_global_su3_soa(mat,idx_mat,Imat);
   mat->r2.c0[idx_mat] = Imat->comp[2][0];
@@ -225,12 +236,20 @@ static inline void single_gl3_into_global_su3_soa( __restrict global_su3_soa * c
   mat->r2.c2[idx_mat] = Imat->comp[2][2];
 }
 #pragma acc routine seq
-static inline void single_gl3_addinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat,						   single_su3 * Imat){
+static inline void single_gl3_addinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat, single_su3 * Imat){
 
- single_su3_addinto_su3_soa(mat,idx_mat,Imat);
+  single_su3_addinto_su3_soa(mat,idx_mat,Imat);
   mat->r2.c0[idx_mat] += Imat->comp[2][0];
   mat->r2.c1[idx_mat] += Imat->comp[2][1];
   mat->r2.c2[idx_mat] += Imat->comp[2][2];
+}
+#pragma acc routine seq
+static inline void single_gl3_subtinto_su3_soa( __restrict su3_soa * const mat, const int idx_mat, single_su3 * Imat){
+
+  single_su3_subtinto_su3_soa(mat,idx_mat,Imat);
+  mat->r2.c0[idx_mat] -= Imat->comp[2][0];
+  mat->r2.c1[idx_mat] -= Imat->comp[2][1];
+  mat->r2.c2[idx_mat] -= Imat->comp[2][2];
 }
 #pragma acc routine seq
 static inline void single_tamat_into_tamat_soa(__restrict tamat_soa * out, int idx, single_tamat * in){
@@ -321,14 +340,43 @@ static inline void print_su3_stdout(single_su3 *m){
 
    }
 }
+
+#pragma acc routine seq
+static inline void summ_single_tamats_times_scalar(single_tamat * out, single_tamat * QA1 , single_tamat *QA2, d_complex scalar){
+  out->c01 = (QA1->c01 + QA2->c01)*scalar; // comp_01
+  out->c02 = (QA1->c02 + QA2->c02)*scalar; // comp_02
+  out->c12 = (QA1->c12 + QA2->c12)*scalar; // comp_12
+  out->ic00 = (QA1->ic00+ QA2->ic00)*creal(scalar);   // Im(comp_00)
+  out->ic11 = (QA1->ic11+ QA1->ic11)*creal(scalar);   // Im(comp_11)
+}
+
+#pragma acc routine seq
+static inline void single_tamat_times_scalar_into_tamat(single_tamat * out, single_tamat * QA , d_complex scalar){
+  out->c01 = QA->c01 *scalar; // comp_01
+  out->c02 = QA->c02 *scalar; // comp_02
+  out->c12 = QA->c12 *scalar; // comp_12
+  out->ic00 = QA->ic00*creal(scalar);   // Im(comp_00)
+  out->ic11 = QA->ic11*creal(scalar);   // Im(comp_11)
+}
+
+#pragma acc routine seq
+static inline void single_tamat_times_scalar_add_to_tamat(single_tamat * out, single_tamat * QA , d_complex scalar){
+  out->c01 += QA->c01 *scalar; // comp_01
+  out->c02 += QA->c02 *scalar; // comp_02
+  out->c12 += QA->c12 *scalar; // comp_12
+  out->ic00 += QA->ic00*creal(scalar);   // Im(comp_00)
+  out->ic11 += QA->ic11*creal(scalar);   // Im(comp_11)
+}
+
+
 #pragma acc routine seq
 static inline void single_su3_times_scalar(single_su3 * m , d_complex scalar){
 
    for(int r=0;r<3;r++)
     for(int c=0;c<3;c++)
      m->comp[r][c] *= scalar;
-
 }
+
 #pragma acc routine seq
 static inline void single_su3xsu3(single_su3 * out , single_su3 *m1, single_su3 *m2){
 
@@ -349,6 +397,29 @@ static inline void single_su3xsu3_add_to_out(single_su3 * out , single_su3 *m1, 
 
     }
 }
+
+#pragma acc routine seq
+static inline void single_gl3xsu3_add_to_out(single_su3 * out , single_su3 *m1, single_su3 *m2){
+  single_su3 *tmp=m2;
+  rebuild3row(tmp);
+  for(int r=0;r<3;r++)
+    for(int c=0;c<3;c++){
+      for(int d=0;d<3;d++) out->comp[r][c] += m1->comp[r][d] * tmp->comp[d][c] ;
+    }
+
+}
+
+#pragma acc routine seq
+static inline void single_su3xgl3_add_to_out(single_su3 * out , single_su3 *m1, single_su3 *m2){
+  single_su3 *tmp=m1;
+  rebuild3row(tmp);
+   for(int r=0;r<3;r++)
+    for(int c=0;c<3;c++){
+        for(int d=0;d<3;d++) out->comp[r][c] += tmp->comp[r][d] * m2->comp[d][c] ;
+
+    }
+}
+
 #pragma acc routine seq
 static inline void single_su3add(single_su3 * out , single_su3 *m){
 
@@ -460,6 +531,336 @@ static inline void single_su3add_no3rdrow(single_su3 * out , single_su3 *m){
         out->comp[r][c] += m->comp[r][c];
 
 }
+
+#pragma acc routine seq
+static inline void su3_soa_times_su3_soa_into_single_su3( const su3_soa * const mat1, const int idx_mat1, const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat){
+
+  //first single_su3
+  single_su3 m1;
+  m1.comp[0][0] = mat1->r0.c0[idx_mat1];
+  m1.comp[0][1] = mat1->r0.c1[idx_mat1];
+  m1.comp[0][2] = mat1->r0.c2[idx_mat1];
+  m1.comp[1][0] = mat1->r1.c0[idx_mat1];
+  m1.comp[1][1] = mat1->r1.c1[idx_mat1];
+  m1.comp[1][2] = mat1->r1.c2[idx_mat1];
+  //second single_su3
+  single_su3 m2;
+  m2.comp[0][0] = mat2->r0.c0[idx_mat2];
+  m2.comp[0][1] = mat2->r0.c1[idx_mat2];
+  m2.comp[0][2] = mat2->r0.c2[idx_mat2];
+  m2.comp[1][0] = mat2->r1.c0[idx_mat2];
+  m2.comp[1][1] = mat2->r1.c1[idx_mat2];
+  m2.comp[1][2] = mat2->r1.c2[idx_mat2];
+  rebuild3row(&m2);
+  for(int r = 0; r < 2; r++)
+    for(int c = 0; c < 3; c++){
+      Omat->comp[r][c] = 0;
+      for (int k = 0; k<3; k++)
+	Omat->comp[r][c] += m1.comp[r][k]*m2.comp[k][c];
+    }
+}
+
+#pragma acc routine seq
+static inline void su3_soa_times_su3_soa_dag_into_single_su3( __restrict const su3_soa * const mat1, const int idx_mat1, __restrict const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat){
+
+  //first single_su3
+  single_su3 m1;
+  m1.comp[0][0] = mat1->r0.c0[idx_mat1];
+  m1.comp[0][1] = mat1->r0.c1[idx_mat1];
+  m1.comp[0][2] = mat1->r0.c2[idx_mat1];
+  m1.comp[1][0] = mat1->r1.c0[idx_mat1];
+  m1.comp[1][1] = mat1->r1.c1[idx_mat1];
+  m1.comp[1][2] = mat1->r1.c2[idx_mat1];
+  //second single_su3
+  single_su3 m2;
+  single_su3_from_su3_soa(mat2,idx_mat2,&m2);
+  rebuild3row(&m2);
+  gl3_dagger(&m2);
+
+  for(int r = 0; r < 2; r++)
+    for(int c = 0; c < 3; c++){
+      Omat->comp[r][c] = 0;
+      for (int k = 0; k<3; k++)
+	Omat->comp[r][c] += m1.comp[r][k]*m2.comp[k][c];
+    }
+}
+
+#pragma acc routine seq
+static inline void su3_soa_dag_times_su3_soa_into_single_su3( __restrict const su3_soa * const mat1, const int idx_mat1, __restrict const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat){
+
+  //first single_su3
+  single_su3 m1;
+  single_su3_from_su3_soa(mat1,idx_mat1,&m1);
+  rebuild3row(&m1);
+  gl3_dagger(&m1);
+  //second single_su3
+  single_su3 m2;
+  single_su3_from_su3_soa(mat2,idx_mat2,&m2);
+  rebuild3row(&m2);
+  
+  for(int r = 0; r < 2; r++)
+    for(int c = 0; c < 3; c++){
+      Omat->comp[r][c] = 0;
+      for (int k = 0; k<3; k++)
+	Omat->comp[r][c] += m1.comp[r][k]*m2.comp[k][c];
+    }
+}
+
+#pragma acc routine seq
+static inline void su3_soa_times_gl3_soa_into_gl3(__restrict const su3_soa * const mat1, const int idx_mat1, __restrict const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat)
+{
+  //single su3
+  single_su3 su3;
+  single_su3_from_su3_soa(mat1,idx_mat1,&su3);
+  rebuild3row(&su3);
+  //single gl3
+  single_su3 gl3;
+  single_su3_from_su3_soa(mat2,idx_mat2,&gl3);
+  gl3.comp[2][0] = mat2->r2.c0[idx_mat2];
+  gl3.comp[2][1] = mat2->r2.c1[idx_mat2];
+  gl3.comp[2][2] = mat2->r2.c2[idx_mat2];
+
+  single_su3xsu3(Omat,&su3,&gl3);
+}
+
+#pragma acc routine seq
+static inline void gl3_soa_times_su3_soa_dag_into_gl3(__restrict const su3_soa * const mat1, const int idx_mat1, __restrict const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat)
+{
+  //single gl3
+  single_su3 gl3;
+  single_su3_from_su3_soa(mat1,idx_mat1,&gl3);
+  gl3.comp[2][0] = mat1->r2.c0[idx_mat1];
+  gl3.comp[2][1] = mat1->r2.c1[idx_mat1];
+  gl3.comp[2][2] = mat1->r2.c2[idx_mat1];
+
+  //single su3
+  single_su3 su3;
+  single_su3_from_su3_soa(mat2,idx_mat2,&su3);
+  rebuild3row(&su3);
+  gl3_dagger(&su3);
+  
+  single_su3xsu3(Omat,&gl3,&su3);
+}
+
+#pragma acc routine seq
+static inline void su3_soa_dag_times_gl3_soa_dag_into_gl3(__restrict const su3_soa * const mat1, const int idx_mat1, __restrict const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat)
+{
+  //single su3
+  single_su3 su3;
+  single_su3_from_su3_soa(mat1,idx_mat1,&su3);
+  rebuild3row(&su3);
+  gl3_dagger(&su3);
+  
+  //single gl3
+  single_su3 gl3;
+  single_su3_from_su3_soa(mat2,idx_mat2,&gl3);
+  gl3.comp[2][0] = mat2->r2.c0[idx_mat2];
+  gl3.comp[2][1] = mat2->r2.c1[idx_mat2];
+  gl3.comp[2][2] = mat2->r2.c2[idx_mat2];
+  gl3_dagger(&gl3);
+  
+  single_su3xsu3(Omat,&su3,&gl3);
+}
+
+#pragma acc routine seq
+static inline void gl3_soa_dag_times_su3_soa_into_gl3(__restrict const su3_soa * const mat1, const int idx_mat1, __restrict const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat)
+{
+  //single gl3
+  single_su3 gl3;
+  single_su3_from_su3_soa(mat1,idx_mat1,&gl3);
+  gl3.comp[2][0] = mat1->r2.c0[idx_mat1];
+  gl3.comp[2][1] = mat1->r2.c1[idx_mat1];
+  gl3.comp[2][2] = mat1->r2.c2[idx_mat1];
+  gl3_dagger(&gl3);
+  
+  //single su3 - MAKE SURE IT IS AN SU3
+  single_su3 su3;
+  single_su3_from_su3_soa(mat2,idx_mat2,&su3);
+  rebuild3row(&su3);
+  
+  single_su3xsu3(Omat,&gl3,&su3);
+}
+
+#pragma acc routine seq
+static inline void gl3_soa_times_single_su3_addto_gl3(__restrict const su3_soa * const mat1, const int idx_mat1, single_su3 * mat2, single_su3 * Omat)
+{
+  //single gl3
+  single_su3 gl3;
+  single_su3_from_su3_soa(mat1,idx_mat1,&gl3);
+  gl3.comp[2][0] = mat1->r2.c0[idx_mat1];
+  gl3.comp[2][1] = mat1->r2.c1[idx_mat1];
+  gl3.comp[2][2] = mat1->r2.c2[idx_mat1];
+  
+  //single su3 - MAKE SURE IT IS AN SU3
+  single_su3 mat2_3row;
+  mat2_3row.comp[0][0] = mat2->comp[0][0];
+  mat2_3row.comp[0][1] = mat2->comp[0][1];
+  mat2_3row.comp[0][2] = mat2->comp[0][2];
+
+  mat2_3row.comp[1][0] = mat2->comp[1][0];
+  mat2_3row.comp[1][1] = mat2->comp[1][1];
+  mat2_3row.comp[1][2] = mat2->comp[1][2];
+  rebuild3row(&mat2_3row);
+  
+  for(int r=0;r<3;r++)
+    for(int c=0;c<3;c++)
+      for(int d=0;d<3;d++)
+	Omat->comp[r][c] += gl3.comp[r][d] * mat2_3row.comp[d][c] ;
+
+}
+
+#pragma acc routine seq
+static inline void single_su3_times_gl3_soa_addto_gl3(single_su3 * mat1,__restrict const su3_soa * const mat2, const int idx_mat2,  single_su3 * Omat)
+{
+  //single su3 - MAKE SURE IT IS AN SU3
+  single_su3 mat1_3row;
+  mat1_3row.comp[0][0] = mat1->comp[0][0];
+  mat1_3row.comp[0][1] = mat1->comp[0][1];
+  mat1_3row.comp[0][2] = mat1->comp[0][2];
+
+  mat1_3row.comp[1][0] = mat1->comp[1][0];
+  mat1_3row.comp[1][1] = mat1->comp[1][1];
+  mat1_3row.comp[1][2] = mat1->comp[1][2];
+  rebuild3row(&mat1_3row);
+  //single gl3
+  single_su3 gl3;
+  single_su3_from_su3_soa(mat2,idx_mat2,&gl3);
+  gl3.comp[2][0] = mat2->r2.c0[idx_mat2];
+  gl3.comp[2][1] = mat2->r2.c1[idx_mat2];
+  gl3.comp[2][2] = mat2->r2.c2[idx_mat2];
+
+  for(int r=0;r<3;r++)
+    for(int c=0;c<3;c++)
+      for(int d=0;d<3;d++)
+	Omat->comp[r][c] += mat1_3row.comp[r][d] * gl3.comp[d][c] ;
+  
+}
+
+#pragma acc routine seq
+static inline void gl3_soa_dag_times_single_su3_addto_gl3(__restrict const su3_soa * const mat1, const int idx_mat1, single_su3 * mat2, single_su3 * Omat)
+{
+  //single gl3
+  single_su3 gl3;
+  single_su3_from_su3_soa(mat1,idx_mat1,&gl3);
+  gl3.comp[2][0] = mat1->r2.c0[idx_mat1];
+  gl3.comp[2][1] = mat1->r2.c1[idx_mat1];
+  gl3.comp[2][2] = mat1->r2.c2[idx_mat1];
+  gl3_dagger(&gl3);
+  
+  rebuild3row(mat2);
+  
+  single_su3xsu3_add_to_out(Omat,&gl3,mat2);
+}
+
+#pragma acc routine seq
+static inline void single_su3_times_gl3_soa_dag_addto_gl3(single_su3 * mat1,__restrict const su3_soa * const mat2, const int idx_mat2,  single_su3 * Omat)
+{
+  //single su3 - MAKE SURE IT IS AN SU3
+  single_su3 mat1_3row;
+  mat1_3row.comp[0][0] = mat1->comp[0][0];
+  mat1_3row.comp[0][1] = mat1->comp[0][1];
+  mat1_3row.comp[0][2] = mat1->comp[0][2];
+
+  mat1_3row.comp[1][0] = mat1->comp[1][0];
+  mat1_3row.comp[1][1] = mat1->comp[1][1];
+  mat1_3row.comp[1][2] = mat1->comp[1][2];
+  rebuild3row(&mat1_3row);
+  //single gl3
+  single_su3 gl3;
+  single_su3_from_su3_soa(mat2,idx_mat2,&gl3);
+  gl3.comp[2][0] = mat2->r2.c0[idx_mat2];
+  gl3.comp[2][1] = mat2->r2.c1[idx_mat2];
+  gl3.comp[2][2] = mat2->r2.c2[idx_mat2];
+  gl3_dagger(&gl3);
+  
+  single_su3xsu3_add_to_out(Omat,&mat1_3row,&gl3);
+}
+
+#pragma acc routine seq
+static inline void su3_soa_times_single_su3_into_single_su3( __restrict const su3_soa * const mat1, const int idx_mat1, single_su3 * mat2, single_su3 * Omat){
+
+  //first single_su3
+  single_su3 m1;
+  single_su3_from_su3_soa(mat1,idx_mat1,&m1);
+  
+  single_su3 m2;
+  m2.comp[0][0] = mat2->comp[0][0];
+  m2.comp[0][1] = mat2->comp[0][1];
+  m2.comp[0][2] = mat2->comp[0][2];
+
+  m2.comp[1][0] = mat2->comp[1][0];
+  m2.comp[1][1] = mat2->comp[1][1];
+  m2.comp[1][2] = mat2->comp[1][2];
+  rebuild3row(&m2);
+  
+  single_su3xsu3_no3rdrow(Omat,&m1,&m2);
+}
+
+#pragma acc routine seq
+static inline void single_su3_times_su3_soa_into_single_su3( single_su3 * mat1, __restrict const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat){
+
+  //second single_su3
+  single_su3 m2;
+  single_su3_from_su3_soa(mat2,idx_mat2,&m2);
+  rebuild3row(&m2);
+
+  single_su3xsu3_no3rdrow(Omat,mat1,&m2);
+}
+
+#pragma acc routine seq
+static inline void set_to_zero_single_su3(single_su3 * Inout){
+  Inout->comp[0][0] = 0+I*0;
+  Inout->comp[0][1] = 0+I*0;
+  Inout->comp[0][2] = 0+I*0;
+  Inout->comp[1][0] = 0+I*0;
+  Inout->comp[1][1] = 0+I*0;
+  Inout->comp[1][2] = 0+I*0;
+  Inout->comp[2][0] = 0+I*0;
+  Inout->comp[2][1] = 0+I*0;
+  Inout->comp[2][2] = 0+I*0;
+}
+
+/*
+#pragma acc routine seq
+static inline void su3_soa_times_su3_soa_into_single_gl3( __restrict const su3_soa * const mat1, const int idx_mat1, __restrict const su3_soa * const mat2, const int idx_mat2, single_su3 * Omat){
+
+  //first matrix elements IT MUST BE SU3
+  m1_00 = mat1->r0.c0[idx_mat1];
+  m1_01 = mat1->r0.c1[idx_mat1];
+  m1_02 = mat1->r0.c2[idx_mat1];
+
+  m1_10 = mat1->r1.c0[idx_mat1];
+  m1_11 = mat1->r1.c1[idx_mat1];
+  m1_12 = mat1->r1.c2[idx_mat1];  
+
+  //second matrix elements IT MUST BE SU3
+  m2_00 = mat2->r0.c0[idx_mat2];
+  m2_01 = mat2->r0.c1[idx_mat2];
+  m2_02 = mat2->r0.c2[idx_mat2];  
+
+  m2_10 = mat2->r1.c0[idx_mat2];
+  m2_11 = mat2->r1.c1[idx_mat2];
+  m2_12 = mat2->r1.c2[idx_mat2];  
+
+  m2_20 = conj(mat2->r0.c1[idx_mat2] * mat2->r1.c2[idx_mat2] - mat2->r0.c2[idx_mat2] * mat2->r1.c1[idx_mat2]);
+  m2_21 = conj(mat2->r0.c2[idx_mat2] * mat2->r1.c0[idx_mat2] - mat2->r0.c0[idx_mat2] * mat2->r1.c2[idx_mat2]);
+  m2_22 = conj(mat2->r0.c0[idx_mat2] * mat2->r1.c1[idx_mat2] - mat2->r0.c1[idx_mat2] * mat2->r1.c0[idx_mat2]);  
+  
+  //computation
+  Omat->comp[0][0] = m1_00*m2_00 + m1_01*m2_10 + m1_02*m2_20;
+  Omat->comp[0][1] = m1_00*m2_01 + m1_01*m2_11 + m1_02*m2_21;
+  Omat->comp[0][2] = m1_00*m2_02 + m1_01*m2_12 + m1_02*m2_22;
+
+  Omat->comp[1][0] = m1_10*m2_00 + m1_11*m2_10 + m1_12*m2_20;
+  Omat->comp[1][1] = m1_10*m2_01 + m1_11*m2_11 + m1_12*m2_21;
+  Omat->comp[1][2] = m1_10*m2_02 + m1_11*m2_12 + m1_12*m2_22;
+
+  Omat->comp[2][0] = m1_20*m2_00 + m1_21*m2_10 + m1_22*m2_20;
+  Omat->comp[2][1] = m1_20*m2_01 + m1_21*m2_11 + m1_22*m2_21;
+  Omat->comp[2][2] = m1_20*m2_02 + m1_21*m2_12 + m1_22*m2_22;
+
+}
+*/
 
 
 #endif

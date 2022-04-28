@@ -593,6 +593,9 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
             else {
                 x = xtmp;
                 parity = (x+y+z+t)%2;// parity = (d0+d1+d2+d3)%2;
+    						#if defined(MULTIDEVICE) && defined(GAUGE_ACT_WILSON)
+								parity = !parity;
+    						#endif
             }
             int xs[4] = {x,y,z,t};
             int d[4];
@@ -604,9 +607,9 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
             int idxh_machine = snum_acc(d[0],d[1],d[2],d[3]);
 #endif
             for(dir=0;dir<dirlimit;dir++){
-                int dirmachine = geom_par.xyztmap[dir];
-                single_element_rw(idxh_machine,parity,dirmachine,datastruct,
-                        conf_machine_endianness_disagreement,fp);
+							int dirmachine = geom_par.xyztmap[dir];
+							single_element_rw(idxh_machine,parity,dirmachine,datastruct,
+																conf_machine_endianness_disagreement,fp);
             }
         }
 }

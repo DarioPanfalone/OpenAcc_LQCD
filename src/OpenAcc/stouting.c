@@ -21,38 +21,38 @@
 
 extern int verbosity_lv;
 
-#define TRANSFER_THICKNESS 2
+#define TRANSFER_THICKNESS GAUGE_HALO
 
-#ifdef STOUT_FERMIONS
-void stout_wrapper(const su3_soa * const tconf_acc,
-        su3_soa * tstout_conf_acc_arr)
+#if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
+void stout_wrapper(__restrict const su3_soa * const tconf_acc,
+									 __restrict su3_soa * tstout_conf_acc_arr, const int istopo)
 {
     double max_unitarity_deviation,avg_unitarity_deviation;
-
+		int stoutsteps=(istopo)?act_params.topo_stout_steps:act_params.stout_steps;
+		
     if(verbosity_lv > 1) 
         printf("MPI%02d:Stouting gauge conf %d times.\n",
-                devinfo.myrank, act_params.stout_steps);
-
-    if(act_params.stout_steps > 0){
+                devinfo.myrank, stoutsteps);
+    if(stoutsteps > 0){
         stout_isotropic(tconf_acc, tstout_conf_acc_arr, auxbis_conf_acc, 
-                glocal_staples, gipdot );
+												glocal_staples, gipdot, istopo);
 #ifdef MULTIDEVICE
         communicate_su3_borders(tstout_conf_acc_arr,TRANSFER_THICKNESS);
 #endif
         if(verbosity_lv > 4){
             check_unitarity_device(tstout_conf_acc_arr,&max_unitarity_deviation,&avg_unitarity_deviation);
             printf("MPI%02d:(Stout wrapper,1/%d) Avg_unitarity_deviation : %e\n",
-                    devinfo.myrank,act_params.stout_steps,avg_unitarity_deviation);
+                    devinfo.myrank,stoutsteps,avg_unitarity_deviation);
             printf("MPI%02d:(Stout wrapper,1/%d) Max_unitarity_deviation : %e\n",
-                    devinfo.myrank,act_params.stout_steps,max_unitarity_deviation);
+                    devinfo.myrank,stoutsteps,max_unitarity_deviation);
         }
 
-        for(int stoutlevel=1;stoutlevel < act_params.stout_steps;
+        for(int stoutlevel=1;stoutlevel < stoutsteps;
                 stoutlevel++){
 
             stout_isotropic(&(tstout_conf_acc_arr[8*(stoutlevel-1)]),
                     &(tstout_conf_acc_arr[8*stoutlevel]),auxbis_conf_acc,
-                    glocal_staples,  gipdot );
+														glocal_staples,  gipdot, istopo);
 #ifdef MULTIDEVICE
             communicate_su3_borders(
                     &(tstout_conf_acc_arr[8*stoutlevel]),TRANSFER_THICKNESS);
@@ -62,10 +62,10 @@ void stout_wrapper(const su3_soa * const tconf_acc,
                         &max_unitarity_deviation,&avg_unitarity_deviation);
 
                 printf("MPI%02d:(Stout wrapper,%d/%d) Avg_unitarity_deviation : %e\n",
-                        devinfo.myrank, stoutlevel+1,act_params.stout_steps, 
+                        devinfo.myrank, stoutlevel+1,stoutsteps, 
                         avg_unitarity_deviation);
                 printf("MPI%02d:(Stout wrapper,%d/%d) Max_unitarity_deviation : %e\n",
-                        devinfo.myrank, stoutlevel+1,act_params.stout_steps, 
+                        devinfo.myrank, stoutlevel+1,stoutsteps, 
                         max_unitarity_deviation);
             }
 
@@ -78,11 +78,12 @@ void stout_wrapper(const su3_soa * const tconf_acc,
 #endif
 
 void stout_isotropic(
-        __restrict const su3_soa * u,               // --> input conf
-        su3_soa * uprime,          // --> output conf [stouted]
-        __restrict su3_soa * local_staples,   // --> parking variable
-        su3_soa * auxiliary,       // --> parking variable
-        __restrict tamat_soa * tipdot)       // --> parking variable
+        __restrict const su3_soa * const u,               // --> input conf
+        __restrict su3_soa * const uprime,          // --> output conf [stouted]
+        __restrict su3_soa * const local_staples,   // --> parking variable
+        __restrict su3_soa * const auxiliary,       // --> parking variable
+        __restrict tamat_soa * const tipdot,        // --> parking variable
+				const int istopo) //istopo = {0,1} -> rho={fermrho,toporho}
 {
 
 
@@ -95,7 +96,7 @@ void stout_isotropic(
 
     calc_loc_staples_nnptrick_all(u,local_staples);
 
-    RHO_times_conf_times_staples_ta_part(u,local_staples,tipdot);
+    RHO_times_conf_times_staples_ta_part(u,local_staples,tipdot,istopo);
 
 
     exp_minus_QA_times_conf(u,tipdot,uprime,auxiliary);
@@ -705,8 +706,9 @@ static inline void RIGHT_iABC_times_DminusE_absent_stag_phases(
         __restrict const su3_soa *   const UC, const int idxC,
         __restrict const thmat_soa * const LD, const int idxD,
         __restrict const thmat_soa * const LE, const int idxE,
-        __restrict su3_soa * const RES, const int idxRES)
+        __restrict su3_soa * const RES, const int idxRES,const int istopo)
 {
+	  const double RHO=(istopo)?(double)gl_topo_rho:(double)gl_stout_rho;
     // Cosa calcoliamo in questa routine:
     //  RES += UA * dag(UB) * dag(UC) * ((RHO*I)*(LD - LE))
     d_complex matA_00 = UA->r0.c0[idxA];
@@ -780,14 +782,16 @@ static inline void RIGHT_iABC_times_DminusE_absent_stag_phases(
 
 
 // Questa e' di quelle della categoria RIGHT 
+
 #pragma acc routine seq
 static inline void RIGHT_iFABC_absent_stag_phases(  
         __restrict const su3_soa *   const UA, const int idxA,
         __restrict const su3_soa *   const UB, const int idxB,
         __restrict const su3_soa *   const UC, const int idxC,
         __restrict const thmat_soa * const LF, const int idxF,
-        __restrict su3_soa * const RES,  const int idxRES)
+        __restrict su3_soa * const RES,  const int idxRES, const int istopo)
 {
+	  const double RHO=(istopo)?(double)gl_topo_rho:(double)gl_stout_rho;
     // Cosa calcoliamo in questa routine:
     //  RES += ((RHO*I)*LF) * UA * dag(UB) * dag(UC)
 
@@ -868,15 +872,17 @@ static inline void RIGHT_iFABC_absent_stag_phases(
 
 
 // Questa e' di quelle della categoria RIGHT 
+
 #pragma acc routine seq
 static inline void RIGHT_miABGC_absent_stag_phases(  
         __restrict const su3_soa *   const UA, const int idxA,
         __restrict const su3_soa *   const UB, const int idxB,
         __restrict const su3_soa *   const UC, const int idxC,
         __restrict const thmat_soa * const LG, const int idxG,
-        __restrict su3_soa * const RES, const int idxRES)
+        __restrict su3_soa * const RES, const int idxRES, const int istopo)
 {
 
+	  const double RHO=(istopo)?(double)gl_topo_rho:(double)gl_stout_rho;
     // Cosa calcoliamo in questa routine:
     //  RES +=  UA * dag(UB) * ((-RHO*I)*LG) * dag(UC)
 
@@ -957,8 +963,9 @@ static inline void LEFT_iAB_times_GminusE_times_C_absent_stag_phases(
         __restrict const su3_soa *   const UC, const int idxC,
         __restrict const thmat_soa * const LE, const int idxE,
         __restrict const thmat_soa * const LG, const int idxG,
-        __restrict su3_soa * const RES, const int idxRES)
+        __restrict su3_soa * const RES, const int idxRES, const int istopo)
 {
+	  const double RHO=(istopo)?(double)gl_topo_rho:(double)gl_stout_rho;
     // Cosa calcoliamo in questa routine:
     //  RES += dag(UA) * dag(UB) * ((RHO*I)*(LG - LE)) * UC
     // construct (into the variables matA_ij) the hermitian conjugate of the UA matrix
@@ -1033,8 +1040,9 @@ static inline void LEFT_iABCD_absent_stag_phases(
         __restrict const su3_soa *   const UB, const int idxB,
         __restrict const su3_soa *   const UC, const int idxC,
         __restrict const thmat_soa * const LD, const int idxD,
-        __restrict su3_soa * const RES, const int idxRES)
+        __restrict su3_soa * const RES, const int idxRES, const int istopo)
 {
+	  const double RHO=(istopo)?(double)gl_topo_rho:(double)gl_stout_rho;
     // Cosa calcoliamo in questa routine:
     //  RES += dag(UA) * dag(UB) * UC * ((RHO*I)*LD
     // construct (into the variables matA_ij) the hermitian conjugate of the UA matrix
@@ -1110,8 +1118,9 @@ static inline void LEFT_miAFBC_absent_stag_phases(
         __restrict const su3_soa *   const UB, const int idxB,
         __restrict const su3_soa *   const UC, const int idxC,
         __restrict const thmat_soa * const LF, const int idxF,
-        __restrict su3_soa * const RES, const int idxRES)
+        __restrict su3_soa * const RES, const int idxRES, const int istopo)
 {
+	  const double RHO=(istopo)?(double)gl_topo_rho:(double)gl_stout_rho;
     // Cosa calcoliamo in questa routine:
     //  RES += dag(UA) * (-RHO*I)*LF * dag(UB) * UC
     // construct (into the variables matA_ij) the hermitian conjugate of the UA matrix
@@ -1191,8 +1200,8 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
         __restrict const su3_soa   * const U,  // la configurazione di gauge --> input
         __restrict su3_soa   * const S,  // entra Sigma primo (input: fermforce del passo precedente) ED esce Sigma --> sia input che ouput
         __restrict const tamat_soa * const QA, // gli stessi Q che arrivano a Cayley hamilton --> input (sostanzialmente sono rho*ta(staples))
-        __restrict su3_soa   * const TMP // variabile di parcheggio
-        )
+				__restrict su3_soa   * const TMP, // variabile di parcheggio
+        const int istopo) //istopo = {0,1} -> rho={fermrho,toporho}
 {
     int d0, d1, d2, d3, mu, iter;
 
@@ -1255,19 +1264,22 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
                                     &U[dir_nu_3R],       idxh,    // C
                                     &L[dir_link],        idxh,    // D
                                     &L[dir_nu_3R],       idxh,    // E
-                                    &S[dir_link],        idxh);
+																	  &S[dir_link],        idxh,
+																		istopo);
                             //  iFABC
                             RIGHT_iFABC_absent_stag_phases(&U[dir_nu_1R],       idx_pmu, // A
                                     &U[dir_mu_2R],       idx_pnu, // B
                                     &U[dir_nu_3R],       idxh,    // C
                                     &L[dir_nu_1R],       idx_pmu, // F
-                                    &S[dir_link],        idxh);
+                                    &S[dir_link],        idxh,
+																		istopo);
                             // -iABGC
                             RIGHT_miABGC_absent_stag_phases(&U[dir_nu_1R],       idx_pmu, // A
                                     &U[dir_mu_2R],       idx_pnu, // B
                                     &U[dir_nu_3R],       idxh,    // C
                                     &L[dir_mu_2R],       idx_pnu, // G
-                                    &S[dir_link],        idxh);
+                                    &S[dir_link],        idxh,
+																		istopo);
                             const int idx_mnu = nnm_openacc[idxh][nu][parity] ;         // r-nu
                             const int idx_pmu_mnu = nnm_openacc[idx_pmu][nu][!parity];  // r+mu-nu
 
@@ -1287,7 +1299,8 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
                                     &U[dir_nu_3L],       idx_mnu,     // C
                                     &L[dir_mu_2L],       idx_mnu,     // E
                                     &L[dir_nu_3L],       idx_mnu,     // G
-                                    &S[dir_link],        idxh);
+                                    &S[dir_link],        idxh,
+																		istopo);
 
                             //  iABCD
 
@@ -1295,13 +1308,15 @@ void compute_sigma(__restrict const thmat_soa * const L,  // la Lambda --> ouput
                                     &U[dir_mu_2L],       idx_mnu,     // B
                                     &U[dir_nu_3L],       idx_mnu,     // C
                                     &L[dir_link],        idxh,        // D
-                                    &S[dir_link],        idxh);
+                                    &S[dir_link],        idxh,
+																		istopo);
                             // -iAFBC
                             LEFT_miAFBC_absent_stag_phases(&U[dir_nu_1L],       idx_pmu_mnu, // A
                                     &U[dir_mu_2L],       idx_mnu,     // B
                                     &U[dir_nu_3L],       idx_mnu,     // C
                                     &L[dir_nu_1L],       idx_pmu_mnu, // F
-                                    &S[dir_link],        idxh);
+                                    &S[dir_link],        idxh,
+																		istopo);
                         }  // iter
 
                     } // mu

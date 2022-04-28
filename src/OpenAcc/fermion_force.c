@@ -49,15 +49,15 @@
 extern int verbosity_lv;
 
 
-
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
         __restrict thmat_soa  * Lambda, // la var globale e' aux_th
         __restrict tamat_soa  * QA, // la var globale e' aux_ta
-        __restrict const su3_soa * const U,// la var globale e' .... per adesso conf_acc
-        __restrict su3_soa * const TMP//la var globale e' aux_conf_acc //PARCHEGGIO??
-        ){
+        __restrict const su3_soa * const U,// qua ci va la conf al livello di smearing opportuno
+				__restrict su3_soa * const TMP,//la var globale e' aux_conf_acc //PARCHEGGIO??
+        const int istopo //istopo = {0,1} -> rho={fermrho,toporho}
+				){
     if(verbosity_lv > 3) printf("DOUBLE PRECISION VERSION OF COMPUTE_SIGMA_FROM_SIGMA_PRIME_BACKINTO_SIGMA_PRIME\n");
-
+    
 
 
 
@@ -75,18 +75,31 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Sigma[old]20 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c0[0]),cimag(Sigma[0].r2.c0[0]));                                               
         printf("Sigma[old]21 = %.18lf + (%.18lf)*I\n",creal(Sigma[0].r2.c1[0]),cimag(Sigma[0].r2.c1[0]));                                               
         printf("Sigma[old]22 = %.18lf + (%.18lf)*I\n\n",creal(Sigma[0].r2.c2[0]),cimag(Sigma[0].r2.c2[0]));                
+    
+#pragma acc update self(U[0:8])
+        printf("-------------U------------------\n");                                                                                             
+        printf("U00 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c0[0]),cimag(U[0].r0.c0[0]));                                               
+        printf("U01 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c1[0]),cimag(U[0].r0.c1[0]));                                               
+        printf("U02 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c2[0]),cimag(U[0].r0.c2[0]));                                               
+        printf("U10 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c0[0]),cimag(U[0].r1.c0[0]));                                               
+        printf("U11 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c1[0]),cimag(U[0].r1.c1[0]));                                               
+        printf("U12 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c2[0]),cimag(U[0].r1.c2[0]));                                               
+        printf("U20 = %.18lf + (%.18lf)*I\n",creal(U[0].r2.c0[0]),cimag(U[0].r2.c0[0]));                                               
+        printf("U21 = %.18lf + (%.18lf)*I\n",creal(U[0].r2.c1[0]),cimag(U[0].r2.c1[0]));                                               
+        printf("U22 = %.18lf + (%.18lf)*I\n\n",creal(U[0].r2.c2[0]),cimag(U[0].r2.c2[0]));                
     }
+
+
 
     set_su3_soa_to_zero(TMP);
 
     calc_loc_staples_nnptrick_all(U,TMP);
     if(verbosity_lv > 4)printf("MPI%02d:\t\tcomputed staples  \n",
-            devinfo.myrank);
+			       devinfo.myrank);
 #ifdef MULTIDEVICE
     communicate_gl3_borders(TMP,1);
 #endif
-
-    RHO_times_conf_times_staples_ta_part(U,TMP,QA);
+    RHO_times_conf_times_staples_ta_part(U,TMP,QA,istopo);
 
 #ifdef MULTIDEVICE
     communicate_tamat_soa_borders(QA,1);
@@ -122,7 +135,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa   
         printf("Lambda02 = %.18lf + (%.18lf)*I\n",creal(Lambda[0].c02[0]),cimag(Lambda[0].c02[0]));
         printf("Lambda12 = %.18lf + (%.18lf)*I\n\n",creal(Lambda[0].c12[0]),cimag(Lambda[0].c12[0]));
     }
-    compute_sigma(Lambda,U,Sigma,QA,TMP);
+    compute_sigma(Lambda,U,Sigma,QA,TMP,istopo);
     if(verbosity_lv > 4)   printf("MPI%02d:\t\tcomputed Sigma  \n",
             devinfo.myrank);
 
@@ -181,7 +194,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
     __restrict su3_soa_f * conf_to_use_f; // CONF TO USE IN CALCULATION OF 
     // FERMION FORCE
 #ifdef STOUT_FERMIONS
-    stout_wrapper(tconf_acc,tstout_conf_acc_arr);// calcolo 
+    stout_wrapper(tconf_acc,tstout_conf_acc_arr,0);// calcolo 
     if(act_params.stout_steps > 0) 
         conf_to_use =  
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
@@ -259,7 +272,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
                     devinfo.myrank, stout_level,stout_level-1);
         conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
         compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
-                aux_th,aux_ta,conf_to_use, taux_conf_acc );
+								 			 aux_th,aux_ta,conf_to_use, taux_conf_acc, 0);
         if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
             char gl3_aux_name[50];
             sprintf(gl3_aux_name,
@@ -275,7 +288,7 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
         printf("MPI%02d:\t\tSigma' to Sigma [lvl 1 to lvl 0]\n",
                 devinfo.myrank);
     compute_sigma_from_sigma_prime_backinto_sigma_prime(gl3_aux,
-            aux_th,aux_ta,tconf_acc, taux_conf_acc );
+										 aux_th,aux_ta,tconf_acc, taux_conf_acc, 0);
     }
 
 #endif
@@ -302,7 +315,7 @@ printf("F12 = %.18lf + (%.18lf)*I\n\n",creal(tipdot_acc[0].c12[0]),cimag(tipdot_
     double dt_preker_to_postker = (double)(t2.tv_sec - t1.tv_sec) + ((double)(t2.tv_usec - t1.tv_usec)/1.0e6);
     printf("MPI%02d\t\t\
 FULL FERMION FORCE COMPUTATION  PreKer->PostKer :%f sec  \n",
-dt_preker_to_postker,devinfo.myrank);
+devinfo.myrank,dt_preker_to_postker);
 #endif
     if(verbosity_lv > 0){
         printf("MPI%02d:\t\tCompleted fermion force openacc\n",

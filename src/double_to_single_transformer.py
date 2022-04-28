@@ -61,6 +61,10 @@ fileNames = [\
 'OpenAcc/cayley_hamilton.h',\
 'OpenAcc/fermion_force.c',\
 'OpenAcc/fermion_force.h',\
+'OpenAcc/topological_action.c',\
+'OpenAcc/topological_action.h',\
+'OpenAcc/topological_force.c',\
+'OpenAcc/topological_force.h',\
 'OpenAcc/fermion_force_utilities.c',\
 'OpenAcc/fermion_force_utilities.h',\
 'OpenAcc/fermionic_utilities.c',\
@@ -92,6 +96,8 @@ fileNames = [\
 'DbgTools/dbgtools.c',\
 'Mpi/communications.h',\
 'Mpi/communications.c',\
+'Meas/gauge_meas.h',\
+'Meas/gauge_meas.c',\
 ]
 
 # files where we can change all 'd_complex' with 'f_complex'
@@ -107,6 +113,10 @@ filesALLDtoF=[\
 'OpenAcc/fermion_force.h',\
 'OpenAcc/fermion_force_utilities.c',\
 'OpenAcc/fermion_force_utilities.h',\
+'OpenAcc/topological_action.c',\
+'OpenAcc/topological_action.h',\
+'OpenAcc/topological_force.c',\
+'OpenAcc/topological_force.h',\
 'OpenAcc/fermion_matrix.c',\
 'OpenAcc/fermion_matrix.h',\
 'OpenAcc/ipdot_gauge.c',\
@@ -128,6 +138,8 @@ filesALLDtoF=[\
 'Mpi/communications.c',\
 'DbgTools/dbgtools.h',\
 'DbgTools/dbgtools.c',\
+'Meas/gauge_meas.h',\
+'Meas/gauge_meas.c',\
 ]
 
 # protected file lists

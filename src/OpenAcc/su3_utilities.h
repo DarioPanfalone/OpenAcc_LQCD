@@ -5,7 +5,7 @@
 #include "./struct_c_def.h"
 #include "./single_types.h"
 #include "./cayley_hamilton.h"
-
+#include "./action.h"
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
  #define __restrict
@@ -14,7 +14,6 @@
  #include <accelmath.h>
  #include "../OpenAcc/deviceinit.h"
 #endif
-
 
 // multiply the whole configuration for the staggered phases field
 // (only the first two lines)
@@ -36,16 +35,23 @@ void set_su3_soa_to_zero( __restrict su3_soa * const matrix);
 void set_su3_soa_to_su3_soa( __restrict const su3_soa * const matrix_in,
         __restrict su3_soa * const matrix_out);
 
+void set_su3_soa_to_su3_soa_device(__restrict const su3_soa * const matrix_in,
+			     	   __restrict su3_soa * const matrix_out);
 
 void conf_times_staples_ta_part(
         __restrict const su3_soa * const u,
         __restrict const su3_soa * const loc_stap,
         __restrict tamat_soa * const tipdot);
 
-void RHO_times_conf_times_staples_ta_part(
-        __restrict const su3_soa * u,       
-        __restrict const su3_soa * loc_stap,
+void conf_times_staples_ta_part_addto_tamat(
+        __restrict const su3_soa * const u,
+        __restrict const su3_soa * const loc_stap,
         __restrict tamat_soa * const tipdot);
+
+void RHO_times_conf_times_staples_ta_part(
+        __restrict const su3_soa * const u,       
+        __restrict const su3_soa * const loc_stap,
+        __restrict tamat_soa * const tipdot, int istopo); //istopo = {0,1} -> rho={fermrho,toporho}
 
 void mom_sum_mult( __restrict thmat_soa * const mom,
         __restrict const tamat_soa * const ipdot, const double * factor,
@@ -199,6 +205,52 @@ static inline void    mat1_times_mat2_into_mat1_absent_stag_phases(
       + mat1_12 * mat2_22 ;
 }
 
+
+#pragma acc routine seq
+static inline void mat1_times_conj_mat2_into_mat3_absent_stag_phases(
+																	__restrict const su3_soa * const mat1, int idx_mat1,
+																	__restrict const su3_soa * const mat2, int idx_mat2,
+																	__restrict su3_soa * const mat3, int idx_mat3)
+{
+
+  d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
+  d_complex B00,B01,B02,B10,B11,B12,B20,B21,B22;
+  // LOAD A = MAT1 
+  A00 = mat1->r0.c0[idx_mat1];
+  A01 = mat1->r0.c1[idx_mat1];
+  A02 = mat1->r0.c2[idx_mat1];
+  A10 = mat1->r1.c0[idx_mat1];
+  A11 = mat1->r1.c1[idx_mat1];
+  A12 = mat1->r1.c2[idx_mat1];
+  A20 = conj( ( A01 * A12 ) - ( A02 * A11) ) ;
+  A21 = conj( ( A02 * A10 ) - ( A00 * A12) ) ;
+  A22 = conj( ( A00 * A11 ) - ( A01 * A10) ) ;
+
+  // LOAD B = MAT2^DAG
+  B00 = conj( mat2->r0.c0[idx_mat2] ) ;
+  B10 = conj( mat2->r0.c1[idx_mat2] ) ;
+  B20 = conj( mat2->r0.c2[idx_mat2] ) ;
+  B01 = conj( mat2->r1.c0[idx_mat2] ) ;
+  B11 = conj( mat2->r1.c1[idx_mat2] ) ;
+  B21 = conj( mat2->r1.c2[idx_mat2] ) ;
+  B02 = conj( ( B10 * B21 ) - ( B20 * B11) ) ;
+  B12 = conj( ( B20 * B01 ) - ( B00 * B21) ) ;
+  B22 = conj( ( B00 * B11 ) - ( B10 * B01) ) ;
+
+  // MAT3 = A * B = MAT1 * MAT3^DAG
+  mat3->r0.c0[idx_mat3] = A00 * B00 + A01 * B10 + A02 * B20;
+  mat3->r0.c1[idx_mat3] = A00 * B01 + A01 * B11 + A02 * B21;
+  mat3->r0.c2[idx_mat3] = A00 * B02 + A01 * B12 + A02 * B22;
+  mat3->r1.c0[idx_mat3] = A10 * B00 + A11 * B10 + A12 * B20;
+  mat3->r1.c1[idx_mat3] = A10 * B01 + A11 * B11 + A12 * B21;
+  mat3->r1.c2[idx_mat3] = A10 * B02 + A11 * B12 + A12 * B22;
+  mat3->r2.c0[idx_mat3] = A20 * B00 + A21 * B10 + A22 * B20;
+  mat3->r2.c1[idx_mat3] = A20 * B01 + A21 * B11 + A22 * B21;
+  mat3->r2.c2[idx_mat3] = A20 * B02 + A21 * B12 + A22 * B22;
+
+}
+
+
 // mat1 = mat1 * hermitian_conjucate(mat2)
 #pragma acc routine seq
 static inline void    mat1_times_conj_mat2_into_mat1_absent_stag_phases(
@@ -247,13 +299,264 @@ static inline void    mat1_times_conj_mat2_into_mat1_absent_stag_phases(
       + mat1_12 * mat2_22 ;
 }
 
+
+#pragma acc routine seq
+static inline void conj_mat1_times_mat2_into_mat3_absent_stag_phases(
+								     __restrict const su3_soa * const mat1, int idx_mat1,
+								     __restrict const su3_soa * const mat2, int idx_mat2,
+								     __restrict su3_soa * const mat3, int idx_mat3)
+{
+
+  d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
+  d_complex B00,B01,B02,B10,B11,B12,B20,B21,B22;
+
+  // LOAD A = MAT1^DAG
+  A00 = conj( mat1->r0.c0[idx_mat1] ) ;
+  A10 = conj( mat1->r0.c1[idx_mat1] ) ;
+  A20 = conj( mat1->r0.c2[idx_mat1] ) ;
+  A01 = conj( mat1->r1.c0[idx_mat1] ) ;
+  A11 = conj( mat1->r1.c1[idx_mat1] ) ;
+  A21 = conj( mat1->r1.c2[idx_mat1] ) ;
+  A02 = conj( ( A10 * A21 ) - ( A20 * A11) ) ;
+  A12 = conj( ( A20 * A01 ) - ( A00 * A21) ) ;
+  A22 = conj( ( A00 * A11 ) - ( A10 * A01) ) ;
+
+  // LOAD B = MAT2 
+  B00 = mat2->r0.c0[idx_mat2];
+  B01 = mat2->r0.c1[idx_mat2];
+  B02 = mat2->r0.c2[idx_mat2];
+  B10 = mat2->r1.c0[idx_mat2];
+  B11 = mat2->r1.c1[idx_mat2];
+  B12 = mat2->r1.c2[idx_mat2];
+  B20 = conj( ( B01 * B12 ) - ( B02 * B11) ) ;
+  B21 = conj( ( B02 * B10 ) - ( B00 * B12) ) ;
+  B22 = conj( ( B00 * B11 ) - ( B01 * B10) ) ;
+
+  // MAT3 = A * B = MAT1 * MAT3^DAG
+  mat3->r0.c0[idx_mat3] = A00 * B00 + A01 * B10 + A02 * B20;
+  mat3->r0.c1[idx_mat3] = A00 * B01 + A01 * B11 + A02 * B21;
+  mat3->r0.c2[idx_mat3] = A00 * B02 + A01 * B12 + A02 * B22;
+  mat3->r1.c0[idx_mat3] = A10 * B00 + A11 * B10 + A12 * B20;
+  mat3->r1.c1[idx_mat3] = A10 * B01 + A11 * B11 + A12 * B21;
+  mat3->r1.c2[idx_mat3] = A10 * B02 + A11 * B12 + A12 * B22;
+  mat3->r2.c0[idx_mat3] = A20 * B00 + A21 * B10 + A22 * B20;
+  mat3->r2.c1[idx_mat3] = A20 * B01 + A21 * B11 + A22 * B21;
+  mat3->r2.c2[idx_mat3] = A20 * B02 + A21 * B12 + A22 * B22;
+
+}
+
+#pragma acc routine seq
+static inline void conj_mat1_times_conj_mat2_into_mat3_absent_stag_phases(
+									  __restrict su3_soa * const mat1, int idx_mat1,
+									  __restrict su3_soa * const mat2, int idx_mat2,
+									  __restrict su3_soa * const mat3, int idx_mat3)
+{
+
+  d_complex A00,A01,A02,A10,A11,A12,A20,A21,A22;
+  d_complex B00,B01,B02,B10,B11,B12,B20,B21,B22;
+
+  // LOAD A = MAT1^DAG
+  A00 = conj( mat1->r0.c0[idx_mat1] ) ;
+  A10 = conj( mat1->r0.c1[idx_mat1] ) ;
+  A20 = conj( mat1->r0.c2[idx_mat1] ) ;
+  A01 = conj( mat1->r1.c0[idx_mat1] ) ;
+  A11 = conj( mat1->r1.c1[idx_mat1] ) ;
+  A21 = conj( mat1->r1.c2[idx_mat1] ) ;
+  A02 = conj( ( A10 * A21 ) - ( A20 * A11) ) ;
+  A12 = conj( ( A20 * A01 ) - ( A00 * A21) ) ;
+  A22 = conj( ( A00 * A11 ) - ( A10 * A01) ) ;
+
+  // LOAD B = MAT2 
+  B00 = conj(mat2->r0.c0[idx_mat2]);
+  B01 = conj(mat2->r0.c1[idx_mat2]);
+  B02 = conj(mat2->r0.c2[idx_mat2]);
+  B10 = conj(mat2->r1.c0[idx_mat2]);
+  B11 = conj(mat2->r1.c1[idx_mat2]);
+  B12 = conj(mat2->r1.c2[idx_mat2]);
+  B20 = conj( ( B01 * B12 ) - ( B02 * B11) ) ;
+  B21 = conj( ( B02 * B10 ) - ( B00 * B12) ) ;
+  B22 = conj( ( B00 * B11 ) - ( B01 * B10) ) ;
+
+  // MAT3 = A * B = MAT1 * MAT3^DAG
+  mat3->r0.c0[idx_mat3] = A00 * B00 + A01 * B10 + A02 * B20;
+  mat3->r0.c1[idx_mat3] = A00 * B01 + A01 * B11 + A02 * B21;
+  mat3->r0.c2[idx_mat3] = A00 * B02 + A01 * B12 + A02 * B22;
+  mat3->r1.c0[idx_mat3] = A10 * B00 + A11 * B10 + A12 * B20;
+  mat3->r1.c1[idx_mat3] = A10 * B01 + A11 * B11 + A12 * B21;
+  mat3->r1.c2[idx_mat3] = A10 * B02 + A11 * B12 + A12 * B22;
+  mat3->r2.c0[idx_mat3] = A20 * B00 + A21 * B10 + A22 * B20;
+  mat3->r2.c1[idx_mat3] = A20 * B01 + A21 * B11 + A22 * B21;
+  mat3->r2.c2[idx_mat3] = A20 * B02 + A21 * B12 + A22 * B22;
+
+}
+
+
+#pragma acc routine seq
+static inline void mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(  
+										       __restrict const su3_soa * const mat1, const int idx_mat1,
+										       __restrict const su3_soa * const mat2, const int idx_mat2,
+										       double fact,
+										       __restrict su3_soa * const mat3,   const int idx_mat3)
+{
+  d_complex mat1_00 = mat1->r0.c0[idx_mat1];
+  d_complex mat1_01 = mat1->r0.c1[idx_mat1];
+  d_complex mat1_02 = mat1->r0.c2[idx_mat1];
+  
+  d_complex mat1_10 = mat1->r1.c0[idx_mat1];
+  d_complex mat1_11 = mat1->r1.c1[idx_mat1];
+  d_complex mat1_12 = mat1->r1.c2[idx_mat1];
+    
+  d_complex mat2_00 = mat2->r0.c0[idx_mat2];
+  d_complex mat2_10 = mat2->r1.c0[idx_mat2];
+  d_complex mat2_20 = mat2->r2.c0[idx_mat2];
+
+  d_complex mat2_01 = mat2->r0.c1[idx_mat2];
+  d_complex mat2_11 = mat2->r1.c1[idx_mat2];
+  d_complex mat2_21 = mat2->r2.c1[idx_mat2];
+
+  d_complex mat2_02 = mat2->r0.c2[idx_mat2];
+  d_complex mat2_12 = mat2->r1.c2[idx_mat2];
+  d_complex mat2_22 = mat2->r2.c2[idx_mat2];
+
+  //Compute the outcome
+  mat3->r0.c0[idx_mat3] += fact*(mat1_00 * mat2_00 + mat1_01 * mat2_10 
+				 + mat1_02 * mat2_20) ;
+  mat3->r0.c1[idx_mat3] += fact*(mat1_00 * mat2_01 + mat1_01 * mat2_11 
+				 + mat1_02 * mat2_21) ;
+  mat3->r0.c2[idx_mat3] += fact*(mat1_00 * mat2_02 + mat1_01 * mat2_12 
+				 + mat1_02 * mat2_22) ;
+    
+  mat3->r1.c0[idx_mat3] += fact*(mat1_10 * mat2_00 + mat1_11 * mat2_10 
+				 + mat1_12 * mat2_20) ;
+  mat3->r1.c1[idx_mat3] += fact*(mat1_10 * mat2_01 + mat1_11 * mat2_11 
+				 + mat1_12 * mat2_21) ;
+  mat3->r1.c2[idx_mat3] += fact*(mat1_10 * mat2_02 + mat1_11 * mat2_12 
+				 + mat1_12 * mat2_22) ;
+    
+  mat3->r2.c0[idx_mat3] += fact*conj( ( mat1_01 * mat1_12 ) 
+				      - ( mat1_02 * mat1_11) ) ;
+  mat3->r2.c1[idx_mat3] += fact*conj( ( mat1_02 * mat1_10 ) 
+				      - ( mat1_00 * mat1_12) ) ;
+  mat3->r2.c2[idx_mat3] += fact*conj( ( mat1_00 * mat1_11 ) 
+				      - ( mat1_01 * mat1_10) ) ;
+
+}
+
+#pragma acc routine seq
+static inline void conj_mat1_times_mat2_times_fact_addto_mat3_absent_stag_phases(  
+										 __restrict const su3_soa * const mat1, const int idx_mat1,
+										 __restrict const su3_soa * const mat2, const int idx_mat2,
+										 double fact,
+										 __restrict su3_soa * const mat3,   const int idx_mat3)
+{
+
+    d_complex mat1_00 = conj(mat1->r0.c0[idx_mat1]);
+    d_complex mat1_01 = conj(mat1->r1.c0[idx_mat1]);
+    d_complex mat1_02 = conj(mat1->r2.c0[idx_mat1]);
+
+    d_complex mat1_10 = conj(mat1->r0.c1[idx_mat1]);
+    d_complex mat1_11 = conj(mat1->r1.c1[idx_mat1]);
+    d_complex mat1_12 = conj(mat1->r2.c1[idx_mat1]);
+
+    d_complex mat1_20 = conj(mat1->r0.c2[idx_mat1]);
+    d_complex mat1_21 = conj(mat1->r1.c2[idx_mat1]);
+    d_complex mat1_22 = conj(mat1->r2.c2[idx_mat1]);
+
+    d_complex mat2_00 = mat2->r0.c0[idx_mat2];
+    d_complex mat2_10 = mat2->r1.c0[idx_mat2];
+    d_complex mat2_20 = mat2->r2.c0[idx_mat2];
+
+    d_complex mat2_01 = mat2->r0.c1[idx_mat2];
+    d_complex mat2_11 = mat2->r1.c1[idx_mat2];
+    d_complex mat2_21 = mat2->r2.c1[idx_mat2];
+
+    d_complex mat2_02 = mat2->r0.c2[idx_mat1];
+    d_complex mat2_12 = mat2->r1.c2[idx_mat1];
+    d_complex mat2_22 = mat2->r2.c2[idx_mat1];
+
+    //Compute the outcome
+    mat3->r0.c0[idx_mat3] += fact*(mat1_00 * mat2_00 + mat1_01 * mat2_10 
+				   + mat1_02 * mat2_20) ;
+    mat3->r0.c1[idx_mat3] += fact*(mat1_00 * mat2_01 + mat1_01 * mat2_11 
+				   + mat1_02 * mat2_21) ;
+    mat3->r0.c2[idx_mat3] += fact*(mat1_00 * mat2_02 + mat1_01 * mat2_12 
+				   + mat1_02 * mat2_22) ;
+	
+    mat3->r1.c0[idx_mat3] += fact*(mat1_10 * mat2_00 + mat1_11 * mat2_10 
+				   + mat1_12 * mat2_20) ;
+    mat3->r1.c1[idx_mat3] += fact*(mat1_10 * mat2_01 + mat1_11 * mat2_11 
+				   + mat1_12 * mat2_21) ;
+    mat3->r1.c2[idx_mat3] += fact*(mat1_10 * mat2_02 + mat1_11 * mat2_12 
+				   + mat1_12 * mat2_22) ;
+	
+    mat3->r2.c0[idx_mat3] += fact*conj( ( mat1_01 * mat1_12 ) 
+					- ( mat1_02 * mat1_11) ) ;
+    mat3->r2.c1[idx_mat3] += fact*conj( ( mat1_02 * mat1_10 ) 
+					- ( mat1_00 * mat1_12) ) ;
+    mat3->r2.c2[idx_mat3] += fact*conj( ( mat1_00 * mat1_11 ) 
+					- ( mat1_01 * mat1_10) ) ;
+
+}
+
+#pragma acc routine seq
+static inline void mat1_times_conj_mat2_times_fact_addto_mat3_absent_stag_phases(
+										 __restrict const su3_soa * const mat1, const int idx_mat1,
+										 __restrict const su3_soa * const mat2, const int idx_mat2,
+										 double fact,
+										 __restrict su3_soa * const mat3,   const int idx_mat3)
+{
+
+    d_complex mat1_00 = mat1->r0.c0[idx_mat1];
+    d_complex mat1_01 = mat1->r0.c1[idx_mat1];
+    d_complex mat1_02 = mat1->r0.c2[idx_mat1];
+
+    d_complex mat1_10 = mat1->r1.c0[idx_mat1];
+    d_complex mat1_11 = mat1->r1.c1[idx_mat1];
+    d_complex mat1_12 = mat1->r1.c2[idx_mat1];
+
+    d_complex mat2_00 = conj(mat2->r0.c0[idx_mat2]);
+    d_complex mat2_10 = conj(mat2->r0.c1[idx_mat2]);
+    d_complex mat2_20 = conj(mat2->r0.c2[idx_mat2]);
+						     					   
+    d_complex mat2_01 = conj(mat2->r1.c0[idx_mat2]);
+    d_complex mat2_11 = conj(mat2->r1.c1[idx_mat2]);
+    d_complex mat2_21 = conj(mat2->r1.c2[idx_mat2]);
+
+    d_complex mat2_02 = conj(mat2->r2.c0[idx_mat2]);
+    d_complex mat2_12 = conj(mat2->r2.c1[idx_mat2]);
+    d_complex mat2_22 = conj(mat2->r2.c2[idx_mat2]);
+
+    //Compute the outcome
+	mat3->r0.c0[idx_mat3] += fact*(mat1_00 * mat2_00 + mat1_01 * mat2_10 
+							  + mat1_02 * mat2_20) ;
+	mat3->r0.c1[idx_mat3] += fact*(mat1_00 * mat2_01 + mat1_01 * mat2_11 
+							  + mat1_02 * mat2_21) ;
+	mat3->r0.c2[idx_mat3] += fact*(mat1_00 * mat2_02 + mat1_01 * mat2_12 
+							  + mat1_02 * mat2_22) ;
+	
+	mat3->r1.c0[idx_mat3] += fact*(mat1_10 * mat2_00 + mat1_11 * mat2_10 
+							  + mat1_12 * mat2_20) ;
+	mat3->r1.c1[idx_mat3] += fact*(mat1_10 * mat2_01 + mat1_11 * mat2_11 
+							  + mat1_12 * mat2_21) ;
+	mat3->r1.c2[idx_mat3] += fact*(mat1_10 * mat2_02 + mat1_11 * mat2_12 
+							  + mat1_12 * mat2_22) ;
+	
+	mat3->r2.c0[idx_mat3] += fact*conj( ( mat1_01 * mat1_12 ) 
+								   - ( mat1_02 * mat1_11) ) ;
+	mat3->r2.c1[idx_mat3] += fact*conj( ( mat1_02 * mat1_10 ) 
+								   - ( mat1_00 * mat1_12) ) ;
+	mat3->r2.c2[idx_mat3] += fact*conj( ( mat1_00 * mat1_11 ) 
+								   - ( mat1_01 * mat1_10) ) ;
+
+}
+
+
 // Routine for the computation of the 3 matrices which contributes 
 // to the right part of the staple
 // mat4 = mat1 * hermitian_conjucate(mat2)* hermitian_conjucate(mat3)
 
 #pragma acc routine seq
-static inline void 
-mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(  
+static inline void mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(  
         __restrict const su3_soa * const matnu1, const int idx_mat_nu1,
         __restrict const su3_soa * const matmu2, const int idx_mat_mu2,
         __restrict const su3_soa * const matnu3, const int idx_mat_nu3,
@@ -346,8 +649,7 @@ mat1_times_conj_mat2_times_conj_mat3_addto_mat4_absent_stag_phases(
 // Routine for the computation of the 3 matrices which contributes to the left part of the staple
 // mat4 = hermitian_conjucate(mat1)* hermitian_conjucate(mat2) * mat3
 #pragma acc routine seq
-static inline void    
-conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(   
+static inline void conj_mat1_times_conj_mat2_times_mat3_addto_mat4_absent_stag_phases(   
         __restrict const su3_soa * const matnu1, const int idx_mat_nu1,
         __restrict const su3_soa * const matmu2, const int idx_mat_mu2,
         __restrict const su3_soa * const matnu3, const int idx_mat_nu3,
@@ -507,11 +809,71 @@ static inline void mat1_times_mat2_into_tamat3(
 }
 
 #pragma acc routine seq
+static inline void mat1_times_mat2_addto_tamat3(
+        __restrict const su3_soa * const mat1,
+        const int idx_mat1,
+        __restrict const su3_soa * const mat2,
+        const int idx_mat2,
+        __restrict tamat_soa * const mat3,
+        const int idx_mat3)
+{
+  //Load the first two rows of mat1 (that is a link variable)
+  d_complex mat1_00 = mat1->r0.c0[idx_mat1];
+  d_complex mat1_01 = mat1->r0.c1[idx_mat1];
+  d_complex mat1_02 = mat1->r0.c2[idx_mat1];
+  d_complex mat1_10 = mat1->r1.c0[idx_mat1];
+  d_complex mat1_11 = mat1->r1.c1[idx_mat1];
+  d_complex mat1_12 = mat1->r1.c2[idx_mat1];
+  //Compute the 3rd row of mat1 (that is a link variable)
+  d_complex mat1_20 = conj(( mat1_01 * mat1_12 )-( mat1_02 * mat1_11));
+  d_complex mat1_21 = conj(( mat1_02 * mat1_10 )-( mat1_00 * mat1_12));
+  d_complex mat1_22 = conj(( mat1_00 * mat1_11 )-( mat1_01 * mat1_10));
+
+  //Load all the rows of mat2 (that is a staple variable)
+  d_complex mat2_00 = mat2->r0.c0[idx_mat2];
+  d_complex mat2_01 = mat2->r0.c1[idx_mat2];
+  d_complex mat2_02 = mat2->r0.c2[idx_mat2];
+  d_complex mat2_10 = mat2->r1.c0[idx_mat2];
+  d_complex mat2_11 = mat2->r1.c1[idx_mat2];
+  d_complex mat2_12 = mat2->r1.c2[idx_mat2];
+  d_complex mat2_20 = mat2->r2.c0[idx_mat2];
+  d_complex mat2_21 = mat2->r2.c1[idx_mat2];
+  d_complex mat2_22 = mat2->r2.c2[idx_mat2];
+
+  // Compute first row of the product mat1 * mat2
+  d_complex mat3_00 = mat1_00 * mat2_00 + mat1_01 * mat2_10 
+      + mat1_02 * mat2_20;
+  d_complex mat3_01 = mat1_00 * mat2_01 + mat1_01 * mat2_11 
+      + mat1_02 * mat2_21;
+  d_complex mat3_02 = mat1_00 * mat2_02 + mat1_01 * mat2_12 
+      + mat1_02 * mat2_22;
+  // Compute second row of the product mat1 * mat2 and save it
+  // into reusable variables
+  mat1_00 = mat1_10*mat2_00+mat1_11*mat2_10+mat1_12*mat2_20; // mat3_10 
+  mat1_01 = mat1_10*mat2_01+mat1_11*mat2_11+mat1_12*mat2_21; // mat3_11
+  mat1_02 = mat1_10*mat2_02+mat1_11*mat2_12+mat1_12*mat2_22; // mat3_12
+  // Compute third row of the product mat1 * mat2 and save it 
+  // into reusable variables
+  mat1_10 = mat1_20*mat2_00+mat1_21*mat2_10+mat1_22*mat2_20; // mat3_20
+  mat1_11 = mat1_20*mat2_01+mat1_21*mat2_11+mat1_22*mat2_21; // mat3_21
+  mat1_12 = mat1_20*mat2_02+mat1_21*mat2_12+mat1_22*mat2_22; // mat3_22
+
+  mat3->c01[idx_mat3] += 0.5*(mat3_01-conj(mat1_00));
+  mat3->c02[idx_mat3] += 0.5*(mat3_02-conj(mat1_10));
+  mat3->c12[idx_mat3] += 0.5*(mat1_02-conj(mat1_11));
+  mat3->ic00[idx_mat3]+= cimag(mat3_00)-
+      ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
+  mat3->ic11[idx_mat3]+= cimag(mat1_01)-
+      ONE_BY_THREE*(cimag(mat3_00)+cimag(mat1_01)+cimag(mat1_12));
+}
+
+#pragma acc routine seq
 static inline void RHO_times_mat1_times_mat2_into_tamat3(
         __restrict const su3_soa * const mat1, const int idx_mat1,
         __restrict const su3_soa * const mat2, const int idx_mat2,
-        __restrict tamat_soa * const mat3,     const int idx_mat3)
+        __restrict tamat_soa * const mat3,     const int idx_mat3, int istopo)
 {
+	const double RHO=(istopo)?(double)gl_topo_rho:(double)gl_stout_rho;
   //Load the first two rows of mat1 (that is a link variable)
   d_complex mat1_00 = mat1->r0.c0[idx_mat1];
   d_complex mat1_01 = mat1->r0.c1[idx_mat1];
@@ -550,7 +912,7 @@ static inline void RHO_times_mat1_times_mat2_into_tamat3(
   mat1_11 = mat1_20*mat2_01+mat1_21*mat2_11+mat1_22*mat2_21; // mat3_21
   mat1_12 = mat1_20*mat2_02+mat1_21*mat2_12+mat1_22*mat2_22; // mat3_22
 
-  // oltre a moltiplicare per RHO devo anche dividere per C_ZERO
+  // oltre a moltiplicare per rho devo anche dividere per C_ZERO
   // perche' le staples che entrano qui dentro sono le staples * C_ZERO 
   // --> lo devo togliere!!
   double tmp = RHO/C_ZERO;
@@ -565,7 +927,7 @@ static inline void RHO_times_mat1_times_mat2_into_tamat3(
 
 // mat1 = mat1 * integer factor
 #pragma acc routine seq
-static inline void   mat1_times_int_factor( 
+static inline void  mat1_times_int_factor( 
         __restrict su3_soa * const mat1,
         const int idx_mat1,
         int factor)
@@ -588,7 +950,31 @@ static inline void   mat1_times_int_factor(
 
 // mat1 = mat1 * integer factor
 #pragma acc routine seq
-static inline void   gl3_times_int_factor( 
+static inline void  mat1_times_double_factor( 
+        __restrict su3_soa * const mat1,
+        const int idx_mat1,
+        double factor)
+{
+
+  mat1->r0.c0[idx_mat1] *= factor;
+  mat1->r0.c1[idx_mat1] *= factor;
+  mat1->r0.c2[idx_mat1] *= factor;
+
+  mat1->r1.c0[idx_mat1] *= factor;
+  mat1->r1.c1[idx_mat1] *= factor;
+  mat1->r1.c2[idx_mat1] *= factor;
+
+  //Third row needs not to be multiplied
+  //  mat1->r2.c0[idx_mat1] *= factor;
+  //  mat1->r2.c1[idx_mat1] *= factor;
+  //  mat1->r2.c2[idx_mat1] *= factor;
+
+}
+
+
+// mat1 = mat1 * integer factor
+#pragma acc routine seq
+static inline void  gl3_times_int_factor( 
         __restrict su3_soa * const mgl3,
         const int idx_mgl3,
         int factor){
@@ -606,6 +992,51 @@ static inline void   gl3_times_int_factor(
   mgl3->r2.c2[idx_mgl3] *= factor;
 
 }
+
+// mat1 = mat1 * double factor
+#pragma acc routine seq
+static inline void  gl3_times_double_factor( 
+        __restrict su3_soa * const mgl3,
+        const int idx_mgl3,
+        double factor){
+
+  mgl3->r0.c0[idx_mgl3] *= factor;
+  mgl3->r0.c1[idx_mgl3] *= factor;
+  mgl3->r0.c2[idx_mgl3] *= factor;
+
+  mgl3->r1.c0[idx_mgl3] *= factor;
+  mgl3->r1.c1[idx_mgl3] *= factor;
+  mgl3->r1.c2[idx_mgl3] *= factor;
+
+  mgl3->r2.c0[idx_mgl3] *= factor;
+  mgl3->r2.c1[idx_mgl3] *= factor;
+  mgl3->r2.c2[idx_mgl3] *= factor;
+
+}
+
+#pragma acc routine seq
+static inline void  gl3_dag_times_double_factor( 
+        __restrict su3_soa * const mgl3,
+        const int idx_mgl3,
+        double factor){
+  
+  mgl3->r0.c0[idx_mgl3] = conj(mgl3->r0.c0[idx_mgl3])*factor;
+  d_complex m01 = mgl3->r0.c1[idx_mgl3];
+  d_complex m02 = mgl3->r0.c2[idx_mgl3];
+  mgl3->r0.c1[idx_mgl3] = conj(mgl3->r1.c0[idx_mgl3])*factor;
+  mgl3->r0.c2[idx_mgl3] = conj(mgl3->r2.c0[idx_mgl3])*factor;
+  
+  mgl3->r1.c0[idx_mgl3] = conj(m01)*factor;
+  mgl3->r1.c1[idx_mgl3] = conj(mgl3->r1.c1[idx_mgl3])*factor;  
+  d_complex m12 = mgl3->r1.c2[idx_mgl3];
+  mgl3->r1.c2[idx_mgl3] = conj(mgl3->r2.c1[idx_mgl3])*factor;
+
+  mgl3->r2.c0[idx_mgl3] = conj(m02)*factor;
+  mgl3->r2.c1[idx_mgl3] = conj(m12)*factor;
+  mgl3->r2.c2[idx_mgl3] = conj(mgl3->r2.c2[idx_mgl3])*factor;
+  
+}
+
 
 // calcola la traccia della matrice di su3
 #pragma acc routine seq

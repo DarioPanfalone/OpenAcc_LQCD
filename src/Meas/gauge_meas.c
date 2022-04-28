@@ -2,12 +2,11 @@
 // use the global defined fermions loc_chi, loc_phi, rnd_o, rnd_e, chi_o and loc_h
 #ifndef GAUGE_MEAS_C
 #define GAUGE_MEAS_C
-
 #include "../OpenAcc/geometry.h"
 #include "../OpenAcc/struct_c_def.h"
 #include "../OpenAcc/su3_utilities.h"
 #include "./gauge_meas.h"
-
+#include "../Mpi/multidev.h"
 
 #ifdef __GNUC__
  #include "math.h"
@@ -21,11 +20,10 @@
 #endif
 
 
-
 char gauge_outfilename[50];
 char gauge_outfile_header[100];
-/*
-void compute_local_topological_charge(  __restrict su3_soa * const u,
+
+void compute_local_topological_charge(  __restrict const su3_soa * const u,
 					__restrict su3_soa * const quadri,
 					double_soa * const loc_q,
 					int mu, int nu)
@@ -33,7 +31,7 @@ void compute_local_topological_charge(  __restrict su3_soa * const u,
   
   int d0, d1, d2, d3;
 #pragma acc kernels present(u) present(quadri) present(loc_q) present(nnp_openacc) present(nnm_openacc)
-#pragma acc loop independent gang 
+#pragma loop independent gang 
   for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent gang vector 
       for(d2=0; d2<nd2; d2++) {
@@ -44,7 +42,6 @@ void compute_local_topological_charge(  __restrict su3_soa * const u,
                   const int idxh = snum_acc(d0,d1,d2,d3);  // r
                   const int parity = (d0+d1+d2+d3) % 2;
                   loc_q[parity].d[idxh] = 0.0;
-                  //	  for(nu=1; nu<4; nu++){
                   int b;
                   int a;
                   int rho;
@@ -135,9 +132,6 @@ void compute_local_topological_charge(  __restrict su3_soa * const u,
                           &quadri[2+parity],   idxh,
                           Epsilon,
                           &loc_q[parity],      idxh);
-                  //	      if((idxh==0)&&(parity==0)) printf("loc_q(mu=%d,nu=%d)= %.18lf\n",mu,nu,loc_q[0].d[0]);
-
-                  //	  } // closes nu
               } // closes d0
           } // closes d1
       } // closes d2
@@ -165,14 +159,14 @@ double reduce_loc_top_charge(double_soa * const loc_q)
     return result;
 }
 
+double compute_topological_charge(__restrict const su3_soa * const u, su3_soa * const quadri, double_soa * const loc_q){  
 
-double compute_topological_charge(__restrict su3_soa * const u,
-        __restrict su3_soa * const quadri,
-        double_soa * const loc_q){  
 
-    set_su3_soa_to_zero(quadri); // forse non serve a una mazza
+#pragma acc data present(quadri) present(loc_q)
+	set_su3_soa_to_zero(quadri); // forse non serve a una mazza
 
-    double temp_ch =0.0;
+	
+    double temp_ch;
     compute_local_topological_charge(u,quadri,loc_q,0,1);// (d0,d1) - (d2,d3)
     temp_ch = reduce_loc_top_charge(loc_q);
     compute_local_topological_charge(u,quadri,loc_q,0,2);// (d0,d2) - (d1,d3)
@@ -183,6 +177,6 @@ double compute_topological_charge(__restrict su3_soa * const u,
 
     return  temp_ch;
 }
-*/
+
 
 #endif

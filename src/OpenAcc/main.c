@@ -26,6 +26,7 @@
 #include "../Meas/ferm_meas.h"
 #include "../Meas/gauge_meas.h"
 #include "../Meas/polyakov.h"
+#include "../Meas/measure_topo.h"
 #include "../Mpi/communications.h"
 #include "../Mpi/multidev.h"
 #include "../Rand/random.h"
@@ -55,7 +56,7 @@
 #ifdef __GNUC__
 #include "sys/time.h"
 #endif
-
+#include "./cooling.h"
 #include <unistd.h>
 #include <mpi.h>
 #include "../Include/stringify.h"
@@ -72,16 +73,9 @@
 int conf_id_iter;
 int verbosity_lv;
 
-
-
-
-
-
-
 int main(int argc, char* argv[]){
 
     gettimeofday ( &(mc_params.start_time), NULL );
-
     // READ input file.
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
@@ -100,7 +94,7 @@ int main(int argc, char* argv[]){
 
 
     int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]);
-
+		
 #ifdef MULTIDEVICE
     if(input_file_read_check){
         printf("MPI%02d: input file reading failed, Aborting...\n",devinfo.myrank);
@@ -115,7 +109,8 @@ int main(int argc, char* argv[]){
         printf("MPI%02d: input file reading failed, aborting...\n",devinfo.myrank);
         exit(1);
     }
-    if(0==devinfo.myrank) print_geom_defines();
+
+		if(0==devinfo.myrank) print_geom_defines();
     verbosity_lv = debug_settings.input_vbl;
 
     if(0==devinfo.myrank){
@@ -211,7 +206,13 @@ int main(int argc, char* argv[]){
         printf("\n  MPI%02d - Allocazione della memoria (float) [EXTENDED]: OK \n\n\n",devinfo.myrank);
     }
     printf("\n  MPI%02d - Allocazione della memoria totale: %zu \n\n\n",devinfo.myrank,max_memory_used);
-    compute_nnp_and_nnm_openacc();
+
+		gl_stout_rho=act_params.stout_rho;
+		gl_topo_rho=act_params.topo_rho;
+#pragma acc enter data copyin(gl_stout_rho)
+#pragma acc enter data copyin(gl_topo_rho)
+
+		compute_nnp_and_nnm_openacc();
 #pragma acc enter data copyin(nnp_openacc)
 #pragma acc enter data copyin(nnm_openacc)
     printf("MPI%02d - nn computation : OK \n",devinfo.myrank);
@@ -283,7 +284,9 @@ int main(int argc, char* argv[]){
 
 
 
-    double plq,rect,topoch;
+    double plq,rect;
+    double cool_topo_ch[meastopo_params.coolmeasstep/meastopo_params.cool_measinterval+1];
+    double stout_topo_ch[meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval+1];
     d_complex poly;
 
     int accettate_therm=0;
@@ -294,8 +297,12 @@ int main(int argc, char* argv[]){
     plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
     printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
             devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
-    rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-
+    //rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+		#if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
+    	rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+		#else
+    	printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
+	#endif
 
     printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
             devinfo.myrank, conf_id_iter,rect/GL_SIZE/6.0/3.0/2.0);
@@ -303,8 +310,7 @@ int main(int argc, char* argv[]){
     poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
     printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
             devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
-
-
+	
     //char confile_dbg[50];
     //sprintf(confile_dbg,"conf_ascii_test_%s", devinfo.myrankstr);
     //dbg_print_su3_soa(conf_acc,confile_dbg,0);
@@ -324,13 +330,19 @@ int main(int argc, char* argv[]){
         //--------- MISURA ROBA DI GAUGE ------------------//
         if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
         plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-        rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-        poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
+        //rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+        #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
+    			rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+				#else
+    			printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
+				#endif
+				poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);//misura polyakov loop
+    
 
-        printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
+	
+	printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
         printf("Rectangle     : %.18lf\n" ,rect/GL_SIZE/3.0/6.0/2.0);
         printf("Polyakov Loop : (%.18lf,%.18lf) \n",creal(poly),cimag(poly));
-
 
         //--------- MISURA ROBA FERMIONICA ----------------//
         //
@@ -356,7 +368,7 @@ int main(int argc, char* argv[]){
     init_global_program_status(); 
 
     printf("run_condition: %d\n",mc_params.run_condition) ;
-  
+  	if ( 0 != mc_params.ntraj ) {
     while ( RUN_CONDITION_TERMINATE != mc_params.run_condition)
     {
 
@@ -450,14 +462,77 @@ int main(int argc, char* argv[]){
 
             //--------- MISURA ROBA DI GAUGE ------------------//
             plq  = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-            poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
-
+            //rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+            #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
+    					rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+						#else
+    					printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
+						#endif
+						poly =  (*polyakov_loop[geom_par.tmap])(conf_acc);
+	    
+	    if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
+	      su3_soa *conf_to_use;
+	      cool_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
+		    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
+		      if(cs==1)
+			conf_to_use=(su3_soa*)conf_acc;
+		      else
+			conf_to_use=(su3_soa*)aux_conf_acc;	
+		      cool_conf(conf_to_use,aux_conf_acc,auxbis_conf_acc);
+		      if(cs%meastopo_params.cool_measinterval==0)
+			cool_topo_ch[cs/meastopo_params.cool_measinterval]=compute_topological_charge(aux_conf_acc,auxbis_conf_acc,topo_loc);
+		    }
+	            printf("MPI%02d - Printing cooled charge - only by master rank...\n",
+                    devinfo.myrank);
+        	    if(devinfo.myrank ==0){
+                	FILE *cooloutfile = fopen(meastopo_params.pathcool,"at");
+	                if(!cooloutfile){
+        	            cooloutfile = fopen(meastopo_params.pathcool,"wt");
+	                    char coolheader[35];
+			    strcpy(coolheader,"#conf_id\tCoolStp\tTopoChCool\n");
+                	    fprintf(cooloutfile,"%s",coolheader);
+	                }
+        	        if(cooloutfile){
+				for(int i = 0; i <= meastopo_params.coolmeasstep/meastopo_params.cool_measinterval;i++)
+					fprintf(cooloutfile,"%d\t%d\t%18.18lf\n",conf_id_iter,
+						i*meastopo_params.cool_measinterval,
+						cool_topo_ch[i]);
+			}
+        	        fclose(cooloutfile);
+            	    }
+	    }
+	    if(meastopo_params.measstout && conf_id_iter%meastopo_params.stouteach==0){
+		    stout_wrapper(conf_acc,gstout_conf_acc_arr,1);
+		    stout_topo_ch[0]=compute_topological_charge(conf_acc,auxbis_conf_acc,topo_loc);
+		    for(int ss = 0; ss < meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
+	    	    	/* aux_conf_acc = &(gstout_conf_acc_arr[8*ss]); */
+			int topoindx =1+ss/meastopo_params.stout_measinterval; 
+		    	stout_topo_ch[topoindx]=compute_topological_charge(&gstout_conf_acc_arr[8*ss],auxbis_conf_acc,topo_loc);
+		    }
+	    
+	            printf("MPI%02d - Printing stouted charge - only by master rank...\n",
+                    devinfo.myrank);
+        	    if(devinfo.myrank ==0){
+                	FILE *stoutoutfile = fopen(meastopo_params.pathstout,"at");
+	                if(!stoutoutfile){
+        	            stoutoutfile = fopen(meastopo_params.pathstout,"wt");
+	                    char stoutheader[35];
+			    strcpy(stoutheader,"#conf_id\tStoutStp\tTopoChStout\n");
+                	    fprintf(stoutoutfile,"%s",stoutheader);
+	                }
+        	        if(stoutoutfile){
+				for(int i = 0; i <= meastopo_params.stoutmeasstep/meastopo_params.stout_measinterval;i++)
+					fprintf(stoutoutfile,"%d\t%d\t%18.18lf\n",conf_id_iter,
+						i*meastopo_params.stout_measinterval,
+						stout_topo_ch[i]);
+			}
+        	        fclose(stoutoutfile);
+            	    }
+	    }
 
             printf("MPI%02d - Printing gauge obs - only by master rank...\n",
                     devinfo.myrank);
-            if(devinfo.myrank ==0 ){
-
+            if(devinfo.myrank ==0){
                 FILE *goutfile = fopen(gauge_outfilename,"at");
                 if(!goutfile){
                     goutfile = fopen(gauge_outfilename,"wt");
@@ -469,8 +544,6 @@ int main(int argc, char* argv[]){
                         printf("Therm_iter %d",conf_id_iter );
                         printf("Placchetta= %.18lf    ", plq/GL_SIZE/6.0/3.0);
                         printf("Rettangolo= %.18lf\n",rect/GL_SIZE/6.0/3.0/2.0);
-
-
                     }else printf("Metro_iter %d   Placchetta= %.18lf    Rettangolo= %.18lf\n",conf_id_iter,plq/GL_SIZE/6.0/3.0,rect/GL_SIZE/6.0/3.0/2.0);
 
 
@@ -481,7 +554,6 @@ int main(int argc, char* argv[]){
                             plq/GL_SIZE/6.0/3.0,
                             rect/GL_SIZE/6.0/3.0/2.0, 
                             creal(poly), cimag(poly));
-
                 }
                 fclose(goutfile);
             }
@@ -628,7 +700,6 @@ int main(int argc, char* argv[]){
             //-------------------------------------------------//
 
         }
-
         // determining next thing to do
         if(0 == conf_id_iter % fm_par.measEvery)
             mc_params.next_gps = GPSTATUS_FERMION_MEASURES;
@@ -697,6 +768,12 @@ int main(int argc, char* argv[]){
                 printf("%s - shutting down now.\n", devinfo.myrankstr);
                 mc_params.run_condition = RUN_CONDITION_TERMINATE;
             }
+						if (0==mc_params.ntraj) {
+                printf("%s - NTraj=%d reached, job done!",
+                        devinfo.myrankstr, mc_params.ntraj);
+                printf("%s - shutting down now.\n", devinfo.myrankstr);
+						mc_params.run_condition = RUN_CONDITION_TERMINATE;
+						}
 
         }
 #ifdef MULTIDEVICE
@@ -710,8 +787,8 @@ int main(int argc, char* argv[]){
 
 #endif
 
-    }// while id_iter loop ends here             
-
+    } // while id_iter loop ends here             
+	} // closes if (0 != mc_params.ntraj)
 
     //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
 
@@ -749,6 +826,8 @@ int main(int argc, char* argv[]){
     printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)
+#pragma acc exit data delete(gl_stout_rho)
+#pragma acc exit data delete(gl_topo_rho)
 
     printf("\n  MPI%02d - Prima dello shutdown, memoria allocata: %zu \n\n\n",devinfo.myrank,memory_used);
     

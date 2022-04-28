@@ -21,7 +21,6 @@ extern int verbosity_lv;
 #include "../DbgTools/dbgtools.h"
 #include "./action.h"
 
-
 void calc_ipdot_gauge_soloopenacc_std( 
         __restrict const su3_soa * const tconf_acc, 
         __restrict su3_soa * const local_staples,
@@ -121,9 +120,8 @@ void calc_ipdot_gauge_soloopenacc(
     if(GAUGE_ACTION==1){
         calc_ipdot_gauge_soloopenacc_tlsm(tconf_acc,local_staples,tipdot);
     }
-
-
-
+	
+	
     if(debug_settings.save_diagnostics == 1){
 
 

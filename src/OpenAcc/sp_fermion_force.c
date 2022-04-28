@@ -41,13 +41,15 @@
 #include "../Mpi/sp_communications.h"
 #endif 
 
+
 extern int verbosity_lv;
 
 void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_f    * Sigma, // la var globale e' auxbis_conf_acc_f [sia input che ouptput]
         __restrict thmat_soa_f  * Lambda, // la var globale e' aux_th_f
         __restrict tamat_soa_f  * QA, // la var globale e' aux_ta_f
         __restrict const su3_soa_f * const U,// la var globale e' .... per adesso conf_acc_f
-        __restrict su3_soa_f * const TMP//la var globale e' aux_conf_acc_f //PARCHEGGIO??
+				__restrict su3_soa_f * const TMP, //la var globale e' aux_conf_acc_f //PARCHEGGIO??
+        const int istopo //istopo = {0,1} -> rho={fermrho,toporho}
         ){
     
     if(verbosity_lv > 3) printf("SINGLE PRECISION VERSION OF COMPUTE_SIGMA_FROM_SIGMA_PRIME_BACKINTO_SIGMA_PRIME\n");
@@ -69,6 +71,18 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_
         printf("Sigma[old]20 = %f + (%f)*I\n",crealf(Sigma[0].r2.c0[0]),cimagf(Sigma[0].r2.c0[0]));                                               
         printf("Sigma[old]21 = %f + (%f)*I\n",crealf(Sigma[0].r2.c1[0]),cimagf(Sigma[0].r2.c1[0]));                                               
         printf("Sigma[old]22 = %f + (%f)*I\n\n",crealf(Sigma[0].r2.c2[0]),cimagf(Sigma[0].r2.c2[0]));                
+    
+#pragma acc update self(U[0:8])
+        printf("-------------U------------------\n");                                                                                             
+        printf("U00 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c0[0]),cimag(U[0].r0.c0[0]));                                               
+        printf("U01 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c1[0]),cimag(U[0].r0.c1[0]));                                               
+        printf("U02 = %.18lf + (%.18lf)*I\n",creal(U[0].r0.c2[0]),cimag(U[0].r0.c2[0]));                                               
+        printf("U10 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c0[0]),cimag(U[0].r1.c0[0]));                                               
+        printf("U11 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c1[0]),cimag(U[0].r1.c1[0]));                                               
+        printf("U12 = %.18lf + (%.18lf)*I\n",creal(U[0].r1.c2[0]),cimag(U[0].r1.c2[0]));                                               
+        printf("U20 = %.18lf + (%.18lf)*I\n",creal(U[0].r2.c0[0]),cimag(U[0].r2.c0[0]));                                               
+        printf("U21 = %.18lf + (%.18lf)*I\n",creal(U[0].r2.c1[0]),cimag(U[0].r2.c1[0]));                                               
+        printf("U22 = %.18lf + (%.18lf)*I\n\n",creal(U[0].r2.c2[0]),cimag(U[0].r2.c2[0]));                
     }
 
     set_su3_soa_to_zero_f(TMP);
@@ -79,8 +93,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_
 #ifdef MULTIDEVICE
     communicate_gl3_borders_f(TMP,1);
 #endif
-
-    RHO_times_conf_times_staples_ta_part_f(U,TMP,QA);
+    RHO_times_conf_times_staples_ta_part_f(U,TMP,QA,istopo);
 
 #ifdef MULTIDEVICE
     communicate_tamat_soa_borders_f(QA,1);
@@ -116,7 +129,7 @@ void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_
         printf("Lambda02 = %f + (%f)*I\n",crealf(Lambda[0].c02[0]),cimagf(Lambda[0].c02[0]));
         printf("Lambda12 = %f + (%f)*I\n\n",crealf(Lambda[0].c12[0]),cimagf(Lambda[0].c12[0]));
     }
-    compute_sigma_f(Lambda,U,Sigma,QA,TMP);
+    compute_sigma_f(Lambda,U,Sigma,QA,TMP,istopo);
     if(verbosity_lv > 4)   printf("MPI%02d:\t\tcomputed Sigma  \n",
             devinfo.myrank);
 
@@ -172,7 +185,7 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
     __restrict su3_soa_f * conf_to_use; // CONF TO USE IN CALCULATION OF 
     // FERMION FORCE
 #ifdef STOUT_FERMIONS
-    stout_wrapper_f(tconf_acc,tstout_conf_acc_arr);// calcolo 
+    stout_wrapper_f(tconf_acc,tstout_conf_acc_arr,0);// calcolo 
     if(act_params.stout_steps > 0) 
         conf_to_use =  
             &(tstout_conf_acc_arr[8*(act_params.stout_steps-1)]);
@@ -241,7 +254,7 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
                     devinfo.myrank, stout_level,stout_level-1);
         conf_to_use = &(tstout_conf_acc_arr[8*(stout_level-2)]);
         compute_sigma_from_sigma_prime_backinto_sigma_prime_f(gl3_aux,
-                aux_th_f,aux_ta_f,conf_to_use, taux_conf_acc );
+					           aux_th_f,aux_ta_f,conf_to_use, taux_conf_acc, 0 );
         if(md_dbg_print_count<debug_settings.md_dbg_print_max_count){
             char gl3_aux_name[50];
             sprintf(gl3_aux_name,
@@ -256,7 +269,7 @@ void fermion_force_soloopenacc_f(__restrict su3_soa_f    * tconf_acc,
         printf("MPI%02d:\t\tSigma' to Sigma [lvl 1 to lvl 0]\n",
                 devinfo.myrank);
     compute_sigma_from_sigma_prime_backinto_sigma_prime_f(gl3_aux,
-            aux_th_f,aux_ta_f,tconf_acc, taux_conf_acc );
+		           		aux_th_f,aux_ta_f,tconf_acc, taux_conf_acc, 0 );
     }
 #endif
 
