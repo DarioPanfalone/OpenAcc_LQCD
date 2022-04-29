@@ -175,7 +175,8 @@ int scan_group_V(int ntagstofind, const char **strtofind,
         for(int itype =0; itype <ntagstofind; itype++){
             found_something = strstr(filelines[iline],strtofind[itype]);
             if(found_something){
-                printf("Found group %s on line %d\n",strtofind[itype], iline);
+                if(0==devinfo.myrank) printf("Found group %s on line %d\n",
+                        strtofind[itype], iline);
                 taglines[nres] = iline;
                 tagtypes[nres] = itype;
                 nres++;
@@ -410,16 +411,15 @@ int read_flavour_info(ferm_param *flpar,char filelines[MAXLINES][MAXLINELENGTH],
     return scan_group_NV(sizeof(fp)/sizeof(par_info),fp, filelines, startline, endline);
 }
 
-//anche qui questo action_param non ho capito dove lo definisce.
 int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
 {
-    // see OpenAcc/su3_measurements.h
-    const double stout_rho_def = RHO;
+	const double stout_rho_def = 0.15;
 	const int topo_action_def = 0;
 	const double barrier_def = 2.0;
 	const double width_def = 0.1;
 	const char topo_file_path_def[] = "ToPotential";
 	const int topo_stout_steps_def = 0;
+	const double topo_stout_rho_def = 0.15;
 	const char topo_act_comment[] = "#Set to 1 to enable multicanonical topological potential.";
     par_info ap[]={
         (par_info){(void*) &(act_par->beta)            , TYPE_DOUBLE, "Beta"          , NULL, NULL},
@@ -430,30 +430,11 @@ int read_action_info(action_param *act_par,char filelines[MAXLINES][MAXLINELENGT
 		(par_info){(void*) &(act_par->width)           , TYPE_DOUBLE, "Width"         , (const void*) &width_def, NULL},
 		(par_info){(void*) &(act_par->topo_file_path)  , TYPE_STR   , "TopoPath"      , (const void*) &topo_file_path_def, NULL},
 		(par_info){(void*) &(act_par->topo_stout_steps), TYPE_INT   , "TopoStoutSteps", (const void*) &topo_stout_steps_def, NULL},
-		(par_info){(void*) &(act_par->topo_rho)        , TYPE_DOUBLE, "TopoRho"       , NULL, NULL}
+		(par_info){(void*) &(act_par->topo_rho)        , TYPE_DOUBLE, "TopoRho"       , (const void*) &stout_rho_def, NULL}
 	};			   
 				   
-    int res = scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
-
-    if(startline<endline){
-        if(act_par->stout_rho != RHO ){ 
-            if(0==devinfo.myrank){
-                printf("Error, input file stout_rho != RHO \n");
-                printf("  Either modify the input file, or recompile changing RHO\n");
-                printf(" (input) stout_rho = %f, (code) RHO = %f\n", act_par->stout_rho,RHO);
-            }
-            res = 1;
-        }
-        if(act_par->topo_rho != TOPO_RHO ){ 
-            if(0==devinfo.myrank){
-                printf("Error, input file topo_rho != TOPO_RHO \n");
-                printf("  Either modify the input file, or recompile changing TOPO_RHO\n");
-                printf(" (input) topo_rho = %f, (code) TOPO_RHO = %f\n", act_par->topo_rho,TOPO_RHO);
-            }
-            res = 1;
-        }
-    }
-    return res;
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(ap)/sizeof(par_info),ap, filelines, startline, endline);
 }
 
 int read_backfield_info(bf_param *bfpar,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
@@ -578,13 +559,15 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
     const int do_norandom_test_def = 0; 
     const int rng_fakeness_level_def = 0 ;
     const int md_dbg_print_max_count_def = 0;
+    const int md_dbg_be_verbose_def = 0;
     const int print_bfield_dbginfo_def = 0;
     const int md_diag_print_every_def = 10000;
 
     const char SaveAllAtEnd_comment[] = "# Set this to 0 if you want the program not to save its state at the end\n\
 # (or it may overwrite some files and you won't be able to reproduce bugs/do other things)";
-
-		// see /Meas
+    const char md_dbg_print_max_count_comment[] = "#Print gauge conf, momenta and ipdot intermediate results during MD evolution";
+    const char md_dbg_be_verbose_comment[] = "#More intermediate results will be printed";
+    // see /Meas
     par_info gmp[]= {
         (par_info){(void*) &(dbg_settings->use_ildg),              TYPE_INT,"UseILDG"                , (const void*) &useildg_def,NULL},
         (par_info){(void*) &(dbg_settings->input_vbl),             TYPE_INT,"VerbosityLv"            , (const void*) &input_vbl_def,NULL},
@@ -594,7 +577,8 @@ int read_debug_info(debug_settings_t * dbg_settings,char filelines[MAXLINES][MAX
         (par_info){(void*) &(dbg_settings->do_reversibility_test), TYPE_INT,"DoRevTest"              , (const void*) &do_reversibility_test_def,NULL},
         (par_info){(void*) &(dbg_settings->do_norandom_test),      TYPE_INT,"DoNoRandomTest"         , (const void*) &do_norandom_test_def,NULL},
         (par_info){(void*) &(dbg_settings->rng_fakeness_level),    TYPE_INT,"RngFakenessLevel"       , (const void*) &rng_fakeness_level_def,NULL},
-        (par_info){(void*) &(dbg_settings->md_dbg_print_max_count),TYPE_INT,"MDDbgPrintMaxCount"     , (const void*) &md_dbg_print_max_count_def,NULL},
+        (par_info){(void*) &(dbg_settings->md_dbg_print_max_count),TYPE_INT,"MDDbgPrintMaxCount"     , (const void*) &md_dbg_print_max_count_def,md_dbg_print_max_count_comment},
+        (par_info){(void*) &(dbg_settings->md_dbg_be_verbose),     TYPE_INT,"MDDbgBeVerbose"         , (const void*) &md_dbg_be_verbose_def,md_dbg_be_verbose_comment},
         (par_info){(void*) &(dbg_settings->diagnostics_filename),  TYPE_STR,"SaveDiagnosticsFilename", (const void*) &diagnostics_filename_def,NULL},
         (par_info){(void*) &(dbg_settings->md_diag_print_every) ,  TYPE_INT,"PrintDiagInfoEvery",      (const void*) &md_diag_print_every_def,NULL},
             
@@ -645,7 +629,7 @@ int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXL
     
     const int measstout_def = 0;
     const char pathstout_def[] = "TopoStout";
-    const double measrhostout_def = TOPO_RHO;
+    const double measrhostout_def = 0.1;
     const char measrhostout_comment[]="# MeasStoutRho can't be changed, it have to be equal to StoutRho, which is setted in src/Include/common_defines.h";
     const int stoutmeasstep_def = 1;
     const int stout_measinterval_def = 1;
@@ -668,19 +652,8 @@ int read_topomeas_info(meastopo_param * meastopars,char filelines[MAXLINES][MAXL
         (par_info){(void*) &(meastopars->stouteach),               TYPE_INT,"StoutMeasEach"       ,(const void*) &stouteach_def,stouteach_comment},
     };
 
-    int res = scan_group_NV(sizeof(tomp)/sizeof(par_info),tomp, filelines, startline, endline);
-    if(startline<endline){
-        if(meastopars->measrhostout != TOPO_RHO ){ 
-
-            if(0==devinfo.myrank){
-                printf("Error, input file MeasStoutRho != TOPO_RHO \n");
-                printf("  Either modify the input file, or recompile changing TOPO_RHO\n");
-                printf(" (input) topo_rho = %f, (code) TOPO_RHO = %f\n", meastopars->measrhostout,TOPO_RHO);
-            }
-            res = 1;
-        }
-    }
-    return res;
+    // from here on, you should not have to modify anything.
+    return scan_group_NV(sizeof(tomp)/sizeof(par_info),tomp, filelines, startline, endline);
 }
 
 int read_device_setting(dev_info * di,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline)
@@ -741,7 +714,7 @@ int read_geometry(geom_parameters *gpar,char filelines[MAXLINES][MAXLINELENGTH],
     const int nx_def   = nd0; 
     const int ny_def   = nd1; 
     const int nz_def   = nd2; 
-    const int nt_def   = nd3; 
+    const int nt_def   = NRANKS_D3*LOC_N3; 
     const int xmap_def = 0;
     const int ymap_def = 1;
     const int zmap_def = 2;
@@ -1070,7 +1043,7 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
                 break;
 
             default:
-                printf("TAG TYPE NOT RECOGNIZED\n");
+                if(0==devinfo.myrank)printf("TAG TYPE NOT RECOGNIZED\n");
                 return 1;
                 break;
         }
@@ -1111,23 +1084,26 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
         strcat(fm_par.fermionic_outfilename, hash_string);
         strcat(debug_settings.diagnostics_filename,hash_string);
 
-        //if(0==devinfo.myrank){
-        //    printf("Hash of all relevant settings: %s\n", hash_string );
+        if(0==devinfo.myrank){
+            printf("Hash of all relevant settings: %s\n", hash_string );
 
-        //    strcpy(input_to_rename_filename, input_filename);
-        //    strcat(input_to_rename_filename, hash_string );
-        //    
-        //    FILE * input2 = fopen(input_filename,"r");
-        //    FILE * input_renamed = fopen(input_to_rename_filename,"w"); 
-        //    printf("Creating copy of run configuration file (%s) \nwith hash appended in the name (%s)...\n", input_filename, input_to_rename_filename);
-        //    char ch;
-        //    while(( ch = fgetc(input2) ) != EOF)
-        //        fputc(ch, input_renamed);
+            strcpy(input_to_rename_filename, input_filename);
+            strcat(input_to_rename_filename, hash_string );
+            
+            FILE * input2 = fopen(input_filename,"r");
+            FILE * input_renamed = fopen(input_to_rename_filename,"w"); 
+            printf("Creating copy of run configuration file (%s) \nwith hash appended in the name (%s)...\n", input_filename, input_to_rename_filename);
+            char ch;
+            do{
+                ch = fgetc(input2); 
+                if(feof(input2)) break;
+                fputc((char)ch, input_renamed);
+            }
+            while(1);
 
-        //    fclose(input2);
-        //    fclose(input_renamed);
-
-        //}
+            fclose(input2);
+            fclose(input_renamed);
+        }
     }
     return 0;
 }

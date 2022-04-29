@@ -20,6 +20,7 @@
 //######################################################################################################################################//
 
 #include "../DbgTools/dbgtools.h" // DEBUG
+#include "../DbgTools/debugger_hook.h"
 #include "../Include/debug.h"
 #include "../Include/fermion_parameters.h"
 #include "../Include/montecarlo_parameters.h"
@@ -86,8 +87,6 @@
 int conf_id_iter;
 int verbosity_lv;
 
-extern int TOPO_GLOBAL_DONT_TOUCH; 
-
 int main(int argc, char* argv[]){
  
   gettimeofday ( &(mc_params.start_time), NULL );
@@ -104,22 +103,8 @@ int main(int argc, char* argv[]){
 
   // READ input file.
 #ifdef MULTIDEVICE
-  pre_init_multidev1D(&devinfo);
-  {
-    volatile int flag = 0;
-    if(0==devinfo.myrank && getenv("GDBHOOK")){
-      printf("MPI%02d: Thank you for using the GDB HOOK!\n",devinfo.myrank);
-      printf("         Waiting for user intervention.Please attach to process %d,\n",
-	     getpid());
-      printf("         [hint: gdb -p %d ] \n",  getpid());
-      printf("         and set the value of 'flag' to 1.\n");
-      printf("         You may have to use 'finish' a couple of times to go down the call stack.\n");
-      printf("         HAPPY HUNTING AND GOOD LUCK!!!!\n");
-      while(1 != flag)
-	sleep(1);
-    }
-    MPI_Barrier(MPI_COMM_WORLD);
-  }
+    pre_init_multidev1D(&devinfo);
+    gdbhook();
 #endif
 
   if(0==devinfo.myrank){
@@ -130,7 +115,7 @@ int main(int argc, char* argv[]){
     printf("****************************************************\n");
   }
 
-  int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]); //here the reading happens.
+  int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]);
     
 #ifdef MULTIDEVICE
   if(input_file_read_check){
@@ -142,13 +127,22 @@ int main(int argc, char* argv[]){
   devinfo.nranks = 1;
 #endif
 
-  if(input_file_read_check){
-    printf("MPI%02d: input file reading failed, aborting...\n",devinfo.myrank);
-    exit(1);
-  }
-  if(0==devinfo.myrank) print_geom_defines();
-  verbosity_lv = debug_settings.input_vbl;
+    if(input_file_read_check){
+        printf("MPI%02d: input file reading failed, aborting...\n",devinfo.myrank);
+        exit(1);
+    }
 
+		if(0==devinfo.myrank) print_geom_defines();
+    verbosity_lv = debug_settings.input_vbl;
+
+    if(0==devinfo.myrank){
+        if(0 != mc_params.JarzynskiMode){
+            printf("****************************************************\n");
+            printf("                   JARZYNSKI MODE              \n");
+            printf("     check which parameter corresponds to what! \n");
+            printf("****************************************************\n");
+			}
+		}
   //######################################################################################################################################//
   //######################################################################################################################################//
     
@@ -215,6 +209,7 @@ int main(int argc, char* argv[]){
   printf("MPI%02d: Selecting device.\n", devinfo.myrank);
 #ifdef MULTIDEVICE
   select_init_acc_device(my_device_type, (devinfo.single_dev_choice + devinfo.myrank)%devinfo.proc_per_node);
+	// select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
 #else
   select_init_acc_device(my_device_type, devinfo.single_dev_choice);
 #endif
@@ -242,8 +237,6 @@ int main(int argc, char* argv[]){
   }
 #pragma acc enter data copyin(fermions_parameters[0:alloc_info.NDiffFlavs])
     
-  //********************* ALLOCATION OF CONF *******************************************//
-    
   mem_alloc_core(); // Allocation has been done here.
   mem_alloc_extended(); //extend alloc.
  
@@ -260,10 +253,13 @@ int main(int argc, char* argv[]){
   }
    
   printf("\n  MPI%02d - Allocazione della memoria totale: %zu \n\n\n",devinfo.myrank,max_memory_used);
-    
-  //*****************NEAREST NEIGHBOURS DEFINITION!!******************************//
-    
+  
+		gl_stout_rho=act_params.stout_rho;
+		gl_topo_rho=act_params.topo_rho;
+#pragma acc enter data copyin(gl_stout_rho)
+#pragma acc enter data copyin(gl_topo_rho)
   compute_nnp_and_nnm_openacc();
+
 #pragma acc enter data copyin(nnp_openacc)
 #pragma acc enter data copyin(nnm_openacc)
   printf("MPI%02d - nn computation : OK \n",devinfo.myrank);
@@ -612,7 +608,7 @@ int main(int argc, char* argv[]){
 					printf("Estimated HMC acceptance for this run [replica %d]: %f +- %f\n. Iterations: %d",r,acceptance, acc_err, iterations[r]);
 				}
 			}
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+#pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8])
 
 			//############# ACTION AFTER ######################################################
 
@@ -629,12 +625,12 @@ int main(int argc, char* argv[]){
 	    if (0==devinfo.myrank) {printf("CONF SWAP PROPOSED\n");}
 	    All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, &def, &swap_number,all_swap_vector,acceptance_vector, rep);
 	    if (0==devinfo.myrank) {printf("Number of accepted swaps: %d\n", swap_number);}       
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+#pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8])
                 
 	    // PERIODIC CONF TRANSLATION
 	    trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
 	  }
-#pragma acc update self(conf_hasenbusch[0:rep->replicas_total_number][0:8]) 
+#pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8]) 
 
 		//####################################################    
 
@@ -650,14 +646,13 @@ int main(int argc, char* argv[]){
 	      file_label=fopen(acc_info->file_label_name,"at");
 	      if(!file_label){file_label=fopen(acc_info->file_label_name,"wt");}
 	    }
-                
 	    if(rep->replicas_total_number>1){
 	      hmc_acc_file=fopen(acc_info->hmc_file_name,"at");
 	      if(!hmc_acc_file){hmc_acc_file=fopen(acc_info->hmc_file_name,"wt");}
                     
 	      swap_acc_file=fopen(acc_info->swap_file_name,"at");
 	      if(!swap_acc_file){swap_acc_file=fopen(acc_info->swap_file_name,"wt");}
-	    }
+	     }
             
 	    if(rep->replicas_total_number>1){
 	      fprintf(hmc_acc_file,"%d\t",conf_id_iter);
@@ -694,7 +689,7 @@ int main(int argc, char* argv[]){
 	  }
           
 	  //-------------------------------------------------// 
-
+		//---------- MISURA ROBA DI GAUGE ---------------//
 	  printf("===========GAUGE MEASURING============\n");
             
 	  plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
@@ -736,13 +731,11 @@ int main(int argc, char* argv[]){
 	      fclose(cooloutfile);
 	    }
 	  }
+
 	  if(meastopo_params.measstout && conf_id_iter%meastopo_params.stouteach==0){
-	    TOPO_GLOBAL_DONT_TOUCH=1;
-	    stout_wrapper(conf_hasenbusch[0],gstout_conf_acc_arr);
-	    TOPO_GLOBAL_DONT_TOUCH=0;
+	    stout_wrapper(conf_hasenbusch[0],gstout_conf_acc_arr,1);
 	    stout_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
 	    for(int ss = 0; ss < meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
-	      /* aux_conf_acc = &(gstout_conf_acc_arr[8*ss]); */
 	      int topoindx =1+ss/meastopo_params.stout_measinterval; 
 	      stout_topo_ch[topoindx]=compute_topological_charge(&gstout_conf_acc_arr[8*ss],auxbis_conf_acc,topo_loc);
 	    }
@@ -765,8 +758,7 @@ int main(int argc, char* argv[]){
 	      }
 	      fclose(stoutoutfile);
 	    }
-	  }//while end
-            
+}//if stout end
 
 	  printf("MPI%02d - Printing gauge obs - only by master rank...\n",
 		 devinfo.myrank);
@@ -1017,7 +1009,7 @@ int main(int argc, char* argv[]){
 	  }
 
 	  // program exits if MaxConfIdIter is reached
-	  if(conf_id_iter > mc_params.MaxConfIdIter ){
+	  if(conf_id_iter >= mc_params.MaxConfIdIter ){
 
 	    printf("%s - MaxConfIdIter=%d reached, job done!",
 		   devinfo.myrankstr, mc_params.MaxConfIdIter);
@@ -1037,7 +1029,6 @@ int main(int argc, char* argv[]){
 	    printf("%s - shutting down now.\n", devinfo.myrankstr);
 	    mc_params.run_condition = RUN_CONDITION_TERMINATE;
 	  }
-
         }
 #ifdef MULTIDEVICE
 
@@ -1068,34 +1059,12 @@ int main(int argc, char* argv[]){
       printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
 	     mc_params.RandGenStatusFilename);
       saverand_tofile(mc_params.RandGenStatusFilename);
-    }else printf(
-		 "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
-        
+    }else printf("\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
     strcpy(mc_params.save_conf_name,aux_name_file);
-        
   }//end for replicas.
 
   //-------------------------------------------------//
   if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd){
-    /*
-      printf("Saving global program status...\n");
-      printf("%d %f %f %d\n",
-      mc_params.next_gps,
-      mc_params.max_flavour_cycle_time,
-      mc_params.max_update_time,
-      mc_params.measures_done);
-
-      printf("#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n#mc_params.max_update_time,mc_params.measures_done\n");
-
-      FILE * gps_file = fopen(mc_params.statusFileName, "w");  
-      fprintf(gps_file,"%d %f %f %d\n",
-      mc_params.next_gps,
-      mc_params.max_flavour_cycle_time,
-      mc_params.max_update_time,
-      mc_params.measures_done);
-      fprintf(gps_file,"#mc_params.next_gps,mc_params.max_flavour_cycle_time,\n#mc_params.max_update_time,mc_params.measures_done\n");
-      fclose(gps_file);
-    */
     save_global_program_status(mc_params); // THIS FUNCTION IN SOME CASES DOES NOT WORK
   }
 
@@ -1124,6 +1093,8 @@ int main(int argc, char* argv[]){
   printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)
+#pragma acc exit data delete(gl_stout_rho)
+#pragma acc exit data delete(gl_topo_rho)
 
   printf("\n  MPI%02d - Prima dello shutdown, memoria allocata: %zu \n\n\n",devinfo.myrank,memory_used);
   struct memory_allocated_t *all=memory_allocated_base;

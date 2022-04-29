@@ -9,7 +9,6 @@
 #ifndef STOUTING_H
  #include "./stouting.h"
 #endif
-extern int TOPO_GLOBAL_DONT_TOUCH;
 #ifdef MULTIDEVICE
 #include <mpi.h>
 #endif
@@ -96,7 +95,6 @@ double compute_topo_action(__restrict su3_soa * u
 #endif
 			   )
 {
-  TOPO_GLOBAL_DONT_TOUCH = 1;
   __restrict su3_soa * quadri;
   __restrict su3_soa * conf_to_use;
   __restrict double_soa *loc_q;
@@ -105,7 +103,7 @@ double compute_topo_action(__restrict su3_soa * u
 #ifdef STOUT_TOPO
 #pragma acc update self(tstout_conf_acc_arr[0:8])
   if(act_params.topo_stout_steps > 0){
-    stout_wrapper(u,tstout_conf_acc_arr);
+    stout_wrapper(u,tstout_conf_acc_arr,1);
     conf_to_use = &(tstout_conf_acc_arr[8*(act_params.topo_stout_steps-1)]);
   }
   else conf_to_use=u;
@@ -138,7 +136,6 @@ double compute_topo_action(__restrict su3_soa * u
 
   double topo_action = topodynamical_pot(Q);
 
-  TOPO_GLOBAL_DONT_TOUCH = 0;
   return topo_action;
 }
 
