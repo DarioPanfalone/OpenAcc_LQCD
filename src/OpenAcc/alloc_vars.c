@@ -31,9 +31,6 @@ global_dcomplex_soa *dcomplex_rw;
 // a global double_soa, only for read-write
 global_double_soa *double_rw; 
 
-
-
-
 su3_soa  * conf_acc; // the gauge configuration.
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
 // if the metro test fails.
@@ -363,7 +360,9 @@ void mem_free_core()
 			FREECHECK(conf_hasenbusch[r]);
     }
 #pragma acc exit data delete(conf_hasenbusch[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
-    FREECHECK(conf_hasenbusch);
+
+	FREECHECK(conf_hasenbusch);
+#pragma acc exit data delete(conf_hasenbusch)
 }
 
 void mem_free_extended()
@@ -405,10 +404,6 @@ void mem_free_extended()
         FREECHECK(momenta_backup);               
 #pragma acc exit data delete(momenta_backup)               
     }
-    FREECHECK(aux_conf_acc);          
-#pragma acc exit data delete(aux_conf_acc)          
-    FREECHECK(auxbis_conf_acc);       
-#pragma acc exit data delete(auxbis_conf_acc)
     FREECHECK(ipdot_acc);  
 #pragma acc exit data delete(ipdot_acc)  
 
