@@ -74,9 +74,11 @@ int conf_id_iter;
 int verbosity_lv;
 
 int main(int argc, char* argv[]){
+ 
+  gettimeofday ( &(mc_params.start_time), NULL );
+	if (GAUGE_ACTION == 1 ) printf("\n\nRUN WITH TREE-LEVEL SYMANZIK IMPROVED GAUGE ACTION\n\n");
+	else printf("\n\nRUN WITH WILSON GAUGE ACTION\n\n");
 
-    gettimeofday ( &(mc_params.start_time), NULL );
-    // READ input file.
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
     gdbhook();
