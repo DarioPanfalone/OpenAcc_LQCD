@@ -621,17 +621,18 @@ int main(int argc, char* argv[]){
 				printf("ACTION AFTER HMC STEP REPLICA %d: %.15lg\n", r, action);
 			}
 
-      // CONF SWAP 
-	    if (0==devinfo.myrank) {printf("CONF SWAP PROPOSED\n");}
-	    All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, &def, &swap_number,all_swap_vector,acceptance_vector, rep);
-	    if (0==devinfo.myrank) {printf("Number of accepted swaps: %d\n", swap_number);}       
+			if(rep->replicas_total_number>1){
+				// CONF SWAP 
+				if (0==devinfo.myrank) {printf("CONF SWAP PROPOSED\n");}
+				All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, &def, &swap_number,all_swap_vector,acceptance_vector, rep);
+				if (0==devinfo.myrank) {printf("Number of accepted swaps: %d\n", swap_number);}       
 #pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8])
                 
-	    // PERIODIC CONF TRANSLATION
-	    trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
-	  }
+				// PERIODIC CONF TRANSLATION
+				trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
+			}
 #pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8]) 
-
+		}
 		//####################################################    
 
 	  id_iter++;
