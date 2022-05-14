@@ -15,7 +15,7 @@
 void compute_sigma_from_sigma_prime_backinto_sigma_prime(  __restrict su3_soa    * Sigma, // la var globale e' auxbis_conf_acc [sia input che ouptput]
 							   __restrict thmat_soa  * Lambda, // la var globale e' aux_th
 							   __restrict tamat_soa  * QA, // la var globale e' aux_ta
-							   __restrict const su3_soa    * const U, // la var globale e' .... per adesso conf_acc
+							   __restrict const su3_soa    * const U, // qua ci va la conf al livello di smearing opportuno
 								 __restrict su3_soa    * const TMP,// la var globale e' aux_conf_acc //PARCHEGGIO??
 								 const int istopo //istopo = {0,1} -> rho={fermrho,toporho}
 							   );

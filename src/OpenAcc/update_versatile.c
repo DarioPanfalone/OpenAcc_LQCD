@@ -143,7 +143,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     }// end for iflav
 #pragma acc update device(ferm_phi_acc[0:alloc_info.NPS_tot])
 
-    gconf_as_fermionmatrix_f = conf_acc_f;
+    gconf_as_fermionmatrix_f = conf_hasenbusch_f[0];
+		//^^^ THIS WORKS ONLY FOR SEQUENTIAL REPLICAS UPDATING. If you want to parallelize it, use conf_hasenbusch_f[replica_id].
 #ifdef STOUT_FERMIONS  //STOUT FERM DIRECTIVE.
     // DILATION USING STOUTED DIRAC OPERATOR
     // STOUTING...(ALREADY ON DEVICE)
@@ -237,11 +238,11 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
         
         action_ferm_in=0;
         for(int iflav = 0 ; iflav < alloc_info.NDiffFlavs ; iflav++){ //iflav start
-	  for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
+					for(int ips = 0 ; ips < fermions_parameters[iflav].number_of_ps ; ips++){
 	    
-	    int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
-	    action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
-	  }
+						int ps_index = fermions_parameters[iflav].index_of_the_first_ps + ips;
+						action_ferm_in += real_scal_prod_global(&ferm_phi_acc[ps_index],&ferm_phi_acc[ps_index]);
+					}
         }// end for iflav
         ///////////////////////////////////////////////////////////////////////////////////////
         printf("MPI%02d - Initial Action Computed : OK \n", devinfo.myrank);
@@ -300,7 +301,8 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
         // conversion double to float
 
-        su3_soa_f * tconf_acc_f = conf_acc_f;
+        su3_soa_f * tconf_acc_f = conf_hasenbusch_f[0];
+				//^^^ THIS WORKS ONLY FOR SEQUENTIAL REPLICAS UPDATING. If you want to parallelize it, use conf_hasenbusch_f[replica_id].
 
         printf("Converting mommenta...\n");
         convert_double_to_float_thmat_soa(momenta,momenta_f);

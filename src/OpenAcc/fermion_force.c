@@ -211,7 +211,8 @@ void fermion_force_soloopenacc(__restrict su3_soa    * tconf_acc,
             1 == md_parameters.recycleInvsForce){
        if(0==devinfo.myrank && verbosity_lv >2) 
            printf("Converting gauge conf to single precision...\n");
-       conf_to_use_f = conf_acc_f; // USING GLOBAL VARIABLE FOR CONVENIENCE
+       conf_to_use_f = conf_hasenbusch_f[0]; // USING GLOBAL VARIABLE FOR CONVENIENCE.
+			 //^^^ THIS WORKS ONLY FOR SEQUENTIAL REPLICAS UPDATING. If you want to parallelize it, use conf_hasenbusch_f[replica_id].
        convert_double_to_float_su3_soa(conf_to_use,conf_to_use_f);
        ipt.u_f = conf_to_use_f;
     }

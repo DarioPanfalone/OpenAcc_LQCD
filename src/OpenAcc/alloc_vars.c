@@ -31,7 +31,6 @@ global_dcomplex_soa *dcomplex_rw;
 // a global double_soa, only for read-write
 global_double_soa *double_rw; 
 
-su3_soa  * conf_acc; // the gauge configuration.
 su3_soa  * conf_acc_bkp; // the old stored conf that will be recovered 
 // if the metro test fails.
 su3_soa  * aux_conf_acc; // auxiliary 
@@ -145,14 +144,6 @@ void mem_alloc_core(){
     if(devinfo.async_comm_gauge) alloc_info.conf_acc_size *=2 ; 
 #endif
     
-    
- /*
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_acc, ALIGN, 
-            alloc_info.conf_acc_size*sizeof(su3_soa)); //ovviamente qui alloc_info.conf_accsize fa da size.
-    ALLOCCHECK(allocation_check, conf_acc);
-#pragma acc enter data create(conf_acc[0:alloc_info.conf_acc_size])
-
-   */
     
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch, ALIGN,
                                                alloc_info.num_replicas*sizeof(su3_soa*));
@@ -352,10 +343,6 @@ void mem_free_core()
     FREECHECK(u1_back_phases);        
 #pragma acc exit data delete(u1_back_phases)        
 
-    /*
-    FREECHECK(conf_acc);
-#pragma acc exit data delete(conf_acc)*/
-   
 		for(int r=0;r<alloc_info.num_replicas;r++){
 			FREECHECK(conf_hasenbusch[r]);
     }

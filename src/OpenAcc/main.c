@@ -45,6 +45,7 @@
 #include "./fermion_matrix.h"
 #include "./fermionic_utilities.h"
 #include "./find_min_max.h"
+#include "./float_double_conv.h"
 #include "./inverter_full.h"
 #include "./inverter_multishift_full.h"
 #include "./io.h"
@@ -327,10 +328,31 @@ int main(int argc, char* argv[]){
 	if (0==devinfo.myrank) printf("############## AUX CONF INIT_K ############\n");
   init_k(aux_conf_acc,1,0,vec_aux_bound,&def,1);
   init_k(auxbis_conf_acc,1,0,vec_aux_bound,&def,1);
-	if (0==devinfo.myrank) printf("###########################################\n");
+  #pragma acc update device(aux_conf_acc[0:8])
+  #pragma acc update device(auxbis_conf_acc[0:8])
 
-#pragma acc update device(aux_conf_acc[0:8])
-#pragma acc update device(auxbis_conf_acc[0:8])
+	if(md_parameters.singlePrecMD){
+		convert_double_to_float_su3_soa(aux_conf_acc,aux_conf_acc_f);
+		convert_double_to_float_su3_soa(auxbis_conf_acc,auxbis_conf_acc_f);
+    #pragma acc update host(aux_conf_acc_f[0:8])
+    #pragma acc update host(auxbis_conf_acc_f[0:8])
+	}
+	
+	if(alloc_info.stoutAllocations)
+		if (0==devinfo.myrank) printf("############ STOUT VECTOR INIT_K ##########\n");
+	int stout_steps = (act_params.stout_steps>act_params.topo_stout_steps?
+										 act_params.stout_steps:act_params.topo_stout_steps);
+	for (int i = 0; i < stout_steps; i++)
+		init_k(&gstout_conf_acc_arr[8*i],1,0,vec_aux_bound,&def,1);
+  #pragma acc update device(gstout_conf_acc_arr[0:8*stout_steps])
+	if(md_parameters.singlePrecMD){
+		for (int i = 0; i < stout_steps; i++)
+			convert_double_to_float_su3_soa(&gstout_conf_acc_arr[8*i],&gstout_conf_acc_arr_f[8*i]);
+    #pragma acc update host(gstout_conf_acc_arr_f[0:8*stout_steps])
+	}
+
+	if (0==devinfo.myrank) printf("###########################################\n");
+	
     
 	if( (verbosity_lv>2) && (0==devinfo.myrank) ){
 		printf("Boundary conditions coeffs c(r):\n");
@@ -340,13 +362,30 @@ int main(int argc, char* argv[]){
 
   if (0==devinfo.myrank) printf("############## REPLICA INIT_K ############\n"); 
   for(int r=0;r<rep->replicas_total_number;r++){
-  if (0==devinfo.myrank) printf("############## REPLICA %d INIT_K ############\n",r); 
-    rep->label[r]=r;
-    init_k(conf_hasenbusch[r],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,r);
-#ifdef MULTIDEVICE
+		if (0==devinfo.myrank) printf("############## REPLICA %d INIT_K ############\n",r); 
+		rep->label[r]=r;
+		init_k(conf_hasenbusch[r],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,r);
+		
+		
+    #ifdef MULTIDEVICE
     if(devinfo.async_comm_gauge) init_k(&conf_hasenbusch[r][8],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,1);
-#endif
-#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:alloc_info.conf_acc_size])
+    #endif
+		
+    #pragma acc update device(conf_hasenbusch[r:1][0:alloc_info.conf_acc_size])
+		if(md_parameters.singlePrecMD){
+			if (0==devinfo.myrank) printf("###### SINGLE PREC INIT_K ######\n");
+			convert_double_to_float_su3_soa(conf_hasenbusch[r],conf_hasenbusch_f[r]);
+			//^^ Doing this because a K initialization for su3_soa_f doesn't exist.
+      #ifdef MULTIDEVICE
+			if(devinfo.async_comm_gauge){
+				if (0==devinfo.myrank) printf("#### SINGLE PREC INIT_K ASYNC ####\n");
+				convert_double_to_float_su3_soa(&conf_hasenbusch[r][8],&conf_hasenbusch_f[r][8]);
+				//^^ Doing this because a K initialization for su3_soa_f doesn't exist.
+			}
+      #endif
+			
+      #pragma acc update host(conf_hasenbusch_f[r:1][0:alloc_info.conf_acc_size])
+		}
 	}
   if (0==devinfo.myrank) printf("##############################################\n");
   //#################################################################################  

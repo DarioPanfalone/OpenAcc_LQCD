@@ -815,7 +815,7 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
 #pragma acc update self(tconf_acc[0:8])
 #endif
     
-  set_su3_soa_to_su3_soa(tconf_acc,taux_conf); // conf_aux=conf_acc
+  set_su3_soa_to_su3_soa(tconf_acc,taux_conf);
     
   double dir0;
   int dir=0;
