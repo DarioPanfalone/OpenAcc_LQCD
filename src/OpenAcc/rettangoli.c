@@ -59,11 +59,13 @@ double calc_loc_rectangles_2x1_nnptrick(
                     mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_muE],idxpnu);               // LOC_RECT = LOC_RECT * E 
                     mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
                     tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
-                    
+
+										#ifdef PAR_TEMP
                     //K_mu_nu computation;
                     double K_mu_nu = (u[dir_muA].K.d[idxh])*(u[dir_muB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupmu]) * 
 																			(u[dir_muD].K.d[idxpmupnu])*(u[dir_muE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
                     tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
+										#endif
                 }  // d0          
             }  // d1            
         }  // d2              
@@ -134,11 +136,13 @@ double calc_loc_rectangles_1x2_nnptrick(
                     mat1_times_conj_mat2_into_mat1_absent_stag_phases(&loc_plaq[parity],idxh,&u[dir_nuF],idxh);                 // LOC_RECT = LOC_RECT * F
 
                     tr_local_plaqs[parity].c[idxh] = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
-                    
+
+                    #ifdef PAR_TEMP
                     //K_mu_nu computation;
                     double K_mu_nu = (u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_nuC].K.d[idxpmupnu]) * 
 																			(u[dir_muD].K.d[idxpnupnu])*(u[dir_nuE].K.d[idxpnu])*(u[dir_nuF].K.d[idxh]);
                     tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
+										#endif
                 } // d0
             } // d1
         } // d2
@@ -284,9 +288,8 @@ void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(
             MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
         }
     }
-    
+    #ifdef PAR_TEMP
     double K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
-
     mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
     mat6->r0.c1[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][1];
     mat6->r0.c2[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][2];
@@ -299,6 +302,21 @@ void    PPMMM_5mat_prod_addto_mat6_absent_stag_phases(
     mat6->r2.c0[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
     mat6->r2.c1[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
     mat6->r2.c2[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+		#else
+    mat6->r0.c0[idx_mat6] += C_ONE * MAT2.comp[0][0];
+    mat6->r0.c1[idx_mat6] += C_ONE * MAT2.comp[0][1];
+    mat6->r0.c2[idx_mat6] += C_ONE * MAT2.comp[0][2];
+
+    mat6->r1.c0[idx_mat6] += C_ONE * MAT2.comp[1][0];
+    mat6->r1.c1[idx_mat6] += C_ONE * MAT2.comp[1][1];
+    mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
+
+    //Compute 3rd result column from the first two
+    mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+    mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+    mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+		#endif
+		
 }  // closes PPMMM
 
 // Routine for the computation of the 5 matrices which contributes to the staples C-Right and B-Left.
@@ -427,7 +445,8 @@ void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(
             MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
         }
     }
-    
+		
+    #ifdef PAR_TEMP
     double K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
     
     mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
@@ -442,6 +461,20 @@ void    PMMMP_5mat_prod_addto_mat6_absent_stag_phases(
     mat6->r2.c0[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
     mat6->r2.c1[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
     mat6->r2.c2[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+		#else
+    mat6->r0.c0[idx_mat6] += C_ONE * MAT2.comp[0][0];
+    mat6->r0.c1[idx_mat6] += C_ONE * MAT2.comp[0][1];
+    mat6->r0.c2[idx_mat6] += C_ONE * MAT2.comp[0][2];
+
+    mat6->r1.c0[idx_mat6] += C_ONE * MAT2.comp[1][0];
+    mat6->r1.c1[idx_mat6] += C_ONE * MAT2.comp[1][1];
+    mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
+
+    //Compute 3rd result column from the first two
+    mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+    mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+    mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+		#endif
 }  // closes PMMMP
 
 
@@ -576,7 +609,8 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(
             MAT2.comp[i][j] = (AUX.comp[i][0] * MAT1.comp[0][j] + AUX.comp[i][1] * MAT1.comp[1][j] + AUX.comp[i][2] * MAT1.comp[2][j]);
         }
     }
-    
+
+		#ifdef PAR_TEMP
     double K_mu_nu=(mat1->K.d[idx_mat1])*(mat2->K.d[idx_mat2])*(mat3->K.d[idx_mat3])*(mat4->K.d[idx_mat4])*(mat5->K.d[idx_mat5]);
     
     mat6->r0.c0[idx_mat6] += K_mu_nu*C_ONE * MAT2.comp[0][0];
@@ -591,6 +625,21 @@ void    MMMPP_5mat_prod_addto_mat6_absent_stag_phases(
     mat6->r2.c0[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
     mat6->r2.c1[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
     mat6->r2.c2[idx_mat6] += K_mu_nu*C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+		#else
+    mat6->r0.c0[idx_mat6] += C_ONE * MAT2.comp[0][0];
+    mat6->r0.c1[idx_mat6] += C_ONE * MAT2.comp[0][1];
+    mat6->r0.c2[idx_mat6] += C_ONE * MAT2.comp[0][2];
+
+    mat6->r1.c0[idx_mat6] += C_ONE * MAT2.comp[1][0];
+    mat6->r1.c1[idx_mat6] += C_ONE * MAT2.comp[1][1];
+    mat6->r1.c2[idx_mat6] += C_ONE * MAT2.comp[1][2];
+
+    //Compute 3rd result column from the first two
+    mat6->r2.c0[idx_mat6] += C_ONE * conj(MAT2.comp[0][1] * MAT2.comp[1][2] - MAT2.comp[0][2] * MAT2.comp[1][1]);
+    mat6->r2.c1[idx_mat6] += C_ONE * conj(MAT2.comp[0][2] * MAT2.comp[1][0] - MAT2.comp[0][0] * MAT2.comp[1][2]);
+    mat6->r2.c2[idx_mat6] += C_ONE * conj(MAT2.comp[0][0] * MAT2.comp[1][1] - MAT2.comp[0][1] * MAT2.comp[1][0]);
+		#endif
+		
 }  // closes MMMPP
 
 void calc_loc_improved_staples_typeA_nnptrick_all(  

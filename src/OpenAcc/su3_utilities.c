@@ -589,6 +589,7 @@ void mom_exp_times_conf_soloopenacc_d3c(
 
 #endif
 
+#ifdef PAR_TEMP
 // each staple must be multiplied for k_mu(x), the coefficient associated to the U_mu(x) link
 // this function is to be called after the full computation of the staple and before the computation of ipdot_gauge
 void add_defect_coeffs_to_staple(
@@ -616,6 +617,7 @@ void add_defect_coeffs_to_staple(
 	}
 }
 
+#ifdef MULTIDEVICE
 // same as <add_defect_coeffs_to_staple> but only for links living on the bulk
 void add_defect_coeffs_to_staple_bulk( 
 				__restrict const su3_soa * const u,
@@ -668,5 +670,6 @@ void add_defect_coeffs_to_staple_d3c(
 		}
 	}
 }
-
+#endif
+#endif
 #endif

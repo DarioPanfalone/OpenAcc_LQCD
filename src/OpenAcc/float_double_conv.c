@@ -103,7 +103,9 @@ void convert_float_to_double_su3_soa(__restrict const su3_soa_f * f_var,
             d_var[dir].r2.c1[t] = ((double)crealf(f_var[dir].r2.c1[t])) + ((double)cimagf(f_var[dir].r2.c1[t]))*I;
             d_var[dir].r2.c2[t] = ((double)crealf(f_var[dir].r2.c2[t])) + ((double)cimagf(f_var[dir].r2.c2[t]))*I;
 
+						#ifdef PAR_TEMP
             d_var[dir].K.d[t] = ((double)f_var[dir].K.d[t]);
+						#endif
         }
     }
 }
@@ -127,7 +129,9 @@ void convert_double_to_float_su3_soa(__restrict const su3_soa * d_var,
             f_var[dir].r2.c1[t] = ((float)creal(d_var[dir].r2.c1[t])) + ((float)cimag(d_var[dir].r2.c1[t]))*I;
             f_var[dir].r2.c2[t] = ((float)creal(d_var[dir].r2.c2[t])) + ((float)cimag(d_var[dir].r2.c2[t]))*I;
 
+						#ifdef PAR_TEMP
 						f_var[dir].K.d[t] = ((float)d_var[dir].K.d[t]);
+						#endif
 				}
     }
 }

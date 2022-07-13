@@ -36,8 +36,9 @@ typedef struct su3_soa_t {
   vec3_soa r0;
   vec3_soa r1;
   vec3_soa r2;
+	#ifdef PAR_TEMP
   double_soa K; //Adjoint vector K. This vector is part of the struct and its values directly modify the near defect links computation in the action. Obviously its lenght is sizeh.
-  //int label; //the conf label -> moved to <rep_info> struct
+	#endif
 } su3_soa;
 
 

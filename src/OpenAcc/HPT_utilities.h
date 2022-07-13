@@ -1,11 +1,13 @@
 #ifndef HPT_UTILITIES_H
 #define HPT_UTILITIES_H
 
+#include "../Include/common_defines.h"
+#ifdef PAR_TEMP
+
 #include <stdio.h>
 #include "./struct_c_def.h"
 #include "./alloc_settings.h"
 #include "./alloc_vars.h"
-#include "../Include/common_defines.h"
 #include "./action.h"
 #include "../Include/rep_info.h"
 
@@ -71,4 +73,5 @@ void All_Conf_SWAP(su3_soa ** conf_hasenbusch,
                    defect_info * def, 
 									 int *swap_num,int * all_swap_vet, int * acceptance_vet, rep_info *hpt_params);
 
+#endif
 #endif

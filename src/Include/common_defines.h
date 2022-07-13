@@ -36,6 +36,10 @@
 //#define GAUGE_ACT_WILSON
 
 //**************************************//
+//WARNING! uncomment only if you want to perform parallel tempering
+//#define PAR_TEMP
+
+//**************************************//
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS

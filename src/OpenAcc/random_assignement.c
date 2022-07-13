@@ -193,7 +193,7 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
     int d0h, d1, d2, d3; //le dim
     for(int mu=0; mu<8; mu++) //gli indici mu
         for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) for(d2=0; d2<nd2; d2++)
-            for(d1=0; d1<nd1; d1++)	for(d0h=0; d0h < nd0h; d0h++) { //i for concatenati si possono scrivere anche cosi. Buono a sapersi.
+            for(d1=0; d1<nd1; d1++)	for(d0h=0; d0h < nd0h; d0h++) {
 
                 
                 // I take the size to be even, but it's the same
@@ -201,9 +201,8 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
                 int t  = snum_acc(d0,d1,d2,d3);
 
                 single_su3 aux;
-                generate_random_su3(&aux,factor); //questo genera random su3.
+                generate_random_su3(&aux,factor);
                 single_gl3_into_su3_soa(&conf[mu],t,&aux);
-//conf[mu] ovviamente va passato per le modifiche come puntatore quindi &conf[mu]
             }
  
     

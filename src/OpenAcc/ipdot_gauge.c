@@ -42,7 +42,9 @@ void calc_ipdot_gauge_soloopenacc_std(
 
 	set_su3_soa_to_zero(local_staples); // staples = 0
 	calc_loc_staples_nnptrick_all(tconf_acc,local_staples); // compute staples = dS/dU
+	#ifdef PAR_TEMP
 	add_defect_coeffs_to_staple(tconf_acc, local_staples); // staple_mu(x) *= k_mu(x) for every link (x,mu)
+	#endif
 	conf_times_staples_ta_part(tconf_acc,local_staples,tipdot); // U * (dS/dU - dS/dU^dagger)/2
 
 	#ifdef DEBUG_FORCE
@@ -209,8 +211,10 @@ void calc_ipdot_gauge_soloopenacc_tlsm(
     calc_loc_improved_staples_typeB_nnptrick_all(tconf_acc,local_staples);
     calc_loc_improved_staples_typeC_nnptrick_all(tconf_acc,local_staples);
 
+		#ifdef PAR_TEMP
 		add_defect_coeffs_to_staple(tconf_acc, local_staples); // staple_mu(x) *= k_mu(x) for every link (x,mu)
-
+		#endif
+		
     conf_times_staples_ta_part(tconf_acc,local_staples,tipdot);
  
 	#ifdef DEBUG_FORCE
@@ -436,7 +440,11 @@ void calc_ipdot_gauge_soloopenacc_std_bulk(
 
 	set_su3_soa_to_zero_bulk(local_staples);
 	calc_loc_staples_nnptrick_all_bulk(tconf_acc,local_staples);
+
+  #ifdef PAR_TEMP
 	add_defect_coeffs_to_staple_bulk(tconf_acc, local_staples); // staple_mu(x) *= k_mu(x) for every link (x,mu) on the bulk
+	#endif
+
 	conf_times_staples_ta_part_bulk(tconf_acc,local_staples,tipdot);
 
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count
@@ -479,7 +487,11 @@ void calc_ipdot_gauge_soloopenacc_tlsm_bulk(
 	calc_loc_improved_staples_typeA_nnptrick_all_bulk(tconf_acc,local_staples);
 	calc_loc_improved_staples_typeB_nnptrick_all_bulk(tconf_acc,local_staples);
 	calc_loc_improved_staples_typeC_nnptrick_all_bulk(tconf_acc,local_staples);
+
+	#ifdef PAR_TEMP
 	add_defect_coeffs_to_staple_bulk(tconf_acc, local_staples); // staple_mu(x) *= k_mu(x) for every link (x,mu) on the bulk
+	#endif
+
 	conf_times_staples_ta_part_bulk(tconf_acc,local_staples,tipdot);
 
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count
@@ -529,7 +541,11 @@ void calc_ipdot_gauge_soloopenacc_std_d3c(
 
 	set_su3_soa_to_zero_d3c(local_staples, offset3, thickness3);
 	calc_loc_staples_nnptrick_all_d3c(tconf_acc, local_staples, offset3, thickness3);
+
+	#ifdef PAR_TEMP
 	add_defect_coeffs_to_staple_d3c(tconf_acc, local_staples, offset3, thickness3); // staple_mu(x) *= k_mu(x) for every link (x,mu) on the border
+	#endif
+
 	conf_times_staples_ta_part_d3c(tconf_acc,local_staples,tipdot, offset3,thickness3);
     
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count
@@ -574,7 +590,11 @@ void calc_ipdot_gauge_soloopenacc_tlsm_d3c(
 	calc_loc_improved_staples_typeA_nnptrick_all_d3c(tconf_acc,local_staples,offset3,thickness3);
 	calc_loc_improved_staples_typeB_nnptrick_all_d3c(tconf_acc,local_staples,offset3,thickness3);
 	calc_loc_improved_staples_typeC_nnptrick_all_d3c(tconf_acc,local_staples,offset3,thickness3);
+
+	#ifdef PAR_TEMP
 	add_defect_coeffs_to_staple_d3c(tconf_acc, local_staples, offset3, thickness3); // staple_mu(x) *= k_mu(x) for every link (x,mu) on the border
+	#endif
+
 	conf_times_staples_ta_part_d3c(tconf_acc,local_staples,tipdot,offset3,thickness3);
 
     if(md_dbg_print_count<debug_settings.md_dbg_print_max_count

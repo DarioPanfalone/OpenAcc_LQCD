@@ -146,16 +146,11 @@ int main(int argc, char* argv[]){
             printf("****************************************************\n");
 			}
 		}
-  //######################################################################################################################################//
-  //######################################################################################################################################//
-    
-  //######################################################################################################################################//
-  //############### INITIALIZATION #########################################################################################################//
-  //######################################################################################################################################//
-  
+   //############### INITIALIZATION ############################//
+
+#ifdef PAR_TEMP
   int *all_swap_vector;
   int *acceptance_vector;
-  int mu1,mu2;
   double mean_acceptance;
   int *acceptance_vector_old;
     
@@ -163,12 +158,13 @@ int main(int argc, char* argv[]){
   acceptance_vector=malloc(sizeof(int)*rep->replicas_total_number-1);
   acceptance_vector_old=malloc(sizeof(int)*rep->replicas_total_number-1);
     
-  for(mu1=0;mu1<rep->replicas_total_number-1;mu1++){
-    acceptance_vector[mu1]=0;
-    acceptance_vector_old[mu1]=0;
-    all_swap_vector[mu1]=0;
+  for(int i=0;i<rep->replicas_total_number-1;i++){
+    acceptance_vector[i]=0;
+    acceptance_vector_old[i]=0;
+    all_swap_vector[i]=0;
   }
-    
+#endif
+
   //just printing headtitles
   if(0==devinfo.myrank){
     if(0 != mc_params.JarzynskiMode){
@@ -281,16 +277,20 @@ int main(int argc, char* argv[]){
   printf("MPI%02d - init md vars : OK \n",devinfo.myrank);
 
   //***************** INIZIALIZZAZIONE DELLA CONFIGURAZIONE *************//
-  defect_info def;
+
+#ifdef PAR_TEMP
+	defect_info def;
   char rep_str [20];
   char aux_name_file[200];
   strcpy(aux_name_file,mc_params.save_conf_name);
-    
+#endif
+	
   for(int r=0;r<rep->replicas_total_number;r++){
-    printf("replicas counter %d\n",r);
+#ifdef PAR_TEMP
     snprintf(rep_str,20,"replica_%d",r);
 		strcat(mc_params.save_conf_name,rep_str);
- 
+#endif
+		
     if(debug_settings.do_norandom_test){
       if(!read_conf_wrapper(conf_hasenbusch[r],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
 	// READS ALSO THE conf_id_iter
@@ -318,14 +318,42 @@ int main(int argc, char* argv[]){
 	conf_id_iter=0;
       }
     }
+#ifdef PAR_TEMP
     strcpy(mc_params.save_conf_name,aux_name_file);
-  }
     
-  //***************** K_mu(x) initialization for each replica ***************//
-  
+		if (0==devinfo.myrank) printf("%d/%d Defect initialization\n",r,rep->replicas_total_number); 
+		rep->label[r]=r;
+		init_k(conf_hasenbusch[r],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,r);
+		
+		
+    #ifdef MULTIDEVICE
+    if(devinfo.async_comm_gauge) init_k(&conf_hasenbusch[r][8],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,1);
+    #endif
+		
+    #pragma acc update device(conf_hasenbusch[r:1][0:alloc_info.conf_acc_size])
+		if(md_parameters.singlePrecMD){
+			convert_double_to_float_su3_soa(conf_hasenbusch[r],conf_hasenbusch_f[r]);
+			//^^ Doing this because a K initialization for su3_soa_f doesn't exist.
+      #ifdef MULTIDEVICE
+			if(devinfo.async_comm_gauge){
+				convert_double_to_float_su3_soa(&conf_hasenbusch[r][8],&conf_hasenbusch_f[r][8]);
+				//^^ Doing this because a K initialization for su3_soa_f doesn't exist.
+			}
+      #endif
+			
+      #pragma acc update host(conf_hasenbusch_f[r:1][0:alloc_info.conf_acc_size])
+		}
+#else
+#pragma acc update device(conf_hasenbusch[r:1][0:alloc_info.conf_acc_size])
+#endif
+  }
+
+#ifdef PAR_TEMP
+
+  /******* K_mu(x) init *********/
   int vec_aux_bound[3]={1,1,1};
 
-	if (0==devinfo.myrank) printf("############## AUX CONF INIT_K ############\n");
+	if (0==devinfo.myrank) printf("Auxiliary confs defect initialization\n");
   init_k(aux_conf_acc,1,0,vec_aux_bound,&def,1);
   init_k(auxbis_conf_acc,1,0,vec_aux_bound,&def,1);
   #pragma acc update device(aux_conf_acc[0:8])
@@ -339,7 +367,6 @@ int main(int argc, char* argv[]){
 	}
 	
 	if(alloc_info.stoutAllocations)
-		if (0==devinfo.myrank) printf("############ STOUT VECTOR INIT_K ##########\n");
 	int stout_steps = (act_params.stout_steps>act_params.topo_stout_steps?
 										 act_params.stout_steps:act_params.topo_stout_steps);
 	for (int i = 0; i < stout_steps; i++)
@@ -349,47 +376,9 @@ int main(int argc, char* argv[]){
 		for (int i = 0; i < stout_steps; i++)
 			convert_double_to_float_su3_soa(&gstout_conf_acc_arr[8*i],&gstout_conf_acc_arr_f[8*i]);
     #pragma acc update host(gstout_conf_acc_arr_f[0:8*stout_steps])
-	}
-
-	if (0==devinfo.myrank) printf("###########################################\n");
+	}	
+#endif
 	
-    
-	if( (verbosity_lv>2) && (0==devinfo.myrank) ){
-		printf("Boundary conditions coeffs c(r):\n");
-  	for(int i=0;i<rep->replicas_total_number;i++)
-    	printf("c(%d) = %.15lg\n", i, rep->cr_vec[i]);
-  }
-
-  if (0==devinfo.myrank) printf("############## REPLICA INIT_K ############\n"); 
-  for(int r=0;r<rep->replicas_total_number;r++){
-		if (0==devinfo.myrank) printf("############## REPLICA %d INIT_K ############\n",r); 
-		rep->label[r]=r;
-		init_k(conf_hasenbusch[r],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,r);
-		
-		
-    #ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge) init_k(&conf_hasenbusch[r][8],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,1);
-    #endif
-		
-    #pragma acc update device(conf_hasenbusch[r:1][0:alloc_info.conf_acc_size])
-		if(md_parameters.singlePrecMD){
-			if (0==devinfo.myrank) printf("###### SINGLE PREC INIT_K ######\n");
-			convert_double_to_float_su3_soa(conf_hasenbusch[r],conf_hasenbusch_f[r]);
-			//^^ Doing this because a K initialization for su3_soa_f doesn't exist.
-      #ifdef MULTIDEVICE
-			if(devinfo.async_comm_gauge){
-				if (0==devinfo.myrank) printf("#### SINGLE PREC INIT_K ASYNC ####\n");
-				convert_double_to_float_su3_soa(&conf_hasenbusch[r][8],&conf_hasenbusch_f[r][8]);
-				//^^ Doing this because a K initialization for su3_soa_f doesn't exist.
-			}
-      #endif
-			
-      #pragma acc update host(conf_hasenbusch_f[r:1][0:alloc_info.conf_acc_size])
-		}
-	}
-  if (0==devinfo.myrank) printf("##############################################\n");
-  //#################################################################################  
-
   double max_unitarity_deviation,avg_unitarity_deviation;
     
   for(int r=0;r<rep->replicas_total_number;r++){
@@ -400,11 +389,7 @@ int main(int argc, char* argv[]){
 	   max_unitarity_deviation);
   }
 
-  int swap_number=0;
-
-  //######################################################################################################################################//
-  //############### MEASURES #########################################################################################################//
-  //######################################################################################################################################//
+  //############### MEASURES #####################//
     
   double plq,rect;
   double cool_topo_ch[meastopo_params.coolmeasstep/meastopo_params.cool_measinterval+1];
@@ -426,15 +411,15 @@ int main(int argc, char* argv[]){
   iterations=malloc(sizeof(int)*rep->replicas_total_number);
     
   //inizialization to 0
-  int i;
-  for(i=0;i<rep->replicas_total_number;i++){
+  for(int i=0;i<rep->replicas_total_number;i++){
     accettate_metro[i]=0;
     accettate_therm[i]=0;
     iterations[i]=0;
     accettate_therm_old[i]=0;
     accettate_metro_old[i]=0;
   }
-   
+	int swap_number=0;
+
   //Plaquette measures and polyakov loop measures.
   printf("PLAQUETTE START\n");
     
@@ -593,7 +578,7 @@ int main(int argc, char* argv[]){
 	  printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
 		 devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
             
-	  for (i=0;i<rep->replicas_total_number;i++){
+	  for (int i=0;i<rep->replicas_total_number;i++){
             accettate_therm_old [i]= accettate_therm[i];
             accettate_metro_old [i]= accettate_metro[i];
 	  }
@@ -607,17 +592,17 @@ int main(int argc, char* argv[]){
 		     act_params.beta);
 	    printf(  "#################################################\n\n");
 	  }
-            
-	  for(mu1=0;mu1<rep->replicas_total_number-1;mu1++){
-	    acceptance_vector_old[mu1]=acceptance_vector[mu1];
-	  }
 
+		#ifdef PAR_TEMP
+	  for(int i=0;i<rep->replicas_total_number-1;i++){
+	    acceptance_vector_old[i]=acceptance_vector[i];
+	  }
+		#endif
+		
 	  //--------- REPLICAS UPDATE - HPT STEP ----------------//
         
 	  for(int r=0;r<rep->replicas_total_number;r++){
-	    printf("\n#################################################\n");
 	    printf("REPLICA %d:\n",r);
-	    printf("#################################################\n\n");
 
 			//######### ACTION BEFORE #########################################
 			
@@ -662,8 +647,9 @@ int main(int argc, char* argv[]){
 				printf("ACTION AFTER HMC STEP REPLICA %d: %.15lg\n", r, action);
 			}
 
+#ifdef PAR_TEMP
 			if(rep->replicas_total_number>1){
-				// CONF SWAP 
+				// CONF SWAP
 				if (0==devinfo.myrank) {printf("CONF SWAP PROPOSED\n");}
 				All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, &def, &swap_number,all_swap_vector,acceptance_vector, rep);
 				if (0==devinfo.myrank) {printf("Number of accepted swaps: %d\n", swap_number);}       
@@ -672,13 +658,15 @@ int main(int argc, char* argv[]){
 				// PERIODIC CONF TRANSLATION
 				trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
 			}
-#pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8]) 
+#pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+#endif
 		}
 		//####################################################    
 
 	  id_iter++;
 	  conf_id_iter++;
             
+#ifdef PAR_TEMP
 	  //-----------------------------------------------//
 	  printf("MPI%02d - Printing acceptances - only by master rank...\n",
 		 devinfo.myrank);
@@ -687,32 +675,29 @@ int main(int argc, char* argv[]){
 	    if(rep->replicas_total_number>1){
 	      file_label=fopen(acc_info->file_label_name,"at");
 	      if(!file_label){file_label=fopen(acc_info->file_label_name,"wt");}
-	    }
-	    if(rep->replicas_total_number>1){
+
 	      hmc_acc_file=fopen(acc_info->hmc_file_name,"at");
 	      if(!hmc_acc_file){hmc_acc_file=fopen(acc_info->hmc_file_name,"wt");}
                     
 	      swap_acc_file=fopen(acc_info->swap_file_name,"at");
 	      if(!swap_acc_file){swap_acc_file=fopen(acc_info->swap_file_name,"wt");}
-	     }
-            
-	    if(rep->replicas_total_number>1){
+
 	      fprintf(hmc_acc_file,"%d\t",conf_id_iter);
 	      fprintf(swap_acc_file,"%d\t",conf_id_iter);
 	      label_print(rep, file_label, conf_id_iter);
 	    }
             // PRINT ACCEPTANCES
-            for(mu1=0;mu1<rep->replicas_total_number;mu1++){
-	      if(mu1<rep->replicas_total_number-1){
-                mean_acceptance=(double)acceptance_vector[mu1]/all_swap_vector[mu1];
-                if(0==devinfo.myrank){ printf("replica couple [%d/%d]: proposed %d, accepted %d, mean_acceptance %f\n",mu1,mu1+1,all_swap_vector[mu1],acceptance_vector[mu1],mean_acceptance);}
-		if(rep->replicas_total_number>1){
-		  fprintf(swap_acc_file,"%d\t",acceptance_vector[mu1]-acceptance_vector_old[mu1]);}
+			for(int i=0;i<rep->replicas_total_number;i++){
+	      if(i<rep->replicas_total_number-1){
+					mean_acceptance=(double)acceptance_vector[i]/all_swap_vector[i];
+					if(0==devinfo.myrank){ printf("replica couple [%d/%d]: proposed %d, accepted %d, mean_acceptance %f\n",i,i+1,all_swap_vector[i],acceptance_vector[i],mean_acceptance);}
+					if(rep->replicas_total_number>1){
+						fprintf(swap_acc_file,"%d\t",acceptance_vector[i]-acceptance_vector_old[i]);}
 	      }
             
 	      if(rep->replicas_total_number>1){
-                fprintf(hmc_acc_file,"%d\t", accettate_therm[mu1]+accettate_metro[mu1]
-                        -accettate_therm_old[mu1]-accettate_metro_old[mu1]);
+                fprintf(hmc_acc_file,"%d\t", accettate_therm[i]+accettate_metro[i]
+                        -accettate_therm_old[i]-accettate_metro_old[i]);
 	      }
               
             }
@@ -729,6 +714,7 @@ int main(int argc, char* argv[]){
 	    }
         
 	  }
+#endif
           
 	  //-------------------------------------------------// 
 		//---------- MISURA ROBA DI GAUGE ---------------//
@@ -800,7 +786,7 @@ int main(int argc, char* argv[]){
 	      }
 	      fclose(stoutoutfile);
 	    }
-}//if stout end
+		}//if stout end
 
 	  printf("MPI%02d - Printing gauge obs - only by master rank...\n",
 		 devinfo.myrank);
@@ -833,9 +819,7 @@ int main(int argc, char* argv[]){
             
           
        
-	  //######################################################################################################################################//
-	  //############### SAVING #########################################################################################################//
-	  //######################################################################################################################################//
+	  //############### SAVING #####################//
             
             
 	  //*****************SAVING CONF_STORE****************//
@@ -861,25 +845,27 @@ int main(int argc, char* argv[]){
   
 	  if(conf_id_iter%mc_params.saveconfinterval==0){
 	    for(int r=0;r<rep->replicas_total_number;r++){
-                
+        #ifdef PAR_TEMP        
 	      snprintf(rep_str,20,"replica_%d",r);
 	      strcat(mc_params.save_conf_name,rep_str);
-                
+				#endif
 	      if (debug_settings.SaveAllAtEnd){
 		printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
 		       mc_params.save_conf_name);
 		save_conf_wrapper(conf_hasenbusch[r],mc_params.save_conf_name, conf_id_iter,
 				  debug_settings.use_ildg);
-		printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
-		       mc_params.RandGenStatusFilename);
-		saverand_tofile(mc_params.RandGenStatusFilename);
-	      }else printf(
-			   "\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
-                    
+	      }else
+					printf("\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+        #ifdef PAR_TEMP        
 	      strcpy(mc_params.save_conf_name,aux_name_file);
-            }
-            
-	  }       
+				#endif
+			}
+			if (debug_settings.SaveAllAtEnd){
+				printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
+							 mc_params.RandGenStatusFilename);
+				saverand_tofile(mc_params.RandGenStatusFilename);
+			}
+	  }
             
 	  //-------------------------------------------------//
 
@@ -1089,22 +1075,26 @@ int main(int argc, char* argv[]){
 
   //---- SAVES GAUGE CONF AND RNG STATUS TO FILE ----//
   for(int r=0;r<rep->replicas_total_number;r++){
-      
+		#ifdef PAR_TEMP
     snprintf(rep_str,20,"replica_%d",r);//inizializza rep_str
     strcat(mc_params.save_conf_name,rep_str); //appiccica rep_str in fondo.
-        
+		#endif
+		
     if (debug_settings.SaveAllAtEnd){
       printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
 	     mc_params.save_conf_name);
       save_conf_wrapper(conf_hasenbusch[r],mc_params.save_conf_name, conf_id_iter,
 			debug_settings.use_ildg);
-      printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
-	     mc_params.RandGenStatusFilename);
-      saverand_tofile(mc_params.RandGenStatusFilename);
     }else printf("\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
+		#ifdef PAR_TEMP
     strcpy(mc_params.save_conf_name,aux_name_file);
-  }//end for replicas.
-
+		#endif
+	}//end for replicas.
+	if (debug_settings.SaveAllAtEnd){
+      printf("MPI%02d - Saving rng status in %s.\n", devinfo.myrank, 
+						 mc_params.RandGenStatusFilename);
+      saverand_tofile(mc_params.RandGenStatusFilename);
+	}
   //-------------------------------------------------//
   if(0 == devinfo.myrank && debug_settings.SaveAllAtEnd){
     save_global_program_status(mc_params); // THIS FUNCTION IN SOME CASES DOES NOT WORK
@@ -1125,13 +1115,15 @@ int main(int argc, char* argv[]){
     mem_free_extended_f();
   }
 
+	#ifdef PAR_TEMP
   free(all_swap_vector);
   free(acceptance_vector);
 
   // freeing rep_info vectors
   free(rep->cr_vec);
   free(rep->label);
-    
+	#endif
+	
   printf("MPI%02d: freeing device nnp and nnm\n", devinfo.myrank);
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)

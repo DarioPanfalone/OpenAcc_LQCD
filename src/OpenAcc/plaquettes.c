@@ -55,11 +55,13 @@ double calc_loc_plaquettes_nnptrick(
 	    
 	  d_complex ciao = matrix_trace_absent_stag_phase(&loc_plaq[parity],idxh);
 	  tr_local_plaqs[parity].c[idxh] = creal(ciao)+cimag(ciao)*I;
-	    
+		
+		#ifdef PAR_TEMP
 	  //K_mu_nu computation;
 	  double K_mu_nu=(u[dir_muA].K.d[idxh])*(u[dir_nuB].K.d[idxpmu])*(u[dir_muC].K.d[idxpnu])*(u[dir_nuD].K.d[idxh]);
-	    
 	  tr_local_plaqs[parity].c[idxh] *= K_mu_nu;
+		#endif
+		
 	}  // d0
       }  // d1
     }  // d2

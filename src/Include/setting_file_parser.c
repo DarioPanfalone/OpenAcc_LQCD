@@ -772,14 +772,25 @@ int read_test_setting(test_info * ti,char filelines[MAXLINES][MAXLINELENGTH], in
 
 int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
 
+  	const int totalnumber_def = 1;
+  	const int defect_boundary_def = 0;
     par_info rp[]={
+#ifndef PAR_TEMP        
+        (par_info){(void*) IGNORE_IT, TYPE_INT,"totalnumber",    (const void*) &totalnumber_def,     NULL},
+        (par_info){(void*) IGNORE_IT, TYPE_INT,"defect_boundary",(const void*) &defect_boundary_def, NULL},
+#else
         (par_info){(void*) &(re->replicas_total_number),TYPE_INT,"totalnumber",NULL, NULL},
         (par_info){(void*) &(re->defect_boundary),TYPE_INT,"defect_boundary",NULL, NULL},
+#endif
     };
 
     
-   int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, startline+3);
-  
+		int res = scan_group_NV(sizeof(rp)/sizeof(par_info),rp, filelines, startline, startline+3);
+
+#ifndef PAR_TEMP
+		re->replicas_total_number = 1;
+    alloc_info.num_replicas = 1;
+#else      
     alloc_info.num_replicas=re->replicas_total_number;
     par_info rp1[3];
     
@@ -848,19 +859,34 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
 				printf("ERROR: defect length along dir %d exceeds corresponding lattice size\n", perp_dir[re->defect_boundary][j]);
 			}
 		}
+#endif
     return res;
 }
 
 int read_acceptance_numbers(accept_info * acp,char filelines[MAXLINES][MAXLINELENGTH], int startline, int endline){
 
+	  const char Hmc_file_name_def[]="fool";
+	  const char Swap_file_name_def[]="fool";
+	  const char Label_file_name_def[]="fool";
+	
     par_info tp[]= {
-        (par_info){(void*) &(acp->hmc_file_name),TYPE_STR,"Hmc_file_name",NULL, NULL},
-        (par_info){(void*) &(acp->swap_file_name),TYPE_STR,"Swap_file_name",NULL, NULL},
-        (par_info){(void*) &(acp->file_label_name),TYPE_STR,"Label_file_name",NULL,NULL},
+#ifndef PAR_TEMP
+				(par_info){(void*) IGNORE_IT ,TYPE_STR,"Hmc_file_name",   &Hmc_file_name_def  , NULL},
+        (par_info){(void*) IGNORE_IT ,TYPE_STR,"Swap_file_name",  &Swap_file_name_def , NULL},
+        (par_info){(void*) IGNORE_IT ,TYPE_STR,"Label_file_name", &Label_file_name_def,NULL},
+#else
+        (par_info){(void*) &(acp->hmc_file_name),  TYPE_STR, "Hmc_file_name",   NULL, NULL},
+        (par_info){(void*) &(acp->swap_file_name), TYPE_STR, "Swap_file_name",  NULL, NULL},
+        (par_info){(void*) &(acp->file_label_name),TYPE_STR, "Label_file_name", NULL, NULL},
+#endif				
     };
 
     int res = scan_group_NV(sizeof(tp)/sizeof(par_info),tp, filelines, startline, endline);
-    
+
+#ifndef PAR_TEMP
+		res=0; //nothing can be wrong if these parameters have to be ignored.
+#endif
+
     if(res!=1) {printf("ERROR: problem in reading acc filenames\n");}
     
     return res;
@@ -950,8 +976,12 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     int check = 1;
     if(!helpmode){
         for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
-            if(igrouptype != PMG_FERMION  && igrouptype != PMG_DEBUG 
-             && igrouptype != PMG_TESTS )  check *= tagcounts[igrouptype];
+					if(igrouptype != PMG_FERMION  && igrouptype != PMG_DEBUG 
+						 && igrouptype != PMG_TESTS)
+							 #ifndef PAR_TEMP
+						if(igrouptype != PMG_REPLICAS && igrouptype != PMG_ACCEPTANCES)
+							 #endif
+							check *= tagcounts[igrouptype];
         if(!check){
             for(int igrouptype  = 0 ; igrouptype < NPMGTYPES; igrouptype++)
                 if (!tagcounts[igrouptype]) if(0==devinfo.myrank)

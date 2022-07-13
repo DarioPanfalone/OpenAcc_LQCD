@@ -1,6 +1,8 @@
 #ifndef HPT_UTILITIES_C
 #define HPT_UTILITIES_C
 
+#include "../Include/common_defines.h"
+#ifdef PAR_TEMP
 // this library containes all Hasenbusch Parallel Tempering (HPT) routines
 
 #include "HPT_utilities.h"
@@ -15,7 +17,6 @@
 #include "../Mpi/multidev.h"
 #include "./plaquettes.h"
 #include "./su3_utilities.h"
-#include "../Include/common_defines.h"
 #include "./single_types.h"
 #include "./rettangoli.h"
 #include "./plaquettes.h"
@@ -840,5 +841,5 @@ void trasl_conf( __restrict const su3_soa *  const tconf_acc,
 #pragma acc update self(tconf_acc[0:8])
 #endif
 }
-
+#endif
 #endif

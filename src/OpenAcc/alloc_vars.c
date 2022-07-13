@@ -147,11 +147,11 @@ void mem_alloc_core(){
     
     allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch, ALIGN,
                                                alloc_info.num_replicas*sizeof(su3_soa*));
-    
+
 		for(int r=0; r<alloc_info.num_replicas; r++){
-    POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch[r], ALIGN,
-                           alloc_info.conf_acc_size*sizeof(su3_soa));
-    ALLOCCHECK(allocation_check, conf_hasenbusch[r]);
+			POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch[r], ALIGN,
+														 alloc_info.conf_acc_size*sizeof(su3_soa));
+			ALLOCCHECK(allocation_check, conf_hasenbusch[r]);
     }
 #pragma acc enter data create(conf_hasenbusch[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
 }
