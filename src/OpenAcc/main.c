@@ -93,17 +93,13 @@ int main(int argc, char* argv[]){
   gettimeofday ( &(mc_params.start_time), NULL );
 	if (GAUGE_ACTION == 1 ) printf("\n\nRUN WITH TREE-LEVEL SYMANZIK IMPROVED GAUGE ACTION\n\n");
 	else printf("\n\nRUN WITH WILSON GAUGE ACTION\n\n");
-    
+
   FILE *hmc_acc_file;
   FILE *swap_acc_file;
   FILE *file_label;
  
   srand(time(NULL));
     
-  //######################################################################################################################################//
-  //############### FILE READING #########################################################################################################//
-  //######################################################################################################################################//
-
   // READ input file.
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
