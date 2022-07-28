@@ -47,7 +47,7 @@ extern int verbosity_lv;
 void compute_sigma_from_sigma_prime_backinto_sigma_prime_f(  __restrict su3_soa_f    * Sigma, // la var globale e' auxbis_conf_acc_f [sia input che ouptput]
         __restrict thmat_soa_f  * Lambda, // la var globale e' aux_th_f
         __restrict tamat_soa_f  * QA, // la var globale e' aux_ta_f
-        __restrict const su3_soa_f * const U,// la var globale e' conf_hasenbusch_f[i]
+        __restrict const su3_soa_f * const U,// la var globale e' conf_acc_f[i]
 				__restrict su3_soa_f * const TMP, //la var globale e' aux_conf_acc_f //PARCHEGGIO??
         const int istopo //istopo = {0,1} -> rho={fermrho,toporho}
         ){

@@ -730,7 +730,7 @@ double calc_Delta_S_Symanzik_SWAP(__restrict const su3_soa * const u,
 }
 #endif
 
-int metro_SWAP(su3_soa ** conf_hasenbusch,
+int metro_SWAP(su3_soa ** conf_acc,
                __restrict su3_soa * const loc_plaq,
                dcomplex_soa * const tr_local_plaqs,
 	       int rep_indx1, int rep_indx2,defect_info * def, rep_info * hpt_params)
@@ -738,7 +738,7 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
   double p1,p2;
   double Delta_S_SWAP;
   int accettata = 0;
-  Delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2],loc_plaq,tr_local_plaqs,def);
+  Delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_acc[rep_indx1],conf_acc[rep_indx2],loc_plaq,tr_local_plaqs,def);
   if(verbosity_lv>8 && 0==devinfo.myrank) printf("DELTA_S_SWAP(r1=%d,r2=%d):%.15lg\n",rep_indx1, rep_indx2, Delta_S_SWAP);
   if(Delta_S_SWAP < 0) { // delta_S < 0 ==> exp(-Delta_S) > 1
     accettata=1;
@@ -756,11 +756,11 @@ int metro_SWAP(su3_soa ** conf_hasenbusch,
 		if(verbosity_lv>8 && 0==devinfo.myrank) printf("p_metro = %.15lg, p_extracted= %.15lg\n", p1, p2);
 		if (p2<p1) accettata=1;
 	}
-  if (accettata==1) replicas_swap(conf_hasenbusch[rep_indx1],conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, hpt_params);
+  if (accettata==1) replicas_swap(conf_acc[rep_indx1],conf_acc[rep_indx2], rep_indx1, rep_indx2, hpt_params);
   return accettata;
 }
 
-void All_Conf_SWAP( su3_soa ** conf_hasenbusch,
+void All_Conf_SWAP( su3_soa ** conf_acc,
 		    __restrict su3_soa * const loc_plaq,
 		    dcomplex_soa * const tr_local_plaqs, 
 		    defect_info * def, 
@@ -784,8 +784,8 @@ void All_Conf_SWAP( su3_soa ** conf_hasenbusch,
 		// proposed swaps order: 0 <-> 1, 1 <-> 2, ..., N_r-2 <-> N_r-1
     for(i_counter=0;i_counter<replicas_number-1;i_counter++){
       if(verbosity_lv>4 && 0==devinfo.myrank) printf("proposing swap %d %d\n",i_counter,i_counter+1);      
-      accettata=metro_SWAP(conf_hasenbusch, loc_plaq, tr_local_plaqs, i_counter, i_counter+1, def, hpt_params);
-			#pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])
+      accettata=metro_SWAP(conf_acc, loc_plaq, tr_local_plaqs, i_counter, i_counter+1, def, hpt_params);
+			#pragma acc update device(conf_acc[0:replicas_number][0:8])
       *swap_num=*swap_num+1;
       all_swap_vet[i_counter]++;
       if (accettata==1) acceptance_vet[i_counter]++;
@@ -797,8 +797,8 @@ void All_Conf_SWAP( su3_soa ** conf_hasenbusch,
 		// proposed swaps order: N_r-1 <-> N_r-2, ..., 2 <-> 1, 1 <-> 0 
     for(i_counter=0;i_counter<replicas_number-1;i_counter++){
       if(verbosity_lv>4 && 0==devinfo.myrank) printf("proposing swap %d %d\n",i_counter,i_counter+1);      
-      accettata=metro_SWAP( conf_hasenbusch,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2, def, hpt_params);
-			#pragma acc update device(conf_hasenbusch[0:replicas_number][0:8])      
+      accettata=metro_SWAP( conf_acc,loc_plaq,tr_local_plaqs, replicas_number-i_counter-1, replicas_number-i_counter-2, def, hpt_params);
+			#pragma acc update device(conf_acc[0:replicas_number][0:8])      
       *swap_num=*swap_num+1;
       all_swap_vet[replicas_number-i_counter-2]++;
       if(accettata==1) acceptance_vet[replicas_number-i_counter-2]++;

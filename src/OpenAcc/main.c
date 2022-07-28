@@ -292,7 +292,7 @@ int main(int argc, char* argv[]){
 #endif
 		
     if(debug_settings.do_norandom_test){
-      if(!read_conf_wrapper(conf_hasenbusch[r],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
+      if(!read_conf_wrapper(conf_acc[r],"conf_norndtest",&conf_id_iter,debug_settings.use_ildg)){
 	// READS ALSO THE conf_id_iter
 	printf("MPI%02d - Stored Gauge Conf conf_norndtest Read : OK\n",devinfo.myrank);
       }
@@ -304,7 +304,7 @@ int main(int argc, char* argv[]){
       }
     }
     else{
-      if(!read_conf_wrapper(conf_hasenbusch[r],mc_params.save_conf_name,
+      if(!read_conf_wrapper(conf_acc[r],mc_params.save_conf_name,
 			    &conf_id_iter,debug_settings.use_ildg)){
 	// READS ALSO THE conf_id_iter
 	printf("MPI%02d - Stored Gauge Conf \"%s\" Read : OK \n",
@@ -312,7 +312,7 @@ int main(int argc, char* argv[]){
       }
       else{
             
-	generate_Conf_cold(conf_hasenbusch[r],mc_params.eps_gen);
+	generate_Conf_cold(conf_acc[r],mc_params.eps_gen);
 	printf("MPI%02d - Cold Gauge Conf Generated : OK \n",
 	       devinfo.myrank);
 	conf_id_iter=0;
@@ -323,28 +323,28 @@ int main(int argc, char* argv[]){
     
 		if (0==devinfo.myrank) printf("%d/%d Defect initialization\n",r,rep->replicas_total_number); 
 		rep->label[r]=r;
-		init_k(conf_hasenbusch[r],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,r);
+		init_k(conf_acc[r],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,r);
 		
 		
     #ifdef MULTIDEVICE
-    if(devinfo.async_comm_gauge) init_k(&conf_hasenbusch[r][8],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,1);
+    if(devinfo.async_comm_gauge) init_k(&conf_acc[r][8],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,1);
     #endif
 		
-    #pragma acc update device(conf_hasenbusch[r:1][0:alloc_info.conf_acc_size])
+    #pragma acc update device(conf_acc[r:1][0:alloc_info.conf_acc_size])
 		if(md_parameters.singlePrecMD){
-			convert_double_to_float_su3_soa(conf_hasenbusch[r],conf_hasenbusch_f[r]);
+			convert_double_to_float_su3_soa(conf_acc[r],conf_acc_f[r]);
 			//^^ Doing this because a K initialization for su3_soa_f doesn't exist.
       #ifdef MULTIDEVICE
 			if(devinfo.async_comm_gauge){
-				convert_double_to_float_su3_soa(&conf_hasenbusch[r][8],&conf_hasenbusch_f[r][8]);
+				convert_double_to_float_su3_soa(&conf_acc[r][8],&conf_acc_f[r][8]);
 				//^^ Doing this because a K initialization for su3_soa_f doesn't exist.
 			}
       #endif
 			
-      #pragma acc update host(conf_hasenbusch_f[r:1][0:alloc_info.conf_acc_size])
+      #pragma acc update host(conf_acc_f[r:1][0:alloc_info.conf_acc_size])
 		}
 #else
-#pragma acc update device(conf_hasenbusch[r:1][0:alloc_info.conf_acc_size])
+#pragma acc update device(conf_acc[r:1][0:alloc_info.conf_acc_size])
 #endif
   }
 
@@ -366,23 +366,24 @@ int main(int argc, char* argv[]){
     #pragma acc update host(auxbis_conf_acc_f[0:8])
 	}
 	
-	if(alloc_info.stoutAllocations)
-	int stout_steps = (act_params.stout_steps>act_params.topo_stout_steps?
-										 act_params.stout_steps:act_params.topo_stout_steps);
-	for (int i = 0; i < stout_steps; i++)
-		init_k(&gstout_conf_acc_arr[8*i],1,0,vec_aux_bound,&def,1);
-  #pragma acc update device(gstout_conf_acc_arr[0:8*stout_steps])
-	if(md_parameters.singlePrecMD){
+	if(alloc_info.stoutAllocations){
+		int stout_steps = (act_params.stout_steps>act_params.topo_stout_steps?
+											 act_params.stout_steps:act_params.topo_stout_steps);
 		for (int i = 0; i < stout_steps; i++)
-			convert_double_to_float_su3_soa(&gstout_conf_acc_arr[8*i],&gstout_conf_acc_arr_f[8*i]);
+			init_k(&gstout_conf_acc_arr[8*i],1,0,vec_aux_bound,&def,1);
+    #pragma acc update device(gstout_conf_acc_arr[0:8*stout_steps])
+		if(md_parameters.singlePrecMD){
+			for (int i = 0; i < stout_steps; i++)
+				convert_double_to_float_su3_soa(&gstout_conf_acc_arr[8*i],&gstout_conf_acc_arr_f[8*i]);
     #pragma acc update host(gstout_conf_acc_arr_f[0:8*stout_steps])
-	}	
+		}
+	}
 #endif
 	
   double max_unitarity_deviation,avg_unitarity_deviation;
     
   for(int r=0;r<rep->replicas_total_number;r++){
-    check_unitarity_host(conf_hasenbusch[r],&max_unitarity_deviation,&avg_unitarity_deviation);
+    check_unitarity_host(conf_acc[r],&max_unitarity_deviation,&avg_unitarity_deviation);
     printf("\tMPI%02d: Avg_unitarity_deviation on host: %e\n", devinfo.myrank, 
 	   avg_unitarity_deviation);
     printf("\tMPI%02d: Max_unitarity_deviation on host: %e\n", devinfo.myrank,
@@ -423,21 +424,21 @@ int main(int argc, char* argv[]){
   //Plaquette measures and polyakov loop measures.
   printf("PLAQUETTE START\n");
     
-  plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+  plq = calc_plaquette_soloopenacc(conf_acc[0],aux_conf_acc,local_sums);
   printf("\tMPI%02d: Therm_iter %d Placchetta    = %.18lf \n",
 	 devinfo.myrank, conf_id_iter,plq/GL_SIZE/6.0/3.0);
     
   printf("PLAQUETTE END\n");
 
 #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
-  rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+  rect = calc_rettangolo_soloopenacc(conf_acc[0],aux_conf_acc,local_sums);
   printf("\tMPI%02d: Therm_iter %d Rettangolo    = %.18lf \n",
 	 devinfo.myrank, conf_id_iter,rect/GL_SIZE/6.0/3.0/2.0);
 #else
   printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
 #endif
 
-  poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
+  poly =  (*polyakov_loop[geom_par.tmap])(conf_acc[0]);//misura polyakov loop
   printf("\tMPI%02d: Therm_iter %d Polyakov Loop = (%.18lf, %.18lf)  \n",
 	 devinfo.myrank, conf_id_iter,creal(poly),cimag(poly));
 
@@ -449,29 +450,29 @@ int main(int argc, char* argv[]){
 		int rep_indx2=i+1;
 		double delta_S_STUPID=0.0;
 		// ACTION OLD
-		double S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-		double S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+		double S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_acc[rep_indx1], aux_conf_acc, local_sums);
+		double S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_acc[rep_indx2], aux_conf_acc, local_sums);
 		#ifdef GAUGE_ACT_TLSM
-		S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-		S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+		S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_acc[rep_indx1], aux_conf_acc, local_sums);
+		S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_acc[rep_indx2], aux_conf_acc, local_sums);
 		#endif
 		delta_S_STUPID -= (S_1 + S_2);  
 		// swap conf
-		replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, rep);
-		#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+		replicas_swap(conf_acc[rep_indx1], conf_acc[rep_indx2], rep_indx1, rep_indx2, rep);
+		#pragma acc update device(conf_acc[0:rep->replicas_total_number][0:8])
 		// ACTION NEW
-		S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-		S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+		S_1 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_acc[rep_indx1], aux_conf_acc, local_sums);
+		S_2 = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_acc[rep_indx2], aux_conf_acc, local_sums);
 		#ifdef GAUGE_ACT_TLSM
-		S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx1], aux_conf_acc, local_sums);
-		S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums);
+		S_1 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_acc[rep_indx1], aux_conf_acc, local_sums);
+		S_2 += - C_ONE * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_acc[rep_indx2], aux_conf_acc, local_sums);
 		#endif
 		delta_S_STUPID += (S_1 + S_2);
 		// go back
-		replicas_swap(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], rep_indx1, rep_indx2, rep);
-		#pragma acc update device(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+		replicas_swap(conf_acc[rep_indx1], conf_acc[rep_indx2], rep_indx1, rep_indx2, rep);
+		#pragma acc update device(conf_acc[0:rep->replicas_total_number][0:8])
 		// compute delta_S_SWAP smart
-		double delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_hasenbusch[rep_indx1], conf_hasenbusch[rep_indx2], aux_conf_acc, local_sums, &def);
+		double delta_S_SWAP = calc_Delta_S_soloopenacc_SWAP(conf_acc[rep_indx1], conf_acc[rep_indx2], aux_conf_acc, local_sums, &def);
 		// compare
 		if(0==devinfo.myrank) printf("(%d<->%d) %.15lg %.15lg\n", rep_indx1, rep_indx1+1, delta_S_SWAP, delta_S_STUPID);
 	}
@@ -497,13 +498,13 @@ int main(int argc, char* argv[]){
     //--------- MISURA ROBA DI GAUGE ------------------//
     if(0 == devinfo.myrank ) printf("Misure di Gauge:\n");
         
-    plq = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    plq = calc_plaquette_soloopenacc(conf_acc[0],aux_conf_acc,local_sums);
 #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
-    rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+    rect = calc_rettangolo_soloopenacc(conf_acc[0],aux_conf_acc,local_sums);
 #else
     printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
 #endif 
-    poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);//misura polyakov loop
+    poly =  (*polyakov_loop[geom_par.tmap])(conf_acc[0]);//misura polyakov loop
         
     printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
     printf("Rectangle     : %.18lf\n" ,rect/GL_SIZE/3.0/6.0/2.0);
@@ -513,7 +514,7 @@ int main(int argc, char* argv[]){
     //
     if(0 == devinfo.myrank)  printf("Fermion Measurements: see file %s\n",
 				    fm_par.fermionic_outfilename);
-    fermion_measures(conf_hasenbusch[0],fermions_parameters,
+    fermion_measures(conf_acc[0],fermions_parameters,
 		     &fm_par, md_parameters.residue_metro, 
 		     md_parameters.max_cg_iterations, id_iter_offset,
 		     plq/GL_SIZE/3.0/6.0,
@@ -573,7 +574,7 @@ int main(int argc, char* argv[]){
 	  }
 
 
-	  check_unitarity_device(conf_hasenbusch[0],&max_unitarity_deviation,
+	  check_unitarity_device(conf_acc[0],&max_unitarity_deviation,
 				 &avg_unitarity_deviation);
 	  printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
 		 devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
@@ -608,22 +609,22 @@ int main(int argc, char* argv[]){
 			
 			if (verbosity_lv>10){
 				double action;
-				action  = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[r], aux_conf_acc, local_sums);
+				action  = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_acc[r], aux_conf_acc, local_sums);
 				#ifdef GAUGE_ACT_TLSM
-				action += - C_ONE  * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[r], aux_conf_acc, local_sums);
+				action += - C_ONE  * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_acc[r], aux_conf_acc, local_sums);
 				#endif
 				printf("ACTION BEFORE HMC STEP REPLICA %d: %.15lg\n", r, action);
 			}
 
 			//########### HMC STEP #############################################
 			if(id_iter<mc_params.therm_ntraj){
-				accettate_therm[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[r],
+				accettate_therm[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc[r],
 										   md_parameters.residue_metro,md_parameters.residue_md,
 										   id_iter-id_iter_offset,
 										   accettate_therm[r],0,md_parameters.max_cg_iterations);
 			}
 			else{
-				accettate_metro[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_hasenbusch[r],
+				accettate_metro[r] = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc[r],
 										   md_parameters.residue_metro,md_parameters.residue_md,
 										   id_iter-id_iter_offset-accettate_therm[r],
 												accettate_metro[r],1,md_parameters.max_cg_iterations);
@@ -634,15 +635,15 @@ int main(int argc, char* argv[]){
 					printf("Estimated HMC acceptance for this run [replica %d]: %f +- %f\n. Iterations: %d",r,acceptance, acc_err, iterations[r]);
 				}
 			}
-#pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+#pragma acc update host(conf_acc[0:rep->replicas_total_number][0:8])
 
 			//############# ACTION AFTER ######################################################
 
 			if (verbosity_lv>10){
 				double action;
-				action  = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_hasenbusch[r], aux_conf_acc, local_sums);
+				action  = - C_ZERO * BETA_BY_THREE * calc_plaquette_soloopenacc(conf_acc[r], aux_conf_acc, local_sums);
 				#ifdef GAUGE_ACT_TLSM
-				action += - C_ONE  * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_hasenbusch[r], aux_conf_acc, local_sums);
+				action += - C_ONE  * BETA_BY_THREE * calc_rettangolo_soloopenacc(conf_acc[r], aux_conf_acc, local_sums);
 				#endif
 				printf("ACTION AFTER HMC STEP REPLICA %d: %.15lg\n", r, action);
 			}
@@ -651,14 +652,14 @@ int main(int argc, char* argv[]){
 			if(rep->replicas_total_number>1){
 				// CONF SWAP
 				if (0==devinfo.myrank) {printf("CONF SWAP PROPOSED\n");}
-				All_Conf_SWAP(conf_hasenbusch,aux_conf_acc,local_sums, &def, &swap_number,all_swap_vector,acceptance_vector, rep);
+				All_Conf_SWAP(conf_acc,aux_conf_acc,local_sums, &def, &swap_number,all_swap_vector,acceptance_vector, rep);
 				if (0==devinfo.myrank) {printf("Number of accepted swaps: %d\n", swap_number);}       
-#pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+#pragma acc update host(conf_acc[0:rep->replicas_total_number][0:8])
                 
 				// PERIODIC CONF TRANSLATION
-				trasl_conf(conf_hasenbusch[0],auxbis_conf_acc);
+				trasl_conf(conf_acc[0],auxbis_conf_acc);
 			}
-#pragma acc update host(conf_hasenbusch[0:rep->replicas_total_number][0:8])
+#pragma acc update host(conf_acc[0:rep->replicas_total_number][0:8])
 #endif
 		}
 		//####################################################    
@@ -720,20 +721,20 @@ int main(int argc, char* argv[]){
 		//---------- MISURA ROBA DI GAUGE ---------------//
 	  printf("===========GAUGE MEASURING============\n");
             
-	  plq  = calc_plaquette_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+	  plq  = calc_plaquette_soloopenacc(conf_acc[0],aux_conf_acc,local_sums);
 #if !defined(GAUGE_ACT_WILSON) || !defined(MULTIDEVICE)
-	  rect = calc_rettangolo_soloopenacc(conf_hasenbusch[0],aux_conf_acc,local_sums);
+	  rect = calc_rettangolo_soloopenacc(conf_acc[0],aux_conf_acc,local_sums);
 #else
 	  printf("\tMPI%02d: multidevice rectangle computation with Wilson action not implemented\n",devinfo.myrank);
 #endif
-	  poly =  (*polyakov_loop[geom_par.tmap])(conf_hasenbusch[0]);
+	  poly =  (*polyakov_loop[geom_par.tmap])(conf_acc[0]);
             
 	  if(meastopo_params.meascool && conf_id_iter%meastopo_params.cooleach==0){
 	    su3_soa *conf_to_use;
-	    cool_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
+	    cool_topo_ch[0]=compute_topological_charge(conf_acc[0],auxbis_conf_acc,topo_loc);
 	    for(int cs = 1; cs <= meastopo_params.coolmeasstep; cs++){
 	      if(cs==1)
-		conf_to_use=(su3_soa*)conf_hasenbusch[0];
+		conf_to_use=(su3_soa*)conf_acc[0];
 	      else
 		conf_to_use=(su3_soa*)aux_conf_acc;
 	      cool_conf(conf_to_use,aux_conf_acc,auxbis_conf_acc);
@@ -761,8 +762,8 @@ int main(int argc, char* argv[]){
 	  }
 
 	  if(meastopo_params.measstout && conf_id_iter%meastopo_params.stouteach==0){
-	    stout_wrapper(conf_hasenbusch[0],gstout_conf_acc_arr,1);
-	    stout_topo_ch[0]=compute_topological_charge(conf_hasenbusch[0],auxbis_conf_acc,topo_loc);
+	    stout_wrapper(conf_acc[0],gstout_conf_acc_arr,1);
+	    stout_topo_ch[0]=compute_topological_charge(conf_acc[0],auxbis_conf_acc,topo_loc);
 	    for(int ss = 0; ss < meastopo_params.stoutmeasstep; ss+=meastopo_params.stout_measinterval){
 	      int topoindx =1+ss/meastopo_params.stout_measinterval; 
 	      stout_topo_ch[topoindx]=compute_topological_charge(&gstout_conf_acc_arr[8*ss],auxbis_conf_acc,topo_loc);
@@ -833,7 +834,7 @@ int main(int argc, char* argv[]){
 	    strcat(tempname,serial);
 	    printf("MPI%02d - Storing conf %s.\n",
 		   devinfo.myrank, tempname);
-	    save_conf_wrapper(conf_hasenbusch[0],tempname,conf_id_iter,
+	    save_conf_wrapper(conf_acc[0],tempname,conf_id_iter,
 			      debug_settings.use_ildg);
 	    strcpy(tempname,mc_params.RandGenStatusFilename);
 	    sprintf(serial,".%05d",conf_id_iter);
@@ -852,7 +853,7 @@ int main(int argc, char* argv[]){
 	      if (debug_settings.SaveAllAtEnd){
 		printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
 		       mc_params.save_conf_name);
-		save_conf_wrapper(conf_hasenbusch[r],mc_params.save_conf_name, conf_id_iter,
+		save_conf_wrapper(conf_acc[r],mc_params.save_conf_name, conf_id_iter,
 				  debug_settings.use_ildg);
 	      }else
 					printf("\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
@@ -924,7 +925,7 @@ int main(int argc, char* argv[]){
 
 	  }
 
-	  check_unitarity_device(conf_hasenbusch[0],&max_unitarity_deviation,
+	  check_unitarity_device(conf_acc[0],&max_unitarity_deviation,
 				 &avg_unitarity_deviation);
 	  printf("\tMPI%02d: Avg/Max unitarity deviation on device: %e / %e\n", 
 		 devinfo.myrank,avg_unitarity_deviation,max_unitarity_deviation);
@@ -934,7 +935,7 @@ int main(int argc, char* argv[]){
 
 	  struct timeval tf0, tf1;
 	  gettimeofday(&tf0, NULL);
-	  fermion_measures(conf_hasenbusch[0],fermions_parameters,
+	  fermion_measures(conf_acc[0],fermions_parameters,
 			   &fm_par, md_parameters.residue_metro,
 			   md_parameters.max_cg_iterations,conf_id_iter,
 			   plq/GL_SIZE/3.0/6.0,
@@ -1083,7 +1084,7 @@ int main(int argc, char* argv[]){
     if (debug_settings.SaveAllAtEnd){
       printf("MPI%02d - Saving conf %s.\n", devinfo.myrank,
 	     mc_params.save_conf_name);
-      save_conf_wrapper(conf_hasenbusch[r],mc_params.save_conf_name, conf_id_iter,
+      save_conf_wrapper(conf_acc[r],mc_params.save_conf_name, conf_id_iter,
 			debug_settings.use_ildg);
     }else printf("\n\nMPI%02d: WARNING, \'SaveAllAtEnd\'=0,NOT SAVING/OVERWRITING CONF AND RNG STATUS.\n\n\n", devinfo.myrank);
 		#ifdef PAR_TEMP

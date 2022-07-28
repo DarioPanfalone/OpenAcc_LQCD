@@ -60,7 +60,7 @@ su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in either cases
 // in fermion related computation (with or without stouting)
 
 // replicas for parallel tempering are stored in this array
-su3_soa ** conf_hasenbusch;
+su3_soa ** conf_acc;
 
 // STOUTING 
 su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth
@@ -145,15 +145,15 @@ void mem_alloc_core(){
 #endif
     
     
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch, ALIGN,
+    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_acc, ALIGN,
                                                alloc_info.num_replicas*sizeof(su3_soa*));
 
 		for(int r=0; r<alloc_info.num_replicas; r++){
-			POSIX_MEMALIGN_WRAPPER((void **)&conf_hasenbusch[r], ALIGN,
+			POSIX_MEMALIGN_WRAPPER((void **)&conf_acc[r], ALIGN,
 														 alloc_info.conf_acc_size*sizeof(su3_soa));
-			ALLOCCHECK(allocation_check, conf_hasenbusch[r]);
+			ALLOCCHECK(allocation_check, conf_acc[r]);
     }
-#pragma acc enter data create(conf_hasenbusch[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
+#pragma acc enter data create(conf_acc[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
 }
 
 void mem_alloc_extended()
@@ -344,12 +344,12 @@ void mem_free_core()
 #pragma acc exit data delete(u1_back_phases)        
 
 		for(int r=0;r<alloc_info.num_replicas;r++){
-			FREECHECK(conf_hasenbusch[r]);
+			FREECHECK(conf_acc[r]);
     }
-#pragma acc exit data delete(conf_hasenbusch[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
+#pragma acc exit data delete(conf_acc[0:alloc_info.num_replicas][0:alloc_info.conf_acc_size])
 
-	FREECHECK(conf_hasenbusch);
-#pragma acc exit data delete(conf_hasenbusch)
+	FREECHECK(conf_acc);
+#pragma acc exit data delete(conf_acc)
 }
 
 void mem_free_extended()

@@ -53,7 +53,7 @@ extern su3_soa * gconf_as_fermionmatrix; //(only a pointer) conf to use in eithe
                       // in fermion related computation (with or without stouting)
 
 //CONF HASENBUSCH
-extern su3_soa ** conf_hasenbusch;
+extern su3_soa ** conf_acc;
 
 // STOUTING 
 extern su3_soa * gstout_conf_acc_arr; // all stouting steps except the zeroth

@@ -190,11 +190,10 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
 {
     printf("\t Generating random cold configuration with eps = %f .\n", factor);
 
-    int d0h, d1, d2, d3; //le dim
-    for(int mu=0; mu<8; mu++) //gli indici mu
+    int d0h, d1, d2, d3;
+    for(int mu=0; mu<8; mu++)
         for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) for(d2=0; d2<nd2; d2++)
             for(d1=0; d1<nd1; d1++)	for(d0h=0; d0h < nd0h; d0h++) {
-
                 
                 // I take the size to be even, but it's the same
                 int  d0 = 2*d0h + ((d1+d2+d3) & 0x1);
@@ -203,10 +202,8 @@ void generate_Conf_cold(__restrict su3_soa * const conf,double factor)
                 single_su3 aux;
                 generate_random_su3(&aux,factor);
                 single_gl3_into_su3_soa(&conf[mu],t,&aux);
-            }
- 
-    
-    
+
+							}
 #ifdef MULTIDEVICE
     communicate_su3_borders_hostonly(conf, HALO_WIDTH);
 #endif
