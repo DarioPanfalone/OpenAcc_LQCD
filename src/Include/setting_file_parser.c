@@ -69,7 +69,7 @@ const char * par_macro_groups_names[] ={ // NPMTYPES strings, NO SPACES!
     "DebugSettings"          ,     // 10
     "InverterTricks"         ,     // 11
     "TestSettings"           ,     // 12
-    "Replicas numbers"       ,     //13
+    "ReplicasNumbers"       ,     //13
     "AcceptancesMeasuresSettings"  //14
 };
 enum pmg_types {
@@ -789,7 +789,7 @@ int read_replicas_numbers(rep_info * re,char filelines[MAXLINES][MAXLINELENGTH],
 
 #ifndef PAR_TEMP
 		re->replicas_total_number = 1;
-    alloc_info.num_replicas = 1;
+    alloc_info.num_replicas = re->replicas_total_number;
 #else      
     alloc_info.num_replicas=re->replicas_total_number;
     par_info rp1[3];
@@ -1092,7 +1092,12 @@ int set_global_vars_and_fermions_from_input_file(const char* input_filename)
     if(devinfo.myrank == 0 )
         printf("Set alloc_info.stoutAllocations to %d\n",  alloc_info.stoutAllocations );
 
-    // check == 1 means at least one parameter was not found.
+		#ifndef PAR_TEMP
+		rep->replicas_total_number = 1;
+    alloc_info.num_replicas = rep->replicas_total_number;
+    #endif      
+
+		// check == 1 means at least one parameter was not found.
     if(totcheck!=0 || helpmode ){
         
         if(helpmode && 0 == devinfo.myrank) fclose(helpfile);

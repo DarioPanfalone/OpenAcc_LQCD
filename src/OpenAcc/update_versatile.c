@@ -80,7 +80,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
     double p1; //definition of p1, p2. Acceptance rates
     double p2;
     int accettata;
-    double delta_S; //delta_S
+    double delta_S;
     double action_in,action_fin,action_mom_in,action_mom_fin,action_ferm_in,action_ferm_fin;
 	double action_topo_in,action_topo_fin;
 
@@ -97,7 +97,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     gettimeofday ( &t_saved, NULL );
 
-    // ESTRAZIONI RANDOM //momenta are randomly generated.
     if(debug_settings.do_norandom_test){ // NORANDOM
         printf("NORANDOM mode, loading momenta from memory.\n");
         if(read_thmat_soa_wrapper(momenta,"momenta_norndtest")){
@@ -199,7 +198,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #pragma acc update device(approx_fi[0:1])
     }//end for iflav
 
-//it goes into this for if metro==1, that means that metropolis will be executed.
     if(metro==1){
         /////////////// INITIAL ACTION COMPUTATION ////////////////////////////////////////////
         
@@ -291,7 +289,6 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 
     }//end for iflav
 
-    // DINAMICA MOLECOLARE (stouting implicitamente usato in calcolo forza fermionica)
     struct timeval md_start, md_end;
     int multishift_iterations_before_md = multishift_invert_iterations ;  
     gettimeofday(&md_start,NULL);
@@ -349,7 +346,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr_f,
 #endif
-                auxbis_conf_acc_f, // globale
+                auxbis_conf_acc_f,
                 aux_conf_acc_f,fermions_parameters,alloc_info.NDiffFlavs,
                 ferm_chi_acc_f,ferm_shiftmulti_acc_f,
                 ip,
@@ -370,7 +367,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr,
 #endif
-                auxbis_conf_acc, // globale
+                auxbis_conf_acc,
                 aux_conf_acc,fermions_parameters,alloc_info.NDiffFlavs,
                 ferm_chi_acc,ferm_shiftmulti_acc,
                 ip,
@@ -405,7 +402,7 @@ int UPDATE_SOLOACC_UNOSTEP_VERSATILE(su3_soa *tconf_acc,
 #if (defined STOUT_FERMIONS) || (defined STOUT_TOPO)
                 tstout_conf_acc_arr,
 #endif
-                auxbis_conf_acc, // globale
+                auxbis_conf_acc,
                 aux_conf_acc,fermions_parameters,alloc_info.NDiffFlavs,
                 ferm_chi_acc,ferm_shiftmulti_acc,
                 ip,
