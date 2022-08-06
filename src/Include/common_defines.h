@@ -1,45 +1,45 @@
 #ifndef COMMON_DEFINES_H_
 #define COMMON_DEFINES_H_
 
-//#define BACKFIELD
-//#define IMCHEMPOT
+// #define BACKFIELD
+// #define IMCHEMPOT
 
-// se BACKFIELD o IMCHEMPOT sono definiti allora nell'applicazione della matrice
-// di dirac usa la routine che moltiplica anche per la fase opportuna, altrimenti
-// in modo hard coded usa l'altra routine moltiplica link per fermione e basta.
-// Per farlo viene definita la variabile PHASE_MAT_VEC_MULT o meno.
+// if BACKFIELD or IMCHEMPOT are defined, then the routine which multiplies by
+// the suitable phases is used in the Dirac matrix application. Otherwise, it
+// uses the other routine (in an hard coded way), which multiplies links by
+// fermion and no more.
+// This is what PHASE_MAT_VEC_MULT does.
 
 #if defined(BACKFIELD) || defined (IMCHEMPOT)
-  #define PHASE_MAT_VEC_MULT 
+#define PHASE_MAT_VEC_MULT 
 #endif
 
-//keep these commented if you are using M100
+// the following definitions are necessary with some compilers, for example the
+// one in the nvidia hpc-sdk package.
+// When using the PGI compiler in M100, they give errors. Keep them commented
+// in that case
 /*
-#define conj __builtin_conj
-#define creal __builtin_creal
-#define cimag __builtin_cimag
-#define conjf __builtin_conjf
-#define crealf __builtin_crealf
-#define cimagf __builtin_cimagf
+	#define conj __builtin_conj
+	#define creal __builtin_creal
+	#define cimag __builtin_cimag
+	#define conjf __builtin_conjf
+	#define crealf __builtin_crealf
+	#define cimagf __builtin_cimagf
 */
 
 #define DIM_BLOCK_X 8 // This should divide (nx/2)
 #define DIM_BLOCK_Y 8 // This should divide ny
-#define DIM_BLOCK_Z 8  // This should divide nz*nt
+#define DIM_BLOCK_Z 8 // This should divide nz*nt
 
-//#define TIMING_ALL // if defined many computation times are printed in the output
+// #define TIMING_ALL // if defined many computation times are printed in the output
 
-//**************************************//
-//ACHTUNG !!!!!! comment the one you don't wanna use and decoment the other one
+// WARNING!!!!!! comment the one you don't wanna use and decoment the other one
 
 #define GAUGE_ACT_TLSM
-//#define GAUGE_ACT_WILSON
+// #define GAUGE_ACT_WILSON
 
-//**************************************//
-//WARNING! uncomment only if you want to perform parallel tempering
-//#define PAR_TEMP
-
-//**************************************//
+// WARNING! uncomment only if you want to perform parallel tempering
+// #define PAR_TEMP
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS
@@ -79,11 +79,10 @@ extern int verbosity_lv;
 // macro to check the outcome of 'fscanf', reporting the file and line where the problem
 // happened.
  
-#define CHECKREAD(expr,should_read) \
-{int read = expr ;if(read != should_read) { \
-        printf("%s:%d, Error, not read expected number of entries : %d read vs %d should_read\n.", __FILE__, __LINE__ , read,should_read);\
-        exit(1);}}\
+#define CHECKREAD(expr,should_read)																			\
+	{int read = expr ;if(read != should_read) {														\
+			printf("%s:%d, Error, not read expected number of entries : %d read vs %d should_read\n.", __FILE__, __LINE__ , read,should_read); \
+			exit(1);}}																												\
 
 
 #endif
-

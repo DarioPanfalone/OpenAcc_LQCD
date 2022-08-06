@@ -7,7 +7,7 @@
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
- #define __restrict
+#define __restrict
 #endif
 
 double double_gauss(void);

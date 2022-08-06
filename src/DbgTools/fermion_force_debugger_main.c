@@ -17,7 +17,7 @@ void su2_rand(double *pp);
 #include "./inverter_full.c"
 #include "./find_min_max.c"
 #include "./inverter_multishift_full.c"
-#include "./rettangoli.c"
+#include "./rectangles.c"
 #include "./ipdot_gauge.c"
 #include "../Meas/ferm_meas.c"
 #include "./homebrew_acos.c"

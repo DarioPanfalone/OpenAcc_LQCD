@@ -23,8 +23,8 @@ __common_generated_sources = \
 	OpenAcc/sp_md_integrator.h  \
 	OpenAcc/sp_plaquettes.c  \
 	OpenAcc/sp_plaquettes.h  \
-	OpenAcc/sp_rettangoli.c  \
-	OpenAcc/sp_rettangoli.h  \
+	OpenAcc/sp_rectangles.c  \
+	OpenAcc/sp_rectangles.h  \
 	OpenAcc/sp_single_types.h  \
 	OpenAcc/sp_stouting.c  \
 	OpenAcc/sp_stouting.h  \
@@ -147,8 +147,8 @@ __common_sources = \
 	OpenAcc/plaquettes.h \
 	OpenAcc/random_assignement.c \
 	OpenAcc/random_assignement.h \
-	OpenAcc/rettangoli.c \
-	OpenAcc/rettangoli.h \
+	OpenAcc/rectangles.c \
+	OpenAcc/rectangles.h \
 	OpenAcc/single_types.h \
 	OpenAcc/sp_fermion_force.c \
 	OpenAcc/stouting.c \

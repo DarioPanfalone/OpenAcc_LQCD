@@ -1,12 +1,10 @@
 #ifndef BACKFIELD_PARAMETERS_H
 #define BACKFIELD_PARAMETERS_H
 
-// quanti di campo esterno
-
+// external field quanta
 typedef struct bf_param_t{
 
- double ex,ey,ez,bx,by,bz;
- // maybe you want to add some other strange things, setting and so on
+	double ex,ey,ez,bx,by,bz;
 
 } bf_param;
 

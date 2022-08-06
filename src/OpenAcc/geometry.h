@@ -4,7 +4,7 @@
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
- #define __restrict
+#define __restrict
 #endif
 
 #include "../Mpi/geometry_multidev.h"
@@ -16,7 +16,7 @@
 
 #define sizehh nd0*nd1*nd2*nd3/2 
 
-#define ANTIPERIODIC_T_BC  // else periodic time bc are taken
+#define ANTIPERIODIC_T_BC // else periodic time bc are taken
 
 #define vol1 nd0
 #define vol2 (nd1 * vol1)
@@ -28,37 +28,33 @@
 #define sizeh (NSITES / 2)
 #define no_links (4 * vol4)
 
-//struttura con i parametri geometrici.
 typedef struct geom_parameters_t{
 
-    int initialized_check;
-    int gnx,gny,gnz,gnt; // equal to the dimensions of the configuration
-    // map of physical directions onto logical directions
-    int xmap,ymap,zmap,tmap;// tmap is the "antiperiodic direction" for 
-                            // fermions
+	int initialized_check;
+	int gnx,gny,gnz,gnt; // equal to the dimensions of the configuration
+	// map of physical directions onto logical directions
+	int xmap,ymap,zmap,tmap;// tmap is the "antiperiodic direction" for fermions
 
-    // The following will be set by set_geom_glv()
-    int nd[4];
-    int nloc[4];
-    int vol3s[4];
-    int xyztmap[4];
-    int d0123map[4];
+	// The following will be set by set_geom_glv()
+	int nd[4];
+	int nloc[4];
+	int vol3s[4];
+	int xyztmap[4];
+	int d0123map[4];
 
-    int nranks[4]; //numero di rank.
-    int halos[4];
+	int nranks[4]; // ranks number
+	int halos[4];
 
 } geom_parameters;
 
 extern geom_parameters geom_par;
 
-
-//Look Out!(Achtung!): Comprension of the table of the nearest neighbours is fundamental for the correct initialization of K_mu.
-
-// TABLES FOR THE NEAREST NEIGHBOURS       (Actually here is  not quite clear, but I suppose that for positive he meant the onward direction and as negative the backward one.)
+// tables for the nearest neighbours
 // nnp[site_half][dir][par] = nearest neighbour in the positive direction "dir"            
-//                            starting from the site "site_half" (from 0 to sizeh) of parity "par"      //4 directions. // 2 parity.
-// nnm[site_half][dir][par] = nearest neighbour in the negative direction "dir"            
+//                            starting from the site "site_half" (from 0 to sizeh) of parity "par"
+// nnm[site_half][dir][par] = nearest neighbour in the negative direction "dir"
 //                            starting from the site "site_half" (from 0 to sizeh) of parity "par"         
+
 // temporarily defined and computed here (should be moved elsewhere!)      
 int nnp_openacc[sizeh][4][2];
 int nnm_openacc[sizeh][4][2];

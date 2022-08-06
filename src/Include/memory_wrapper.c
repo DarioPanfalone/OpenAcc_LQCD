@@ -15,11 +15,11 @@ int posix_memalign_wrapper(void **memptr,size_t alignment,size_t size,const char
 {
   int res=posix_memalign(memptr,alignment,size);
   
-  /*! increment the used size, and take the maximum */
+  // increment the used size, and take the maximum
   memory_used+=size;
   if(memory_used>max_memory_used) max_memory_used=memory_used;
   
-  /* creates the page and insert on top of the stack */
+  // creates the page and insert on top of the stack
   struct memory_allocated_t *all=(struct memory_allocated_t *)malloc(sizeof(struct memory_allocated_t));
   all->ptr=*memptr;
   all->varname=varname;
@@ -32,7 +32,7 @@ int posix_memalign_wrapper(void **memptr,size_t alignment,size_t size,const char
 
 void free_wrapper(void *memptr)
 {
-  /* creates the page and insert on top of the stack */
+  // creates the page and insert on top of the stack
   struct memory_allocated_t *all=memory_allocated_base,*prev=NULL;
   
   while(all!=NULL && all->ptr!=memptr)
@@ -55,4 +55,3 @@ void free_wrapper(void *memptr)
   free(all->ptr);
   free(all);
 };
-

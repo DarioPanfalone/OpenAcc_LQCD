@@ -84,8 +84,8 @@ fileNames = [\
 'OpenAcc/md_integrator.h',\
 'OpenAcc/plaquettes.c',\
 'OpenAcc/plaquettes.h',\
-'OpenAcc/rettangoli.c',\
-'OpenAcc/rettangoli.h',\
+'OpenAcc/rectangles.c',\
+'OpenAcc/rectangles.h',\
 'OpenAcc/single_types.h',\
 'OpenAcc/stouting.c',\
 'OpenAcc/stouting.h',\
@@ -126,8 +126,8 @@ filesALLDtoF=[\
 'OpenAcc/matvecmul.h',\
 'OpenAcc/plaquettes.c',\
 'OpenAcc/plaquettes.h',\
-'OpenAcc/rettangoli.c',\
-'OpenAcc/rettangoli.h',\
+'OpenAcc/rectangles.c',\
+'OpenAcc/rectangles.h',\
 'OpenAcc/single_types.h',\
 'OpenAcc/stouting.c',\
 'OpenAcc/stouting.h',\

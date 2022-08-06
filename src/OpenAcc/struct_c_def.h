@@ -6,24 +6,24 @@
 
 // if using GCC, there are some problems with __restrict.
 #ifdef __GNUC__
- #define __restrict
+#define __restrict
 #endif
 
 #include "./double_complex.h"
 
-//TYPEDEF_FLOAT_COMPLEX  //leave this there for double_to_songle_transformer.py
+//TYPEDEF_FLOAT_COMPLEX  //leave this there for double_to_single_transformer.py
 
 typedef struct vec3_soa_t {
-    d_complex c0[sizeh];
-    d_complex c1[sizeh];
-    d_complex c2[sizeh];
+	d_complex c0[sizeh];
+	d_complex c1[sizeh];
+	d_complex c2[sizeh];
 } vec3_soa;
 typedef struct dcomplex_soa_t {
-    d_complex c[sizeh];
+	d_complex c[sizeh];
 } dcomplex_soa;
 
 typedef struct double_soa_t {
-    double d[sizeh];
+	double d[sizeh];
 } double_soa;
 
 typedef struct vec3_t {
@@ -36,9 +36,9 @@ typedef struct su3_soa_t {
   vec3_soa r0;
   vec3_soa r1;
   vec3_soa r2;
-	#ifdef PAR_TEMP
-  double_soa K; //Adjoint vector K. This vector is part of the struct and its values directly modify the near defect links computation in the action. Obviously its lenght is sizeh.
-	#endif
+#ifdef PAR_TEMP
+  double_soa K; // lattice defect informations.
+#endif
 } su3_soa;
 
 
@@ -61,9 +61,9 @@ typedef struct thmat_soa_t {
 // GLOBAL data structures (multi-rank)
 
 typedef struct global_vec3_soa_t {
-    d_complex c0[GL_SIZEH];
-    d_complex c1[GL_SIZEH];
-    d_complex c2[GL_SIZEH];
+	d_complex c0[GL_SIZEH];
+	d_complex c1[GL_SIZEH];
+	d_complex c2[GL_SIZEH];
 } global_vec3_soa;
 typedef struct global_su3_soa_t {
   global_vec3_soa r0;
@@ -85,15 +85,11 @@ typedef struct global_thmat_soa_t {
   double rc11[GL_SIZEH];   // Re(comp_11)
 } global_thmat_soa;
 typedef struct global_dcomplex_soa_t {
-    d_complex c[GL_SIZEH];
+	d_complex c[GL_SIZEH];
 } global_dcomplex_soa;
 typedef struct global_double_soa_t {
-    double d[GL_SIZEH];
+	double d[GL_SIZEH];
 } global_double_soa;
 
 
-
-
 #endif
-
-

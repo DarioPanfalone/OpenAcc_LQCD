@@ -12,23 +12,23 @@
 #include "../Include/rep_info.h"
 
 typedef struct defect_info_t{
-		// min and max values of the logical coordinates where Delta_S_SWAP =/= 0
+	// min and max values of the logical coordinates where Delta_S_SWAP =/= 0
 		
-		// Wilson case
-		// def_min/max[nu][dirs]. Delta_S_SWAP=/=0 for the 3 nu=/=def_axis. For each nu, store min/max for each dir (NB: 1 of the 4 nu index is not used, defined just for convenience)
-    int defect_swap_min[4][4];
-    int defect_swap_max[4][4];
+	// Wilson case
+	// def_min/max[nu][dirs]. Delta_S_SWAP=/=0 for the 3 nu=/=def_axis. For each nu, store min/max for each dir (NB: 1 of the 4 nu index is not used, defined just for convenience)
+	int defect_swap_min[4][4];
+	int defect_swap_max[4][4];
 		
-		// Symanzik case
-		// def_min/max[j][nu][dirs]: j specifies which case is considered ( 0 = 1x2 rect, 1 = 2x1 rect), nu and dirs same as Wilson case
-    #ifdef GAUGE_ACT_TLSM
-    int defect_swap_min_TLSM[2][4][4];
-    int defect_swap_max_TLSM[2][4][4];
-    #endif
+	// Symanzik case
+	// def_min/max[j][nu][dirs]: j specifies which case is considered ( 0 = 1x2 rect, 1 = 2x1 rect), nu and dirs same as Wilson case
+#ifdef GAUGE_ACT_TLSM
+	int defect_swap_min_TLSM[2][4][4];
+	int defect_swap_max_TLSM[2][4][4];
+#endif
 
-		// defect location and extension
-    int def_axis_mapped; // boundary where the defect is put MAPPED
-    int def_mapped_perp_dir[3]; // the 3 logical directions orthogonal to def_axis_mapped
+	// defect location and extension
+	int def_axis_mapped; // boundary where the defect is put MAPPED
+	int def_mapped_perp_dir[3]; // the 3 logical directions orthogonal to def_axis_mapped
 
 } defect_info;
 
@@ -58,9 +58,9 @@ double calc_Delta_S_Wilson_SWAP(__restrict const su3_soa * const u,
                                 const int mu, const int nu, defect_info * def);
 
 double calc_Delta_S_soloopenacc_SWAP( __restrict  su3_soa * const tconf_acc,
-                                          __restrict  su3_soa * const tconf_acc2,
-                                        __restrict su3_soa * const local_plaqs,
-                                        dcomplex_soa * const tr_local_plaqs,defect_info * def);
+																			__restrict  su3_soa * const tconf_acc2,
+																			__restrict su3_soa * const local_plaqs,
+																			dcomplex_soa * const tr_local_plaqs,defect_info * def);
 
 int metro_SWAP(su3_soa ** conf_acc,
                __restrict su3_soa * const loc_plaq,

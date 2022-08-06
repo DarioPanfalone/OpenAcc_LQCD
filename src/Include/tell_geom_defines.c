@@ -1,12 +1,11 @@
-
 #include "stdio.h"
 #include "./tell_geom_defines.h"
 
 void print_geom_defines(){
 
-        printf("#############################\n") ;
-        printf("#   PRINTING GEOM DEFINES   #\n") ;
-        printf("#############################\n") ;
+	printf("#############################\n") ;
+	printf("#   PRINTING GEOM DEFINES   #\n") ;
+	printf("#############################\n") ;
 	printf("LOC_N0       %d\n",LOC_N0       );         
 	printf("LOC_N1       %d\n",LOC_N1       );         
 	printf("LOC_N2       %d\n",LOC_N2       );         

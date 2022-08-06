@@ -3,8 +3,8 @@
 
 typedef struct alloc_settings_t{
 
-    int NDiffFlavs; // set in Include/setting_file_parser.c, from input file 
-    int NPS_tot; // set in Include/fermion_parameters.c 
+    int NDiffFlavs;
+    int NPS_tot;
     int conf_acc_size; 
     int maxNeededShifts;
     int maxApproxOrder;
