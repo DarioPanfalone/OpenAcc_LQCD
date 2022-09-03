@@ -6,6 +6,7 @@
 #include "../Include/fermion_parameters.h"
 
 // if using GCC, there are some problems with __restrict.
+
 #ifdef __GNUC__
 #define __restrict
 #endif
@@ -18,9 +19,9 @@ static inline void vec1_directprod_conj_vec2_into_mat1(
         __restrict const vec3_soa  * const fer_r, int idr,
         double factor)
 {
-    // forse si possono risparmiare un po di conti andando a prendere le sole parti reale e immaginarie 
-    //  e scrivendo i prodotti in modo molto piu' sbrodolato
-    // in particolare per gli elementi lungo la diagonale
+    // NOTE: maybe it is possible to avoid some computation using just real and imaginary parts,
+    // and writing products explicitly
+    // especially for diagonal entries
     d_complex r0 = factor * conj(fer_r->c0[idr]);
     d_complex r1 = factor * conj(fer_r->c1[idr]);
     d_complex r2 = factor * conj(fer_r->c2[idr]);
@@ -54,7 +55,7 @@ static inline  void mat1_times_auxmat_into_tamat(
     d_complex mat1_10 = mat1->r1.c0[idx];
     d_complex mat1_11 = mat1->r1.c1[idx];
     d_complex mat1_12 = mat1->r1.c2[idx];
-    //Compute 3rd matrix row from the first two
+    // compute 3rd matrix row from the first two
     d_complex mat1_20 = conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
     d_complex mat1_21 = conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
     d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;
@@ -113,7 +114,7 @@ static inline  void mat1_times_auxmat_into_tamat_nophase(
     d_complex mat1_10 = mat1->r1.c0[idx];
     d_complex mat1_11 = mat1->r1.c1[idx];
     d_complex mat1_12 = mat1->r1.c2[idx];
-    //Compute 3rd matrix row from the first two
+    // compute 3rd matrix row from the first two
     d_complex mat1_20 = conj( ( mat1_01 * mat1_12 ) - ( mat1_02 * mat1_11) ) ;
     d_complex mat1_21 = conj( ( mat1_02 * mat1_10 ) - ( mat1_00 * mat1_12) ) ;
     d_complex mat1_22 = conj( ( mat1_00 * mat1_11 ) - ( mat1_01 * mat1_10) ) ;

@@ -18,7 +18,7 @@ void su2_rand(double *pp);
 #include "./inverter_full.c"
 #include "./find_min_max.c"
 #include "./inverter_multishift_full.c"
-#include "./rettangoli.c"
+#include "./rectangles.c"
 #include "./ipdot_gauge.c"
 #include "../Meas/ferm_meas.c"
 #include "./homebrew_acos.c"
@@ -34,18 +34,18 @@ int main(){
   initrand(111);
   fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
-  su3_soa  * conf_acc;
+  su3_soa  * conf_acc[0];
   su3_soa  * sigma_primo;
   su3_soa  * sigma;
-  int  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
+  int  allocation_check =  posix_memalign((void **)&conf_acc[0], ALIGN, 8*sizeof(su3_soa));
   int  allocation_check =  posix_memalign((void **)&sigma_primo, ALIGN, 8*sizeof(su3_soa));
   int  allocation_check =  posix_memalign((void **)&sigma, ALIGN, 8*sizeof(su3_soa));
-  if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
-  conf_acc->status = IN_USE;
+  if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc[0] \n");
+  conf_acc[0]->status = IN_USE;
   printf("Allocazione della configurazione : OK \n");
 
   generate_Conf_cold(sigma_primo,0.3);// 
-  generate_Conf_cold(conf_acc,0.1);
+  generate_Conf_cold(conf_acc[0],0.1);
   //  generate_Conf_cold(sigma,0.3);
 
 
@@ -82,19 +82,19 @@ int main(){
   //###################### INIZIALIZZAZIONE DELLA CONFIGURAZIONE #################################
   // cold start
   if(start_opt==0){
-    generate_Conf_cold(conf_acc,0.01);
+    generate_Conf_cold(conf_acc[0],0.01);
     printf("Cold Gauge Conf Generated : OK \n");
     conf_id_iter=0;
   }
  // start from saved conf
   if(start_opt==1){
-    read_su3_soa(conf_acc,"stored_config"); // READS ALSO THE conf_id_iter
+    read_su3_soa(conf_acc[0],"stored_config"); // READS ALSO THE conf_id_iter
     printf("Stored Gauge Conf Read : OK \n");
   }
   //###############################################################################################
 
 
-#pragma acc data   copy(conf_acc[0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs])
+#pragma acc data   copy(conf_acc[0][0:8]) copyin(u1_back_field_phases[0:8]) create(ipdot_acc[0:8]) create(aux_conf_acc[0:8]) create(auxbis_conf_acc[0:8]) create(ferm_chi_acc[0:NPS_tot]) create(ferm_phi_acc[0:NPS_tot])  create(ferm_out_acc[0:NPS_tot]) create(ferm_shiftmulti_acc[0:max_ps*max_approx_order]) create(kloc_r[0:1])  create(kloc_h[0:1])  create(kloc_s[0:1])  create(kloc_p[0:1])  create(k_p_shiftferm[0:max_approx_order]) create(momenta[0:8]) copyin(nnp_openacc) copyin(nnm_openacc) create(local_sums[0:2]) create(d_local_sums[0:1])  copyin(fermions_parameters[0:NDiffFlavs])
   {
 #ifdef STOUT_FERMIONS
 #pragma acc data create(aux_th[0:8]) create(aux_ta[0:8]) create(gstout_conf_acc_arr[0:(8*STOUT_STEPS)]) create(glocal_staples[0:8]) create(gipdot[0:8]) 
@@ -118,13 +118,13 @@ int main(){
 	       printf(  "#################################################\n\n");
 	       //--------- CONF UPDATE ----------------//
 	       if(id_iter<therm_ITERATIONS){
-		 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,
+		 accettate_therm = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc[0],
                  residue_metro,residue_md,id_iter-id_iter_offset,
                  accettate_therm,0);
 	       }else{
-		 accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc,residue_metro,residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
+		 accettate_metro = UPDATE_SOLOACC_UNOSTEP_VERSATILE(conf_acc[0],residue_metro,residue_md,id_iter-id_iter_offset-accettate_therm,accettate_metro,1);
 	       }
-#pragma acc update host(conf_acc[0:8])
+#pragma acc update host(conf_acc[0][0:8])
 	       //---------------------------------------//
 
 	       //--------- MISURA ROBA FERMIONICA ----------------//
@@ -132,14 +132,14 @@ int main(){
 	       if(!foutfile) foutfile = fopen(nome_file_ferm_output,"wt");
 	       if(foutfile){
 		 fprintf(foutfile,"%d\t",conf_id_iter);
-		 for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc,u1_back_field_phases,&(fermions_parameters[iflv]),residue_metro,foutfile);
+		 for(int iflv=0;iflv<NDiffFlavs;iflv++) perform_chiral_measures(conf_acc[0],u1_back_field_phases,&(fermions_parameters[iflv]),residue_metro,foutfile);
 		 fprintf(foutfile,"\n");
 	       }
 	       fclose(foutfile);
 	       //-------------------------------------------------// 
 	       //--------- MISURA ROBA DI GAUGE ------------------//
-	       plq = calc_plaquette_soloopenacc(conf_acc,aux_conf_acc,local_sums);
-	       rect = calc_rettangolo_soloopenacc(conf_acc,aux_conf_acc,local_sums);
+	       plq = calc_plaquette_soloopenacc(conf_acc[0],aux_conf_acc,local_sums);
+	       rect = calc_rettangolo_soloopenacc(conf_acc[0],aux_conf_acc,local_sums);
 	       
                FILE *goutfile = fopen(nome_file_gauge_output,"at");
                if(!goutfile) goutfile = fopen(nome_file_gauge_output,"wt");
@@ -166,7 +166,7 @@ int main(){
 	       //-------------------------------------------------//
 	       
 	       //--------- SALVA LA CONF SU FILE ------------------//
-	       if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc,"stored_config");
+	       if(conf_id_iter%save_conf_every==0)	print_su3_soa(conf_acc[0],"stored_config");
 	       //-------------------------------------------------//
 	       
     }// id_iter loop ends here
@@ -174,7 +174,7 @@ int main(){
 
 
     //--------- SALVA LA CONF SU FILE ------------------//
-    print_su3_soa(conf_acc,"stored_config");
+    print_su3_soa(conf_acc[0],"stored_config");
     //-------------------------------------------------//
 
 #ifdef STOUT_FERMIONS
@@ -183,14 +183,14 @@ int main(){
  
   }// end pragma acc data
 
-  CHECKSTATUS(conf_acc);
+  CHECKSTATUS(conf_acc[0]);
 
   //////  OPENACC CONTEXT CLOSING    //////////////////////////////////////////////////////////////
   SHUTDOWN_ACC_DEVICE(my_device_type);
   /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-  free(conf_acc);
+  free(conf_acc[0]);
   mem_free();
 
   return 0;

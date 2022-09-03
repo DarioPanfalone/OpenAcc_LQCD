@@ -1,4 +1,6 @@
-#!/usr/bin/python2 
+#!/usr/bin/python2.7
+# This script does some work for converting
+
 '''
  This script does the work of creating single precision header and source files
  from their double precision version.
@@ -82,8 +84,8 @@ fileNames = [\
 'OpenAcc/md_integrator.h',\
 'OpenAcc/plaquettes.c',\
 'OpenAcc/plaquettes.h',\
-'OpenAcc/rettangoli.c',\
-'OpenAcc/rettangoli.h',\
+'OpenAcc/rectangles.c',\
+'OpenAcc/rectangles.h',\
 'OpenAcc/single_types.h',\
 'OpenAcc/stouting.c',\
 'OpenAcc/stouting.h',\
@@ -124,8 +126,8 @@ filesALLDtoF=[\
 'OpenAcc/matvecmul.h',\
 'OpenAcc/plaquettes.c',\
 'OpenAcc/plaquettes.h',\
-'OpenAcc/rettangoli.c',\
-'OpenAcc/rettangoli.h',\
+'OpenAcc/rectangles.c',\
+'OpenAcc/rectangles.h',\
 'OpenAcc/single_types.h',\
 'OpenAcc/stouting.c',\
 'OpenAcc/stouting.h',\

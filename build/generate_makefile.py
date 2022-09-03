@@ -2,7 +2,6 @@
 import os.path as path
 from sys import exit,argv,stderr,stdout
 
-
 make_rgen_string ='\n\
 \
 rgen: \n\

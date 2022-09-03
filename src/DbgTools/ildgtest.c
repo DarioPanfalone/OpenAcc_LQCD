@@ -7,7 +7,7 @@ int conf_id_iter;
 int verbosity_lv;
 
 
-su3_soa  * conf_acc; // the gauge configuration.
+su3_soa  * conf_acc[0]; // the gauge configuration.
 
 int main(int argc, char* argv[]){
 
@@ -24,26 +24,26 @@ int main(int argc, char* argv[]){
     else if(verbosity_lv > 2) printf("\tAllocation of %s : OK , %p\n", #var, var );\
 
 #define ALIGN 128
-    int allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
-    ALLOCCHECK(allocation_check, conf_acc);
+    int allocation_check =  posix_memalign((void **)&conf_acc[0], ALIGN, 8*sizeof(su3_soa));
+    ALLOCCHECK(allocation_check, conf_acc[0]);
 
 
 
     printf("Reading ildg conf\n");
-    if(read_su3_soa_ildg_binary(conf_acc,"confildgtest",&conf_id_iter))
+    if(read_su3_soa_ildg_binary(conf_acc[0],"confildgtest",&conf_id_iter))
         exit(1);
     printf("Writing ASCII conf, %d\n", conf_id_iter);
     // READS ALSO THE conf_id_iter
-    print_su3_soa_ASCII(conf_acc,mkwch_pars.save_conf_name,conf_id_iter); 
+    print_su3_soa_ASCII(conf_acc[0],mkwch_pars.save_conf_name,conf_id_iter); 
 
     /*
     printf("Writing ildg conf\n");
-    print_su3_soa_ildg_binary(conf_acc,"conf.out.ildg",conf_id_iter);
+    print_su3_soa_ildg_binary(conf_acc[0],"conf.out.ildg",conf_id_iter);
     */
 
 
 
-    free(conf_acc);
+    free(conf_acc[0]);
 
 
     return 0;

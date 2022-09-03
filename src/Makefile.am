@@ -1,6 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
-
 __common_generated_sources = \
 	OpenAcc/sp_alloc_vars.c  \
 	OpenAcc/sp_alloc_vars.h  \
@@ -24,8 +23,8 @@ __common_generated_sources = \
 	OpenAcc/sp_md_integrator.h  \
 	OpenAcc/sp_plaquettes.c  \
 	OpenAcc/sp_plaquettes.h  \
-	OpenAcc/sp_rettangoli.c  \
-	OpenAcc/sp_rettangoli.h  \
+	OpenAcc/sp_rectangles.c  \
+	OpenAcc/sp_rectangles.h  \
 	OpenAcc/sp_single_types.h  \
 	OpenAcc/sp_stouting.c  \
 	OpenAcc/sp_stouting.h  \
@@ -45,11 +44,12 @@ __common_generated_sources = \
 	Mpi/sp_communications.h  \
 	Mpi/sp_communications.c 
 
-
 __common_sources = \
 	DbgTools/dbgtools.c \
 	DbgTools/dbgtools.h \
 	DbgTools/debugger_hook.h \
+	Include/acceptances_info.c \
+	Include/acceptances_info.h \
 	Include/all_include.h \
 	Include/common_defines.h \
 	Include/debug.c \
@@ -63,6 +63,8 @@ __common_sources = \
 	Include/inverter_tricks.h \
 	Include/montecarlo_parameters.c \
 	Include/montecarlo_parameters.h \
+	Include/rep_info.c \
+	Include/rep_info.h \
 	Include/setting_file_parser.c \
 	Include/setting_file_parser.h \
 	Include/stringify.h \
@@ -88,6 +90,8 @@ __common_sources = \
 	Mpi/geometry_multidev.h \
 	Mpi/multidev.c \
 	Mpi/multidev.h \
+	OpenAcc/HPT_utilities.c \
+  OpenAcc/HPT_utilities.h \
 	OpenAcc/action.c \
 	OpenAcc/action.h \
 	OpenAcc/alloc_settings.c \
@@ -143,8 +147,8 @@ __common_sources = \
 	OpenAcc/plaquettes.h \
 	OpenAcc/random_assignement.c \
 	OpenAcc/random_assignement.h \
-	OpenAcc/rettangoli.c \
-	OpenAcc/rettangoli.h \
+	OpenAcc/rectangles.c \
+	OpenAcc/rectangles.h \
 	OpenAcc/single_types.h \
 	OpenAcc/sp_fermion_force.c \
 	OpenAcc/stouting.c \

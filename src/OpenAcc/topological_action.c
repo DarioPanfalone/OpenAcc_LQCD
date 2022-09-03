@@ -7,7 +7,7 @@
 #include "./alloc_vars.h"
 #include "./action.h"
 #ifndef STOUTING_H
- #include "./stouting.h"
+#include "./stouting.h"
 #endif
 #ifdef MULTIDEVICE
 #include <mpi.h>
@@ -66,11 +66,11 @@ double topodynamical_pot(double Q)
 	load_topo(act_params.topo_file_path,barr,width,grid,ngrid);
 	if(igrid>=0 && igrid<=ngrid)
 		{
-			//interpolate
+			// interpolate
 			double x0=igrid*width-barr;
 			double m=(grid[igrid+1]-grid[igrid])/width;
 			double q=grid[igrid]-m*x0;
-	 	        printf("topotential: q+mx = %f; q = %f m = %f, x0 = %f, igrid = %d, ngrid = %d, Q = %f\n", q+m*x0,q,m,x0,igrid,ngrid,Q);
+			printf("topotential: q+mx = %f; q = %f m = %f, x0 = %f, igrid = %d, ngrid = %d, Q = %f\n", q+m*x0,q,m,x0,igrid,ngrid,Q);
 			printf("barr = %f, width = %f, widthh = %f, \n",barr,width,widthh);
 			return q+m*Q;
 		}
@@ -91,9 +91,9 @@ double topodynamical_pot(double Q)
 
 double compute_topo_action(__restrict su3_soa * u
 #ifdef STOUT_TOPO
-			  ,__restrict su3_soa * const tstout_conf_acc_arr
+													 ,__restrict su3_soa * const tstout_conf_acc_arr
 #endif
-			   )
+													 )
 {
   __restrict su3_soa * quadri;
   __restrict su3_soa * conf_to_use;
@@ -101,7 +101,7 @@ double compute_topo_action(__restrict su3_soa * u
   
 
 #ifdef STOUT_TOPO
-#pragma acc update self(tstout_conf_acc_arr[0:8])
+	#pragma acc update self(tstout_conf_acc_arr[0:8])
   if(act_params.topo_stout_steps > 0){
     stout_wrapper(u,tstout_conf_acc_arr,1);
     conf_to_use = &(tstout_conf_acc_arr[8*(act_params.topo_stout_steps-1)]);
@@ -115,17 +115,17 @@ double compute_topo_action(__restrict su3_soa * u
     printf("\t\t\tMPI%02d - compute_topological_charge(u,quadri,loc_q)\n",devinfo.myrank);
   
   posix_memalign((void **)&quadri,128,8*sizeof(su3_soa));
-#pragma acc enter data create(quadri[0:8])
+	#pragma acc enter data create(quadri[0:8])
   
   posix_memalign((void **)&loc_q,128,2*sizeof(double_soa));
-#pragma acc enter data create(loc_q[0:2])  
+	#pragma acc enter data create(loc_q[0:2])  
 
   double Q = compute_topological_charge(conf_to_use, quadri, loc_q);
   
-#pragma acc exit data delete(quadri)  
+	#pragma acc exit data delete(quadri)  
   free(quadri);
 
-#pragma acc exit data delete(loc_q)  
+	#pragma acc exit data delete(loc_q)  
   free(loc_q);
   
   if(verbosity_lv>4)
@@ -138,5 +138,6 @@ double compute_topo_action(__restrict su3_soa * u
 
   return topo_action;
 }
+
 
 #endif

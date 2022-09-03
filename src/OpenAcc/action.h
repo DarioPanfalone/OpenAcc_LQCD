@@ -5,13 +5,13 @@
 
 typedef struct action_param_t{
 
-    double beta;
-    int stout_steps;
-    double stout_rho; // AT PRESENT, ONLY FOR CHECKING PURPOSES
+	double beta;
+	int stout_steps;
+	double stout_rho;
 
 	int topo_action;
 	double barrier;
-	double width; // MAYBE IT GIVE REDUNDANT INFO: width = 2*barrier/(tot lines in topo_file)
+	double width;
 	char topo_file_path[20];
 	int topo_stout_steps;
 	double topo_rho;

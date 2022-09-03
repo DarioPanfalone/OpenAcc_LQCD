@@ -3,10 +3,10 @@
 
 typedef struct inv_tricks_t{
 
-    int singlePInvAccelMultiInv;
-    int useMixedPrecision;
-    double mixedPrecisionDelta;
-    int restartingEvery;
+	int singlePInvAccelMultiInv;
+	int useMixedPrecision;
+	double mixedPrecisionDelta;
+	int restartingEvery;
 
 } inv_tricks;
 

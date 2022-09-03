@@ -17,7 +17,7 @@ void su2_rand(double *pp);
 #include "./inverter_full.c"
 #include "./find_min_max.c"
 #include "./inverter_multishift_full.c"
-#include "./rettangoli.c"
+#include "./rectangles.c"
 #include "./ipdot_gauge.c"
 #include "../Meas/ferm_meas.c"
 #include "./homebrew_acos.c"
@@ -35,10 +35,10 @@ int main(){
   initrand(111);
   fflush(stdout);
   printf("INIZIO DEL PROGRAMMA \n");
-  su3_soa  * conf_acc;
-  int  allocation_check =  posix_memalign((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa));
-  if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc \n");
-  conf_acc->flag = 1;
+  su3_soa  * conf_acc[0];
+  int  allocation_check =  posix_memalign((void **)&conf_acc[0], ALIGN, 8*sizeof(su3_soa));
+  if(allocation_check != 0)  printf("Errore nella allocazione di conf_acc[0] \n");
+  conf_acc[0]->flag = 1;
   printf("Allocazione della configurazione : OK \n");
 
   // INIT FERM PARAMS AND READ RATIONAL APPROX COEFFS
@@ -56,12 +56,12 @@ int main(){
   printf("u1_backfield initialization : OK \n");
 #endif
 
-  generate_Conf_cold(conf_acc,0.1);
-  //  generate_Conf_cold(conf_acc,0.1);
+  generate_Conf_cold(conf_acc[0],0.1);
+  //  generate_Conf_cold(conf_acc[0],0.1);
   printf("Cold Gauge Conf Generated : OK \n");
   conf_id_iter=0;
     // CAMBIARE UN LINK!!!!!!!!!!
-    //    conf_acc[0].r0.c0[0] += 0.001 + 0.0*I;
+    //    conf_acc[0][0].r0.c0[0] += 0.001 + 0.0*I;
     double eps=0.00001;
     set_tamat_soa_to_zero(ipdot_acc);
     int i=0;
@@ -73,27 +73,27 @@ int main(){
     //    ipdot_acc[i].rc11[s]= eps/sqrt(3.0) ;
     CH_exponential_antihermitian_soa_nissalike(&(aux_conf_acc[i]),&(ipdot_acc[i]),s);
     single_su3 M;
-    M.comp[0][0] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c0[s];
-    M.comp[0][1] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c1[s];
-    M.comp[0][2] =aux_conf_acc[i].r0.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[i].r2.c2[s];
-    M.comp[1][0] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c0[s];
-    M.comp[1][1] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c1[s];
-    M.comp[1][2] =aux_conf_acc[i].r1.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[i].r2.c2[s];
-    M.comp[2][0] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c0[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c0[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c0[s];
-    M.comp[2][1] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c1[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c1[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c1[s];
-    M.comp[2][2] =aux_conf_acc[i].r2.c0[s]*conf_acc[i].r0.c2[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[i].r1.c2[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[i].r2.c2[s];
+    M.comp[0][0] =aux_conf_acc[i].r0.c0[s]*conf_acc[0][i].r0.c0[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[0][i].r1.c0[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[0][i].r2.c0[s];
+    M.comp[0][1] =aux_conf_acc[i].r0.c0[s]*conf_acc[0][i].r0.c1[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[0][i].r1.c1[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[0][i].r2.c1[s];
+    M.comp[0][2] =aux_conf_acc[i].r0.c0[s]*conf_acc[0][i].r0.c2[s]+aux_conf_acc[i].r0.c1[s]*conf_acc[0][i].r1.c2[s]+aux_conf_acc[i].r0.c2[s]*conf_acc[0][i].r2.c2[s];
+    M.comp[1][0] =aux_conf_acc[i].r1.c0[s]*conf_acc[0][i].r0.c0[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[0][i].r1.c0[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[0][i].r2.c0[s];
+    M.comp[1][1] =aux_conf_acc[i].r1.c0[s]*conf_acc[0][i].r0.c1[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[0][i].r1.c1[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[0][i].r2.c1[s];
+    M.comp[1][2] =aux_conf_acc[i].r1.c0[s]*conf_acc[0][i].r0.c2[s]+aux_conf_acc[i].r1.c1[s]*conf_acc[0][i].r1.c2[s]+aux_conf_acc[i].r1.c2[s]*conf_acc[0][i].r2.c2[s];
+    M.comp[2][0] =aux_conf_acc[i].r2.c0[s]*conf_acc[0][i].r0.c0[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[0][i].r1.c0[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[0][i].r2.c0[s];
+    M.comp[2][1] =aux_conf_acc[i].r2.c0[s]*conf_acc[0][i].r0.c1[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[0][i].r1.c1[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[0][i].r2.c1[s];
+    M.comp[2][2] =aux_conf_acc[i].r2.c0[s]*conf_acc[0][i].r0.c2[s]+aux_conf_acc[i].r2.c1[s]*conf_acc[0][i].r1.c2[s]+aux_conf_acc[i].r2.c2[s]*conf_acc[0][i].r2.c2[s];
 
-    conf_acc[i].r0.c0[s] = M.comp[0][0];
-    conf_acc[i].r0.c1[s] = M.comp[0][1];
-    conf_acc[i].r0.c2[s] = M.comp[0][2];
-    conf_acc[i].r1.c0[s] = M.comp[1][0];
-    conf_acc[i].r1.c1[s] = M.comp[1][1];
-    conf_acc[i].r1.c2[s] = M.comp[1][2];
-    conf_acc[i].r2.c0[s] = M.comp[2][0];
-    conf_acc[i].r2.c1[s] = M.comp[2][1];
-    conf_acc[i].r2.c2[s] = M.comp[2][2];
+    conf_acc[0][i].r0.c0[s] = M.comp[0][0];
+    conf_acc[0][i].r0.c1[s] = M.comp[0][1];
+    conf_acc[0][i].r0.c2[s] = M.comp[0][2];
+    conf_acc[0][i].r1.c0[s] = M.comp[1][0];
+    conf_acc[0][i].r1.c1[s] = M.comp[1][1];
+    conf_acc[0][i].r1.c2[s] = M.comp[1][2];
+    conf_acc[0][i].r2.c0[s] = M.comp[2][0];
+    conf_acc[0][i].r2.c1[s] = M.comp[2][1];
+    conf_acc[0][i].r2.c2[s] = M.comp[2][2];
 
-    print_su3_soa(conf_acc,"conf_mod");
+    print_su3_soa(conf_acc[0],"conf_mod");
 
 
 
@@ -113,10 +113,10 @@ int main(){
 #ifdef STOUT_FERMIONS 
     // USO DELLA VERSIONE STOUTATA GIA' PER LO STIRACCHIAMENTO
     // STOUTING...(ALREADY ON DEVICE)
-    stout_wrapper(conf_acc,tstout_conf_acc_arr,0);
+    stout_wrapper(conf_acc[0],tstout_conf_acc_arr,0);
     gconf_as_fermionmatrix = &tstout_conf_acc_arr[8*(STOUT_STEPS-1)];
 #else
-    gconf_as_fermionmatrix = conf_acc;
+    gconf_as_fermionmatrix = conf_acc[0];
 #endif
     
     
@@ -164,7 +164,7 @@ int main(){
       rescale_rational_approximation(approx_md_mother,approx_md,minmaxeig);
     }
     /*
-    fermion_force_soloopenacc(conf_acc,
+    fermion_force_soloopenacc(conf_acc[0],
 #ifdef STOUT_FERMIONS
 			      gstout_conf_acc_arr, auxbis_conf_acc, // parkeggio
 #endif
@@ -177,7 +177,7 @@ int main(){
 
 
 
-    DEOTT_fermion_force_soloopenacc(conf_acc,
+    DEOTT_fermion_force_soloopenacc(conf_acc[0],
 #ifdef STOUT_FERMIONS
 			      gstout_conf_acc_arr, auxbis_conf_acc, // parkeggio
 #endif
@@ -191,10 +191,10 @@ int main(){
 
 #ifdef STOUT_FERMIONS
     // STOUTING...(ALREADY ON DEVICE)
-    stout_wrapper(conf_acc,tstout_conf_acc_arr,0);
+    stout_wrapper(conf_acc[0],tstout_conf_acc_arr,0);
     gconf_as_fermionmatrix = &(tstout_conf_acc_arr[8*(STOUT_STEPS-1)]);
 #else
-    gconf_as_fermionmatrix = conf_acc;
+    gconf_as_fermionmatrix = conf_acc[0];
 #endif
 
 
@@ -237,7 +237,7 @@ int main(){
     printf("eps= %.18lf  DELTA_ACTION= %.18lf\n",eps,action_ferm_fin-action_ferm_in);    
 
 
-  free(conf_acc);
+  free(conf_acc[0]);
   mem_free();
 
   return 0;

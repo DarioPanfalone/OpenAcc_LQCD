@@ -76,14 +76,14 @@ uint32_t hash_settings_explicit(
     hashfun(&hash,(char*)&(mdpar->singlePrecMD),sizeof(int));
     hashfun(&hash,(char*)&(mdpar->expected_max_eigenvalue),
             sizeof(double));
-    // ONLY RELEVANT geometry info
+    // only relevant geometry info
     hashfun(&hash,(char*)&(gpar->gnx),sizeof(int));
     hashfun(&hash,(char*)&(gpar->gny),sizeof(int));
     hashfun(&hash,(char*)&(gpar->gnz),sizeof(int));
     hashfun(&hash,(char*)&(gpar->gnt),sizeof(int));
-    // ONLY RELEVANT mcpar info
+    // only relevant mcpar info
     hashfun(&hash,(char*)&(mcpar->JarzynskiMode),sizeof(int));
-    // ONLY RELEVANT fermion measurements info
+    // only relevant fermion measurements info
     hashfun(&hash,(char*)&(fmpar->measEvery),sizeof(int));
     hashfun(&hash,(char*)&(fmpar->SingleInvNVectors),sizeof(int));
     hashfun(&hash,(char*)&(fmpar->DoubleInvNVectorsChiral),sizeof(int));
@@ -102,10 +102,6 @@ uint32_t hash_settings(){
 
 
 }
-
-
-
-
 
 
 #endif

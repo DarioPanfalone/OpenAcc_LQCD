@@ -836,8 +836,13 @@ void send_lnh_subconf_to_rank(const global_su3_soa *gl_soa_conf,
 
 
     //sending the subconfiguration
-    MPI_Send(target_su3_soa, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE, target_rank , target_rank, MPI_COMM_WORLD); // tag = target_rank
-    // In case we remove the third line, this is possibly the thing to do
+    //
+    // OLD LINE
+    //MPI_Send(target_su3_soa, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE, target_rank , target_rank, MPI_COMM_WORLD); // tag = target_rank
+    
+		MPI_Send(target_su3_soa, 8*sizeof(su3_soa), MPI_CHAR, target_rank, target_rank, MPI_COMM_WORLD); // tag = target_rank
+
+		// In case we remove the third line, this is possibly the thing to do
     //MPI_Send(target_su3_soa, 2*4*(6*2)*LNH_SIZEH,MPI_DOUBLE, rank, 0, MPI_COMM_WORLD);
     //Or maybe do multiple sends in a more complicated way
     // ^^ CHECK
@@ -868,7 +873,11 @@ void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf,
             8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check, target_su3_soa);
 
-    MPI_Recv(target_su3_soa, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE,target_rank,tag,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    // OLD LINE
+		//MPI_Recv(target_su3_soa, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE,target_rank,tag,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+
+		MPI_Recv(target_su3_soa, 8*sizeof(su3_soa), MPI_CHAR, target_rank,tag,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
     recv_loc_subconf_from_buffer(gl_soa_conf,target_su3_soa,target_rank);
 
@@ -876,20 +885,27 @@ void recv_loc_subconf_from_rank(global_su3_soa *gl_soa_conf,
 }
 void send_lnh_subconf_to_master(const su3_soa *lnh_soa_conf, int tag)
 {
-    //sending the subconfiguration
-    if(verbosity_lv > 3) printf("MPI%02d - send_lnh_subconf_to_master(), tag %d\n",
-            devinfo.myrank,tag);
-    MPI_Send(lnh_soa_conf, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE, 0, tag , MPI_COMM_WORLD);
+   //sending the subconfiguration
+      if(verbosity_lv > 3) printf("MPI%02d - send_lnh_subconf_to_master(), tag %d\n",
+           devinfo.myrank,tag);
+		
+		// OLD LINE vvv
+    //MPI_Send(lnh_soa_conf, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE, 0, tag , MPI_COMM_WORLD);
+		
+		// NEW LINE vvv
+		MPI_Send(lnh_soa_conf, 8*sizeof(su3_soa), MPI_CHAR, 0, tag, MPI_COMM_WORLD);
 }
 void receive_lnh_subconf_from_master(su3_soa* lnh_su3_conf)
 {
+		// OLD LINE vvv
+    //MPI_Recv(lnh_su3_conf, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE,0, devinfo.myrank,MPI_COMM_WORLD, MPI_STATUS_IGNORE); // tag = myrank
 
-    MPI_Recv(lnh_su3_conf, 2*4*(6*3)*LNH_SIZEH,MPI_DOUBLE,0,
-            devinfo.myrank,MPI_COMM_WORLD, MPI_STATUS_IGNORE); 
-    // tag = myrank
+		// NEW LINE vvv
+    MPI_Recv(lnh_su3_conf, 8*sizeof(su3_soa), MPI_CHAR, 0, devinfo.myrank,MPI_COMM_WORLD, MPI_STATUS_IGNORE); // tag = myrank
+
     // In case we remove the third line possibly 
     // we have to do something different
-    // ^^ CHECK
+    // ^^ CHECK (with new line actually no)
 }
 
 // chunks, fermions
