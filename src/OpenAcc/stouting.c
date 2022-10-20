@@ -28,7 +28,7 @@ void stout_wrapper(__restrict const su3_soa * const tconf_acc,
 									 __restrict su3_soa * tstout_conf_acc_arr, const int istopo)
 {
 	double max_unitarity_deviation,avg_unitarity_deviation;
-	int stoutsteps=(istopo)?act_params.topo_stout_steps:act_params.stout_steps;
+	int stoutsteps=(istopo & act_params.topo_action)?act_params.topo_stout_steps:act_params.stout_steps;
 		
 	if(verbosity_lv > 1) 
 		printf("MPI%02d:Stouting gauge conf %d times.\n",
