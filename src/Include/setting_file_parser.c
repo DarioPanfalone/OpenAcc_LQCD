@@ -887,7 +887,7 @@ int read_acceptance_numbers(accept_info * acp,char filelines[MAXLINES][MAXLINELE
 	res=0; // nothing can be wrong if these parameters have to be ignored.
 #endif
 
-	if(res!=1) {printf("ERROR: problem in reading acc filenames\n");}
+	if(res==1) {printf("ERROR: problem in reading acc filenames\n");}
     
 	return res;
 }

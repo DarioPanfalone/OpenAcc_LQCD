@@ -310,7 +310,6 @@ int main(int argc, char* argv[]){
 		rep->label[r]=r;
 		init_k(conf_acc[r],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,r);
 		
-		
 #ifdef MULTIDEVICE
     if(devinfo.async_comm_gauge) init_k(&conf_acc[r][8],rep->cr_vec[r],rep->defect_boundary,rep->defect_coordinates,&def,1);
 #endif
@@ -349,10 +348,10 @@ int main(int argc, char* argv[]){
 		#pragma acc update host(aux_conf_acc_f[0:8])
 		#pragma acc update host(auxbis_conf_acc_f[0:8])
 	}
-	
+
 	if(alloc_info.stoutAllocations){
-		int stout_steps = (act_params.stout_steps>act_params.topo_stout_steps?
-											 act_params.stout_steps:act_params.topo_stout_steps);
+		int stout_steps = ((act_params.topo_stout_steps>act_params.stout_steps) & (act_params.topo_action==1)?
+											  act_params.topo_stout_steps:act_params.stout_steps );
 		for (int i = 0; i < stout_steps; i++)
 			init_k(&gstout_conf_acc_arr[8*i],1,0,vec_aux_bound,&def,1);
 		#pragma acc update device(gstout_conf_acc_arr[0:8*stout_steps])
