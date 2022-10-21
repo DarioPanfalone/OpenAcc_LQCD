@@ -2,7 +2,10 @@
 
 # SIMULATION PARAMETERS
 ACTION_TYPE='TLSM'         # must be either 'WILSON' or 'TLSM'
-DO_PARALLEL_TEMPERING=1    # must be either 1==YES or 0==NO
+DO_PARALLEL_TEMPERING=0    # must be either 1==YES or 0==NO
+
+# LOCAL LIB PATH
+my_lib_path=$( echo "${LIBRARY_PATH}" | cut -d ':' -f 1 ) 
 
 # CONFIGURE PARAMETERS SET FOR OPTIMIZED COMPILATION ON M100 (GPU = Nvidia Volta (V100) -> --ta=tesla,cc70) 
 C_comp=pgcc 
@@ -11,9 +14,6 @@ linker_flags="-acc=noautopar -v -O3 -Minfo=all -ta=tesla:cc70 -lmpi -L${MPILIB} 
 CXX_comp=pgc++ 
 CXX_comp_flags=-O3 
 cur_dir="--prefix=${PWD}" 
-
-# LIB PATH
-my_lib_path=$( echo "${LIBRARY_PATH}" | cut -d ':' -f 1 ) 
 
 # LOAD PYTHON2.6
 module unload python
@@ -58,7 +58,10 @@ else # PAR_TEMP is commented
 fi
 
 # CONFIGURE + COMPILE
-make clean 
+# if autotools are not built, build them
+if [ ! -f ../configure ]; then cd ../; autoreconf -f -i; cd -; fi
+# clean everything, configure, then make
+make clean
 ../configure CC="${C_comp}" CFLAGS="${C_comp_flags}" LDFLAGS="${linker_flags}" CXX="${CXX_comp}" CXXFLAGS="${CXX_comp_flags}" ${cur_dir}
 make -j 32
 
