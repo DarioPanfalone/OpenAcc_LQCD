@@ -34,12 +34,15 @@
 // #define TIMING_ALL // if defined many computation times are printed in the output
 
 // WARNING!!!!!! comment the one you don't wanna use and decoment the other one
+// ACHTUNG! Please, use script_compile_Open_StaPLE.sh to comment/uncomment these macros
 
 #define GAUGE_ACT_TLSM
-// #define GAUGE_ACT_WILSON
+//#define GAUGE_ACT_WILSON
 
 // WARNING! uncomment only if you want to perform parallel tempering
-// #define PAR_TEMP
+// ACHTUNG! Please, use script_compile_Open_StaPLE.sh to comment/uncomment this macro
+
+#define PAR_TEMP
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS

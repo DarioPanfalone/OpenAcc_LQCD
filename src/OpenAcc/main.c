@@ -83,9 +83,35 @@ int verbosity_lv;
 int main(int argc, char* argv[]){
  
   gettimeofday ( &(mc_params.start_time), NULL );
-	if (GAUGE_ACTION == 1 ) printf("\n\nRUN WITH TREE-LEVEL SYMANZIK IMPROVED GAUGE ACTION\n\n");
-	else printf("\n\nRUN WITH WILSON GAUGE ACTION\n\n");
+  
+  if(0==devinfo.myrank){
+    printf("****************************************************\n");
+		if (argc!=2) printf("          COMPILATION INFO                        \n");
+    if (argc==2) printf("          PRE INIT - READING SETTING  FILE          \n");
+    if (argc==2) printf("     check which parameter corresponds to what! \n");
+    printf("commit: %s\n", xstr(COMMIT_HASH) );
+    printf("****************************************************\n");
+  }
+  
+  if (GAUGE_ACTION == 1 ){
+    if(0==devinfo.myrank) printf("\nCOMPILED WITH TREE-LEVEL SYMANZIK IMPROVED GAUGE ACTION\n\n");
+  }
+  else{
+    if(0==devinfo.myrank) printf("COMPILED WITH WILSON GAUGE ACTION\n\n");
+  }
 
+#ifdef PAR_TEMP
+  if(0==devinfo.myrank) printf("COMPILED FOR PARALLEL TEMPERING ON BOUNDARY CONDITIONS\n\n");
+#else
+  if(0==devinfo.myrank) printf("COMPILED WITHOUT PARALLEL TEMPERING (1 REPLICA RUN)\n\n");
+#endif
+
+  if(argc!=2){
+    if(0==devinfo.myrank) print_geom_defines();
+    if(0==devinfo.myrank) printf("\n\nERROR! Use mpirun -n <num_tasks> %s input_file to execute the code!\n\n", argv[0]);
+    exit(EXIT_FAILURE);			
+  }
+  
   FILE *hmc_acc_file;
   FILE *swap_acc_file;
   FILE *file_label;
@@ -97,14 +123,6 @@ int main(int argc, char* argv[]){
 	pre_init_multidev1D(&devinfo);
 	gdbhook();
 #endif
-
-  if(0==devinfo.myrank){
-    printf("****************************************************\n");
-    printf("          PRE INIT - READING SETTING  FILE          \n");
-    printf("     check which parameter corresponds to what! \n");
-    printf("commit: %s\n", xstr(COMMIT_HASH) );
-    printf("****************************************************\n");
-  }
 
   int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]);
     

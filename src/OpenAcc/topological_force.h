@@ -1,5 +1,5 @@
-#ifndef TOPO_FORCE_H
-#define TOPO_FORCE_H
+#ifndef TOPOLOGICAL_FORCE_H
+#define TOPOLOGICAL_FORCE_H
 
 #include <stdlib.h>
 #include <stdio.h>
