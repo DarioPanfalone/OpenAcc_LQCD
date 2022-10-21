@@ -19,7 +19,7 @@ cur_dir="--prefix=${PWD}"
 module unload python
 
 # CHECKS
-if [ "${ACTION_TYPE}" == 'TLSM' ] && [ "${ACTION_TYPE}" == 'WILSON' ]; then
+if [ "${ACTION_TYPE}" != 'TLSM' ] && [ "${ACTION_TYPE}" != 'WILSON' ]; then
 	echo "ERROR! ACTION_TYPE set to ${ACTION_TYPE} but must be either WILSON or TLSM"
 	exit 1
 fi
