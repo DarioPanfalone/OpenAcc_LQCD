@@ -1,13 +1,15 @@
-#ifndef PLAQUETTES_C_
-#define PLAQUETTES_C_
+#ifndef FIELD_CORR_C_
+#define FIELD_CORR_C_
 
-#include "./geometry.h"
-#include "./plaquettes.h"
-#include "./su3_utilities.h"
+
+#include "./field_corr.h"
+
+
+
 void calc_field_corr(
         __restrict const su3_soa * const u,
 		__restrict su3_soa * const field_corr,
-		__restrict d_complex * const traccia,
+		__restrict d_complex * const trace,
         const int mu, const int nu, const int ro)
 {
 
@@ -719,3 +721,5 @@ double calc_loc_plaquettes_nnptrick(
   //printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);
   return res_R_p;
 }// closes routine
+
+#endif
