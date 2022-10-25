@@ -337,13 +337,13 @@ static inline void    mat1_minus_conj_mat1_into_mat1_absent_stag_phases(
         )
 {
   
- mat1->r0.c0[idx] = mat1->r0.c0[idx] - conj( mat1->r0.c0[idx] ) ;
- mat1->r0.c1[idx] = mat1->r0.c1[idx] - conj( mat1->r0.c1[idx]) ;
- mat1->r0.c2[idx] = mat1->r0.c2[idx] - conj( mat1->r0.c2[idx]) ;
-
- mat1->r1.c0[idx] = mat1->r1.c0[idx] - conj( mat1->r1.c0[idx]  ) ;
- mat1->r1.c1[idx] = mat1->r1.c1[idx] - conj( mat1->r1.c1[idx] ) ;
- mat1->r1.c2[idx] = mat1->r1.c2[idx] - conj( mat1->r1.c2[idx] ) ;
+ mat1->r0.c0[idx_mat1] = mat1->r0.c0[idx_mat1] - conj( mat1->r0.c0[idx_mat1] ) ;
+ mat1->r0.c1[idx_mat1] = mat1->r0.c1[idx_mat1] - conj( mat1->r0.c1[idx_mat1] ) ;
+ mat1->r0.c2[idx_mat1] = mat1->r0.c2[idx_mat1] - conj( mat1->r0.c2[idx_mat1] ) ;
+					     			           
+ mat1->r1.c0[idx_mat1] = mat1->r1.c0[idx_mat1] - conj( mat1->r1.c0[idx_mat1] ) ;
+ mat1->r1.c1[idx_mat1] = mat1->r1.c1[idx_mat1] - conj( mat1->r1.c1[idx_mat1] ) ;
+ mat1->r1.c2[idx_mat1] = mat1->r1.c2[idx_mat1] - conj( mat1->r1.c2[idx_mat1] ) ;
   
 }
 
@@ -1311,9 +1311,28 @@ static inline void assign_zero_to_su3_soa_component(__restrict su3_soa * const m
   matrix_comp->r2.c2[idx]=0.0+I*0.0;
 }
 
+
 #pragma acc routine seq 
 static inline void assign_su3_soa_to_su3_soa_component(
         __restrict const su3_soa * const matrix_comp_in,
+        __restrict su3_soa * const matrix_comp_out,
+        int idx)
+{
+	
+  matrix_comp_out->r0.c0[idx] =  matrix_comp_in->r0.c0[idx];
+  matrix_comp_out->r0.c1[idx] =  matrix_comp_in->r0.c1[idx];
+  matrix_comp_out->r0.c2[idx] =  matrix_comp_in->r0.c2[idx];
+
+  matrix_comp_out->r1.c0[idx] =  matrix_comp_in->r1.c0[idx];
+  matrix_comp_out->r1.c1[idx] =  matrix_comp_in->r1.c1[idx];
+  matrix_comp_out->r1.c2[idx] =  matrix_comp_in->r1.c2[idx];
+
+}
+
+
+#pragma acc routine seq 
+static inline void assign_su3_soa_to_su3_soa_component_nc(
+        __restrict su3_soa * const matrix_comp_in,
         __restrict su3_soa * const matrix_comp_out,
         int idx)
 {

@@ -14,7 +14,7 @@ void calc_field_corr(
 {
 
   int d0, d1, d2, d3;
-  su3_soa *loc_plaq;
+  su3_soa *const loc_plaq;
   //calcolo le placchette nel piano mu, nu in ogni sito
 #pragma acc kernels present(u) present(field_corr)
 #pragma acc loop independent gang(STAPGANG3)
@@ -46,12 +46,12 @@ void calc_field_corr(
 	  // |       r (D) r+mu
 	  // +---> mu
 
-	  mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpnu,&field_corr[parity],idxh);   // field_corr = A * B
-	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_muC],idxpmu);              // field_corr = field_corr * C 
-	  mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_nuD],idxh);                // field_corr = field_corr * D
+		mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpnu,&field_corr[parity],idxh);   // field_corr = A * B
+		mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_muC],idxpmu);              // field_corr = field_corr * C 
+		mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_nuD],idxh);                // field_corr = field_corr * D
 
-      //copia delle placchette che serve per poi chiudere i correlatori 
-	  assign_su3_soa_to_su3_soa_component(&field_corr[parity], &loc_plaq[parity], idxh) 
+		//copia delle placchette che serve per poi chiudere i correlatori 
+	  assign_su3_soa_to_su3_soa_component_nc(&field_corr[parity], &loc_plaq[parity], idxh); 
 	 
 	    }  // d0
       }  // d1
@@ -60,13 +60,12 @@ void calc_field_corr(
   
   //calcolo dei correlatori al variare della lunghezza 
   int idxh, parity, idxpro,idxmro, dir_roE;
-  su3_soa *loc_plaq;
   su3_soa *field_corr2;
   single_su3 *closed_corr;
-  traccia[nd0/2];
+  
   
   for(int L=1; L<=nd0/2; L++){
-	traccia[L]=0;	
+	trace[L]=0;	
 	//d3 tempo
 	for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 		for(d2=0; d2<nd2; d2++) {
@@ -94,18 +93,18 @@ void calc_field_corr(
 	//idxmro = nnm_openacc[idxh][ro][parity];  // r-ro                       	  
 
 	// FxU (F=fieldcorr, U=link E)     
-	mat1_times_mat2_into_mat3_absent_stag_phases(&field_corr[parity], idxh,&u[dir_roE], idxh, &field_corr[parity], idxh);         
+	/*	mat1_times_mat2_into_mat3_absent_stag_phases(&field_corr[parity], idxh, &u[dir_roE], idxh, &field_corr[parity], idxh);         */
 	// U*FxU 
-	conj_mat1_times_mat2_into_mat2_absent_stag_phases(&u[dir_roE],idxh,&field_corr[parity],idxh);	   	    
+	/*conj_mat1_times_mat2_into_mat2_absent_stag_phases(&u[dir_roE],idxh,&field_corr[parity],idxh);	   	    */
     // chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: U*FxUx(G*-G)  [G=placchetta]
-	mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr); 
+	/* 1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr); */
 		 
 	//assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr2[!parity], idxmro);	
 	//copia fieldcorr nel sito r in fieldcorr2
-	assign_su3_soa_to_su3_soa_component(&field_corr[parity], &field_corr2[parity], idxh);
+	assign_su3_soa_to_su3_soa_component_nc(&field_corr[parity], &field_corr2[parity], idxh);
 
 	
-	traccia[L] = traccia[L] + single_matrix_trace_absent_stag_phase(&closed_corr);
+	trace[L] = trace[L] + single_matrix_trace_absent_stag_phase( closed_corr);
 	
 			}  // d0
       }  // d1
@@ -124,7 +123,7 @@ void calc_field_corr(
 	//idxmro = nnm_openacc[idxh][ro][parity];// r-ro 
 	
 	//assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr2[!parity], idxmro, &field_corr[parity], idxh);	
-	assign_su3_soa_to_su3_soa_component(&field_corr2[parity], &field_corr[parity]_, idxh);	
+	assign_su3_soa_to_su3_soa_component_nc(&field_corr2[parity], &field_corr[parity],idxh);
 	
 			}  // d0
       }  // d1
@@ -137,7 +136,7 @@ void calc_field_corr(
 
 }// closes routine 
 
-
+/*
 
 
 
@@ -721,5 +720,5 @@ double calc_loc_plaquettes_nnptrick(
   //printf("res_R_p %e , mu %d  nu %d\n", res_R_p, mu ,nu);
   return res_R_p;
 }// closes routine
-
+*/
 #endif

@@ -60,13 +60,13 @@ int main(int argc, char* argv[]){
 
 
 
-    if(0==devinfo.myrank){
-        printf("****************************************************\n");
-        printf("          PRE INIT - READING SETTING  FILE          \n");
-        printf("     check which parameter corresponds to what! \n");
-        printf("commit: %s\n", xstr(COMMIT_HASH) );
-        printf("****************************************************\n");
-    }
+    /* if(0==devinfo.myrank){ */
+    /*     printf("****************************************************\n"); */
+    /*     printf("          PRE INIT - READING SETTING  FILE          \n"); */
+    /*     printf("     check which parameter corresponds to what! \n"); */
+    /*     printf("commit: %s\n", xstr(COMMIT_HASH) ); */
+    /*     printf("****************************************************\n"); */
+    /* } */
 
 
     int input_file_read_check = set_global_vars_and_fermions_from_input_file(argv[1]);
@@ -90,18 +90,18 @@ compute_nnp_and_nnm_openacc();
 #pragma acc enter data copyin(nnp_openacc)
 #pragma acc enter data copyin(nnm_openacc)
 
-for(ro=0; ro<4; ro++){
-   for(mu=0 ; mu<3; mu++){
-        for(nu=mu+1; nu<4; nu++){          
+/* for(ro=0; ro<4; ro++){ */
+/*    for(mu=0 ; mu<3; mu++){ */
+/*         for(nu=mu+1; nu<4; nu++){           */
 
-         calc_field_corr(u, field_corr, traccia, mu, nu, ro);
+/*          calc_field_corr(u, field_corr, traccia, mu, nu, ro); */
 
-            for(L=1, L<=nd0/2; L++) {
-                    fprintf(fp,"%d;%d;%d;%d;%lf\n", mu, nu, ro, L, traccia[L]);
-                                        }
-                            }
-                    }   
-        }
+/*             for(L=1, L<=nd0/2; L++) { */
+/*                     fprintf(fp,"%d;%d;%d;%d;%lf\n", mu, nu, ro, L, traccia[L]); */
+/*                                         } */
+/*                             } */
+/*                     }    */
+/*         } */
 
     return 0;
 }
