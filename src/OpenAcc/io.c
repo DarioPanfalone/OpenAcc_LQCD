@@ -392,22 +392,21 @@ int read_su3_soa_ildg_binary(global_su3_soa * conf,
 			return 2;
 		}
 	}else *conf_id_iter = 1;
-
+  
 	// read ildg-binary-data (su3 gauge conf)
 	if(verbosity_lv>2)
 		printf("Reading ildg-binary-data...\n");
 
 
-
+	
 	off_t ibd_start = ildg_header_ends_positions[ildg_binary_data_index];
 
 	fseeko(fg,ibd_start, SEEK_SET);
 	rw_iterate_on_global_sites_lx_xyzt_axis_ordering(
 																									 binaryread_single_su3_into_su3_soa,(void*)conf,fg,0);
 
-
 	fclose(fg);
-
+	
 	return 0;
 
 }
@@ -559,7 +558,7 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(void (*single_element_rw)(
 																											const void* datastruct, FILE * fp, const int scalar_even_mode)
 {
 	// fp must be already in the right position
-
+	
 	const int nx = geom_par.gnx;
 	const int ny = geom_par.gny;
 	const int nz = geom_par.gnz;
@@ -578,7 +577,7 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(void (*single_element_rw)(
 		xlimit = nx;
 		dirlimit = 4;
 	}
-
+  
 	for(t=0;t<nt;t++) for(z=0;z<nz;z++)
 											for(y=0;y<ny;y++) for(xtmp=0;xtmp<xlimit;xtmp++)
 																					{
@@ -605,10 +604,10 @@ void rw_iterate_on_global_sites_lx_xyzt_axis_ordering(void (*single_element_rw)(
 #else
 																						int idxh_machine = snum_acc(d[0],d[1],d[2],d[3]);
 #endif
-																						for(dir=0;dir<dirlimit;dir++){
-																							int dirmachine = geom_par.xyztmap[dir];
+																						for(dir=0;dir<dirlimit;dir++){//printf("proova1\n");
+																							int dirmachine = geom_par.xyztmap[dir];//printf("proova2\n");
 																							single_element_rw(idxh_machine,parity,dirmachine,datastruct,
-																																conf_machine_endianness_disagreement,fp);
+																																conf_machine_endianness_disagreement,fp);//printf("prova3\n");
 																						}
 																					}
 }
@@ -627,7 +626,7 @@ void binaryread_single_su3_into_su3_soa(// machine big endian
 					 __FILE__,__LINE__, idxh_machine, dirmachine,reads );
 		exit(2);
 	}
-
+	//printf("Qui1\n");
 	// fix endiannes
 	int irow,icol;
 	for(irow=0;irow<3;irow++) for(icol=0;icol<3;icol++){
@@ -641,9 +640,9 @@ void binaryread_single_su3_into_su3_soa(// machine big endian
 				m.comp[irow][icol] = re + im*I;
 			}
 
-    }
-	rebuild3row(&m);
-	single_su3_into_global_su3_soa(&conf[2*dirmachine+parity],idxh_machine,&m);
+    }//printf("Qui2\n");
+	rebuild3row(&m);//printf("Qui3:%d\t%d\t%d\n",dirmachine,parity,idxh_machine);
+	single_su3_into_global_su3_soa(&conf[2*dirmachine+parity],idxh_machine,&m);//printf("Qui4\n");
 }
 
 void binarywrite_single_su3_into_su3_soa(const int idxh_machine, const int parity, const int dirmachine, 

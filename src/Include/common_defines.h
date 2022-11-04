@@ -42,7 +42,7 @@
 // WARNING! uncomment only if you want to perform parallel tempering
 // ACHTUNG! Please, use script_compile_Open_StaPLE.sh to comment/uncomment this macro
 
-#define PAR_TEMP
+//#define PAR_TEMP
 
 #define STOUT_FERMIONS
 #ifdef STOUT_FERMIONS

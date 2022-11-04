@@ -78,9 +78,9 @@ void calc_field_corr(
 	  // moltiplico fieldcorr in ogni sito r per la linea di Schwinger lungo ro	
 	  //
 	  //                            r+nu   (B)   r+nu+mu
-	  // 	nu	                        +------>+
+	  // 	nu	                          +------>+
 	  //      ^                         ^       |
-	  //      |                     (A) |	    | (C) 	
+	  //      |                     (A) |	      | (C) 	
 	  //      |                         |  (D)  v   	
 	  //      +---->mu                r + <-----+ r+mu   
 	  //     /                          ^|
