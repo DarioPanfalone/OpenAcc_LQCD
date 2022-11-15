@@ -62,7 +62,7 @@
 
 // definitions outside the main.
 int conf_id_iter;
-int verbosity_lv;
+int verbosity_lv=3;
 //
 #define STAMPA_DEBUG_SU3_SOA(var,dir,idx)\
 	printf("%s[%d], idx %d:\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n(%le,%le)    (%le,%le)    (%le,%le)\n\n", #var, dir, idx, \
@@ -74,10 +74,13 @@ int main(int argc, char **argv){
   
     su3_soa *  u;
     su3_soa *  field_corr;
+		su3_soa *  field_corr_aux;
 		su3_soa * conf_au;
+		single_su3 * closed_corr;
+		single_su3 * loc_plaq_aux;
 		double plq, rect;
 		global_su3_soa * conf;
-    dcomplex_soa * trace ;
+    d_complex * trace ;
 		dcomplex_soa * local_sum;
 		//    int mu, nu, ro, L;
     int allocation_check;
@@ -102,10 +105,18 @@ int main(int argc, char **argv){
 		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&field_corr, ALIGN, 8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check, field_corr );
 #pragma acc enter data create(field_corr[0:8])
-		
-		//		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&trace, ALIGN, nd0*sizeof(d_complex));
-		//		ALLOCCHECK(allocation_check, trace );
-		//pragma acc enter data create(trace[0:nd0])
+		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&field_corr_aux, ALIGN, 8*sizeof(su3_soa));
+		ALLOCCHECK(allocation_check, field_corr_aux );
+#pragma acc enter data create(field_corr_aux[0:8])
+    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&loc_plaq_aux, ALIGN, 8*sizeof(su3_soa));
+		ALLOCCHECK(allocation_check, loc_plaq_aux);
+#pragma acc enter data create(loc_plaq_aux[0:8])
+		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&trace, ALIGN, nd0*sizeof(d_complex));
+		ALLOCCHECK(allocation_check, trace );
+#pragma acc enter data create(trace[0:nd0])
+    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&closed_corr, ALIGN, sizeof(single_su3));
+		ALLOCCHECK(allocation_check, closed_corr);
+#pragma acc enter data create(closed_corr[0:1])
 		
 #ifdef MULTIDEVICE
     pre_init_multidev1D(&devinfo);
@@ -171,36 +182,39 @@ int main(int argc, char **argv){
 		//printf("fatto\n");
 		//prova stampa link
 		int d0=1, d1=11, d2=1, d3=D3_HALO;
-		int mu=1;
+		int muh=1;
 		int idxh = snum_acc(d0, d1, d2, d3);
 		int parity = (d0 + d1 + d2 + d3) % 2;
-		int dir_link = 2*mu + parity;
+		int dir_link = 2*muh + parity;
 		
 	  
 #pragma acc update self(u[0:8])
 		STAMPA_DEBUG_SU3_SOA(u,dir_link,idxh);
-		printf("%d\n",nnp_openacc[idxh][mu][parity]);
 
-		plq = calc_plaquette_soloopenacc(u, conf_au, local_sum);
+			plq = calc_plaquette_soloopenacc(u, conf_au, local_sum);
 		//		rect = calc_rettangolo_soloopenacc(u, conf_au, local_sum);
 		//	printf("rettangolo     : %.18lf\n" ,rect);
 		printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
 
-	#pragma acc exit data delete(nnp_openacc)
-  #pragma acc exit data delete(nnm_openacc)
-		
-/* for(ro=0; ro<4; ro++){ */
-/*    for(mu=0 ; mu<3; mu++){ */
-/*         for(nu=mu+1; nu<4; nu++){           */
-
-/*          calc_field_corr(u, field_corr, traccia, mu, nu, ro); */
-
-/*             for(L=1, L<=nd0/2; L++) { */
-/*                     fprintf(fp,"%d;%d;%d;%d;%lf\n", mu, nu, ro, L, traccia[L]); */
-/*                                         } */
-/*                             } */
-/*                     }    */
-/*         } */
-
-    return 0;
+	  for(int ro=0; ro<4; ro++){ 
+			for(int mu=0 ; mu<3; mu++){ 
+							for(int nu=mu+1; nu<4; nu++){           
+								//								int mu=0, nu=1, ro=2;
+ 					 calc_field_corr(u, field_corr, field_corr_aux, conf_au, trace, closed_corr, mu, nu, ro); 
+#pragma acc update self(trace[0:nd0])
+//#pragma acc update self(field_corr[0:8])
+//STAMPA_DEBUG_SU3_SOA(field_corr,dir_link,idxh);
+					 #pragma acc data copyout(trace[0:nd0])
+					 for(int L=1; L<=nd0/2; L++) { 
+						 printf("%d: %d\t%d\t%d\t(%.18lf,%.18lf)\n", L, ro, mu, nu, creal(trace[L])/GL_SIZE, cimag(trace[L]));
+						 //       fprintf(fp,"%d;%d;%d;%d;%lf\n", mu, nu, ro, L, traccia[L]); 
+                                         } 
+                             } 
+		                   }    
+					   }
+#pragma acc exit data delete(nnp_openacc)
+#pragma acc exit data delete(nnm_openacc)					 
+					 
+					 return 0;
 }
+

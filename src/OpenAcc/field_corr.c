@@ -7,23 +7,24 @@
 
 
 void calc_field_corr(
-        __restrict const su3_soa * const u,
+    __restrict const su3_soa * const u,
 		__restrict su3_soa * const field_corr,
+		__restrict su3_soa * const field_corr_aux,
+		__restrict su3_soa * const loc_plaq,	
 		__restrict d_complex * const trace,
+		__restrict single_su3 * const closed_corr,
         const int mu, const int nu, const int ro)
 {
 
-  int d0, d1, d2, d3;
-  su3_soa *const loc_plaq;
   //calcolo le placchette nel piano mu, nu in ogni sito
-#pragma acc kernels present(u) present(field_corr)
+#pragma acc kernels present(u) present(field_corr) present(loc_plaq) present(nnp_openacc)
 #pragma acc loop independent gang(STAPGANG3)
  //d3=tempo
-  for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+  for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-    for(d2=0; d2<nd2; d2++) {
-      for(d1=0; d1<nd1; d1++) {
-          for(d0=0; d0 < nd0; d0++) {
+    for(int d2=0; d2<nd2; d2++) {
+      for(int d1=0; d1<nd1; d1++) {
+          for(int d0=0; d0 < nd0; d0++) {
 	  int idxh,idxpmu,idxpnu;
 	  int parity;
 	  int dir_muA,dir_nuB;
@@ -59,18 +60,18 @@ void calc_field_corr(
   }  // d3
   
   //calcolo dei correlatori al variare della lunghezza 
-  int idxh, parity, idxpro,idxmro, dir_roE;
-  su3_soa *field_corr2;
-  single_su3 *closed_corr;
-  
-  
-  for(int L=1; L<=nd0/2; L++){
-	trace[L]=0;	
+  int idxh, parity, idxpro,idxmro, dir_roE;    
+
+ for(int L=1; L<=nd0/2; L++){
+	//trace[L]=0;	
 	//d3 tempo
-	for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-		for(d2=0; d2<nd2; d2++) {
-      		for(d1=0; d1<nd1; d1++) {
-				for(d0=0; d0 < nd0; d0++) {
+#pragma acc kernels present(u) present(field_corr) present(loc_plaq) present(field_corr_aux) present(closed_corr) present(trace) present(nnp_openacc)
+#pragma acc loop independent gang(STAPGANG3)
+  	for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+	  	for(int d2=0 ; d2<nd2; d2++) {
+      		for(int d1=0; d1<nd1; d1++) {
+				     for(int d0=0; d0 < nd0; d0++) {
 	
 	idxh = snum_acc(d0,d1,d2,d3);  // r  
 	parity = (d0+d1+d2+d3) % 2; 
@@ -93,46 +94,49 @@ void calc_field_corr(
 	//idxmro = nnm_openacc[idxh][ro][parity];  // r-ro                       	  
 
 	// FxU (F=fieldcorr, U=link E)     
-	/*	mat1_times_mat2_into_mat3_absent_stag_phases(&field_corr[parity], idxh, &u[dir_roE], idxh, &field_corr[parity], idxh);         */
+	mat1_times_mat2_into_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &u[dir_roE], idxh, &field_corr[parity], idxh);
 	// U*FxU 
-	/*conj_mat1_times_mat2_into_mat2_absent_stag_phases(&u[dir_roE],idxh,&field_corr[parity],idxh);	   	    */
-    // chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: U*FxUx(G*-G)  [G=placchetta]
-	/* 1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr); */
+	conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);
+  // chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: U*FxUx(G*-G)  [G=placchetta]
+	mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 		 
 	//assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr2[!parity], idxmro);	
 	//copia fieldcorr nel sito r in fieldcorr2
-	assign_su3_soa_to_su3_soa_component_nc(&field_corr[parity], &field_corr2[parity], idxh);
+	assign_su3_soa_to_su3_soa_component_nc(&field_corr[parity], &field_corr_aux[parity], idxh);
 
 	
-	trace[L] = trace[L] + single_matrix_trace_absent_stag_phase( closed_corr);
-	
-			}  // d0
+	trace[L] = trace[L] + single_matrix_trace_absent_stag_phase(closed_corr);
+ 	
+ 			 }  // d0
       }  // d1
     }  // d2
   }  // d3
 
  // scambio fieldcorr nel sito r con fieldcorr2 
  //d3 tempo
-	for(d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
-		for(d2=0; d2<nd2; d2++) {
-      		for(d1=0; d1<nd1; d1++) {
-				for(d0=0; d0 < nd0; d0++) {
+#pragma acc kernels present(field_corr) present(field_corr_aux)
+#pragma acc loop independent gang(STAPGANG3)
+ for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)	
+ 	  for(int d2=0; d2<nd2; d2++) {
+     		for(int d1=0; d1<nd1; d1++) {
+						for(int d0=0; d0 < nd0; d0++) {
 	
 	idxh = snum_acc(d0,d1,d2,d3);  // r  
 	parity = (d0+d1+d2+d3) % 2; 
 	//idxmro = nnm_openacc[idxh][ro][parity];// r-ro 
 	
 	//assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr2[!parity], idxmro, &field_corr[parity], idxh);	
-	assign_su3_soa_to_su3_soa_component_nc(&field_corr2[parity], &field_corr[parity],idxh);
+	assign_su3_soa_to_su3_soa_component_nc(&field_corr_aux[parity], &field_corr[parity],idxh);
 	
-			}  // d0
-      }  // d1
-    }  // d2
-  }  // d3
+		    	}  // d0
+        }  // d1
+      }  // d2
+    }  // d3
 
 
   
-} //l
+ } //l
 
 }// closes routine 
 
