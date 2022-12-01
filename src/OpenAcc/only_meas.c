@@ -70,6 +70,9 @@ int verbosity_lv=3;
 		creal(var[dir].r1.c0[idx]),cimag(var[dir].r1.c0[idx]),creal(var[dir].r1.c1[idx]),cimag(var[dir].r1.c1[idx]),creal(var[dir].r1.c2[idx]),cimag(var[dir].r1.c2[idx]), \
 		creal(var[dir].r2.c0[idx]),cimag(var[dir].r2.c0[idx]),creal(var[dir].r2.c1[idx]),cimag(var[dir].r2.c1[idx]),creal(var[dir].r2.c2[idx]),cimag(var[dir].r2.c2[idx]));
 //
+#define MAX 100
+int lettura_parole(char file[], char matrice[][MAX]);
+
 int main(int argc, char **argv){
   
     su3_soa *  u;
@@ -85,6 +88,8 @@ int main(int argc, char **argv){
 		//    int mu, nu, ro, L;
     int allocation_check;
 		//		verbosity_lv=6;
+//Variabili per lettura file conf
+		char confs[MAX][MAX], file[MAX],  nome[MAX];
 		FILE *fp;
 #define ALLOCCHECK(control_int,var)  if(control_int != 0 )							\
     printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var);\
@@ -142,7 +147,7 @@ int main(int argc, char **argv){
 		#endif
 		printf("Device Selected : OK \n");
     #endif
-
+		
 
 		if(0==devinfo.myrank) print_geom_defines(); 
 		compute_nnp_and_nnm_openacc();
@@ -172,7 +177,9 @@ int main(int argc, char **argv){
 		//argv[0]="save_conf";
 		printf("Reading conf..\n");
 		//int r=read_su3_soa_ASCII(&conf_rw,"save_conf",&conf_id);
- 		int  r = read_su3_soa_ildg_binary(conf,"save_conf",&conf_id); 
+		int dim=lettura_parole(argv[1], confs);
+		//strcpy(nome, confs[0]);
+		int  r = read_su3_soa_ildg_binary(conf,confs[0],&conf_id); 
 		
 	 	if(0==r){
 		send_lnh_subconf_to_buffer(conf, u, 0);
@@ -197,7 +204,7 @@ int main(int argc, char **argv){
 		//	printf("rettangolo     : %.18lf\n" ,rect);
 		printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
 
-		fp=fopen("corrprova2", "w");
+		fp=fopen(argv[2], "w");
 	  for(int ro=0; ro<4; ro++){ 
 			for(int mu=0 ; mu<3; mu++){ 
 							for(int nu=mu+1; nu<4; nu++){           
@@ -221,3 +228,16 @@ int main(int argc, char **argv){
 					 return 0;
 }
 
+int lettura_parole(char file[], char matrice[][MAX]){
+
+	FILE *fp;
+	int i=0;
+	fp=fopen(file,"r");
+	while(!feof(fp)){
+		fscanf(fp, "%s", matrice[i]);
+		i++;
+	}
+	fclose(fp);
+	return i;
+
+}
