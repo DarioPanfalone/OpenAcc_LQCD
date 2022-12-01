@@ -84,7 +84,8 @@ int main(int argc, char **argv){
 		dcomplex_soa * local_sum;
 		//    int mu, nu, ro, L;
     int allocation_check;
-		//		verbosity_lv=6;		
+		//		verbosity_lv=6;
+		FILE *fp;
 #define ALLOCCHECK(control_int,var)  if(control_int != 0 )							\
     printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var);\
     else if(verbosity_lv > 2) printf("MPI%02d: \tAllocation of %s : OK , %p\n",\
@@ -196,6 +197,7 @@ int main(int argc, char **argv){
 		//	printf("rettangolo     : %.18lf\n" ,rect);
 		printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
 
+		fp=fopen("corrprova2", "w");
 	  for(int ro=0; ro<4; ro++){ 
 			for(int mu=0 ; mu<3; mu++){ 
 							for(int nu=mu+1; nu<4; nu++){           
@@ -204,14 +206,15 @@ int main(int argc, char **argv){
 #pragma acc update self(trace[0:nd0])
 //#pragma acc update self(field_corr[0:8])
 //STAMPA_DEBUG_SU3_SOA(field_corr,dir_link,idxh);
-					 #pragma acc data copyout(trace[0:nd0])
+#pragma acc data copyout(trace[0:nd0])					
 					 for(int L=1; L<=nd0/2; L++) { 
-						 printf("%d: %d\t%d\t%d\t(%.18lf,%.18lf)\n", L, ro, mu, nu, creal(trace[L])/GL_SIZE, cimag(trace[L]));
+						 fprintf(fp,"%d: %d\t%d\t%d\t(%.18lf,%.18lf)\n", L, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE, cimag(trace[L]));
 						 //       fprintf(fp,"%d;%d;%d;%d;%lf\n", mu, nu, ro, L, traccia[L]); 
                                          } 
                              } 
 		                   }    
 					   }
+		fclose(fp);
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)					 
 					 

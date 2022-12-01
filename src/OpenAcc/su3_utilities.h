@@ -241,7 +241,7 @@ static inline void mat1_times_mat2_into_mat1_absent_stag_phases(__restrict su3_s
   mat1->r1.c2[idx_mat1] = mat1_10 * mat2_02 + mat1_11 * mat2_12 
 		+ mat1_12 * mat2_22 ;
 }
-#pragma acc routine seq // mat3 = mat1 * (mat2*-mat2)
+#pragma acc routine seq // mat3 = mat1 * (mat2*-mat2-1/3trace(mat2*-mat2)
 static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases(
 																																											 __restrict const su3_soa * const mat1, int idx_mat1,
 																																											 __restrict const su3_soa * const mat2, int idx_mat2,
@@ -273,18 +273,18 @@ static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_
 	B22 = conj( ( B00 * B11 ) - ( B10 * B01) ) - (( B00 * B11 ) - ( B10 * B01)) ;
 
 	// MAT3 = A * B = MAT1 * MAT3^DAG 0=1, 1,2 2=3
-	mat3->comp[0][0] = A00 * B00 + A01 * B10 + A02 * B20;
-	mat3->comp[0][1] = A00 * B01 + A01 * B11 + A02 * B21;
-	mat3->comp[0][2] = A00 * B02 + A01 * B12 + A02 * B22;
-	mat3->comp[1][0] = A10 * B00 + A11 * B10 + A12 * B20;
-	mat3->comp[1][1] = A10 * B01 + A11 * B11 + A12 * B21;
-	mat3->comp[1][2] = A10 * B02 + A11 * B12 + A12 * B22;
-	mat3->comp[2][0] = A20 * B00 + A21 * B10 + A22 * B20;
-	mat3->comp[2][1] = A20 * B01 + A21 * B11 + A22 * B21;
-	mat3->comp[2][2] = A20 * B02 + A21 * B12 + A22 * B22;
+	mat3->comp[0][0] = A00 * (B00 - 1.0/3.0*(B00 + B11 + B22)) + A01 * (B10 - 1.0/3.0*(B00 + B11 + B22)) + A02 * (B20 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[0][1] = A00 * (B01 - 1.0/3.0*(B00 + B11 + B22)) + A01 * (B11 - 1.0/3.0*(B00 + B11 + B22)) + A02 * (B21 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[0][2] = A00 * (B02 - 1.0/3.0*(B00 + B11 + B22)) + A01 * (B12 - 1.0/3.0*(B00 + B11 + B22)) + A02 * (B22 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[1][0] = A10 * (B00 - 1.0/3.0*(B00 + B11 + B22)) + A11 * (B10 - 1.0/3.0*(B00 + B11 + B22)) + A12 * (B20 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[1][1] = A10 * (B01 - 1.0/3.0*(B00 + B11 + B22)) + A11 * (B11 - 1.0/3.0*(B00 + B11 + B22)) + A12 * (B21 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[1][2] = A10 * (B02 - 1.0/3.0*(B00 + B11 + B22)) + A11 * (B12 - 1.0/3.0*(B00 + B11 + B22)) + A12 * (B22 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[2][0] = A20 * (B00 - 1.0/3.0*(B00 + B11 + B22)) + A21 * (B10 - 1.0/3.0*(B00 + B11 + B22)) + A22 * (B20 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[2][1] = A20 * (B01 - 1.0/3.0*(B00 + B11 + B22)) + A21 * (B11 - 1.0/3.0*(B00 + B11 + B22)) + A22 * (B21 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[2][2] = A20 * (B02 - 1.0/3.0*(B00 + B11 + B22)) + A21 * (B12 - 1.0/3.0*(B00 + B11 + B22)) + A22 * (B22 - 1.0/3.0*(B00 + B11 + B22));
 
 }
-#pragma acc routine seq // mat3 = mat1 * (mat2*-mat2)
+#pragma acc routine seq // mat3 = mat1 * (mat2*-mat2 - 1/3trace(mat2*-mat2)
 static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(
 																	__restrict su3_soa * const mat1, int idx_mat1,
 																	__restrict su3_soa * const mat2, int idx_mat2,
@@ -315,17 +315,17 @@ static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_
   B12 = conj( ( B20 * B01 ) - ( B00 * B21) ) - (( B20 * B01 ) - ( B00 * B21));
   B22 = conj( ( B00 * B11 ) - ( B10 * B01) ) - (( B00 * B11 ) - ( B10 * B01)) ;
 
-  // MAT3 = A * B = MAT1 * MAT3^DAG 0=1, 1,2 2=3
-  mat3->comp[0][0] = A00 * B00 + A01 * B10 + A02 * B20;
-  mat3->comp[0][1] = A00 * B01 + A01 * B11 + A02 * B21;
-  mat3->comp[0][2] = A00 * B02 + A01 * B12 + A02 * B22;
-  mat3->comp[1][0] = A10 * B00 + A11 * B10 + A12 * B20;
-  mat3->comp[1][1] = A10 * B01 + A11 * B11 + A12 * B21;
-  mat3->comp[1][2] = A10 * B02 + A11 * B12 + A12 * B22;
-  mat3->comp[2][0] = A20 * B00 + A21 * B10 + A22 * B20;
-  mat3->comp[2][1] = A20 * B01 + A21 * B11 + A22 * B21;
-  mat3->comp[2][2] = A20 * B02 + A21 * B12 + A22 * B22;
-
+	// MAT3 = A * B = MAT1 * MAT3^DAG 0=1, 1,2 2=3
+	mat3->comp[0][0] = A00 * (B00 - 1.0/3.0*(B00 + B11 + B22)) + A01 * (B10 - 1.0/3.0*(B00 + B11 + B22)) + A02 * (B20 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[0][1] = A00 * (B01 - 1.0/3.0*(B00 + B11 + B22)) + A01 * (B11 - 1.0/3.0*(B00 + B11 + B22)) + A02 * (B21 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[0][2] = A00 * (B02 - 1.0/3.0*(B00 + B11 + B22)) + A01 * (B12 - 1.0/3.0*(B00 + B11 + B22)) + A02 * (B22 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[1][0] = A10 * (B00 - 1.0/3.0*(B00 + B11 + B22)) + A11 * (B10 - 1.0/3.0*(B00 + B11 + B22)) + A12 * (B20 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[1][1] = A10 * (B01 - 1.0/3.0*(B00 + B11 + B22)) + A11 * (B11 - 1.0/3.0*(B00 + B11 + B22)) + A12 * (B21 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[1][2] = A10 * (B02 - 1.0/3.0*(B00 + B11 + B22)) + A11 * (B12 - 1.0/3.0*(B00 + B11 + B22)) + A12 * (B22 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[2][0] = A20 * (B00 - 1.0/3.0*(B00 + B11 + B22)) + A21 * (B10 - 1.0/3.0*(B00 + B11 + B22)) + A22 * (B20 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[2][1] = A20 * (B01 - 1.0/3.0*(B00 + B11 + B22)) + A21 * (B11 - 1.0/3.0*(B00 + B11 + B22)) + A22 * (B21 - 1.0/3.0*(B00 + B11 + B22));
+	mat3->comp[2][2] = A20 * (B02 - 1.0/3.0*(B00 + B11 + B22)) + A21 * (B12 - 1.0/3.0*(B00 + B11 + B22)) + A22 * (B22 - 1.0/3.0*(B00 + B11 + B22)); 
+	
 }
 #pragma acc routine seq
 static inline void mat1_times_conj_mat2_into_single_mat3_absent_stag_phases(

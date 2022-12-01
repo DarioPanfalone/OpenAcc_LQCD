@@ -97,7 +97,7 @@ void calc_field_corr(
 	mat1_times_mat2_into_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &u[dir_roE], idxh, &field_corr[parity], idxh);
 	// U*FxU 
 	conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);
-  // chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: U*FxUx(G*-G)  [G=placchetta]
+  // chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: U*FxUx(G*-G-1/3trace(G*-G))  [G=placchetta]
 	mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 		 
 	//assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr2[!parity], idxmro);	
