@@ -361,13 +361,13 @@ int read_su3_soa_ildg_binary(global_su3_soa * conf,
 	char * strfnt = strstr(ildg_format_str,"<lt>");
 	int nx_r,ny_r,nz_r,nt_r;
 	int allfound = 1;
-	if(strfnx!= NULL){sscanf(strfnx," <lx> %d </lx> ",&nx_r);printf("nx: %d\n",nx_r);}
+	if(strfnx!= NULL){sscanf(strfnx," <lx> %d </lx> ",&nx_r);/*printf("nx: %d\n",nx_r);*/}
 	else{allfound = 0;}
-	if(strfny!= NULL){sscanf(strfny," <ly> %d </ly> ",&ny_r);printf("ny: %d\n",ny_r);}
+	if(strfny!= NULL){sscanf(strfny," <ly> %d </ly> ",&ny_r);/*printf("ny: %d\n",ny_r);*/}
 	else{allfound = 0;}
-	if(strfnz!= NULL){sscanf(strfnz," <lz> %d </lz> ",&nz_r);printf("nz: %d\n",nz_r);}
+	if(strfnz!= NULL){sscanf(strfnz," <lz> %d </lz> ",&nz_r);/*printf("nz: %d\n",nz_r);*/}
 	else{allfound = 0;}
-	if(strfnt!= NULL){sscanf(strfnt," <lt> %d </lt> ",&nt_r);printf("nt: %d\n",nt_r);}
+	if(strfnt!= NULL){sscanf(strfnt," <lt> %d </lt> ",&nt_r);/*printf("nt: %d\n",nt_r);*/}
 	else{allfound = 0;}
 	if(!allfound){
 		printf("Error, %s:%d : lx,ly,lz or lt not found in \"ildg-format\"\n",

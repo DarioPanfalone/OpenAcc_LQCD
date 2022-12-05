@@ -62,7 +62,7 @@ void calc_field_corr(
   //calcolo dei correlatori al variare della lunghezza 
   int idxh, parity, idxpro,idxmro, dir_roE;    
 
- for(int L=1; L<=nd0/2; L++){
+ for(int L=1; L<=13; L++){
 	//trace[L]=0;	
 	//d3 tempo
 #pragma acc kernels present(u) present(field_corr) present(loc_plaq) present(field_corr_aux) present(closed_corr) present(trace) present(nnp_openacc)

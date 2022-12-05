@@ -62,7 +62,7 @@
 
 // definitions outside the main.
 int conf_id_iter;
-int verbosity_lv=3;
+int verbosity_lv;
 //
 #define ALLOCCHECK(control_int,var)  if(control_int != 0 )              \
 		printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var);\
@@ -75,7 +75,7 @@ int verbosity_lv=3;
 		creal(var[dir].r1.c0[idx]),cimag(var[dir].r1.c0[idx]),creal(var[dir].r1.c1[idx]),cimag(var[dir].r1.c1[idx]),creal(var[dir].r1.c2[idx]),cimag(var[dir].r1.c2[idx]), \
 		creal(var[dir].r2.c0[idx]),cimag(var[dir].r2.c0[idx]),creal(var[dir].r2.c1[idx]),cimag(var[dir].r2.c1[idx]),creal(var[dir].r2.c2[idx]),cimag(var[dir].r2.c2[idx]));
 //
-#define MAX 100
+#define MAX 140
 int lettura_parole(char file[], char matrice[][MAX]);
 
 int main(int argc, char **argv){
@@ -97,6 +97,7 @@ int main(int argc, char **argv){
 //Variabili per lettura file conf
 		char confs[MAX][MAX], file[MAX],  nome[MAX];
 		FILE *fp;
+		FILE *fd;
 		
 	 	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf, ALIGN,8*sizeof(global_su3_soa));
 		ALLOCCHECK(allocation_check, conf);
@@ -110,9 +111,9 @@ int main(int argc, char **argv){
 		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_staple, ALIGN, 8*sizeof(su3_soa));
 		ALLOCCHECK(allocation_check, aux_staple);
 #pragma acc enter data create(aux_staple[0:8])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&local_sum, ALIGN, 2*sizeof(dcomplex_soa));
+		/*allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&local_sum, ALIGN, 2*sizeof(dcomplex_soa));
 		ALLOCCHECK(allocation_check, local_sum) ;
-#pragma acc enter data create(local_sum[0:2])
+#pragma acc enter data create(local_sum[0:2])*/
 		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&field_corr, ALIGN, 8*sizeof(su3_soa)); 
     ALLOCCHECK(allocation_check, field_corr );
 #pragma acc enter data create(field_corr[0:8])
@@ -169,7 +170,7 @@ int main(int argc, char **argv){
 		geom_par.gny = GL_N1 ;
 		geom_par.gnz = GL_N2 ;
 		geom_par.gnt = GL_N3 ;
-
+		
 	 	geom_par.xmap = 0 ;
 	 	geom_par.ymap = 1 ;
 		geom_par.zmap = 2 ;
@@ -184,60 +185,76 @@ int main(int argc, char **argv){
 		//int r=read_su3_soa_ASCII(&conf_rw,"save_conf",&conf_id);
 		int dim=lettura_parole(argv[1], confs);
 		//strcpy(nome, confs[0]);
-
-		int  r = read_su3_soa_ildg_binary(conf,confs[0],&conf_id); 
+		int maxstep=20, L;
+		fp=fopen(argv[2], "a"); //file dove scrivere le misure parall
+		fd=fopen(argv[3], "a"); //file dove scrivere le misure perp 
+		for(int coolstep=1; coolstep<=maxstep; coolstep++){
+			for(int conf_num=0; conf_num<dim; conf_num++){
+				
+				int  r = read_su3_soa_ildg_binary(conf,confs[conf_num],&conf_id); 
 		
-	 	if(0==r){
-		send_lnh_subconf_to_buffer(conf, u, 0);
+				if(0==r){
+					send_lnh_subconf_to_buffer(conf, u, 0);
 #pragma acc update device(u[0:8])
-		    } else {
-			printf("Some error in reading occured\n");
-		}
-		//printf("fatto\n");
-		//prova stampa link
-	int d0=1, d1=11, d2=1, d3=D3_HALO;
-		int muh=1;
-		int idxh = snum_acc(d0, d1, d2, d3);
-		int parity = (d0 + d1 + d2 + d3) % 2;
-		int dir_link = 2*muh + parity;
-		//cooling
-		int maxstep=10;
-		fp=fopen(argv[2], "w");
-	for(int coolstep=0; coolstep<maxstep; coolstep++){
-
-			cool_conf(u ,u, aux_staple);
+				} else {
+					printf("Some error in reading occured\n");
+				}
+				//printf("fatto\n");
+							//prova stampa link
+				/*				int d0=1, d1=11, d2=1, d3=D3_HALO;
+				int muh=1;
+				int idxh = snum_acc(d0, d1, d2, d3);
+				int parity = (d0 + d1 + d2 + d3) % 2;
+				int dir_link = 2*muh + parity;*/ 
+				//cooling
+				//int maxstep=5, L=6;
+				//fp=fopen(argv[2], "w");
+				//for(int coolstep=1; coolstep<=maxstep; coolstep++){
+				
+				cool_conf(u ,u, aux_staple);
 	  
 #pragma acc update self(u[0:8])
-			STAMPA_DEBUG_SU3_SOA(u,dir_link,idxh);
-
-			plq = calc_plaquette_soloopenacc(u, conf_au, local_sum);
-		//		rect = calc_rettangolo_soloopenacc(u, conf_au, local_sum);
-		//	printf("rettangolo     : %.18lf\n" ,rect);
-		printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
-
-		//	fp=fopen(argv[2], "w");
-	  for(int ro=0; ro<4; ro++){ 
-			for(int mu=0 ; mu<3; mu++){ 
-							for(int nu=mu+1; nu<4; nu++){           
-								//								int mu=0, nu=1, ro=2;
- 					 calc_field_corr(u, field_corr, field_corr_aux, conf_au, trace, closed_corr, mu, nu, ro); 
+				//		STAMPA_DEBUG_SU3_SOA(u,dir_link,idxh);
+				
+				//plq = calc_plaquette_soloopenacc(u, conf_au, local_sum);
+				//		rect = calc_rettangolo_soloopenacc(u, conf_au, local_sum);
+				//	printf("rettangolo     : %.18lf\n" ,rect);
+				//printf("%d\n", conf_num);
+				//printf("Plaquette %d : %.18lf\n" ,conf_num, plq/GL_SIZE/3.0/6.0);
+				
+				//	fp=fopen(argv[2], "w");
+				for(int ro=0; ro<4; ro++){ 
+					for(int mu=0 ; mu<3; mu++){ 
+						for(int nu=mu+1; nu<4; nu++){           
+							//								int mu=0, nu=1, ro=2;
+							calc_field_corr(u, field_corr, field_corr_aux, conf_au, trace, closed_corr, mu, nu, ro); 
 #pragma acc update self(trace[0:nd0])
 //#pragma acc update self(field_corr[0:8])
 //STAMPA_DEBUG_SU3_SOA(field_corr,dir_link,idxh);
 #pragma acc data copyout(trace[0:nd0])					
-					 for(int L=1; L<=nd0/2; L++) { 
-						 fprintf(fp," %d\t%d: %d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
+							//for(int L=1; L<=nd0/2; L++) { 
+							//if(coolstep>=15){
+							if(ro==mu || ro==nu){
+								L=6;
+								fprintf(fp,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
+							} else {
+								L=13;
+								fprintf(fd,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
+							}
 						 //       fprintf(fp,"%d;%d;%d;%d;%lf\n", mu, nu, ro, L, traccia[L]); 
-                                         } 
-                             } 
-		                   }    
-					   }
-	}
+             //                            } 
+						} 
+					}    
+				}
+			}
+			printf("\nfine step %d", coolstep);
+		}
 		fclose(fp);
+		fclose(fd);
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)					 
-					 
-					 return 0;
+		
+		return 0;
 }
 
 int lettura_parole(char file[], char matrice[][MAX]){
