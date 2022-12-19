@@ -194,7 +194,7 @@ int main(int argc, char **argv){
 	int dim=lettura_parole(argv[1], confs); //leggo i nomi dei file delle conf da input
 		//strcpy(nome, confs[0]);
 	int maxstep=1, L, confmax=dim;
-	fp=fopen(argv[2], "a"); //file dove scrivere le misure
+	fp=fopen(argv[2], "w"); //file dove scrivere le misure
 	
 	for(int conf_num=0; conf_num<confmax; conf_num++){
 				
@@ -224,7 +224,7 @@ int main(int argc, char **argv){
 				for(int mu=0 ; mu<3; mu++){ 
 					for(int nu=mu+1; nu<4; nu++){           
 							//								int mu=0, nu=1, ro=2;
-						calc_field_corr(conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
+						calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
 		 
 						//#pragma acc update device(corr[0:nd0])
 						//#pragma acc update self(corr[0:nd0])
