@@ -79,227 +79,187 @@ int verbosity_lv;
 int lettura_parole(char file[], char matrice[][MAX]);
 
 int main(int argc, char **argv){
-  
+	
 	su3_soa *  conf_acc;
 	su3_soa *  conf_to_use;
 	su3_soa *  aux_conf_acc;
 	su3_soa *  field_corr;
 	su3_soa *  field_corr_aux;
-		su3_soa * conf_au;
-		su3_soa * aux_staple;
-		single_su3 * closed_corr;
-		single_su3 * loc_plaq_aux;
-		double plq, rect;
-		global_su3_soa * conf;
-    d_complex * trace ;
-		dcomplex_soa * local_sum;
+	su3_soa * conf_au;
+	su3_soa * aux_staple;
+	single_su3 * closed_corr;
+	single_su3 * loc_plaq_aux;
+	double plq, rect;
+	global_su3_soa * conf;
+	d_complex * corr ;
+	dcomplex_soa * local_sum;
 		//    int mu, nu, ro, L;
-    int allocation_check;
+	int allocation_check;
 		//		verbosity_lv=6;
 //Variabili per lettura file conf
-		char confs[MAX][MAX], file[MAX],  nome[MAX];
-		FILE *fp;
-		FILE *fd;
+	char confs[MAX][MAX], file[MAX],  nome[MAX];
+	FILE *fp;
+	FILE *fd;
 		
-	 	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf, ALIGN,8*sizeof(global_su3_soa));
-		ALLOCCHECK(allocation_check, conf);
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf, ALIGN,8*sizeof(global_su3_soa));
+	ALLOCCHECK(allocation_check, conf);
 #pragma acc enter data create(conf[0:8])
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa)); 
-		ALLOCCHECK(allocation_check, conf_acc);
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_acc, ALIGN, 8*sizeof(su3_soa)); 
+	ALLOCCHECK(allocation_check, conf_acc);
 #pragma acc enter data create(conf_acc[0:8])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
-		ALLOCCHECK(allocation_check, aux_conf_acc);
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
+	ALLOCCHECK(allocation_check, aux_conf_acc);
 #pragma acc enter data create(aux_conf_acc[0:8])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_to_use, ALIGN, 8*sizeof(su3_soa));
-		ALLOCCHECK(allocation_check, conf_to_use);
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_to_use, ALIGN, 8*sizeof(su3_soa));
+	ALLOCCHECK(allocation_check, conf_to_use);
 #pragma acc enter data create(conf_to_use[0:8])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_au, ALIGN, 8*sizeof(su3_soa));
-		ALLOCCHECK(allocation_check, conf_au);
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&conf_au, ALIGN, 8*sizeof(su3_soa));
+	ALLOCCHECK(allocation_check, conf_au);
 #pragma acc enter data create(conf_au[0:8])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_staple, ALIGN, 8*sizeof(su3_soa));
-		ALLOCCHECK(allocation_check, aux_staple);
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_staple, ALIGN, 8*sizeof(su3_soa));
+	ALLOCCHECK(allocation_check, aux_staple);
 #pragma acc enter data create(aux_staple[0:8])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&local_sum, ALIGN, 2*sizeof(dcomplex_soa));
-		ALLOCCHECK(allocation_check, local_sum) ;
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&local_sum, ALIGN, 2*sizeof(dcomplex_soa));
+	ALLOCCHECK(allocation_check, local_sum) ;
 #pragma acc enter data create(local_sum[0:2])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&field_corr, ALIGN, 8*sizeof(su3_soa)); 
-    ALLOCCHECK(allocation_check, field_corr );
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&field_corr, ALIGN, 8*sizeof(su3_soa)); 
+	ALLOCCHECK(allocation_check, field_corr );
 #pragma acc enter data create(field_corr[0:8])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&field_corr_aux, ALIGN, 8*sizeof(su3_soa));
-		ALLOCCHECK(allocation_check, field_corr_aux );
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&field_corr_aux, ALIGN, 8*sizeof(su3_soa));
+	ALLOCCHECK(allocation_check, field_corr_aux );
 #pragma acc enter data create(field_corr_aux[0:8])
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&loc_plaq_aux, ALIGN, 8*sizeof(su3_soa));
-		ALLOCCHECK(allocation_check, loc_plaq_aux);
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&loc_plaq_aux, ALIGN, 8*sizeof(su3_soa));
+	ALLOCCHECK(allocation_check, loc_plaq_aux);
 #pragma acc enter data create(loc_plaq_aux[0:8])
-		allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&trace, ALIGN, nd0*sizeof(d_complex));
-		ALLOCCHECK(allocation_check, trace );
-#pragma acc enter data create(trace[0:nd0])
-    allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&closed_corr, ALIGN, sizeof(single_su3));
-		ALLOCCHECK(allocation_check, closed_corr);
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&corr, ALIGN, nd0*sizeof(d_complex));
+	ALLOCCHECK(allocation_check, corr);
+#pragma acc enter data create(corr[0:nd0])
+	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&closed_corr, ALIGN, sizeof(single_su3));
+	ALLOCCHECK(allocation_check, closed_corr);
 #pragma acc enter data create(closed_corr[0:1])
 		
 #ifdef MULTIDEVICE
-    pre_init_multidev1D(&devinfo);
-    gdbhook();
+	pre_init_multidev1D(&devinfo);
+	gdbhook();
 #endif
 		
 #ifndef __GNUC__
 		//////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
 		// NVIDIA GPUs
-		acc_device_t my_device_type = acc_device_nvidia;
+	acc_device_t my_device_type = acc_device_nvidia;
 		// AMD GPUs
 		// acc_device_t my_device_type = acc_device_radeon;
 		// Intel XeonPhi
 		//acc_device_t my_device_type = acc_device_xeonphi;
 		// Select device ID
-		printf("MPI%02d: Selecting device.\n", devinfo.myrank);
-		#ifdef MULTIDEVICE
-		select_init_acc_device(my_device_type, (devinfo.single_dev_choice + devinfo.myrank)%devinfo.proc_per_node);
+	printf("MPI%02d: Selecting device.\n", devinfo.myrank);
+#ifdef MULTIDEVICE
+	select_init_acc_device(my_device_type, (devinfo.single_dev_choice + devinfo.myrank)%devinfo.proc_per_node);
 		// select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
-		#else
-		select_init_acc_device(my_device_type, devinfo.single_dev_choice);
-		#endif
-		printf("Device Selected : OK \n");
-    #endif
+#else
+	select_init_acc_device(my_device_type, devinfo.single_dev_choice);
+#endif
+	printf("Device Selected : OK \n");
+#endif
 		
 
-		if(0==devinfo.myrank) print_geom_defines(); 
-		compute_nnp_and_nnm_openacc();
+	if(0==devinfo.myrank) print_geom_defines(); 
+	compute_nnp_and_nnm_openacc();
 #pragma acc enter data copyin(nnp_openacc) 
 #pragma acc enter data copyin(nnm_openacc) 
 
-		printf("HARDCODED LATTICE DIMENSIONS:\n");
-		printf("GL_N0: %d\n", GL_N0) ;
-		printf("GL_N1: %d\n", GL_N1) ;
-		printf("GL_N2: %d\n", GL_N2) ;
-		printf("GL_N3: %d\n", GL_N3) ;
+	printf("HARDCODED LATTICE DIMENSIONS:\n");
+	printf("GL_N0: %d\n", GL_N0) ;
+	printf("GL_N1: %d\n", GL_N1) ;
+	printf("GL_N2: %d\n", GL_N2) ;
+	printf("GL_N3: %d\n", GL_N3) ;
+	
+	geom_par.gnx = GL_N0 ;
+	geom_par.gny = GL_N1 ;
+	geom_par.gnz = GL_N2 ;
+	geom_par.gnt = GL_N3 ;
 		
-		geom_par.gnx = GL_N0 ;
-		geom_par.gny = GL_N1 ;
-		geom_par.gnz = GL_N2 ;
-		geom_par.gnt = GL_N3 ;
-		
-	 	geom_par.xmap = 0 ;
-	 	geom_par.ymap = 1 ;
-		geom_par.zmap = 2 ;
-		geom_par.tmap = 3 ;
+	geom_par.xmap = 0 ;
+	geom_par.ymap = 1 ;
+	geom_par.zmap = 2 ;
+	geom_par.tmap = 3 ;
 
-		set_geom_glv(&geom_par);
+	set_geom_glv(&geom_par);
 		
  	//	global_su3_soa * conf_rw = (global_su3_soa * ) malloc(8*sizeof(global_su3_soa));	
- 		int conf_id;
+	int conf_id;
 		//argv[0]="save_conf";
 		//printf("Reading conf..\n");
 		//int r=read_su3_soa_ASCII(&conf_rw,"save_conf",&conf_id);
-		int dim=lettura_parole(argv[1], confs);
+	int dim=lettura_parole(argv[1], confs); //leggo i nomi dei file delle conf da input
 		//strcpy(nome, confs[0]);
-		int maxstep=20, L, confmax=139;
-		fp=fopen(argv[2], "w"); //file dove scrivere le misure
-
-		for(int conf_num=0; conf_num<confmax; conf_num++){
+	int maxstep=1, L, confmax=dim;
+	fp=fopen(argv[2], "a"); //file dove scrivere le misure
+	
+	for(int conf_num=0; conf_num<confmax; conf_num++){
 				
-				int  r = read_su3_soa_ildg_binary(conf,confs[conf_num],&conf_id); 
+		int  r = read_su3_soa_ildg_binary(conf,confs[conf_num],&conf_id); 
 		
-				if(0==r){
-					send_lnh_subconf_to_buffer(conf, conf_acc, 0);
+		if(0==r){
+			send_lnh_subconf_to_buffer(conf, conf_acc, 0);
 #pragma acc update device(conf_acc[0:8])
-				} else {
-					printf("Some error in reading occured\n");
-				}
-				//printf("fatto\n");
-							//prova stampa link
-				/* 				int d0=1, d1=11, d2=1, d3=D3_HALO;
-				int muh=1;
-				int idxh = snum_acc(d0, d1, d2, d3);
-				int parity = (d0 + d1 + d2 + d3) % 2;
-				int dir_link = 2*muh + parity;*/ 
-				//cooling
-				//int maxstep=5, L=6;
-				//fp=fopen(argv[2], "w");
-				//for(int coolstep=1; coolstep<=maxstep; coolstep++){
-				
-				//cool_conf(u ,u, aux_staple);
-				/*
-#pragma acc update self(conf_acc[0:8])
-						STAMPA_DEBUG_SU3_SOA(conf_acc,dir_link,idxh);
-				
-				plq = calc_plaquette_soloopenacc(conf_acc, conf_au, local_sum);
-				printf("Plaquette: %.18lf\n" , plq/GL_SIZE/3.0/6.0);
+		} else {
+			printf("Some error in reading occured\n");
+		}
+		//prova stampa link
 
-				cool_conf(conf_acc, aux_conf_acc, aux_staple);
-				
-#pragma acc update self(aux_conf_acc[0:8])
-				STAMPA_DEBUG_SU3_SOA(aux_conf_acc,dir_link,idxh);
-				plq=0.0;
-				plq = calc_plaquette_soloopenacc(aux_conf_acc, conf_au, local_sum);
-				printf("Plaquette: %.18lf\n" , plq/GL_SIZE/3.0/6.0);
-
+		for(int coolstep=1; coolstep<=maxstep; coolstep++){
+					
+			if(coolstep==1){
 				conf_to_use=(su3_soa*)conf_acc;
-#pragma acc update self(conf_to_use[0:8])
-				STAMPA_DEBUG_SU3_SOA(conf_to_use,dir_link,idxh);
-				cool_conf(conf_to_use, aux_conf_acc, aux_staple);
-
-				plq=0.0;
-				plq = calc_plaquette_soloopenacc(conf_to_use, conf_au, local_sum);
-				printf("Plaquette: %.18lf\n" , plq/GL_SIZE/3.0/6.0);
-#pragma acc update self(aux_conf_acc[0:8])
-				STAMPA_DEBUG_SU3_SOA(aux_conf_acc,dir_link,idxh);
+			}else{
 				conf_to_use=(su3_soa*)aux_conf_acc;
-				cool_conf(conf_to_use, aux_conf_acc, aux_staple);
-#pragma acc update self(aux_conf_acc[0:8])
-STAMPA_DEBUG_SU3_SOA(aux_conf_acc,dir_link,idxh);*/
-				
-				for(int coolstep=1; coolstep<=maxstep; coolstep++){
+						
+			}
 					
-					if(coolstep==1){
-						conf_to_use=(su3_soa*)conf_acc;
-					}else{
-						conf_to_use=(su3_soa*)aux_conf_acc;
-					}
-					cool_conf(conf_to_use, aux_conf_acc, aux_staple);
-					//#pragma acc update self(aux_conf_acc[0:8])
-					//	STAMPA_DEBUG_SU3_SOA(aux_conf_acc,dir_link,idxh);
-					
-					double  D_paral = 0.0, D_perp = 0.0;
-					for(int ro=0; ro<4; ro++){ 
-						for(int mu=0 ; mu<3; mu++){ 
-							for(int nu=mu+1; nu<4; nu++){           
+		 	cool_conf(conf_to_use, aux_conf_acc, aux_staple);
+			
+			double  D_paral = 0.0, D_perp = 0.0;
+			for(int ro=0; ro<4; ro++){ 
+				for(int mu=0 ; mu<3; mu++){ 
+					for(int nu=mu+1; nu<4; nu++){           
 							//								int mu=0, nu=1, ro=2;
-								calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, conf_au, trace, closed_corr, mu, nu, ro); 
-#pragma acc update self(trace[0:nd0])
-								//#pragma acc update self(field_corr[0:8])
-								//STAMPA_DEBUG_SU3_SOA(field_corr,dir_link,idxh);
-#pragma acc data copyout(trace[0:nd0])					
-								//for(int L=1; L<=nd0/2; L++) { 
-							//if(coolstep>=15){
-								if(ro==mu || ro==nu){
+						calc_field_corr(conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
+		 
+						//#pragma acc update device(corr[0:nd0])
+						//#pragma acc update self(corr[0:nd0])
+						//#pragma acc data copyout(trace[0:nd0])					
+						//for(int L=1; L<=nd0/2; L++) { 
+						//fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
+									//if(coolstep>=15){
+									if(ro==mu || ro==nu){
 									L=6;
-									D_paral = D_paral + 0.5*creal(trace[L])/(GL_SIZE*(double)3);
+									D_paral = D_paral + 0.5*corr[L]/(GL_SIZE*(double)3);
 									//fprintf(fp,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
 								} else {
 									L=13;
-									D_perp = D_perp +  0.5*creal(trace[L])/(GL_SIZE*(double)3);
-										//fprintf(fd,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
-								}
-		 						//                            } 
-							} 
-						}    
-					}
-					fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral,  D_perp);
+									D_perp = D_perp +  0.5*corr[L]/(GL_SIZE*(double)3);
+									//fprintf(fd,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
+									}
+					} 
+				} 
+			}
+			
+			fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral,  D_perp);
 					// printf("\nfine step %d\n", coolstep);
-				}
-				printf("\nfine conf %d\n", conf_num);
 		}
-		fclose(fp);
-	  
+		printf("\nfine conf %d\n", conf_num);
+	}
+	fclose(fp);
+	
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)					 
 		
-		return 0;
+	return 0;
 }
 
 int lettura_parole(char file[], char matrice[][MAX]){
-
+	
 	FILE *fp;
 	int i=0;
 	fp=fopen(file,"r");
