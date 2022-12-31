@@ -33,23 +33,24 @@ void calc_field_corr(
 	  idxh = snum_acc(d0,d1,d2,d3);  // r  
 	  parity = (d0+d1+d2+d3) % 2;  
 	  
-	  dir_muA = 2*nu +  parity; 
-	  dir_muC = 2*nu + !parity;  
-	  idxpnu = nnp_openacc[idxh][mu][parity];// r+nu
+	  dir_muA = 2*mu +  parity; 
+	  dir_muC = 2*mu + !parity;  
+	  idxpmu = nnp_openacc[idxh][mu][parity];// r+mu
 	    
-	  dir_nuB = 2*mu + !parity;
-	  dir_nuD = 2*mu +  parity;
-	  idxpmu = nnp_openacc[idxh][nu][parity];// r+mu
-	  //      r+nu (B) r+mu+nu
-	  //          +--->+
-	  // nu       ^    |
-	  // ^    (A) |    v (C)
-	  // |        +<---+
-	  // |       r (D) r+mu
+	  dir_nuB = 2*nu + !parity;
+	  dir_nuD = 2*nu +  parity;
+	  idxpnu = nnp_openacc[idxh][nu][parity];// r+nu
+
+		//      r+nu (C) r+mu+nu
+	  //          +<---+
+	  // nu       |    ^
+	  // ^    (D) v    | (B)
+	  // |        +--->+
+	  // |       r (A) r+mu
 	  // +---> mu
 
-		mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpnu,&field_corr[parity],idxh);   // field_corr = A * B
-		mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_muC],idxpmu);              // field_corr = field_corr * C 
+		mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&field_corr[parity],idxh);   // field_corr = A * B
+		mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_muC],idxpnu);              // field_corr = field_corr * C 
 		mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_nuD],idxh);                // field_corr = field_corr * D
 		
 		//copia delle placchette che serve per poi chiudere i correlatori 
@@ -65,7 +66,7 @@ void calc_field_corr(
 	for(int L=1; L<=nd0/2; L++){
 		corr[L]=0;
 	//d3 tempo
-#pragma acc kernels present(u) present(field_corr) present(loc_plaq) present(field_corr_aux) present(closed_corr) present(trace_local) present(nnp_openacc)
+#pragma acc kernels present(u) present(field_corr) present(loc_plaq) present(field_corr_aux) present(closed_corr) present(trace_local) present(nnp_openacc) present(nnm_openacc)
 #pragma acc loop independent gang(STAPGANG3)
 		for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
@@ -78,36 +79,34 @@ void calc_field_corr(
 	 
 	  // moltiplico fieldcorr in ogni sito r per la linea di Schwinger lungo ro	
 	  //
-	  //                            r+nu   (B)   r+nu+mu
-	  // 	nu	                          +------>+
-	  //      ^                         ^       |
-	  //      |                     (A) |	      | (C) 	
-	  //      |                         |  (D)  v   	
-	  //      +---->mu                r + <-----+ r+mu   
-	  //     /                          ^|
-	  //    v                      (E*) |v (E)
-	  //    ro	 	                	+
-	  //                     		 r+ro 
+	  //                            r+nu       r+nu+mu
+	  // 	nu	                          +<------+
+	  //      ^                         |       ^
+	  //      |                         |	      |  	
+	  //      |                         v       |   	
+	  //      +---->mu                r + ----->+ r+mu   
+	  //     /                          |^
+	  //    v                      (E)  v| (E^(dagger))
+	  //    ro	 	                	    +
+	  //                     		       r+ro 
 	     
-							int dir_roE = 2*ro + !parity; 
+							int dir_roE = 2*ro + parity; 
 							int idxpro = nnp_openacc[idxh][ro][parity];  // r+ro
-	//idxmro = nnm_openacc[idxh][ro][parity];  // r-ro                       	  
+							int idxmro = nnm_openacc[idxh][ro][parity];  // r-ro
 
-	// FxU (F=fieldcorr, U=link E)     
+// FxU (F=fieldcorr, U=link E)     
 							mat1_times_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity], idxh, &u[dir_roE], idxh);
-	// U*FxU 
+// U^(dagger)xFxU 
 							conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);
- //Per fare la prova con la configuazione di identità: U*FxUxG*
-							//					mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
-							
 
- // chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: U*FxUx(G*-G-1/3trace(G*-G))  [G=placchetta]
+//Per fare la prova con la configuazione di identità: U^(dagger)xFxUxG^(dagger)
+//mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
+
+//copia field_corr in field_corr_aux 
+							assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr_aux[parity], idxh);
+
+//chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: U^(dagger)xFxUx(G^(dagger)-G-1/3trace(G^(dagger)-G)) [G=placchetta]
 				 			mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
-	
-	//assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr2[!parity], idxmro);	
-	//copia fieldcorr nel sito r in fieldcorr2
-							
-							assign_su3_soa_to_su3_soa_component_nc(&field_corr[parity], &field_corr_aux[parity], idxh);
 
 						  d_complex tmp_aux =  single_matrix_trace_absent_stag_phase(closed_corr);
 							trace_local[parity].c[idxh] = creal(tmp_aux) + cimag(tmp_aux)*I ;
@@ -131,10 +130,10 @@ void calc_field_corr(
 		//	printf("\n%d\t%d\t%d\t%d\t%lf", mu, nu, ro, L, res_R_p);
 		corr[L] = res_R_p;
 
- // scambio fieldcorr nel sito r con fieldcorr2 
 
+		//traslazione 
 //d3 tempo
-#pragma acc kernels present(field_corr) present(field_corr_aux)
+#pragma acc kernels present(field_corr) present(field_corr_aux) present(nnm_openacc) 
 #pragma acc loop independent gang(STAPGANG3)
 		for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)	
@@ -144,10 +143,9 @@ void calc_field_corr(
 						
 						int idxh = snum_acc(d0,d1,d2,d3);  // r  
 						int parity = (d0+d1+d2+d3) % 2; 
-	//idxmro = nnm_openacc[idxh][ro][parity];// r-ro 
-	
-	//assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr2[!parity], idxmro, &field_corr[parity], idxh);	
-						assign_su3_soa_to_su3_soa_component_nc(&field_corr_aux[parity], &field_corr[parity], idxh);
+						int idxmro = nnm_openacc[idxh][ro][parity];// r-ro
+						
+						assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr_aux[!parity], idxmro, &field_corr[parity], idxh);	
 	
 		    	}  // d0
         }  // d1
@@ -159,5 +157,64 @@ void calc_field_corr(
  } //l
 
 }// closes routine 
+
+
+
+
+/*
+void random_gauge_transformation(__restrict su3_soa * const u, single_su3 * m,  __restrict su3_soa * const m_soa){
+	//Genero per ogni sito del reticolo un elemento G di SU(3) random
+#pragma acc kernels present(m) present(m_soa)
+#pragma acc loop independent gang(STAPGANG3)
+	for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+		for(int d2=0; d2<nd2; d2++) {
+			for(int d1=0; d1<nd1; d1++) {
+				for(int d0=0; d0 < nd0; d0++) {
+					
+				 int idxh = snum_acc(d0,d1,d2,d3);  // r
+					int parity = (d0+d1+d2+d3) % 2;
+
+					int factor=2.500000e-01;
+					generate_random_su3(&m, factor);
+					single_su3_into_su3_soa_nc(&m_soa[parity], idxh, &m);
+					
+				}  // d0
+			}  // d1
+		}  // d2
+	}  // d3
+
+	//Faccio la trasformazione di gauge: G(n)xU(n)xG*(n+mu) dove U è il link n-->n+mu
+
+#pragma acc kernels present(m_soa) present(u) present(npp_openacc)	
+#pragma acc loop independent gang(STAPGANG3)
+	for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+#pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
+		for(int d2=0; d2<nd2; d2++) {
+			for(int d1=0; d1<nd1; d1++) {
+				for(int d0=0; d0 < nd0; d0++) {
+					
+					int idxh = snum_acc(d0,d1,d2,d3);  // r
+					int parity = (d0+d1+d2+d3) % 2;
+					
+				  for(int mu=0; mu<4; mu++){
+						
+						int dir_link = 2*mu + parity;
+						int idxpmu = nnp_openacc[idxh][mu][parity]; // r+mu
+						//GxU
+						mat1_times_mat2_into_mat2_absent_stag_phases_nc(&m_soa[parity], idxh, &u[dir_link], idxh);
+						//GxUxG*
+						mat1_times_conj_mat2_into_mat1_nc(&u[dir_link], idxh, &m_soa[!parity], idxpmu);
+					}	
+				}  // d0
+			}  // d1
+		}  // d2
+	}  // d3
+																								
+	
+}
+*/
+
+
 
 #endif
