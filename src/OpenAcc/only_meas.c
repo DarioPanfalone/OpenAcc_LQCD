@@ -90,7 +90,7 @@ int main(int argc, char **argv){
 	su3_soa * m_soa;
 	single_su3 * closed_corr;
 	single_su3 * loc_plaq_aux;
-	single_su3 * m; //elemento random di SU(3)
+	//single_su3 * m; //elemento random di SU(3)
 	double plq, rect;
 	global_su3_soa * conf;
 	d_complex * corr ;
@@ -142,9 +142,9 @@ int main(int argc, char **argv){
 	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&closed_corr, ALIGN, sizeof(single_su3));
 	ALLOCCHECK(allocation_check, closed_corr);
 #pragma acc enter data create(closed_corr[0:1])
-  allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&m, ALIGN, sizeof(single_su3));
+	/*  allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&m, ALIGN, sizeof(single_su3));
 	ALLOCCHECK(allocation_check, m);
-#pragma acc enter data create(m[0:1])
+	#pragma acc enter data create(m[0:1])*/
 #ifdef MULTIDEVICE
 	pre_init_multidev1D(&devinfo);
 	gdbhook();
@@ -200,7 +200,7 @@ int main(int argc, char **argv){
 		//int r=read_su3_soa_ASCII(&conf_rw,"save_conf",&conf_id);
 	int dim=lettura_parole(argv[1], confs); //leggo i nomi dei file delle conf da input
 		//strcpy(nome, confs[0]);
-	int maxstep=15, L, confmax=dim;
+	int maxstep=1, L, confmax=dim;
 	fp=fopen(argv[2], "w"); //file dove scrivere le misure
 	
 	for(int conf_num=0; conf_num<confmax; conf_num++){
@@ -220,12 +220,12 @@ int main(int argc, char **argv){
 		plq = calc_plaquette_soloopenacc(conf_acc, conf_au, local_sum);
 	  printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
 		//#pragma acc update device(conf_acc[0:8])
-		random_gauge_transformation( conf_acc, m, m_soa);
+		random_gauge_transformation( conf_acc, m_soa);
 		plq = calc_plaquette_soloopenacc(conf_acc, conf_au, local_sum);
 		printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
-		*/
-		for(int coolstep=0; coolstep<=maxstep; coolstep++){
-
+		*/ 	
+		for(int coolstep=0; coolstep<maxstep; coolstep++){
+			/*
 			if(coolstep==0){
 				aux_conf_acc=(su3_soa*)conf_acc;
 			}
@@ -236,7 +236,7 @@ int main(int argc, char **argv){
 				conf_to_use=(su3_soa*)aux_conf_acc;
 				cool_conf(conf_to_use, aux_conf_acc, aux_staple);		
 			}
-			
+			*/
 			//	cool_conf(conf_to_use, aux_conf_acc, aux_staple);
 			
 			double  D_paral = 0.0, D_perp = 0.0;
@@ -244,17 +244,17 @@ int main(int argc, char **argv){
 				for(int mu=0 ; mu<3; mu++){ 
 					for(int nu=mu+1; nu<4; nu++){           
 							//								int mu=0, nu=1, ro=2;
-						calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
+						calc_field_corr(conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
 		 
 						//for(int L=1; L<=nd0/2; L++) { 
 						//fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
 									//if(coolstep>=15){
 									if(ro==mu || ro==nu){
-									L=6;
+									L=5;
 									D_paral = D_paral + 0.5*corr[L]/(GL_SIZE*(double)3);
 									//fprintf(fp,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
 								} else {
-									L=13;
+									L=11;
 									D_perp = D_perp +  0.5*corr[L]/(GL_SIZE*(double)3);
 									//fprintf(fd,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
 									}
