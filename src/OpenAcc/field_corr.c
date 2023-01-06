@@ -95,9 +95,9 @@ void calc_field_corr(
 							//int idxmro = nnm_openacc[idxh][ro][parity];  // r-ro
 
 // FxU (F=fieldcorr, U=link E)     
-							mat1_times_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity], idxh, &u[dir_roE], idxh);
+							mat1_times_conj_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity], idxh, &u[dir_roE], idxh);
 // U^(dagger)xFxU 
-							conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);
+							mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);
 
 //Per fare la prova con la configuazione di identità: U^(dagger)xFxUxG^(dagger)
 //							mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);

@@ -701,7 +701,6 @@ static inline void conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(
 
 
 #pragma acc routine seq //
-#pragma acc routine seq
 static inline void mat1_times_mat2_into_mat2_absent_stag_phases_nc(
 																																	 __restrict su3_soa * const mat1, int idx_mat1,
 																																	 __restrict su3_soa * const mat2, int idx_mat2)
