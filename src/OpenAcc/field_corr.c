@@ -86,7 +86,7 @@ void calc_field_corr(
 	  //      |                         v       |   	
 	  //      +---->mu                r + ----->+ r+mu   
 	  //     /                          |^
-	  //    v                      (E)  v| (E^(dagger))
+	  //    v             (E(^dagger))  v| (E)
 	  //    ro	 	                	    +
 	  //                     		       r+ro 
 	     
@@ -94,18 +94,18 @@ void calc_field_corr(
 							int idxpro = nnp_openacc[idxh][ro][parity];  // r+ro
 							//int idxmro = nnm_openacc[idxh][ro][parity];  // r-ro
 
-// FxU (F=fieldcorr, U=link E)     
+// FxU^(dagger) (F=fieldcorr, U=link E)     
 							mat1_times_conj_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity], idxh, &u[dir_roE], idxh);
-// U^(dagger)xFxU 
+// UxFxU^(dagger) 
 							mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);
 
-//Per fare la prova con la configuazione di identità: U^(dagger)xFxUxG^(dagger)
+//Per fare la prova con la configuazione di identità: UxFxU^(dagger)xG^(dagger)
 //							mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 
 //copia field_corr in field_corr_aux 
 							assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr_aux[parity], idxh);
 
-//chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: U^(dagger)xFxUx(G^(dagger)-G-1/3trace(G^(dagger)-G)) [G=placchetta]
+//chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: UxFxU^(dagger)x(G^(dagger)-G-1/3trace(G^(dagger)-G)) [G=placchetta]
 				 			mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 
 						  d_complex tmp_aux =  single_matrix_trace_absent_stag_phase(closed_corr);

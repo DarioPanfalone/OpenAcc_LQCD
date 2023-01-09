@@ -200,7 +200,7 @@ int main(int argc, char **argv){
 		//int r=read_su3_soa_ASCII(&conf_rw,"save_conf",&conf_id);
 	int dim=lettura_parole(argv[1], confs); //leggo i nomi dei file delle conf da input
 		//strcpy(nome, confs[0]);
-	int maxstep=1, L, confmax=dim;
+	int maxstep=1,  L, confmax=dim;
 	fp=fopen(argv[2], "w"); //file dove scrivere le misure
 	
 	for(int conf_num=0; conf_num<confmax; conf_num++){
@@ -226,7 +226,7 @@ int main(int argc, char **argv){
 		*/ 	
 		for(int coolstep=0; coolstep<maxstep; coolstep++){
 			/*
-			if(coolstep==0){
+			  (coolstep==0){
 				aux_conf_acc=(su3_soa*)conf_acc;
 			}
 			else if(coolstep==1){
@@ -244,7 +244,7 @@ int main(int argc, char **argv){
 				for(int mu=0 ; mu<3; mu++){ 
 					for(int nu=mu+1; nu<4; nu++){           
 							//								int mu=0, nu=1, ro=2;
-						calc_field_corr(conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
+						calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
 		 
 						//for(int L=1; L<=nd0/2; L++) { 
 						//fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
@@ -262,7 +262,7 @@ int main(int argc, char **argv){
 				} 
 			}
 			
-			fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral,  D_perp);
+			fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral/(double)4,  D_perp/(double)4);
 					// printf("\nfine step %d\n", coolstep);
 					}
 		printf("\nfine conf %d\n", conf_num);
