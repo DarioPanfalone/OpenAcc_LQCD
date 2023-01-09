@@ -244,7 +244,7 @@ int main(int argc, char **argv){
 				for(int mu=0 ; mu<3; mu++){ 
 					for(int nu=mu+1; nu<4; nu++){           
 							//								int mu=0, nu=1, ro=2;
-						calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
+						calc_field_corr(conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
 		 
 						//for(int L=1; L<=nd0/2; L++) { 
 						//fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
@@ -261,8 +261,8 @@ int main(int argc, char **argv){
 					} 
 				} 
 			}
-			
-			fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral/(double)4,  D_perp/(double)4);
+			printf("%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));
+			fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));
 					// printf("\nfine step %d\n", coolstep);
 					}
 		printf("\nfine conf %d\n", conf_num);
