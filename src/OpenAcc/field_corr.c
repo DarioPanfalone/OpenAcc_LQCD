@@ -7,7 +7,7 @@
 
 
 void calc_field_corr(
-										 __restrict const su3_soa * const u,
+										 __restrict su3_soa * const u,
 										 __restrict su3_soa * const field_corr,
 										 __restrict su3_soa * const field_corr_aux,
 										 __restrict su3_soa * const loc_plaq,	
@@ -49,9 +49,9 @@ void calc_field_corr(
 	  // |       r (A) r+mu
 	  // +---> mu
 
-		mat1_times_mat2_into_mat3_absent_stag_phases(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&field_corr[parity],idxh);   // field_corr = A * B
-		mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_muC],idxpnu);              // field_corr = field_corr * C 
-		mat1_times_conj_mat2_into_mat1_absent_stag_phases(&field_corr[parity],idxh,&u[dir_nuD],idxh);                // field_corr = field_corr * D
+		mat1_times_mat2_into_mat3_absent_stag_phases_nc(&u[dir_muA],idxh,&u[dir_nuB],idxpmu,&field_corr[parity],idxh);   // field_corr = A * B
+		mat1_times_conj_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity],idxh,&u[dir_muC],idxpnu);              // field_corr = field_corr * C 
+		mat1_times_conj_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity],idxh,&u[dir_nuD],idxh);                // field_corr = field_corr * D
 		
 		//copia delle placchette che serve per poi chiudere i correlatori 
 	  assign_su3_soa_to_su3_soa_component_nc(&field_corr[parity], &loc_plaq[parity], idxh); 
@@ -154,14 +154,14 @@ void calc_field_corr(
     }  // d3
 
 
-  
- } //l
+	}//l
 
 }// closes routine 
 
-/*
+
 void random_gauge_transformation(
 																 __restrict su3_soa * const u,
+																 __restrict su3_soa * const u_new,
 																 __restrict su3_soa * const m_soa)
 {
 
@@ -178,9 +178,9 @@ void random_gauge_transformation(
 					int parity = (d0+d1+d2+d3) % 2;
 
 					int factor=2.500000e-01;
-					single_su3 * aux;
+					single_su3 aux;
 					generate_random_su3(&aux, factor);
-					single_su3_into_su3_soa_nc(&m_soa[parity], idxh, &aux);
+					single_gl3_into_su3_soa(&m_soa[parity], idxh, &aux);
 					
 				}  // d0
 			}  // d1
@@ -188,37 +188,35 @@ void random_gauge_transformation(
 	}  // d3
 
 	//Faccio la trasformazione di gauge: G(n)xU(n)xG*(n+mu) dove U è il link n-->n+mu
- for(int mu=0; mu<4; mu++){
-
 #pragma acc kernels present(m_soa) present(u) present(nnp_openacc)	
 #pragma acc loop independent gang(STAPGANG3)
-	for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
+		for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
-		for(int d2=0; d2<nd2; d2++) {
-			for(int d1=0; d1<nd1; d1++) {
-				for(int d0=0; d0 < nd0; d0++) {
+			for(int d2=0; d2<nd2; d2++) {
+				for(int d1=0; d1<nd1; d1++) {
+					for(int d0=0; d0 < nd0; d0++) {
 					
-					int idxh = snum_acc(d0,d1,d2,d3);  // r
-					int parity = (d0+d1+d2+d3) % 2;
-					int dir_link, idxpmu;
-
-				  //for(int mu=0; mu<4; mu++){
+						int idxh = snum_acc(d0,d1,d2,d3);  // r
+						int parity = (d0+d1+d2+d3) % 2;
+						int dir_link, idxpmu;
 						
-					  dir_link = 2*mu + parity;
-						idxpmu = nnp_openacc[idxh][mu][parity]; // r+mu
-						//GxU
-						mat1_times_mat2_into_mat2_absent_stag_phases_nc(&m_soa[parity], idxh, &u[dir_link], idxh);
-						//GxUxG*
-						mat1_times_conj_mat2_into_mat1_absent_stag_phases_nc(&u[dir_link], idxh, &m_soa[!parity], idxpmu);
-						//}
+						for(int mu=0; mu<4; mu++){
 					
-				}  // d0
-			}  // d1
-		}  // d2
-	}  // d3
-	
- }
- }*/
+						dir_link = 2*mu + parity;
+						idxpmu = nnp_openacc[idxh][mu][parity]; // r+mu
+						//U_(new) = GxU
+						mat1_times_mat2_into_mat3_absent_stag_phases_nc(&m_soa[parity], idxh, &u[dir_link], idxh, &u_new[dir_link], idxh);
+						//U_(new) = U_(new)xG*
+						mat1_times_conj_mat2_into_mat1_absent_stag_phases_nc(&u_new[dir_link], idxh, &m_soa[!parity], idxpmu);
+
+						}
+					
+					}  // d0
+				}  // d1
+			}  // d2
+		}  // d3
+} 
+
 
 
 

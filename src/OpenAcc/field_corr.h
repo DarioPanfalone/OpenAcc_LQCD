@@ -15,5 +15,6 @@ void calc_field_corr(
 										 const int mu, const int nu, const int ro);
 
 void random_gauge_transformation(__restrict su3_soa * const u,
+																 __restrict su3_soa * const u_new,
 																 __restrict su3_soa * const m_soa);
 #endif

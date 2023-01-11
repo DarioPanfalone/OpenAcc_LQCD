@@ -158,7 +158,7 @@ static inline void    mat1_times_mat2_into_mat3_absent_stag_phases(
 
 #pragma acc routine seq
 static inline void mat1_times_mat2_into_mat3_absent_stag_phases_nc(__restrict su3_soa * const mat1,  const int idx_mat1,
-																																   __restrict const su3_soa * const mat2,  const int idx_mat2,
+																																   __restrict su3_soa * const mat2,  const int idx_mat2,
 																															   	 __restrict su3_soa * const mat3,   const int idx_mat3)
 {
   d_complex mat1_00 = mat1->r0.c0[idx_mat1];

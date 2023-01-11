@@ -214,18 +214,19 @@ int main(int argc, char **argv){
 			printf("Some error in reading occured\n");
 		}
 		//prova stampa link
-		/*
+
 #pragma acc update self(conf_acc[0:8])
 
 		plq = calc_plaquette_soloopenacc(conf_acc, conf_au, local_sum);
 	  printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
 		//#pragma acc update device(conf_acc[0:8])
-		random_gauge_transformation( conf_acc, m_soa);
-		plq = calc_plaquette_soloopenacc(conf_acc, conf_au, local_sum);
+		random_gauge_transformation(conf_acc,aux_conf_acc, m_soa);
+		//#pragma acc update self(aux_conf_acc[0:8])
+		plq = calc_plaquette_soloopenacc(aux_conf_acc, conf_au, local_sum);
 		printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
-		*/ 	
+		/*  
 		for(int coolstep=0; coolstep<maxstep; coolstep++){
-			/*
+		  	
 			  (coolstep==0){
 				aux_conf_acc=(su3_soa*)conf_acc;
 			}
@@ -235,10 +236,9 @@ int main(int argc, char **argv){
 			}else{
 				conf_to_use=(su3_soa*)aux_conf_acc;
 				cool_conf(conf_to_use, aux_conf_acc, aux_staple);		
-			}
-			*/
+				}
 			//	cool_conf(conf_to_use, aux_conf_acc, aux_staple);
-			
+		  	
 			double  D_paral = 0.0, D_perp = 0.0;
 			for(int ro=0; ro<4; ro++){ 
 				for(int mu=0 ; mu<3; mu++){ 
@@ -265,7 +265,7 @@ int main(int argc, char **argv){
 			fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));
 					// printf("\nfine step %d\n", coolstep);
 					}
-		printf("\nfine conf %d\n", conf_num);
+					printf("\nfine conf %d\n", conf_num);*/
 	}
 	fclose(fp);
 	
