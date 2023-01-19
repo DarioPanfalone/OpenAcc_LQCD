@@ -100,7 +100,7 @@ void calc_field_corr(
 							conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);
 
 //Per fare la prova con la configuazione di identità: UxFxU^(dagger)xG^(dagger)
-//							mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
+//						mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 
 //copia field_corr in field_corr_aux 
 							assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr_aux[parity], idxh);
@@ -129,8 +129,7 @@ void calc_field_corr(
 		}
 		//	printf("\n%d\t%d\t%d\t%d\t%lf", mu, nu, ro, L, res_R_p);
 		corr[L] = res_R_p;
-
-
+				
 		//traslazione 
 //d3 tempo
 #pragma acc kernels present(field_corr) present(field_corr_aux)
@@ -143,7 +142,7 @@ void calc_field_corr(
 						
 						int idxh = snum_acc(d0,d1,d2,d3);  // r  
 						int parity = (d0+d1+d2+d3) % 2; 
-						int idxmro = nnm_openacc[idxh][ro][parity];// r-ro
+						//int idxmro = nnm_openacc[idxh][ro][parity];// r-ro
 						int idxpro = nnp_openacc[idxh][ro][parity];  // r+ro
 						
 						assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr_aux[!parity], idxpro, &field_corr[parity], idxh);	
@@ -152,7 +151,7 @@ void calc_field_corr(
         }  // d1
       }  // d2
     }  // d3
-
+	  
 
 	}//l
 

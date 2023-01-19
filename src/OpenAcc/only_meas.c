@@ -223,7 +223,8 @@ int main(int argc, char **argv){
 		double factor = 0.1;
 		generate_Conf_cold(conf_random, factor);
 #pragma acc update device(conf_random[0:8])
-	//verifica della funzione che fa la trasformazione 
+		/*
+		//verifica della funzione che fa la trasformazione 
 		int d0=1, d1=11, d2=1, d3=D3_HALO;
 		int mu=1;
 		int idxh = snum_acc(d0, d1, d2, d3);
@@ -240,7 +241,7 @@ int main(int argc, char **argv){
 		  STAMPA_DEBUG_SU3_SOA(aux_conf_acc,dir_link,idxh);
 		 plq = calc_plaquette_soloopenacc(aux_conf_acc, conf_au, local_sum);
 		printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
-	
+		*/	
 		for(int coolstep=0; coolstep<maxstep; coolstep++){
 			/*  	
 			  (coolstep==0){
@@ -265,11 +266,11 @@ int main(int argc, char **argv){
 						//fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
 									//if(coolstep>=15){
 									if(ro==mu || ro==nu){
-									L=5;
+									L=0;
 									D_paral = D_paral + 0.5*corr[L]/(GL_SIZE*(double)3);
 									//fprintf(fp,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
 								} else {
-									L=11;
+									L=0;
 									D_perp = D_perp +  0.5*corr[L]/(GL_SIZE*(double)3);
 									//fprintf(fd,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
 									}
@@ -292,11 +293,11 @@ int main(int argc, char **argv){
             //fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
                   //if(coolstep>=15){
                   if(ro==mu || ro==nu){
-                  L=5;
+                  L=0;
                   D_paral = D_paral + 0.5*corr[L]/(GL_SIZE*(double)3);
                   //fprintf(fp,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
                 } else {
-                  L=11;
+                  L=0;
                   D_perp = D_perp +  0.5*corr[L]/(GL_SIZE*(double)3);
                   //fprintf(fd,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
                   }
