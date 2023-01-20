@@ -95,9 +95,9 @@ void calc_field_corr(
 							//int idxmro = nnm_openacc[idxh][ro][parity];  // r-ro
 
 // FxU (F=fieldcorr, U=link E)     
-							mat1_times_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity], idxh, &u[dir_roE], idxh);
+							mat1_times_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity], idxh, &u[dir_roE], idxh);//
 // U^(dagger)xFxU
-							conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);
+							conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);//
 
 //Per fare la prova con la configuazione di identità: UxFxU^(dagger)xG^(dagger)
 //						mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
@@ -106,7 +106,9 @@ void calc_field_corr(
 							assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr_aux[parity], idxh);
 
 //chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: UxFxU^(dagger)x(G^(dagger)-G-1/3trace(G^(dagger)-G)) [G=placchetta]
-				 			mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
+							mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
+//oppure
+// 						mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc_p(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 
 						  d_complex tmp_aux =  single_matrix_trace_absent_stag_phase(closed_corr);
 							trace_local[parity].c[idxh] = creal(tmp_aux) + cimag(tmp_aux)*I ;
@@ -142,10 +144,10 @@ void calc_field_corr(
 						
 						int idxh = snum_acc(d0,d1,d2,d3);  // r  
 						int parity = (d0+d1+d2+d3) % 2; 
-						//int idxmro = nnm_openacc[idxh][ro][parity];// r-ro
+						int idxmro = nnm_openacc[idxh][ro][parity];// r-ro
 						int idxpro = nnp_openacc[idxh][ro][parity];  // r+ro
 						
-						assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr_aux[!parity], idxpro, &field_corr[parity], idxh);	
+						assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr_aux[!parity], idxmro, &field_corr[parity], idxh);	
 	
 		    	}  // d0
         }  // d1

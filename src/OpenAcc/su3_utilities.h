@@ -285,7 +285,7 @@ static inline void mat1_times_mat2_into_mat1_absent_stag_phases(__restrict const
 		+ mat1_12 * mat2_22 ;
 }
 
-#pragma acc routine seq // mat3 = mat1 * (mat2*-mat2 - 1/3trace(mat2*-mat2)
+#pragma acc routine seq // mat3 = mat1 * (mat2* - mat2 - 1/3trace(mat2*-mat2)
 static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(
 																	__restrict su3_soa * const mat1, int idx_mat1,
 																	__restrict su3_soa * const mat2, int idx_mat2,
@@ -329,7 +329,7 @@ static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_
   C12 = conj( ( C20 * C01 ) - ( C00 * C21) ) ;
   C22 = conj( ( C00 * C11 ) - ( C10 * C01) ) ;
 
-	//compute D = C-B = mat2^DAG - mat2
+	//compute D = C - B = mat2^DAG - mat2
 
 	D00 = C00 - B00 ;
 	D10 = C10 - B10 ;
@@ -344,18 +344,84 @@ static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_
 	trace_D = D00 + D11 + D22;// D00 + D11 + D22;
 	
 	// MAT3 = A * B = MAT1 * MAT3^DAG 0=1, 1,2 2=3
-	mat3->comp[0][0] = A00 * (D00 - (1.0/3.0 * trace_D)) + A01 * (D10 - (1.0/3.0 * trace_D)) + A02 * (D20 - (1.0/3.0 * trace_D));
-	mat3->comp[0][1] = A00 * (D01 - (1.0/3.0 * trace_D)) + A01 * (D11 - (1.0/3.0 * trace_D)) + A02 * (D21 - (1.0/3.0 * trace_D));
-  mat3->comp[0][2] = A00 * (D02 - (1.0/3.0 * trace_D)) + A01 * (D12 - (1.0/3.0 * trace_D)) + A02 * (D22 - (1.0/3.0 * trace_D));
-	mat3->comp[1][0] = A10 * (D00 - (1.0/3.0 * trace_D)) + A11 * (D10 - (1.0/3.0 * trace_D)) + A12 * (D20 - (1.0/3.0 * trace_D));
-	mat3->comp[1][1] = A10 * (D01 - (1.0/3.0 * trace_D)) + A11 * (D11 - (1.0/3.0 * trace_D)) + A12 * (D21 - (1.0/3.0 * trace_D));
-	mat3->comp[1][2] = A10 * (D02 - (1.0/3.0 * trace_D)) + A11 * (D12 - (1.0/3.0 * trace_D)) + A12 * (D22 - (1.0/3.0 * trace_D));
-	mat3->comp[2][0] = A20 * (D00 - (1.0/3.0 * trace_D)) + A21 * (D10 - (1.0/3.0 * trace_D)) + A22 * (D20 - (1.0/3.0 * trace_D));
-	mat3->comp[2][1] = A20 * (D01 - (1.0/3.0 * trace_D)) + A21 * (D11 - (1.0/3.0 * trace_D)) + A22 * (D21 - (1.0/3.0 * trace_D));
-	mat3->comp[2][2] = A20 * (D02 - (1.0/3.0 * trace_D)) + A21 * (D12 - (1.0/3.0 * trace_D)) + A22 * (D22 - (1.0/3.0 * trace_D)); 
+	mat3->comp[0][0] = A00 * (D00 - (1.0/3.0 * trace_D)) + A01 * (D10) + A02 * (D20);
+	mat3->comp[0][1] = A00 * (D01) + A01 * (D11 - (1.0/3.0 * trace_D)) + A02 * (D21);
+  mat3->comp[0][2] = A00 * (D02) + A01 * (D12) + A02 * (D22 - (1.0/3.0 * trace_D));
+	mat3->comp[1][0] = A10 * (D00 - (1.0/3.0 * trace_D)) + A11 * (D10) + A12 * (D20);
+	mat3->comp[1][1] = A10 * (D01) + A11 * (D11 - (1.0/3.0 * trace_D)) + A12 * (D21);
+	mat3->comp[1][2] = A10 * (D02) + A11 * (D12) + A12 * (D22 - (1.0/3.0 * trace_D));
+	mat3->comp[2][0] = A20 * (D00 - (1.0/3.0 * trace_D)) + A21 * (D10) + A22 * (D20);
+	mat3->comp[2][1] = A20 * (D01) + A21 * (D11 - (1.0/3.0 * trace_D)) + A22 * (D21);
+	mat3->comp[2][2] = A20 * (D02) + A21 * (D12) + A22 * (D22 - (1.0/3.0 * trace_D)); 
 	
 }
+#pragma acc routine seq // mat3 = mat1 * (mat2*-mat2 - 1/3trace(mat2*-mat2)
+static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc_p(
+																	__restrict su3_soa * const mat1, int idx_mat1,
+																	__restrict su3_soa * const mat2, int idx_mat2,
+																	__restrict single_su3 *  const mat3)
+{
+	//load mat1
+	d_complex mat1_00 = mat1->r0.c0[idx_mat1];
+	d_complex mat1_01 = mat1->r0.c1[idx_mat1];
+	d_complex mat1_02 = mat1->r0.c2[idx_mat1];
 
+	d_complex mat1_10 = mat1->r1.c0[idx_mat1];
+	d_complex mat1_11 = mat1->r1.c1[idx_mat1];
+	d_complex mat1_12 = mat1->r1.c2[idx_mat1];
+
+	// construct (into the variables mat2_ij) the hermitian conjugate 
+  // of the mat2 matrix
+  d_complex mat2_c_00 = conj( mat2->r0.c0[idx_mat2] ) ;
+  d_complex mat2_c_10 = conj( mat2->r0.c1[idx_mat2] ) ;
+  d_complex mat2_c_20 = conj( mat2->r0.c2[idx_mat2] ) ;
+
+  d_complex mat2_c_01 = conj( mat2->r1.c0[idx_mat2] ) ;
+  d_complex mat2_c_11 = conj( mat2->r1.c1[idx_mat2] ) ;
+  d_complex mat2_c_21 = conj( mat2->r1.c2[idx_mat2] ) ;
+
+  // compute 3rd mat2 conjugate column from the first two
+  d_complex mat2_c_02 = conj(( mat2_c_10 * mat2_c_21 )-( mat2_c_20 * mat2_c_11));
+  d_complex mat2_c_12 = conj(( mat2_c_20 * mat2_c_01 )-( mat2_c_00 * mat2_c_21));
+  d_complex mat2_c_22 = conj(( mat2_c_00 * mat2_c_11 )-( mat2_c_10 * mat2_c_01));
+
+	d_complex mat2_00 = mat2->r0.c0[idx_mat2];
+  d_complex mat2_01 = mat2->r0.c1[idx_mat2];
+  d_complex mat2_02 = mat2->r0.c2[idx_mat2];
+
+  d_complex mat2_10 = mat2->r1.c0[idx_mat2];
+  d_complex mat2_11 = mat2->r1.c1[idx_mat2];
+  d_complex mat2_12 = mat2->r1.c2[idx_mat2];
+
+  // compute 3rd mat2 row from the first two                    
+  d_complex mat2_20 = conj((mat2_01 * mat2_12 )-( mat2_02 * mat2_11));
+  d_complex mat2_21 = conj((mat2_02 * mat2_10 )-( mat2_00 * mat2_12));
+  d_complex mat2_22 = conj((mat2_00 * mat2_11 )-( mat2_01 * mat2_10));
+
+	mat2_00 = mat2_c_00 - mat2_00;
+	mat2_01 = mat2_c_01 - mat2_01;
+	mat2_02 = mat2_c_02 - mat2_02;                                                                                                                             mat2_10 = mat2_c_10 - mat2_10;
+	mat2_11 = mat2_c_11 - mat2_11;                                                                                                                             mat2_12 = mat2_c_12 - mat2_12;
+  mat2_20 = mat2_c_20 - mat2_20;                                                                                                                             mat2_21 = mat2_c_21 - mat2_21;
+	mat2_22 = mat2_c_22 - mat2_22;
+
+	d_complex trace_mat2 = mat2_00 + mat2_11 + mat2_22;
+
+	mat3->comp[0][0] = mat1_00 * (mat2_00 - (1.0/3.0 * trace_mat2)) + mat1_01 * (mat2_10 - (1.0/3.0 * trace_mat2))
+		+ mat1_02 * (mat2_20 - (1.0/3.0 * trace_mat2)) ;
+	mat3->comp[0][1] = mat1_00 * (mat2_01 - (1.0/3.0 * trace_mat2)) + mat1_01 * (mat2_11 - (1.0/3.0 * trace_mat2))
+		+ mat1_02 * (mat2_21 - (1.0/3.0 * trace_mat2)) ;
+	mat3->comp[0][2] = mat1_00 * (mat2_02 - (1.0/3.0 * trace_mat2)) + mat1_01 * (mat2_12 - (1.0/3.0 * trace_mat2))
+		+ mat1_02 * (mat2_22 - (1.0/3.0 * trace_mat2)) ;
+	
+	mat3->comp[1][0]= mat1_10 * (mat2_00 - (1.0/3.0 * trace_mat2)) + mat1_11 * (mat2_10 - (1.0/3.0 * trace_mat2))
+		+ mat1_12 * (mat2_20 - (1.0/3.0 * trace_mat2)) ;
+	mat3->comp[1][1] = mat1_10 * (mat2_01 - (1.0/3.0 * trace_mat2)) + mat1_11 * (mat2_11 - (1.0/3.0 * trace_mat2))
+		+ mat1_12 * (mat2_21 - (1.0/3.0 * trace_mat2)) ;
+	mat3->comp[1][2] = mat1_10 * (mat2_02 - (1.0/3.0 * trace_mat2)) + mat1_11 * (mat2_12 - (1.0/3.0 * trace_mat2))
+		+ mat1_12 * (mat2_22 - (1.0/3.0 * trace_mat2)) ;
+	
+}
 #pragma acc routine seq
 static inline void mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(
 																																						__restrict su3_soa * const mat1, int idx_mat1,
@@ -1537,9 +1603,9 @@ static inline d_complex single_matrix_trace_absent_stag_phase(
   // ho calcolata mai, quindi dove sembrerebbe doverci essere 
   // in realta' non c'e niente, quindi non la posso caricare
   // 2) carico quello che mi serve e ricostruisco
-	//d_complex loc_plaq_22 = loc_plaq->comp[2][2];
-	d_complex loc_plaq_22 =  conj( ( loc_plaq_00 * loc_plaq_11 ) -
-																 ( loc_plaq_01 * loc_plaq_10) ) ;
+  d_complex loc_plaq_22 = loc_plaq->comp[2][2];
+	//d_complex loc_plaq_22 =  conj( ( loc_plaq_00 * loc_plaq_11 ) -
+	//															 ( loc_plaq_01 * loc_plaq_10) ) ;
 
 	return (loc_plaq_00 + loc_plaq_11 + loc_plaq_22);
 }
