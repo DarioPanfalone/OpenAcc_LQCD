@@ -204,7 +204,7 @@ int main(int argc, char **argv){
 		//int r=read_su3_soa_ASCII(&conf_rw,"save_conf",&conf_id);
 	int dim=lettura_parole(argv[1], confs); //leggo i nomi dei file delle conf da input
 		//strcpy(nome, confs[0]);
-	int maxstep=1,  L, confmax=dim;
+	int maxstep=21,  L, confmax=dim;
 	fp=fopen(argv[2], "w"); //file dove scrivere le misure
 	
 	for(int conf_num=0; conf_num<confmax; conf_num++){
@@ -217,34 +217,10 @@ int main(int argc, char **argv){
 		} else {
 			printf("Some error in reading occured\n");
 		}
-		//prova stampa link
 
-#pragma acc update self(conf_acc[0:8])
-		double factor = 0.1;
-		generate_Conf_cold(conf_random, factor);
-#pragma acc update device(conf_random[0:8])
-		/*	
-		//verifica della funzione che fa la trasformazione 
-		int d0=1, d1=11, d2=1, d3=D3_HALO;
-		int mu=1;
-		int idxh = snum_acc(d0, d1, d2, d3);
-		int parity = (d0 + d1 + d2 + d3) % 2;
-		int dir_link = 2*mu + parity;
-		STAMPA_DEBUG_SU3_SOA(conf_random,dir_link,idxh);
-		
-		plq = calc_plaquette_soloopenacc(conf_acc, conf_au, local_sum);
-	  printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
-		//#pragma acc update device(conf_acc[0:8])
-		random_gauge_transformation(conf_acc, aux_conf_acc, conf_random);
-		#pragma acc update self(aux_conf_acc[0:8])
-		 STAMPA_DEBUG_SU3_SOA(conf_acc,dir_link,idxh);
-		  STAMPA_DEBUG_SU3_SOA(aux_conf_acc,dir_link,idxh);
-		 plq = calc_plaquette_soloopenacc(aux_conf_acc, conf_au, local_sum);
-		printf("Plaquette     : %.18lf\n" ,plq/GL_SIZE/3.0/6.0);
-*/		
 		for(int coolstep=0; coolstep<maxstep; coolstep++){
-			/*  	
-			  (coolstep==0){
+			  	
+			  if(coolstep==0){
 				aux_conf_acc=(su3_soa*)conf_acc;
 			}
 			else if(coolstep==1){
@@ -253,14 +229,14 @@ int main(int argc, char **argv){
 			}else{
 				conf_to_use=(su3_soa*)aux_conf_acc;
 				cool_conf(conf_to_use, aux_conf_acc, aux_staple);		
-				}*/
+				}
 		  	
 			double  D_paral = 0.0, D_perp = 0.0;
 			for(int ro=0; ro<4; ro++){ 
 				for(int mu=0 ; mu<3; mu++){ 
 					for(int nu=mu+1; nu<4; nu++){           
 							//								int mu=0, nu=1, ro=2;
-						calc_field_corr(conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
+						calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
 		 
 						//for(int L=1; L<=nd0/2; L++) { 
 						//fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
@@ -277,38 +253,11 @@ int main(int argc, char **argv){
 					} 
 				} 
 			}
-			printf("%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));
-						
-			random_gauge_transformation(conf_acc, aux_conf_acc, conf_random);
-#pragma acc update self(aux_conf_acc[0:8])
-			//misura dopo la trasformazione
-			  D_paral = 0.0, D_perp = 0.0;
-      for(int ro=0; ro<4; ro++){
-        for(int mu=0 ; mu<3; mu++){
-          for(int nu=mu+1; nu<4; nu++){
-              //                int mu=0, nu=1, ro=2;
-            calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro);
-
-            //for(int L=1; L<=nd0/2; L++) {
-            //fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
-                  //if(coolstep>=15){
-                  if(ro==mu || ro==nu){
-                  L=5;
-                  D_paral = D_paral + 0.5*corr[L]/(GL_SIZE*(double)3);
-                  //fprintf(fp,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
-                } else {
-                  L=11;
-                  D_perp = D_perp +  0.5*corr[L]/(GL_SIZE*(double)3);
-                  //fprintf(fd,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
-                  }
-          }
-        }
-      }
-      printf("%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));
-			//fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));
+		  //printf("%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));
+			fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));			
 			// printf("\nfine step %d\n", coolstep);
-					}
-					printf("\nfine conf %d\n", conf_num);
+		}
+			printf("\nfine conf %d\n", conf_num);
 	}
 	fclose(fp);
 	

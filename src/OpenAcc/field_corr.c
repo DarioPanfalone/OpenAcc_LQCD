@@ -145,7 +145,7 @@ void calc_field_corr(
 						int idxh = snum_acc(d0,d1,d2,d3);  // r  
 						int parity = (d0+d1+d2+d3) % 2; 
 						int idxmro = nnm_openacc[idxh][ro][parity];// r-ro
-						int idxpro = nnp_openacc[idxh][ro][parity];  // r+ro
+						//int idxpro = nnp_openacc[idxh][ro][parity];  // r+ro
 						
 						assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr_aux[!parity], idxmro, &field_corr[parity], idxh);	
 	
