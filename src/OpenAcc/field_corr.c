@@ -17,7 +17,7 @@ void calc_field_corr(
 										 const int mu, const int nu, const int ro)
 {
 	
-  //computing plaquettes in the mu,nu plane at each site
+  //computing plaquettes in the mu,nu plane for each site
 #pragma acc kernels present(u) present(field_corr) present(loc_plaq) 
 #pragma acc loop independent gang(STAPGANG3)
 	//d3=time
@@ -60,7 +60,7 @@ void calc_field_corr(
     }  // d2
   }  // d3
   
-  //calculation of correlator varying the lenght 
+  //routine for correlator varying the lenght 
 
 	for(int L=0; L<nd0/2; L++){
 
@@ -76,7 +76,7 @@ void calc_field_corr(
 							int idxh = snum_acc(d0,d1,d2,d3);  // r  
 							int parity = (d0+d1+d2+d3) % 2; 
 	 
-	  // moltiplico fieldcorr in ogni sito r per la linea di Schwinger lungo ro	
+	  // multiplying fieldcorr and the Schwinger line in ro direction at each site	
 	  //
 	  //                            r+nu       r+nu+mu
 	  // 	nu	                          +<------+
@@ -189,7 +189,7 @@ void random_gauge_transformation(
 		}  // d2
 	}  // d3
 */
-	//Faccio la trasformazione di gauge: G(n)xU(n)xG*(n+mu) dove U è il link n-->n+mu
+	//Gauge transformation: G(n)xU(n)xG*(n+mu). U is the link n-->n+mu
 #pragma acc kernels present(m_soa) present(u) present(nnp_openacc)	
 #pragma acc loop independent gang(STAPGANG3)
 		for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
