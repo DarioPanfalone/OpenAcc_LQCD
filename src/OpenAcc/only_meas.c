@@ -204,7 +204,7 @@ int main(int argc, char **argv){
 		//int r=read_su3_soa_ASCII(&conf_rw,"save_conf",&conf_id);
 	int dim=lettura_parole(argv[1], confs); //leggo i nomi dei file delle conf da input
 		//strcpy(nome, confs[0]);
-	int maxstep=21,  L, confmax=dim;
+	int maxstep=8,  L, confmax=dim;
 	fp=fopen(argv[2], "w"); //file dove scrivere le misure
 	
 	for(int conf_num=0; conf_num<confmax; conf_num++){
@@ -231,31 +231,37 @@ int main(int argc, char **argv){
 				cool_conf(conf_to_use, aux_conf_acc, aux_staple);		
 				}
 		  	
-			double  D_paral = 0.0, D_perp = 0.0;
-			for(int ro=0; ro<4; ro++){ 
-				for(int mu=0 ; mu<3; mu++){ 
-					for(int nu=mu+1; nu<4; nu++){           
-							//								int mu=0, nu=1, ro=2;
+				double  D_paral[nd0], D_perp[nd0];
+				for(L=0; L<nd0/2; L++){
+					D_paral[L] = 0.0;
+					D_perp[L] = 0.0;
+				}
+				for(int ro=0; ro<4; ro++){ 
+					for(int mu=0 ; mu<3; mu++){ 
+						for(int nu=mu+1; nu<4; nu++){           
+						//								int mu=0, nu=1, ro=2;
 						calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, conf_au, local_sum, corr, closed_corr, mu, nu, ro); 
 		 
 						//for(int L=1; L<=nd0/2; L++) { 
 						//fprintf(fp,"%d\t%d\t%d\t%d\t%d\t%.18lf\n", coolstep, L, ro, mu, nu, corr[L]/GL_SIZE);
-									//if(coolstep>=15){
-									if(ro==mu || ro==nu){
-									L=5;
-									D_paral = D_paral + 0.5*corr[L]/(GL_SIZE*(double)3);
-									//fprintf(fp,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
-								} else {
-									L=11;
-									D_perp = D_perp +  0.5*corr[L]/(GL_SIZE*(double)3);
+						//if(coolstep>=15){
+						for(L=0; L<nd0/2; L++){
+							if(ro==mu || ro==nu){
+								D_paral[L] = D_paral[L] + corr[L];
+											//fprintf(fp,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
+							} else {
+								D_perp[L] = D_perp[L] +  corr[L];
 									//fprintf(fd,"%d;%d;%d;%d;%.18lf\n", coolstep, ro, mu, nu, 0.5*creal(trace[L])/GL_SIZE);
-									}
-					} 
+							}
+						}
+					}
 				} 
 			}
 		  //printf("%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));
-			fprintf(fp,"%d\t%.18lf\t%.18lf\n", coolstep, D_paral/((double)4),  D_perp/((double)4));			
-			// printf("\nfine step %d\n", coolstep);
+				for(L=0; L<nd0/2; L++){
+			  	fprintf(fp,"%d\t%d\t%.18lf\t%.18lf\n", coolstep, L, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
+				}
+				 // printf("\nfine step %d\n", coolstep);
 		}
 			printf("\nfine conf %d\n", conf_num);
 	}

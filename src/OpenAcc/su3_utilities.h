@@ -342,17 +342,22 @@ static inline void mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_
 	D22 = C22 - B22 ;
 
 	trace_D = D00 + D11 + D22;// D00 + D11 + D22;
-	
+
+	//compute D - 1/3trace(D)
+	D00 = D00 - (1.0/3.0 * trace_D);
+	D11 = D11 - (1.0/3.0 * trace_D);
+	D22 = D22 - (1.0/3.0 * trace_D);
+
 	// MAT3 = A * B = MAT1 * MAT3^DAG 0=1, 1,2 2=3
-	mat3->comp[0][0] = A00 * (D00 - (1.0/3.0 * trace_D)) + A01 * (D10) + A02 * (D20);
-	mat3->comp[0][1] = A00 * (D01) + A01 * (D11 - (1.0/3.0 * trace_D)) + A02 * (D21);
-  mat3->comp[0][2] = A00 * (D02) + A01 * (D12) + A02 * (D22 - (1.0/3.0 * trace_D));
-	mat3->comp[1][0] = A10 * (D00 - (1.0/3.0 * trace_D)) + A11 * (D10) + A12 * (D20);
-	mat3->comp[1][1] = A10 * (D01) + A11 * (D11 - (1.0/3.0 * trace_D)) + A12 * (D21);
-	mat3->comp[1][2] = A10 * (D02) + A11 * (D12) + A12 * (D22 - (1.0/3.0 * trace_D));
-	mat3->comp[2][0] = A20 * (D00 - (1.0/3.0 * trace_D)) + A21 * (D10) + A22 * (D20);
-	mat3->comp[2][1] = A20 * (D01) + A21 * (D11 - (1.0/3.0 * trace_D)) + A22 * (D21);
-	mat3->comp[2][2] = A20 * (D02) + A21 * (D12) + A22 * (D22 - (1.0/3.0 * trace_D)); 
+	mat3->comp[0][0] = A00 * D00 + A01 * D10 + A02 * D20;
+	mat3->comp[0][1] = A00 * D01 + A01 * D11 + A02 * D21;
+  mat3->comp[0][2] = A00 * D02 + A01 * D12 + A02 * D22;
+	mat3->comp[1][0] = A10 * D00 + A11 * D10 + A12 * D20;
+	mat3->comp[1][1] = A10 * D01 + A11 * D11 + A12 * D21;
+	mat3->comp[1][2] = A10 * D02 + A11 * D12 + A12 * D22;
+	mat3->comp[2][0] = A20 * D00 + A21 * D10 + A22 * D20;
+	mat3->comp[2][1] = A20 * D01 + A21 * D11 + A22 * D21;
+	mat3->comp[2][2] = A20 * D02 + A21 * D12 + A22 * D22; 
 	
 }
 #pragma acc routine seq // mat3 = mat1 * (mat2*-mat2 - 1/3trace(mat2*-mat2)

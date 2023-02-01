@@ -17,10 +17,10 @@ void calc_field_corr(
 										 const int mu, const int nu, const int ro)
 {
 	
-  //calcolo le placchette nel piano mu, nu in ogni sito
+  //computing plaquettes in the mu,nu plane at each site
 #pragma acc kernels present(u) present(field_corr) present(loc_plaq) 
 #pragma acc loop independent gang(STAPGANG3)
-	//d3=tempo
+	//d3=time
   for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
 #pragma acc loop independent tile(STAPTILE0,STAPTILE1,STAPTILE2)
     for(int d2=0; d2<nd2; d2++) {
@@ -53,7 +53,6 @@ void calc_field_corr(
 		mat1_times_conj_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity],idxh,&u[dir_muC],idxpnu);              // field_corr = field_corr * C 
 		mat1_times_conj_mat2_into_mat1_absent_stag_phases_nc(&field_corr[parity],idxh,&u[dir_nuD],idxh);                // field_corr = field_corr * D
 		
-		//copia delle placchette che serve per poi chiudere i correlatori 
 	  assign_su3_soa_to_su3_soa_component_nc(&field_corr[parity], &loc_plaq[parity], idxh); 
 	 
 				}  // d0
@@ -61,11 +60,11 @@ void calc_field_corr(
     }  // d2
   }  // d3
   
-  //calcolo dei correlatori al variare della lunghezza 
+  //calculation of correlator varying the lenght 
 
 	for(int L=0; L<nd0/2; L++){
 
-	//d3 tempo
+	//d3 time
 #pragma acc kernels present(u) present(field_corr) present(loc_plaq) present(field_corr_aux) present(closed_corr) present(trace_local)
 #pragma acc loop independent gang(STAPGANG3)
 		for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
@@ -99,16 +98,18 @@ void calc_field_corr(
 // U^(dagger)xFxU
 							conj_mat1_times_mat2_into_mat2_absent_stag_phases_nc(&u[dir_roE],idxh,&field_corr[parity],idxh);//
 
-//Per fare la prova con la configuazione di identità: UxFxU^(dagger)xG^(dagger)
+// UxFxU^(dagger)xG^(dagger)
 //						mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 
-//copia field_corr in field_corr_aux 
+//copying field_corr in field_corr_aux 
 							assign_su3_soa_to_su3_soa_diff_idx_component(&field_corr[parity], idxh, &field_corr_aux[parity], idxh);
 
-//chiudo moltiplicando per il complesso coniugato della placchetta meno la placchetta nel sito r+ro: UxFxU^(dagger)x(G^(dagger)-G-1/3trace(G^(dagger)-G)) [G=placchetta]
+//UxFxU^(dagger)x(G^(dagger)-G-1/3trace(G^(dagger)-G)) [G=placchetta]
 							mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
-//oppure
+//or
 // 						mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc_p(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
+//UxFxU^(dagger)xG^(dagger)
+//            mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 
 						  d_complex tmp_aux =  single_matrix_trace_absent_stag_phase(closed_corr);
 							trace_local[parity].c[idxh] = creal(tmp_aux) + cimag(tmp_aux)*I ;
@@ -132,8 +133,8 @@ void calc_field_corr(
 		//	printf("\n%d\t%d\t%d\t%d\t%lf", mu, nu, ro, L, res_R_p);
 		corr[L] = res_R_p;
 				
-		//traslazione 
-//d3 tempo
+		//traslation 
+//d3 time
 #pragma acc kernels present(field_corr) present(field_corr_aux)
 #pragma acc loop independent gang(STAPGANG3)
 		for(int d3=D3_HALO; d3<nd3-D3_HALO; d3++) {
