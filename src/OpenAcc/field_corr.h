@@ -4,7 +4,7 @@
 #include "./geometry.h"
 #include "./su3_utilities.h"
 
-void calc_field_corr(
+void calc_field_corr_single_orientation(
 										 __restrict const su3_soa * const u,
 										 __restrict su3_soa * const field_corr,
 										 __restrict su3_soa * const field_corr_aux,

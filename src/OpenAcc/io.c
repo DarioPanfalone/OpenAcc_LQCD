@@ -677,5 +677,37 @@ void binarywrite_single_su3_into_su3_soa(const int idxh_machine, const int parit
     }
 }
 
+char ** read_list_of_confs(char *filename, long int *lines){
+	FILE *fin;
+
+	fin=fopen(filename,"r");
+	char ** confs;
+	long int in_lines=0;
+
+	char *buf=NULL;
+	size_t n;
+	printf("Counting lines\n");
+	while(getline (&buf, &n, fin) != -1)
+		{
+			in_lines++;
+		}
+	printf("Lines: %d\n",in_lines);
+	
+	*lines = in_lines;
+	confs = (char**) malloc(sizeof(char*) * (in_lines+1) );
+
+	fclose(fin);
+	fin=fopen(filename,"r");
+	printf("Reading conf names\n");
+	for(long int t =0; t < in_lines; t++)
+		{
+			confs[t] = (char*) malloc(sizeof(char) * n );
+			getline (&confs[t], &n, fin);
+			confs[t][strcspn(confs[t], "\n")] = 0;
+		}
+
+	fclose(fin);
+	return confs;
+}
 
 #endif
