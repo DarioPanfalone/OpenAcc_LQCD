@@ -61,15 +61,15 @@
 // definitions outside the main.
 int conf_id_iter;
 int verbosity_lv;
-//
-#define ALLOCCHECK(control_int,var)  if(control_int != 0 )              \
-		printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var); \
-	else if(verbosity_lv > 2) printf("MPI%02d: \tAllocation of %s : OK , %p\n",	\
-																	 devinfo.myrank, #var, var );					\
 
-#define FREECHECK(var) if(verbosity_lv >2)											\
-    printf("\tFreed %s, %p ...", #var,var);											\
-	free_wrapper(var); if(verbosity_lv > 2)  printf(" done.\n");
+#define ALLOCCHECK(control_int,var)																			\
+  if(control_int != 0 )	printf("MPI%02d: \tError in  allocation of %s . \n",devinfo.myrank, #var); \
+	else printf("MPI%02d: \tAllocation of %s : OK , %p\n",								\
+							devinfo.myrank, #var, var );															\
+	
+#define FREECHECK(var)																					\
+	printf("\tFreed %s ...", #var); fflush(stdout);								\
+	free_wrapper(var); printf(" done.\n");
 
 int main(int argc, char **argv){
 	if(argc!=3)
@@ -234,35 +234,45 @@ int main(int argc, char **argv){
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)					 
 
-	FREECHECK(allocation_check, conf);
-
-	FREECHECK(allocation_check, conf_acc);
-#pragma acc exit data delete(conf_acc)
-
-	FREECHECK(allocation_check, aux_conf_acc);
-#pragma acc exit data delete(aux_conf_acc)
-
-	FREECHECK(allocation_check, auxbis_conf_acc);
-#pragma acc exit data delete(auxbis_conf_acc)
-
-	FREECHECK(allocation_check, local_sum);
-#pragma acc exit data delete(local_sum)
-
-	FREECHECK(allocation_check, field_corr );
-#pragma acc exit data delete(field_corr)
-
-	FREECHECK(allocation_check, field_corr_aux );
-#pragma acc exit data delete(field_corr_aux)
-
-	FREECHECK(allocation_check, loc_plaq_aux);
-#pragma acc exit data delete(loc_plaq_aux)
-
-	FREECHECK(allocation_check, corr);
+	
+	FREECHECK(closed_corr);
+#pragma acc exit data delete(closed_corr)
+	
+	FREECHECK(corr);
 #pragma acc exit data delete(corr)
 
-	FREECHECK(allocation_check, closed_corr);
-#pragma acc exit data delete(closed_corr)
+	FREECHECK(loc_plaq_aux);
+#pragma acc exit data delete(loc_plaq_aux)
 
-	
-	return 0;
+	FREECHECK(field_corr_aux );
+#pragma acc exit data delete(field_corr_aux)
+
+	FREECHECK(field_corr );
+#pragma acc exit data delete(field_corr)
+
+	FREECHECK(local_sum);
+#pragma acc exit data delete(local_sum)
+
+	FREECHECK(auxbis_conf_acc);
+#pragma acc exit data delete(auxbis_conf_acc)
+
+	FREECHECK(aux_conf_acc);
+#pragma acc exit data delete(aux_conf_acc)
+
+	FREECHECK(conf_acc);
+#pragma acc exit data delete(conf_acc)
+
+	FREECHECK(conf);
+
+#ifndef __GNUC__
+  // OpenAcc context closing
+  shutdown_acc_device(my_device_type);
+#endif
+
+#ifdef MULTIDEVICE
+  shutdown_multidev();
+#endif
+    
+  if(0==devinfo.myrank){printf("The End\n");}
+  return(EXIT_SUCCESS);
 }
