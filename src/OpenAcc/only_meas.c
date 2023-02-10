@@ -67,8 +67,8 @@ int verbosity_lv;
 	else printf("MPI%02d: \tAllocation of %s : OK , %p\n",								\
 							devinfo.myrank, #var, var );															\
 	
-#define FREECHECK(var)																					\
-	printf("\tFreed %s ...", #var); fflush(stdout);								\
+#define FREECHECK(var)														\
+	printf("\tFreed %s ...", #var); fflush(stdout);	\
 	free_wrapper(var); printf(" done.\n");
 
 int main(int argc, char **argv){
@@ -77,6 +77,42 @@ int main(int argc, char **argv){
 			printf("ERROR: wrong usage.\nCorrect syntax: mpirun -n <nranks> %s <conf_list_file_name> <output_file_name>\n",argv[0]);
 			exit(1);
 		}
+
+#ifdef MULTIDEVICE
+	pre_init_multidev1D(&devinfo);
+	gdbhook();
+#endif		
+
+#ifdef MULTIDEVICE        
+	devinfo.single_dev_choice  = 0;
+	devinfo.async_comm_fermion = 1;
+	devinfo.async_comm_gauge   = 1;
+	devinfo.proc_per_node      = 2; //HARDCODED.
+#endif
+	devinfo.nranks_read=devinfo.nranks;
+	
+	
+	init_multidev1D(&devinfo);
+	
+#ifndef __GNUC__
+	//////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
+	// NVIDIA GPUs
+	acc_device_t my_device_type = acc_device_nvidia;
+	// AMD GPUs
+	// acc_device_t my_device_type = acc_device_radeon;
+	// Intel XeonPhi
+	//acc_device_t my_device_type = acc_device_xeonphi;
+	// Select device ID
+	printf("MPI%02d: Selecting device.\n", devinfo.myrank);
+#ifdef MULTIDEVICE
+	printf("devinfo.single_dev_choice: %d\ndevinfo.myrank: %d\n devinfo.proc_per_node: %d\n", devinfo.single_dev_choice, devinfo.myrank, devinfo.proc_per_node);
+	select_init_acc_device(my_device_type, (devinfo.single_dev_choice + devinfo.myrank)%devinfo.proc_per_node);
+	// select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
+#else
+	select_init_acc_device(my_device_type, devinfo.single_dev_choice);
+#endif
+	printf("Device Selected : OK \n");
+#endif
 	
 	su3_soa * conf_acc;
 	su3_soa * aux_conf_acc;
@@ -130,41 +166,19 @@ int main(int argc, char **argv){
 	ALLOCCHECK(allocation_check, closed_corr);
 #pragma acc enter data create(closed_corr[0:1])
 
-#ifdef MULTIDEVICE
-	pre_init_multidev1D(&devinfo);
-	gdbhook();
-#endif
-		
-#ifndef __GNUC__
-	//////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
-	// NVIDIA GPUs
-	acc_device_t my_device_type = acc_device_nvidia;
-	// AMD GPUs
-	// acc_device_t my_device_type = acc_device_radeon;
-	// Intel XeonPhi
-	//acc_device_t my_device_type = acc_device_xeonphi;
-	// Select device ID
-	printf("MPI%02d: Selecting device.\n", devinfo.myrank);
-#ifdef MULTIDEVICE
-	select_init_acc_device(my_device_type, (devinfo.single_dev_choice + devinfo.myrank)%devinfo.proc_per_node);
-	// select_init_acc_device(my_device_type, devinfo.myrank%devinfo.proc_per_node);
-#else
-	select_init_acc_device(my_device_type, devinfo.single_dev_choice);
-#endif
-	printf("Device Selected : OK \n");
-#endif
-		
-
 	if(0==devinfo.myrank) print_geom_defines(); 
 	compute_nnp_and_nnm_openacc();
 #pragma acc enter data copyin(nnp_openacc) 
 #pragma acc enter data copyin(nnm_openacc) 
 
-	printf("HARDCODED LATTICE DIMENSIONS:\n");
-	printf("GL_N0: %d\n", GL_N0) ;
-	printf("GL_N1: %d\n", GL_N1) ;
-	printf("GL_N2: %d\n", GL_N2) ;
-	printf("GL_N3: %d\n", GL_N3) ;
+	if(0==devinfo.myrank)
+		{
+			printf("HARDCODED LATTICE DIMENSIONS:\n");
+			printf("GL_N0: %d\n", GL_N0) ;
+			printf("GL_N1: %d\n", GL_N1) ;
+			printf("GL_N2: %d\n", GL_N2) ;
+			printf("GL_N3: %d\n", GL_N3) ;
+		}
 	
 	geom_par.gnx = GL_N0 ;
 	geom_par.gny = GL_N1 ;
@@ -179,57 +193,81 @@ int main(int argc, char **argv){
 	set_geom_glv(&geom_par);
 
 	// read conf paths from input and count number of configurations.
-	printf("Reading input...\n");
+	if(0==devinfo.myrank)
+		printf("Reading input...\n");
 	long int confmax;
 	char ** confs = read_list_of_confs(argv[1], &confmax);
-
-	// open output file
+	
 	FILE *fp;
-	fp=fopen(argv[2], "w");
-	if (fp == NULL)
+	// open output file only by master rank
+	if(0==devinfo.myrank)
 		{
-			printf("Could not open file\n");
-			exit(1);
+			fp=fopen(argv[2], "w");
+			if (fp == NULL)
+				{
+					printf("Could not open file\n");
+					exit(1);
+				}
+			// printing header of measurements file.
+			fprintf(fp,"#conf_id cooling_step L D_para D_perp\n");
+			fflush(fp);
 		}
-	// printing header of measurements file.
-	fprintf(fp,"#conf_id cooling_step L D_para D_perp\n");
-
 	
 	// hardcoded number of cooling steps. Could become a command line argument.
 	int maxstep=20;
 	su3_soa * conf_to_use;
 	int conf_id;
-	printf("Starting analysis.\n");
 	for(int conf_num=0; conf_num<confmax; conf_num++){
-		printf("Reading file %s\n",confs[conf_num]);
-		int r = local_confrw_read_conf_wrapper(conf, conf_acc, confs[conf_num], &conf_id, 1);
-    #pragma acc update device(conf_acc[0:8])
+		if(0==devinfo.myrank)
+			printf("Reading file %s\n",confs[conf_num]);
+		if(! local_confrw_read_conf_wrapper(conf, conf_acc, confs[conf_num], &conf_id, 1))
+			{
+				printf("MPI%02d - Gauge Conf \"%s\" Read : OK \n",
+							 devinfo.myrank, confs[conf_num]);
+      }
+		else
+			{
+				printf("MPI%02d - Gauge Conf \"%s\" Read : FAILED \n\nABORTING",
+							 devinfo.myrank, confs[conf_num]);
+				MPI_Abort(MPI_COMM_WORLD,0);
+			}
+#pragma acc update device(conf_acc[0:8])
 
-		
-		printf("Computing correlators\n");
+		if(0==devinfo.myrank)
+			printf("Computing correlators\n");
+	
 		double  D_paral[nd0], D_perp[nd0];
 		calc_field_corr(conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp); 
 
-		for(int L=0; L<nd0/2; L++)
-			fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\n", conf_id, 0, L+1, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
+		if(0==devinfo.myrank)
+			for(int L=0; L<nd0/2; L++)
+				fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\n", conf_id, 0, L+1, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
 
-		for(int coolstep=1; coolstep<maxstep+1; coolstep++){
-			if(coolstep==1)
+		for(int coolstep=1; coolstep<=maxstep; coolstep++){
+			/*
+				if(coolstep==1)
 				conf_to_use=(su3_soa*)conf_acc;
-			else
+				else
 				conf_to_use=(su3_soa*)aux_conf_acc;
 
-			cool_conf(conf_to_use, aux_conf_acc, auxbis_conf_acc);
+				cool_conf(conf_to_use, aux_conf_acc, auxbis_conf_acc);
 
-			calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp); 
+				calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp); */
 
-			for(int L=0; L<nd0/2; L++){
-			fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\n", conf_id, coolstep, L+1, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
-			}// close coolstep
-		}// close conf_id
-		printf("%s analysis completed. Progress: %d/%d\n", confs[conf_num],conf_num+1,confmax);
-	}
-	fclose(fp);
+			cool_conf(conf_acc, conf_acc, auxbis_conf_acc);
+
+			calc_field_corr(conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp);
+			
+			if(0==devinfo.myrank)
+				for(int L=0; L<nd0/2; L++)
+					fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\n", conf_id, coolstep, L+1, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
+			
+		}// close coolstep
+		if(0==devinfo.myrank)
+			printf("%s analysis completed. Progress: %d/%d\n", confs[conf_num],conf_num+1,confmax);
+	}// close conf_id
+	if(0==devinfo.myrank)
+		fclose(fp);
 
 #pragma acc exit data delete(nnp_openacc)
 #pragma acc exit data delete(nnm_openacc)					 

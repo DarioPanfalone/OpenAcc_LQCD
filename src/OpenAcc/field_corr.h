@@ -7,8 +7,8 @@
 void calc_field_corr_single_orientation(
 										 __restrict const su3_soa * const u,
 										 __restrict su3_soa * const field_corr,
-										 __restrict su3_soa * const field_corr_aux,
-										 __restrict su3_soa * const loc_plaq,
+										 su3_soa * field_corr_aux,
+										 su3_soa * loc_plaq,
 										 dcomplex_soa * const trace_local,
 										 d_complex * const corr,
 										 __restrict single_su3 * const closed_corr,
