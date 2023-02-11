@@ -92,7 +92,9 @@ int main(int argc, char **argv){
 	devinfo.nranks_read=devinfo.nranks;
 	
 	
+#ifdef MULTIDEVICE        
 	init_multidev1D(&devinfo);
+#endif
 	
 #ifndef __GNUC__
 	//////  OPENACC CONTEXT INITIALIZATION    //////////////////////////////////////////////////////
