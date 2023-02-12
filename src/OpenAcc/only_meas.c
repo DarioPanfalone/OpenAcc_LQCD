@@ -238,12 +238,14 @@ int main(int argc, char **argv){
 		if(0==devinfo.myrank)
 			printf("Computing correlators\n");
 	
-		double  D_paral[nd0], D_perp[nd0];
-		calc_field_corr(conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp); 
+		double  D_paral[nd0], D_perp[nd0], D_temp_paral[nd0], D_temp_perp[nd0];
+		calc_field_corr(conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp, &D_temp_paral, &D_temp_perp); 
 
 		if(0==devinfo.myrank)
 			for(int L=0; L<nd0/2; L++)
-				fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\n", conf_id, 0, L+1, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
+			  fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\t%.18lf\t%.18lf\\n", conf_id, 0, L+1,
+								D_paral[L]/((double)18*GL_SIZE),  D_perp[L]/((double)18*GL_SIZE),
+								D_temp_paral[L]/((double)6*GL_SIZE),  D_temp_perp[L]/((double)6*GL_SIZE));			
 
 		for(int coolstep=1; coolstep<=maxstep; coolstep++){
 			/*
@@ -258,11 +260,13 @@ int main(int argc, char **argv){
 
 			cool_conf(conf_acc, conf_acc, auxbis_conf_acc);
 
-			calc_field_corr(conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp);
+			calc_field_corr(conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp, &D_temp_paral, &D_temp_perp);
 			
 			if(0==devinfo.myrank)
 				for(int L=0; L<nd0/2; L++)
-					fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\n", conf_id, coolstep, L+1, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
+					fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\t%.18lf\t%.18lf\\n", conf_id, coolstep, L+1,
+									D_paral[L]/((double)18*GL_SIZE),  D_perp[L]/((double)18*GL_SIZE),
+									D_temp_paral[L]/((double)6*GL_SIZE),  D_temp_perp[L]/((double)6*GL_SIZE));			
 			
 		}// close coolstep
 		if(0==devinfo.myrank)
