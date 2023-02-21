@@ -29,7 +29,6 @@
 #include "../Rand/random.h"
 #include "../RationalApprox/rationalapprox.h"
 #include "./action.h"
-/* #include "./alloc_vars.h" */
 #include "./backfield_parameters.h"
 #include "./deviceinit.h"
 #include "./fermion_matrix.h"
@@ -87,10 +86,10 @@ int main(int argc, char **argv){
 	devinfo.single_dev_choice  = 0;
 	devinfo.async_comm_fermion = 1;
 	devinfo.async_comm_gauge   = 1;
-	devinfo.proc_per_node      = 2; //HARDCODED.
+	devinfo.proc_per_node      = NRANKS_D3; // It only works on one node
 #endif
 	devinfo.nranks_read=devinfo.nranks;
-	
+	printf("devinfo.nranks: %d\n",devinfo.nranks);
 	
 #ifdef MULTIDEVICE        
 	init_multidev1D(&devinfo);
@@ -118,7 +117,6 @@ int main(int argc, char **argv){
 	
 	su3_soa * conf_acc;
 	su3_soa * aux_conf_acc;
-	su3_soa * auxbis_conf_acc;
 	su3_soa * field_corr;
 	su3_soa * field_corr_aux;
 	single_su3 * closed_corr;
@@ -139,10 +137,6 @@ int main(int argc, char **argv){
 	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&aux_conf_acc, ALIGN, 8*sizeof(su3_soa));
 	ALLOCCHECK(allocation_check, aux_conf_acc);
 #pragma acc enter data create(aux_conf_acc[0:8])
-
-	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&auxbis_conf_acc, ALIGN, 8*sizeof(su3_soa));
-	ALLOCCHECK(allocation_check, auxbis_conf_acc);
-#pragma acc enter data create(auxbis_conf_acc[0:8])
 
 	allocation_check =  POSIX_MEMALIGN_WRAPPER((void **)&local_sum, ALIGN, 2*sizeof(dcomplex_soa));
 	ALLOCCHECK(allocation_check, local_sum) ;
@@ -216,9 +210,10 @@ int main(int argc, char **argv){
 		}
 	
 	// hardcoded number of cooling steps. Could become a command line argument.
-	int maxstep=20;
+	int maxstep=100;
 	su3_soa * conf_to_use;
 	int conf_id;
+	
 	for(int conf_num=0; conf_num<confmax; conf_num++){
 		if(0==devinfo.myrank)
 			printf("Reading file %s\n",confs[conf_num]);
@@ -238,31 +233,25 @@ int main(int argc, char **argv){
 		if(0==devinfo.myrank)
 			printf("Computing correlators\n");
 	
-		double  D_paral[nd0], D_perp[nd0];
-		calc_field_corr(conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp); 
+		double  D_paral[nd0], D_perp[nd0], D_temp_paral[nd0], D_temp_perp[nd0];
+		calc_field_corr(conf_acc, field_corr, field_corr_aux, aux_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp, &D_temp_paral, &D_temp_perp); 
 
 		if(0==devinfo.myrank)
 			for(int L=0; L<nd0/2; L++)
-				fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\n", conf_id, 0, L+1, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
+			  fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\t%.18lf\t%.18lf\\n", conf_id, 0, L+1,
+								D_paral[L]/((double)18*GL_SIZE),  D_perp[L]/((double)18*GL_SIZE),
+								D_temp_paral[L]/((double)6*GL_SIZE),  D_temp_perp[L]/((double)6*GL_SIZE));			
 
 		for(int coolstep=1; coolstep<=maxstep; coolstep++){
-			/*
-				if(coolstep==1)
-				conf_to_use=(su3_soa*)conf_acc;
-				else
-				conf_to_use=(su3_soa*)aux_conf_acc;
+			cool_conf(conf_acc, conf_acc, aux_conf_acc);
 
-				cool_conf(conf_to_use, aux_conf_acc, auxbis_conf_acc);
-
-				calc_field_corr(aux_conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp); */
-
-			cool_conf(conf_acc, conf_acc, auxbis_conf_acc);
-
-			calc_field_corr(conf_acc, field_corr, field_corr_aux, auxbis_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp);
+			calc_field_corr(conf_acc, field_corr, field_corr_aux, aux_conf_acc, local_sum, corr, closed_corr, &D_paral, &D_perp, &D_temp_paral, &D_temp_perp);
 			
 			if(0==devinfo.myrank)
 				for(int L=0; L<nd0/2; L++)
-					fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\n", conf_id, coolstep, L+1, D_paral[L]/((double)24*GL_SIZE),  D_perp[L]/((double)24*GL_SIZE));			
+					fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\t%.18lf\t%.18lf\\n", conf_id, coolstep, L+1,
+									D_paral[L]/((double)18*GL_SIZE),  D_perp[L]/((double)18*GL_SIZE),
+									D_temp_paral[L]/((double)6*GL_SIZE),  D_temp_perp[L]/((double)6*GL_SIZE));			
 			
 		}// close coolstep
 		if(0==devinfo.myrank)
@@ -293,12 +282,12 @@ int main(int argc, char **argv){
 	FREECHECK(local_sum);
 #pragma acc exit data delete(local_sum)
 
-	FREECHECK(auxbis_conf_acc);
-#pragma acc exit data delete(auxbis_conf_acc)
-
 	FREECHECK(aux_conf_acc);
 #pragma acc exit data delete(aux_conf_acc)
-
+	/*
+	FREECHECK(aux_conf_acc);
+#pragma acc exit data delete(aux_conf_acc)
+	*/
 	FREECHECK(conf_acc);
 #pragma acc exit data delete(conf_acc)
 
