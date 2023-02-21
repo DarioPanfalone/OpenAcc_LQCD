@@ -122,7 +122,7 @@ void calc_field_corr_single_orientation(
 						//UxFxU^(dagger)x(G^(dagger)-G-1/3trace(G^(dagger)-G)) [G=placchetta]
 						mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 						//or
-						// 						mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc_p(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
+						//mat1_times_conj_mat2_minus_mat2_into_single_mat3_absent_stag_phases_nc_p(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 						//UxFxU^(dagger)xG^(dagger)
 						//            mat1_times_conj_mat2_into_single_mat3_absent_stag_phases_nc(&field_corr[parity], idxh, &loc_plaq[!parity], idxpro, closed_corr);
 
@@ -183,38 +183,64 @@ void calc_field_corr(
 										 d_complex * const corr,
 										 __restrict single_su3 * const closed_corr,
 										 double * const D_paral,
-										 double * const D_perp
+										 double * const D_perp,
+										 double * const D_time_paral,
+										 double * const D_time_perp
 										 )
 {
-	double local_D_paral[nd0/2], local_D_perp[nd0/2];
+	double local_D_paral[nd0/2], local_D_perp[nd0/2], local_D_time_paral[nd0/2], local_D_time_perp[nd0/2];
 	for(int L=0; L<nd0/2; L++){
+		D_time_paral[L] = 0.0;
+		D_time_perp[L] = 0.0;
+		local_D_time_paral[L] = 0.0;
+		local_D_time_perp[L] = 0.0;
+
 		D_paral[L] = 0.0;
-		D_perp[L] = 0.0;
-		local_D_paral[L] = 0.0;
-		local_D_perp[L] = 0.0;
+    D_perp[L] = 0.0;
+    local_D_paral[L] = 0.0;
+    local_D_perp[L] = 0.0;
 	}
 	for(int ro=0; ro<4; ro++)
 		for(int mu=0 ; mu<3; mu++)
 			for(int nu=mu+1; nu<4; nu++){    
 				calc_field_corr_single_orientation(u, field_corr, field_corr_aux, loc_plaq, trace_local, corr, closed_corr, mu, nu, ro);
 
-				
-				for(int L=0; L<nd0/2; L++)
-					{
-						if(ro==mu || ro==nu)
-							local_D_paral[L] += corr[L];
-						else
-							local_D_perp[L] += corr[L];
+				if(ro==3){	 
+					for(int L=0; L<nd0/2; L++)
+						{
+							if(ro==mu || ro==nu)
+								local_D_time_paral[L] += corr[L];
+							else
+								local_D_time_perp[L] += corr[L];
 #ifdef MULTIDEVICE
-						MPI_Allreduce((void*)&local_D_paral[L],(void*)&D_paral[L],
-													1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
-						MPI_Allreduce((void*)&local_D_perp[L],(void*)&D_perp[L],
+							MPI_Allreduce((void*)&local_D_time_paral[L],(void*)&D_time_paral[L],
+														1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+							MPI_Allreduce((void*)&local_D_time_perp[L],(void*)&D_time_perp[L],
 													1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
 #else
-						D_paral[L] = local_D_paral[L];
-						D_perp[L] = local_D_perp[L];
+							D_time_paral[L] = local_D_time_paral[L];
+							D_time_perp[L] = local_D_time_perp[L];
 #endif
-					} // closing loop on L
+						} // closing loop on L
+				}
+				else{
+					for(int L=0; L<nd0/2; L++)
+						{
+            if(ro==mu || ro==nu)
+              local_D_paral[L] += corr[L];
+            else
+              local_D_perp[L] += corr[L];
+#ifdef MULTIDEVICE
+            MPI_Allreduce((void*)&local_D_paral[L],(void*)&D_paral[L],
+                          1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+            MPI_Allreduce((void*)&local_D_perp[L],(void*)&D_perp[L],
+                          1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+#else
+            D_paral[L] = local_D_paral[L];
+            D_perp[L] = local_D_perp[L];
+#endif
+          } // closing loop on L
+				}
 			} // closing loop on directions
 }
 

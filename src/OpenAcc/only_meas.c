@@ -42,7 +42,6 @@
 #include "./md_parameters.h"
 #include "./random_assignement.h"
 #include "./rectangles.h"
-#include "./sp_alloc_vars.h"
 #include "./stouting.h"
 #include "./struct_c_def.h"
 #include "./su3_measurements.h"
@@ -284,10 +283,7 @@ int main(int argc, char **argv){
 
 	FREECHECK(aux_conf_acc);
 #pragma acc exit data delete(aux_conf_acc)
-	/*
-	FREECHECK(aux_conf_acc);
-#pragma acc exit data delete(aux_conf_acc)
-	*/
+
 	FREECHECK(conf_acc);
 #pragma acc exit data delete(conf_acc)
 
