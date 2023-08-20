@@ -197,19 +197,20 @@ int main(int argc, char **argv){
 	// open output file only by master rank
 	if(0==devinfo.myrank)
 		{
-			fp=fopen(argv[2], "w");
+			fp=fopen(argv[2], "a");
 			if (fp == NULL)
 				{
 					printf("Could not open file\n");
 					exit(1);
 				}
 			// printing header of measurements file.
-			fprintf(fp,"#conf_id cooling_step L D_para D_perp\n");
+			//fprintf(fp,"#conf_id cooling_step L D_para D_perp\n");
+			fprintf(fp,"\n");
 			fflush(fp);
 		}
 	
 	// hardcoded number of cooling steps. Could become a command line argument.
-	int maxstep=100;
+	int maxstep=200;
 	su3_soa * conf_to_use;
 	int conf_id;
 	
@@ -237,7 +238,7 @@ int main(int argc, char **argv){
 
 		if(0==devinfo.myrank)
 			for(int L=0; L<nd0/2; L++)
-			  fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\t%.18lf\t%.18lf\\n", conf_id, 0, L+1,
+			  fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\t%.18lf\t%.18lf\n", conf_id, 0, L+1,
 								D_paral[L]/((double)18*GL_SIZE),  D_perp[L]/((double)18*GL_SIZE),
 								D_temp_paral[L]/((double)6*GL_SIZE),  D_temp_perp[L]/((double)6*GL_SIZE));			
 
@@ -248,7 +249,7 @@ int main(int argc, char **argv){
 			
 			if(0==devinfo.myrank)
 				for(int L=0; L<nd0/2; L++)
-					fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\t%.18lf\t%.18lf\\n", conf_id, coolstep, L+1,
+					fprintf(fp,"%d\t%d\t%d\t%.18lf\t%.18lf\t%.18lf\t%.18lf\n", conf_id, coolstep, L+1,
 									D_paral[L]/((double)18*GL_SIZE),  D_perp[L]/((double)18*GL_SIZE),
 									D_temp_paral[L]/((double)6*GL_SIZE),  D_temp_perp[L]/((double)6*GL_SIZE));			
 			
